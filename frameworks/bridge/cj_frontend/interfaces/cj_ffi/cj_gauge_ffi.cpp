@@ -16,6 +16,8 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_gauge_ffi.h"
 
 #include "cj_lambda.h"
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
@@ -34,6 +36,18 @@ ViewAbstractModel* ViewAbstractModel::GetInstance()
     static NG::ViewAbstractModelNG instance;
     return &instance;
 }
+
+// Should use CJUIModifier API later
+NG::GaugeModelNG* GetGaugeModel()
+{
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("gauge");
+    if (module == nullptr) {
+        LOGF("Can't find gauge dynamic module");
+        abort();
+    }
+    return reinterpret_cast<NG::GaugeModelNG*>(module->GetModel());
+}
+
 }
 
 extern "C" {
@@ -87,23 +101,23 @@ void FfiOHOSAceFrameworkGaugeCreate(double gaugeValue, double gaugeMin, double g
     if (gaugeValue < gaugeMin || gaugeValue > gaugeMax) {
         gaugeValue = gaugeMin;
     }
-    GaugeModel::GetInstance()->Create(gaugeValue, gaugeMin, gaugeMax);
-    GaugeModel::GetInstance()->SetIsShowLimitValue(true);
+    GetGaugeModel()->Create(gaugeValue, gaugeMin, gaugeMax);
+    GetGaugeModel()->SetIsShowLimitValue(true);
 }
 
 void FfiOHOSAceFrameworkGaugeSetValue(double value)
 {
-    GaugeModel::GetInstance()->SetValue(value);
+    GetGaugeModel()->SetValue(value);
 }
 
 void FfiOHOSAceFrameworkGaugeSetStartAngle(double startAngle)
 {
-    GaugeModel::GetInstance()->SetStartAngle(startAngle);
+    GetGaugeModel()->SetStartAngle(startAngle);
 }
 
 void FfiOHOSAceFrameworkGaugeSetEndAngle(double endAngle)
 {
-    GaugeModel::GetInstance()->SetEndAngle(endAngle);
+    GetGaugeModel()->SetEndAngle(endAngle);
 }
 
 void SortColorStopOffset(std::vector<NG::ColorStopArray>& colors)
@@ -138,7 +152,7 @@ void FfiOHOSAceFrameworkGaugeSetColors(VectorUInt32Ptr gaugeColors, VectorFloat3
     for (size_t i = 0; i < vecColor.size(); ++i) {
         colors.push_back(Color(vecColor[i]));
     }
-    GaugeModel::GetInstance()->SetColors(colors, vecWeight);
+    GetGaugeModel()->SetColors(colors, vecWeight);
 }
 
 void FfiOHOSAceFrameworkGaugeSetColorsV2(VectorUInt32Ptr gaugeColors, VectorFloat32Ptr gaugeWeights)
@@ -153,7 +167,7 @@ void FfiOHOSAceFrameworkGaugeSetColorsV2(VectorUInt32Ptr gaugeColors, VectorFloa
         return;
     }
     if (vecColor.size() <= 0) {
-        GaugeModel::GetInstance()->ResetGradientColors();
+        GetGaugeModel()->ResetGradientColors();
         return;
     }
     if (vecColor.size() > 1) {
@@ -162,19 +176,19 @@ void FfiOHOSAceFrameworkGaugeSetColorsV2(VectorUInt32Ptr gaugeColors, VectorFloa
             colorStopArray.emplace_back(std::make_pair(Color(vecColor[i]), Dimension(vecWeight[i], DimensionUnit::VP)));
             colors.emplace_back(colorStopArray);
         }
-        GaugeModel::GetInstance()->SetGradientColors(colors, weights, type);
+        GetGaugeModel()->SetGradientColors(colors, weights, type);
         return;
     }
     type = NG::GaugeType::TYPE_CIRCULAR_MONOCHROME;
     NG::ColorStopArray colorStopArray;
     colorStopArray.emplace_back(std::make_pair(Color(vecColor[0]), Dimension(vecWeight[0], DimensionUnit::VP)));
     colors.emplace_back(colorStopArray);
-    GaugeModel::GetInstance()->SetGradientColors(colors, weights, type);
+    GetGaugeModel()->SetGradientColors(colors, weights, type);
 }
 
 void FfiOHOSAceFrameworkGaugeResetColors()
 {
-    GaugeModel::GetInstance()->ResetGradientColors();
+    GetGaugeModel()->ResetGradientColors();
 }
 
 void FfiOHOSAceFrameworkGaugeSetLinearGradientColors(VecLinearGradientHandle linearGradients, VectorUInt32Ptr weight)
@@ -189,7 +203,7 @@ void FfiOHOSAceFrameworkGaugeSetLinearGradientColors(VecLinearGradientHandle lin
         return;
     }
     if (vecLinearGradients.size() <= 0) {
-        GaugeModel::GetInstance()->ResetGradientColors();
+        GetGaugeModel()->ResetGradientColors();
         return;
     }
     if (vecLinearGradients.size() > 1) {
@@ -210,7 +224,7 @@ void FfiOHOSAceFrameworkGaugeSetLinearGradientColors(VecLinearGradientHandle lin
             colors.emplace_back(colorStopArray);
         }
         SortColorStopOffset(colors);
-        GaugeModel::GetInstance()->SetGradientColors(colors, weights, type);
+        GetGaugeModel()->SetGradientColors(colors, weights, type);
         return;
     }
     type = NG::GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT;
@@ -222,7 +236,7 @@ void FfiOHOSAceFrameworkGaugeSetLinearGradientColors(VecLinearGradientHandle lin
     }
     colors.emplace_back(colorStopArray);
     SortColorStopOffset(colors);
-    GaugeModel::GetInstance()->SetGradientColors(colors, weights, type);
+    GetGaugeModel()->SetGradientColors(colors, weights, type);
 }
 
 void FfiOHOSAceFrameworkGaugeSetShadowOptions(double radius, double offsetX, double offsetY)
@@ -241,28 +255,28 @@ void FfiOHOSAceFrameworkGaugeSetShadowOptions(double radius, double offsetX, dou
     shadowOptions.offsetX = offsetX;
     shadowOptions.offsetY = offsetY;
 
-    GaugeModel::GetInstance()->SetShadowOptions(shadowOptions);
+    GetGaugeModel()->SetShadowOptions(shadowOptions);
 }
 
 void FfiOHOSAceFrameworkGaugeSetStrokeWidth(double strokeWidth, int32_t strokeUnit)
 {
     Dimension strokeDimWidth(strokeWidth, static_cast<DimensionUnit>(strokeUnit));
-    GaugeModel::GetInstance()->SetStrokeWidth(strokeDimWidth);
+    GetGaugeModel()->SetStrokeWidth(strokeDimWidth);
 }
 
 void FfiOHOSAceFrameworkGaugeSetIndicator(const char* icon, double size)
 {
     std::string iconPath = icon;
     if (icon == INDICATOR_NULL) {
-        GaugeModel::GetInstance()->SetIsShowIndicator(false);
+        GetGaugeModel()->SetIsShowIndicator(false);
         return;
     }
     if (icon == INDICATOR_DEFAULT) {
-        GaugeModel::GetInstance()->ResetIndicatorIconPath();
+        GetGaugeModel()->ResetIndicatorIconPath();
     } else {
         std::string bundleName;
         std::string moduleName;
-        GaugeModel::GetInstance()->SetIndicatorIconPath(iconPath, bundleName, moduleName);
+        GetGaugeModel()->SetIndicatorIconPath(iconPath, bundleName, moduleName);
     }
 
     CalcDimension space;
@@ -271,13 +285,13 @@ void FfiOHOSAceFrameworkGaugeSetIndicator(const char* icon, double size)
     } else {
         space = CalcDimension(size, DimensionUnit::VP);
     }
-    GaugeModel::GetInstance()->SetIndicatorSpace(space);
+    GetGaugeModel()->SetIndicatorSpace(space);
 }
 
 void FfiOHOSAceFrameworkGaugeSetDescription(void (*builder)())
 {
-    GaugeModel::GetInstance()->SetIsShowLimitValue(false);
-    GaugeModel::GetInstance()->SetIsShowDescription(true);
+    GetGaugeModel()->SetIsShowLimitValue(false);
+    GetGaugeModel()->SetIsShowDescription(true);
     // parse builder
     auto buildFunc = CJLambda::Create(builder);
     RefPtr<AceType> customNode;
@@ -286,7 +300,7 @@ void FfiOHOSAceFrameworkGaugeSetDescription(void (*builder)())
         buildFunc();
         customNode = ViewStackModel::GetInstance()->Finish();
     }
-    GaugeModel::GetInstance()->SetDescription(customNode);
+    GetGaugeModel()->SetDescription(customNode);
 }
 
 void FfiOHOSAceFrameworkSetPrivacySensitive(bool isprivacySensitiveMode)

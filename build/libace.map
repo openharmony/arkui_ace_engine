@@ -41,6 +41,7 @@
       GetArkUIFullNodeAPI;
       GetArkUIAniModifiers;
       GetArkUIDrawableDescriptor;
+      GetArkUINodeModifiers;
 
       OHOS::Ace::AceApplicationInfo::*;
       OHOS::Ace::AceScopedTrace::*;
@@ -52,6 +53,7 @@
       OHOS::Ace::CalendarPickerModel::*;
       OHOS::Ace::ConnectServerManager::*;
       OHOS::Ace::Container::*;
+      *OHOS::Ace::Container::IsCurrentUseNewPipeline*;
       OHOS::Ace::CubicCurve::*;
       OHOS::Ace::Curves::*;
       OHOS::Ace::EngineHelper::*;
@@ -79,6 +81,8 @@
       OHOS::Ace::SystemProperties::*;
       OHOS::Ace::ThemeConstants::*;
       OHOS::Ace::UIContentImpl::*;
+      OHOS::Ace::ProgressComponent::ProgressComponent*;
+      OHOS::Ace::ProgressComponent::InitStyle*;
       OHOS::Ace::MemoryMonitor::*;
       OHOS::Ace::PerfMonitor::*;
       OHOS::Ace::DumpLog::*;
@@ -118,6 +122,7 @@
       OHOS::Ace::NG::ContainerModalView::*;
       OHOS::Ace::NG::BuildTitleNodeForCj*;
       OHOS::Ace::NG::AddControlButtonsForCj*;
+      OHOS::Ace::DynamicModuleHelper::*;
       OHOS::Ace::PixelMap::*;
       OHOS::Ace::MeasureUtil::*;
       OHOS::Ace::ViewPartialUpdateModel::*;
@@ -143,7 +148,10 @@
       OHOS::Ace::DividerModel::*;
       OHOS::Ace::EllipseModel::*;
       OHOS::Ace::ForEachModel::*;
-      OHOS::Ace::GaugeModel::*;
+      OHOS::Ace::NG::GaugeModelNG::*;
+      "OHOS::Ace::GaugeModel::GetInstance()";
+      "OHOS::Ace::GaugeModel::instance_";
+      "OHOS::Ace::GaugeModel::mutex_";
       OHOS::Ace::GridColModel::*;
       OHOS::Ace::GridModel::*;
       OHOS::Ace::GridItemModel::*;
@@ -199,6 +207,7 @@
       OHOS::Ace::TabContentModel::*;
       OHOS::Ace::TextClockModel::*;
       OHOS::Ace::TextModel::*;
+      OHOS::Ace::NG::TextModelNG::*;
       OHOS::Ace::TextFieldModel::*;
       OHOS::Ace::TextPickerModel::*;
       OHOS::Ace::TextTimerModel::*;
@@ -339,6 +348,7 @@
       OHOS::Ace::ImageAnalyzerMgr::UpdateConfig*;
       OHOS::Ace::ImageAnalyzerMgr::Release*;
       OHOS::Ace::ImageAnalyzerMgr::UpdateOverlayStatus*;
+      OHOS::Ace::ResourceParseUtils::*;
       "OHOS::Ace::NG::GeometryNode::SetMarginFrameOffset(OHOS::Ace::NG::OffsetT<float> const&)";
       "OHOS::Ace::NG::GeometryNode::GetFrameRect(bool) const";
       OHOS::Ace::NG::GeometryNode::*;
@@ -354,6 +364,18 @@
       OHOS::Ace::NG::SecurityUIExtensionProxy::*;
       OHOS::Ace::NG::DynamicModelStatic::*;
       OHOS::Ace::NG::DynamicParam::*;
+      OHOS::Ace::NG::MinusPaddingToSize*;
+      OHOS::Ace::NG::AddPaddingToSize*;
+      OHOS::Ace::ToRSPoint*;
+      OHOS::Ace::NG::GeometryNode::*;
+      OHOS::Ace::NG::ModifierAdapter::*;
+      OHOS::Ace::NG::TextLayoutAlgorithm::*;
+      OHOS::Ace::NG::TextLayoutProperty::*;
+      OHOS::Ace::NG::ImagePainter::DrawImage*;
+      OHOS::Ace::NG::Modifier::*;
+      OHOS::Ace::NG::ArkTSUtils::*;
+      "OHOS::Ace::NG::TextPattern::TextPattern()";
+      OHOS::Ace::NG::ViewAbstractModelStatic::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
@@ -404,6 +426,10 @@
       vtable?for?OHOS::Ace::NG::PasteButtonModelNG;
       vtable?for?OHOS::Ace::NG::SecurityComponentModelNG;
       vtable?for?OHOS::Ace::NG::Pattern;
+      vtable?for?OHOS::Ace::NG::GaugeModelNG;
+      vtable?for?OHOS::Ace::GaugeModel;
+      vtable?for?OHOS::Ace::Framework::GaugeModelImpl;
+      vtable?for?OHOS::Ace::NG::TextLayoutProperty;
 
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;
@@ -431,6 +457,7 @@
       VTT?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
       VTT?for?OHOS::Ace::NG::OffscreenCanvasPattern;
       VTT?for?OHOS::Ace::NG::ParallelPagePattern;
+      VTT?for?OHOS::Ace::NG::TextLayoutProperty;
       VTT?for?OHOS::Ace::NG::ViewAdvancedRegister;
       VTT?for?OHOS::Ace::NG::ContainerModalView;
       VTT?for?OHOS::Ace::NG::Pattern;
@@ -499,6 +526,8 @@
       OHOS::Ace::Kit::OverlayManager::*;
       OHOS::Ace::Kit::UIContext::*;
       OHOS::Ace::Theme::*;
+      OHOS::Ace::TokenTheme::*;
+      OHOS::Ace::TimeEventProxy::*;
       OHOS::Ace::TokenColors::*;
       OHOS::Ace::NG::ListModelNG::*;
       OHOS::Ace::NG::ListItemModelNG::*;
@@ -539,6 +568,14 @@
       OHOS::Ace::UiMaterialTheme::*;
       OHOS::Ace::MaterialUtils::*;
       OHOS::Ace::UiMaterial::*;
+      OHOS::Ace::NG::Validator::*;
+      OHOS::Ace::NG::CreateProxyNode*;
+      OHOS::Ace::NG::Converter::ResourceConverter::*;
+      OHOS::Ace::NG::CommonViewModelNG::CreateFrameNode*;
+      *OHOS::Ace::NG::Converter::Convert*;
+      *OHOS::Ace::NG::Converter::AssignCast*;
+      *OHOS::Ace::NG::Converter::AssignArkValue*;
+      *OHOS::Ace::NG::Converter::OptConvertFromArkNumStrRes*;
 
       OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
       "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";

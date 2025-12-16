@@ -145,7 +145,7 @@ using namespace OHOS::Ace::NG;
 #define BLANK_LINES 6
 
 extern "C" {
-const ArkUINodeModifiers* GetArkUINodeModifiers()
+ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static ArkUINodeModifiers impl = {

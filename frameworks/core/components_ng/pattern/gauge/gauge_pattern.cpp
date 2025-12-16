@@ -21,6 +21,10 @@
 #include "core/components_ng/property/position_property.h"
 
 namespace OHOS::Ace::NG {
+
+constexpr const char* GAUGE_DESCRIPTION_TAG = "GaugeDescription";
+constexpr const char* TEXT_ETS_TAG = "Text";
+
 bool GaugePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool /*skipLayout*/)
 {
     if (skipMeasure || dirty->SkipMeasureContent()) {
@@ -124,7 +128,7 @@ void GaugePattern::InitTitleContent()
     if ((host->TotalChildCount() > 0) && (!titleChildId_.has_value())) {
         auto firstChild = host->GetFirstChild();
         CHECK_NULL_VOID(firstChild);
-        if (firstChild->GetTag() == V2::GAUGE_DESCRIPTION_TAG) {
+        if (firstChild->GetTag() == GAUGE_DESCRIPTION_TAG) {
             return;
         }
 
@@ -140,7 +144,7 @@ void GaugePattern::InitDescriptionNode()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto linearNode = FrameNode::GetOrCreateFrameNode(V2::GAUGE_DESCRIPTION_TAG, GetDescriptionNodeId(),
+    auto linearNode = FrameNode::GetOrCreateFrameNode(GAUGE_DESCRIPTION_TAG, GetDescriptionNodeId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     CHECK_NULL_VOID(linearNode);
     linearNode->Clean();
@@ -164,7 +168,7 @@ void GaugePattern::InitLimitValueText(int32_t valueTextId, bool isMin)
     auto gaugePaintProperty = GetPaintProperty<GaugePaintProperty>();
     CHECK_NULL_VOID(gaugePaintProperty);
     auto textNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXT_ETS_TAG, valueTextId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+        TEXT_ETS_TAG, valueTextId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     CHECK_NULL_VOID(textNode);
 
     auto limitValue =
@@ -205,7 +209,7 @@ void GaugePattern::HideLimitValueText(int32_t valueTextId, bool isMin)
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto textNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXT_ETS_TAG, valueTextId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+        TEXT_ETS_TAG, valueTextId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     CHECK_NULL_VOID(textNode);
     auto geometryNode = textNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -329,7 +333,7 @@ void GaugePattern::ObscureLimitValueText(bool isSensitive)
 
 void GaugePattern::ObscureText(int32_t valueTextId, bool isSensitive)
 {
-    auto textNode = FrameNode::GetFrameNode(V2::TEXT_ETS_TAG, valueTextId);
+    auto textNode = FrameNode::GetFrameNode(TEXT_ETS_TAG, valueTextId);
     CHECK_NULL_VOID(textNode);
     auto textPattern = textNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);

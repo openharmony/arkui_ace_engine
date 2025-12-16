@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_extra_view_register.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
+#include "bridge/declarative_frontend/jsview/js_linear_gradient_binding.h"
 #ifdef NG_BUILD
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #else
@@ -67,7 +68,6 @@
 #include "bridge/declarative_frontend/jsview/js_form_button.h"
 #endif
 #include "bridge/declarative_frontend/jsview/js_form_link.h"
-#include "bridge/declarative_frontend/jsview/js_gauge.h"
 #include "bridge/declarative_frontend/jsview/js_grid.h"
 #include "bridge/declarative_frontend/jsview/js_grid_col.h"
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
@@ -512,7 +512,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Rating", JSRating::JSBind },
     { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
-    { "Gauge", JSGauge::JSBind },
     { "Marquee", JSMarquee::JSBind },
     { "Swiper", JSSwiper::JSBind },
     { "Indicator", JSIndicator::JSBind },
@@ -532,7 +531,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "CheckboxGroup", JSCheckboxGroup::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
-    { "LinearGradient", JSLinearGradient::JSBind },
+    { "LinearGradient", JSLinearGradientBinding::JSBind },
     { "ColorMetricsLinearGradient", JSColorMetricsLinearGradient::JSBind },
     { "FormLink", JSFormLink::JSBind },
 #ifdef FORM_BUTTON_COMPONENT_SUPPORT
@@ -708,7 +707,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
     { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
-    { "Gauge", JSGauge::JSBind },
     { "MagnifierController", JSMagnifierController::JSBind },
     { "Marquee", JSMarquee::JSBind },
     { "Menu", JSMenu::JSBind },
@@ -769,7 +767,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "__Recycle__", JSRecycleView::JSBind },
-    { "LinearGradient", JSLinearGradient::JSBind },
+    { "LinearGradient", JSLinearGradientBinding::JSBind },
     { "ColorMetricsLinearGradient", JSColorMetricsLinearGradient::JSBind },
     { "ImageSpan", JSImageSpan::JSBind },
 #ifdef PREVIEW
@@ -898,7 +896,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine, bool isCusto
     JSSearchController::JSBind(globalObj);
     JSTextClockController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
-    JSLinearGradient::JSBind(globalObj);
+    JSLinearGradientBinding::JSBind(globalObj);
     JSColorMetricsLinearGradient::JSBind(globalObj);
 #ifdef WEB_SUPPORTED
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
@@ -938,7 +936,7 @@ void RegisterAllFormModule(BindingTarget globalObj, void* nativeEngine)
     JSPath2D::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
-    JSLinearGradient::JSBind(globalObj);
+    JSLinearGradientBinding::JSBind(globalObj);
     JSColorMetricsLinearGradient::JSBind(globalObj);
     for (auto& iter : formBindFuncs) {
         iter.second(globalObj);
@@ -1077,7 +1075,7 @@ void JsBindFormViews(
 
         JSProfiler::JSBind(globalObj);
         JSCommonView::JSBind(globalObj);
-        JSLinearGradient::JSBind(globalObj);
+        JSLinearGradientBinding::JSBind(globalObj);
         JSColorMetricsLinearGradient::JSBind(globalObj);
         JSPath2D::JSBind(globalObj);
         JSOffscreenRenderingContext::JSBind(globalObj);
