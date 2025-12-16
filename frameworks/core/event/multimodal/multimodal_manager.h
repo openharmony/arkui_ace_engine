@@ -35,7 +35,7 @@ public:
     void OpenChannel(const RefPtr<PipelineContext>& context);
 
     RefPtr<MultiModalScene> GetMultiModalScene(int32_t pageId);
-    RefPtr<MultiModalScene> GetCurrentMultiModalScene();
+    ACE_FORCE_EXPORT RefPtr<MultiModalScene> GetCurrentMultiModalScene();
 
     void DumpMultimodalScene();
 

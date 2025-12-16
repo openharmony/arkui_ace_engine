@@ -46,7 +46,7 @@ enum class BoxStateAttribute {
 };
 
 // A component can box others components.
-class ACE_EXPORT BoxComponent : public BoxBaseComponent {
+class ACE_FORCE_EXPORT BoxComponent : public BoxBaseComponent {
     DECLARE_ACE_TYPE(BoxComponent, BoxBaseComponent);
 
 public:

@@ -62,7 +62,7 @@ public:
     ACE_FORCE_EXPORT static ViewStackProcessor* GetInstance();
     ~ViewStackProcessor() = default;
     // possible wrapping components
-    RefPtr<FlexItemComponent> GetFlexItemComponent();
+    ACE_FORCE_EXPORT RefPtr<FlexItemComponent> GetFlexItemComponent();
     RefPtr<StepperItemComponent> GetStepperItemComponent();
     RefPtr<DisplayComponent> GetStepperDisplayComponent();
     RefPtr<ScrollComponent> GetStepperScrollComponent();

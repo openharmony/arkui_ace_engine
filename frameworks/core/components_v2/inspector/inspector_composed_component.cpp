@@ -164,7 +164,7 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { PLUGIN_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { VIDEO_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_VIDEO, id); } },
     { INDEXER_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::IndexerComposedElement>(id); } },
     { SLIDER_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SliderComposedElement>(id); } },
