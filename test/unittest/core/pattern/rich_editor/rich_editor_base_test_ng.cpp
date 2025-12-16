@@ -894,6 +894,46 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel021, TestSize.Level0)
 }
 
 /**
+ * @tc.name: RichEditorModel022
+ * @tc.desc: test SetEnableAutoSpacing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel022, TestSize.Level0)
+{
+    /**
+     * @tc.steps: Create RichEditor node and Set EnableAutoSpacing True
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create(true);
+    richEditorModel.SetEnableAutoSpacing(true);
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = richEditorNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.expected: Get EnableAutoSpacing Value
+     */
+    EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), true);
+    EXPECT_EQ(pattern->isEnableAutoSpacing_, true);
+
+    /**
+     * @tc.expected: Set EnableAutoSpacing False
+     */
+    richEditorModel.SetEnableAutoSpacing(false);
+
+    /**
+     * @tc.expected: Get EnableAutoSpacing Value
+     */
+    EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), false);
+    EXPECT_EQ(pattern->isEnableAutoSpacing_, false);
+}
+
+/**
  * @tc.name: CreateImageSourceInfo001
  * @tc.desc: test CreateImageSourceInfo
  * @tc.type: FUNC
