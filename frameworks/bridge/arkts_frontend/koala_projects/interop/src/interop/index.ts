@@ -28,7 +28,7 @@ import {
 export { registerCallback, setCallbackRegistry } from '#common/wrappers/Callback'
 
 export { Access, Exec } from './arrays'
-export { Finalizable, NativeThunk } from './Finalizable'
+export { Finalizable, NativeThunk, resourceFinalizerRegister } from './Finalizable'
 export { nullable } from './nullable'
 export { getPtr, isNullPtr, nullptr, ptrEqual, Wrapper, ptrToBits, bitsToPtr } from './Wrapper'
 
