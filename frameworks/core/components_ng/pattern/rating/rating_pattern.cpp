@@ -1185,6 +1185,7 @@ void RatingPattern::OnColorModeChange(uint32_t colorMode)
     auto layoutProperty = host->GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
+    imageSuccessStateCode_ = 0;
     LoadForeground(layoutProperty, ratingTheme, iconTheme);
     LoadSecondary(layoutProperty, ratingTheme, iconTheme);
     LoadBackground(layoutProperty, ratingTheme, iconTheme);
