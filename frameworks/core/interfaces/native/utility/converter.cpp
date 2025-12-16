@@ -118,21 +118,27 @@ namespace {
                 return std::to_string(*value);
             } else if (auto* value = std::get_if<double>(&item)) {
                 return std::to_string(static_cast<int64_t>(*value));
+            } else if (auto* value = std::get_if<Converter::ResourceConverter>(&item)) {
+                auto intVal = value->ToInt().value_or(0);
+                return std::to_string(intVal);
             }
         } else if (type == "s") {
             if (auto* value = std::get_if<std::string>(&item)) {
                 return *value;
+            } else if (auto* value = std::get_if<Converter::ResourceConverter>(&item)) {
+                return value->ToString().value_or("");
             }
         } else if (type == "f") {
             if (auto* value = std::get_if<int64_t>(&item)) {
                 return std::to_string(static_cast<double>(*value));
             } else if (auto* value = std::get_if<double>(&item)) {
                 return std::to_string(*value);
+            } else if (auto* value = std::get_if<Converter::ResourceConverter>(&item)) {
+                auto fVal = value->ToFloat().value_or(0);
+                return std::to_string(fVal);
             }
         }
-        if (auto* value = std::get_if<Converter::ResourceConverter>(&item)) {
-            return value->ToString().value_or("");
-        }
+
         return "";
     }
     void ReplaceHolder(std::optional<std::string>& originStr,
