@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (q16, r16, s16, t16) {
-    var u16 = arguments.length, v16 = u16 < 3 ? r16 : t16 === null ? t16 = Object.getOwnPropertyDescriptor(r16, s16) : t16, w16;
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-        v16 = Reflect.decorate(q16, r16, s16, t16);
+        r = Reflect.decorate(decorators, target, key, desc);
     else
-        for (var x16 = q16.length - 1; x16 >= 0; x16--)
-            if (w16 = q16[x16])
-                v16 = (u16 < 3 ? w16(v16) : u16 > 3 ? w16(r16, s16, v16) : w16(r16, s16)) || v16;
-    return u16 > 3 && v16 && Object.defineProperty(r16, s16, v16), v16;
+        for (var i = decorators.length - 1; i >= 0; i--)
+            if (d = decorators[i])
+                r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
@@ -30,61 +30,65 @@ import { Constants } from '../common/CommonConstants';
 import { CanvasHome } from "./CanvasFramework";
 import { TextTouchUpComponent } from "./TextTouchUp";
 export class ImageGeneratorDialog extends ViewV2 {
-    constructor(k16, l16, m16, n16 = -1, o16, p16) {
-        super(k16, n16, p16);
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
         this.stack = new NavPathStack();
-        this.options = undefined;
+        this.initParam("options", (params && "options" in params) ? params.options : undefined);
         this.width_ = 650;
         this.height_ = 560;
         this.MAX_IMAGE_COUNT = 4;
         this.imageInfoArr = [];
+        this.stylesArr = [];
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(j16) {
+    resetStateVarsOnReuse(params) {
+        this.resetParam("options", (params && "options" in params) ? params.options : undefined);
         this.width_ = 650;
         this.height_ = 560;
         this.imageInfoArr = [];
+        this.stylesArr = [];
     }
-    pageMap(x15, y15 = null) {
-        this.observeComponentCreation2((z15, a16) => {
+    pageMap(name, parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (x15 === 'home') {
+            if (name === 'home') {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((f16, g16) => {
-                            if (g16) {
-                                let h16 = new CanvasHome(this, { imageInfoArr: this.imageInfoArr }, undefined, f16, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/Main.ets", line: 33, col: 7 });
-                                ViewV2.create(h16);
-                                let i16 = () => {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new CanvasHome(this, { imageInfoArr: this.imageInfoArr, styles: this.options?.imageGenerationModel?.getModelSupportStyles() }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/Main.ets", line: 34, col: 7 });
+                                ViewV2.create(componentCall);
+                                let paramsLambda = () => {
                                     return {
-                                        imageInfoArr: this.imageInfoArr
+                                        imageInfoArr: this.imageInfoArr,
+                                        styles: this.options?.imageGenerationModel?.getModelSupportStyles()
                                     };
                                 };
-                                h16.paramsGenerator_ = i16;
+                                componentCall.paramsGenerator_ = paramsLambda;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(f16, {
-                                    imageInfoArr: this.imageInfoArr
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    imageInfoArr: this.imageInfoArr, styles: this.options?.imageGenerationModel?.getModelSupportStyles()
                                 });
                             }
                         }, { name: "CanvasHome" });
                     }
                 });
             }
-            else if (x15 === 'textTouchUp') {
+            else if (name === 'textTouchUp') {
                 this.ifElseBranchUpdateFunction(1, () => {
                     {
-                        this.observeComponentCreation2((b16, c16) => {
-                            if (c16) {
-                                let d16 = new TextTouchUpComponent(this, {}, undefined, b16, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/Main.ets", line: 35, col: 7 });
-                                ViewV2.create(d16);
-                                let e16 = () => {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new TextTouchUpComponent(this, {}, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/Main.ets", line: 37, col: 7 });
+                                ViewV2.create(componentCall);
+                                let paramsLambda = () => {
                                     return {};
                                 };
-                                d16.paramsGenerator_ = e16;
+                                componentCall.paramsGenerator_ = paramsLambda;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(b16, {});
+                                this.updateStateVarsOfChildByElmtId(elmtId, {});
                             }
                         }, { name: "TextTouchUpComponent" });
                     }
@@ -99,16 +103,16 @@ export class ImageGeneratorDialog extends ViewV2 {
     }
     initImageInfoArr() {
         if (this.options && this.options.images) {
-            let t15 = 1;
-            for (let w15 = 0; w15 < this.options.images.length && w15 < this.MAX_IMAGE_COUNT; w15++) {
-                if (this.options.images[w15].zIndex === undefined) {
-                    this.options.images[w15].zIndex = t15;
-                    t15++;
+            let initZIndex = 1;
+            for (let index = 0; index < this.options.images.length && index < this.MAX_IMAGE_COUNT; index++) {
+                if (this.options.images[index].zIndex === undefined) {
+                    this.options.images[index].zIndex = initZIndex;
+                    initZIndex++;
                 }
-                this.imageInfoArr.push(this.options.images[w15]);
+                this.imageInfoArr.push(this.options.images[index]);
             }
-            this.imageInfoArr.sort((u15, v15) => {
-                return (u15.zIndex ?? 0) - (v15.zIndex ?? 0);
+            this.imageInfoArr.sort((a, b) => {
+                return (a.zIndex ?? 0) - (b.zIndex ?? 0);
             });
         }
         while (this.imageInfoArr.length < this.MAX_IMAGE_COUNT) {
@@ -117,17 +121,20 @@ export class ImageGeneratorDialog extends ViewV2 {
     }
     aboutToAppear() {
         this.initImageInfoArr();
+        for (let i = 0; i < this.MAX_IMAGE_COUNT; ++i) {
+            this.stylesArr.push({ name: '' + i, icon: { "id": 125836048, "type": 40000, params: ['sys.symbol.style'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } });
+        }
         this.stack.pushPath({ name: 'home' });
     }
     initialRender() {
-        this.observeComponentCreation2((r15, s15) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Scroll.create();
             Scroll.width('100%');
             Scroll.height('100%');
             Scroll.scrollable(ScrollDirection.FREE);
         }, Scroll);
-        this.observeComponentCreation2((p15, q15) => {
-            Navigation.create(this.stack, { moduleName: "__harDefaultModuleName__", pagePath: "", isUserCreateStack: true });
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Navigation.create(this.stack, { moduleName: "image_generator_dialog", pagePath: "", isUserCreateStack: true });
             Navigation.navDestination({ builder: this.pageMap.bind(this) });
             Navigation.hideNavBar(true);
             Navigation.height(this.height_);
@@ -141,10 +148,21 @@ export class ImageGeneratorDialog extends ViewV2 {
         Navigation.pop();
         Scroll.pop();
     }
+    updateStateVars(params) {
+        if (params === undefined) {
+            return;
+        }
+        if ("options" in params) {
+            this.updateParam("options", params.options);
+        }
+    }
     rerender() {
         this.updateDirtyElements();
     }
 }
+__decorate([
+    Param
+], ImageGeneratorDialog.prototype, "options", void 0);
 __decorate([
     Local
 ], ImageGeneratorDialog.prototype, "width_", void 0);
@@ -154,3 +172,6 @@ __decorate([
 __decorate([
     Local
 ], ImageGeneratorDialog.prototype, "imageInfoArr", void 0);
+__decorate([
+    Local
+], ImageGeneratorDialog.prototype, "stylesArr", void 0);

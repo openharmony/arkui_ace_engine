@@ -34,6 +34,7 @@ export struct CanvasHome {
   @Local currentCanvasMode: CanvasMode = CanvasMode.GENERAL_MODE;
   @Local currentGenerateState: ImageGenerateState = ImageGenerateState.CONFIGURATION;
   @Param @Require imageInfoArr: Array<imageGeneration.ImageItem>;
+  @Param @Require styles?: Array<imageGeneration.ImageStyle>;
   @Builder
   homeTitleBuilder() {
     HomeTitle({
@@ -47,7 +48,8 @@ export struct CanvasHome {
       if (this.currentCanvasMode === CanvasMode.GENERAL_MODE) {
         LandscapeLayout({
           currentGenerateState: this.currentGenerateState!!,
-          imageInfoArr: this.imageInfoArr
+          imageInfoArr: this.imageInfoArr,
+          styles: this.styles
         })
       } else if (this.currentCanvasMode === CanvasMode.DOODLE_MODE) {
 
@@ -60,6 +62,7 @@ export struct CanvasHome {
 
 @ComponentV2
 struct LandscapeLayout {
+  @Param @Require styles?: Array<imageGeneration.ImageStyle>;
   @Param currentGenerateState: ImageGenerateState = ImageGenerateState.CONFIGURATION;
   @Event $currentGenerateState: (state: ImageGenerateState) => void = (state: ImageGenerateState) => {
   };
@@ -116,7 +119,7 @@ struct LandscapeLayout {
         })
           .margin({ left: 69, right: 54 })
         if (this.currentGenerateState === ImageGenerateState.CONFIGURATION) {
-          LandscapeSelectFuncArea({ imageInfoArr: this.imageInfoArr, imageMatrixArr: this.imageMatrixArr })
+          LandscapeSelectFuncArea({ imageInfoArr: this.imageInfoArr, imageMatrixArr: this.imageMatrixArr, styles: this.styles })
             .margin({ right: 16 })
         }
 

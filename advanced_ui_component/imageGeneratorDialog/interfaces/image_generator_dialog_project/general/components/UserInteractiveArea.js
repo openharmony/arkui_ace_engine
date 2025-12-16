@@ -13,71 +13,82 @@
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (s30, t30, u30, v30) {
-    var w30 = arguments.length, x30 = w30 < 3 ? t30 : v30 === null ? v30 = Object.getOwnPropertyDescriptor(t30, u30) : v30, y30;
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-        x30 = Reflect.decorate(s30, t30, u30, v30);
+        r = Reflect.decorate(decorators, target, key, desc);
     else
-        for (var z30 = s30.length - 1; z30 >= 0; z30--)
-            if (y30 = s30[z30])
-                x30 = (w30 < 3 ? y30(x30) : w30 > 3 ? y30(t30, u30, x30) : y30(t30, u30)) || x30;
-    return w30 > 3 && x30 && Object.defineProperty(t30, u30, x30), x30;
+        for (var i = decorators.length - 1; i >= 0; i--)
+            if (d = decorators[i])
+                r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
-import { FunctionAreaPlaceholder, StyleSelectBuilder, StyleSelectTabBarBuilder, UserInteractiveTabBarBuilder } from "./UserFunctionArea";
+import { FunctionAreaPlaceholder, StyleSelectBuilder, UserInteractiveTabBarBuilder } from "./UserFunctionArea";
 import { PhotoSelect } from "./PhotoSelect";
 export class LandscapeSelectFuncArea extends ViewV2 {
-    constructor(m30, n30, o30, p30 = -1, q30, r30) {
-        super(m30, p30, r30);
-        this.styles = undefined;
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
+        this.initParam("styles", (params && "styles" in params) ? params.styles : undefined);
         this.tabBarDefaultBgColor = 'rgba(0,0,0,0.05)';
         this.tabBarStyleBgColor = this.tabBarDefaultBgColor;
         this.styleItems = [];
-        this.initParam("imageInfoArr", (n30 && "imageInfoArr" in n30) ? n30.imageInfoArr : undefined);
-        this.initParam("imageMatrixArr", (n30 && "imageMatrixArr" in n30) ? n30.imageMatrixArr : undefined);
+        this.initParam("imageInfoArr", (params && "imageInfoArr" in params) ? params.imageInfoArr : undefined);
+        this.initParam("imageMatrixArr", (params && "imageMatrixArr" in params) ? params.imageMatrixArr : undefined);
+        this.selectedIndex = 0;
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(l30) {
-        this.styles = undefined;
+    resetStateVarsOnReuse(params) {
+        this.resetParam("styles", (params && "styles" in params) ? params.styles : undefined);
         this.tabBarStyleBgColor = this.tabBarDefaultBgColor;
         this.styleItems = [];
-        this.resetParam("imageInfoArr", (l30 && "imageInfoArr" in l30) ? l30.imageInfoArr : undefined);
-        this.resetParam("imageMatrixArr", (l30 && "imageMatrixArr" in l30) ? l30.imageMatrixArr : undefined);
+        this.resetParam("imageInfoArr", (params && "imageInfoArr" in params) ? params.imageInfoArr : undefined);
+        this.resetParam("imageMatrixArr", (params && "imageMatrixArr" in params) ? params.imageMatrixArr : undefined);
+        this.selectedIndex = 0;
     }
     aboutToAppear() {
-        for (let q6 = 0; this.styles && q6 < this.styles?.length; ++q6) {
-            this.styleItems.push({ name: this.styles[q6].name, resourceAddr: this.styles[q6].icon });
+        for (let i = 0; this.styles && i < this.styles?.length; ++i) {
+            this.styleItems.push({ name: this.styles[i].name, resourceAddr: this.styles[i].icon });
         }
     }
     initialRender() {
-        this.observeComponentCreation2((j30, k30) => {
-            Tabs.create();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Tabs.create({ index: this.selectedIndex });
             Tabs.barHeight(284);
             Tabs.scrollable(false);
             Tabs.vertical(true);
             Tabs.barPosition(BarPosition.End);
             Tabs.width(118);
             Tabs.height(386);
+            Tabs.onChange((index) => {
+                this.selectedIndex = index;
+            });
+            Tabs.onAnimationStart((index, targetIndex, event) => {
+                if (index === targetIndex) {
+                    return;
+                }
+                this.selectedIndex = targetIndex;
+            });
         }, Tabs);
-        this.observeComponentCreation2((d30, e30) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             TabContent.create(() => {
                 {
-                    this.observeComponentCreation2((f30, g30) => {
-                        if (g30) {
-                            let h30 = new PhotoSelect(this, { imageInfoArr: this.imageInfoArr, imageMatrixArr: this.imageMatrixArr }, undefined, f30, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 38, col: 9 });
-                            ViewV2.create(h30);
-                            let i30 = () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        if (isInitialRender) {
+                            let componentCall = new PhotoSelect(this, { imageInfoArr: this.imageInfoArr, imageMatrixArr: this.imageMatrixArr }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 40, col: 9 });
+                            ViewV2.create(componentCall);
+                            let paramsLambda = () => {
                                 return {
                                     imageInfoArr: this.imageInfoArr,
                                     imageMatrixArr: this.imageMatrixArr
                                 };
                             };
-                            h30.paramsGenerator_ = i30;
+                            componentCall.paramsGenerator_ = paramsLambda;
                         }
                         else {
-                            this.updateStateVarsOfChildByElmtId(f30, {
+                            this.updateStateVarsOfChildByElmtId(elmtId, {
                                 imageInfoArr: this.imageInfoArr, imageMatrixArr: this.imageMatrixArr
                             });
                         }
@@ -85,82 +96,79 @@ export class LandscapeSelectFuncArea extends ViewV2 {
                 }
             });
             TabContent.tabBar({ builder: () => {
-                    UserInteractiveTabBarBuilder.call(this, '图像');
+                    UserInteractiveTabBarBuilder.call(this, 0, '图像', { "id": 125836048, "type": 40000, params: ['sys.symbol.style'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                 } });
         }, TabContent);
         TabContent.pop();
-        this.observeComponentCreation2((x29, y29) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             TabContent.create(() => {
                 StyleSelectBuilder.bind(this)(this.styleItems);
             });
             TabContent.tabBar({ builder: () => {
-                    StyleSelectTabBarBuilder.call(this, makeBuilderParameterProxy("StyleSelectTabBarBuilder", { name: () => '风格', icon: () => ({ bundleName: "", moduleName: "", id: 0 }), bgColor: () => (this["__tabBarStyleBgColor"] ? this["__tabBarStyleBgColor"] : this["tabBarStyleBgColor"]) }));
+                    UserInteractiveTabBarBuilder.call(this, 1, '风格', { "id": 125836048, "type": 40000, params: ['sys.media.ohos_image_style'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                 } });
-            TabContent.onWillShow(() => {
-                this.tabBarStyleBgColor = Color.White;
-            });
-            TabContent.onWillHide(() => {
-                this.tabBarStyleBgColor = this.tabBarDefaultBgColor;
-            });
         }, TabContent);
         TabContent.pop();
-        this.observeComponentCreation2((r29, s29) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             TabContent.create(() => {
                 {
-                    this.observeComponentCreation2((t29, u29) => {
-                        if (u29) {
-                            let v29 = new FunctionAreaPlaceholder(this, {}, undefined, t29, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 54, col: 9 });
-                            ViewV2.create(v29);
-                            let w29 = () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        if (isInitialRender) {
+                            let componentCall = new FunctionAreaPlaceholder(this, {}, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 50, col: 9 });
+                            ViewV2.create(componentCall);
+                            let paramsLambda = () => {
                                 return {};
                             };
-                            v29.paramsGenerator_ = w29;
+                            componentCall.paramsGenerator_ = paramsLambda;
                         }
                         else {
-                            this.updateStateVarsOfChildByElmtId(t29, {});
+                            this.updateStateVarsOfChildByElmtId(elmtId, {});
                         }
                     }, { name: "FunctionAreaPlaceholder" });
                 }
             });
             TabContent.tabBar({ builder: () => {
-                    UserInteractiveTabBarBuilder.call(this, '比例');
+                    UserInteractiveTabBarBuilder.call(this, 2, '比例', { "id": 125836048, "type": 40000, params: ['sys.symbol.style'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                 } });
         }, TabContent);
         TabContent.pop();
-        this.observeComponentCreation2((l29, m29) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             TabContent.create(() => {
                 {
-                    this.observeComponentCreation2((n29, o29) => {
-                        if (o29) {
-                            let p29 = new FunctionAreaPlaceholder(this, {}, undefined, n29, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 59, col: 9 });
-                            ViewV2.create(p29);
-                            let q29 = () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        if (isInitialRender) {
+                            let componentCall = new FunctionAreaPlaceholder(this, {}, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 55, col: 9 });
+                            ViewV2.create(componentCall);
+                            let paramsLambda = () => {
                                 return {};
                             };
-                            p29.paramsGenerator_ = q29;
+                            componentCall.paramsGenerator_ = paramsLambda;
                         }
                         else {
-                            this.updateStateVarsOfChildByElmtId(n29, {});
+                            this.updateStateVarsOfChildByElmtId(elmtId, {});
                         }
                     }, { name: "FunctionAreaPlaceholder" });
                 }
             });
             TabContent.tabBar({ builder: () => {
-                    UserInteractiveTabBarBuilder.call(this, '清晰度');
+                    UserInteractiveTabBarBuilder.call(this, 3, '清晰度', { "id": 125836048, "type": 40000, params: ['sys.symbol.style'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                 } });
         }, TabContent);
         TabContent.pop();
         Tabs.pop();
     }
-    updateStateVars(k29) {
-        if (k29 === undefined) {
+    updateStateVars(params) {
+        if (params === undefined) {
             return;
         }
-        if ("imageInfoArr" in k29) {
-            this.updateParam("imageInfoArr", k29.imageInfoArr);
+        if ("styles" in params) {
+            this.updateParam("styles", params.styles);
         }
-        if ("imageMatrixArr" in k29) {
-            this.updateParam("imageMatrixArr", k29.imageMatrixArr);
+        if ("imageInfoArr" in params) {
+            this.updateParam("imageInfoArr", params.imageInfoArr);
+        }
+        if ("imageMatrixArr" in params) {
+            this.updateParam("imageMatrixArr", params.imageMatrixArr);
         }
     }
     rerender() {
@@ -168,7 +176,7 @@ export class LandscapeSelectFuncArea extends ViewV2 {
     }
 }
 __decorate([
-    Local
+    Param
 ], LandscapeSelectFuncArea.prototype, "styles", void 0);
 __decorate([
     Local
@@ -182,3 +190,6 @@ __decorate([
 __decorate([
     Param
 ], LandscapeSelectFuncArea.prototype, "imageMatrixArr", void 0);
+__decorate([
+    Provider('functionAreaSelectedIndex')
+], LandscapeSelectFuncArea.prototype, "selectedIndex", void 0);
