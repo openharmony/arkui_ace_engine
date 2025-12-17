@@ -758,7 +758,7 @@ void SetIncludeFontPaddingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    RichEditorModelNG::SetIncludeFontPadding(frameNode, convValue.value_or(true));
+    RichEditorModelStatic::SetIncludeFontPadding(frameNode, convValue);
 }
 void SetFallbackLineSpacingImpl(Ark_NativePointer node,
                                 const Opt_Boolean* value)
@@ -766,7 +766,7 @@ void SetFallbackLineSpacingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    RichEditorModelNG::SetFallbackLineSpacing(frameNode, convValue.value_or(true));
+    RichEditorModelStatic::SetFallbackLineSpacing(frameNode, convValue);
 }
 void SetBindSelectionMenuImpl(Ark_NativePointer node,
                               const Opt_RichEditorSpanType* spanType,
