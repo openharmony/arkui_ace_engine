@@ -102,6 +102,7 @@ void MovingPhotoModelNG::SetHdrBrightness(float hdrBrightness)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
     movingPhotoPattern->SetHdrBrightness(hdrBrightness);
 }
 
@@ -110,6 +111,7 @@ void MovingPhotoModelNG::SetEnableCameraPostprocessing(bool isEnabled)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
     movingPhotoPattern->SetEnableCameraPostprocessing(isEnabled);
 }
 
@@ -118,6 +120,7 @@ void MovingPhotoModelNG::SetMuted(bool value)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
     movingPhotoPattern->UpdateMuted(value);
 }
 
@@ -314,6 +317,7 @@ void MovingPhotoModelNG::SetMovingPhotoController(MovingPhotoNode *frameNode,
 {
     CHECK_NULL_VOID(frameNode);
     auto movingPhotoPattern = AceType::DynamicCast<MovingPhotoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(movingPhotoPattern);
     movingPhotoPattern->SetMovingPhotoController(controller);
 }
 
