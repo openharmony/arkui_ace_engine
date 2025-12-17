@@ -95,6 +95,7 @@ struct LandscapeLayout {
 
   @Local imgCounts: number = 0;
   @Param userPrompt: string = '';
+  @Local resultList: string[] = [];
 
   private initImageMatrix(): void {
     let input: imageGeneration.ImageItem[] = [];
@@ -136,6 +137,10 @@ struct LandscapeLayout {
             })
               .margin({ right: 16 })
           }
+          if (this.currentGenerateState === ImageGenerateState.GENERATED) {
+            HistoryArea({ resultList: this.resultList })
+              .margin({ right: 16 })
+          }
         }
         .margin({ top: 21, bottom: 28 })
         // text input area
@@ -157,6 +162,15 @@ struct LandscapeLayout {
               this.$currentGenerateState(state);
             }
           })
+        }
+        if (this.currentGenerateState === ImageGenerateState.GENERATED) {
+          ContinueOperateArea({
+            currentGenerateState: this.currentGenerateState,
+            changeGenerateState: (state: ImageGenerateState) => {
+              this.$currentGenerateState(state);
+            }
+          })
+            .margin({ bottom: 14 })
         }
       }
     }
