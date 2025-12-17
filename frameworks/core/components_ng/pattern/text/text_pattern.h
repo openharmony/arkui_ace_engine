@@ -1251,6 +1251,7 @@ private:
     std::list<RefPtr<SpanItem>> GetSpanSelectedContent();
     bool RegularMatchNumbers(const std::u16string& content);
     void ResetMouseLeftPressedState();
+    void GetPaintOffsetWithoutTransform(OffsetF& paintOffset);
     void ContentChangeByDetaching(PipelineContext*) override;
 
     bool isMeasureBoundary_ = false;
@@ -1314,6 +1315,7 @@ private:
     MouseFormat lastLeftMouseClickStyle_ = MouseFormat::DEFAULT;
     bool isTryEntityDragging_ = false;
     bool isRegisteredAreaCallback_ = false;
+    OffsetF gestureSelectTextPaintOffset_;
 
     // ----- multi thread state variables -----
     // ----- multi thread state variables end -----

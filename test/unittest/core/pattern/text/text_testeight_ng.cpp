@@ -307,6 +307,7 @@ HWTEST_F(TextTestEightNg, OnTextGestureSelectionUpdate005, TestSize.Level1)
     pattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(pattern);
     pattern->magnifierController_->magnifierNodeExist_ = false;
     pattern->textSelector_.baseOffset = 0;
+    pattern->selectOverlay_->isTriggerParentToScroll_ = true;
     pattern->OnTextGestureSelectionUpdate(start, end, touchEventInfo);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 2);

@@ -633,6 +633,7 @@ void TextSelectOverlay::TriggerScrollableParentToScroll(
     notifyDragEvent->SetY(globalOffset.GetY());
     scrollablePattern->HandleOnDragStatusCallback(
         isStopAutoScroll ? DragEventType::DROP : DragEventType::MOVE, notifyDragEvent);
+    isTriggerParentToScroll_ = !isStopAutoScroll;
 }
 
 const RefPtr<ScrollablePattern> TextSelectOverlay::FindScrollableParent()

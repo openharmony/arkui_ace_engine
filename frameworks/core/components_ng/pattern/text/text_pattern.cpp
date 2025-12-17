@@ -3931,7 +3931,8 @@ void TextPattern::OnModifyDone()
         if (CanStartAITask() && !GetDataDetectorAdapter()->aiDetectInitialized_) {
             ParseOriText(textForDisplay_);
         }
-        if (textCache != textForDisplay_) { // textForDisplay_ is updated by ParseOriText
+        // textForDisplay_ is updated by ParseOriText
+        if (textCache != textForDisplay_ && !selectOverlay_->IsTriggerParentToScroll()) {
             CloseSelectOverlay();
             ResetSelection();
         }
@@ -6694,6 +6695,7 @@ void TextPattern::StartGestureSelection(int32_t start, int32_t end, const Offset
     scrollableParent_ = selectOverlay_->FindScrollableParent();
     SetupMagnifier();
     TextGestureSelector::StartGestureSelection(start, end, startOffset);
+    GetPaintOffsetWithoutTransform(gestureSelectTextPaintOffset_);
 }
 
 int32_t TextPattern::GetTouchIndex(const OffsetF& offset)
@@ -6716,8 +6718,15 @@ void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const
     selectOverlay_->TriggerScrollableParentToScroll(
         scrollableParent_.Upgrade(), info.GetTouches().front().GetGlobalLocation(), false);
     auto localOffset = info.GetTouches().front().GetLocalLocation();
+    OffsetF deltaPaintOffset;
+    if (selectOverlay_->IsTriggerParentToScroll()) {
+        OffsetF currentPaintOffset = gestureSelectTextPaintOffset_;
+        GetPaintOffsetWithoutTransform(currentPaintOffset);
+        deltaPaintOffset = gestureSelectTextPaintOffset_ - currentPaintOffset;
+    }
     if (GetOrCreateMagnifier()) {
-        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
+        magnifierController_->SetLocalOffset(
+            { localOffset.GetX() + deltaPaintOffset.GetX(), localOffset.GetY() + deltaPaintOffset.GetY() });
     }
     if (start != textSelector_.GetStart()) {
         StartVibratorByIndexChange(start, textSelector_.GetStart());
@@ -7053,6 +7062,15 @@ void TextPattern::HandleFormVisibleChange(bool visible)
     } else {
         contentMod_->PauseAnimation();
     }
+}
+
+void TextPattern::GetPaintOffsetWithoutTransform(OffsetF& paintOffset)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    paintOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
 }
 
 #define DEFINE_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                        \
