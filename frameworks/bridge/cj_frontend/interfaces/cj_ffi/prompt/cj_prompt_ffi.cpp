@@ -181,10 +181,7 @@ int32_t CalculateToastAlignment(int32_t alignment, const std::string& bottom)
     if (bottom.empty()) {
         return alignment;
     }
-    double value = 0.0;
-    if (!StringUtils::StringToDouble(bottom, value)) {
-        return alignment;
-    }
+    double value = StringUtils::StringToDouble(bottom);
     constexpr double EPSILON = 1e-9;
     if (std::abs(value) < EPSILON) {
         return alignment;
@@ -197,6 +194,7 @@ void ShowDialogInner(DialogProperties& dialogProperties, std::function<void(int3
 {
     LOGI("Dialog IsCurrentUseNewPipeline.");
     auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     dialogProperties.onCancel = [callback, taskExecutor = context->GetTaskExecutor()] {
         taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
             TaskExecutor::TaskType::JS, "CJFroentendShowDialogInner");

@@ -15,6 +15,8 @@
 
 #include "core/components_ng/render/render_context.h"
 
+#include "ui/properties/ui_material.h"
+
 #include "base/utils/multi_thread.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -214,5 +216,15 @@ void RenderContext::FromJson(const std::unique_ptr<JsonValue>& json)
     } else {
         LOGE("UITree |ERROR| invalid clip=%{public}s", clip.c_str());
     }
+}
+
+void RenderContext::SetSystemMaterial(const RefPtr<UiMaterial>& material)
+{
+    uiMaterial_ = material;
+}
+
+RefPtr<UiMaterial> RenderContext::GetSystemMaterial() const
+{
+    return uiMaterial_;
 }
 } // namespace OHOS::Ace::NG

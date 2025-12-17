@@ -587,8 +587,22 @@ void TextModelNG::SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
         auto textPattern = frameNode->GetPattern<TextPattern>();
         CHECK_NULL_VOID(textPattern);
         TextDetectConfig& textDetectConfigValue = const_cast<TextDetectConfig&>(textDetectConfig);
+        if (!textDetectConfigValue.entityColorFlag) {
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            auto hyperlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
+            CHECK_NULL_VOID(hyperlinkTheme);
+            textDetectConfigValue.entityColor = hyperlinkTheme->GetTextColor();
+        }
+        if (!textDetectConfigValue.entityDecorationColorFlag) {
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            auto hyperlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
+            CHECK_NULL_VOID(hyperlinkTheme);
+            textDetectConfigValue.entityDecorationColor = hyperlinkTheme->GetTextColor();
+        }
         textDetectConfigValue.ReloadResources();
-        textPattern->SetTextDetectConfig(textDetectConfig);
+        textPattern->SetTextDetectConfig(textDetectConfigValue);
     };
     textPattern->AddResObj("dataDetectorConfig", resObj, std::move(updateFunc));
 }
@@ -1921,5 +1935,33 @@ void TextModelNG::ReSetTextContentAlign(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
         TextLayoutProperty, TextContentAlign, PROPERTY_UPDATE_LAYOUT, frameNode);
+}
+
+void TextModelNG::SetSelectedDragPreviewStyle(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedDragPreviewStyle, value);
+}
+
+void TextModelNG::ResetSelectedDragPreviewStyle()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, SelectedDragPreviewStyle, PROPERTY_UPDATE_MEASURE);
+}
+
+Color TextModelNG::GetSelectedDragPreviewStyle(FrameNode* frameNode)
+{
+    Color value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextLayoutProperty, SelectedDragPreviewStyle, value, frameNode, value);
+    return value;
+}
+
+void TextModelNG::SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedDragPreviewStyle, value, frameNode);
+}
+
+void TextModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedDragPreviewStyle, frameNode);
 }
 } // namespace OHOS::Ace::NG

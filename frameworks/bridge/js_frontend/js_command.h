@@ -23,10 +23,10 @@
 #include "base/utils/macros.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/pipeline/pipeline_context.h"
-#include "frameworks/bridge/common/dom/dom_badge.h"
 #include "frameworks/bridge/common/dom/dom_canvas.h"
 #include "frameworks/bridge/common/dom/dom_chart.h"
 #include "frameworks/bridge/common/dom/dom_clock.h"
+#include "frameworks/bridge/common/dom/dom_configs.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/dom/dom_image_animator.h"
 #include "frameworks/bridge/common/dom/dom_input.h"
@@ -263,8 +263,8 @@ private:
 
 class ACE_EXPORT  JsCommandAppendElement final : public JsCommandDomElementCreator {
 public:
-JsCommandAppendElement(const std::string& tagName, NodeId nodeId, NodeId parentNodeId)
-    : JsCommandDomElementCreator(tagName, nodeId), parentNodeId_(parentNodeId)
+    JsCommandAppendElement(const std::string& tagName, NodeId nodeId, NodeId parentNodeId)
+        : JsCommandDomElementCreator(tagName, nodeId), parentNodeId_(parentNodeId)
     {}
     ~JsCommandAppendElement() override = default;
 

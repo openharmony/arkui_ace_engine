@@ -97,7 +97,7 @@ const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.s
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.enabled";
 const char IS_FOCUS_ACTIVE_KEY[] = "persist.gesture.smart_gesture_enable";
-std::mutex g_mutexFormRenderFontFamily;
+std::mutex g_mutexFontFamily;
 constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
 constexpr int32_t EXTENSION_HALF_SCREEN_MODE = 2;
 constexpr int32_t DARK_RES_DUMP_MIN_SIZE = 3;
@@ -1223,6 +1223,27 @@ void AceContainer::OnNewRequest(int32_t instanceId, const std::string& data)
     front->OnNewRequest(data);
 }
 
+void AceContainer::InitForceSplitManager()
+{
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(context);
+    auto mgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(mgr);
+    auto abilityInfo = abilityInfo_.lock();
+    if (abilityInfo && abilityInfo->iconId != 0) {
+        mgr->SetAppIconId(abilityInfo->iconId);
+        return;
+    }
+    auto runtimeContext = runtimeContext_.lock();
+    CHECK_NULL_VOID(runtimeContext);
+    auto appInfo = runtimeContext->GetApplicationInfo();
+    if (appInfo && appInfo->iconId != 0) {
+        mgr->SetAppIconId(appInfo->iconId);
+        return;
+    }
+    TAG_LOGW(AceLogTag::ACE_ROUTER, "failed to get app iconId");
+}
+
 void AceContainer::InitializeCallback()
 {
     ACE_FUNCTION_TRACE();
@@ -1755,7 +1776,10 @@ public:
             return;
         }
         auto node = node_.Upgrade();
-        CHECK_NULL_VOID(node);
+        if (!node) {
+            TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "requesting node is nullptr.");
+            return;
+        }
         taskExecutor->PostTask(
             [viewDataWrap, pipelineContext, autoFillType = autoFillType_, triggerType = triggerType_, node]() {
                 if (pipelineContext) {
@@ -2739,6 +2763,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
     InitWindowCallback();
     InitializeCallback();
+    InitForceSplitManager();
 
     auto&& finishEventHandler = [weak = WeakClaim(this), instanceId] {
         auto container = weak.Upgrade();
@@ -3384,13 +3409,8 @@ void AceContainer::CheckAndSetFontFamily()
     for (const auto& fontFamilyName : fontFamilyNames) {
         fullPath.push_back(path + fontFamilyName);
     }
-    if (isFormRender_) {
-        // Resolve garbled characters caused by FRS multi-thread async
-        std::lock_guard<std::mutex> lock(g_mutexFormRenderFontFamily);
-        fontManager->SetFontFamily(familyName.c_str(), fullPath);
-    } else {
-        fontManager->SetFontFamily(familyName.c_str(), fullPath);
-    }
+    std::lock_guard<std::mutex> lock(g_mutexFontFamily);
+    fontManager->SetFontFamily(familyName.c_str(), fullPath);
 }
 
 void AceContainer::SetFontScaleAndWeightScale(int32_t instanceId)
@@ -3716,7 +3736,7 @@ void AceContainer::NotifyConfigurationChange(bool needReloadTransition, const Co
                 }
                 container->FlushReloadTask(needReloadTransition, configurationChange);
                 },
-            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUINotifyConfigurationChange");
         return;
     }
     taskExecutor->PostTask(

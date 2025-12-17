@@ -27,6 +27,7 @@ public:
 
     static void JSBind(BindingTarget globalObj);
     static void Print(const JSCallbackInfo& info);
+    static void AddDesc(const JSCallbackInfo& info);
 };
 
 class JSDumpRegister {

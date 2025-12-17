@@ -122,6 +122,7 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
@@ -1912,8 +1913,9 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     }
     auto smartGesture = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_SMART_GESTURE_SWITCH);
     if (!smartGesture.empty()) {
-        SystemProperties::SetFocusCanBeActive(smartGesture ==
-            OHOS::AppExecFwk::ConfigurationInner::SMART_GESTURE_AUTO);
+        auto canActivate = (smartGesture == OHOS::AppExecFwk::ConfigurationInner::SMART_GESTURE_AUTO);
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "StoreConfiguration SMART_GESTURE %{public}d", canActivate);
+        SystemProperties::SetFocusCanBeActive(canActivate);
     }
 }
 
@@ -2602,6 +2604,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
                 }
                 return false;
             });
+    bool isCustomNodeDeleteInTransition = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "ComponentDeleteInTransitionEnabled" && metaDataItem.value == "true"; });
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    if (pipelineContext) {
+        pipelineContext->SetIsCustomNodeDeleteInTransition(isCustomNodeDeleteInTransition);
+    }
+
     pipeline->SetHasPreviewTextOption(hasPreviewTextOption);
     // Use metadata to control whether the cutout safeArea takes effect.
     bool useCutout = std::any_of(metaData.begin(), metaData.end(),
@@ -3340,7 +3349,7 @@ void UIContentImpl::AddKeyFrameNodeCallback(const std::function<
     addNodeCallback_ = callback;
 }
 
-void UIContentImpl::LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode)
+void UIContentImpl::LinkKeyFrameNode()
 {
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -3348,12 +3357,17 @@ void UIContentImpl::LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFra
     auto pipelineContext = container->GetPipelineContext();
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
+    auto rootElement = context->GetRootElement();
+    CHECK_NULL_VOID(rootElement);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
+    CHECK_NULL_VOID(rosenRenderContext);
 #ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
         CHECK_NULL_VOID(window_);
         auto surfaceNode = window_->GetSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
+        auto keyFrameNode = rosenRenderContext->GetKeyFrameNode();
         CHECK_NULL_VOID(keyFrameNode);
         keyFrameNode->SetRSUIContext(surfaceNode->GetRSUIContext());
         TAG_LOGD(AceLogTag::ACE_WINDOW, "AddChild surfaceNode %{public}" PRIu64 "keyFrameNode %{public}" PRIu64 "",
@@ -3363,10 +3377,6 @@ void UIContentImpl::LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFra
 #endif
 #endif
     TAG_LOGD(AceLogTag::ACE_WINDOW, "LinkKeyFrameNode.");
-    auto rootElement = context->GetRootElement();
-    CHECK_NULL_VOID(rootElement);
-    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
-    CHECK_NULL_VOID(rosenRenderContext);
     rosenRenderContext->LinkKeyFrameNodeToRootNode(context->GetRootElement());
 }
 
@@ -3378,6 +3388,7 @@ void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config,
     TAG_LOGD(AceLogTag::ACE_WINDOW, "CacheAnimateInfo.");
     cachedAnimateFlag_.store(true);
     cachedConfig_ = config;
+    cachedConfig_.SetKeyFrameConfigCacheState(true);
     cachedReason_ = reason;
     cachedRsTransaction_ = rsTransaction;
     cachedAvoidAreas_ = avoidAreas;
@@ -3407,6 +3418,13 @@ void UIContentImpl::ExecKeyFrameCachedAnimateAction()
         };
         taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay,
             "ArkUIExecKeyFrameCachedAnimateTask", PriorityType::HIGH);
+        auto context = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+        CHECK_NULL_VOID(context);
+        auto rootElement = context->GetRootElement();
+        CHECK_NULL_VOID(rootElement);
+        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
+        CHECK_NULL_VOID(rosenRenderContext);
+        rosenRenderContext->SetHasKeyFrameCache(false);
     }
     cachedAnimateFlag_.store(false);
 }
@@ -3470,10 +3488,10 @@ void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
         return;
     }
     rosenRenderContext->CreateKeyFrameNode();
-    keyFrameNode_ = rosenRenderContext->GetKeyFrameNode();
-    if (addNodeCallback_ && keyFrameNode_) {
+    auto keyFrameNode = rosenRenderContext->GetKeyFrameNode();
+    if (addNodeCallback_ && keyFrameNode) {
         TAG_LOGI(AceLogTag::ACE_WINDOW, "rsTransaction addNodeCallback_.");
-        addNodeCallback_(keyFrameNode_, rsTransaction);
+        addNodeCallback_(keyFrameNode, rsTransaction);
     }
     CloseSyncTransaction(transactionController, transactionHandler);
     std::function<void()> callbackCachedAnimation = std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
@@ -3497,24 +3515,27 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_RETURN(context, true);
 
+    bool fromAnimateCache = config.GetKeyFrameConfig().fromAnimateCache_;
     bool animateRes = true;
     auto rootElement = context->GetRootElement();
     CHECK_NULL_RETURN(rootElement, true);
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
     CHECK_NULL_RETURN(rosenRenderContext, true);
+    if ((reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START ||
+        reason == OHOS::Rosen::WindowSizeChangeReason::DRAG) &&
+        !rosenRenderContext->GetIsDraggingFlag()) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "keyframe start policy");
+        rosenRenderContext->SetIsDraggingFlag(true);
+        KeyFrameDragStartPolicy(context);
+        return true;
+    }
+
     switch (reason) {
-        case OHOS::Rosen::WindowSizeChangeReason::DRAG_START:
-            if (!rosenRenderContext->GetIsDraggingFlag()) {
-                if (rosenRenderContext->GetKeyFrameNode()) {
-                    rosenRenderContext->SetReDraggingFlag(true);
-                }
-                rosenRenderContext->SetIsDraggingFlag(true);
-                KeyFrameDragStartPolicy(context);
-            }
-            return true;
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_END:
-            rosenRenderContext->SetIsDraggingFlag(false);
-            rosenRenderContext->SetReDraggingFlag(false);
+            TAG_LOGD(AceLogTag::ACE_WINDOW, "keyframe stop policy: from cache %{public}d", fromAnimateCache);
+            if (!fromAnimateCache) {
+                rosenRenderContext->SetIsDraggingFlag(false);
+            }
             [[fallthrough]];
         case OHOS::Rosen::WindowSizeChangeReason::DRAG:
             animateRes = rosenRenderContext->SetKeyFrameNodeOpacityAnimation(
@@ -3523,6 +3544,7 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
                 reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END);
             if (!animateRes) {
                 CacheAnimateInfo(config, reason, rsTransaction, avoidAreas);
+                rosenRenderContext->SetHasKeyFrameCache(true);
                 return true;
             }
             return false;
@@ -3794,11 +3816,12 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto updateforceSplitTask = [context, width = config.Width()]() {
+    auto updateforceSplitTask = [weakContext = WeakPtr(context)]() {
+        auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
         auto forceSplitMgr = context->GetForceSplitManager();
         CHECK_NULL_VOID(forceSplitMgr);
-        forceSplitMgr->UpdateIsInForceSplitMode(width);
+        forceSplitMgr->UpdateIsInForceSplitMode();
     };
     auto updateDensityTask = [container, modifyConfig]() {
         auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
@@ -4508,8 +4531,7 @@ void UIContentImpl::SetFormViewScale(float width, float height, float formViewSc
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    float viewScale = (formViewScale <= DEFAULT_VIEW_SCALE) ? DEFAULT_VIEW_SCALE : formViewScale;
-
+    float viewScale = LessOrEqual(formViewScale, 0.0f) ? DEFAULT_VIEW_SCALE : formViewScale;
     auto density = SystemProperties::GetResolution() / viewScale;
     TAG_LOGD(AceLogTag::ACE_FORM, "SetFormViewScale viewScale: %{public}f, density: %{public}f.", viewScale, density);
     pipelineContext->OnSurfaceDensityChanged(density);
@@ -5496,9 +5518,9 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
         TaskExecutor::TaskType::UI, "ArkUIStatusBarItemColor");
 }
 
-void UIContentImpl::SetForceSplitEnable(
-    bool isForceSplit, const std::string& homePage, bool isRouter, bool ignoreOrientation)
+void UIContentImpl::SetForceSplitEnable(bool isForceSplit)
 {
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "UIContent SetForceSplitEnable isForceSplit %{public}d", isForceSplit);
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -5506,58 +5528,78 @@ void UIContentImpl::SetForceSplitEnable(
     CHECK_NULL_VOID(context);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, homePage, isRouter, ignoreOrientation]() {
+    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
         auto forceSplitMgr = context->GetForceSplitManager();
         CHECK_NULL_VOID(forceSplitMgr);
-        forceSplitMgr->SetForceSplitEnable(isForceSplit, ignoreOrientation);
-        if (isRouter) {
-            auto stageManager = context->GetStageManager();
-            CHECK_NULL_VOID(stageManager);
-            stageManager->SetForceSplitEnable(isForceSplit, homePage, ignoreOrientation);
-            return;
-        }
-        auto navManager = context->GetNavigationManager();
-        CHECK_NULL_VOID(navManager);
-        navManager->SetForceSplitEnable(isForceSplit, homePage, ignoreOrientation);
+        forceSplitMgr->SetForceSplitEnable(isForceSplit);
     };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         forceSplitTask();
         return;
     }
-    taskExecutor->PostTask(std::move(forceSplitTask), TaskExecutor::TaskType::UI,
-        isRouter ? "ArkUISetForceSplitEnable" : "ArkUISetNavigationForceSplitEnable");
+    taskExecutor->PostTask(std::move(forceSplitTask), TaskExecutor::TaskType::UI, "ArkUISetForceSplitEnable");
 }
 
-void UIContentImpl::SetForceSplitConfig(const std::string& configJsonStr)
+void UIContentImpl::SetForceSplitConfig(const std::optional<SystemForceSplitConfig>& systemConfig,
+                                        const std::optional<AppForceSplitConfig>& appConfig)
 {
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(context);
-    NG::ForceSplitConfig config;
-    if (!NG::ForceSplitUtils::ParseForceSplitConfig(configJsonStr, config)) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse forceSplit config!");
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_VOID(forceSplitMgr);
+    if (forceSplitMgr->HasSetForceSplitConfig()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "ForceSplit config can only be setted for once time!");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ForceSplitConfig: enableHook:%{public}d, navId:%{public}s,"
-        "navDepth:%{public}s, disablePlaceholder:%{public}d, disableDivider:%{public}d", config.isArkUIHookEnabled,
-        (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
-        (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"),
-        config.navigationDisablePlaceholder, config.navigationDisableDivider);
-    context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
     auto navManager = context->GetNavigationManager();
-    if (navManager) {
+    CHECK_NULL_VOID(navManager);
+    if (appConfig.has_value()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Using app forceSplitConfig");
+        NG::ForceSplitConfig config;
+        if (!NG::ForceSplitUtils::ParseAppForceSplitConfig(appConfig->isRouter, appConfig->configJsonStr, config)) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse app forceSplit config!");
+            return;
+        }
+        NG::ForceSplitUtils::LogAppForceSplitConfig(appConfig->isRouter, config);
+        context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
+        forceSplitMgr->SetIsRouter(appConfig->isRouter);
+        forceSplitMgr->SetHomePageName(config.homePage);
+        forceSplitMgr->SetRelatedPageName(config.relatedPage);
+        forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
+        if (!(appConfig->isRouter)) {
+            navManager->SetForceSplitNavigationId(config.navigationId);
+            navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
+            navManager->SetDividerDisabled(config.navigationDisableDivider);
+        }
+        return;
+    }
+    if (!systemConfig.has_value()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "forceSplit is not supported.");
+        context->SetIsArkUIHookEnabled(false);
+        forceSplitMgr->IsForceSplitEnable(false);
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Using system forceSplitConfig");
+    NG::ForceSplitConfig config;
+    if (!NG::ForceSplitUtils::ParseSystemForceSplitConfig(systemConfig->configJsonStr, config)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse system forceSplit config!");
+        return;
+    }
+    NG::ForceSplitUtils::LogSystemForceSplitConfig(systemConfig->isRouter, systemConfig->homePage, config);
+    context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
+    forceSplitMgr->SetIsRouter(systemConfig->isRouter);
+    forceSplitMgr->SetHomePageName(systemConfig->homePage);
+    forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
+    if (!(systemConfig->isRouter)) {
         navManager->SetForceSplitNavigationId(config.navigationId);
         navManager->SetForceSplitNavigationDepth(config.navigationDepth);
         navManager->SetPlaceholderDisabled(config.navigationDisablePlaceholder);
         navManager->SetDividerDisabled(config.navigationDisableDivider);
-    }
-    auto forceSplitMgr = context->GetForceSplitManager();
-    if (forceSplitMgr) {
-        forceSplitMgr->SetFullScreenPages(std::move(config.fullScreenPages));
     }
 }
 
@@ -5823,6 +5865,87 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     sendCommandCallbackInner(taskExecutor);
     SaveGetCurrentInstanceId();
     RegisterExeAppAIFunction(taskExecutor);
+    SaveGetHitTestInfoCallback(taskExecutor);
+    SetContentChangeDetectCallback(taskExecutor);
+    RegisterGetSpecifiedContentOffsetsCallback(taskExecutor);
+    RegisterHighlightSpecifiedContentCallback(taskExecutor);
+    RegisterSelectTextCallback(taskExecutor);
+    SaveGetStateMgmtInfoFunction(taskExecutor);
+}
+
+void UIContentImpl::RegisterGetSpecifiedContentOffsetsCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto getSpecifiedContentOffsetsCallback = [weakTaskExecutor = taskExecutor](int32_t id,
+        const std::string& content) -> std::vector<std::pair<float, float>> {
+    auto taskExecutor = weakTaskExecutor.Upgrade();
+        std::vector<std::pair<float, float>> offsets;
+        CHECK_NULL_RETURN(taskExecutor, offsets);
+        taskExecutor->PostTask(
+            [&offsets, id, content]() {
+                auto node = AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(id));
+                if (!node) {
+                    LOGW("GetSpecifiedContentOffsets no such NodeId");
+                    return;
+                }
+                offsets = node->GetSpecifiedContentOffsets(content);
+                UiSessionManager::GetInstance()->SendSpecifiedContentOffsets(offsets);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionGetSpecifiedContentOffsets");
+        return offsets;
+    };
+    UiSessionManager::GetInstance()->SaveGetSpecifiedContentOffsetsFunction(getSpecifiedContentOffsetsCallback);
+}
+
+void UIContentImpl::RegisterHighlightSpecifiedContentCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto highlightSpecifiedContentCallback = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& content,
+                                                 const std::vector<std::string>& nodeIds, const std::string& configs) {
+    auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [id, content, nodeIds, configs]() {
+                auto node = AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(id));
+                if (!node) {
+                    LOGW("HighlightSpecifiedContent no such NodeId");
+                    return;
+                }
+                node->HighlightSpecifiedContent(content, nodeIds, configs);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionHighlightSpecifiedContent");
+    };
+    UiSessionManager::GetInstance()->SaveHighlightSpecifiedContentFunction(highlightSpecifiedContentCallback);
+}
+
+void UIContentImpl::RegisterSelectTextCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto selectTextCallback = [weakTaskExecutor = taskExecutor]() {
+    auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            []() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->ReportSelectedText();
+            },
+            TaskExecutor::TaskType::UI, "UiSessionSelectText");
+    };
+    UiSessionManager::GetInstance()->SaveSelectTextFunction(selectTextCallback);
+}
+
+void UIContentImpl::SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto getHitTestInfoCallback = [weakTaskExecutor = taskExecutor](InteractionParamConfig config) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [config]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->GetHitTestInfos(config);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionGetHitTestInfos");
+    };
+    UiSessionManager::GetInstance()->SaveGetHitTestInfoCallback(getHitTestInfoCallback);
 }
 
 void UIContentImpl::SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6214,5 +6337,61 @@ int32_t UIContentImpl::GetUIContentWindowID(int32_t instanceId)
     LOGI(
         "GetUIContentWindowID entry success instanceId:[%{public}d],windowId:[%{public}d]", instanceId, windowId);
     return static_cast<int32_t>(windowId);
+}
+
+void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    UiSessionManager::GetInstance()->SetStartContentChangeDetectCallback([weakTaskExecutor = taskExecutor]
+        (ContentChangeConfig config) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [config]() {
+                AceEngine::Get().NotifyContainers([config](const RefPtr<Container>& container) {
+                    auto pipeline = container->GetPipelineContext();
+                    CHECK_NULL_VOID(pipeline);
+                    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+                    CHECK_NULL_VOID(ngPipeline);
+                    auto contentChangeMgr = ngPipeline->GetContentChangeManager();
+                    CHECK_NULL_VOID(contentChangeMgr);
+                    contentChangeMgr->StartContentChangeReport(config);
+                });
+            },
+            TaskExecutor::TaskType::UI, "UiSessionContentChangeDetectStart");
+    });
+    UiSessionManager::GetInstance()->SetStopContentChangeDetectCallback([weakTaskExecutor = taskExecutor]() {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            []() {
+                AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
+                    auto pipeline = container->GetPipelineContext();
+                    CHECK_NULL_VOID(pipeline);
+                    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+                    CHECK_NULL_VOID(ngPipeline);
+                    auto contentChangeMgr = ngPipeline->GetContentChangeManager();
+                    CHECK_NULL_VOID(contentChangeMgr);
+                    contentChangeMgr->StopContentChangeReport();
+                });
+            },
+            TaskExecutor::TaskType::UI, "UiSessionContentChangeDetectStop");
+    });
+}
+
+void UIContentImpl::SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto getStateMgmtInfoCallback = [weakTaskExecutor = taskExecutor](const std::string& componentName,
+                                        const std::string& propertyName, const std::string& jsonPath) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [componentName, propertyName, jsonPath]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->GetStateMgmtInfo(componentName, propertyName, jsonPath);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionGetStateMgmtInfo");
+    };
+    UiSessionManager::GetInstance()->SaveGetStateMgmtInfoFunction(getStateMgmtInfoCallback);
 }
 } // namespace OHOS::Ace

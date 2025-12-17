@@ -1,0 +1,16 @@
+{
+  "name": "ark_xnode",
+  "version": "0.0.1",
+  "description": "ArkUI imperative interface",
+  "main": "./dist/jsXNode.js",
+  "devDependencies": {
+    "@types/node": "^15.0.1",
+    "typescript": "^4.2.4"
+  },
+  "scripts": {
+    "build_state_mgmt": "npm --prefix ../state_mgmt install && npm --prefix ../state_mgmt run build_release",
+    "build": "rm -rf ./dist && tsc --build tsconfig.json && node export.js ./dist/jsXNode.js"
+  },
+  "author": "ArkUI",
+  "license": "Apache-2.0"
+}

@@ -18,6 +18,8 @@
 #include "ipc_skeleton.h"
 
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
+#include "adapter/ohos/entrance/ui_session/content_change_config_impl.h"
+#include "adapter/ohos/entrance/ui_session/get_inspector_tree_config_impl.h"
 
 namespace OHOS::Ace {
 int32_t UIContentServiceProxy::GetInspectorTree(
@@ -36,9 +38,11 @@ int32_t UIContentServiceProxy::GetInspectorTree(
     }
     report_->RegisterGetInspectorTreeCallback(eventCallback);
 
-    data.WriteBool(config.interactionInfo);
-    data.WriteBool(config.accessibilityInfo);
-    data.WriteBool(config.cacheNodes);
+    GetInspectorTreeConfigImpl configImpl(config);
+    if (!data.WriteParcelable(&configImpl)) {
+        LOGW("GetInspectorTree write config failed");
+        return FAILED;
+    }
 
     if (Remote()->SendRequest(UI_CONTENT_SERVICE_GET_TREE, data, reply, option) != ERR_NONE) {
         LOGW("GetInspectorTree send request failed");
@@ -63,9 +67,11 @@ int32_t UIContentServiceProxy::GetVisibleInspectorTree(
     }
     report_->RegisterGetInspectorTreeCallback(eventCallback);
 
-    data.WriteBool(config.interactionInfo);
-    data.WriteBool(config.accessibilityInfo);
-    data.WriteBool(config.cacheNodes);
+    GetInspectorTreeConfigImpl configImpl(config);
+    if (!data.WriteParcelable(&configImpl)) {
+        LOGW("GetInspectorTree write config failed");
+        return FAILED;
+    }
 
     if (Remote()->SendRequest(GET_VISIBLE_TREE, data, reply, option) != ERR_NONE) {
         LOGW("GetVisibleInspectorTree send request failed");
@@ -73,6 +79,32 @@ int32_t UIContentServiceProxy::GetVisibleInspectorTree(
     }
     return NO_ERROR;
 }
+
+int32_t UIContentServiceProxy::GetLatestHitTestNodeInfosForTouch(
+    const std::function<void(std::string, int32_t, bool)>& eventCallback, InteractionParamConfig config)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetLatestHitTestNodeInfosForTouch write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr");
+        return FAILED;
+    }
+    report_->RegisterGetHitTestNodeInfoCallback(eventCallback);
+
+    data.WriteBool(config.isTopMost);
+
+    if (Remote()->SendRequest(GET_HIT_TEST_NODE_INFO_FOR_TOUCH, data, reply, option) != ERR_NONE) {
+        LOGW("GetLatestHitTestNodeInfosForTouch send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
 
 int32_t UIContentServiceProxy::Connect(const EventCallback& eventCallback)
 {
@@ -270,6 +302,81 @@ int32_t UIContentServiceProxy::RegisterLifeCycleEventCallback(const EventCallbac
     report_->RegisterLifeCycleEventCallback(eventCallback);
     if (Remote()->SendRequest(REGISTER_LIFE_CYCLE_EVENT, data, reply, option) != ERR_NONE) {
         LOGW("RegisterLifeCycleEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::RegisterSelectTextEventCallback(const EventCallback& eventCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("RegisterSelectTextEventCallback write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterSelectTextEventCallback(eventCallback);
+    if (Remote()->SendRequest(REGISTER_SELECT_TEXT_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("RegisterSelectTextEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::GetSpecifiedContentOffsets(int32_t id, const std::string& content,
+    const std::function<void(std::vector<std::pair<float, float>>)>& eventCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetSpecifiedContentOffsets write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(id) || !data.WriteString(content)) {
+        LOGW("GetSpecifiedContentOffsets write data failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("GetSpecifiedContentOffsets reportStub is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterGetSpecifiedContentOffsets(eventCallback);
+    if (Remote()->SendRequest(GET_SPECIFIED_CONTENT_OFFSETS, data, reply, option) != ERR_NONE) {
+        LOGW("GetSpecifiedContentOffsets send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::HighlightSpecifiedContent(int32_t id, const std::string& content,
+    const std::vector<std::string>& nodeIds, const std::string& configs)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("HighlightSpecifiedContent write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(id) || !data.WriteString(content) || !data.WriteInt32(nodeIds.size()) ||
+        !data.WriteString(configs)) {
+        LOGW("HighlightSpecifiedContent write data failed");
+        return FAILED;
+    }
+    for (auto& i : nodeIds) {
+        if (!data.WriteString(i)) {
+            LOGW("HighlightSpecifiedContent write data failed");
+            return FAILED;
+        }
+    }
+    if (Remote()->SendRequest(HIGHLIGHT_SPECIFIED_CONTENT, data, reply, option) != ERR_NONE) {
+        LOGW("HighlightSpecifiedContent send request failed");
         return REPLY_ERROR;
     }
     return NO_ERROR;
@@ -501,6 +608,27 @@ int32_t UIContentServiceProxy::UnregisterLifeCycleEventCallback()
     report_->UnregisterLifeCycleEventCallback();
     if (Remote()->SendRequest(UNREGISTER_LIFE_CYCLE_EVENT, data, reply, option) != ERR_NONE) {
         LOGW("UnregisterLifeCycleEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::UnregisterSelectTextEventCallback()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("UnregisterSelectTextEventCallback write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->UnregisterSelectTextEventCallback();
+    if (Remote()->SendRequest(UNREGISTER_SELECT_TEXT_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("UnregisterSelectTextEventCallback send request failed");
         return REPLY_ERROR;
     }
     return NO_ERROR;
@@ -785,6 +913,105 @@ int32_t UIContentServiceProxy::ExeAppAIFunction(
     report_->RegisterExeAppAIFunction(finishCallback);
     if (Remote()->SendRequest(EXE_APP_AI_FUNCTION, data, reply, option) != ERR_NONE) {
         LOGW("ExeAppAIFunction send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::RegisterContentChangeCallback(const ContentChangeConfig& config,
+    const std::function<void(ChangeType type, const std::string& simpleTree)> callback)
+{
+    if (callback == nullptr) {
+        LOGW("RegisterContentChangeCallback callback is nullptr");
+        return PARAM_INVALID;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("RegisterContentChangeCallback write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(processId_)) {
+        LOGW("RegisterContentChangeCallback write processId failed");
+        return FAILED;
+    }
+
+    ContentChangeConfigImpl configImpl(config);
+    if (!data.WriteParcelable(&configImpl)) {
+        LOGW("RegisterContentChangeCallback write config failed");
+        return FAILED;
+    }
+
+    if (report_ == nullptr) {
+        LOGW("RegisterContentChangeCallback is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterContentChangeCallback(callback);
+
+    if (Remote()->SendRequest(REGISTER_CONTENT_CHANGE, data, reply, option) != ERR_NONE) {
+        LOGW("RegisterContentChangeCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::UnregisterContentChangeCallback()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("UnregisterContentChangeCallback write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("UnregisterContentChangeCallback is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->UnregisterContentChangeCallback();
+    if (Remote()->SendRequest(UNREGISTER_CONTENT_CHANGE, data, reply, option) != ERR_NONE) {
+        LOGW("UnregisterContentChangeCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
+    const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback)
+{
+    MessageParcel value;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!value.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetStateMgmtInfo write interface token failed");
+        return FAILED;
+    }
+    if (!value.WriteInt32(processId_)) {
+        LOGW("GetStateMgmtInfo write interface processId failed");
+        return FAILED;
+    }
+    if (!value.WriteString(componentName)) {
+        LOGW("GetStateMgmtInfo write componentName failed");
+        return FAILED;
+    }
+    if (!value.WriteString(propertyName)) {
+        LOGW("GetStateMgmtInfo write propertyName failed");
+        return FAILED;
+    }
+    if (!value.WriteString(jsonPath)) {
+        LOGW("GetStateMgmtInfo write jsonPath failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("GetStateMgmtInfo is nullptr, connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterGetStateMgmtInfoCallback(eventCallback);
+    if (Remote()->SendRequest(REQUEST_STATE_MGMT_INFO, value, reply, option) != ERR_NONE) {
+        LOGW("GetStateMgmtInfo send request failed");
         return REPLY_ERROR;
     }
     return NO_ERROR;

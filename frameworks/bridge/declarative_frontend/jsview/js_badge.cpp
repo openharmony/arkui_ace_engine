@@ -20,9 +20,11 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components/badge/badge_theme.h"
 #include "core/components/common/layout/grid_container_info.h"
+#include "core/components_ng/pattern/badge/badge_model.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
-#include "frameworks/bridge/declarative_frontend/jsview/models/badge_model_impl.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<BadgeModel> BadgeModel::instance_ = nullptr;
@@ -39,7 +41,9 @@ BadgeModel* BadgeModel::GetInstance()
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::BadgeModelNG());
             } else {
-                instance_.reset(new Framework::BadgeModelImpl());
+                static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("badge");
+                static BadgeModel* instance = loader ? reinterpret_cast<BadgeModel*>(loader->CreateModel()) : nullptr;
+                return instance;
             }
 #endif
         }

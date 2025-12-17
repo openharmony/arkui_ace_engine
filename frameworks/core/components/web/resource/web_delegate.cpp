@@ -831,6 +831,17 @@ void ContextMenuResultOhos::PasteAndMatchStyle() const
     }
 }
 
+void ContextMenuResultOhos::RequestPasswordAutoFill() const
+{
+    if (callback_) {
+        callback_->Continue(CI_REQUEST_AUTOFILL, EF_NONE);
+    }
+    auto delegate = delegate_.Upgrade();
+    if (delegate) {
+        delegate->OnRequestAutofill(static_cast<int32_t>(NG::WebMenuType::TYPE_CONTEXTMENU));
+    }
+}
+
 void WebWindowNewHandlerOhos::SetWebController(int32_t id)
 {
     if (handler_) {
@@ -3631,6 +3642,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->PutVaultPlainTextCallback(vaultPlainTextImpl);
             auto pattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
+            pattern->RegisterMenuLifeCycleCallback();
             pattern->InitDataDetector();
             pattern->InitSelectDataDetector();
             pattern->InitAIDetectResult();
@@ -4820,7 +4832,7 @@ void WebDelegate::LoadUrl()
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebLoadSrcUrl");
 }
 
-void WebDelegate::OnInactive(bool isOfflineWebOffMainTree)
+void WebDelegate::OnInactive()
 {
     int webId = GetWebId();
     TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnInactive, webId:%{public}d", webId);
@@ -4829,15 +4841,13 @@ void WebDelegate::OnInactive(bool isOfflineWebOffMainTree)
         return;
     }
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), webId, isOfflineWebOffMainTree]() {
+        [weak = WeakClaim(this), webId]() {
             auto delegate = weak.Upgrade();
             if (!delegate) {
                 return;
             }
             if (delegate->nweb_) {
-                if (!isOfflineWebOffMainTree) {
-                    OHOS::NWeb::NWebHelper::Instance().SetNWebActiveStatus(webId, false);
-                }
+                OHOS::NWeb::NWebHelper::Instance().SetNWebActiveStatus(webId, false);
                 delegate->nweb_->OnPause();
             }
         },
@@ -6303,7 +6313,6 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
         auto webPattern = delegate->webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
         webPattern->SetAILinkMenuShow(false);
-        webPattern->RegisterMenuLifeCycleCallback();
         if (delegate->richtextData_) {
             webPattern->OnContextMenuShow(info, true, true);
             result = true;
@@ -6330,7 +6339,6 @@ bool WebDelegate::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info)
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
             webPattern->SetAILinkMenuShow(false);
-            webPattern->RegisterMenuLifeCycleCallback();
             if (delegate->richtextData_) {
                 webPattern->OnContextMenuShow(info, true, true);
                 result = true;
@@ -9592,6 +9600,13 @@ void WebDelegate::OnFirstScreenPaint(
         TaskExecutor::TaskType::JS, "ArkUIWebOnFirstScreenPaint");
 }
 
+void WebDelegate::OnRequestAutofill(int32_t menuType)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->RequestPasswordAutoFill(static_cast<NG::WebMenuType>(menuType));
+}
+
 void WebDelegate::UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
     const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold)
 {
@@ -9873,5 +9888,28 @@ void WebDelegate::OnMicrophoneCaptureStateChanged(int originalState, int newStat
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebMicrophoneCaptureStateChanged");
+}
+
+void WebDelegate::SetOfflineWebActiveStatus(int32_t webId, bool isActive)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::SetOfflineWebActiveStatus");
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), webId, isActive]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate || !delegate->nweb_) {
+                TAG_LOGE(AceLogTag::ACE_WEB, "WebDelegate::SetOfflineWebActiveStatus delegate is nullptr");
+                return;
+            }
+            if (isActive && OHOS::NWeb::NWebHelper::Instance().GetNWebActiveStatus(webId)) {
+                delegate->nweb_->OnContinue();
+            } else if (!isActive) {
+                delegate->nweb_->OnPause();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "SetOfflineWebActiveStatus");
 }
 } // namespace OHOS::Ace

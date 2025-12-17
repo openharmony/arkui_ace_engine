@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,14 @@
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 
 #include "core/common/ace_engine.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
+#include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
@@ -566,11 +567,7 @@ RefPtr<FrameNode> DragAnimationHelper::CreateGatherNode(const RefPtr<FrameNode>&
     std::vector<GatherNodeChildInfo>& gatherNodeInfo)
 {
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto parentNode = DragDropFuncWrapper::FindItemParentNode(frameNode);
-    CHECK_NULL_RETURN(parentNode, nullptr);
-    auto scrollPattern = parentNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_RETURN(scrollPattern, nullptr);
-    auto children = scrollPattern->GetVisibleSelectedItems();
+    auto children = SelectableUtils::GetVisibleSelectedItems(frameNode);
     if (children.empty()) {
         return nullptr;
     }

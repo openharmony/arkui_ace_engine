@@ -15,11 +15,24 @@
 
 #include <optional>
 
+// SORTED_SECTION
+#include "core/common/ime/text_input_action.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/paint_state.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/web/web_event.h"
+#include "core/components_ng/pattern/list/list_item_group_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+#include "core/components_ng/pattern/security_component/security_component_common.h"
+#include "core/components_ng/pattern/tabs/tabs_model.h"
+#include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/components_v2/list/list_properties.h"
 
+#include "ace_engine_types.h"
 #include "arkoala_api_generated.h"
 #include "reverse_converter.h"
 
@@ -264,17 +277,45 @@ void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src)
     }
 }
 
-void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src)
+void AssignArkValue(Ark_GestureControl_GestureType& dst, const GestureTypeName& src)
 {
     switch (src) {
-        case GestureTypeName::TAP_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_TAP_GESTURE; break;
-        case GestureTypeName::LONG_PRESS_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_LONG_PRESS_GESTURE; break;
-        case GestureTypeName::PAN_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_PAN_GESTURE; break;
-        case GestureTypeName::PINCH_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_PINCH_GESTURE; break;
-        case GestureTypeName::SWIPE_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_SWIPE_GESTURE; break;
-        case GestureTypeName::ROTATION_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_ROTATION_GESTURE; break;
-        case GestureTypeName::DRAG: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_DRAG; break;
-        case GestureTypeName::CLICK: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_CLICK; break;
+        case GestureTypeName::TAP_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_TAP_GESTURE;
+            break;
+        case GestureTypeName::LONG_PRESS_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_LONG_PRESS_GESTURE;
+            break;
+        case GestureTypeName::PAN_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_PAN_GESTURE;
+            break;
+        case GestureTypeName::PINCH_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_PINCH_GESTURE;
+            break;
+        case GestureTypeName::SWIPE_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_SWIPE_GESTURE;
+            break;
+        case GestureTypeName::ROTATION_GESTURE:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_ROTATION_GESTURE;
+            break;
+        case GestureTypeName::DRAG:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_DRAG;
+            break;
+        case GestureTypeName::CLICK:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_CLICK;
+            break;
+        case GestureTypeName::BOXSELECT:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_BOX_SELECT_GESTURE;
+            break;
+        case GestureTypeName::WEBSCROLL:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_WEB_SCROLL_GESTURE;
+            break;
+        case GestureTypeName::TEXTFIELD_BOXSELECT:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_TEXT_FIELD_SELECT_GESTURE;
+            break;
+        case GestureTypeName::CONTEXT_MENU_HOVER:
+            dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_CONTEXT_MENU_HOVER_GESTURE;
+            break;
         default:
             LOGE("Unexpected enum value in GestureTypeName: %{public}d", src);
             dst = static_cast<Ark_GestureControl_GestureType>(-1);
@@ -556,11 +597,6 @@ void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src)
     }
 }
 
-void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src)
-{
-    dst.scrollForward = ArkValue<Ark_NestedScrollMode>(src.forward);
-    dst.scrollBackward = ArkValue<Ark_NestedScrollMode>(src.backward);
-}
 void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src)
 {
     if (src.type >= static_cast<uint32_t>(Ark_PanDirection::ARK_PAN_DIRECTION_NONE) &&
@@ -571,6 +607,7 @@ void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src)
         LOGE("Unexpected enum value in PanDirection: %{public}d", src.type);
     }
 }
+
 void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
 {
     switch (src) {

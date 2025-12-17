@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG {
 namespace TextPickerDialogExtender {
-void Show(const Ark_TextPickerDialogOptions* options);
+void Show(const Ark_Union_TextPickerDialogOptions_TextPickerDialogOptionsExt* options);
 } // namespace TextPickerDialogExtender
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_TEXT_PICKER_DIALOG_EXTENDER_H

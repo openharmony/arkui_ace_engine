@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
-#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -39,10 +39,16 @@ enum class ListItemSwipeIndex {
     SWIPER_ACTION = 2,
 };
 
+using ItemState = uint32_t;
+inline constexpr ItemState ITEM_STATE_NORMAL = 0;
+inline constexpr ItemState ITEM_STATE_PRESSED = 1;
+inline constexpr ItemState ITEM_STATE_FOCUSED = 1 << 1;
+inline constexpr ItemState ITEM_STATE_HOVERED = 1 << 2;
+
 using PendingSwipeFunc = std::function<void()>;
 
-class ACE_EXPORT ListItemPattern : public Pattern {
-    DECLARE_ACE_TYPE(ListItemPattern, Pattern);
+class ACE_EXPORT ListItemPattern : public SelectableItemPattern {
+    DECLARE_ACE_TYPE(ListItemPattern, SelectableItemPattern);
 
 public:
     void SwipeCommon(ListItemSwipeIndex targetState);
@@ -158,16 +164,6 @@ public:
 
     void MarkIsSelected(bool isSelected);
 
-    bool IsSelected() const
-    {
-        return isSelected_;
-    }
-
-    void SetSelected(bool selected)
-    {
-        isSelected_ = selected;
-    }
-
     bool Selectable() const
     {
         return selectable_;
@@ -218,7 +214,7 @@ public:
 
     void CloseSwipeAction(OnFinishFunc&& onFinishCallback);
     void CloseSwipeActionMultiThread(OnFinishFunc&& onFinishCallback);
-	
+
     void ExpandSwipeAction(ListItemSwipeActionDirection direction);
     void ExpandSwipeActionWithAnimate(ListItemSwipeIndex index);
 
@@ -268,6 +264,10 @@ public:
     }
 
     void SetDeleteArea();
+
+    void OnHoverWithHightLight(bool isHover) override;
+    void OnPaintFocusState(bool isFocus) override;
+    void NotifyItemState(ItemState itemState, bool isEffective);
 
 protected:
     void OnModifyDone() override;
@@ -342,7 +342,6 @@ private:
 
     // selectable
     bool selectable_ = true;
-    bool isSelected_ = false;
 
     // drag sort
     RefPtr<ListItemDragManager> dragManager_;

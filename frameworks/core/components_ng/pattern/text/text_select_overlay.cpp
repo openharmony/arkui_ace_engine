@@ -247,9 +247,24 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         TAG_LOGI(AceLogTag::ACE_TEXT, "Close the selectoverlay when nothing is selected.");
         CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
     }
+    textPattern->ReportSelectedText();
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextSelectOverlay::SetTextSelectionHolderId(int32_t id)
+{
+    auto overlayManager = SelectContentOverlayManager::GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->SetTextSelectionHolderId(id);
+}
+
+void TextSelectOverlay::RemoveTextSelectionHolderId(int32_t id)
+{
+    auto overlayManager = SelectContentOverlayManager::GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->RemoveTextSelectionHolderId(id);
 }
 
 std::string TextSelectOverlay::GetSelectedText()
@@ -633,6 +648,7 @@ void TextSelectOverlay::TriggerScrollableParentToScroll(
     notifyDragEvent->SetY(globalOffset.GetY());
     scrollablePattern->HandleOnDragStatusCallback(
         isStopAutoScroll ? DragEventType::DROP : DragEventType::MOVE, notifyDragEvent);
+    isTriggerParentToScroll_ = !isStopAutoScroll;
 }
 
 const RefPtr<ScrollablePattern> TextSelectOverlay::FindScrollableParent()

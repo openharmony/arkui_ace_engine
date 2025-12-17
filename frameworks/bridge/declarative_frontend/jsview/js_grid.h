@@ -38,6 +38,7 @@ public:
     static void JsOnScrollBarUpdate(const JSCallbackInfo& info);
     static void SetCachedCount(const JSCallbackInfo& info);
     static void SetEditMode(const JSCallbackInfo& info);
+    static void SetEditModeOptions(const JSCallbackInfo& info);
     static void SetMultiSelectable(bool multiSelectable);
     static void SetMaxCount(const JSCallbackInfo& info);
     static void SetMinCount(const JSCallbackInfo& info);
@@ -59,6 +60,7 @@ public:
     static void SetFocusWrapMode(const JSCallbackInfo& args);
     static void SetAlignItems(const JSCallbackInfo& info);
     static void SetSyncLoad(const JSCallbackInfo& info);
+    static void SetSupportLazyLoadingEmptyBranch(const JSCallbackInfo& info);
 
     static void JsOnScroll(const JSCallbackInfo& args);
     static void JsOnReachStart(const JSCallbackInfo& args);

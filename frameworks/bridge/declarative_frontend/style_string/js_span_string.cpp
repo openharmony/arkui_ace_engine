@@ -764,7 +764,7 @@ void JSSpanString::FromHtml(const JSCallbackInfo& info)
     napi_value result = nullptr;
     napi_create_promise(asyncContext->env, &asyncContext->deferred, &result);
     taskExecutor->PostTask(
-        [htmlStr = arg, asyncContext]() mutable {
+        [htmlStr = arg, asyncContext, execCtx = info.GetExecutionContext()]() mutable {
             ContainerScope scope(asyncContext->instanceId);
             // FromHtml may cost much time because of pixelmap.
             // Therefore this function should be called in Background thread.
@@ -772,7 +772,8 @@ void JSSpanString::FromHtml(const JSCallbackInfo& info)
             auto container = AceEngine::Get().GetContainer(asyncContext->instanceId);
             CHECK_NULL_VOID(container);
             auto taskExecutor = container->GetTaskExecutor();
-            taskExecutor->PostTask([styledString, asyncContext]() mutable {
+            taskExecutor->PostTask([styledString, asyncContext, execCtx]() mutable {
+                    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                     ContainerScope scope(asyncContext->instanceId);
                     if (!styledString) {
                         ProcessPromiseCallback(asyncContext, ERROR_CODE_FROM_HTML_CONVERT_ERROR);

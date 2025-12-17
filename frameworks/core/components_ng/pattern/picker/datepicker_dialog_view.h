@@ -182,6 +182,7 @@ private:
         RefPtr<DatePickerPattern>& datePickerPattern, RefPtr<DatePickerPattern>& monthDaysPickerPattern);
     static std::string GetDialogAgingButtonText(bool isNext);
     static std::string GetDialogNormalButtonText(bool isConfirm);
+    static void UpdateLinearMargin(const RefPtr<LinearLayoutProperty>& layoutProps);
     static bool switchTimePickerFlag_;
     static bool switchDatePickerFlag_;
     static bool isShowTime_;
@@ -190,6 +191,18 @@ private:
     static Dimension selectedTextStyleFont_;
     static Dimension normalTextStyleFont_;
     static Dimension disappearTextStyleFont_;
+    static Dimension titlePaddingHorizontal_;
+    static Dimension titleMarginTop_;
+    static Dimension titleMarginBottom_;
+    static Dimension pickerDialogMargin_;
+    static Dimension pickerTitleHeight_;
+    static Color buttonColor_;
+    static bool useButtonFocusArea_;
+
+    static Dimension checkboxSize_;
+    static Dimension lunarSwitchHeight_;
+    static Dimension checkboxPaddingLeft_;
+    static Dimension checkboxPaddingRight_;
     static DatePickerMode datePickerMode_;
 };
 } // namespace OHOS::Ace::NG

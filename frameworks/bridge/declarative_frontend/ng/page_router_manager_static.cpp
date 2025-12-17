@@ -121,9 +121,9 @@ RefPtr<FrameNode> PageRouterManager::PushExtender(
     }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
-    auto stageManager = context->GetStageManager();
-    CHECK_NULL_RETURN(stageManager, nullptr);
-    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !stageManager->GetForceSplitEnable()) {
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, nullptr);
+    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !forceSplitMgr->IsForceSplitEnable(true)) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "StartPush exceeds maxStackSize.");
         if (target.errorCallback != nullptr) {
             target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);

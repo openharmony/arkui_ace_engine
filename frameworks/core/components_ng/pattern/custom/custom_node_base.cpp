@@ -324,6 +324,16 @@ void CustomNodeBase::SetClearAllRecycleFunc(std::function<void()>&& func)
     clearAllRecycleFunc_ = func;
 }
 
+void CustomNodeBase::SetCreatorId(const std::string& creatorId)
+{
+    creatorId_ = creatorId;
+}
+
+const std::string& CustomNodeBase::GetCreatorId() const
+{
+    return creatorId_;
+}
+
 void CustomNodeBase::SetReuseId(const std::string& reuseId)
 {
     reuseId_ = reuseId;

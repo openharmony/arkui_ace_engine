@@ -112,6 +112,7 @@ public:
     static void SetCustomKeyboard(FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance);
     static void SetIncludeFontPadding(FrameNode* frameNode, const std::optional<bool>& optValue);
     static void SetFallbackLineSpacing(FrameNode* frameNode, const std::optional<bool>& optValue);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& value);
 private:
 
 };

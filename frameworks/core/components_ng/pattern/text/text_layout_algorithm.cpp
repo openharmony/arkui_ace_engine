@@ -101,7 +101,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
     auto contentConstraint = CalcContentConstraint(constraint, layoutWrapper);
     ConstructTextStyles(contentConstraint, layoutWrapper, textStyle_);
-    if (isSpanStringMode_ && spanStringHasMaxLines_) {
+    if (isSpanStringMode_ && spanStringHasMaxLines_ && !textLayoutProperty->GetIsTextMaxlinesFirstValue(false)) {
         textStyle_.SetMaxLines(UINT32_MAX);
     }
     // inheritTextStyle_ is used to control spans_ in versions below VERSION_EIGHTEEN, preventing them from

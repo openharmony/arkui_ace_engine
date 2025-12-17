@@ -14,10 +14,10 @@
  */
 
 #include "core/common/multi_thread_build_manager.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_common.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
 #include "core/components/common/layout/constants.h"
+#include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -115,7 +115,7 @@ void SetOnClickImpl(Ark_NativePointer node,
             message = secEventValue->GetString("message", message);
         }
 #endif
-        const auto event = Converter::ArkClickEventSync(info);
+        const auto event = Converter::SyncEvent<Ark_ClickEvent>(info);
         Ark_SaveButtonOnClickResult arkResult = Converter::ArkValue<Ark_SaveButtonOnClickResult>(res);
         auto error = Converter::ArkValue<Opt_BusinessError>();
         arkCallback.InvokeSync(event.ArkValue(), arkResult, error);

@@ -30,12 +30,12 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/ressched/ressched_report.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "base/window/foldable_window.h"
-#include "base/ressched/ressched_report.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/ace_application_info.h"
@@ -59,10 +59,11 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/manager/focus/focus_view.h"
-#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
@@ -80,6 +81,7 @@
 #include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_mask_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -950,6 +952,7 @@ void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, con
             }
             auto dialogPattern = node->GetPattern<DialogPattern>();
             dialogPattern->CallDialogDidAppearCallback();
+            overlayManager->ContentChangeReport(node);
         });
     auto ctx = node->GetRenderContext();
     option.SetFinishCallbackType(dialogPattern->GetOpenAnimation().has_value()
@@ -1026,6 +1029,7 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
             auto dialogPattern = node->GetPattern<DialogPattern>();
             CHECK_NULL_VOID(dialogPattern);
             dialogPattern->CallDialogDidDisappearCallback();
+            overlayManager->ContentChangeReport(node);
     });
     auto ctx = node->GetRenderContext();
     if (!ctx) {
@@ -1157,6 +1161,7 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, co
             }
             auto dialogPattern = node->GetPattern<DialogPattern>();
             dialogPattern->CallDialogDidAppearCallback();
+            overlayManager->ContentChangeReport(node);
         }
     );
 
@@ -1277,6 +1282,7 @@ void OverlayManager::CloseDialogMatchTransition(const RefPtr<FrameNode>& node)
                 CHECK_NULL_VOID(node);
                 auto dialogPattern = node->GetPattern<DialogPattern>();
                 dialogPattern->CallDialogDidDisappearCallback();
+                overlayManager->ContentChangeReport(node);
         });
     } else {
         auto id = Container::CurrentId();
@@ -1326,6 +1332,7 @@ void OverlayManager::OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK
     if (!menuWrapperPattern->IsHide()) {
         menuWrapperPattern->SetMenuStatus(MenuStatus::SHOW);
     }
+    ContentChangeReport(menu);
 }
 
 void OverlayManager::SetPreviewFirstShow(const RefPtr<FrameNode>& menu)
@@ -1338,6 +1345,7 @@ void OverlayManager::SetPreviewFirstShow(const RefPtr<FrameNode>& menu)
     auto previewPattern = AceType::DynamicCast<MenuPreviewPattern>(previewChild->GetPattern());
     CHECK_NULL_VOID(previewPattern);
     previewPattern->SetFirstShow();
+    ContentChangeReport(menu);
 }
 
 void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
@@ -1470,6 +1478,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     CHECK_NULL_VOID(overlayManager);
 
     overlayManager->SetContextMenuDragHideFinished(true);
+    overlayManager->ContentChangeReport(menu);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_FINISHED);
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
@@ -4242,6 +4251,7 @@ void OverlayManager::PublishMenuStatus(bool isMenuShow, const RefPtr<FrameNode>&
     // notify drag manager the menu show status
     if (!menuNode) {
         DragDropGlobalController::GetInstance().PublishMenuStatusWithNode(isMenuShow);
+        SelectableUtils::GetInstance().PublishMenuStatus(isMenuShow, menuNode);
         return;
     }
     auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
@@ -4253,6 +4263,7 @@ void OverlayManager::PublishMenuStatus(bool isMenuShow, const RefPtr<FrameNode>&
     auto targetNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
     CHECK_NULL_VOID(targetNode);
     DragDropGlobalController::GetInstance().PublishMenuStatusWithNode(isMenuShow, targetNode);
+    SelectableUtils::GetInstance().PublishMenuStatus(isMenuShow, targetNode);
 }
 
 void OverlayManager::SetIsMenuShow(bool isMenuShow, const RefPtr<FrameNode>& menuNode)
@@ -9209,5 +9220,19 @@ void OverlayManager::EraseMenuInfoFromWrapper(const RefPtr<FrameNode>& menuWrapp
     if (currentMenuWrapper->GetId() == menuWrapperNode->GetId()) {
         EraseMenuInfo(targetId);
     }
+}
+
+void OverlayManager::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
+{
+    auto pipeline = GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->IsSubPipeline()) {
+        int32_t parentId = SubwindowManager::GetInstance()->GetParentContainerId(pipeline->GetInstanceId());
+        pipeline = PipelineContext::GetContextByContainerId(parentId);
+        CHECK_NULL_VOID(pipeline);
+    }
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnDialogChangeEnd(keyNode);
 }
 } // namespace OHOS::Ace::NG

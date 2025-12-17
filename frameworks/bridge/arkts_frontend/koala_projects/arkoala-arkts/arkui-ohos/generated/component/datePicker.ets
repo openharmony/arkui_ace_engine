@@ -171,6 +171,18 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._DatePickerAttribute_setEnableHapticFeedback(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setCanLoopAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DatePickerAttribute_setCanLoop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface DatePickerResult {
     year?: int32;
@@ -213,6 +225,9 @@ export interface DatePickerAttribute extends CommonMethod {
     enableHapticFeedback(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableHapticFeedback")
     }
+    canLoop(value: boolean | undefined): this {
+        throw new Error("Unimplemented method canLoop")
+    }
     attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
@@ -225,6 +240,7 @@ export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePick
     onDateChange_value?: ((value0: Date) => void) | undefined
     digitalCrownSensitivity_value?: CrownSensitivity | undefined
     enableHapticFeedback_value?: boolean | undefined
+    canLoop_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined
     setDatePickerOptions(options?: DatePickerOptions): this {
         return this
@@ -248,6 +264,9 @@ export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePick
         return this
     }
     enableHapticFeedback(value: boolean | undefined): this {
+        return this
+    }
+    canLoop(value: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -289,6 +308,7 @@ export interface DatePickerDialogOptions extends DatePickerOptions {
     enableHoverMode?: boolean;
     hoverModeArea?: HoverModeAreaType;
     enableHapticFeedback?: boolean;
+    canLoop?: boolean;
 }
 
 export class ArkDatePickerComponent extends ArkCommonMethodComponent implements DatePickerAttribute {
@@ -359,6 +379,14 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("enableHapticFeedback")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableHapticFeedbackAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public canLoop(value: boolean | undefined): this {
+        if (this.checkPriority("canLoop")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setCanLoopAttribute(value_casted)
             return this
         }
         return this
@@ -928,6 +956,14 @@ export class DatePickerDialogOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForCanLoop  = value.canLoop
+        if (valueHolderForCanLoop !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCanLoopTmpValue  = valueHolderForCanLoop!
+            valueSerializer.writeBoolean(valueHolderForCanLoopTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): DatePickerDialogOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -1239,7 +1275,13 @@ export class DatePickerDialogOptions_serializer {
             enableHapticFeedbackTmpBuf = valueDeserializer.readBoolean()
         }
         const enableHapticFeedbackTmpResult : boolean | undefined = enableHapticFeedbackTmpBuf
-        let value : DatePickerDialogOptions = ({start: startTmpResult, end: endTmpResult, selected: selectedTmpResult, mode: modeTmpResult, lunar: lunarTmpResult, lunarSwitch: lunarSwitchTmpResult, lunarSwitchStyle: lunarSwitchStyleTmpResult, showTime: showTimeTmpResult, useMilitaryTime: useMilitaryTimeTmpResult, disappearTextStyle: disappearTextStyleTmpResult, textStyle: textStyleTmpResult, acceptButtonStyle: acceptButtonStyleTmpResult, cancelButtonStyle: cancelButtonStyleTmpResult, selectedTextStyle: selectedTextStyleTmpResult, maskRect: maskRectTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, onCancel: onCancelTmpResult, onDateAccept: onDateAcceptTmpResult, onDateChange: onDateChangeTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, shadow: shadowTmpResult, dateTimeOptions: dateTimeOptionsTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, enableHapticFeedback: enableHapticFeedbackTmpResult} as DatePickerDialogOptions)
+        const canLoopTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let canLoopTmpBuf : boolean | undefined = undefined
+        if ((canLoopTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            canLoopTmpBuf = valueDeserializer.readBoolean()
+        }
+        const canLoopTmpResult : boolean | undefined = canLoopTmpBuf
+        let value : DatePickerDialogOptions = ({start: startTmpResult, end: endTmpResult, selected: selectedTmpResult, mode: modeTmpResult, lunar: lunarTmpResult, lunarSwitch: lunarSwitchTmpResult, lunarSwitchStyle: lunarSwitchStyleTmpResult, showTime: showTimeTmpResult, useMilitaryTime: useMilitaryTimeTmpResult, disappearTextStyle: disappearTextStyleTmpResult, textStyle: textStyleTmpResult, acceptButtonStyle: acceptButtonStyleTmpResult, cancelButtonStyle: cancelButtonStyleTmpResult, selectedTextStyle: selectedTextStyleTmpResult, maskRect: maskRectTmpResult, alignment: alignmentTmpResult, offset: offsetTmpResult, onCancel: onCancelTmpResult, onDateAccept: onDateAcceptTmpResult, onDateChange: onDateChangeTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, shadow: shadowTmpResult, dateTimeOptions: dateTimeOptionsTmpResult, enableHoverMode: enableHoverModeTmpResult, hoverModeArea: hoverModeAreaTmpResult, enableHapticFeedback: enableHapticFeedbackTmpResult, canLoop: canLoopTmpResult} as DatePickerDialogOptions)
         return value
     }
 }

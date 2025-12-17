@@ -43,6 +43,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "ui/properties/ui_material.h"
 
 using namespace testing;
 using namespace testing::ext;

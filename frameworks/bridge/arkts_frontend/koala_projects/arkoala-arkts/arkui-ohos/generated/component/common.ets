@@ -36,6 +36,7 @@ import { uiEffect_VisualEffect_serializer, uiEffect_Filter_serializer, uiEffect_
 import { FocusBoxStyle_serializer, FocusBoxStyle, FocusPriority } from "./focus"
 import { matrix4_Matrix4Transit_serializer } from "./../framework/ohos.matrix4"
 import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, RectShape_serializer } from "./../framework/ohos.arkui.shape"
+import { uiMaterial_Material_serializer } from "./../framework/ohos.arkui.uiMaterial"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback } from "./styledString"
 import { ComponentContent_serializer } from "./../ComponentContent"
@@ -47,6 +48,7 @@ import { CustomBuilder } from "./builder"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, FingerInfo, GestureControl, GestureRecognizerState, EventTargetInfo } from "./gesture"
+import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
 import { default as image } from "@ohos.multimedia.image"
 import { ComponentContent, ComponentContentBase } from "arkui.ComponentContent"
 import { AsyncCallback, BusinessError } from "@ohos.base"
@@ -668,6 +670,7 @@ export interface DragEvent {
     getVelocity(): double
     executeDropAnimation(customDropAnimation: (() => void)): void
     startDataLoading(options: unifiedDataChannel.GetDataParams): string | undefined
+    getDisplayId(): int32
     enableInternalDropAnimation(configuration: string): void
 }
 export class DragEventInternal implements MaterializedBase,DragEvent {
@@ -766,6 +769,9 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     public startDataLoading(options: unifiedDataChannel.GetDataParams): string | undefined {
         return hookDragEventStartDataLoading(this, options)
     }
+    public getDisplayId(): int32 {
+        return this.getDisplayId_serialize()
+    }
     public enableInternalDropAnimation(configuration: string): void {
         const configuration_casted = configuration as (string)
         this.enableInternalDropAnimation_serialize(configuration_casted)
@@ -855,6 +861,10 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         thisSerializer.holdAndWriteCallback(customDropAnimation)
         ArkUIGeneratedNativeModule._DragEvent_executeDropAnimation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    getDisplayId_serialize(): int32 {
+        const retval  = ArkUIGeneratedNativeModule._DragEvent_getDisplayId(this.peer!.ptr)
+        return retval
     }
     enableInternalDropAnimation_serialize(configuration: string): void {
         ArkUIGeneratedNativeModule._DragEvent_enableInternalDropAnimation(this.peer!.ptr, configuration)
@@ -4783,6 +4793,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityFocusDrawLevel(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSystemMaterialAttribute(value: uiMaterial.Material | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            uiMaterial_Material_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setSystemMaterial(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setExpandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (types !== undefined) {
@@ -7257,6 +7279,10 @@ export enum HapticFeedbackMode {
     ENABLED = 1,
     AUTO = 2
 }
+export enum MenuKeyboardAvoidMode {
+    NONE = 0,
+    TRANSLATE_AND_RESIZE = 1
+}
 export interface ContextMenuOptions {
     offset?: Position;
     placement?: Placement;
@@ -7289,6 +7315,8 @@ export interface ContextMenuOptions {
     previewScaleMode?: PreviewScaleMode;
     availableLayoutArea?: AvailableLayoutArea;
     anchorPosition?: Position;
+    keyboardAvoidMode?: MenuKeyboardAvoidMode;
+    minKeyboardAvoidDistance?: LengthMetrics;
 }
 export interface MenuOptions extends ContextMenuOptions {
     title?: ResourceStr;
@@ -7897,6 +7925,9 @@ export interface CommonMethod {
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
         throw new Error("Unimplemented method accessibilityFocusDrawLevel")
     }
+    systemMaterial(value: uiMaterial.Material | undefined): this {
+        throw new Error("Unimplemented method systemMaterial")
+    }
     customProperty(name: string, value: CustomProperty): this {
         throw new Error("Unimplemented method customProperty")
     }
@@ -8212,6 +8243,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onTouchIntercept_value?: ((value0: TouchEvent) => HitTestMode) | undefined
     onSizeChange_value?: SizeChangeCallback | undefined
     accessibilityFocusDrawLevel_value?: FocusDrawLevel | undefined
+    systemMaterial_value?: uiMaterial.Material | undefined
     width(value: Length | LayoutPolicy | undefined): this {
         return this
     }
@@ -8704,6 +8736,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
         return this
     }
+    systemMaterial(value: uiMaterial.Material | undefined): this {
+        return this
+    }
     customProperty(name: string, value: CustomProperty): this {
         return this
     }
@@ -8985,6 +9020,7 @@ export { UIContext } from "@ohos.arkui.UIContext"
 export { DrawContext } from "arkui.Graphics"
 export type VisualEffect = uiEffect.VisualEffect;
 export type Filter = uiEffect.Filter;
+export type SystemUiMaterial = uiMaterial.Material;
 export type Blender = uiEffect.Blender;
 export type PromptActionDialogController = promptAction.DialogController;
 export interface RectResult {
@@ -10549,6 +10585,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("accessibilityFocusDrawLevel")) {
             const value_casted = value as (FocusDrawLevel | undefined)
             this.getPeer()?.setAccessibilityFocusDrawLevelAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public systemMaterial(value: uiMaterial.Material | undefined): this {
+        if (this.checkPriority("systemMaterial")) {
+            const value_casted = value as (uiMaterial.Material | undefined)
+            this.getPeer()?.setSystemMaterialAttribute(value_casted)
             return this
         }
         return this
@@ -18217,6 +18261,22 @@ export class ContextMenuOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForKeyboardAvoidMode  = value.keyboardAvoidMode
+        if (valueHolderForKeyboardAvoidMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForKeyboardAvoidModeTmpValue  = (valueHolderForKeyboardAvoidMode as MenuKeyboardAvoidMode)
+            valueSerializer.writeInt32(valueHolderForKeyboardAvoidModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForMinKeyboardAvoidDistance  = value.minKeyboardAvoidDistance
+        if (valueHolderForMinKeyboardAvoidDistance !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMinKeyboardAvoidDistanceTmpValue  = valueHolderForMinKeyboardAvoidDistance!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForMinKeyboardAvoidDistanceTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ContextMenuOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -18633,7 +18693,19 @@ export class ContextMenuOptions_serializer {
             anchorPositionTmpBuf = Position_serializer.read(valueDeserializer)
         }
         const anchorPositionTmpResult : Position | undefined = anchorPositionTmpBuf
-        let value : ContextMenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult} as ContextMenuOptions)
+        const keyboardAvoidModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let keyboardAvoidModeTmpBuf : MenuKeyboardAvoidMode | undefined = undefined
+        if ((keyboardAvoidModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            keyboardAvoidModeTmpBuf = MenuKeyboardAvoidMode.fromValue(valueDeserializer.readInt32())
+        }
+        const keyboardAvoidModeTmpResult : MenuKeyboardAvoidMode | undefined = keyboardAvoidModeTmpBuf
+        const minKeyboardAvoidDistanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let minKeyboardAvoidDistanceTmpBuf : LengthMetrics | undefined = undefined
+        if ((minKeyboardAvoidDistanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            minKeyboardAvoidDistanceTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const minKeyboardAvoidDistanceTmpResult : LengthMetrics | undefined = minKeyboardAvoidDistanceTmpBuf
+        let value : ContextMenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult} as ContextMenuOptions)
         return value
     }
 }
@@ -19802,6 +19874,22 @@ export class MenuOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForKeyboardAvoidMode  = value.keyboardAvoidMode
+        if (valueHolderForKeyboardAvoidMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForKeyboardAvoidModeTmpValue  = (valueHolderForKeyboardAvoidMode as MenuKeyboardAvoidMode)
+            valueSerializer.writeInt32(valueHolderForKeyboardAvoidModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForMinKeyboardAvoidDistance  = value.minKeyboardAvoidDistance
+        if (valueHolderForMinKeyboardAvoidDistance !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMinKeyboardAvoidDistanceTmpValue  = valueHolderForMinKeyboardAvoidDistance!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForMinKeyboardAvoidDistanceTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForTitle  = value.title
         if (valueHolderForTitle !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -20242,6 +20330,18 @@ export class MenuOptions_serializer {
             anchorPositionTmpBuf = Position_serializer.read(valueDeserializer)
         }
         const anchorPositionTmpResult : Position | undefined = anchorPositionTmpBuf
+        const keyboardAvoidModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let keyboardAvoidModeTmpBuf : MenuKeyboardAvoidMode | undefined = undefined
+        if ((keyboardAvoidModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            keyboardAvoidModeTmpBuf = MenuKeyboardAvoidMode.fromValue(valueDeserializer.readInt32())
+        }
+        const keyboardAvoidModeTmpResult : MenuKeyboardAvoidMode | undefined = keyboardAvoidModeTmpBuf
+        const minKeyboardAvoidDistanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let minKeyboardAvoidDistanceTmpBuf : LengthMetrics | undefined = undefined
+        if ((minKeyboardAvoidDistanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            minKeyboardAvoidDistanceTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const minKeyboardAvoidDistanceTmpResult : LengthMetrics | undefined = minKeyboardAvoidDistanceTmpBuf
         const titleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let titleTmpBuf : ResourceStr | undefined = undefined
         if ((titleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

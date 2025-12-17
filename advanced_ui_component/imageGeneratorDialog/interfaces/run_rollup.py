@@ -36,7 +36,7 @@ export function __localImageGeneratorDialogCreator(options) {
     }
     console.info('[imageGenerator]', `will call loadImageGeneratorDialog`);
     ViewStackProcessor.StartGetAccessRecordingFor(ViewStackProcessor.AllocateNewElmetIdForNextComponent());
-    loadImageGeneratorDialog(new ImageGeneratorDialog(undefined, {}));
+    loadImageGeneratorDialog(new ImageGeneratorDialog(undefined, {options: options}));
     ViewStackProcessor.StopGetAccessRecording();
     return __CreateErrorCode.NO_ERROR;
 }

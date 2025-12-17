@@ -20,7 +20,7 @@ action("run_rollup") {
   script = "run_rollup.py"
 
   inputs = [
-    rebase_path("image_generator_dialog_project/general/components/main.js"),
+    rebase_path("image_generator_dialog_project/general/components/Main.js"),
   ]
 
   outputs = [
@@ -29,7 +29,7 @@ action("run_rollup") {
 
   args = [
     rebase_path("//prebuilts/build-tools/common/js-framework/node_modules/rollup/dist/bin"),
-    rebase_path("image_generator_dialog_project/general/components/main.js"),
+    rebase_path("image_generator_dialog_project/general/components/Main.js"),
     rebase_path(target_out_dir + "/summary.js")
   ]
 }

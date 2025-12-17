@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
@@ -405,7 +406,8 @@ static void BindGestureJudgeForMenuHoverScale(const RefPtr<FrameNode>& targetNod
         });
 }
 
-static void BindGestureForMenuHoverScale(const RefPtr<FrameNode>& targetNode, const MenuParam& menuParam)
+static void BindGestureForMenuHoverScale(
+    const RefPtr<FrameNode>& targetNode, const MenuParam& menuParam, bool needDirty)
 {
     CHECK_NULL_VOID(targetNode);
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
@@ -440,10 +442,14 @@ static void BindGestureForMenuHoverScale(const RefPtr<FrameNode>& targetNode, co
         MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::MENU_SHOW);
     });
     gestureHub->AddGesture(gesture);
+    if (needDirty) {
+        // static language need OnModifyDone here.
+        gestureHub->OnModifyDone();
+    }
 }
 
-static void BindGestureForContextMenu(const RefPtr<FrameNode>& targetNode, const MenuParam& menuParam,
-    std::function<void(const NG::OffsetF&)> contextMenuShow)
+void BindGestureForContextMenu(const RefPtr<FrameNode>& targetNode, const MenuParam& menuParam,
+    std::function<void(const NG::OffsetF&)> contextMenuShow, bool needDirty)
 {
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
@@ -452,7 +458,7 @@ static void BindGestureForContextMenu(const RefPtr<FrameNode>& targetNode, const
         MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::DISABLE);
     } else {
         MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::READY);
-        BindGestureForMenuHoverScale(targetNode, menuParam);
+        BindGestureForMenuHoverScale(targetNode, menuParam, needDirty);
     }
 
     auto startVibratorCall = [menuParam, weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode))]() {
@@ -468,8 +474,8 @@ static void BindGestureForContextMenu(const RefPtr<FrameNode>& targetNode, const
     BindGestureJudgeForMenuHoverScale(targetNode, contextMenuShow, startVibratorCall);
 }
 
-static void BindContextMenuWithLongPress(const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc,
-    MenuParam& menuParam, std::function<void()>& previewBuildFunc)
+void ViewAbstractModelNG::BindContextMenuWithLongPress(const RefPtr<FrameNode>& targetNode,
+    std::function<void()>& buildFunc, MenuParam& menuParam, std::function<void()>& previewBuildFunc, bool needDirty)
 {
     CHECK_NULL_VOID(targetNode);
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
@@ -521,12 +527,13 @@ static void BindContextMenuWithLongPress(const RefPtr<FrameNode>& targetNode, st
         TAG_LOGI(AceLogTag::ACE_MENU, "Trigger longPress event for menu");
         contextMenuShow(NG::OffsetF(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY()));
     });
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, targetNode);
     auto longPressDuration = menuParam.isShowHoverImage ? HOVER_IMAGE_LONG_PRESS_DURATION : LONG_PRESS_DURATION;
-    gestureHub->SetLongPressEvent(longPress, false, true, longPressDuration);
+    gestureHub->SetLongPressEvent(
+        longPress, false, true, longPressDuration, SelectableUtils::IsSelectableItem(targetNode));
     gestureHub->SetLongPressEventType(GestureTypeName::CONTEXT_MENU_HOVER);
 
-    BindGestureForContextMenu(targetNode, menuParam, contextMenuShow);
+    BindGestureForContextMenu(targetNode, menuParam, contextMenuShow, needDirty);
 }
 
 static void BindContextMenuWithRightClick(const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc,
@@ -613,7 +620,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         if (type == ResponseType::RIGHT_CLICK) {
             BindContextMenuWithRightClick(targetNode, buildFunc, menuParam);
         } else if (type == ResponseType::LONG_PRESS) {
-            BindContextMenuWithLongPress(targetNode, buildFunc, menuParam, previewBuildFunc);
+            ViewAbstractModelNG::BindContextMenuWithLongPress(targetNode, buildFunc, menuParam, previewBuildFunc);
         } else {
             return;
         }
@@ -639,7 +646,8 @@ void ViewAbstractModelNG::BindContextMenu(std::function<void(MenuBindingType)>& 
             };
 
         if (type == MenuBindingType::LONG_PRESS) {
-            BindContextMenuWithLongPress(targetNode, buildFunc, currentMenuParam, previewBuildFunc);
+            ViewAbstractModelNG::BindContextMenuWithLongPress(
+                targetNode, buildFunc, currentMenuParam, previewBuildFunc);
         } else {
             BindContextMenuWithRightClick(targetNode, buildFunc, currentMenuParam);
         }

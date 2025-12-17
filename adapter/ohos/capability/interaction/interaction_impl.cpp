@@ -72,7 +72,7 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
     dragData.filterInfo, dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX,
     dragData.displayY, dragData.displayId, dragData.mainWindow, dragData.hasCanceledAnimation,
     dragData.hasCoordinateCorrected, dragData.summarys, dragData.isDragDelay, dragData.detailedSummarys,
-    dragData.summaryFormat, dragData.version, dragData.totalSize, dragData.summaryTag };
+    dragData.summaryFormat, dragData.version, dragData.totalSize, dragData.summaryTag, dragData.materialId };
     for (auto& shadowInfo: dragData.shadowInfos) {
         if (shadowInfo.pixelMap) {
             msdpDragData.shadowInfos.push_back({ shadowInfo.pixelMap->GetPixelMapSharedPtr(),

@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components/theme/shadow_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -904,13 +905,38 @@ void BubblePattern::UpdateStyleOption(BlurStyle blurStyle, bool needUpdateShadow
     }
 }
 
+void BubblePattern::UpdateShadow()
+{
+    if (IsShadowStyle()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+        CHECK_NULL_VOID(childNode);
+        auto renderContext = childNode->GetRenderContext();
+        CHECK_EQUAL_VOID(renderContext->HasBackShadow(), false);
+        auto shadow = renderContext->GetBackShadow().value();
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto colorMode = context->GetColorMode();
+        auto shadowStyle = shadow.GetStyle();
+        auto shadowTheme = context->GetTheme<ShadowTheme>();
+        if (shadowTheme) {
+            shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+        }
+        renderContext->UpdateBackShadow(shadow);
+    }
+}
+
 void BubblePattern::OnColorConfigurationUpdate()
 {
     // Tips: Color mode changes are already adapted, so ConfigChangePerform() control is not required.
     if (isTips_) {
         UpdateStyleOption(BlurStyle::COMPONENT_REGULAR, true);
-    } else if (SystemProperties::ConfigChangePerform()) {
-        UpdateStyleOption(popupParam_->GetBlurStyle(), false);
+    } else {
+        if (popupParam_) {
+            UpdateStyleOption(popupParam_->GetBlurStyle(), false);
+        }
+        UpdateShadow();
     }
     if (isCustomPopup_) {
         return;

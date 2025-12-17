@@ -68,6 +68,8 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
     _childrenMainSize_0_0value?: ChildrenMainSize | undefined
     _maintainVisibleContentPosition_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _maintainVisibleContentPosition_0_0value?: boolean | undefined
+    _supportEmptyBranchInLazyLoading_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _supportEmptyBranchInLazyLoading_0_0value?: boolean | undefined
     _stackFromEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _stackFromEnd_0_0value?: boolean | undefined
     _onScrollIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -367,6 +369,24 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 default: {
                     this._maintainVisibleContentPosition_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setMaintainVisibleContentPositionAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._supportEmptyBranchInLazyLoading_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._supportEmptyBranchInLazyLoading_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSupportEmptyBranchInLazyLoadingAttribute((this._supportEmptyBranchInLazyLoading_0_0value as boolean | undefined));
+                    this._supportEmptyBranchInLazyLoading_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._supportEmptyBranchInLazyLoading_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._supportEmptyBranchInLazyLoading_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSupportEmptyBranchInLazyLoadingAttribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -1083,6 +1103,19 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
+        if (modifier._supportEmptyBranchInLazyLoading_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._supportEmptyBranchInLazyLoading_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.supportEmptyBranchInLazyLoading(modifier._supportEmptyBranchInLazyLoading_0_0value);
+                    break;
+                }
+                default: {
+                    this.supportEmptyBranchInLazyLoading((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._stackFromEnd_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._stackFromEnd_0_flag) {
@@ -1614,6 +1647,17 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         } else
         {
             this._maintainVisibleContentPosition_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    supportEmptyBranchInLazyLoading(value: boolean | undefined): this {
+        if (((this._supportEmptyBranchInLazyLoading_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._supportEmptyBranchInLazyLoading_0_0value) !== (value)))
+        {
+            this._supportEmptyBranchInLazyLoading_0_flag = AttributeUpdaterFlag.UPDATE
+            this._supportEmptyBranchInLazyLoading_0_0value = value
+        } else
+        {
+            this._supportEmptyBranchInLazyLoading_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

@@ -13,17 +13,28 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+
 #include "arkoala_api_generated.h"
+#include "nav_path_stack_peer_impl.h"
+
+namespace OHOS::Ace::NG::Converter {
+void AssignArkValue(Ark_uiObserver_NavigationInfo& dst, const std::shared_ptr<OHOS::Ace::NG::NavigationInfo>& src,
+    ConvContext *ctx)
+{
+    CHECK_NULL_VOID(src);
+    dst.navigationId = ArkValue<Ark_String>(src->navigationId, ctx);
+    dst.pathStack = new NavPathStackPeer(src->pathStack.Upgrade());
+    dst.uniqueId = ArkValue<Opt_Int32>(src->uniqueId);
+}
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIContextGetInfoAccessor {
 Opt_uiObserver_NavigationInfo GetNavigationInfoByUniqueIdImpl(Ark_Int64 id)
 {
     auto retVal = Converter::ArkValue<Opt_uiObserver_NavigationInfo>();
-    retVal.tag = InteropTag::INTEROP_TAG_UNDEFINED;
     CHECK_NULL_RETURN(id, retVal);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, retVal);
@@ -34,7 +45,7 @@ Opt_uiObserver_NavigationInfo GetNavigationInfoByUniqueIdImpl(Ark_Int64 id)
     CHECK_NULL_RETURN(nodePtr, retVal);
     auto result = navigationMgr->GetNavigationInfo(nodePtr);
     CHECK_NULL_RETURN(result, retVal);
-    return Converter::ArkValue<Opt_uiObserver_NavigationInfo>(result);
+    return Converter::ArkValue<Opt_uiObserver_NavigationInfo>(result, Converter::FC);
 }
 
 void EnableSwipeBackImpl(const Opt_Boolean* enabled)

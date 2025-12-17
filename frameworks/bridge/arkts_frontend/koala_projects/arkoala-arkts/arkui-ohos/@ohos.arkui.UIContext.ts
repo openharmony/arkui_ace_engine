@@ -39,7 +39,7 @@ import { default as mediaquery } from '@ohos.mediaquery';
 import { AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions } from 'arkui/framework';
 import { ActionSheetOptions } from 'arkui/framework';
 import { TimePickerDialogOptions } from 'arkui/framework';
-import { TextPickerDialogOptions } from 'arkui/framework';
+import { TextPickerDialogOptions, TextPickerDialogOptionsExt } from 'arkui/framework';
 import { DatePickerDialogOptions } from 'arkui/framework';
 import { SheetOptions } from 'arkui/framework';
 import inspector from '@ohos/arkui/inspector';
@@ -473,8 +473,30 @@ export const enum KeyboardAvoidMode {
     NONE = 4,
 }
 
+export class ResolvedUIContext extends UIContextImpl {
+    public strategy: ResolveStrategy = ResolveStrategy.UNDEFINED;
+    constructor(instanceId: int32, strategy: ResolveStrategy) {
+        super(instanceId);
+        this.strategy = strategy;
+    }
+}
+
+export const enum ResolveStrategy {
+    CALLING_SCOPE = 0,
+    LAST_FOCUS = 1,
+    MAX_INSTANCE_ID = 2,
+    UNIQUE = 3,
+    LAST_FOREGROUND = 4,
+    UNDEFINED = 5
+}
+
 export class UIContext {
     constructor() {
+    }
+    
+    static resolveUIContext(): ResolvedUIContext {
+        let instance = UIContextUtil.resolveUIContext();
+        return new ResolvedUIContext(instance[0] as int32, instance[1] as ResolveStrategy);
     }
     static getFocusedUIContext(): UIContext | undefined {
         const instanceId = ArkUIAniModule._Common_GetFocused_InstanceId();
@@ -515,7 +537,7 @@ export class UIContext {
     getFrameNodeByNodeId(id: number): FrameNode | null {
         throw Error("getFrameNodeByNodeId not implemented in UIContext!")
     }
-    getFrameNodeByUniqueId(id: number): FrameNode | null {
+    getFrameNodeByUniqueId(id: int): FrameNode | null {
         throw Error("getFrameNodeByUniqueId not implemented in UIContext!")
     }
     getNavigationInfoByUniqueId(id: int64): uiObserver.NavigationInfo | undefined {
@@ -584,8 +606,8 @@ export class UIContext {
     public createAnimator(options: AnimatorOptions | SimpleAnimatorOptions): AnimatorResult {
         throw Error("createAnimator not implemented in UIContext!")
     }
-    public setFrameCallback(onFrameCallback: ((index: number) => void), onIdleCallback: ((index: number) => void),
-                                              delayTime: number): void {
+    public setFrameCallback(onFrameCallback: ((index: long) => void), onIdleCallback: ((index: long) => void),
+                                              delayTime: long): void {
         throw Error("setFrameCallback not implemented in UIContext!")
     }
     runScopedTask(callback: () => void): void {
@@ -597,7 +619,7 @@ export class UIContext {
     postFrameCallback(frameCallback: FrameCallback): void {
         throw Error("postFrameCallback not implemented in UIContext!")
     }
-    postDelayedFrameCallback(frameCallback: FrameCallback, delayTime: number): void {
+    postDelayedFrameCallback(frameCallback: FrameCallback, delayTime: long): void {
         throw Error("postDelayedFrameCallback not implemented in UIContext!")
     }
     public getUIInspector(): UIInspector {
@@ -636,7 +658,7 @@ export class UIContext {
         throw Error("showTimePickerDialog not implemented in UIContext!")
     }
 
-    public showTextPickerDialog(options: TextPickerDialogOptions): void {
+    public showTextPickerDialog(options: TextPickerDialogOptions | TextPickerDialogOptionsExt): void {
         throw Error("showTextPickerDialog not implemented in UIContext!")
     }
 
@@ -644,7 +666,7 @@ export class UIContext {
         throw Error("showDatePickerDialog not implemented in UIContext!")
     }
     // @ts-ignore
-    public freezeUINode(id: number, isFrozen: boolean): void {
+    public freezeUINode(id: int, isFrozen: boolean): void {
         throw Error("freezeUINode not implemented in UIContext!")
     }
 
@@ -669,22 +691,22 @@ export class UIContext {
     public getWindowHeightBreakpoint(): HeightBreakpoint {
         throw Error("getWindowHeightBreakpoint not implemented in UIContext!")
     }
-    public vp2px(value: number): number {
+    public vp2px(value: double): double {
         throw Error("vp2px not implemented in UIContext!")
     }
-    public px2vp(value: number): number {
+    public px2vp(value: double): double {
         throw Error("px2vp not implemented in UIContext!")
     }
-    public fp2px(value: number): number {
+    public fp2px(value: double): double {
         throw Error("fp2px not implemented in UIContext!")
     }
-    public px2fp(value: number): number {
+    public px2fp(value: double): double {
         throw Error("px2fp not implemented in UIContext!")
     }
-    public lpx2px(value: number): number {
+    public lpx2px(value: double): double {
         throw Error("lpx2px not implemented in UIContext!")
     }
-    public px2lpx(value: number): number {
+    public px2lpx(value: double): double {
         throw Error("px2lpx not implemented in UIContext!")
     }
 
@@ -754,8 +776,8 @@ export class UIContext {
     }
 }
 export abstract class FrameCallback {
-    onFrame(frameTimeInNano: number): void {}
-    onIdle(timeLeftInNano: number): void {}
+    onFrame(frameTimeInNano: long): void {}
+    onIdle(timeLeftInNano: long): void {}
 }
 
 export class UIObserver {

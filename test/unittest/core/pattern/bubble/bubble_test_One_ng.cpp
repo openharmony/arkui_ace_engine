@@ -1266,6 +1266,36 @@ HWTEST_F(BubbleTestOneNg, UpdateBubbleText001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateShadowTest001
+ * @tc.desc: Test UpdateShadow function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, UpdateShadowTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto id = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(id, targetTag));
+    ASSERT_NE(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    /**
+     * @tc.steps: step2. call UpdateShadow.
+     * @tc.expected: step2. Check the property is correct.
+     */
+    bubblePattern->isShadowStyle_ = false;
+    bubblePattern->UpdateShadow();
+    bubblePattern->isShadowStyle_ = true;
+    bubblePattern->UpdateShadow();
+    EXPECT_EQ(bubblePattern->IsShadowStyle(), true);
+}
+
+/**
  * @tc.name: BubbleAlgorithmTest001
  * @tc.desc: Test GetAdjustPosition
  * @tc.type: FUNC

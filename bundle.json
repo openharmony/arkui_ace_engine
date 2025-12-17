@@ -113,13 +113,15 @@
                 "jsframework",
                 "opencl-headers",
                 "opengles",
+                "opencv",
                 "zlib",
                 "skia",
                 "libuv",
                 "resource_schedule_service",
                 "background_task_mgr",
                 "request",
-                "qrcodegen"
+                "qrcodegen",
+                "sdk"
             ],
             "third_party": []
         },

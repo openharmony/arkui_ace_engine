@@ -29,6 +29,8 @@ FormRendererDispatcherStub::FormRendererDispatcherStub()
         &FormRendererDispatcherStub::HandleDispatchSurfaceChangeEvent;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_OBSCURED)] =
         &FormRendererDispatcherStub::HandleSetObscured;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_COLOR_MODE)] =
+        &FormRendererDispatcherStub::HandleSetColorMode;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_CHILD_TREE_REGISTER)] =
         &FormRendererDispatcherStub::HandleOnAccessibilityChildTreeRegister;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_CHILD_TREE_DEREGISTER)] =
@@ -119,11 +121,18 @@ int32_t FormRendererDispatcherStub::HandleDispatchSurfaceChangeEvent(MessageParc
     return ERR_OK;
 }
 
-
 int32_t FormRendererDispatcherStub::HandleSetObscured(MessageParcel &data, MessageParcel &reply)
 {
     bool isObscured = data.ReadBool();
     SetObscured(isObscured);
+    reply.WriteInt32(ERR_OK);
+    return ERR_OK;
+}
+
+int32_t FormRendererDispatcherStub::HandleSetColorMode(MessageParcel &data, MessageParcel &reply)
+{
+    int32_t colorMode = data.ReadInt32();
+    SetColorMode(colorMode);
     reply.WriteInt32(ERR_OK);
     return ERR_OK;
 }

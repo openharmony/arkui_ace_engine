@@ -16,7 +16,7 @@
 
 namespace OHOS::Ace::NG {
 namespace Converter {
-void AssignArkValue(Ark_AxisModel& dst, const AxisModel& src)
+void AssignArkValue(Ark_AxisModel& dst, const AxisModel& src, ConvContext *ctx)
 {
     switch (src) {
         case AxisModel::ABS_X: dst = ARK_AXIS_MODEL_ABS_X; break;

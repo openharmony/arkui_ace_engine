@@ -1027,13 +1027,55 @@ HWTEST_F(WebPatternWindowTestNg, OnWindowHide002, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern->delegate_, nullptr);
-    webPattern->offlineWebInited_ = true;
     auto host = webPattern->GetHost();
     EXPECT_NE(host, nullptr);
-    host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_OFF_MAINTREE);
+
     webPattern->isWindowShow_ = true;
+    webPattern->offlineWebInited_ = true;
+    host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_OFF_MAINTREE);
     webPattern->OnWindowHide();
     EXPECT_TRUE(webPattern->isWindowShow_);
+
+    webPattern->isWindowShow_ = true;
+    webPattern->offlineWebInited_ = true;
+    host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_ON_MAINTREE);
+    webPattern->OnWindowHide();
+    EXPECT_FALSE(webPattern->isWindowShow_);
+#endif
+}
+
+/**
+ * @tc.name: OnWindowHide003
+ * @tc.desc: OnWindowHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, OnWindowHide003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    auto host = webPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+
+    webPattern->isWindowShow_ = true;
+    webPattern->offlineWebInited_ = true;
+    webPattern->isActive_ = true;
+    host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_ON_MAINTREE);
+    webPattern->OnWindowHide();
+    EXPECT_FALSE(webPattern->isWindowShow_);
+
+    webPattern->isWindowShow_ = true;
+    webPattern->isActive_ = false;
+    webPattern->OnWindowHide();
+    EXPECT_FALSE(webPattern->isWindowShow_);
 #endif
 }
 

@@ -1412,4 +1412,34 @@ HWTEST_F(SheetPresentationTestSixNg, GetAnimationPropertyCallForOverlay007, Test
     ASSERT_NE(sheetPattern->GetProperty(), nullptr);
     SheetPresentationTestSixNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: SetSheetKey001
+ * @tc.desc: Branch: if (!isValidTarget && NearEqual(targetId, overlayRootNode->GetId()))
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestSixNg, SetSheetKey001, TestSize.Level1)
+{
+    SheetPresentationTestSixNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto overlayManager = sheetPattern->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto overlayRootNode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(overlayRootNode, nullptr);
+
+    auto id = overlayRootNode->GetId();
+    auto hasValidTargetNode = true;
+    SheetView::InitSheetKey(sheetNode, builder->GetId(), id);
+    hasValidTargetNode = sheetPattern->GetSheetKey().hasValidTargetNode;
+    EXPECT_EQ(hasValidTargetNode, false);
+    SheetPresentationTestSixNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG

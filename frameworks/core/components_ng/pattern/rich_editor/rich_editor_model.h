@@ -433,6 +433,8 @@ public:
     virtual void SetIncludeFontPadding(bool enabled) {};
     virtual void SetFallbackLineSpacing(bool enabled) {};
     virtual void SetSingleLine(bool iaEnable) {};
+    virtual void SetSelectedDragPreviewStyle(const Color& value) {};
+    virtual void ResetSelectedDragPreviewStyle() {};
 
 private:
     static std::unique_ptr<RichEditorModel> instance_;

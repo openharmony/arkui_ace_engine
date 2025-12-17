@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "ui/base/geometry/ng/offset_t.h"
 #include "core/components/select/select_theme.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1492,5 +1493,44 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage039
     frameNode->renderContext_->UpdatePaintRect(RectT(3.0f, 2.0f, 3.0f, 4.0f));
     DragDropFuncWrapper::UpdateNodePositionToWindow(frameNode, offset);
     EXPECT_NE(renderContext->GetPosition(), OffsetT<Dimension>(Dimension(5.0f), Dimension(5.0f)));
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage040
+ * @tc.desc: Test set material.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.options.material, nullptr);
+    /**
+     * @tc.steps: step3. set material.
+     */
+    dragPreviewOption.options.material = AceType::MakeRefPtr<UiMaterial>();
+    ASSERT_NE(dragPreviewOption.options.material, nullptr);
+    frameNode->SetDragPreviewOptions(dragPreviewOption);
+
+    /**
+     * @tc.steps: step4. Invoke ApplyNewestOptionExecutedFromModifierToNode
+     */
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(imageNode, nullptr);
+    imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
+    DragDropFuncWrapper::ApplyNewestOptionExecutedFromModifierToNode(frameNode, imageNode);
+    auto imageContext = imageNode->GetRenderContext();
+    EXPECT_NE(imageContext, nullptr);
+    auto material = imageContext->GetSystemMaterial();
+    EXPECT_NE(material, nullptr);
 }
 } // namespace OHOS::Ace::NG

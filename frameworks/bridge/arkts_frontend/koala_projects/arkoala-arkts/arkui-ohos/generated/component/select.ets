@@ -20,7 +20,7 @@ import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
-import { CommonConfiguration, Bindable_I32_serializer, Bindable_Global_Resource_Resource_serializer, Bindable_String_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, BlurStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { CommonConfiguration, Bindable_I32_serializer, Bindable_Global_Resource_Resource_serializer, Bindable_String_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, BlurStyle, MenuKeyboardAvoidMode, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ResourceStr, Font_serializer, DividerStyleOptions_serializer, Offset_serializer, Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset, EdgeOutlineWidths, EdgeColors, EdgeOutlineWidths_serializer, EdgeColors_serializer } from "./units"
 import { Resource } from "global.resource"
 import { extractors, ContentModifier, AttributeModifier, hookSelectContentModifier, hookSelectSetDividerMethod, hookSelectAttributeModifier, AttributeUpdater } from "#handwritten"
@@ -30,12 +30,14 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { TextModifier_serializer } from "./../TextModifier"
+import { LengthMetrics_serializer } from "./../Graphics"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Color, OptionWidthMode } from "./enums"
 import { ControlSize } from "./button"
 import { DividerOptions_serializer, DividerOptions } from "./textPicker"
 import { TextModifier } from "arkui.TextModifier"
+import { LengthMetrics } from "arkui.Graphics"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
@@ -861,6 +863,30 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_setBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setKeyboardAvoidModeAttribute(value: MenuKeyboardAvoidMode | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as MenuKeyboardAvoidMode)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectAttribute_setKeyboardAvoidMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setMinKeyboardAvoidDistanceAttribute(value: LengthMetrics | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectAttribute_setMinKeyboardAvoidDistance(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setMenuAlignAttribute(alignType: MenuAlignType | undefined, offset?: Offset): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (alignType !== undefined) {
@@ -996,6 +1022,12 @@ export interface SelectAttribute extends CommonMethod {
         throw new Error("Unimplemented method showDefaultSelectedIcon")
     }
     backgroundColor(value: ResourceColor | undefined): this
+    keyboardAvoidMode(value: MenuKeyboardAvoidMode | undefined): this {
+        throw new Error("Unimplemented method keyboardAvoidMode")
+    }
+    minKeyboardAvoidDistance(value: LengthMetrics | undefined): this {
+        throw new Error("Unimplemented method minKeyboardAvoidDistance")
+    }
     menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
         throw new Error("Unimplemented method menuAlign")
     }
@@ -1035,6 +1067,8 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     showDefaultSelectedIcon_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined
     backgroundColor_value?: ResourceColor | undefined
+    keyboardAvoidMode_value?: MenuKeyboardAvoidMode | undefined
+    minKeyboardAvoidDistance_value?: LengthMetrics | undefined
     setSelectOptions(options: Array<SelectOption>): this {
         return this
     }
@@ -1126,6 +1160,12 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
         return this
     }
     backgroundColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    keyboardAvoidMode(value: MenuKeyboardAvoidMode | undefined): this {
+        return this
+    }
+    minKeyboardAvoidDistance(value: LengthMetrics | undefined): this {
         return this
     }
     menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
@@ -1384,6 +1424,22 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements Sele
         if (this.checkPriority("backgroundColor")) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.setBackgroundColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public keyboardAvoidMode(value: MenuKeyboardAvoidMode | undefined): this {
+        if (this.checkPriority("keyboardAvoidMode")) {
+            const value_casted = value as (MenuKeyboardAvoidMode | undefined)
+            this.getPeer()?.setKeyboardAvoidModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public minKeyboardAvoidDistance(value: LengthMetrics | undefined): this {
+        if (this.checkPriority("minKeyboardAvoidDistance")) {
+            const value_casted = value as (LengthMetrics | undefined)
+            this.getPeer()?.setMinKeyboardAvoidDistanceAttribute(value_casted)
             return this
         }
         return this

@@ -1675,6 +1675,114 @@ napi_value ObserverProcess::ProcessSwiperContentUpdateUnRegister(napi_env env, n
     return nullptr;
 }
 
+napi_value ObserverProcess::ProcessRouterPageSizeChangeRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_ONE);
+    if (!isRouterPageSizeChangeHandleFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetRouterPageSizeChangeHandleFunc(&UIObserver::HandleRouterPageSizeChange);
+        isRouterPageSizeChangeHandleFuncSetted_ = true;
+    }
+
+    if (argc == PARAM_SIZE_ONE) {
+        if (!MatchValueType(env, argv[PARAM_INDEX_ZERO], napi_function)) {
+            TAG_LOGE(AceLogTag::ACE_ROUTER, "register routerPageSizeChange with invalid params");
+            return nullptr;
+        }
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ZERO]);
+        UIObserver::RegisterRouterPageSizeChangeCallback(listener);
+    }
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessRouterPageSizeChangeUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_ONE);
+    if (argc == PARAM_SIZE_ZERO) {
+        UIObserver::UnRegisterRouterPageSizeChangeCallback(nullptr);
+        return nullptr;
+    }
+    if (argc == PARAM_SIZE_ONE) {
+        if (MatchValueType(env, argv[PARAM_INDEX_ZERO], napi_function)) {
+            UIObserver::UnRegisterRouterPageSizeChangeCallback(argv[PARAM_INDEX_ZERO]);
+        }
+    }
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessNavDestinationSizeChangeRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_ONE);
+    if (!isNavDestinationSizeChangeHandleFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetNavDestinationSizeChangeHandleFunc(
+            &UIObserver::HandleNavDestinationSizeChange);
+        isNavDestinationSizeChangeHandleFuncSetted_ = true;
+    }
+    if (argc == PARAM_SIZE_ONE) {
+        if (!MatchValueType(env, argv[PARAM_INDEX_ZERO], napi_function)) {
+            TAG_LOGE(AceLogTag::ACE_ROUTER, "register NavDestinationSizeChange observer with invalid params");
+            return nullptr;
+        }
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ZERO]);
+        UIObserver::RegisterNavDestinationSizeChangeCallback(listener);
+    }
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessNavDestinationSizeChangeUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_ONE);
+    if (argc == PARAM_SIZE_ZERO) {
+        UIObserver::UnRegisterNavDestinationSizeChangeCallback(nullptr);
+        return nullptr;
+    }
+    if (argc == PARAM_SIZE_ONE && MatchValueType(env, argv[PARAM_INDEX_ZERO], napi_function)) {
+        UIObserver::UnRegisterNavDestinationSizeChangeCallback(argv[PARAM_INDEX_ZERO]);
+    }
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessNavDestinationSizeChangeByUniqueIdRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_TWO);
+
+    if (!isNavDestinationSizeChangeByUniqueIdHandleFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetNavDestinationSizeChangeByUniqueIdHandleFunc(
+            &UIObserver::HandleNavDestinationSizeChangeByUniqueId);
+        isNavDestinationSizeChangeByUniqueIdHandleFuncSetted_ = true;
+    }
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ZERO], napi_number) &&
+        MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+            int32_t navigationUniqueId;
+            if (napi_get_value_int32(env, argv[PARAM_INDEX_ZERO], &navigationUniqueId) == napi_ok) {
+                auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
+                UIObserver::RegisterNavDestinationSizeChangeByUniqueIdCallback(navigationUniqueId, listener);
+            }
+    }
+    return nullptr;
+}
+
+napi_value ObserverProcess::ProcessNavDestinationSizeChangeByUniqueIdUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_TWO);
+    if (argc == PARAM_SIZE_ONE) {
+        if (MatchValueType(env, argv[PARAM_INDEX_ZERO], napi_number)) {
+            int32_t navigationUniqueId;
+            if (napi_get_value_int32(env, argv[PARAM_INDEX_ZERO], &navigationUniqueId) == napi_ok) {
+                UIObserver::UnRegisterNavDestinationSizeChangeByUniqueIdCallback(navigationUniqueId, nullptr);
+            }
+        }
+    }
+
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ZERO], napi_number)&&
+        MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        int32_t navigationUniqueId;
+        if (napi_get_value_int32(env, argv[PARAM_INDEX_ZERO], &navigationUniqueId) == napi_ok) {
+            UIObserver::UnRegisterNavDestinationSizeChangeByUniqueIdCallback(navigationUniqueId, argv[PARAM_INDEX_ONE]);
+        }
+    }
+    return nullptr;
+}
+
 napi_value ObserverOn(napi_env env, napi_callback_info info)
 {
     return ObserverProcess::GetInstance().ProcessRegister(env, info);
@@ -1693,6 +1801,36 @@ napi_value OnSwiperContentUpdate(napi_env env, napi_callback_info info)
 napi_value OffSwiperContentUpdate(napi_env env, napi_callback_info info)
 {
     return ObserverProcess::GetInstance().ProcessUnRegister(env, info, SWIPER_CONTENT_UPDATE);
+}
+
+napi_value OnRouterPageSizeChange(napi_env env, napi_callback_info info)
+{
+    return ObserverProcess::GetInstance().ProcessRouterPageSizeChangeRegister(env, info);
+}
+
+napi_value OffRouterPageSizeChange(napi_env env, napi_callback_info info)
+{
+    return ObserverProcess::GetInstance().ProcessRouterPageSizeChangeUnRegister(env, info);
+}
+
+napi_value OnNavDestinationSizeChange(napi_env env, napi_callback_info info)
+{
+    return ObserverProcess::GetInstance().ProcessNavDestinationSizeChangeRegister(env, info);
+}
+
+napi_value OffNavDestinationSizeChange(napi_env env, napi_callback_info info)
+{
+    return ObserverProcess::GetInstance().ProcessNavDestinationSizeChangeUnRegister(env, info);
+}
+
+napi_value OnNavDestinationSizeChangeByUniqueId(napi_env env, napi_callback_info info)
+{
+    return ObserverProcess::GetInstance().ProcessNavDestinationSizeChangeByUniqueIdRegister(env, info);
+}
+
+napi_value OffNavDestinationSizeChangeByUniqueId(napi_env env, napi_callback_info info)
+{
+    return ObserverProcess::GetInstance().ProcessNavDestinationSizeChangeByUniqueIdUnRegister(env, info);
 }
 
 napi_value AddToScrollEventType(napi_env env)
@@ -1857,6 +1995,12 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("NodeRenderState", nodeRenderStateType),
         DECLARE_NAPI_FUNCTION("onSwiperContentUpdate", OnSwiperContentUpdate),
         DECLARE_NAPI_FUNCTION("offSwiperContentUpdate", OffSwiperContentUpdate),
+        DECLARE_NAPI_FUNCTION("onRouterPageSizeChange", OnRouterPageSizeChange),
+        DECLARE_NAPI_FUNCTION("offRouterPageSizeChange", OffRouterPageSizeChange),
+        DECLARE_NAPI_FUNCTION("onNavDestinationSizeChange", OnNavDestinationSizeChange),
+        DECLARE_NAPI_FUNCTION("offNavDestinationSizeChange", OffNavDestinationSizeChange),
+        DECLARE_NAPI_FUNCTION("onNavDestinationSizeChangeByUniqueId", OnNavDestinationSizeChangeByUniqueId),
+        DECLARE_NAPI_FUNCTION("offNavDestinationSizeChangeByUniqueId", OffNavDestinationSizeChangeByUniqueId)
     };
     NAPI_CALL(
         env, napi_define_properties(env, exports, sizeof(uiObserverDesc) / sizeof(uiObserverDesc[0]), uiObserverDesc));

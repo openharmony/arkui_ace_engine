@@ -20,11 +20,11 @@
 #include "ui/base/utils/utils.h"
 
 #include "core/common/container_scope.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/node_container/node_container_event_hub.h"
 #include "core/components_ng/pattern/node_container/node_container_node.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -132,7 +132,7 @@ void SetOnTouchEventImpl(Ark_NativePointer self, const Opt_Callback_TouchEvent_V
         return;
     }
     auto onEvent = [callback = CallbackHelper(value->value)](TouchEventInfo& info) {
-        const auto event = Converter::ArkTouchEventSync(info);
+        const auto event = Converter::SyncEvent<Ark_TouchEvent>(info);
         callback.InvokeSync(event.ArkValue());
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));

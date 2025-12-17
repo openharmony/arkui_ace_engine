@@ -208,7 +208,6 @@ void WindowPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
-    auto key = session_->GetScreenSnapshotStatus();
     TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
         "name: %{public}s, state: %{public}u, in recents: %{public}d, prelaunch: %{public}d, "
         "isAppLock: %{public}d",
@@ -218,7 +217,7 @@ void WindowPattern::OnAttachToFrameNode()
     CHECK_EQUAL_VOID(CheckAndAddStartingWindowForPrelaunch(), true);
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         CHECK_EQUAL_VOID(HasStartingPage(), false);
-        if (session_->GetShowRecent() && CheckSnapshotWindow(key)) {
+        if (session_->GetShowRecent() && CheckSnapshotWindow()) {
             CreateSnapshotWindow();
             AddChild(host, snapshotWindow_, snapshotWindowName_);
             return;
@@ -267,10 +266,10 @@ void WindowPattern::OnAttachToFrameNode()
     attachToFrameNodeFlag_ = true;
 }
 
-bool WindowPattern::CheckSnapshotWindow(uint32_t key)
+bool WindowPattern::CheckSnapshotWindow()
 {
     return session_->GetScenePersistence() &&
-        (session_->GetScenePersistence()->IsSavingSnapshot(key) ||
+        (session_->GetScenePersistence()->IsSavingSnapshot() ||
         session_->GetScenePersistence()->HasSnapshot() ||
         session_->HasSnapshot());
 }
@@ -280,10 +279,9 @@ bool WindowPattern::CheckAndAddStartingWindowForPrelaunch()
     CHECK_EQUAL_RETURN(session_->IsPrelaunch(), false, false);
     auto state = session_->GetSessionState();
     auto host = GetHost();
-    auto key = Rosen::WSSnapshotHelper::GetInstance()->GetScreenStatus();
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         CHECK_EQUAL_RETURN(HasStartingPage(), false, false);
-        if (session_->GetShowRecent() && CheckSnapshotWindow(key)) {
+        if (session_->GetShowRecent() && CheckSnapshotWindow()) {
             CreateSnapshotWindow();
             AddChild(host, snapshotWindow_, snapshotWindowName_);
             isPrelaunch_ = true;
@@ -566,6 +564,15 @@ bool WindowPattern::CheckAndAddStartingWindowAboveLocked()
     return true;
 }
 
+void WindowPattern::SetImagePatternSyncLoad(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto imagePattern = node->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    imagePattern->SetSyncLoad(syncStartingWindow_);
+    ACE_SCOPED_TRACE("WindowPattern::SetImagePatternSyncLoad set sync [%d]", syncStartingWindow_);
+}
+
 void WindowPattern::HideStartingWindow()
 {
     session_->SetHidingStartingWindow(true);
@@ -598,6 +605,7 @@ void WindowPattern::CreateStartingWindow()
         HideStartingWindow();
         startingWindow_ = FrameNode::CreateFrameNode(
             V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        SetImagePatternSyncLoad(startingWindow_);
         return;
     }
 
@@ -622,24 +630,28 @@ void WindowPattern::CreateStartingWindow()
         lastParentSize_ = { 0.0f, 0.0f };
         startingWindow_ = startingWindowLayoutHelper_->CreateStartingWindowNode(
             startingWindowInfo, sessionInfo.bundleName_, sessionInfo.moduleName_);
+        SetImagePatternSyncLoad(startingWindow_);
         return;
     }
     startingWindow_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    SetImagePatternSyncLoad(startingWindow_);
     auto imageLayoutProperty = startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     startingWindow_->SetHitTestMode(HitTestMode::HTMNONE);
-    auto sourceInfo = ImageSourceInfo(
-        startingWindowInfo.iconPathEarlyVersion_, sessionInfo.bundleName_, sessionInfo.moduleName_);
-    auto color = Color(startingWindowInfo.backgroundColorEarlyVersion_);
+    ImageSourceInfo sourceInfo;
     auto preLoadPixelMap = Rosen::SceneSessionManager::GetInstance().GetPreLoadStartingWindow(sessionInfo);
     if (preLoadPixelMap != nullptr) {
         auto pixelMap = PixelMap::CreatePixelMap(&preLoadPixelMap);
         sourceInfo = ImageSourceInfo(pixelMap);
         Rosen::SceneSessionManager::GetInstance().RemovePreLoadStartingWindowFromMap(sessionInfo);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "use preload pixelMap id:%{public}d", session_->GetPersistentId());
+    } else {
+        sourceInfo = ImageSourceInfo(startingWindowInfo.iconPathEarlyVersion_, sessionInfo.bundleName_,
+            sessionInfo.moduleName_);
     }
+    auto color = Color(startingWindowInfo.backgroundColorEarlyVersion_);
     UpdateStartingWindowProperty(sessionInfo, color, sourceInfo);
     imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(color);
@@ -744,7 +756,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         CHECK_NULL_VOID(scenePersistence);
         auto key = session_->GetScreenSnapshotStatus();
         auto freeMultiWindow = session_->freeMultiWindow_.load();
-        auto isSavingSnapshot = scenePersistence->IsSavingSnapshot(key, freeMultiWindow);
+        auto isSavingSnapshot = scenePersistence->IsSavingSnapshot();
         auto hasSnapshot = scenePersistence->HasSnapshot(key, freeMultiWindow);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "id: %{public}d isSavingSnapshot: %{public}d, hasSnapshot: %{public}d, key: %{public}d",

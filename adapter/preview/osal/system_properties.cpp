@@ -105,7 +105,6 @@ bool SystemProperties::rosenBackendEnabled_ = true;
 #endif
 bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = true;
-bool SystemProperties::forceSplitIgnoreOrientationEnabled_ = false;
 std::optional<bool> SystemProperties::arkUIHookEnabled_;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::gridIrregularLayoutEnable_ = false;
@@ -339,11 +338,6 @@ bool SystemProperties::GetDisplaySyncSkipEnabled()
 bool SystemProperties::GetNavigationBlurEnabled()
 {
     return navigationBlurEnabled_;
-}
-
-bool SystemProperties::GetForceSplitIgnoreOrientationEnabled()
-{
-    return forceSplitIgnoreOrientationEnabled_;
 }
 
 std::optional<bool> SystemProperties::GetArkUIHookEnabled()

@@ -61,6 +61,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -258,7 +259,23 @@ void SelectPattern::ShowSelectMenu()
     }
     ShowScrollBar();
     TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "select click to show menu.");
+    ConfigMenuParam();
     overlayManager->ShowMenu(host->GetId(), offset, menuWrapper_);
+}
+
+void SelectPattern::ConfigMenuParam()
+{
+    CHECK_NULL_VOID(menuWrapper_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    auto wrapperPattern = menuWrapper_->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    auto menuparam = wrapperPattern->GetMenuParam();
+    menuparam.keyboardAvoidMode = selectLayoutProps->GetMenuKeyboardAvoidMode();
+    menuparam.minKeyboardAvoidDistance = selectLayoutProps->GetMinKeyboardAvoidDistance();
+    wrapperPattern->SetMenuParam(menuparam);
 }
 
 void SelectPattern::ShowSelectMenuInSubWindow()
@@ -285,6 +302,7 @@ void SelectPattern::ShowSelectMenuInSubWindow()
     menuParam.isShowInSubWindow = true;
     menuParam.isShow = true;
     menuParam.setShow = true;
+    ConfigMenuParam();
     subwindowManager->ShowMenuNG(menuWrapper_, menuParam, host, offset);
 }
 
@@ -544,6 +562,7 @@ void SelectPattern::CreateSelectedCallback()
         auto newSelected = pattern->options_[index]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(newSelected);
         auto value = newSelected->GetText();
+        pattern->ReportOnSelectEvent(index, value);
         auto onSelect = hub->GetSelectEvent();
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select choice index %{public}d", index);
         if (onSelect) {
@@ -1775,6 +1794,26 @@ void SelectPattern::ToJsonDividerMode(std::unique_ptr<JsonValue>& json) const
     }
 }
 
+void SelectPattern::ToJsonMenuAvoidKeyboard(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    auto keyboardAvoidMode = selectLayoutProps->GetMenuKeyboardAvoidMode();
+    if (keyboardAvoidMode.has_value()) {
+        if (keyboardAvoidMode.value() == MenuKeyboardAvoidMode::NONE) {
+            json->PutExtAttr("keyboardAvoidMode", "NONE", filter);
+        } else if (keyboardAvoidMode.value() == MenuKeyboardAvoidMode::TRANSLATE_AND_RESIZE) {
+            json->PutExtAttr("keyboardAvoidMode", "TRANSLATE_AND_RESIZE", filter);
+        }
+    }
+    auto minKeyboardAvoidDistance = selectLayoutProps->GetMinKeyboardAvoidDistance();
+    if (minKeyboardAvoidDistance.has_value()) {
+        json->PutExtAttr("minKeyboardAvoidDistance", minKeyboardAvoidDistance.value().ToString().c_str(), filter);
+    }
+}
+
 void SelectPattern::ToJsonOptionMaxlines(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     /* no fixed attr below, just return */
@@ -2071,10 +2110,6 @@ void SelectPattern::SetColorByUser(const RefPtr<FrameNode>& host, const RefPtr<S
     CHECK_NULL_VOID(props);
     auto themeBgcolor = theme->GetMenuBlendBgColor() ? theme->GetBackgroundColor() : Color::TRANSPARENT;
     SetMenuBackgroundColorByUser(themeBgcolor, props);
-    SetOptionBgColorByUser(Color::TRANSPARENT, props);
-    auto layoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
-    CHECK_NULL_VOID(layoutProps);
-    SetSelectedOptionBgColorByUser(theme, props, layoutProps);
     SetModifierByUser(theme, props);
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -2257,6 +2292,94 @@ void SelectPattern::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle)
     auto renderContext = menu->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackBlurStyle(blurStyle);
+}
+
+bool SelectPattern::ParseCommand(const std::string& command, int32_t& targetIndex)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    CHECK_NULL_RETURN(json, false);
+    auto jsonUtil = SelectJsonUtil::FromJson(json);
+    if (!jsonUtil.index.has_value()) {
+        return false;
+    }
+    targetIndex = jsonUtil.index.value();
+    return true;
+}
+
+void SelectPattern::ShowOptions(int32_t index)
+{
+    UpdateSelectedProps(index);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(selectLayoutProps);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (theme->GetExpandDisplay() && selectLayoutProps->GetShowInSubWindowValue(false) &&
+        NG::ViewAbstractModelNG::CheckSkipMenuShow(host)) {
+        // skip menu show when expand display is true and show in sub window is true
+        return;
+    }
+    ShowSelectMenu();
+}
+
+int32_t SelectPattern::OnInjectionEvent(const std::string& command)
+{
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "received command:%{public}s", command.c_str());
+    int32_t targetIndex = -1;
+    if (!ParseCommand(command, targetIndex)) {
+        return RET_FAILED;
+    }
+
+    if (!IsValidIndex(targetIndex)) {
+        return RET_FAILED;
+    }
+
+    SetSelected(targetIndex);
+    ShowOptions(targetIndex);
+    UpdateText(targetIndex);
+    std::string value = "";
+    GetSelectedValue(targetIndex, value);
+    ReportOnSelectEvent(targetIndex, value);
+    return RET_SUCCESS;
+}
+
+bool SelectPattern::IsValidIndex(int32_t index)
+{
+    if (index == selected_) {
+        return false;
+    }
+    if (index >= static_cast<int32_t>(options_.size()) || index < 0) {
+        return false;
+    }
+    return true;
+}
+
+void SelectPattern::GetSelectedValue(int32_t index, std::string& value)
+{
+    CHECK_NULL_VOID(options_[index]);
+    auto newSelected = options_[index]->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(newSelected);
+    value = newSelected->GetText();
+}
+
+bool SelectPattern::ReportOnSelectEvent(int32_t index, const std::string& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto nodeId = host->GetId();
+    CHECK_NULL_RETURN(nodeId, false);
+    SelectJsonUtil util;
+    util.index = index;
+    util.value = value;
+    auto result = SelectJsonUtil::ToJson(util);
+    CHECK_NULL_RETURN(result, false);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "fire onSelect event:%{public}s, nodeId:%{public}d",
+        result->ToString().c_str(), nodeId);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", std::move(result));
+    return true;
 }
 
 void SelectPattern::ResetParams()
@@ -2624,34 +2747,6 @@ void SelectPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("ControlSize: " + ConvertControlSizeToString(controlSize_));
 }
 
-void SelectPattern::SetOptionTextModifierByUser(
-    const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props)
-{
-    CHECK_NULL_VOID(theme);
-    CHECK_NULL_VOID(props);
-    if (!props->GetOptionFontColorSetByUserValue(false)) {
-        SetOptionFontColor(theme->GetFontColor());
-    }
-
-    if (props->GetOptionTextModifierSetByUserValue(false)) {
-        SetOptionTextModifier(textOptionApply_);
-    }
-}
-
-void SelectPattern::SetSelectedOptionTextModifierByUser(
-    const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props)
-{
-    CHECK_NULL_VOID(theme);
-    CHECK_NULL_VOID(props);
-    if (!props->GetSelectedOptionFontColorSetByUserValue(false)) {
-        SetSelectedOptionFontColor(theme->GetSelectedColorText());
-    }
-
-    if (props->GetSelectedOptionTextModifierSetByUserValue(false)) {
-        SetSelectedOptionTextModifier(textSelectOptionApply_);
-    }
-}
-
 void SelectPattern::SetArrowModifierByUser(
     const RefPtr<SelectTheme>& theme, const RefPtr<SelectPaintProperty>& props)
 {
@@ -2702,9 +2797,6 @@ void SelectPattern::SetModifierByUser(const RefPtr<SelectTheme>& theme, const Re
     if (props->GetTextModifierSetByUserValue(false)) {
         SetTextModifierApply(textApply_);
     }
-
-    SetOptionTextModifierByUser(theme, props);
-    SetSelectedOptionTextModifierByUser(theme, props);
     SetArrowModifierByUser(theme, props);
 }
 

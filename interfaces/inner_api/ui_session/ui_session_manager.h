@@ -42,6 +42,9 @@ public:
     using NotifySendCommandFunction = std::function<void(int32_t id, const std::string& command)>;
     using NotifySendCommandAsyncFunction = std::function<int32_t(int32_t id, const std::string& command)>;
     using SendCommandFunction = std::function<void(int32_t value)>;
+    using GetHitTestInfoFunction = std::function<void(InteractionParamConfig config)>;
+    using GetStateMgmtInfoFunction = std::function<void(
+        const std::string& componentName, const std::string& propertyName, const std::string& jsonPath)>;
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -90,6 +93,11 @@ public:
     virtual void ReportLifeCycleEvent(const std::string& data) {};
 
     /**
+     * @description: execute callback when select text event occurs
+     */
+    virtual void ReportSelectTextEvent(const std::string& data) {};
+
+    /**
      * @description: get current page inspector tree value
      */
     virtual void GetInspectorTree(ParamConfig config = ParamConfig()) {};
@@ -100,6 +108,9 @@ public:
     virtual void SaveForSendCommandAsyncFunction(NotifySendCommandAsyncFunction&& function) {};
     virtual void SaveInspectorTreeFunction(InspectorFunction&& function) {};
     virtual void SaveRegisterForWebFunction(NotifyAllWebFunction&& function) {};
+    virtual void SaveGetHitTestInfoCallback(GetHitTestInfoFunction&& function) {};
+    virtual void GetLatestHitTestNodeInfosForTouch(InteractionParamConfig config) {};
+    virtual void ReportHitTestNodeInfos(const std::string& data) {};
     /**
      * @description: Report web editing area focus/blur/textChange event
      * @param type The type of event (focus, blur, or textChange), defaults to empty string
@@ -117,6 +128,7 @@ public:
     virtual void SetComponentChangeEventRegistered(bool status) {};
     virtual void SetScrollEventRegistered(bool status) {};
     virtual void SetLifeCycleEventRegistered(bool status) {};
+    virtual void SetSelectTextEventRegistered(bool status) {};
     virtual bool GetClickEventRegistered()
     {
         return false;
@@ -149,6 +161,10 @@ public:
     {
         return false;
     };
+    virtual bool GetSelectTextEventRegistered()
+    {
+        return false;
+    };
     virtual void SaveBaseInfo(const std::string& info) {};
     virtual void SendBaseInfo(int32_t processId) {};
     virtual void SaveGetPixelMapFunction(GetPixelMapFunction&& function) {};
@@ -166,7 +182,10 @@ public:
     virtual void SendCurrentPageName(const std::string& result) {};
     virtual void SendCurrentLanguage(std::string result) {};
     virtual void SaveProcessId(std::string key, int32_t id) {};
+    virtual void EraseProcessId(const std::string& key) {};
     virtual void GetWebTranslateText(std::string extraData, bool isContinued) {};
+    virtual void GetStateMgmtInfo(
+        const std::string& componentName, const std::string& propertyName, const std::string& jsonPath) {};
     virtual void SendWebTextToAI(int32_t nodeId, std::string res) {};
     virtual void SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids) {};
     virtual void SendTranslateResult(int32_t nodeId, std::string result) {};
@@ -174,12 +193,30 @@ public:
     virtual void GetPixelMap() {};
     virtual void SendCommand(const std::string& command) {};
     virtual void SaveSendCommandFunction(SendCommandFunction&& function) {};
+    virtual void SaveGetStateMgmtInfoFunction(GetStateMgmtInfoFunction&& callback) {};
     virtual void SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps) {};
     virtual void GetVisibleInspectorTree(ParamConfig config = ParamConfig()) {};
     virtual void RegisterPipeLineExeAppAIFunction(
         std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback) {};
     virtual void ExeAppAIFunction(const std::string& funcName, const std::string& params) {};
     virtual void SendExeAppAIFunctionResult(uint32_t result) {};
+    virtual void GetSpecifiedContentOffsets(int32_t id, const std::string& content) {};
+    virtual void HighlightSpecifiedContent(
+        int32_t id, const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) {};
+    virtual void ReportSelectText() {};
+    virtual void SaveGetSpecifiedContentOffsetsFunction(
+        std::function<std::vector<std::pair<float, float>>(int32_t id, const std::string& content)>&& callback) {};
+    virtual void SaveHighlightSpecifiedContentFunction(std::function<void(int32_t id, const std::string& content,
+        const std::vector<std::string>& nodeIds, const std::string& configs)>&& callback) {};
+    virtual void SaveSelectTextFunction(std::function<void()>&& callback) {};
+    virtual void SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets) {};
+    virtual void RegisterContentChangeCallback(const ContentChangeConfig& config) {};
+    virtual void UnregisterContentChangeCallback() {};
+    virtual void ReportContentChangeEvent(ChangeType type, const std::string& simpleTree) {};
+    virtual void SetStartContentChangeDetectCallback(std::function<void(ContentChangeConfig)>&&) {};
+    virtual void SetStopContentChangeDetectCallback(std::function<void()>&&) {};
+    virtual void ReportGetStateMgmtInfo(std::vector<std::string> results) {};
+
 protected:
     UiSessionManager() = default;
     virtual ~UiSessionManager() = default;
@@ -192,12 +229,15 @@ protected:
     std::atomic<int32_t> componentChangeEventRegisterProcesses_ = 0;
     std::atomic<int32_t> scrollEventRegisterProcesses_ = 0;
     std::atomic<int32_t> lifeCycleEventRegisterProcesses_ = 0;
+    std::atomic<int32_t> selectTextEventRegisterProcesses_ = 0;
     bool webFocusEventRegistered = false;
     InspectorFunction inspectorFunction_ = 0;
     NotifyAllWebFunction notifyWebFunction_ = 0;
     GetPixelMapFunction getPixelMapFunction_ = 0;
+    GetHitTestInfoFunction getHitTestInfoFunction_ = 0;
     NotifySendCommandFunction notifySendCommandFunction_ = 0;
     NotifySendCommandAsyncFunction notifySendCommandAsyncFunction_ = 0;
+    GetStateMgmtInfoFunction getStateMgmtInfoFunction_ = 0;
     std::shared_ptr<InspectorJsonValue> jsonValue_ = nullptr;
     std::atomic<int32_t> webTaskNums_ = 0;
     std::string baseInfo_;
@@ -206,8 +246,16 @@ protected:
     std::function<int32_t()> getInstanceIdCallback_;
     std::shared_mutex getInstanceIdCallbackMutex_;
     std::function<std::string()> pipelineContextPageNameCallback_;
+    std::function<std::vector<std::pair<float, float>>(int32_t id,
+        const std::string& content)> getSpecifiedContentOffsetsCallback_;
+    std::function<void(
+        int32_t id, const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs)>
+        highlightSpecifiedContentCallback_;
+    std::function<void()> selectTextCallback_;
     SendCommandFunction sendCommandFunction_ = 0;
     std::function<uint32_t(const std::string& funcName, const std::string& params)> pipelineExeAppAIFunctionCallback_;
+    std::function<void(ContentChangeConfig)> startContentChangeDetectCallback_;
+    std::function<void()> stopContentChangeDetectCallback_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H

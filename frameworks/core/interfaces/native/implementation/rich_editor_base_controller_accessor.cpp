@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
+#include <list>
+#include <string>
+
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/native/implementation/rich_editor_styled_string_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/layout_manager_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "rich_editor_base_controller_peer_impl.h"
+
 #include "arkoala_api_generated.h"
+#include "rich_editor_base_controller_peer_impl.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<> TextStyle Convert(const Ark_RichEditorTextStyle& src);

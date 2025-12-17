@@ -305,6 +305,11 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
     }
+    supportEmptyBranchInLazyLoading(value: boolean | undefined): this {
+        this.getPeer()?.setSupportEmptyBranchInLazyLoadingAttribute(value)
+        this.markDirty()
+        return this
+    }
     attributeModifier(
         value: AttributeModifier<ListAttribute> |
         AttributeModifier<ScrollableCommonMethod> |

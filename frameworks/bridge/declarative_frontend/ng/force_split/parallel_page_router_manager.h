@@ -38,7 +38,6 @@ private:
     // For Arkts1.2
     void LoadPageExtender(int32_t pageId, const RouterPageInfo& target,
         bool needHideLast = true, bool needTransition = true, bool isPush = false) override;
-    RefPtr<FrameNode> LoadPlaceHolderPage();
     RefPtr<ResourceWrapper> CreateResourceWrapper();
     bool DetectPrimaryPage(const RouterPageInfo& target, const RefPtr<FrameNode>& preLastPage);
     bool JudgePrimaryPage(const RouterPageInfo& target);
@@ -50,8 +49,14 @@ private:
     void NotifyForceFullScreenChangeIfNeeded(
         const std::string& curTopPageName, const RefPtr<PipelineContext>& context) override;
     void LoadCompleteManagerStartCollect(const std::string& url);
+    void LoadPlaceholderOrRelatedPageIfNeeded(
+        const RefPtr<PipelineContext>& context, const RefPtr<ParallelStageManager>& manager);
+    bool LoadRelatedPage(const std::string& url, const RefPtr<ParallelStageManager>& manager);
+    bool LoadPlaceHolderPage(const RefPtr<ParallelStageManager>& manager);
 
     ACE_DISALLOW_COPY_AND_MOVE(ParallelPageRouterManager);
+
+    bool hasTryLoadPlaceholderOrRelatedPage_ = false;
 };
 } // namespace OHOS::Ace::NG
 

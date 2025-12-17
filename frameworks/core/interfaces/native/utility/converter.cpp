@@ -15,31 +15,42 @@
 
 #include <cerrno>
 #include <cstdint>
-#include "arkoala_api_generated.h"
 
+#include "arkoala_api_generated.h"
 #include "converter.h"
 
-#include "base/utils/string_utils.h"
+// SORTED_SECTION
 #include "base/geometry/response_region.h"
+#include "base/utils/string_utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/container_picker/container_picker_theme.h"
-#include "core/components_ng/pattern/text/text_model.h"
+#include "core/components/common/properties/paint_state.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_options.h"
+#include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/text/text_model.h"
+#include "core/interfaces/native/implementation/circle_shape_peer.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
-#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
-#include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
+#include "core/interfaces/native/implementation/ellipse_shape_peer.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
-#include "core/interfaces/native/implementation/linear_gradient_peer.h"
-#include "core/interfaces/native/implementation/pixel_map_peer.h"
-#include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
 #include "core/interfaces/native/implementation/level_order_peer.h"
+#include "core/interfaces/native/implementation/linear_gradient_peer.h"
+#include "core/interfaces/native/implementation/path_shape_peer.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/rect_shape_peer.h"
+#include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
+#include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
+#include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -112,14 +123,31 @@ namespace {
         if (index >= params.size()) {
             return std::string();
         }
-        if (auto* value = std::get_if<std::string>(&params.at(index).value())) {
-            return *value;
-        } else if (auto* value = std::get_if<int64_t>(&params.at(index).value())) {
-            return std::to_string(*value);
-        } else if (auto* value = std::get_if<double>(&params.at(index).value())) {
-            return std::to_string(*value);
-        } else if (auto* value = std::get_if<Converter::ResourceConverter>(&params.at(index).value())) {
-            return value->ToString().value_or("");
+        auto& item = params.at(index).value();
+        if (type == "d") {
+            if (auto* value = std::get_if<int64_t>(&item)) {
+                return std::to_string(*value);
+            } else if (auto* value = std::get_if<double>(&item)) {
+                return std::to_string(static_cast<int64_t>(*value));
+            } else if (auto* value = std::get_if<Converter::ResourceConverter>(&item)) {
+                auto num = value->ToFloat().value_or(0);
+                return std::to_string(static_cast<int64_t>(num));
+            }
+        } else if (type == "s") {
+            if (auto* value = std::get_if<std::string>(&item)) {
+                return *value;
+            } else if (auto* value = std::get_if<Converter::ResourceConverter>(&item)) {
+                return value->ToString().value_or("");
+            }
+        } else if (type == "f") {
+            if (auto* value = std::get_if<int64_t>(&item)) {
+                return std::to_string(static_cast<double>(*value));
+            } else if (auto* value = std::get_if<double>(&item)) {
+                return std::to_string(*value);
+            } else if (auto* value = std::get_if<Converter::ResourceConverter>(&item)) {
+                auto num = value->ToFloat().value_or(0);
+                return std::to_string(num);
+            }
         }
         return "";
     }
@@ -978,14 +1006,14 @@ template<>
 Dimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
-    return StringUtils::StringToDimensionWithUnit(str, ConverterStatus::DEFAULT_UNIT);
+    return StringUtils::StringToDimensionWithUnit(str, ConverterState::defDimensionUnit);
 }
 
 template<>
 CalcDimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
-    return StringUtils::StringToCalcDimension(str, false, ConverterStatus::DEFAULT_UNIT);
+    return StringUtils::StringToCalcDimension(str, false, ConverterState::defDimensionUnit);
 }
 
 template<>
@@ -1034,13 +1062,13 @@ std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src
 template<>
 Dimension Convert(const Ark_Number& src)
 {
-    return Dimension(Converter::Convert<float>(src), ConverterStatus::DEFAULT_UNIT);
+    return Dimension(Converter::Convert<float>(src), ConverterState::defDimensionUnit);
 }
 
 template<>
 Dimension Convert(const Ark_Int32& src)
 {
-    return Dimension(static_cast<int>(src), DimensionUnit::VP);
+    return Dimension(static_cast<int>(src), ConverterState::defDimensionUnit);
 }
 
 template<>
@@ -1196,6 +1224,40 @@ BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src)
 }
 
 template<>
+BorderRadiusPropertyOpt Convert(const Ark_LocalizedBorderRadiuses& src)
+{
+    BorderRadiusPropertyOpt property;
+    std::optional<CalcDimension> topStart;
+    auto topStartOpt = Converter::OptConvert<Dimension>(src.topStart);
+    if (topStartOpt) {
+        topStart = topStartOpt.value();
+    }
+    std::optional<CalcDimension> topEnd;
+    auto topEndOpt = Converter::OptConvert<Dimension>(src.topEnd);
+    if (topEndOpt) {
+        topEnd = topEndOpt.value();
+    }
+    std::optional<CalcDimension> bottomStart;
+    auto bottomStartOpt = Converter::OptConvert<Dimension>(src.bottomStart);
+    if (bottomStartOpt) {
+        bottomStart = bottomStartOpt.value();
+    }
+    std::optional<CalcDimension> bottomEnd;
+    auto bottomEndOpt = Converter::OptConvert<Dimension>(src.bottomEnd);
+    if (bottomEndOpt) {
+        bottomEnd = bottomEndOpt.value();
+    }
+    bool hasSetBorderRadius = topStartOpt || topEndOpt || bottomStartOpt || bottomEndOpt;
+    auto isRtl = hasSetBorderRadius && AceApplicationInfo::GetInstance().IsRightToLeft();
+    property.value.radiusTopLeft = isRtl ? topEnd : topStart;
+    property.value.radiusTopRight = isRtl ? topStart : topEnd;
+    property.value.radiusBottomLeft = isRtl ? bottomEnd : bottomStart;
+    property.value.radiusBottomRight = isRtl ? bottomStart : bottomEnd;
+    property.value.multiValued = true;
+    return property;
+}
+
+template<>
 BorderStyleProperty Convert(const Ark_BorderStyle& src)
 {
     BorderStyleProperty property;
@@ -1204,13 +1266,6 @@ BorderStyleProperty Convert(const Ark_BorderStyle& src)
         property.SetBorderStyle(style.value());
     }
     return property;
-}
-
-template<>
-Dimension Convert(const Ark_CustomObject& src)
-{
-    LOGW("Convert [Ark_CustomObject] to [Dimension] is not supported");
-    return Dimension();
 }
 
 template<>
@@ -1411,7 +1466,7 @@ Gradient Convert(const Ark_LinearGradientOptions& value)
     }
 
     auto gradientColors = Converter::Convert<std::vector<GradientColor>>(value.colors);
-    
+
     if (gradientColors.size() == 1) {
         gradient.AddColor(gradientColors.front());
         gradient.AddColor(gradientColors.front());
@@ -1779,7 +1834,7 @@ NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
     options.effectOption.reset();
     BlurStyleOption styleOptions;
     EffectOption effectOption;
-  
+
     if (src.backgroundBlurStyleOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         styleOptions = Converter::Convert<BlurStyleOption>(src.backgroundBlurStyleOptions.value);
         options.blurStyleOption = styleOptions;
@@ -2393,16 +2448,14 @@ void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src)
 template<>
 Dimension Convert(const Ark_Float64& src)
 {
-    return Dimension(src, DimensionUnit::VP);
+    return Dimension(src, ConverterState::defDimensionUnit);
 }
 
 template<>
 Dimension Convert(const Ark_LengthMetrics& src)
 {
     auto value = Converter::Convert<float>(src.value);
-    auto unit = static_cast<int32_t>(src.unit);
-
-    auto dimensionUnit = static_cast<DimensionUnit>(unit);
+    auto dimensionUnit = Converter::OptConvert<DimensionUnit>(src.unit).value_or(ConverterState::defDimensionUnit);
     return Dimension(value, dimensionUnit);
 }
 
@@ -2639,9 +2692,9 @@ PickerIndicatorStyle Convert(const Ark_PickerIndicatorStyle& src)
         dst.backgroundColor = backgroundColor.value();
         dst.isDefaultBackgroundColor = false;
     }
-    auto borderRadius = Converter::OptConvert<BorderRadiusProperty>(src.borderRadius);
+    auto borderRadius = Converter::OptConvert<BorderRadiusPropertyOpt>(src.borderRadius);
     if (borderRadius.has_value()) {
-        dst.borderRadius = borderRadius;
+        dst.borderRadius = (*borderRadius).value;
         dst.isDefaultBorderRadius = false;
     }
     return dst;
@@ -2800,6 +2853,18 @@ BorderRadiusProperty Convert(const Ark_BorderRadiuses& src)
     return borderRadius;
 }
 
+template<>
+BorderRadiusPropertyOpt Convert(const Ark_BorderRadiuses& src)
+{
+    BorderRadiusPropertyOpt borderRadius;
+    borderRadius.value.radiusTopLeft = Converter::OptConvert<Dimension>(src.topLeft);
+    borderRadius.value.radiusTopRight = Converter::OptConvert<Dimension>(src.topRight);
+    borderRadius.value.radiusBottomLeft = Converter::OptConvert<Dimension>(src.bottomLeft);
+    borderRadius.value.radiusBottomRight = Converter::OptConvert<Dimension>(src.bottomRight);
+    borderRadius.value.multiValued = true;
+    return borderRadius;
+}
+
 static BorderRadiusProperty BorderRadiusPropertyFromDimension(std::optional<Dimension> radius)
 {
     BorderRadiusProperty dst;
@@ -2839,6 +2904,46 @@ template<>
 BorderRadiusProperty Convert(const Ark_Resource& src)
 {
     return BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
+}
+
+template<>
+BorderRadiusPropertyOpt Convert(const Ark_LengthMetrics& src)
+{
+    BorderRadiusPropertyOpt opt;
+    opt.value = BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
+    return opt;
+}
+
+template<>
+BorderRadiusPropertyOpt Convert(const Ark_Number& src)
+{
+    BorderRadiusPropertyOpt opt;
+    opt.value = BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
+    return opt;
+}
+
+template<>
+BorderRadiusPropertyOpt Convert(const Ark_Float64& src)
+{
+    BorderRadiusPropertyOpt opt;
+    opt.value = BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
+    return opt;
+}
+
+template<>
+BorderRadiusPropertyOpt Convert(const Ark_String& src)
+{
+    BorderRadiusPropertyOpt opt;
+    opt.value = BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
+    return opt;
+}
+
+template<>
+BorderRadiusPropertyOpt Convert(const Ark_Resource& src)
+{
+    BorderRadiusPropertyOpt opt;
+    opt.value = BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
+    return opt;
 }
 
 template<>
@@ -3263,6 +3368,32 @@ PointLightStyle Convert(const Ark_PointLightStyle& src)
     pointLightStyle.bloom = Converter::OptConvert<float>(src.bloom);
     Validator::ValidateBloom(pointLightStyle.bloom);
     return pointLightStyle;
+}
+
+template<>
+PickerBackgroundStyle Convert(const Ark_PickerBackgroundStyle& src)
+{
+    PickerBackgroundStyle dst;
+    dst.color = Converter::OptConvert<Color>(src.color);
+    dst.borderRadius = Converter::OptConvert<BorderRadiusProperty>(src.borderRadius);
+    return dst;
+}
+
+template<>
+void AssignCast(
+    std::optional<BorderRadiusProperty>& dst, const Ark_Union_LengthMetrics_BorderRadiuses_LocalizedBorderRadiuses& src)
+{
+    Converter::VisitUnion(src,
+        [&dst](const Ark_LengthMetrics& value) {
+            dst = Converter::OptConvert<BorderRadiusProperty>(value);
+        },
+        [&dst](const Ark_BorderRadiuses& value) {
+            dst = Converter::OptConvert<BorderRadiusProperty>(value);
+        },
+        [&dst](const Ark_LocalizedBorderRadiuses& value) {
+            dst = Converter::OptConvert<BorderRadiusProperty>(value);
+        },
+        []() {});
 }
 
 template<>
@@ -3730,7 +3861,7 @@ ScrollFrameResult Convert(const Ark_OnScrollFrameBeginHandlerResult& from)
     ret.offset = Converter::Convert<Dimension>(from.offsetRemain);
     return ret;
 }
-template<> 
+template<>
 RectWidthStyle Convert(const Ark_text_RectWidthStyle& src)
 {
     switch (src) {
@@ -3744,7 +3875,7 @@ RectWidthStyle Convert(const Ark_text_RectWidthStyle& src)
     }
     return RectWidthStyle::TIGHT;
 }
-template<> 
+template<>
 RectHeightStyle Convert(const Ark_text_RectHeightStyle& src)
 {
     switch (src) {
@@ -3755,7 +3886,7 @@ RectHeightStyle Convert(const Ark_text_RectHeightStyle& src)
         case Ark_text_RectHeightStyle::ARK_TEXT_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_MIDDLE:
             return RectHeightStyle::INCLUDE_LINE_SPACE_MIDDLE;
         case Ark_text_RectHeightStyle::ARK_TEXT_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_TOP:
-            return RectHeightStyle::INCLUDE_LINE_SPACE_TOP; 
+            return RectHeightStyle::INCLUDE_LINE_SPACE_TOP;
         case Ark_text_RectHeightStyle::ARK_TEXT_RECT_HEIGHT_STYLE_INCLUDE_LINE_SPACE_BOTTOM:
             return RectHeightStyle::INCLUDE_LINE_SPACE_BOTTOM;
         case Ark_text_RectHeightStyle::ARK_TEXT_RECT_HEIGHT_STYLE_STRUT:
@@ -3828,6 +3959,16 @@ void AssignCast(std::optional<OHOS::Rosen::Filter*>& dst, const Ark_uiEffect_Fil
         return;
     }
     dst = reinterpret_cast<OHOS::Rosen::Filter*>(src);
+}
+
+template<>
+void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_Material& src)
+{
+    if (!src) {
+        dst = std::nullopt;
+        return;
+    }
+    dst = reinterpret_cast<UiMaterial*>(src);
 }
 
 template<>
@@ -3911,6 +4052,17 @@ void ConvertAngleWithDefault(const Ark_Union_Number_String& src, std::optional<f
         }
     } else {
         LOGW("unknown branch in %{public}s, %{public}d", __func__, src.selector);
+    }
+}
+
+template<>
+void AssignCast(std::optional<BlurStyleOption>& dst, const Ark_BlurStyle& src)
+{
+    auto blurStyle = OptConvert<BlurStyle>(src);
+    if (blurStyle) {
+        BlurStyleOption blurStyleOptions;
+        blurStyleOptions.blurStyle = blurStyle.value();
+        dst = blurStyleOptions;
     }
 }
 } // namespace OHOS::Ace::NG::Converter

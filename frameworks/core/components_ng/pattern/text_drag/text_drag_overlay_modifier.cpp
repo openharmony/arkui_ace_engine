@@ -151,7 +151,12 @@ void TextDragOverlayModifier::PaintBackground(const RSPath& path, RSCanvas& canv
     PaintShadow(path, shadow, canvas);
     auto pattern = DynamicCast<TextDragPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
-    Color color = pattern->GetDragBackgroundColor();
+    Color color;
+    if (dragBackgroundColor_.has_value()) {
+        color = dragBackgroundColor_.value_or(Color::WHITE);
+    } else {
+        color = pattern->GetDragBackgroundColor();
+    }
     RSBrush brush;
     brush.SetColor(ToRSColor(color));
     brush.SetAntiAlias(true);

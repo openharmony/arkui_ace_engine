@@ -32,15 +32,17 @@ namespace {
 const int32_t DIVIDER_ROWS_THREE = 3;
 const int32_t MARGIN_HALF = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
-constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
-constexpr Dimension TITLE_BUTTON_HEIGHT = 32.0_vp;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
 } // namespace
 thread_local bool TimePickerDialogView::switchFlag_ = false;
+thread_local bool TimePickerDialogView::useButtonFocusArea_ = false;
 thread_local Dimension TimePickerDialogView::selectedTextStyleFont_ = 40.0_fp;
 thread_local Dimension TimePickerDialogView::normalTextStyleFont_ = 32.0_fp;
 thread_local Dimension TimePickerDialogView::disappearTextStyleFont_ = 28.0_fp;
+thread_local Dimension TimePickerDialogView::pickerDialogMargin_ = 24.0_vp;
+thread_local Dimension TimePickerDialogView::pickerTitleHeight_ = 32.0_vp;
+thread_local Color TimePickerDialogView::buttonColor_ = Color::TRANSPARENT;
 
 RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogProperties,
     const TimePickerSettingData& settingData, const std::vector<ButtonInfo>& buttonInfos,
@@ -191,8 +193,8 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     CHECK_NULL_RETURN(timePickerLayoutProperty, nullptr);
 
     MarginProperty margin;
-    margin.left = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
-    margin.right = CalcLength(PICKER_DIALOG_MARGIN_FORM_EDGE);
+    margin.left = CalcLength(pickerDialogMargin_);
+    margin.right = CalcLength(pickerDialogMargin_);
     timePickerLayoutProperty->UpdateMargin(margin);
 
     buttonTitleNode->MountToParent(contentColumn);
@@ -485,12 +487,12 @@ RefPtr<FrameNode> TimePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     MarginProperty margin;
     margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
     margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
-    margin.top = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
-    margin.bottom = CalcLength(dialogTheme->GetDividerHeight() / MARGIN_HALF);
+    margin.top = CalcLength(pickerTheme->GetTimePickerTitleMarginTop() / MARGIN_HALF);
+    margin.bottom = CalcLength(pickerTheme->GetTimePickerTitleMarginBottom() / MARGIN_HALF);
     buttonTitleNode->GetLayoutProperty()->UpdateMargin(margin);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonTitleNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-            CalcSize(std::nullopt, CalcLength(TITLE_BUTTON_HEIGHT)));
+            CalcSize(std::nullopt, CalcLength(pickerTitleHeight_)));
     }
     textTitleNode->MountToParent(buttonTitleNode);
     return buttonTitleNode;
@@ -677,7 +679,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     CHECK_NULL_RETURN(buttonConfirmLayoutProperty, nullptr);
     UpdateButtonLayoutProperty(buttonConfirmLayoutProperty, pickerTheme);
     auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
-    buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonConfirmRenderContext->UpdateBackgroundColor(buttonColor_);
     UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonConfirmLayoutProperty, buttonConfirmRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonConfirmNode, true);
 
@@ -746,7 +748,11 @@ void TimePickerDialogView::UpdateConfirmButtonTextLayoutProperty(
 {
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateContent(GetDialogNormalButtonText(true));
-    textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    if (useButtonFocusArea_) {
+        textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
+    } else {
+        textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    }
     if (!NeedAdaptForAging()) {
         textLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
@@ -816,7 +822,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     }
 
     auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
-    buttonCancelRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonCancelRenderContext->UpdateBackgroundColor(buttonColor_);
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonCancelLayoutProperty, buttonCancelRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonCancelNode, false);
     buttonCancelNode->MarkModifyDone();
@@ -828,7 +834,11 @@ void TimePickerDialogView::UpdateCancelButtonTextLayoutProperty(
 {
     CHECK_NULL_VOID(textCancelLayoutProperty);
     textCancelLayoutProperty->UpdateContent(GetDialogNormalButtonText(false));
-    textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    if (useButtonFocusArea_) {
+        textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
+    } else {
+        textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    }
     if (!NeedAdaptForAging()) {
         textCancelLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
@@ -1211,6 +1221,10 @@ void TimePickerDialogView::GetUserSettingLimit()
     selectedTextStyleFont_ = pickerTheme->GetUseSetSelectedTextStyle();
     normalTextStyleFont_ = pickerTheme->GetUserSetNormalTextStyle();
     disappearTextStyleFont_ = pickerTheme->GetUserSetDisappearTextStyle();
+    pickerDialogMargin_ = pickerTheme->GetPickerDialogMargin();
+    buttonColor_ = pickerTheme->GetButtonColor();
+    useButtonFocusArea_ = pickerTheme->NeedButtonFocusAreaType();
+    pickerTitleHeight_ = pickerTheme->GetPickerTitleHeight();
 }
 
 void TimePickerDialogView::SetEnableCascade(

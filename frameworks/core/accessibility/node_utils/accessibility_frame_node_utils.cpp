@@ -425,6 +425,12 @@ void AccessibilityFrameNodeUtils::IsCoveredByBrother(
 {
     CHECK_EQUAL_VOID(AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled(), false);
     CHECK_EQUAL_VOID(nodeAccessibilityVisible, false);
+    CHECK_NULL_VOID(frameNode);
+
+    auto frameNodeAccProp = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(frameNodeAccProp);
+    CHECK_EQUAL_VOID(frameNodeAccProp->IsHeaderOrFooter(), true);
+
     auto parentFrameNode = frameNode;
     do {
         parentFrameNode = GetParentFrameNodeWithVirtualNode(parentFrameNode);
@@ -432,6 +438,7 @@ void AccessibilityFrameNodeUtils::IsCoveredByBrother(
 
         auto accessibilityProperty = parentFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_CONTINUE(accessibilityProperty);
+        CHECK_EQUAL_VOID(accessibilityProperty->IsHeaderOrFooter(), true);
 
         NG::RectF parentRect;
         auto find = accessibilityProperty->GetAccessibilityInnerVisibleRect(parentRect);

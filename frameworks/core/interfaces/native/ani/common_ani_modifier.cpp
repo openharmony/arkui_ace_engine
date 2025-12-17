@@ -922,6 +922,7 @@ void SetImageCacheCount(ani_int value, ani_int instanceId)
         return;
     }
     auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -936,6 +937,7 @@ void SetImageRawDataCacheSize(ani_int value, ani_int instanceId)
         return;
     }
     auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -1042,6 +1044,13 @@ ani_boolean SetTouchEventPreventDefault(ani_long nativePtr)
     return true;
 }
 
+void ResolveUIContext(std::vector<int32_t>& instnace)
+{
+    auto currnetId = ContainerScope::CurrentIdWithReason();
+    instnace.push_back(currnetId.first);
+    instnace.push_back(static_cast<int32_t>(currnetId.second));
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -1120,7 +1129,8 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getBaseEventPressedModifierKey = OHOS::Ace::NG::GetBaseEventPressedModifierKey,
         .getKeyEventPressedModifierKey = OHOS::Ace::NG::GetKeyEventPressedModifierKey,
         .setClickEventPreventDefault = OHOS::Ace::NG::SetClickEventPreventDefault,
-        .setTouchEventPreventDefault = OHOS::Ace::NG::SetTouchEventPreventDefault
+        .setTouchEventPreventDefault = OHOS::Ace::NG::SetTouchEventPreventDefault,
+        .resolveUIContext = OHOS::Ace::NG::ResolveUIContext
     };
     return &impl;
 }

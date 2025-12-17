@@ -760,6 +760,13 @@ public:
     virtual void EndTranslate() {};
     virtual void SendTranslateResult(std::string results) {};
     int32_t OnRecvCommand(const std::string& command);
+    virtual std::vector<std::pair<float, float>> GetSpecifiedContentOffsets(const std::string& content)
+    {
+        return std::vector<std::pair<float, float>>{};
+    };
+    virtual void HighlightSpecifiedContent(
+        const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) {};
+    virtual void ReportSelectedText() {};
     virtual int32_t OnInjectionEvent(const std::string& command)
     {
         return RET_SUCCESS;
@@ -854,6 +861,15 @@ public:
         return false;
     }
     virtual RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host)
+    {
+        return nullptr;
+    }
+    virtual void OnHoverWithHightLight(bool isHover) {}
+    virtual void OnPaintFocusState(bool isFocus) {}
+    virtual void OnContentChangeRegister(const ContentChangeConfig& config) {}
+    virtual void OnContentChangeUnregister() {}
+    virtual void ContentChangeByDetaching(PipelineContext*) {}
+    virtual RefPtr<FrameNode> GetKeyFrameNodeWhenContentChanged()
     {
         return nullptr;
     }

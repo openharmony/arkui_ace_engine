@@ -87,6 +87,9 @@ export class Scroller implements MaterializedBase {
     public currentOffset(): OffsetResult | undefined {
         return this.currentOffset_serialize()
     }
+    public offset(): OffsetResult | undefined {
+        return this.offset_serialize()
+    }
     public scrollToIndex(value: int32, smooth?: boolean, align?: ScrollAlign, options?: ScrollToIndexOptions): void {
         const value_casted = value as (int32)
         const smooth_casted = smooth as (boolean | undefined)
@@ -159,6 +162,17 @@ export class Scroller implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._Scroller_currentOffset(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType = retvalDeserializer.readInt8().toInt()
+        let buffer : OffsetResult | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = OffsetResult_serializer.read(retvalDeserializer)
+        }
+        const returnResult : OffsetResult | undefined = buffer
+        return returnResult
+    }
+    offset_serialize(): OffsetResult | undefined {
+        const retval  = ArkUIGeneratedNativeModule._Scroller_offset(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : OffsetResult | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = OffsetResult_serializer.read(retvalDeserializer)

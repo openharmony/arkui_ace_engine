@@ -202,15 +202,15 @@ class ColorMetrics {
   private resourceId_: number;
   private colorSpace_: ColorSpace;
   private res_: Resource | undefined;
-  private static clamp(value: number): number {
-    return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
-  }
   private constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE, res?: Resource) {
     this.red_ = ColorMetrics.clamp(red);
     this.green_ = ColorMetrics.clamp(green);
     this.blue_ = ColorMetrics.clamp(blue);
     this.alpha_ = ColorMetrics.clamp(alpha);
     this.res_ = res === undefined ? undefined : res;
+  }
+  private static clamp(value: number): number {
+    return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
   }
   private toNumeric(): number {
     return (this.alpha_ << 24) + (this.red_ << 16) + (this.green_ << 8) + this.blue_;
@@ -422,11 +422,15 @@ class ShapeMask extends BaseShape {
   public fillColor: number = 0XFF000000;
   public strokeColor: number = 0XFF000000;
   public strokeWidth: number = 0;
+  constructor(...args: []) {
+      super(...args);
+  }
 }
 
 class RenderNode extends Disposable {
   private childrenList: Array<RenderNode>;
   private nodePtr: NodePtr;
+  private type: string; // use for transfer
   private parentRenderNode: WeakRef<RenderNode> | null;
   private backgroundColorValue: number;
   private clipToFrameValue: boolean;
@@ -459,7 +463,7 @@ class RenderNode extends Disposable {
   constructor(type: string, cptrVal: number = 0) {
     super();
     this.nodePtr = null;
-    this.type = type;     // for transfer to arkts1.2
+    this.type = type; // use for transfer
     this.childrenList = [];
     this.parentRenderNode = null;
     this.backgroundColorValue = 0;
@@ -490,7 +494,7 @@ class RenderNode extends Disposable {
       return;
     }
 
-    if (cptrVal === 0) {
+    if (cptrVal === 0 || cptrVal === null || cptrVal === undefined) {
       this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
     } else {
       this._nativeRef = getUINativeModule().renderNode.createRenderNodeWithPtrVal(this, cptrVal);

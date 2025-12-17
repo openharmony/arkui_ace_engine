@@ -15,18 +15,38 @@
 
 #include <optional>
 
+// SORTED_SECTION
+#include "core/animation/chain_animation.h"
+#include "core/common/ime/text_input_action.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/paint_state.h"
 #include "core/components/common/properties/shadow.h"
-#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "core/components/web/web_property.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model.h"
+#include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
+#include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
+#include "core/components_ng/pattern/list/list_item_group_pattern.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/particle/particle_model.h"
+#include "core/components_ng/pattern/slider/slider_model.h"
+#include "core/components_ng/pattern/toggle/toggle_model.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_v2/list/list_properties.h"
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
+#include "ui/view/components/tabs/tabs_data.h"
 
+#include "ace_engine_types.h"
 #include "arkoala_api_generated.h"
-#include "converter.h"
-#include "converter2.h"
-#include "reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
+// Declaration
+template<typename T, typename P>
+void AssignCast(std::optional<T>& dst, const P& src);
+// Implementations
 template<>
 void AssignCast(std::optional<AIImageQuality>& dst, const Ark_image_ResolutionQuality& src)
 {
@@ -96,6 +116,7 @@ void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissRea
         case ARK_DISMISS_REASON_TOUCH_OUTSIDE: dst = BindSheetDismissReason::TOUCH_OUTSIDE; break;
         case ARK_DISMISS_REASON_CLOSE_BUTTON: dst = BindSheetDismissReason::CLOSE_BUTTON; break;
         case ARK_DISMISS_REASON_SLIDE_DOWN: dst = BindSheetDismissReason::SLIDE_DOWN; break;
+        case ARK_DISMISS_REASON_SLIDE: dst = BindSheetDismissReason::SLIDE; break;
         default: LOGE("Unexpected enum value in Ark_DismissReason: %{public}d", src); break;
     }
 }
@@ -130,17 +151,6 @@ void AssignCast(std::optional<BlurStyleActivePolicy>& dst, const Ark_BlurStyleAc
         case ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE: dst = BlurStyleActivePolicy::ALWAYS_ACTIVE; break;
         case ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE: dst = BlurStyleActivePolicy::ALWAYS_INACTIVE; break;
         default: LOGE("Unexpected enum value in Ark_BlurStyleActivePolicy: %{public}d", src);
-    }
-}
-
-template<>
-void AssignCast(std::optional<BlurStyleOption>& dst, const Ark_BlurStyle& src)
-{
-    auto blurStyle = OptConvert<BlurStyle>(src);
-    if (blurStyle) {
-        BlurStyleOption blurStyleOptions;
-        blurStyleOptions.blurStyle = blurStyle.value();
-        dst = blurStyleOptions;
     }
 }
 
@@ -430,6 +440,8 @@ void AssignCast(std::optional<SheetKeyboardAvoidMode>& dst, const Ark_SheetKeybo
         case ARK_SHEET_KEYBOARD_AVOID_MODE_RESIZE_ONLY: dst = SheetKeyboardAvoidMode::RESIZE_ONLY; break;
         case ARK_SHEET_KEYBOARD_AVOID_MODE_TRANSLATE_AND_SCROLL:
             dst = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL; break;
+        case ARK_SHEET_KEYBOARD_AVOID_MODE_POPUP_SHEET:
+            dst = SheetKeyboardAvoidMode::POPUP_SHEET; break;
         default: LOGE("Unexpected enum value in Ark_SheetKeyboardAvoidMode: %{public}d", src);
     }
 }
@@ -462,6 +474,8 @@ void AssignCast(std::optional<SheetType>& dst, const Ark_SheetType& src)
         case ARK_SHEET_TYPE_BOTTOM: dst = SheetType::SHEET_BOTTOM; break;
         case ARK_SHEET_TYPE_CENTER: dst = SheetType::SHEET_CENTER; break;
         case ARK_SHEET_TYPE_POPUP: dst = SheetType::SHEET_POPUP; break;
+        case ARK_SHEET_TYPE_SIDE: dst = SheetType::SHEET_SIDE; break;
+        case ARK_SHEET_TYPE_CONTENT_COVER: dst = SheetType::SHEET_CONTENT_COVER; break;
         default: LOGE("Unexpected enum value in Ark_SheetType: %{public}d", src);
     }
 }

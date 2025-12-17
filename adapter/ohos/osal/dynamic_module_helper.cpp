@@ -24,9 +24,6 @@
 namespace OHOS::Ace {
 namespace {
 const std::string COMPATIABLE_LIB = "libace_compatible_components.z.so";
-const std::string COMPATIABLE_COMPONENT_LOADER = "OHOS_ACE_Compatible_GetLoader";
-const std::string COMPATIABLE_CANVAS_RENDERING_CONTEXT = "OHOS_ACE_Compatible_GetCanvasRenderingContext";
-const std::string COMPATIABLE_CANVAS_BRIDGE = "OHOS_ACE_Compatible_CreateCanvasBridge";
 } // namespace
 DynamicModuleHelper& DynamicModuleHelper::GetInstance()
 {
@@ -67,7 +64,7 @@ void* DynamicModuleHelper::CreateCanvasBridge(CanvasBridgeParams& params)
 
 DynamicModuleHelper::DynamicModuleHelper()
 {
-    LoadLibrary();
+    DynamicLoadLibrary();
 }
 
 DynamicModuleHelper::~DynamicModuleHelper()
@@ -75,7 +72,7 @@ DynamicModuleHelper::~DynamicModuleHelper()
     CloseLibrary();
 }
 
-bool DynamicModuleHelper::LoadLibrary()
+bool DynamicModuleHelper::DynamicLoadLibrary()
 {
     if (!compatibleLibLoaded_) {
         compatibleLibHandle_ = dlopen(COMPATIABLE_LIB.c_str(), RTLD_LAZY);

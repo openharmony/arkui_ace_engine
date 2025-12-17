@@ -19,10 +19,12 @@
 #include "form_renderer_hilog.h"
 #include "form_event_report.h"
 #include "base/utils/utils.h"
+#include "configuration.h"
 
 namespace OHOS {
 namespace Ace {
 namespace {
+constexpr char FORM_DISABLE_UIFIRST_KEY[] = "ohos.extra.param.key.disable_uifirst";
 constexpr char FORM_RENDERER_ALLOW_UPDATE[] = "allowUpdate";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
 constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
@@ -82,19 +84,37 @@ void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::A
     uiContent_->SetFormViewScale(uiWidth, uiHeight, formViewScale_);
 }
 
-void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+void FormRenderer::SetUIContentProperty(const OHOS::AAFwk::Want &want)
 {
     if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) {
         uiContent_->SetFormRenderingMode(static_cast<int8_t>(renderingMode_));
     }
-    if (enableBlurBackground_) {
-        uiContent_->SetFormEnableBlurBackground(enableBlurBackground_);
+    if (enableBlurBackground_ || deleteBackgroundImage_) {
+        uiContent_->SetFormEnableBlurBackground(true);
     }
-    uiContent_->RunFormPage();
+ 
     backgroundColor_ = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
-    if (!backgroundColor_.empty()) {
+    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR || enableBlurBackground_ ||
+        deleteBackgroundImage_) {
+        HILOG_INFO("InitUIContent SetFormBackgroundColor #00FFFFFF");
+        uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
+    } else if (!backgroundColor_.empty()) {
         uiContent_->SetFormBackgroundColor(backgroundColor_);
     }
+ 
+    HILOG_INFO("InitUIContent renderingMode_:%{public}d, enableBlurBackground_:%{public}d, formLocation_:%{public}d, "
+        "deleteBackgroundImage_:%{public}d, backgroundColor_:%{public}s",
+        static_cast<int32_t>(renderingMode_),
+        static_cast<int32_t>(enableBlurBackground_),
+        static_cast<int32_t>(formLocation_),
+        static_cast<int32_t>(deleteBackgroundImage_),
+        backgroundColor_.c_str());
+}
+
+void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want &want, const OHOS::AppExecFwk::FormJsInfo &formJsInfo)
+{
+    SetUIContentProperty(want);
+    uiContent_->RunFormPage();
 
     auto actionEventHandler = [weak = weak_from_this()](const std::string& action) {
         auto formRenderer = weak.lock();
@@ -122,15 +142,6 @@ void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::A
         uiContent_->SetFormLinkInfoUpdateHandler(formLinkInfoUpdateHandler);
     }
 
-    auto surfaceNode = GetSurfaceNode();
-    if (!surfaceNode) {
-        HILOG_ERROR("rsSurfaceNode is nullptr.");
-        return;
-    }
-    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR || enableBlurBackground_) {
-        HILOG_INFO("InitUIContent SetFormBackgroundColor #00FFFFFF");
-        uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
-    }
     HILOG_INFO("ChangeSensitiveNodes: %{public}s", obscurationMode_ ? "true" : "false");
     uiContent_->ChangeSensitiveNodes(obscurationMode_);
     uiContent_->Foreground();
@@ -142,8 +153,9 @@ void FormRenderer::InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppE
     RunFormPageInner(want, formJsInfo);
 }
 
-void FormRenderer::ParseWant(const OHOS::AAFwk::Want& want)
+void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
 {
+    disableUIFirst_ = want.GetBoolParam(FORM_DISABLE_UIFIRST_KEY, false);
     allowUpdate_ = want.GetBoolParam(FORM_RENDERER_ALLOW_UPDATE, true);
     width_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f);
     height_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 0.0f);
@@ -156,6 +168,9 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want& want)
     borderWidth_ = want.GetFloatParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, 0.0f);
     fontScaleFollowSystem_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FONT_FOLLOW_SYSTEM_KEY, true);
     obscurationMode_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, false);
+    formLocation_ = static_cast<AppExecFwk::Constants::FormLocation>(
+        want.GetIntParam(OHOS::AppExecFwk::Constants::FORM_LOCATION_KEY, -1));  // -1: FormLocation::OTHER
+    deleteBackgroundImage_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_DELETE_BACKGROUND_IMAGE, false);
 }
 
 int32_t FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -366,6 +381,10 @@ int32_t FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJs
         return ERR_APPEXECFWK_FORM_FORM_NODE_RELEASED;
     }
     HILOG_INFO("Form OnSurfaceCreate, id: %{public}" PRIu64, rsSurfaceNode->GetId());
+    if (disableUIFirst_) {
+        rsSurfaceNode->SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch::FORCE_DISABLE_CARD);
+        HILOG_INFO("force disable uifirst and rendergroup");
+    }
 
     int32_t ret = ERR_OK;
     if (formJsInfo.uiSyntax == OHOS::AppExecFwk::FormType::ETS) {
@@ -538,7 +557,15 @@ void FormRenderer::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
         HILOG_ERROR("uiContent_ is null");
         return;
     }
+    if (!config) {
+        HILOG_ERROR("config is null");
+        return;
+    }
 
+    std::string colorModeValue = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    if (!colorModeValue.empty() && formLocation_ == AppExecFwk::Constants::FormLocation::STANDBY) {
+        config->RemoveItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    }
     uiContent_->UpdateConfiguration(config);
 }
 
@@ -591,7 +618,8 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
         backgroundColor_ = backgroundColor;
         uiContent_->SetFormBackgroundColor(backgroundColor_);
     }
-    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR || enableBlurBackground_) {
+    if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR || enableBlurBackground_ ||
+        deleteBackgroundImage_) {
         HILOG_INFO("AttachUIContent SetFormBackgroundColor #00FFFFFF");
         uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
     }
@@ -626,6 +654,22 @@ void FormRenderer::RecoverForm(const std::string& statusData)
     uiContent_->RecoverForm(statusData);
 }
 
+void FormRenderer::SetRenderGroupEnableFlag(bool isEnable)
+{
+    auto rsSurfaceNode = GetSurfaceNode();
+    if (!rsSurfaceNode) {
+        HILOG_ERROR("SetRenderGroupEnableFlag rsSurfaceNode is nullptr.");
+        return;
+    }
+
+    HILOG_INFO("SetRenderGroupEnableFlag isEnable:%{public}d", isEnable);
+    if (!isEnable) {
+        rsSurfaceNode->SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch::FORCE_DISABLE_CARD);
+        return;
+    }
+    rsSurfaceNode->SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch::NONE);
+}
+ 
 void FormRenderer::SetVisibleChange(bool isVisible)
 {
     if (formRendererDispatcherImpl_ != nullptr) {

@@ -666,13 +666,21 @@ void ListItemDragManager::HandleOnItemDragCancel()
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetDraggingIndex(-1);
+    pattern->SetHotZoneScrollCallback(nullptr);
+    if (scrolling_) {
+        pattern->HandleLeaveHotzoneEvent();
+        scrolling_ = false;
+    }
     HandleDragEndAnimation();
+    int32_t to = GetIndex();
+    auto forEach = forEachNode_.Upgrade();
+    CHECK_NULL_VOID(forEach);
+    forEach->FireOnMove(fromIndex_, to);
+    forEach->FireOnDrop(to);
     dragState_ = ListItemDragState::IDLE;
     if (isDragAnimationStopped_) {
         SetIsNeedDividerAnimation(true);
     }
-    pattern->HandleLeaveHotzoneEvent();
-    pattern->SetHotZoneScrollCallback(nullptr);
 }
 
 int32_t ListItemDragManager::GetIndex() const

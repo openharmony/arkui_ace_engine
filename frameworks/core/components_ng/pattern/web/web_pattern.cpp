@@ -82,6 +82,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/web/web_accessibility_child_tree_callback.h"
+#include "core/components_ng/pattern/web/web_dom_document.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #include "core/components_ng/pattern/web/view_data_common.h"
 #include "core/components_ng/pattern/web/transitional_node_info.h"
@@ -551,6 +552,7 @@ constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
 // web feature params
 constexpr char VISIBLE_ACTIVE_ENABLE[] = "persist.web.visible_active_enable";
 constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
+constexpr char OFFLINE_WEB_EVICT_FRAME_BUFFERS_ENABLE[] = "persist.web.offline_web_evict_frame_buffers_enable";
 const std::vector<std::string> SYNC_RENDER_SLIDE {V2::LIST_ETS_TAG, V2::SCROLL_ETS_TAG};
 
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
@@ -602,6 +604,7 @@ WebPattern::WebPattern()
     renderMode_ = RenderMode::ASYNC_RENDER;
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
+    webDomDocument_ = std::make_unique<WebDomDocument>();
     InitRotationEventCallback();
 }
 
@@ -613,6 +616,7 @@ WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& w
     InitMagnifier();
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
+    webDomDocument_ = std::make_unique<WebDomDocument>();
     InitRotationEventCallback();
 }
 
@@ -625,18 +629,18 @@ WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWeb
     InitMagnifier();
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
+    webDomDocument_ = std::make_unique<WebDomDocument>();
     InitRotationEventCallback();
 }
 
 WebPattern::~WebPattern()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
-    int webId = GetWebId();
-    ACE_SCOPED_TRACE("WebPattern::~WebPattern, web id = %d", webId);
-    CleanupWebPatternResource(webId);
+    ACE_SCOPED_TRACE("WebPattern::~WebPattern, web id = %d", GetWebId());
+    CleanupWebPatternResource();
     UninitTouchEventListener();
     if (setWebDetachCallback_) {
-        auto setWebDetachTask = [callback = setWebDetachCallback_, webId]() {
+        auto setWebDetachTask = [callback = setWebDetachCallback_, webId = GetWebId()]() {
             CHECK_NULL_VOID(callback);
             callback(webId);
         };
@@ -1190,7 +1194,6 @@ void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
             delegate_->SetBlurReason(OHOS::NWeb::BlurReason::VIEW_SWITCH);
             delegate_->OnBlur();
         }
-        UninitMenuLifeCycleCallback();
     }
 }
 
@@ -1216,6 +1219,7 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
     CHECK_NULL_VOID(contextMenuParam_);
     contextMenuResult_ = eventInfo->GetContextMenuResult();
     CHECK_NULL_VOID(contextMenuResult_);
+    isEditableOnContextMenu_ = contextMenuParam_->IsEditable();
     bool isImage = false;
     bool isHyperLink = false;
     bool isText = false;
@@ -1490,6 +1494,7 @@ void WebPattern::InitFeatureParam()
 {
     isVisibleActiveEnable_ = system::GetBoolParameter(VISIBLE_ACTIVE_ENABLE, true);
     isMemoryLevelEnable_ = system::GetBoolParameter(MEMORY_LEVEL_ENABEL, true);
+    isOfflineWebEvictFrameBuffersEnable_ = system::GetBoolParameter(OFFLINE_WEB_EVICT_FRAME_BUFFERS_ENABLE, true);
 }
 
 void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -4541,6 +4546,13 @@ char* HandleWebMessage(const char** params, int32_t size)
 }
 }
 
+void WebPattern::DumpSimplifyInfoOnlyForParamConfig(
+    std::shared_ptr<JsonValue>& json, ParamConfig config)
+{
+    ACE_SCOPED_TRACE("WebPattern::DumpSimplifyInfoOnlyForParamConfig");
+    TAG_LOGI(AceLogTag::ACE_WEB, "web-dom-tree config.withWeb:%{public}d", config.withWeb);
+}
+
 void WebPattern::RecordWebEvent(bool isInit)
 {
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST)
@@ -4594,8 +4606,10 @@ void WebPattern::InitInOfflineMode()
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddWindowStateChangedCallback(host->GetId());
-    offlineWebNodeId_ = host->GetId();
+    if (isOfflineWebEvictFrameBuffersEnable_) {
+        pipelineContext->AddWindowStateChangedCallback(host->GetId());
+        offlineWebNodeId_ = host->GetId();
+    }
     int width = 0;
     int height = 0;
     auto layoutProperty = host->GetLayoutProperty();
@@ -4955,7 +4969,9 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
             }
         }
     }
-    HideMagnifier();
+    if (info.GetChangedTouches().front().GetFingerId() == showMagnifierFingerId_) {
+        HideMagnifier();
+    }
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos)) {
         return;
@@ -4991,7 +5007,7 @@ void WebPattern::OnMagnifierHandleMove(const RectF& handleRect, bool isFirst)
 {
     auto localX = handleRect.GetX() - webOffset_.GetX() + handleRect.Width() / HALF;
     auto localY = handleRect.GetY() - webOffset_.GetY() + handleRect.Height() / HALF;
-    ShowMagnifier(localX, localY);
+    ShowMagnifier(localX, localY, true);
 }
 
 void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
@@ -5036,8 +5052,9 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
         }
         touchPointX = touchPoint.x;
         touchPointY = touchPoint.y;
-        if (magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
-            ShowMagnifier(touchPoint.x, touchPoint.y);
+        if (magnifierController_ && magnifierController_->GetMagnifierNodeExist() &&
+            touchPoint.id == showMagnifierFingerId_) {
+            ShowMagnifier(touchPoint.x, touchPoint.y, true);
         }
 
         if (info.GetSourceTool() == SourceTool::PEN && !IS_CALLING_FROM_M114()) {
@@ -5084,7 +5101,9 @@ void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
         imageAnalyzerManager_->UpdateOverlayTouchInfo(0, 0, TouchType::CANCEL);
         overlayCreating_ = false;
     }
-    HideMagnifier();
+    if (info.GetChangedTouches().front().GetFingerId() == showMagnifierFingerId_) {
+        HideMagnifier();
+    }
 }
 
 bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos)
@@ -5158,6 +5177,8 @@ void WebPattern::CloseSelectOverlay()
             HideMagnifier();
         }
         touchOverlayInfo_.clear();
+    } else if (webSelectOverlay_ && webSelectOverlay_->SelectOverlayIsOn()) {
+        webSelectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
     }
 }
 
@@ -5359,8 +5380,10 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     return false;
 }
 
-void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY)
+void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY, bool isMove)
 {
+    showMagnifierFingerId_ =
+        isMove ? showMagnifierFingerId_ : touchEventInfo_.GetChangedTouches().front().GetFingerId();
     if (magnifierController_) {
         OffsetF localOffset = OffsetF(centerOffsetX, centerOffsetY);
         magnifierController_->SetLocalOffset(localOffset);
@@ -5370,6 +5393,7 @@ void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY)
 void WebPattern::HideMagnifier()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "HideMagnifier");
+    showMagnifierFingerId_ = -1;
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
@@ -5444,7 +5468,11 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         if (nodeInfoWrap->GetIsFocus()) {
             focusType = type;
         }
+        if (triggerType == AceAutoFillTriggerType::MANUAL_REQUEST && type == AceAutoFillType::ACE_UNSPECIFIED) {
+            jsonNode->Put(OHOS::NWeb::NWEB_VIEW_DATA_KEY_VALUE.c_str(), nodeInfoWrap->GetValue().c_str());
+        }
     }
+
     auto pageUrl = viewDataWrap->GetPageUrl();
     jsonNode->Put(AUTO_FILL_VIEW_DATA_PAGE_URL.c_str(), pageUrl.c_str());
     auto otherAccount = viewDataWrap->GetOtherAccount();
@@ -5452,6 +5480,14 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
     delegate_->NotifyAutoFillViewData(jsonNode->ToString(), ConvertAceAutoFillTriggerType(triggerType));
 
     // shift focus after autofill
+    ShiftFocusAfterAutoFill(focusType);
+    if (triggerType == AceAutoFillTriggerType::MANUAL_REQUEST) {
+        autoFillMenuType_ = WebMenuType::TYPE_UNKNOWN_MENU;
+    }
+}
+
+void WebPattern::ShiftFocusAfterAutoFill(AceAutoFillType focusType)
+{
     if (focusType != AceAutoFillType::ACE_UNSPECIFIED && !isPasswordFill_) {
         for (const auto& nodeInfo : pageNodeInfo_) {
             if (nodeInfo && nodeInfo->GetAutoFillType() == focusType) {
@@ -5671,8 +5707,9 @@ bool WebPattern::HandleAutoFillEvent()
 
     auto eventType = viewDataCommon_->GetEventType();
     if (eventType == OHOS::NWeb::NWebAutofillEvent::FILL) {
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST;
         if (isPasswordFill_ && !system::GetBoolParameter(AUTO_FILL_START_POPUP_WINDOW, false)) {
-            return RequestAutoFill(GetFocusedType());
+            return RequestAutoFill(GetFocusedType(), triggerType);
         }
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
@@ -5684,7 +5721,8 @@ bool WebPattern::HandleAutoFillEvent()
             [weak = WeakClaim(this), nodeInfos = pageNodeInfo_] () {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_RETURN(pattern, false);
-                return pattern->RequestAutoFill(pattern->GetFocusedType(), nodeInfos);
+                AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST;
+                return pattern->RequestAutoFill(pattern->GetFocusedType(), nodeInfos, triggerType);
             },
             TaskExecutor::TaskType::UI, AUTOFILL_DELAY_TIME, "ArkUIWebHandleAutoFillEvent");
         return fillRet;
@@ -5719,12 +5757,13 @@ bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapVa
     return HandleAutoFillEvent();
 }
 
-bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
+bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, AceAutoFillTriggerType triggerType)
 {
-    return RequestAutoFill(autoFillType, pageNodeInfo_);
+    return RequestAutoFill(autoFillType, pageNodeInfo_, triggerType);
 }
 
-bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, const std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos)
+bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, const std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos,
+    AceAutoFillTriggerType triggerType)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "RequestAutoFill");
     auto host = GetHost();
@@ -5752,8 +5791,24 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, const std::vector
     CHECK_NULL_RETURN(container, false);
     isAutoFillClosing_ = false;
     bool isPopup = false;
-    return container->RequestAutoFill(host, autoFillType, false, isPopup, autoFillSessionId_, false) ==
+    return container->RequestAutoFill(host, autoFillType, false, isPopup, autoFillSessionId_,
+                                      false, nullptr, nullptr, triggerType) ==
            AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
+}
+
+void WebPattern::RequestPasswordAutoFill(WebMenuType menuType)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RequestPasswordAutoFill");
+    if (menuType == WebMenuType::TYPE_CONTEXTMENU) {
+        if (!isEditableOnContextMenu_) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "web do not send autofill request.");
+            return;
+        }
+    }
+    autoFillMenuType_ = menuType;
+    FakePageNodeInfo();
+    RequestAutoFill(GetFocusedType(), AceAutoFillTriggerType::MANUAL_REQUEST);
+    isEditableOnContextMenu_ = false;
 }
 
 void WebPattern::FakePageNodeInfo()
@@ -6794,26 +6849,25 @@ void WebPattern::OnWindowShow()
         webId, offlineWebInited_, static_cast<int>(nodeStatus));
     CHECK_NULL_VOID(delegate_);
     if (offlineWebInited_ && nodeStatus == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
-        if (OHOS::NWeb::NWebHelper::Instance().GetNWebActiveStatus(webId)) {
-            delegate_->OnActive();
-        }
+        delegate_->SetOfflineWebActiveStatus(webId, true);
         return;
     }
     delegate_->OnRenderToForeground();
     delegate_->OnOnlineRenderToForeground();
 
-    if (isWindowShow_ || !isVisible_) {
-        return;
-    }
-
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     componentVisibility_ = layoutProperty->GetVisibility().value_or(VisibleType::GONE);
     // When the visibility of web component is invisible, the window notification is not processed
-    if (componentVisibility_ == VisibleType::INVISIBLE) {
-        ACE_SCOPED_TRACE("WebPattern::OnWindowShow visibility of web component is invisible, WebId %d", GetWebId());
+    if (isWindowShow_ || !isVisible_ || componentVisibility_ == VisibleType::INVISIBLE) {
+        ACE_SCOPED_TRACE("WebPattern::OnWindowShow WebId %d, isWindowShow %d, isVisible %d, componentVisibility_ %d",
+            webId, isWindowShow_, isVisible_, static_cast<int>(componentVisibility_));
+        if (offlineWebInited_ && isOfflineWebEvictFrameBuffersEnable_) {
+            delegate_->SetOfflineWebActiveStatus(webId, true);
+        }
         return;
     }
+
     delegate_->ShowWebView();
     SetActiveStatusInner(true);
     isWindowShow_ = true;
@@ -6824,11 +6878,12 @@ void WebPattern::OnWindowHide()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     NodeStatus nodeStatus = host->GetNodeStatus();
+    int32_t webId = GetWebId();
     TAG_LOGI(AceLogTag::ACE_WEB, "OnWindowHide WebId: %{public}d, isOfflineWeb: %{public}d, nodeStatus: %{public}d",
-        GetWebId(), offlineWebInited_, static_cast<int>(nodeStatus));
+        webId, offlineWebInited_, static_cast<int>(nodeStatus));
     CHECK_NULL_VOID(delegate_);
     if (offlineWebInited_ && nodeStatus == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
-        delegate_->OnInactive(true);
+        delegate_->SetOfflineWebActiveStatus(webId, false);
         return;
     }
     delegate_->OnRenderToBackground();
@@ -6836,9 +6891,10 @@ void WebPattern::OnWindowHide()
     if (!isWindowShow_) {
         return;
     }
-
-    CHECK_NULL_VOID(delegate_);
-    SetActiveStatusInner(false, offlineWebInited_ && !isActive_);
+    if (offlineWebInited_ && !isActive_) {
+        delegate_->SetOfflineWebActiveStatus(webId, false);
+    }
+    SetActiveStatusInner(false);
     delegate_->HideWebView();
     CloseContextSelectionMenu();
     needOnFocus_ = false;
@@ -9892,10 +9948,10 @@ void WebPattern::OnStatusBarClick()
     }
 }
 
-void WebPattern::CleanupWebPatternResource(int32_t webId)
+void WebPattern::CleanupWebPatternResource()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::CleanupWebPatternResource");
-    OHOS::NWeb::NWebHelper::Instance().RemoveNWebActiveStatus(webId);
+    OHOS::NWeb::NWebHelper::Instance().RemoveNWebActiveStatus(GetWebId());
     if (offlineWebInited_) {
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);

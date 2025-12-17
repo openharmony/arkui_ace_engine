@@ -930,4 +930,14 @@ void TextFieldModelStatic::SetFallbackLineSpacing(FrameNode* frameNode, const st
 {
     TextFieldModelNG::SetFallbackLineSpacing(frameNode, optValue.value_or(false));
 }
+
+void TextFieldModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    if (color.has_value()) {
+        TextFieldModelNG::SetSelectedDragPreviewStyle(frameNode, color.value());
+        return;
+    }
+    TextFieldModelNG::ResetSelectedDragPreviewStyle(frameNode);
+}
+
 } // namespace OHOS::Ace::NG

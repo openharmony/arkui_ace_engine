@@ -614,6 +614,7 @@ void MovingPhotoPattern::HandleImageCompleteEvent(const LoadImageSuccessEvent& i
 
 void MovingPhotoPattern::HandleImageErrorEvent(const LoadImageFailEvent& info)
 {
+    handleImageError_ = true;
     auto errorStatus = info.GetErrorInfo();
     TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "OnHandleImageErrorEventCallback Start.");
     CHECK_NULL_VOID(errorStatus.errorMessage.c_str());
@@ -2001,6 +2002,9 @@ RefPtr<FrameNode> MovingPhotoPattern::GetTempNode()
 
 void MovingPhotoPattern::StopAnimation()
 {
+    if (handleImageError_) {
+        return;
+    }
     isStopAnimation_ = false;
     startAnimationFlag_ = false;
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
@@ -2197,6 +2201,10 @@ void MovingPhotoPattern::HandleImageAnalyzerPlayCallBack()
 
 void MovingPhotoPattern::Start()
 {
+    if (handleImageError_) {
+        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "movingphoto HandleImageError %{public}d.", handleImageError_);
+        return;
+    }
     TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto start play.");
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");

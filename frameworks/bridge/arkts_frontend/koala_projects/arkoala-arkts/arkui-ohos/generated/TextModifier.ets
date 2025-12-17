@@ -29,7 +29,7 @@ import { Color, FontStyle, TextAlign, TextCase, CopyOptions, TextHeightAdaptiveP
 import { Resource } from "global.resource"
 import { LengthMetrics } from "arkui.Graphics"
 import { DecorationStyleInterface } from "./component/styledString"
-import { TextDataDetectorConfig, EditMenuOptions, FontSettingOptions } from "./component/textCommon"
+import { TextDataDetectorConfig, EditMenuOptions, FontSettingOptions, SelectedDragPreviewStyle } from "./component/textCommon"
 import { CustomBuilder } from "./component/builder"
 import { SelectionMenuOptions } from "./component/richEditor"
 import { TextModifier } from "arkui.TextModifier"
@@ -132,6 +132,8 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     _includeFontPadding_0_0value?: boolean | undefined
     _fallbackLineSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fallbackLineSpacing_0_0value?: boolean | undefined
+    _selectedDragPreviewStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _selectedDragPreviewStyle_0_0value?: SelectedDragPreviewStyle | undefined
     _font_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _font_0_0value?: Font | undefined
     _font_0_1value?: FontSettingOptions | undefined
@@ -906,6 +908,24 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
             }
         }
+        if (this._selectedDragPreviewStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._selectedDragPreviewStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSelectedDragPreviewStyleAttribute((this._selectedDragPreviewStyle_0_0value as SelectedDragPreviewStyle | undefined));
+                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSelectedDragPreviewStyleAttribute((undefined as SelectedDragPreviewStyle | undefined));
+                }
+            }
+        }
         if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._font_0_flag) {
@@ -1528,6 +1548,19 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
             }
         }
+        if (modifier._selectedDragPreviewStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._selectedDragPreviewStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.selectedDragPreviewStyle(modifier._selectedDragPreviewStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.selectedDragPreviewStyle((undefined as SelectedDragPreviewStyle | undefined));
+                }
+            }
+        }
         if (modifier._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._font_0_flag) {
@@ -2040,6 +2073,17 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         } else
         {
             this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        if (((this._selectedDragPreviewStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._selectedDragPreviewStyle_0_0value = value
+        } else
+        {
+            this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

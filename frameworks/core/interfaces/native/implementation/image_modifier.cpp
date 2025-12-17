@@ -33,6 +33,7 @@ constexpr int32_t UNION_ONE = 1;
 constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
 constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
 constexpr int32_t SELECTOR_INDEX = 3;
+constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
 } // namespace
 
 namespace Converter {
@@ -65,6 +66,10 @@ void AssignCast(std::optional<ImageRotateOrientation>& dst, const Ark_ImageRotat
         case ARK_IMAGE_ROTATE_ORIENTATION_RIGHT: dst = ImageRotateOrientation::RIGHT; break;
         case ARK_IMAGE_ROTATE_ORIENTATION_DOWN: dst = ImageRotateOrientation::DOWN; break;
         case ARK_IMAGE_ROTATE_ORIENTATION_LEFT: dst = ImageRotateOrientation::LEFT; break;
+        case ARK_IMAGE_ROTATE_ORIENTATION_UP_MIRRORED: dst = ImageRotateOrientation::UP_MIRRORED; break;
+        case ARK_IMAGE_ROTATE_ORIENTATION_RIGHT_MIRRORED: dst = ImageRotateOrientation::RIGHT_MIRRORED; break;
+        case ARK_IMAGE_ROTATE_ORIENTATION_DOWN_MIRRORED: dst = ImageRotateOrientation::DOWN_MIRRORED; break;
+        case ARK_IMAGE_ROTATE_ORIENTATION_LEFT_MIRRORED: dst = ImageRotateOrientation::LEFT_MIRRORED; break;
         default: LOGE("Unexpected enum value in Ark_ImageRotateOrientation: %{public}d", src);
     }
 }
@@ -230,6 +235,14 @@ void SetDynamicRangeModeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     ImageModelStatic::SetDynamicRangeMode(frameNode, Converter::OptConvertPtr<DynamicRangeMode>(value));
 }
+void SetHdrBrightnessImpl(Ark_NativePointer node,
+                          const Opt_Float64* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelStatic::SetHdrBrightness(
+        frameNode, Converter::OptConvertPtr<float>(value).value_or(DEFAULT_HDR_BRIGHTNESS));
+}
 void SetInterpolationImpl(Ark_NativePointer node,
                           const Opt_ImageInterpolation* value)
 {
@@ -278,7 +291,7 @@ void SetDraggableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
-        ImageModelNG::SetDraggable(frameNode, false);
+        ImageModelStatic::ResetDraggable(frameNode);
         return;
     }
     ImageModelNG::SetDraggable(frameNode, *convValue);
@@ -491,6 +504,7 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageAttributeModifier::SetAutoResizeImpl,
         ImageAttributeModifier::SetRenderModeImpl,
         ImageAttributeModifier::SetDynamicRangeModeImpl,
+        ImageAttributeModifier::SetHdrBrightnessImpl,
         ImageAttributeModifier::SetInterpolationImpl,
         ImageAttributeModifier::SetSourceSizeImpl,
         ImageAttributeModifier::SetSyncLoadImpl,

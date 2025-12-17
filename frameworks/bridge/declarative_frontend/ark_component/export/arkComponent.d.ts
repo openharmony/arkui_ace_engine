@@ -455,6 +455,7 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     onDeleteComplete(callback: () => void): RichEditorAttribute;
     onWillAttachIME(callback: (Callback<IMEClient> | undefined)): RichEditorAttribute;
     bindSelectionMenu(spanType: RichEditorSpanType, content: CustomBuilder, responseType: ResponseType, options?: SelectionMenuOptions): RichEditorAttribute;
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle): RichEditorAttribute;
     customKeyboard(value: CustomBuilder): RichEditorAttribute;
     barState(value: BarState): RichEditorAttribute;
     maxLength(value: number): RichEditorAttribute;
@@ -511,6 +512,7 @@ declare class ArkSearchComponent extends ArkComponent implements CommonMethod<Se
     strokeWidth(value: LengthMetrics): SearchAttribute;
     strokeColor(valeu: ResourceColor): SearchAttribute;
     compressLeadingPunctuation(enable: boolean): SearchAttribute;
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle): SearchAttribute;
 }
 declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     _changed: boolean;
@@ -788,6 +790,7 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
         colors: Array<[ ResourceColor, number ]>;
         repeating?: boolean;
     }): this;
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle): TextAttribute;
 }
 declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -822,6 +825,7 @@ declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<
     strokeWidth(value: LengthMetrics): TextAreaAttribute;
     strokeColor(value: ResourceColor): TextAreaAttribute;
     compressLeadingPunctuation(enable: boolean): TextAreaAttribute;
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle): TextAreaAttribute;
 }
 declare class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -875,6 +879,7 @@ declare class ArkTextInputComponent extends ArkComponent implements CommonMethod
     strokeWidth(value: LengthMetrics): TextInputAttribute;
     strokeColor(value: ResourceColor): TextInputAttribute;
     compressLeadingPunctuation(enable: boolean): TextInputAttribute;
+    selectedDragPreviewStyle(value: SelectedDragPreviewStyle): TextInputAttribute;
 }
 declare class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);

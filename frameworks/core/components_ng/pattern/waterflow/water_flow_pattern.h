@@ -163,6 +163,7 @@ public:
      */
     void OnSectionChanged(int32_t start);
 
+    void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void GetEventDumpInfo() override;
     void GetEventDumpInfo(std::unique_ptr<JsonValue>& json) override;

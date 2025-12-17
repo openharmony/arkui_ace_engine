@@ -787,7 +787,7 @@ ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
         return animatorObj;
     }
 
-    // create animatot and construct animatorResult
+    // create animator and construct animatorResult
     auto option = std::make_shared<Napi::AnimatorOption>();
     ParseAnimatorOption(env, aniOption, option);
     TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] option is %{public}s", option->ToString().c_str());

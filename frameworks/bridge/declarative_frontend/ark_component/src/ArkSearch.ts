@@ -979,6 +979,23 @@ class SearchOnWillAttachIMEModifier extends ModifierWithKey<(client: IMEClient) 
   }
 }
 
+class SearchSelectedDragPreviewStyleModifier extends ModifierWithKey<ArkSelectedDragPreviewStyle> {
+  constructor(value: ArkSelectedDragPreviewStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchSelectedDragPreviewStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetSelectedDragPreviewStyle(node);
+    } else {
+      getUINativeModule().search.setSelectedDragPreviewStyle(node, this.value.color);
+    }
+  }
+  checkObjectDiff(): boolean {
+      return !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
+  }
+}
+
 class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1257,6 +1274,13 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   onWillAttachIME(callback: Callback<IMEClient>): this {
     modifierWithKey(this._modifiersWithKeys, SearchOnWillAttachIMEModifier.identity,
       SearchOnWillAttachIMEModifier, callback);
+    return this;
+  }
+  selectedDragPreviewStyle(value: SelectedDragPreviewStyle): this {
+    let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();
+    arkSelectedDragPreviewStyle.color = value?.color;
+    modifierWithKey(this._modifiersWithKeys, SearchSelectedDragPreviewStyleModifier.identity,
+        SearchSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
     return this;
   }
 }

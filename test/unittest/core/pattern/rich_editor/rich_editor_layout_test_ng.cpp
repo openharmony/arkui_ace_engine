@@ -1126,7 +1126,7 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateParagraphByCustomSpanTest002, TestSize.Le
     /**
      * @tc.steps: step2. Create RichEditorLayoutAlgorithm with useParagraphCache_ = true
      */
-    auto layoutAlgorithm = 
+    auto layoutAlgorithm =
         AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     ASSERT_NE(layoutAlgorithm, nullptr);
 

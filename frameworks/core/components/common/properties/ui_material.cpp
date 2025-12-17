@@ -22,9 +22,11 @@
 namespace OHOS::Ace {
 const char UI_MATERIAL_EXTENSION_SO_PATH[] = "system/lib64/libhdsmaterialimpl.z.so";
 const char UI_MATERIAL_FUNC_NAME[] = "SetMaterial";
+const char UI_MATERIAL_FUNC_GET_ID[] = "GetMaterialId";
 
 namespace {
 using SetMaterialFunc = void (*)(NG::FrameNode*, const UiMaterial*);
+using GetMaterialIdFunc = int32_t (*)(const UiMaterial*);
 
 SetMaterialFunc GetOrCreateMaterialFunc()
 {
@@ -51,6 +53,33 @@ SetMaterialFunc GetOrCreateMaterialFunc()
 #endif
     isLoaded = true;
     return materialFunc;
+}
+
+GetMaterialIdFunc GetOrCreateGetMaterialIdFunc()
+{
+    static bool isLoaded = false;
+    static GetMaterialIdFunc getMaterialIdFunc = nullptr;
+    static std::mutex materialMutex;
+    if (isLoaded) {
+        return getMaterialIdFunc;
+    }
+    std::lock_guard<std::mutex> lock(materialMutex);
+    if (isLoaded) {
+        return getMaterialIdFunc;
+    }
+#ifndef _WIN32
+    auto handle = LOADLIB(UI_MATERIAL_EXTENSION_SO_PATH);
+    if (!handle) {
+        isLoaded = true;
+        return nullptr;
+    }
+    getMaterialIdFunc = reinterpret_cast<GetMaterialIdFunc>(LOADSYM(handle, UI_MATERIAL_FUNC_GET_ID));
+    if (!getMaterialIdFunc) {
+        FREELIB(handle);
+    }
+#endif
+    isLoaded = true;
+    return getMaterialIdFunc;
 }
 } // namespace
 
@@ -82,5 +111,25 @@ bool MaterialUtils::CallSetMaterial(NG::FrameNode* node, const UiMaterial* mater
         return true;
     }
     return false;
+}
+int32_t MaterialUtils::CallGetMaterialId(const UiMaterial* material)
+{
+    CHECK_NULL_RETURN(material, -1);
+    auto getMaterialIdFunc = GetOrCreateGetMaterialIdFunc();
+    int32_t materialId = -1;
+    if (getMaterialIdFunc) {
+        materialId = getMaterialIdFunc(material);
+    }
+    return materialId;
+}
+RefPtr<UiMaterial> UiMaterial::Copy() const
+{
+    auto result = AceType::MakeRefPtr<UiMaterial>();
+    CopyTo(result);
+    return result;
+}
+void UiMaterial::CopyTo(RefPtr<UiMaterial>& other) const
+{
+    other->SetType(type_);
 }
 } // namespace OHOS::Ace

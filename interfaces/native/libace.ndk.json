@@ -4116,6 +4116,14 @@
         "name": "OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent"
     },
     {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_NativeModule_ConvertPositionToWindow"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_NativeModule_ConvertPositionFromWindow"
+    },
+    {
         "first_introduced": "21",
         "name": "OH_ArkUI_PositionEdges_Create"
     },
@@ -4641,6 +4649,46 @@
     },
     {
         "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_SetPath"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_GetPath"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_SetFrom"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_GetFrom"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_SetTo"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_GetTo"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_SetRotatable"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_MotionPathOptions_GetRotatable"
+    },
+    {
+        "first_introduced": "23",
         "name": "OH_ArkUI_TextMarqueeOptions_Create"
     },
     {
@@ -4718,5 +4766,37 @@
     {
         "first_introduced": "23",
         "name": "OH_ArkUI_TextMarqueeOptions_GetUpdatePolicy"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectedDragPreviewStyle_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectedDragPreviewStyle_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectedDragPreviewStyle_SetColor"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_SelectedDragPreviewStyle_GetColor"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_PickerIndicatorStyle_Create"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_PickerIndicatorStyle_Dispose"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_PickerIndicatorStyle_ConfigureBackground"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_PickerIndicatorStyle_ConfigureDivider"
     }
 ]

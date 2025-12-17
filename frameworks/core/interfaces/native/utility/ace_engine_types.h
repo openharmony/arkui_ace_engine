@@ -44,11 +44,10 @@ struct RadioStyle {
     std::optional<Color> indicatorColor;
 };
 
-typedef std::tuple<
-    std::optional<Dimension>,
-    std::optional<FontWeight>
-    // here it can be expanded by Family and Style data
-> FontMetaData;
+struct FontMetaData {
+    std::optional<Dimension> size;
+    std::optional<FontWeight> weight;
+};
 
 struct CaretStyle {
     std::optional<Dimension> width;
@@ -149,9 +148,6 @@ struct Header {
         return (headerKey == other.headerKey && headerValue == other.headerValue);
     }
 };
-
-using PickerSelectedType = std::variant<uint32_t, std::vector<uint32_t>>;
-using PickerValueType = std::variant<std::string, std::vector<std::string>>;
 
 struct LightSource {
     std::optional<CalcDimension> x;

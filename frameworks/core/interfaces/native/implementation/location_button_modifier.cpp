@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/security_component/location_button/location_button_common.h"
 #include "core/components_ng/pattern/security_component/location_button/location_button_model_ng.h"
 #include "core/components/common/layout/constants.h"
@@ -135,7 +134,7 @@ void OnClickImpl(Ark_NativePointer node,
             }
         }
 #endif
-        const auto event = Converter::ArkClickEventSync(info);
+        const auto event = Converter::SyncEvent<Ark_ClickEvent>(info);
         Ark_LocationButtonOnClickResult arkResult = Converter::ArkValue<Ark_LocationButtonOnClickResult>(res);
         auto error = Converter::ArkValue<Opt_BusinessError>();
         arkCallback.InvokeSync(event.ArkValue(), arkResult, error);

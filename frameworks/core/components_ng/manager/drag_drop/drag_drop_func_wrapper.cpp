@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,9 @@
 
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/blur_style_theme.h"
@@ -23,12 +25,11 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
-#include "base/subwindow/subwindow_manager.h"
+#include "ui/properties/ui_material.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -182,11 +183,12 @@ void EnvelopedDragData(
     arkExtraInfoJson->Put("event_id", dragAction->dragPointerEvent.pointerEventId);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, dragAction->previewOption);
     auto isDragDelay = (dragAction->dataLoadParams != nullptr);
+    auto materialId = DragDropFuncWrapper::ParseUiMaterial(dragAction->previewOption);
     dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(),
         dragAction->dragPointerEvent.sourceType, recordSize, pointerId, dragAction->dragPointerEvent.displayX,
         dragAction->dragPointerEvent.displayY, dragAction->dragPointerEvent.displayId, windowId, true, false,
         dragSummaryInfo.summary, isDragDelay, dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat,
-        dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag };
+        dragSummaryInfo.version, dragSummaryInfo.totalSize, dragSummaryInfo.tag, materialId };
 }
 
 void DragDropFuncWrapper::EnvelopedData(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
@@ -423,6 +425,7 @@ void DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(
             }
         }
     }
+    option.options.material = imageContext->GetSystemMaterial();
 }
 
 void DragDropFuncWrapper::UpdatePreviewOptionDefaultAttr(DragPreviewOption& option, bool isMultiSelectionEnabled)
@@ -502,6 +505,14 @@ void DragDropFuncWrapper::ParseShadowInfo(Shadow& shadow, std::unique_ptr<JsonVa
     arkExtraInfoJson->Put("shadow_corner", shadow.GetBlurRadius());
     arkExtraInfoJson->Put("shadow_elevation", shadow.GetElevation());
     arkExtraInfoJson->Put("shadow_is_hardwareacceleration", shadow.GetHardwareAcceleration());
+}
+
+int32_t DragDropFuncWrapper::ParseUiMaterial(const DragPreviewOption& option)
+{
+    int32_t materialId = -1;
+    CHECK_NULL_RETURN(option.options.material, materialId);
+    materialId = MaterialUtils::CallGetMaterialId(AceType::RawPtr(option.options.material));
+    return materialId;
 }
 
 std::optional<Shadow> DragDropFuncWrapper::GetDefaultShadow()
@@ -886,21 +897,8 @@ bool DragDropFuncWrapper::IsSelectedItemNode(const RefPtr<UINode>& uiNode)
     if (!isAllowedDrag) {
         return false;
     }
-    if (frameNode->GetTag() == V2::GRID_ITEM_ETS_TAG) {
-        auto itemPattern = frameNode->GetPattern<GridItemPattern>();
-        CHECK_NULL_RETURN(itemPattern, false);
-        if (itemPattern->IsSelected()) {
-            return true;
-        }
-    }
-    if (frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
-        auto itemPattern = frameNode->GetPattern<ListItemPattern>();
-        CHECK_NULL_RETURN(itemPattern, false);
-        if (itemPattern->IsSelected()) {
-            return true;
-        }
-    }
-    return false;
+
+    return SelectableUtils::IsSelectedItemNode(frameNode);
 }
 
 /**
@@ -1013,6 +1011,10 @@ void DragDropFuncWrapper::ApplyNewestOptionExecutedFromModifierToNode(
     if (optionsFromModifier.borderRadius.has_value()) {
         target->UpdateBorderRadius(optionsFromModifier.borderRadius.value());
         target->UpdateClipEdge(true);
+    }
+
+    if (optionsFromModifier.material) {
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(targetNode), AceType::RawPtr(optionsFromModifier.material));
     }
 }
 
@@ -1162,11 +1164,7 @@ RefPtr<PixelMap> DragDropFuncWrapper::CreateTiledPixelMap(const RefPtr<FrameNode
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_RETURN(manager, nullptr);
-    auto fatherNode = DragDropFuncWrapper::FindItemParentNode(frameNode);
-    CHECK_NULL_RETURN(fatherNode, nullptr);
-    auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_RETURN(scrollPattern, nullptr);
-    auto children = scrollPattern->GetVisibleSelectedItems();
+    auto children = SelectableUtils::GetVisibleSelectedItems(frameNode);
     auto pixelMapinfo = GetTiledPixelMapInfo(children);
     RefPtr<PixelMap> tiledPixelMap = nullptr;
 #if defined(PIXEL_MAP_SUPPORTED)
@@ -1251,11 +1249,8 @@ bool DragDropFuncWrapper::IsNeedCreateTiledPixelMap(
 {
     CHECK_NULL_RETURN(frameNode, false);
     CHECK_NULL_RETURN(dragEventActuator, false);
-    auto fatherNode = DragDropFuncWrapper::FindItemParentNode(frameNode);
-    CHECK_NULL_RETURN(fatherNode, false);
-    auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_RETURN(scrollPattern, false);
-    if (frameNode->GetDragPreviewOption().isMultiTiled && scrollPattern->GetVisibleSelectedItems().size() > 1 &&
+    auto children = SelectableUtils::GetVisibleSelectedItems(frameNode);
+    if (frameNode->GetDragPreviewOption().isMultiTiled && children.size() > 1 &&
         DragDropFuncWrapper::IsSelectedItemNode(frameNode) && !dragEventActuator->GetRestartDrag() &&
         type == SourceType::MOUSE) {
         return true;

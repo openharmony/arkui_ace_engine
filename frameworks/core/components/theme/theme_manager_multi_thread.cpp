@@ -21,13 +21,13 @@ namespace OHOS::Ace {
 RefPtr<Theme> ThemeManagerImpl::GetThemeMultiThread(ThemeType type)
 {
     std::lock_guard<std::mutex> lock(themeMultiThreadMutex_);
-    return GetTheme(type);
+    return GetThemeNormal(type);
 }
 
 RefPtr<Theme> ThemeManagerImpl::GetThemeMultiThread(ThemeType type, int32_t themeScopeId)
 {
     std::lock_guard<std::mutex> lock(themeMultiThreadMutex_);
-    return GetTheme(type, themeScopeId);
+    return GetThemeNormal(type, themeScopeId);
 }
 
 void ThemeManagerImpl::LoadResourceThemesMultiThread()

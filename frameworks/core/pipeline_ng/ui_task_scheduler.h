@@ -79,7 +79,7 @@ public:
 
     // Called on Main Thread.
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
-    void AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle);
+    void AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle, bool postByTraverse = false);
     void AddLayoutNode(const RefPtr<FrameNode>& layoutNode);
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
     void AddPredictTask(PredictTask&& task);
@@ -191,6 +191,7 @@ private:
     using RootDirtyMap = std::map<uint32_t, PageDirtySet>;
 
     std::vector<IgnoreLayoutSafeAreaBundle> ignoreLayoutSafeAreaBundles_;
+    std::list<RefPtr<FrameNode>> traverseSafeAreaBundles_;
     std::list<RefPtr<FrameNode>> dirtyLayoutNodes_;
     std::list<RefPtr<FrameNode>> layoutNodes_;
     RootDirtyMap dirtyRenderNodes_;

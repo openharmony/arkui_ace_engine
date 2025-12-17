@@ -455,7 +455,7 @@ class BorderRadiusModifier extends ModifierWithKey<ArkBorderRadiusOpts | undefin
       if (isNumber(this.value.value) || isString(this.value.value) || isResource(this.value.value)) {
         getUINativeModule().common.setBorderRadius(node, this.value.value, this.value.value, this.value.value, this.value.value, this.value.type);
       } else {
-        if (isUndefined(this.value.value)) {
+        if (isUndefined(this.value.value) || isNull(this.value.value)) {
           getUINativeModule().common.setBorderRadius(node, undefined, undefined, undefined, undefined, this.value.type);
           return;
         }
@@ -482,8 +482,17 @@ class BorderRadiusModifier extends ModifierWithKey<ArkBorderRadiusOpts | undefin
   }
 
   checkObjectDiff(): boolean {
+    if (isNull(this.value.value)) {
+      return !isNull(this.stageValue.value);
+    }
+    if (isNull(this.stageValue.value)) {
+      return !isNull(this.value.value);
+    }
     if (isUndefined(this.value.value)) {
-      return this.stageValue.value !== undefined;
+      return !isUndefined(this.stageValue.value);
+    }
+    if (isUndefined(this.stageValue.value)) {
+      return !isUndefined(this.value.value);
     }
     if (!isResource(this.stageValue.value) && !isResource(this.value.value)) {
       if ((Object.keys(this.value.value).indexOf('topStart') >= 0) ||
@@ -4018,6 +4027,20 @@ class CompositingFilterModifier extends ModifierWithKey<Filter> {
   }
 }
 
+class MaterialFilterModifier extends ModifierWithKey<Filter> {
+  constructor(value: Filter) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('materialFilter');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetMaterialFilter(node);
+    } else {
+      getUINativeModule().common.setMaterialFilter(node, this.value);
+    }
+  }
+}
+
 class AccessibilityActionOptionsModifier extends ModifierWithKey<object> {
   constructor(value: object) {
     super(value);
@@ -5998,6 +6021,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
   compositingFilter(filter: Filter): this {
     modifierWithKey(this._modifiersWithKeys, CompositingFilterModifier.identity, CompositingFilterModifier, filter);
+    return this;
+  }
+  materialFilter(filter: Filter): this {
+    modifierWithKey(this._modifiersWithKeys, MaterialFilterModifier.identity, MaterialFilterModifier, filter);
     return this;
   }
   foregroundEffect(options: ForegroundEffectOptions): this {

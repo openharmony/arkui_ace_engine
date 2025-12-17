@@ -1659,7 +1659,7 @@ export struct Filter {
         FilterAccessibilityType.ACCESSIBILITY_TEXT))
       .accessibilityDescription(this.getFloatAccessibilityText(this.floatFilterBarAccessibilityText,
         FilterAccessibilityType.ACCESSIBILITY_DESC))
-      .backgroundColor(this.isFloatArrowBgHover ? this.floatArrowBgColor as undefined | Color | number | ResourceStr :
+      .backgroundColor(this.isFloatArrowBgHover ? this.floatArrowBgColor as undefined | Color | int | ResourceStr :
         TRANS_COLOR)
       .stateStyles({
         focused: (instance: CommonMethod) => {

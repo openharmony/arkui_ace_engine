@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/interfaces/native/implementation/click_event_peer.h"
+#include "core/interfaces/native/implementation/gesture_event_peer.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+
 #include "arkoala_api_generated.h"
-#include "frameworks/core/components_ng/pattern/text/span/span_object.h"
-#include "frameworks/core/interfaces/native/utility/callback_helper.h"
-#include "frameworks/core/interfaces/native/utility/reverse_converter.h"
 #include "gesture_style_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -37,7 +39,7 @@ Ark_GestureStyle ConstructImpl(const Opt_GestureStyleInterface* value)
     GestureStyle gestureInfo {};
     if (onClickOpt) {
         auto onClick = [arkCallback = CallbackHelper(*onClickOpt)](GestureEvent& info) -> void {
-            const auto event = Converter::ArkClickEventSync(info);
+            const auto event = Converter::SyncEvent<Ark_ClickEvent>(info);
             arkCallback.Invoke(event.ArkValue());
         };
         gestureInfo.onClick = std::move(onClick);
@@ -45,7 +47,7 @@ Ark_GestureStyle ConstructImpl(const Opt_GestureStyleInterface* value)
 
     if (onLongClickOpt) {
         auto onLongClick = [arkCallback = CallbackHelper(*onLongClickOpt)](GestureEvent& info) -> void {
-            const auto event = Converter::ArkGestureEventSync(info);
+            const auto event = Converter::SyncEvent<Ark_GestureEvent>(info);
             arkCallback.Invoke(event.ArkValue());
         };
         gestureInfo.onLongPress = std::move(onLongClick);

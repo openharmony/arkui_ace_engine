@@ -27,11 +27,12 @@
 namespace OHOS::Ace {
 extern const char UI_MATERIAL_EXTENSION_SO_PATH[];
 extern const char UI_MATERIAL_FUNC_NAME[];
+extern const char UI_MATERIAL_FUNC_GET_ID[];
 
 namespace NG {
 class PipelineContext;
 class FrameNode;
-} // // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG
 
 enum class MaterialType: int32_t {
     NONE = 0,
@@ -53,6 +54,7 @@ public:
     static std::optional<MaterialType> GetTypeFromMaterial(const UiMaterial* material);
     static ColorMode GetResourceColorMode(NG::PipelineContext* pipeline);
     static bool CallSetMaterial(NG::FrameNode* node, const UiMaterial* material);
+    static int32_t CallGetMaterialId(const UiMaterial* material);
 };
 } // namespace OHOS::Ace
 

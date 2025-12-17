@@ -4127,6 +4127,33 @@ void ResetMotionPath(ArkUINodeHandle node)
     ViewAbstract::SetMotionPath(frameNode, motionPathOption);
 }
 
+ArkUI_Bool GetMotionPath(ArkUINodeHandle node, ArkUI_MotionPathOptions* options)
+{
+    if (!node || !options) {
+        return false;
+    }
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto motionPathOption = ViewAbstract::GetMotionPath(frameNode);
+    if (!motionPathOption.has_value()) {
+        return false;
+    }
+    const auto& path = motionPathOption->GetPath();
+    size_t length = path.length() + 1;
+    auto optionPath = new (std::nothrow) char[length];
+    CHECK_NULL_RETURN(optionPath, false);
+    path.copy(optionPath, path.length());
+    optionPath[path.length()] = '\0';
+    if (options->path) {
+        delete[] options->path;
+        options->path = nullptr;
+    }
+    options->path = optionPath;
+    options->from = motionPathOption->GetBegin();
+    options->to = motionPathOption->GetEnd();
+    options->rotatable = motionPathOption->GetRotate();
+    return true;
+}
 
 void SetMotionBlur(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 anchorX, ArkUI_Float32 anchorY)
 {
@@ -9574,6 +9601,21 @@ void ResetCompositingFilter(ArkUINodeHandle node)
     ViewAbstractModelNG::SetCompositingFilter(frameNode, nullptr);
 }
 
+void SetMaterialFilter(ArkUINodeHandle node, void* materialFilter)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto materialFilterPtr = reinterpret_cast<Rosen::Filter*>(materialFilter);
+    ViewAbstract::SetMaterialFilter(frameNode, materialFilterPtr);
+}
+
+void ResetMaterialFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetMaterialFilter(frameNode, nullptr);
+}
+
 void SetSystemMaterial(ArkUINodeHandle node, void* material)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -10366,27 +10408,41 @@ void GetDashWidth(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 
     (*values)[NUM_3] = dashWidth.leftDimen->GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
-void SetBorderRadiusType(ArkUINodeHandle node, ArkUI_Int32 renderStrategy)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto type = static_cast<OHOS::Ace::RenderStrategy>(renderStrategy);
-    ViewAbstract::SetRenderStrategy(frameNode, type);
-}
-
-void ResetBorderRadiusType(ArkUINodeHandle node)
+void ResetRenderStrategy(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetRenderStrategy(frameNode, RenderStrategy::FAST);
 }
 
-ArkUI_Int32 GetBorderRadiusType(ArkUINodeHandle node)
+ArkUI_Int32 GetRenderStrategy(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     auto type = ViewAbstract::GetRenderStrategy(frameNode);
     return static_cast<ArkUI_Int32>(type);
+}
+
+ArkUIIgnoreLayoutSafeAreaOpts GetIgnoreLayoutSafeAreaOpts(ArkUINodeHandle node)
+{
+    ArkUIIgnoreLayoutSafeAreaOpts ignoreOpts {};
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ignoreOpts);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, ignoreOpts);
+    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+    layoutProperty->CheckIgnoreLayoutSafeArea(layoutDirection);
+    auto* optsPtr = layoutProperty->GetIgnoreLayoutSafeAreaOpts().get();
+    CHECK_NULL_RETURN(optsPtr, ignoreOpts);
+    NG::IgnoreLayoutSafeAreaOpts& opts = *optsPtr;
+    if (!layoutProperty->IsIgnoreOptsValid()) {
+        return ignoreOpts;
+    }
+    ignoreOpts = {
+        .type = opts.type,
+        .edges = opts.edges,
+    };
+    return ignoreOpts;
 }
 } // namespace
 
@@ -10916,22 +10972,25 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAllowForceDark = ResetAllowForceDark,
         .getAllowForceDark = GetAllowForceDark,
         .getPixelRound = GetPixelRound,
+        .getMotionPath = GetMotionPath,
         .setRenderStrategy = SetRenderStrategy,
         .setSystemMaterial = SetSystemMaterial,
         .resetSystemMaterial = ResetSystemMaterial,
         .setChainWeight = SetChainWeight,
         .resetChainWeight = ResetChainWeight,
         .getChainWeight = GetChainWeight,
-        .getLayoutGravity = GetLayoutGravity,
         .setDashGap = SetDashGap,
         .resetDashGap = ResetDashGap,
         .getDashGap = GetDashGap,
         .setDashWidth = SetDashWidth,
         .resetDashWidth = ResetDashWidth,
         .getDashWidth = GetDashWidth,
-        .setBorderRadiusType = SetBorderRadiusType,
-        .resetBorderRadiusType = ResetBorderRadiusType,
-        .getBorderRadiusType = GetBorderRadiusType,
+        .getLayoutGravity = GetLayoutGravity,
+        .resetRenderStrategy = ResetRenderStrategy,
+        .getRenderStrategy = GetRenderStrategy,
+        .setMaterialFilter = SetMaterialFilter,
+        .resetMaterialFilter = ResetMaterialFilter,
+        .getIgnoreLayoutSafeAreaOpts = GetIgnoreLayoutSafeAreaOpts,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

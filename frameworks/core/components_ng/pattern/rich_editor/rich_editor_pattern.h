@@ -1417,6 +1417,11 @@ public:
         return !isAppendContent;
     }
 
+    bool GetDefaultClipValue() const override
+    {
+        return true;
+    }
+
     void SetTextDetectEnable(bool enable) override
     {
         auto currentEnable = textDetectEnable_;
@@ -1460,6 +1465,7 @@ public:
     void ProcessAutoFillOnPaste();
     void HandleOnPasswordVault();
     bool IsShowAutoFill();
+    RefPtr<AIWriteAdapter> GetAIWriteAdapter();
 
 protected:
     RefPtr<TextSelectOverlay> GetSelectOverlay() override
@@ -1596,6 +1602,7 @@ private:
     std::string GetPlaceHolderInJson() const;
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
     std::string GetCustomKeyboardInJson() const;
+    Color GetSelectedDragPreviewStyleColor() const;
     void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const override;
     void ResetSelectionAfterAddSpan(bool isPaste);
     RefPtr<UINode> GetChildByIndex(int32_t index) const override;
@@ -1905,7 +1912,6 @@ private:
     std::function<void()> customKeyboardBuilder_;
     std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;
-    RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     Offset selectionMenuOffset_;
     // add for scroll
     RectF richTextRect_;

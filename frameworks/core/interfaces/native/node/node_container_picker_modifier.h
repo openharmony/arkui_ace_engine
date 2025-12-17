@@ -20,6 +20,10 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIContainerPickerModifier* GetContainerPickerModifier();
+void SetPickerOnChange(ArkUINodeHandle node, void* extraParam);
+void SetPickerOnScrollStop(ArkUINodeHandle node, void* extraParam);
+void ResetPickerOnChange(ArkUINodeHandle node);
+void ResetPickerOnScrollStop(ArkUINodeHandle node);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_CONTAINER_PICKER_MODIFIER_H

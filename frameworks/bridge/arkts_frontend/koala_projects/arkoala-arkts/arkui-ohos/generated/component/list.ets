@@ -28,12 +28,12 @@ import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Axis, ScrollSource, Color } from "./enums"
 import { OnScrollFrameBeginCallback, Scroller, Scroller_serializer, ScrollerInternal, ScrollAlign } from "./scroll"
 import { AttributeModifier, hookListAttributeModifier, AttributeUpdater, hookListChildrenMainSizeImpl } from "#handwritten"
-import { ModifierStateManager } from '../CommonModifier';
 import { Resource } from "global.resource"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { ModifierStateManager } from "./../CommonModifier"
 import { ListModifier } from "./../ListModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkListPeer extends ArkScrollableCommonMethodPeer {
@@ -49,6 +49,7 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
         return _peer
     }
     setListOptionsAttribute(options?: ListOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -215,6 +216,18 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ListAttribute_setMaintainVisibleContentPosition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setSupportEmptyBranchInLazyLoadingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ListAttribute_setSupportEmptyBranchInLazyLoading(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setStackFromEndAttribute(value: boolean | undefined): void {
@@ -533,6 +546,9 @@ export interface ListAttribute extends ScrollableCommonMethod {
     maintainVisibleContentPosition(value: boolean | undefined): this {
         throw new Error("Unimplemented method maintainVisibleContentPosition")
     }
+    supportEmptyBranchInLazyLoading(value: boolean | undefined): this {
+        throw new Error("Unimplemented method supportEmptyBranchInLazyLoading")
+    }
     stackFromEnd(value: boolean | undefined): this {
         throw new Error("Unimplemented method stackFromEnd")
     }
@@ -593,6 +609,7 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     scrollSnapAlign_value?: ScrollSnapAlign | undefined
     childrenMainSize_value?: ChildrenMainSize | undefined
     maintainVisibleContentPosition_value?: boolean | undefined
+    supportEmptyBranchInLazyLoading_value?: boolean | undefined
     stackFromEnd_value?: boolean | undefined
     onScrollIndex_value?: ((start: int32,end: int32,center: int32) => void) | undefined
     onScrollVisibleContentChange_value?: OnScrollVisibleContentChangeCallback | undefined
@@ -646,6 +663,9 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
         return this
     }
     maintainVisibleContentPosition(value: boolean | undefined): this {
+        return this
+    }
+    supportEmptyBranchInLazyLoading(value: boolean | undefined): this {
         return this
     }
     stackFromEnd(value: boolean | undefined): this {
@@ -802,7 +822,7 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
     public childrenMainSize(value: ChildrenMainSize | undefined): this {
         if (this.checkPriority("childrenMainSize")) {
             const value_casted = value as (ChildrenMainSize | undefined)
-            hookListChildrenMainSizeImpl(this, value_casted);
+            hookListChildrenMainSizeImpl(this, value_casted)
             return this
         }
         return this
@@ -811,6 +831,14 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         if (this.checkPriority("maintainVisibleContentPosition")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setMaintainVisibleContentPositionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public supportEmptyBranchInLazyLoading(value: boolean | undefined): this {
+        if (this.checkPriority("supportEmptyBranchInLazyLoading")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setSupportEmptyBranchInLazyLoadingAttribute(value_casted)
             return this
         }
         return this
@@ -931,7 +959,7 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
     }
     public attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
-          hookListAttributeModifier(this, value);
+            hookListAttributeModifier(this, value);
         })
         return this
     }
@@ -1468,11 +1496,11 @@ export class ListScroller extends Scroller implements MaterializedBase {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         try {
-            ArkUIGeneratedNativeModule._ListScroller_scrollToItemInGroup(this.peer!.ptr, index, indexInGroup, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ListScroller_scrollToItemInGroup(this.peer!.ptr, index, indexInGroup, thisSerializer.asBuffer(), thisSerializer.length())
         } catch (error) {
             throw error
         } finally {
-            thisSerializer.release()
+        thisSerializer.release()
         }
     }
     closeAllSwipeActions_serialize(options?: CloseSwipeActionOptions): void {
@@ -1485,11 +1513,11 @@ export class ListScroller extends Scroller implements MaterializedBase {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         try {
-            ArkUIGeneratedNativeModule._ListScroller_closeAllSwipeActions(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ListScroller_closeAllSwipeActions(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         } catch (error) {
             throw error
         } finally {
-            thisSerializer.release()
+        thisSerializer.release()
         }
     }
     getVisibleListContentInfo_serialize(x: double, y: double): VisibleListContentInfo {

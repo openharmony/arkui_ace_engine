@@ -37,7 +37,7 @@ constexpr int32_t DEFAULT_RENDER_SLOT = -1;
 // Element is the key class in the UI framework, which presents a basic logic
 // unit to construct a view hierarchy.
 // There are two types inherited element: RenderElement and ComposedElement.
-class ACE_EXPORT Element : public virtual AceType {
+class ACE_FORCE_EXPORT Element : public virtual AceType {
     DECLARE_ACE_TYPE(Element, AceType);
 
 public:

@@ -842,6 +842,15 @@ std::function<bool(int32_t)> WaterFlowPattern::GetScrollIndexAbility()
     };
 }
 
+void WaterFlowPattern::DumpInfo()
+{
+    auto property = GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    DumpLog::GetInstance().AddDesc(
+        std::string("WaterFlowCacheCount: ")
+        .append(std::to_string(property->GetCachedCount().value_or(layoutInfo_->defCachedCount_))));
+}
+
 void WaterFlowPattern::DumpAdvanceInfo()
 {
     auto property = GetLayoutProperty<WaterFlowLayoutProperty>();

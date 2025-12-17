@@ -495,6 +495,9 @@ void ConvertMouseEvent(
     events.targetDisplayId = pointerEvent->GetTargetDisplayId();
     events.originalId = item.GetOriginPointerId();
     events.deviceId = pointerEvent->GetDeviceId();
+    if (pointerEvent->GetRightButtonSource() == MMI::PointerEvent::RightButtonSource::TOUCHPAD_TWO_FINGER_TAP) {
+        events.isRightButtonEventFromDoulbeTap = true;
+    }
 
     std::set<int32_t> pressedSet = pointerEvent->GetPressedButtons();
     uint32_t pressedButtons = 0;

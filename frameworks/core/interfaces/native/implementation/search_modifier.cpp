@@ -18,7 +18,7 @@
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_static.h"
 #include "core/components_ng/pattern/search/search_node.h"
-#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -276,7 +276,7 @@ void SetOnSubmitImpl(Ark_NativePointer node, const Opt_SearchSubmitCallback* val
         PipelineContext::SetCallBackNode(node);
         Converter::ConvContext ctx;
         auto arkStringValue = Converter::ArkValue<Ark_String>(value, &ctx);
-        const auto event = Converter::ArkSubmitEventSync(info);
+        const auto event = Converter::SyncEvent<Ark_SubmitEvent>(info);
         auto eventArkValue = Converter::ArkValue<Opt_SubmitEvent, Ark_SubmitEvent>(event.ArkValue());
         arkCallback.InvokeSync(arkStringValue, eventArkValue);
     };
@@ -753,6 +753,14 @@ void SetFallbackLineSpacingImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     SearchModelStatic::SetFallbackLineSpacing(frameNode, convValue);
 }
+void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                     const Opt_SelectedDragPreviewStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
+    SearchModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
+}
 void SetSearchButtonImpl(Ark_NativePointer node,
                          const Opt_String* value,
                          const Opt_SearchButtonOptions* option)
@@ -860,6 +868,7 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::SetDividerColorImpl,
         SearchAttributeModifier::SetIncludeFontPaddingImpl,
         SearchAttributeModifier::SetFallbackLineSpacingImpl,
+        SearchAttributeModifier::SetSelectedDragPreviewStyleImpl,
         SearchAttributeModifier::SetSearchButtonImpl,
         SearchAttributeModifier::SetInputFilterImpl,
         SearchAttributeModifier::SetCustomKeyboardImpl,

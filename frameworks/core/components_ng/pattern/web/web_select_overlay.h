@@ -72,6 +72,7 @@ struct MenuAvoidStrategyMember {
     double keyboardInsetStart = 0.0;
     double keyboardHeight = 0.0;
     double avoidFromText = 0.0;
+    double avoidFromSingleHandle = 0.0;
     double avoidPositionX = 0.0;
     double avoidPositionY = 0.0;
     double defaultAvoidY = 0.0;
@@ -104,6 +105,7 @@ public:
     void SetEditMenuOptions(SelectOverlayInfo& selectInfo);
     void UpdateSelectHandleInfo();
     bool IsSelectHandleReverse();
+    bool IsNeedMenuShareForWeb();
     // Check whether the handle status is valid.
     WebOverlayType GetTouchHandleOverlayType(
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
@@ -200,6 +202,8 @@ public:
     void InitMenuAvoidStrategyAboutTop(MenuAvoidStrategyMember& member, InitStrategyTools& tools);
     void InitMenuAvoidStrategyAboutBottom(MenuAvoidStrategyMember& member, InitStrategyTools& tools);
     void InitMenuAvoidStrategyAboutPosition(MenuAvoidStrategyMember& member, InitStrategyTools& tools);
+    void SetDefaultDownPaint(MenuAvoidStrategyMember& member);
+    void SingleHandlePosition(OffsetF& menuOffset, MenuAvoidStrategyMember& member);
     void MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyMember& member);
     bool QuickMenuIsReallyNeedNewAvoid(MenuAvoidStrategyMember &member);
     void OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height);
@@ -211,6 +215,7 @@ private:
     bool IsMouseInHandleRect(
         const MouseInfo& mouseInfo, std::shared_ptr<OHOS::NWeb::NWebTouchHandleState>& selectionHandle, float& offsetY);
     void OnOverlayMouseEvent(const MouseInfo& info);
+    bool IsShowMenuOfAutoFill(uint32_t flags, SelectOverlayInfo& selectInfo);
     bool isShowHandle_ = false;
     bool needResetHandleReverse_ = false;
     bool isSelectAll_ = false;

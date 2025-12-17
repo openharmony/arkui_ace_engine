@@ -60,6 +60,7 @@
 #include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/base/view_advanced_register.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view_factory.h"
@@ -184,6 +185,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
+    contentChangeMgr_ = MakeRefPtr<ContentChangeManager>();
 }
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -211,6 +213,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
+    contentChangeMgr_ = MakeRefPtr<ContentChangeManager>();
 }
 
 PipelineContext::PipelineContext()
@@ -233,6 +236,7 @@ PipelineContext::PipelineContext()
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     clickOptimizer_->Init();
     loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
+    contentChangeMgr_ = MakeRefPtr<ContentChangeManager>();
 }
 
 std::string PipelineContext::GetCurrentPageNameCallback()
@@ -290,6 +294,16 @@ std::string PipelineContext::GetCurrentPageName()
         url += "," + pageName;
     }
     return url;
+}
+
+void PipelineContext::ReportSelectedText()
+{
+    CHECK_NULL_VOID(selectOverlayManager_);
+    int32_t id = selectOverlayManager_->GetTextSelectionHolderId();
+    CHECK_NULL_VOID(id != -1);
+    auto node = AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(id));
+    CHECK_NULL_VOID(node);
+    node->ReportSelectedText();
 }
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
@@ -443,7 +457,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     RequestFrame();
 }
 
-void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle)
+void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle, bool postByTraverse)
 {
     CHECK_RUN_ON(UI);
     if (IsDestroyed()) {
@@ -453,7 +467,7 @@ void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&&
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
         ACE_MEASURE_SCOPED_TRACE("PostponeBundleByIgnore postponedChildCount = %zu", bundle.first.size());
     }
-    taskScheduler_->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
+    taskScheduler_->AddIgnoreLayoutSafeAreaBundle(std::move(bundle), postByTraverse);
 }
 
 void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode)
@@ -824,6 +838,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         return;
     }
     SetVsyncTime(nanoTimestamp);
+    if (contentChangeMgr_) {
+        contentChangeMgr_->OnVsyncStart();
+    }
     if (touchOptimizer_) {
         touchOptimizer_->SetLastVsyncTimeStamp(nanoTimestamp);
     }
@@ -997,6 +1014,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         RequestFrame();
     }
     FireFrameMetricsCallBack(frameMetrics);
+    if (contentChangeMgr_) {
+        contentChangeMgr_->OnVsyncEnd(rootNode_->GetRectWithRender());
+    }
 }
 
 void PipelineContext::FlushMouseEventVoluntarily()
@@ -2766,6 +2786,17 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 #endif
 }
 
+void NotifyDirtyChildren(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto menuChildrens = node->GetChildren();
+    for (auto child : menuChildrens) {
+        if (child) {
+            child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+}
+
 void PipelineContext::MarkDirtyOverlay()
 {
     CHECK_NULL_VOID(rootNode_);
@@ -2773,6 +2804,8 @@ void PipelineContext::MarkDirtyOverlay()
     for (auto child: childNodes) {
         if (child && child->GetTag() == V2::POPUP_ETS_TAG) {
             child->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        } else if (child && child->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            NotifyDirtyChildren(child);
         }
     }
 }
@@ -3240,6 +3273,7 @@ void PipelineContext::OnTouchEvent(
         touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
         touchRestrict.sourceTool = point.sourceTool;
 
+        eventManager_->ClearHitTestInfoRecord(scalePoint);
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
         if (!touchRestrict.childTouchTestList.empty()) {
             scalePoint.childTouchTestList = touchRestrict.childTouchTestList;
@@ -3381,6 +3415,7 @@ void PipelineContext::OnTouchEvent(
     eventManager_->DispatchTouchEvent(scalePoint);
 
     if ((scalePoint.type == TouchType::UP) || (scalePoint.type == TouchType::CANCEL)) {
+        eventManager_->LogHitTestInfoRecord(scalePoint.id);
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
         if (formEventMgr) {
@@ -3835,7 +3870,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-visibleInfoHasTopNavNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         RefPtr<NG::FrameNode> topNavNode;
-        uiTranslateManager_->FindTopNavDestination(rootNode_, topNavNode);
+        rootNode_->FindTopNavDestination(topNavNode);
         if (topNavNode != nullptr) {
             GetOverlayInspector(root, { true, true, true });
             if (!root->Contains("$children")) {
@@ -4661,6 +4696,7 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
     result.screenY = event.screenY;
     result.convertInfo.first = UIInputEventType::AXIS;
     result.convertInfo.second = UIInputEventType::MOUSE;
+    result.targetDisplayId = event.targetDisplayId;
     return result;
 }
 
@@ -6484,42 +6520,70 @@ void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, Para
     }
 }
 
+void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(
+    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> topNavNode, ParamConfig& config)
+{
+    if (topNavNode != nullptr) {
+        GetOverlayInspector(root, config);
+        if (!root->Contains("$children")) {
+            auto array = JsonUtil::CreateArray();
+            root->PutRef("$children", std::move(array));
+        }
+        auto childrenJson = root->GetValue("$children");
+        auto topNavDestinationJson = JsonUtil::CreateSharedPtrJson();
+        topNavNode->DumpSimplifyTreeWithParamConfig(0, topNavDestinationJson, true, config);
+        childrenJson->Put(topNavDestinationJson);
+    } else {
+        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, config);
+    }
+}
+
 void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
 {
-    auto root = JsonUtil::CreateSharedPtrJson(true);
-    auto cb = [root, onlyNeedVisible]() {
-        auto json = root->ToString();
-        json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
-        auto res = JsonUtil::Create(true);
-        res->Put("0", json.c_str());
-        UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
-        if (!onlyNeedVisible) {
-            UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
-        }
-    };
-    ACE_SCOPED_TRACE("GetInspectorTree[onlyNeedVisible:%d][config.interactionInfo:%d][config.accessibilityInfo:%d]["
-                     "config.cacheNodes:%d]",
-        onlyNeedVisible, config.interactionInfo, config.accessibilityInfo, config.cacheNodes);
-    if (onlyNeedVisible) {
-        RefPtr<NG::FrameNode> topNavNode = nullptr;
-        uiTranslateManager_->FindTopNavDestination(rootNode_, topNavNode);
-        if (topNavNode != nullptr) {
-            GetOverlayInspector(root, config);
-            if (!root->Contains("$children")) {
-                auto array = JsonUtil::CreateArray();
-                root->PutRef("$children", std::move(array));
+    constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
+    CHECK_NULL_VOID(taskExecutor_);
+    auto weak = WeakClaim(this);
+    taskExecutor_->PostSyncTaskTimeout(
+        [weak, onlyNeedVisible, config]() mutable {
+            auto pipelineContext = weak.Upgrade();
+            CHECK_NULL_VOID(pipelineContext);
+            auto root = JsonUtil::CreateSharedPtrJson(true);
+            auto cb = [root, onlyNeedVisible]() {
+                auto json = root->ToString();
+                json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
+                auto res = JsonUtil::Create(true);
+                res->Put("0", json.c_str());
+                UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
+                if (!onlyNeedVisible) {
+                    UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
+                }
+            };
+            ACE_SCOPED_TRACE("GetInspectorTree[onlyNeedVisible:%d][config.interactionInfo:%d]"
+                             "[config.accessibilityInfo:%d][config.cacheNodes:%d][config.withWeb:%d]",
+                onlyNeedVisible, config.interactionInfo, config.accessibilityInfo, config.cacheNodes, config.withWeb);
+            auto rootNode = pipelineContext->GetRootElement();
+            CHECK_NULL_VOID(rootNode);
+            auto taskExecutor = pipelineContext->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            if (onlyNeedVisible) {
+                RefPtr<NG::FrameNode> topNavNode = nullptr;
+                rootNode->FindTopNavDestination(topNavNode);
+                pipelineContext->DumpSimplifyTreeJsonFromTopNavNode(root, topNavNode, config);
+                taskExecutor->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");
+            } else {
+                rootNode->DumpSimplifyTreeWithParamConfig(0, root, false, config);
+                taskExecutor->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetInspectorTree");
             }
-            auto childrenJson = root->GetValue("$children");
-            auto topNavDestinationJson = JsonUtil::CreateSharedPtrJson();
-            topNavNode->DumpSimplifyTreeWithParamConfig(0, topNavDestinationJson, true, config);
-            childrenJson->Put(topNavDestinationJson);
-        } else {
-            rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, config);
-        }
-        taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");
-    } else {
-        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, config);
-        taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetInspectorTree");
+        },
+        TaskExecutor::TaskType::UI, SEARCH_ELEMENT_TIMEOUT_TIME, "ArkUIGetInspectorTree");
+}
+
+void PipelineContext::GetHitTestInfos(InteractionParamConfig config)
+{
+    CHECK_NULL_VOID(eventManager_);
+    auto json = eventManager_->GetLastHitTestNodeInfosForTouch(config.isTopMost);
+    if (json.size() != 0) {
+        UiSessionManager::GetInstance()->ReportHitTestNodeInfos(json);
     }
 }
 
@@ -7170,5 +7234,34 @@ const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimize
 const std::shared_ptr<LoadCompleteManager>& PipelineContext::GetLoadCompleteManager() const
 {
     return loadCompleteMgr_;
+}
+
+RefPtr<ContentChangeManager>& PipelineContext::GetContentChangeManager()
+{
+    return contentChangeMgr_;
+}
+
+void PipelineContext::GetStateMgmtInfo(
+    const std::string& componentName, const std::string& propertyName, const std::string& jsonPath)
+{
+    std::vector<std::string> resultsStateMgmtInfo;
+    std::vector<int32_t> matchNodeIds;
+    rootNode_->GetNodeListByComponentName(0, matchNodeIds, componentName);
+    if (matchNodeIds.empty()) {
+        LOGE("GetStateMgmtInfo can't find componentName: %s", componentName.c_str());
+        return;
+    }
+    auto frontend = weakFrontend_.Upgrade();
+    CHECK_NULL_VOID(frontend);
+    std::vector<std::optional<std::string>> resultsOptionalStateMgmtInfo;
+    resultsOptionalStateMgmtInfo = frontend->CallGetStateMgmtInfo(matchNodeIds, propertyName, jsonPath);
+    for (size_t i = 0; i < resultsOptionalStateMgmtInfo.size(); i++) {
+        const auto& resultOptional = resultsOptionalStateMgmtInfo[i];
+        if (resultOptional.has_value()) {
+            resultsStateMgmtInfo.emplace_back(resultOptional.value());
+        }
+    }
+
+    UiSessionManager::GetInstance()->ReportGetStateMgmtInfo(resultsStateMgmtInfo);
 }
 } // namespace OHOS::Ace::NG

@@ -13,19 +13,15 @@
  * limitations under the License.
  */
 #include <vector>
-
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-internal.h"
-
-#define protected public
 #define private public
-
+#define protected public
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
-
 #include "base/geometry/dimension_rect.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -48,6 +44,8 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/pipeline/base/constants.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -427,7 +425,7 @@ HWTEST_F(SelectOverlayFiveTestNg, BuildButton005, TestSize.Level1)
         playClickCallback(gestureEvent);
     }
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
-    EXPECT_NE(selectOverlayNode->isShowInDefaultMenu_[0], false);
+    EXPECT_FALSE(selectOverlayNode->isShowInDefaultMenu_[0]);
 }
 
 /**
@@ -517,7 +515,7 @@ HWTEST_F(SelectOverlayFiveTestNg, BuildButton006, TestSize.Level1)
         playClickCallback(gestureEvent);
     }
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
-    EXPECT_NE(selectOverlayNode->isShowInDefaultMenu_[0], false);
+    EXPECT_FALSE(selectOverlayNode->isShowInDefaultMenu_[0]);
 }
 
 /**

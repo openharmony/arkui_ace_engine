@@ -33,7 +33,7 @@
 namespace OHOS::Ace::StringUtils {
 
 ACE_FORCE_EXPORT  extern const char DEFAULT_STRING[];
-ACE_EXPORT extern const std::wstring DEFAULT_WSTRING;
+ACE_FORCE_EXPORT extern const std::wstring DEFAULT_WSTRING;
 ACE_FORCE_EXPORT  extern const std::u16string DEFAULT_USTRING;
 ACE_EXPORT extern const std::u32string DEFAULT_U32STRING;
 constexpr int32_t TEXT_CASE_LOWERCASE = 1;

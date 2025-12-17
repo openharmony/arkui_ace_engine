@@ -546,53 +546,6 @@ HWTEST_F(TextTimerTestNg, TextTimerTest007, TestSize.Level0)
     EXPECT_NE(pattern->GetTextNode(), nullptr);
 }
 
-/**
- * @tc.name: TextTimerTest008
- * @tc.desc: Test OnVisibleAreaChange of TextTimerPattern.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTimerTestNg, TextTimerTest008, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. create texttimer frameNode.
-     */
-    TestProperty testProperty;
-    auto frameNode = CreateTextTimerParagraph(testProperty);
-    ASSERT_NE(frameNode, nullptr);
-
-    /**
-     * @tc.steps: step2. get pattern and layoutProperty.
-     * @tc.expected: step2.
-     */
-    auto pattern = frameNode->GetPattern<TextTimerPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textLayoutProperty, nullptr);
-    auto host = pattern->GetHost();
-    ASSERT_NE(host, nullptr);
-
-    pattern->InitTimerDisplay();
-    pattern->scheduler_->callback_(1);
-    EXPECT_NE(pattern->scheduler_, nullptr);
-
-    /**
-     * @tc.steps: step3.OnVisibleAreaChange function is called.
-     * @tc.expected: step3. Check whether the value is correct.
-     */
-    int32_t length = host->GetChildren().size();
-    pattern->OnVisibleAreaChange(true);
-    EXPECT_EQ(host->GetChildren().size(), length);
-
-    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
-    ASSERT_NE(childNode, nullptr);
-
-    pattern->OnVisibleAreaChange(true);
-    EXPECT_EQ(host->GetChildren().size(), length);
-    EXPECT_EQ(pattern->textNode_, nullptr);
-
-    pattern->OnVisibleAreaChange(false);
-    EXPECT_EQ(host->GetChildren().size(), length);
-}
 
 /**
  * @tc.name: TextTimerLayoutAlgorithmTest001
@@ -695,7 +648,6 @@ HWTEST_F(TextTimerTestNg, TextTimerTest009, TestSize.Level0)
     pattern->OnModifyDone();
     textLayoutProperty->CleanDirty();
     pattern->scheduler_->callback_(1);
-    EXPECT_EQ(pattern->textTimerController_, nullptr);
     EXPECT_EQ(textLayoutProperty->GetPropertyChangeFlag(), PROPERTY_UPDATE_NORMAL);
 
     textLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
@@ -1174,46 +1126,6 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest008, TestSize.Level0)
     textTimerModel.CreateWithResourceObj(jsResourceType, resObjWithId);
     pattern->OnColorModeChange(colorMode);
     EXPECT_EQ(layoutProperty->GetTextColor(), testColor);
-}
-
-/**
- * @tc.name: TextTimerPatternTest009
- * @tc.desc: Test OnVisibleAreaChange of TextTimerPattern.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTimerTestNg, TextTimerPatternTest009, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. create texttimer frameNode.
-     */
-    TestProperty testProperty;
-    auto frameNode = CreateTextTimerParagraph(testProperty);
-    ASSERT_NE(frameNode, nullptr);
-
-    /**
-     * @tc.steps: step2. get pattern
-     */
-    auto pattern = frameNode->GetPattern<TextTimerPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto host = pattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    pattern->textNode_ = FrameNode::GetOrCreateFrameNode("text", ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<TextPattern>(); });
-
-    /**
-     * @tc.steps: step3.OnVisibleAreaChange function is called.
-     * @tc.expected: step3. Check whether the value is correct.
-     */
-    g_isConfigChangePerform = false;
-    int32_t length = host->GetChildren().size();
-    pattern->OnVisibleAreaChange(true);
-    EXPECT_EQ(host->GetChildren().size(), length);
-
-    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
-    ASSERT_NE(childNode, nullptr);
-    g_isConfigChangePerform = true;
-    pattern->OnVisibleAreaChange(true);
-    EXPECT_EQ(host->GetChildren().size(), length);
 }
 
 /**

@@ -47,6 +47,8 @@ ohos_shared_library("ui_session") {
     "$ace_root/adapter/ohos/entrance/ui_session/ui_report_stub.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_session_json_util.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp",
+    "$ace_root/adapter/ohos/entrance/ui_session/content_change_config_impl.cpp",
+    "$ace_root/adapter/ohos/entrance/ui_session/get_inspector_tree_config_impl.cpp"
   ]
 
   configs = [ "$ace_root:ace_config" ]

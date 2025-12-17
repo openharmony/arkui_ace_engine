@@ -183,6 +183,22 @@ void JSForm::SetModuleName(const JSCallbackInfo& info)
     FormModel::GetInstance()->SetModuleName(moduleName);
 }
 
+void JSForm::SetColorMode(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 0 || !info[0]->IsNumber()) {
+        return;
+    }
+ 
+    auto colorMode = info[0]->ToNumber<int32_t>();
+    // -1: MODE_AUTO, 0: MODE_DARK, 1: MODE_LIGHT
+    if (colorMode < -1 || colorMode > 1) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "colorMode error");
+        return;
+    }
+ 
+    FormModel::GetInstance()->SetColorMode(colorMode);
+}
+
 void JSForm::JsOnAcquired(const JSCallbackInfo& info)
 {
     if (info[0]->IsFunction()) {
@@ -302,6 +318,7 @@ void JSForm::JSBind(BindingTarget globalObj)
     JSClass<JSForm>::StaticMethod("moduleName", &JSForm::SetModuleName, opt);
     JSClass<JSForm>::StaticMethod("clip", &JSViewAbstract::JsClip, opt);
     JSClass<JSForm>::StaticMethod("obscured", &JSForm::JsObscured);
+    JSClass<JSForm>::StaticMethod("colorMode", &JSForm::SetColorMode);
 
     JSClass<JSForm>::StaticMethod("onAcquired", &JSForm::JsOnAcquired);
     JSClass<JSForm>::StaticMethod("onError", &JSForm::JsOnError);

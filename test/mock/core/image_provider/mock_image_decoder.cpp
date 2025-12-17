@@ -37,4 +37,8 @@ WeakPtr<PixelMap> ImageDecoder::GetFromPixelMapCache(const ImageSourceInfo& imag
     return nullptr;
 }
 
+void ImageDecoder::ClearPixelMapCache()
+{
+}
+
 } // namespace OHOS::Ace::NG

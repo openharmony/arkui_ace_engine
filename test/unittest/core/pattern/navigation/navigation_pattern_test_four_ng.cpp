@@ -124,7 +124,7 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded001, TestSize.Level1)
     NavigationPatternTestFourNg::SetUpTestSuite();
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
-    auto manager = context->GetNavigationManager();
+    auto manager = context->GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
     auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
@@ -136,8 +136,9 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded001, TestSize.Level1)
     navigationPattern->forceSplitSuccess_ = true;
     navigationPattern->forceSplitUseNavBar_ = true;
 
+    manager->isRouter_ = true;
     manager->isForceSplitSupported_ = false;
-    navigationPattern->TryForceSplitIfNeeded(SizeF(400.0f, 300.0f));
+    navigationPattern->TryForceSplitIfNeeded();
 
     EXPECT_TRUE(navigationPattern->forceSplitSuccess_);
     EXPECT_TRUE(navigationPattern->forceSplitUseNavBar_);
@@ -155,7 +156,7 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded002, TestSize.Level1)
     NavigationPatternTestFourNg::SetUpTestSuite();
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
-    auto manager = context->GetNavigationManager();
+    auto manager = context->GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
     auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
@@ -167,9 +168,10 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded002, TestSize.Level1)
     navigationPattern->forceSplitSuccess_ = true;
     navigationPattern->forceSplitUseNavBar_ = true;
 
+    manager->isRouter_ = false;
     manager->isForceSplitSupported_ = true;
     manager->isForceSplitEnable_ = false;
-    navigationPattern->TryForceSplitIfNeeded(SizeF(400.0f, 300.0f));
+    navigationPattern->TryForceSplitIfNeeded();
 
     EXPECT_TRUE(navigationPattern->forceSplitSuccess_);
     EXPECT_TRUE(navigationPattern->forceSplitUseNavBar_);
@@ -191,6 +193,8 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded003, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     auto manager = context->GetNavigationManager();
     ASSERT_NE(manager, nullptr);
+    auto forceSplitManager = context->GetForceSplitManager();
+    ASSERT_NE(forceSplitManager, nullptr);
     auto windowManager = context->GetWindowManager();
     ASSERT_NE(windowManager, nullptr);
     auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
@@ -208,8 +212,9 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded003, TestSize.Level1)
     auto property = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     ASSERT_NE(property, nullptr);
 
-    manager->isForceSplitSupported_ = true;
-    manager->isForceSplitEnable_ = true;
+    forceSplitManager->isRouter_ = false;
+    forceSplitManager->isForceSplitSupported_ = true;
+    forceSplitManager->isForceSplitEnable_ = true;
 
     navigationPattern->pageNode_ = WeakPtr(pageNode);
     SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
@@ -219,8 +224,7 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded003, TestSize.Level1)
     manager->dumpMap_[key] = [](int depth) {};
     property->UpdateHideNavBar(true);
 
-    const Dimension NAVIGAITON_WIDTH = 605.0_vp;
-    navigationPattern->TryForceSplitIfNeeded(SizeF(NAVIGAITON_WIDTH.ConvertToPx(), 300.0f));
+    navigationPattern->TryForceSplitIfNeeded();
     EXPECT_FALSE(navigationPattern->forceSplitSuccess_);
     EXPECT_TRUE(navigationPattern->forceSplitUseNavBar_);
 
@@ -244,6 +248,8 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded004, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     auto manager = context->GetNavigationManager();
     ASSERT_NE(manager, nullptr);
+    auto forceSplitManager = context->GetForceSplitManager();
+    ASSERT_NE(forceSplitManager, nullptr);
     auto windowManager = context->GetWindowManager();
     ASSERT_NE(windowManager, nullptr);
     auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
@@ -261,9 +267,9 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded004, TestSize.Level1)
     auto property = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     ASSERT_NE(property, nullptr);
 
-    manager->isForceSplitSupported_ = true;
-    manager->isForceSplitEnable_ = true;
-    manager->ignoreOrientation_ = true;
+    forceSplitManager->isRouter_ = false;
+    forceSplitManager->isForceSplitSupported_ = true;
+    forceSplitManager->isForceSplitEnable_ = true;
 
     navigationPattern->pageNode_ = WeakPtr(pageNode);
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
@@ -273,8 +279,7 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded004, TestSize.Level1)
     manager->dumpMap_[key] = [](int depth) {};
     property->UpdateHideNavBar(true);
 
-    const Dimension NAVIGAITON_WIDTH = 605.0_vp;
-    navigationPattern->TryForceSplitIfNeeded(SizeF(NAVIGAITON_WIDTH.ConvertToPx(), 300.0f));
+    navigationPattern->TryForceSplitIfNeeded();
     EXPECT_FALSE(navigationPattern->forceSplitSuccess_);
     EXPECT_TRUE(navigationPattern->forceSplitUseNavBar_);
 
@@ -294,7 +299,7 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded005, TestSize.Level1)
     NavigationPatternTestFourNg::SetUpTestSuite();
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
-    auto manager = context->GetNavigationManager();
+    auto manager = context->GetForceSplitManager();
     ASSERT_NE(manager, nullptr);
     auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
@@ -306,9 +311,10 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded005, TestSize.Level1)
     navigationPattern->forceSplitSuccess_ = true;
     navigationPattern->forceSplitUseNavBar_ = true;
     navigationPattern->SetIsTargetForceSplitNav(true);
+    manager->isRouter_ = false;
     manager->isForceSplitSupported_ = true;
     manager->isForceSplitEnable_ = false;
-    navigationPattern->TryForceSplitIfNeeded(SizeF(400.0f, 300.0f));
+    navigationPattern->TryForceSplitIfNeeded();
 
     EXPECT_FALSE(navigationPattern->forceSplitSuccess_);
     EXPECT_FALSE(navigationPattern->forceSplitUseNavBar_);
@@ -330,6 +336,8 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded006, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     auto manager = context->GetNavigationManager();
     ASSERT_NE(manager, nullptr);
+    auto forceSplitManager = context->GetForceSplitManager();
+    ASSERT_NE(forceSplitManager, nullptr);
     auto windowManager = context->GetWindowManager();
     ASSERT_NE(windowManager, nullptr);
     auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
@@ -348,8 +356,9 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded006, TestSize.Level1)
     auto property = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     ASSERT_NE(property, nullptr);
 
-    manager->isForceSplitSupported_ = true;
-    manager->isForceSplitEnable_ = true;
+    forceSplitManager->isRouter_ = false;
+    forceSplitManager->isForceSplitSupported_ = true;
+    forceSplitManager->isForceSplitEnable_ = true;
 
     navigationPattern->pageNode_ = WeakPtr(pageNode);
     SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
@@ -359,8 +368,7 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded006, TestSize.Level1)
     manager->dumpMap_[key] = [](int depth) {};
     property->UpdateHideNavBar(true);
 
-    const Dimension NAVIGAITON_WIDTH = 605.0_vp;
-    navigationPattern->TryForceSplitIfNeeded(SizeF(NAVIGAITON_WIDTH.ConvertToPx(), 300.0f));
+    navigationPattern->TryForceSplitIfNeeded();
     EXPECT_FALSE(navigationPattern->forceSplitSuccess_);
     EXPECT_FALSE(navigationPattern->forceSplitUseNavBar_);
 
@@ -384,6 +392,8 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded007, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     auto manager = context->GetNavigationManager();
     ASSERT_NE(manager, nullptr);
+    auto forceSplitManager = context->GetForceSplitManager();
+    ASSERT_NE(forceSplitManager, nullptr);
     auto windowManager = context->GetWindowManager();
     ASSERT_NE(windowManager, nullptr);
     auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
@@ -402,9 +412,9 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded007, TestSize.Level1)
     auto property = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     ASSERT_NE(property, nullptr);
 
-    manager->isForceSplitSupported_ = true;
-    manager->isForceSplitEnable_ = true;
-    manager->ignoreOrientation_ = true;
+    forceSplitManager->isRouter_ = false;
+    forceSplitManager->isForceSplitSupported_ = true;
+    forceSplitManager->isForceSplitEnable_ = true;
 
     navigationPattern->pageNode_ = WeakPtr(pageNode);
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
@@ -414,8 +424,7 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded007, TestSize.Level1)
     manager->dumpMap_[key] = [](int depth) {};
     property->UpdateHideNavBar(true);
 
-    const Dimension NAVIGAITON_WIDTH = 605.0_vp;
-    navigationPattern->TryForceSplitIfNeeded(SizeF(NAVIGAITON_WIDTH.ConvertToPx(), 300.0f));
+    navigationPattern->TryForceSplitIfNeeded();
     EXPECT_FALSE(navigationPattern->forceSplitSuccess_);
     EXPECT_FALSE(navigationPattern->forceSplitUseNavBar_);
 

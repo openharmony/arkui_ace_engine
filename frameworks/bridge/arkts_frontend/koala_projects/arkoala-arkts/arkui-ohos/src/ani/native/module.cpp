@@ -126,6 +126,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::Image_ColorFilter_TransferDynamic)
         },
         ani_native_function {
+            "_Image_SetOnErrorCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Image_SetOnErrorCallback)
+        },
+        ani_native_function {
             "_Extractors_ToWebviewWebviewControllerPtr",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToWebviewWebviewControllerPtr)
@@ -664,6 +669,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Animation_PageTransitionSetOpacity",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::PageTransitionSetOpacity)
+        },
+        ani_native_function {
+            "_UiMaterial_ConstructMaterial",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialConstructMaterial)
+        },
+        ani_native_function {
+            "_UiMaterial_DestroyMaterial",
+            "l:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialDestroyMaterial)
         },
         ani_native_function {
             "_CreateViewStackProcessor",
@@ -1443,6 +1458,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToUiEffectVisualEffectPtr)
         },
         ani_native_function {
+            "_Extractors_ToUiMaterialMaterialPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToUiMaterialMaterialPtr)
+        },
+        ani_native_function {
             "_Extractors_ToDrawContextPtr",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToDrawContextPtr)
@@ -1526,7 +1546,17 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_TouchEvent_preventDefault",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetTouchEventPreventDefault)
-        }
+        },
+        ani_native_function {
+            "_SetCustomCallbackWithCheck",
+            "lC{arkui.FrameNode.FrameNode}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomCallbackWithCheck)
+        },
+        ani_native_function {
+            "_ResolveUIContext",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ResolveUIContext)
+       }
     };
 
     auto bindRst = env->Class_BindStaticNativeMethods(cls, staticMethods.data(), staticMethods.size());

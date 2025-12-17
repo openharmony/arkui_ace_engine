@@ -60,7 +60,7 @@ namespace OHOS::Ace::Framework {
 // If no insertion location is specified, new child will be added to the end of children list by default.
 inline constexpr int32_t DEFAULT_ITEM_INDEX = -1;
 
-class ACE_EXPORT DOMNode : public virtual AceType {
+class ACE_FORCE_EXPORT DOMNode : public virtual AceType {
     DECLARE_ACE_TYPE(DOMNode, AceType);
 
 public:
@@ -264,10 +264,7 @@ public:
         return nodeId_;
     }
 
-    std::string GetNodeIdForEvent() const
-    {
-        return isRootNode_ ? DOM_DEFAULT_ROOT_NODE_ID : std::to_string(GetNodeId());
-    }
+    std::string GetNodeIdForEvent() const;
 
     const std::string& GetTag() const
     {
@@ -541,53 +538,13 @@ public:
         }
     }
 
-    virtual Dimension GetHeight() const
-    {
-        Dimension height = Dimension(-1.0, DimensionUnit::PX);
-        if (declaration_) {
-            auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
-            if (sizeStyle.IsValid()) {
-                height = sizeStyle.height;
-            }
-        }
-        return height;
-    }
+    virtual Dimension GetHeight() const;
 
-    virtual CalcDimension GetCalcHeight() const
-    {
-        CalcDimension height = Dimension(-1.0, DimensionUnit::PX);
-        if (declaration_) {
-            auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
-            if (sizeStyle.IsValid()) {
-                height = sizeStyle.height;
-            }
-        }
-        return height;
-    }
+    virtual CalcDimension GetCalcHeight() const;
 
-    virtual Dimension GetWidth() const
-    {
-        Dimension width = Dimension(-1.0, DimensionUnit::PX);
-        if (declaration_) {
-            auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
-            if (sizeStyle.IsValid()) {
-                width = sizeStyle.width;
-            }
-        }
-        return width;
-    }
+    virtual Dimension GetWidth() const;
 
-    virtual CalcDimension GetCalcWidth() const
-    {
-        CalcDimension width = Dimension(-1.0, DimensionUnit::PX);
-        if (declaration_) {
-            auto& sizeStyle = static_cast<CommonSizeStyle&>(declaration_->GetStyle(StyleTag::COMMON_SIZE_STYLE));
-            if (sizeStyle.IsValid()) {
-                width = sizeStyle.width;
-            }
-        }
-        return width;
-    }
+    virtual CalcDimension GetCalcWidth() const;
 
     DisplayType GetDisplay() const
     {
@@ -648,158 +605,25 @@ protected:
     virtual void OnChildNodeRemoved(const RefPtr<DOMNode>& child) {}
     virtual void OnSetStyleFinished() {}
     // Confirm declaration is exist before call GetClickId and GetLongPressId.
-    virtual const EventMarker& GetClickId()
-    {
-        static EventMarker defaultMarker;
-        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
-        return gestureEvent.IsValid() ? gestureEvent.click.eventMarker : defaultMarker;
-    };
-    virtual const EventMarker& GetDoubleClickId()
-    {
-        static EventMarker defaultMarker;
-        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
-        return gestureEvent.IsValid() ? gestureEvent.doubleClick.eventMarker : defaultMarker;
-    };
-    const EventMarker& GetDragStartId()
-    {
-        static EventMarker defaultMarker;
-        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
-        return gestureEvent.IsValid() ? gestureEvent.dragStart.eventMarker : defaultMarker;
-    };
-    const EventMarker& GetDragId()
-    {
-        static EventMarker defaultMarker;
-        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
-        return gestureEvent.IsValid() ? gestureEvent.drag.eventMarker : defaultMarker;
-    };
-    const EventMarker& GetDragEndId()
-    {
-        static EventMarker defaultMarker;
-        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
-        return gestureEvent.IsValid() ? gestureEvent.dragEnd.eventMarker : defaultMarker;
-    };
-    const EventMarker& GetDragEnterId()
-    {
-        static EventMarker defaultMarker;
-        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
-        return gestureEvent.IsValid() ? gestureEvent.dragEnter.eventMarker : defaultMarker;
-    };
-    const EventMarker& GetDragOverId()
-    {
-        static EventMarker defaultMarker;
-        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
-        return gestureEvent.IsValid() ? gestureEvent.dragOver.eventMarker : defaultMarker;
-    };
-    const EventMarker& GetDragLeaveId()
-    {
-        static EventMarker defaultMarker;
-        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
-        return gestureEvent.IsValid() ? gestureEvent.dragLeave.eventMarker : defaultMarker;
-    };
-    const EventMarker& GetDragDropId()
-    {
-        static EventMarker defaultMarker;
-        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
-        return gestureEvent.IsValid() ? gestureEvent.dragDrop.eventMarker : defaultMarker;
-    };
-    virtual const EventMarker& GetLongPressId()
-    {
-        static EventMarker defaultMarker;
-        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
-        return gestureEvent.IsValid() ? gestureEvent.longPress.eventMarker : defaultMarker;
-    };
-        const EventMarker& GetPinchStartId()
-    {
-        static EventMarker defaultMarker;
-        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
-        return gestureEvent.IsValid() ? gestureEvent.pinchStart.eventMarker : defaultMarker;
-    };
-    const EventMarker& GetPinchUpdateId()
-    {
-        static EventMarker defaultMarker;
-        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
-        return gestureEvent.IsValid() ? gestureEvent.pinchUpdate.eventMarker : defaultMarker;
-    };
-    const EventMarker& GetPinchEndId()
-    {
-        static EventMarker defaultMarker;
-        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
-        return gestureEvent.IsValid() ? gestureEvent.pinchEnd.eventMarker : defaultMarker;
-    };
-    const EventMarker& GetPinchCancelId()
-    {
-        static EventMarker defaultMarker;
-        auto& gestureEvent = static_cast<CommonGestureEvent&>(declaration_->GetEvent(EventTag::COMMON_GESTURE_EVENT));
-        return gestureEvent.IsValid() ? gestureEvent.pinchCancel.eventMarker : defaultMarker;
-    };
+    virtual const EventMarker& GetClickId();
+    virtual const EventMarker& GetDoubleClickId();
+    const EventMarker& GetDragStartId();
+    const EventMarker& GetDragId();
+    const EventMarker& GetDragEndId();
+    const EventMarker& GetDragEnterId();
+    const EventMarker& GetDragOverId();
+    const EventMarker& GetDragLeaveId();
+    const EventMarker& GetDragDropId();
+    virtual const EventMarker& GetLongPressId();
+    const EventMarker& GetPinchStartId();
+    const EventMarker& GetPinchUpdateId();
+    const EventMarker& GetPinchEndId();
+    const EventMarker& GetPinchCancelId();
 
-    EventMarker& GetSwipeId(uint32_t action, uint32_t stage)
-    {
-        static EventMarker defaultMarker;
-        if (!declaration_) {
-            return defaultMarker;
-        }
-        auto& swipeEvent = declaration_->MaybeResetEvent<CommonSwipeEvent>(EventTag::COMMON_SWIPE_EVENT);
-        if (!swipeEvent.IsValid()) {
-            return defaultMarker;
-        }
-        if (action == EventAction::ON && stage == EventStage::CAPTURE) {
-            return swipeEvent.captureSwipe.eventMarker;
-        } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE) {
-            return swipeEvent.catchBubbleSwipe.eventMarker;
-        } else if (action == EventAction::ON && stage == EventStage::BUBBLE) {
-            return swipeEvent.swipe.eventMarker;
-        }
-        return defaultMarker;
-    }
+    EventMarker& GetSwipeId(uint32_t action, uint32_t stage);
 
     // Confirm declaration exist and support raw event before call GetTouchId.
-    EventMarker& GetTouchId(uint32_t action, uint32_t stage, uint32_t type)
-    {
-        static EventMarker defaultMarker;
-        if (!declaration_) {
-            return defaultMarker;
-        }
-
-        auto& rawEvent = declaration_->MaybeResetEvent<CommonRawEvent>(EventTag::COMMON_RAW_EVENT);
-        if (!rawEvent.IsValid()) {
-            return defaultMarker;
-        }
-        if (action == EventAction::ON && stage == EventStage::CAPTURE && type == EventType::TOUCH_CANCEL) {
-            return rawEvent.captureTouchCancel.eventMarker;
-        } else if (action == EventAction::ON && stage == EventStage::CAPTURE && type == EventType::TOUCH_UP) {
-            return rawEvent.captureTouchEnd.eventMarker;
-        } else if (action == EventAction::ON && stage == EventStage::CAPTURE && type == EventType::TOUCH_MOVE) {
-            return rawEvent.captureTouchMove.eventMarker;
-        } else if (action == EventAction::ON && stage == EventStage::CAPTURE && type == EventType::TOUCH_DOWN) {
-            return rawEvent.captureTouchStart.eventMarker;
-        } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE && type == EventType::TOUCH_CANCEL) {
-            return rawEvent.catchBubbleTouchCancel.eventMarker;
-        } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE && type == EventType::TOUCH_UP) {
-            return rawEvent.catchBubbleTouchEnd.eventMarker;
-        } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE && type == EventType::TOUCH_MOVE) {
-            return rawEvent.catchBubbleTouchMove.eventMarker;
-        } else if (action == EventAction::CATCH && stage == EventStage::BUBBLE && type == EventType::TOUCH_DOWN) {
-            return rawEvent.catchBubbleTouchStart.eventMarker;
-        } else if (action == EventAction::CATCH && stage == EventStage::CAPTURE && type == EventType::TOUCH_CANCEL) {
-            return rawEvent.catchCaptureTouchCancel.eventMarker;
-        } else if (action == EventAction::CATCH && stage == EventStage::CAPTURE && type == EventType::TOUCH_UP) {
-            return rawEvent.catchCaptureTouchEnd.eventMarker;
-        } else if (action == EventAction::CATCH && stage == EventStage::CAPTURE && type == EventType::TOUCH_MOVE) {
-            return rawEvent.catchCaptureTouchMove.eventMarker;
-        } else if (action == EventAction::CATCH && stage == EventStage::CAPTURE && type == EventType::TOUCH_DOWN) {
-            return rawEvent.catchCaptureTouchStart.eventMarker;
-        } else if (action == EventAction::ON && stage == EventStage::BUBBLE && type == EventType::TOUCH_CANCEL) {
-            return rawEvent.touchCancel.eventMarker;
-        } else if (action == EventAction::ON && stage == EventStage::BUBBLE && type == EventType::TOUCH_UP) {
-            return rawEvent.touchEnd.eventMarker;
-        } else if (action == EventAction::ON && stage == EventStage::BUBBLE && type == EventType::TOUCH_MOVE) {
-            return rawEvent.touchMove.eventMarker;
-        } else if (action == EventAction::ON && stage == EventStage::BUBBLE && type == EventType::TOUCH_DOWN) {
-            return rawEvent.touchStart.eventMarker;
-        }
-        return defaultMarker;
-    }
+    EventMarker& GetTouchId(uint32_t action, uint32_t stage, uint32_t type);
 
     // Subclasses need to implement this interface to composit specialized component into common components.
     virtual RefPtr<Component> CompositeSpecializedComponent(const std::vector<RefPtr<SingleChild>>& components);

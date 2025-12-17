@@ -42,6 +42,7 @@
 #include "styled_string_ani_modifier.h"
 #include "trace_ani_modifier.h"
 #include "video_ani_modifier.h"
+#include "visual_effect_ani_modifier.h"
 #include "waterflow_ani_modifier.h"
 #include "web_ani_modifier.h"
 #include "xcomponent_ani_modifier.h"
@@ -67,6 +68,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniListModifier = OHOS::Ace::NG::GetArkUIAniListModifier,
         .getComponentSnapshotAniModifier = OHOS::Ace::NG::GetComponentSnapshotAniModifier,
         .getAnimationAniModifier = OHOS::Ace::NG::GetAnimationAniModifier,
+        .getVisualEffectAniModifier = OHOS::Ace::NG::GetVisualEffectAniModifier,
         .getInteropAniModifier = OHOS::Ace::NG::GetInteropAniModifier,
         .getDragControllerAniModifier = OHOS::Ace::NG::GetDragControllerAniModifier,
         .getStyledStringAniModifier = OHOS::Ace::NG::GetStyledStringAniModifier,

@@ -70,6 +70,12 @@ Opt_OffsetResult CurrentOffsetImpl(Ark_VMContext vmContext,
     CHECK_NULL_RETURN(peer, invalid);
     return peer->TriggerCurrentOffset(vmContext);
 }
+Opt_OffsetResult OffsetImpl(Ark_Scroller peer)
+{
+    auto invalid = Converter::ArkValue<Opt_OffsetResult>();
+    CHECK_NULL_RETURN(peer, invalid);
+    return peer->TriggerOffset();
+}
 void ScrollToIndexImpl(Ark_VMContext vmContext,
                        Ark_Scroller peer,
                        Ark_Int32 value,
@@ -127,6 +133,7 @@ const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
         ScrollerAccessor::FlingImpl,
         ScrollerAccessor::ScrollPageImpl,
         ScrollerAccessor::CurrentOffsetImpl,
+        ScrollerAccessor::OffsetImpl,
         ScrollerAccessor::ScrollToIndexImpl,
         ScrollerAccessor::ScrollByImpl,
         ScrollerAccessor::IsAtEndImpl,

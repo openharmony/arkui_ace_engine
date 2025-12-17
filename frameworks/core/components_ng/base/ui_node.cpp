@@ -2371,6 +2371,7 @@ void UINode::SetParent(const WeakPtr<UINode>& parent, bool needDetect)
     }
     parent_ = parent;
     ancestor_ = parent;
+    lastParent_ = parent;
 }
 
 int32_t UINode::GetThemeScopeId() const
@@ -2564,6 +2565,23 @@ void UINode::FindTopNavDestination(RefPtr<FrameNode>& result)
         if (result) {
             return;
         }
+    }
+}
+
+void UINode::GetNodeListByComponentName(int32_t depth, std::vector<int32_t>& foundNodeId, const std::string& name)
+{
+    if (auto customNode = DynamicCast<CustomNode>(this)) {
+        const std::string& tag = customNode->GetCustomTag();
+        if (tag.size() >= name.size() && StringUtils::StartWith(tag, name)) {
+            foundNodeId.emplace_back(nodeId_);
+        }
+    }
+    for (auto& child : children_) {
+        child->GetNodeListByComponentName(depth + 1, foundNodeId, name);
+    }
+    auto frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode && frameNode->GetOverlayNode()) {
+        frameNode->GetOverlayNode()->GetNodeListByComponentName(depth + 1, foundNodeId, name);
     }
 }
 } // namespace OHOS::Ace::NG

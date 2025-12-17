@@ -14,7 +14,6 @@
  */
 
 #include <optional>
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -130,7 +129,7 @@ Ark_Int32 AppendChildImpl(Ark_FrameNode peer,
     CHECK_NULL_RETURN(peerNode, ERROR_CODE_PARAM_INVALID);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peerNode);
     CHECK_NULL_RETURN(currentUINodeRef, ERROR_CODE_PARAM_INVALID);
-    
+
     auto childPeerNode = FrameNodePeer::GetFrameNodeByPeer(child);
     CHECK_NULL_RETURN(childPeerNode, ERROR_CODE_PARAM_INVALID);
     auto childNode = AceType::DynamicCast<UINode>(childPeerNode);
@@ -222,13 +221,12 @@ FrameNode* GetChildNode(RefPtr<FrameNode> nodeRef, int32_t index, int32_t expand
 }
 
 Ark_NativePointer GetChildImpl(Ark_FrameNode peer,
-                           const Ark_Number* index,
-                           const Ark_Number* expandMode)
+                               Ark_Int32 index,
+                               const Ark_Number* expandMode)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, nullptr);
-    CHECK_NULL_RETURN(index, nullptr);
-    auto indexInt = Converter::Convert<int32_t>(*index);
+    auto indexInt = Converter::Convert<int32_t>(index);
     if (indexInt < 0) {
         return nullptr;
     }
@@ -385,13 +383,13 @@ Ark_String GetNodeTypeImpl(Ark_FrameNode peer)
     auto nodeType = frameNode->GetTag();
     return Converter::ArkValue<Ark_String>(nodeType, Converter::FC);
 }
-Ark_Number GetOpacityImpl(Ark_FrameNode peer)
+Ark_Float64 GetOpacityImpl(Ark_FrameNode peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(1);
+    const auto errValue = Converter::ArkValue<Ark_Float64>(1);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, errValue);
     auto opacity = ViewAbstract::GetOpacity(Referenced::RawPtr(peerNode));
-    return Converter::ArkValue<Ark_Number>(opacity);
+    return Converter::ArkValue<Ark_Float64>(opacity);
 }
 Ark_Boolean IsVisibleImpl(Ark_FrameNode peer)
 {
@@ -714,9 +712,9 @@ Ark_Number GetIdByFrameNodeImpl(Ark_NativePointer node)
 }
 Ark_Int32 MoveToImpl(Ark_FrameNode peer,
                      Ark_FrameNode targetParent,
-                     const Ark_Number* index)
+                     Ark_Int32 index)
 {
-    auto indexInt = Converter::Convert<int32_t>(*index);
+    auto indexInt = Converter::Convert<int32_t>(index);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, ERROR_CODE_PARAM_INVALID);
     auto moveNode = AceType::DynamicCast<UINode>(peerNode);
@@ -754,9 +752,9 @@ Ark_Int32 MoveToImpl(Ark_FrameNode peer,
     moveNode->setIsMoving(false);
     return ERROR_CODE_NO_ERROR;
 }
-Ark_Number GetFirstChildIndexWithoutExpandImpl(Ark_FrameNode peer)
+Ark_Int32 GetFirstChildIndexWithoutExpandImpl(Ark_FrameNode peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(-1);
+    const auto errValue = Converter::ArkValue<Ark_Int32>(-1);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, errValue);
     auto child = peerNode->GetFrameNodeChildByIndex(0, false, false);
@@ -764,11 +762,11 @@ Ark_Number GetFirstChildIndexWithoutExpandImpl(Ark_FrameNode peer)
     auto* childNode = reinterpret_cast<FrameNode*>(child);
     auto childRef = Referenced::Claim<FrameNode>(childNode);
     auto index = peerNode->GetFrameNodeIndex(childRef, true);
-    return Converter::ArkValue<Ark_Number>(index);
+    return Converter::ArkValue<Ark_Int32>(index);
 }
-Ark_Number GetLastChildIndexWithoutExpandImpl(Ark_FrameNode peer)
+Ark_Int32 GetLastChildIndexWithoutExpandImpl(Ark_FrameNode peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(-1);
+    const auto errValue = Converter::ArkValue<Ark_Int32>(-1);
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, errValue);
     size_t size = static_cast<size_t>(peerNode->GetTotalChildCountWithoutExpanded());
@@ -778,7 +776,7 @@ Ark_Number GetLastChildIndexWithoutExpandImpl(Ark_FrameNode peer)
     auto* childNode = reinterpret_cast<FrameNode*>(child);
     auto childRef = Referenced::Claim<FrameNode>(childNode);
     auto index = peerNode->GetFrameNodeIndex(childRef, true);
-    return Converter::ArkValue<Ark_Number>(index);
+    return Converter::ArkValue<Ark_Int32>(index);
 }
 Ark_NativePointer GetAttachedFrameNodeByIdImpl(const Ark_String* id)
 {
@@ -1075,6 +1073,42 @@ Array_Float64 ConvertPointImpl(Ark_FrameNode peer, Ark_FrameNode node, const Ark
     Array_Float64 resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
     return resultValue;
 }
+
+Array_Float64 ConvertPositionToWindowImpl(Ark_FrameNode peer,
+                                          const Ark_Vector2* positionByLocal)
+{
+    std::vector<float> indexes;
+    ParseArrayFailNumber(indexes);
+    auto errValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    CHECK_NULL_RETURN(positionByLocal, errValue);
+    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(currentNode, errValue);
+    auto xFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByLocal->x));
+    auto yFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByLocal->y));
+    auto offset = currentNode->ConvertPositionToWindow({ xFloat, yFloat }, false);
+    ParseArrayResultNumber(indexes,
+        { PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) });
+    auto resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    return resultValue;
+}
+
+Array_Float64 ConvertPositionFromWindowImpl(Ark_FrameNode peer, const Ark_Vector2* positionByWindow)
+{
+    std::vector<float> indexes;
+    ParseArrayFailNumber(indexes);
+    auto errValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    CHECK_NULL_RETURN(positionByWindow, errValue);
+    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(currentNode, errValue);
+    auto xFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByWindow->x));
+    auto yFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByWindow->y));
+    auto offset = currentNode->ConvertPositionToWindow({ xFloat, yFloat }, true);
+    ParseArrayResultNumber(indexes,
+        { PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) });
+    auto resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    return resultValue;
+}
+
 Ark_Int32 AdoptChildImpl(Ark_FrameNode peer, Ark_FrameNode child)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -1136,6 +1170,14 @@ Ark_Boolean IsOnRenderTreeImpl(Ark_FrameNode peer)
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     return renderContext->IsOnRenderTree();
+}
+void ApplyAttributesFinishImpl(Ark_FrameNode peer)
+{
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(peerNode);
+    auto frameNode = AceType::DynamicCast<FrameNode>(peerNode);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkModifyDone();
 }
 Ark_Boolean IsOnMainTreeImpl(Ark_FrameNode peer)
 {
@@ -1216,6 +1258,9 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::RemoveAdoptedChildImpl,
         FrameNodeExtenderAccessor::IsOnRenderTreeImpl,
         FrameNodeExtenderAccessor::IsOnMainTreeImpl,
+        FrameNodeExtenderAccessor::ConvertPositionToWindowImpl,
+        FrameNodeExtenderAccessor::ConvertPositionFromWindowImpl,
+        FrameNodeExtenderAccessor::ApplyAttributesFinishImpl,
     };
     return &FrameNodeExtenderAccessorImpl;
 }

@@ -39,14 +39,13 @@ export function ArkComponentRoot(
     NodeAttach<ArkCustomComponentRootPeer>(
         () => {
             const node = ArkCustomComponentRootPeer.create(component);
-            if (component.isCustomLayout) {
-                return node;
-            }
-
             const func = CallbackTransformer.transformFromCustomBuilder(@memo (): void => {
                 rememberDisposable(() => {
                     ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                        const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
+                        ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponent;
                         component.aboutToAppear();
+                        ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
                     });
                     return true;
                 }, (_: boolean | undefined) => {
@@ -63,24 +62,6 @@ export function ArkComponentRoot(
             });
             return node;
         },
-        (node: ArkCustomComponentRootPeer) => {
-            if (!component.isCustomLayout) {
-                return;
-            }
-            rememberDisposable(() => {
-                ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
-                    const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
-                    ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingComponent;
-                    component.aboutToAppear();
-                    ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
-                });
-                return true;
-            }, (_: boolean | undefined) => {
-                scheduleCallback(() => {
-                    component.aboutToDisappear()
-                });
-            });
-            content(node);
-        }
+        (node: ArkCustomComponentRootPeer) => { }
     );
 }

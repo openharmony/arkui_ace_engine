@@ -185,6 +185,7 @@ public:
     virtual void SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {};
     virtual void SetForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {};
     virtual void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {};
+    virtual void SetMaterialFilter(const OHOS::Rosen::Filter* materialFilter) {}
     virtual void SetBlender(const OHOS::Rosen::Blender* blender) {};
     virtual void SetSystemMaterial(const UiMaterial* material) {};
 

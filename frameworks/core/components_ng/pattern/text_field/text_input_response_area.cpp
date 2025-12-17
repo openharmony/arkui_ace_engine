@@ -26,6 +26,7 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
@@ -74,6 +75,7 @@ OffsetF TextInputResponseArea::GetChildOffset(SizeF parentSize, RectF contentRec
     auto textFieldPattern = hostPattern_.Upgrade();
     CHECK_NULL_RETURN(textFieldPattern, offset);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, offset);
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (isRTL) {
         return OffsetF(nodeWidth, offset.GetY());
@@ -135,8 +137,12 @@ RefPtr<FrameNode> TextInputResponseArea::CreateResponseAreaImageNode(const Image
 void TextInputResponseArea::SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
     float hoverRectHeight, bool isFocus)
 {
-    auto textFieldPattern = hostPattern_.Upgrade();
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
+    if (textFieldPattern->IsTV()) {
+        SetHoverRectForTV(stackNode, rect, iconSize, hoverRectHeight, isFocus);
+        return;
+    }
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(stackNode);
@@ -161,6 +167,52 @@ void TextInputResponseArea::SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& re
     } else {
         rect = RectF(stackRect.GetX() - iconHoverPadding, stackRect.GetY() - stackHoverPadding,
             hoverRectHeight, hoverRectHeight);
+    }
+}
+
+void TextInputResponseArea::SetHoverRectForTV(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
+    float hoverRectHeight, bool isFocus)
+{
+    auto textFieldPattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(stackNode);
+    auto stackGeometryNode = stackNode->GetGeometryNode();
+    CHECK_NULL_VOID(stackGeometryNode);
+    auto stackRect = stackGeometryNode->GetFrameRect();
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
+    CHECK_NULL_VOID(imageFrameNode);
+    auto imageGeometryNode = imageFrameNode->GetGeometryNode();
+    CHECK_NULL_VOID(imageGeometryNode);
+    auto imageRect = imageGeometryNode->GetFrameRect();
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto iconOffsetPadding = textFieldTheme->GetIconOffsetPadding().Value();
+
+    if (isFocus) {
+        hoverRectHeight = hoverRectHeight - ICON_FOCUS_PADDING.ConvertToPx();
+    }
+
+    auto iconHoverPadding = (hoverRectHeight - iconSize) / HALF_SPACE;
+    auto stackHoverPadding = (hoverRectHeight - stackRect.Height()) / HALF_SPACE;
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRTL) {
+        rect = RectF(stackRect.GetX() + stackRect.Width() - imageRect.Width() - iconHoverPadding + iconOffsetPadding,
+            stackRect.GetY() - stackHoverPadding + iconOffsetPadding,
+            hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding,
+            hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding);
+    } else {
+        rect = RectF(stackRect.GetX() - iconHoverPadding - iconOffsetPadding,
+            stackRect.GetY() - stackHoverPadding - iconOffsetPadding,
+            hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding,
+            hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding);
     }
 }
 
@@ -1337,6 +1389,14 @@ void PlaceholderResponseArea::SetStyleString(const RefPtr<SpanString>& value)
     auto textPattern = placeholderNode_->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetStyledString(value);
+
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    if (!textFieldPattern->IsTextArea()) {
+        auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateIsTextMaxlinesFirst(true);
+    }
 }
 
 const RefPtr<FrameNode> PlaceholderResponseArea::GetFrameNode()

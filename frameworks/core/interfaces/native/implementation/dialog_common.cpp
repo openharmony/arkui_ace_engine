@@ -93,5 +93,14 @@ NG::MenuParam Convert(const Ark_ContextMenuAnimationOptions& options)
     menuParam.hoverScaleInterruption = hoverScaleInterruption.value_or(false);
     return menuParam;
 }
+
+template<>
+MenuKeyboardAvoidMode Convert(const Ark_MenuKeyboardAvoidMode& options)
+{
+    if (options == Ark_MenuKeyboardAvoidMode::ARK_MENU_KEYBOARD_AVOID_MODE_TRANSLATE_AND_RESIZE) {
+        return MenuKeyboardAvoidMode::TRANSLATE_AND_RESIZE;
+    }
+    return MenuKeyboardAvoidMode::NONE;
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG

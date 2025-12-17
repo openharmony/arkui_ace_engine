@@ -93,6 +93,13 @@ void ButtonModelNG::SetButtonStyle(const std::optional<ButtonStyleMode>& buttonS
     }
 }
 
+void ButtonModelNG::SetButtonStyleOnly(const std::optional<ButtonStyleMode>& buttonStyle)
+{
+    if (buttonStyle.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyle, buttonStyle.value());
+    }
+}
+
 void ButtonModelNG::ParseButtonResColor(
     const RefPtr<ResourceObject>& resObj, Color& result, const ButtonColorType buttonColorType)
 {
@@ -420,6 +427,13 @@ void ButtonModelNG::SetRole(const std::optional<ButtonRole>& buttonRole)
         auto textColor = buttonTheme->GetTextColor(buttonStyleMode, buttonRole.value());
         BackgroundColor(bgColor, true);
         SetFontColor(textColor);
+    }
+}
+
+void ButtonModelNG::SetRoleOnly(const std::optional<ButtonRole>& buttonRole)
+{
+    if (buttonRole.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonRole, buttonRole.value());
     }
 }
 

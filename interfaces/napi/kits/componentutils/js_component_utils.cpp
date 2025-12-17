@@ -15,7 +15,7 @@
 
 #include "core/common/container_scope.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
-
+#include "interfaces/napi/kits/componentutils/js_mistouch_prevention.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 #include "napi/native_api.h"
@@ -217,10 +217,17 @@ static napi_value JSGetRectangleById(napi_env env, napi_callback_info info)
     return obj;
 }
 
+static napi_value JSGetItemsInShapePath(napi_env env, napi_callback_info info)
+{
+    napi_value result = MistouchPrevention::GetItemsInShapePath(env, info);
+    return result;
+}
+
 static napi_value registerFunc(napi_env env, napi_value exports)
 {
     napi_property_descriptor animatorDesc[] = {
         DECLARE_NAPI_FUNCTION("getRectangleById", JSGetRectangleById),
+        DECLARE_NAPI_FUNCTION("getItemsInShapePath", JSGetItemsInShapePath),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(animatorDesc) / sizeof(animatorDesc[0]), animatorDesc));
     return exports;

@@ -14,7 +14,9 @@
  */
 
 #include "core/common/multi_thread_build_manager.h"
-#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/implementation/click_event_peer.h"
+#include "core/interfaces/native/implementation/hover_event_peer.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -220,7 +222,7 @@ void SetOnClick0Impl(Ark_NativePointer node,
         return;
     }
     auto onClick = [callback = CallbackHelper(*optValue)](GestureEvent& info) {
-        const auto event = Converter::ArkClickEventSync(info);
+        const auto event = Converter::SyncEvent<Ark_ClickEvent>(info);
         callback.InvokeSync(event.ArkValue());
     };
     SpanModelNG::SetOnClick(frameNode, std::move(onClick));
@@ -239,7 +241,7 @@ void SetOnHoverImpl(Ark_NativePointer node,
     auto onHover = [arkCallback = CallbackHelper(*optValue), node = weakNode](bool isHover, HoverInfo& hoverInfo) {
         PipelineContext::SetCallBackNode(node);
         Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
-        const auto event = Converter::ArkHoverEventSync(hoverInfo);
+        const auto event = Converter::SyncEvent<Ark_HoverEvent>(hoverInfo);
         arkCallback.InvokeSync(arkIsHover, event.ArkValue());
     };
     SpanModelNG::SetOnHover(frameNode, std::move(onHover));
@@ -256,7 +258,7 @@ void SetOnClick1Impl(Ark_NativePointer node,
         return;
     }
     auto onEvent = [callback = CallbackHelper(*optEvent)](GestureEvent& info) {
-        const auto event = Converter::ArkClickEventSync(info);
+        const auto event = Converter::SyncEvent<Ark_ClickEvent>(info);
         callback.InvokeSync(event.ArkValue());
     };
     auto convValue = Converter::OptConvertPtr<float>(distanceThreshold);

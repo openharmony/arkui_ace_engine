@@ -27,7 +27,7 @@
 namespace OHOS::Ace {
 
 // ComposedElement just maintain a child element may have render node.
-class ACE_EXPORT ComposedElement : public Element {
+class ACE_FORCE_EXPORT ComposedElement : public Element {
     DECLARE_ACE_TYPE(ComposedElement, Element);
 
 public:

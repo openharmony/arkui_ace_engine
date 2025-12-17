@@ -473,4 +473,53 @@ HWTEST_F(ListItemManagerTestNg, InitDragDropEvent_actionLongPress, TestSize.Leve
     EXPECT_EQ(listItemDragManager->dragState_, ListItemDragState::LONG_PRESS);
     EXPECT_EQ(number, 0);
 }
+
+/**
+ * @tc.name: HandleOnItemDragCancel001
+ * @tc.desc: Test ListItemDragManager HandleOnItemDragCancel when scrolling is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemManagerTestNg, HandleOnItemDragCancel001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemDragManager
+     */
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(listNode, nullptr);
+    WeakPtr<FrameNode> weakListNode = AceType::WeakClaim(AceType::RawPtr(listNode));
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(host, nullptr);
+    host->SetParent(weakListNode);
+    host->renderContext_ = RenderContext::Create();
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListItemEventHub> listItemEventHub = AceType::MakeRefPtr<ListItemEventHub>();
+    WeakPtr<ListItemEventHub> weakListItemEventHub = AceType::WeakClaim(AceType::RawPtr(listItemEventHub));
+    host->eventHub_ = listItemEventHub;
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(weakListItemEventHub);
+    WeakPtr<GestureEventHub> weakGestureEventHub = AceType::WeakClaim(AceType::RawPtr(gestureEventHub));
+    eventHub->gestureEventHub_ = gestureEventHub;
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    int32_t onMoveEventCnt = 0;
+    int32_t onDropCnt = 0;
+    lazyForEachNode->onMoveEvent_ = [&onMoveEventCnt](int32_t from, int32_t to) { onMoveEventCnt++; };
+    lazyForEachNode->onDropEvent_ = [&onDropCnt](int32_t index) { onDropCnt++; };
+    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
+    // 0: simulate dragging ListItem 0.
+    listItemDragManager->fromIndex_ = 0;
+    listItemDragManager->scrolling_ = true;
+
+    /**
+     * @tc.steps: step2. Simulate drag cancel when List is scrolling.
+     * @tc.expected: scrolling flag change to false, onMoveEvent and onDropEvent triggered.
+     */
+    listItemDragManager->HandleOnItemDragCancel();
+    // 1: onMoveEvent triggered.
+    EXPECT_EQ(onMoveEventCnt, 1);
+    // 1: onDropEvent triggered.
+    EXPECT_EQ(onDropCnt, 1);
+    EXPECT_FALSE(listItemDragManager->scrolling_);
+}
 } // namespace OHOS::Ace::NG

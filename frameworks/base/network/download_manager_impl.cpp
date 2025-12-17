@@ -333,6 +333,11 @@ public:
         return false;
     }
 
+    void RemoveUrlCache(const std::string& url) override
+    {
+        Request::Preload::GetInstance()->Remove(url);
+    }
+
     bool DownloadSyncWithPreload(
         DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId) override
     {

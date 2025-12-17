@@ -87,12 +87,13 @@ typedef struct webview_WebviewControllerPeer {
     std::function<void(int32_t)> setWebIdFunc = nullptr;
     std::function<void(const std::string&)> setHapPathFunc = nullptr;
     std::function<void(int32_t)> setWebDetachFunc = nullptr;
+    std::function<void(void*, void*, std::function<void(void*)>)> defaultOnShowFileSelectorFunc = nullptr;
 } WebviewControllerPeer;
 
 typedef struct NodeAdapterInfo {
     std::function<void(ani_double)> onAttachToNode = nullptr;
     std::function<void(void)> onDetachFromNode = nullptr;
-    std::function<int32_t(ani_double)> onGetId = nullptr;
+    std::function<int32_t(ani_int)> onGetId = nullptr;
     std::function<ani_long(ani_double)> onCreateChild = nullptr;
     std::function<void(ani_double, ani_double)> onDisposeChild = nullptr;
     std::function<void(ani_double, ani_double)> onUpdateChild = nullptr;
@@ -136,6 +137,9 @@ class Context;
 namespace OHOS::Ace::Ani {
 class DragAction;
 class AniGlobalReference;
+}
+namespace OHOS::Ace {
+class UiMaterial;
 }
 enum class ArkUIDragStatus { STARTED, ENDED };
 enum class ArkUIDragResult { DRAG_SUCCESS, DRAG_FAIL, DRAG_CANCEL };
@@ -381,6 +385,14 @@ struct ArkUIXComponentParams {
     std::function<void(const std::string&)> onSurfaceDestroyed = nullptr;
 };
 
+typedef struct ArkUIAniImageOnErrorParams {
+    std::string errorMessage;
+    int32_t componentWidth = 0;
+    int32_t componentHeight = 0;
+    int32_t errorCode = 0;
+    std::string errorInfo;
+} ArkUIAniImageOnErrorParams;
+
 struct ArkUIAniImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
     void (*setDrawableDescriptor)(ArkUINodeHandle node, void* drawablem);
@@ -391,6 +403,8 @@ struct ArkUIAniImageModifier {
     ani_long (*getColorFilter)(ani_long colorFilterPeer);
     void* (*getDrawingColorFilterPeer)(void* colorFilter);
     void* (*getDrawingLatticePeer)(void* latticePeer);
+    void (*setImageOnErrorCallback)(
+        ArkUINodeHandle node, std::function<void(const ArkUIAniImageOnErrorParams&)>&& callbackBack);
 };
 
 struct ArkUIWaterFlowSectionGap {
@@ -564,6 +578,7 @@ struct ArkUIAniCommonModifier {
     void (*getKeyEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
     ani_boolean (*setClickEventPreventDefault)(ani_long nativePtr);
     ani_boolean (*setTouchEventPreventDefault)(ani_long nativePtr);
+    void(*resolveUIContext)(std::vector<int32_t>& instance);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;
@@ -791,6 +806,11 @@ struct ArkUIAniCommonNodeAniModifier {
     void (*setCommonOptions)(ani_long node);
 };
 
+struct ArkUIAniVisualEffectModifier {
+    OHOS::Ace::UiMaterial* (*constructMaterial)(int32_t type);
+    void (*destroyMaterial)(OHOS::Ace::UiMaterial* ptr);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -806,6 +826,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniListModifier* (*getArkUIAniListModifier)();
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
+    const ArkUIAniVisualEffectModifier* (*getVisualEffectAniModifier)();
     const ArkUIAniInteropModifier* (*getInteropAniModifier)();
     const ArkUIAniDragControllerModifier* (*getDragControllerAniModifier)();
     const ArkUIAniStyledStringModifier* (*getStyledStringAniModifier)();

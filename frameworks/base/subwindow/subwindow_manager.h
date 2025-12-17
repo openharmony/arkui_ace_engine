@@ -108,7 +108,7 @@ public:
     const RefPtr<Subwindow> GetCurrentWindow();
     Rect GetParentWindowRect();
 
-    RefPtr<Subwindow> ShowPreviewNG(bool isStartDraggingFromSubWindow);
+    RefPtr<Subwindow> ShowPreviewNG(bool isStartDraggingFromSubWindow, bool isRestartDrag = false);
     void HidePreviewNG();
     void ShowMenu(const RefPtr<Component>& newComponent);
     void ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const NG::MenuParam& menuParam,
@@ -244,6 +244,8 @@ public:
     void RemoveSubwindowByNodeId(const int32_t nodeId);
     void SetWindowAnchorInfo(const NG::OffsetF &offset, SubwindowType type, int32_t nodeId, int32_t instanceId);
     void AddInstanceSubwindowMap(int32_t subInstanceId, RefPtr<Subwindow> subwindow);
+    bool HasDialogOrPopup(int32_t containerId);
+    bool ShouldEnableDragEventForSubwindow(int32_t containerId, bool isRestartDrag);
 
     // ArkTS 1.2
     ACE_FORCE_EXPORT void ShowToastStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);

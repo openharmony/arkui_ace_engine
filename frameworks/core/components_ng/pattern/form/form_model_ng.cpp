@@ -140,6 +140,15 @@ void FormModelNG::SetModuleName(const std::string& moduleName)
     property->UpdateRequestFormInfo(formInfo);
 }
 
+void FormModelNG::SetColorMode(int32_t colorMode)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto formPattern = frameNode->GetPattern<FormPattern>();
+    CHECK_NULL_VOID(formPattern);
+    formPattern->SetColorMode(colorMode);
+}
+
 int32_t FormModelNG::RequestPublishFormWithSnapshot(const AAFwk::Want& want,
     const std::string& formBindingDataStr, int64_t& formId, std::string &errMsg)
 {

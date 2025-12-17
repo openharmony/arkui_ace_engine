@@ -166,8 +166,20 @@ public:
     {
     }
 
+    bool SetReceiveDragEventEnabled(bool enabled) override
+    {
+        isReceiveDragEventEnabled_ = enabled;
+        return true;
+    }
+
+    bool GetIsReceiveDragEventEnabled() override
+    {
+        return isReceiveDragEventEnabled_;
+    }
+
 private:
     int32_t childContainerId_ = -1;
+    bool isReceiveDragEventEnabled_ = true;
 
     void CheckOffsetOption(const NG::MenuParam& menuParam)
     {
@@ -267,7 +279,7 @@ Opt_ContextMenuOptions getContextMenuOptions(Ark_ContextMenuOptions options = {}
 } // namespace
 
 namespace Converter {
-void AssignArkValue(Ark_TransitionEffect& dst, const RefPtr<NG::ChainedTransitionEffect>& src)
+void AssignArkValue(Ark_TransitionEffect& dst, const RefPtr<NG::ChainedTransitionEffect>& src, ConvContext *ctx)
 {
     const auto peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
     peer->handler = src;

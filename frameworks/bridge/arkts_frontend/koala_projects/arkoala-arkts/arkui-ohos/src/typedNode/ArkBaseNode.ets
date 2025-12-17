@@ -23,7 +23,7 @@ import { GeometryTransitionOptions, GestureModifier, GestureRecognizerJudgeBegin
 import { LinearGradientBlurOptions, BackgroundOptions } from '../component/common';
 import { LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions } from '../component/common';
 import { MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus } from '../component/common';
-import { ProgressMask, Rectangle, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle } from '../component/common';
+import { ProgressMask, Rectangle, ResponseRegion, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle } from '../component/common';
 import { SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult } from '../component/common';
 import { TouchTestInfo, TransitionEffect, TransitionFinishCallback, TranslateOptions } from '../component/common';
 import { VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOptions, ArkCommonMethodPeer } from '../component/common';
@@ -76,6 +76,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
+        return this
+    }
+    public responseRegionList(value: Array<ResponseRegion> | undefined): this {
+        this.getPeer().setResponseRegionListAttribute(value);
         return this
     }
 
@@ -559,6 +563,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     }
     public onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture?: boolean): this {
         this.getPeer().setOnGestureRecognizerJudgeBegin1Attribute(callback_, exposeInnerGesture);
+        return this
+    }
+    public onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined): this {
+        this.getPeer().setOnGestureRecognizerJudgeBegin0Attribute(callback_);
         return this
     }
     public shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this {

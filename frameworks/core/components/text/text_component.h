@@ -32,7 +32,7 @@
 namespace OHOS::Ace {
 
 // A component can show text.
-class ACE_EXPORT TextComponent : public ComponentGroup {
+class ACE_FORCE_EXPORT TextComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(TextComponent, ComponentGroup);
 
 public:

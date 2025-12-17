@@ -52,10 +52,10 @@ HWTEST_F(UIContextAtomicServiceBarAccessorTest, getBarRect, TestSize.Level1)
 
     // Convert frame check
     Ark_Frame src = {
-        .x = ArkValue<Ark_Number>(100.0),
-        .y = ArkValue<Ark_Number>(200.0),
-        .width = ArkValue<Ark_Number>(300.0),
-        .height = ArkValue<Ark_Number>(400.0)
+        .x = ArkValue<Ark_Float64>(100.0),
+        .y = ArkValue<Ark_Float64>(200.0),
+        .width = ArkValue<Ark_Float64>(300.0),
+        .height = ArkValue<Ark_Float64>(400.0)
     };
     RectF result = Converter::Convert<RectF>(src);
     ASSERT_EQ(result.GetX(), 100.0);

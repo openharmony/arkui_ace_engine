@@ -734,65 +734,6 @@ HWTEST_F(TextTestFiveNg, FontRegisterCallback002, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateTextStyle001
- * @tc.desc: test span_node.cpp UpdateTextStyle function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestFiveNg, UpdateTextStyle001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize spanNode and paragraph.
-     */
-    SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE_W);
-    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    pattern->SetTextDetectEnable(true);
-    auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
-    spanNode->SetParent(node);
-    spanNode->MountToParagraph();
-    ASSERT_NE(spanNode->GetParent(), nullptr);
-    spanNode->spanItem_->fontStyle = nullptr;
-    spanNode->spanItem_->position = StringUtils::ToWstring(CREATE_VALUE).length();
-    TextStyle textStyle;
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    /**
-     * @tc.steps: step2. call StartDrag
-     * @tc.expected: IsDragging() return ture
-     */
-    spanNode->spanItem_->StartDrag(1, 2);
-    EXPECT_TRUE(spanNode->spanItem_->IsDragging());
-    /**
-     * @tc.steps: step3. call UpdateTextStyle
-     * @tc.expected: cover branch content is empty.
-     */
-    std::u16string spanContent;
-    EXPECT_TRUE(spanNode->spanItem_->IsDragging());
-    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 1, 2);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
-    /**
-     * @tc.steps: step4. call UpdateTextStyle
-     * @tc.expected: cover branch selStart > 0, selEnd < contentLength.
-     */
-    spanContent = CREATE_VALUE_W;
-    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 1, 2);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
-    /**
-     * @tc.steps: step5. call UpdateTextStyle
-     * @tc.expected: cover branch selStart < 0, selEnd < 0.
-     */
-    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, -1, -1);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
-    /**
-     * @tc.steps: step6. call UpdateTextStyle
-     * @tc.expected: cover branch selStart > contentLength, selEnd > contentLength.
-     */
-    spanNode->spanItem_->UpdateTextStyle(spanContent, paragraph, textStyle, 20, 20);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
-    MockParagraph::TearDown();
-}
-
-/**
  * @tc.name: UpdateTextStyle002
  * @tc.desc: test span_node.cpp UpdateTextStyle function
  * @tc.type: FUNC

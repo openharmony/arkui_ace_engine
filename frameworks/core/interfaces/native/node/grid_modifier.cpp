@@ -519,6 +519,31 @@ ArkUI_Bool GetGridSyncLoad(ArkUINodeHandle node)
     return GridModelNG::GetSyncLoad(frameNode);
 }
 
+void SetGridEditModeOptions(ArkUINodeHandle node, ArkUIEditModeOptions options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    EditModeOptions newOptions;
+    newOptions.enableGatherSelectedItemsAnimation = options->enableGatherSelectedItemsAnimation;
+    GridModelNG::SetEditModeOptions(frameNode, newOptions);
+}
+
+void ResetGridEditModeOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    EditModeOptions newOptions;
+    GridModelNG::SetEditModeOptions(frameNode, newOptions);
+}
+
+void GetGridEditModeOptions(ArkUINodeHandle node, ArkUI_Bool (*values)[1])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    EditModeOptions options = GridModelNG::GetEditModeOptions(frameNode);
+    (*values)[0] = options.enableGatherSelectedItemsAnimation ? 1 : 0;
+}
+
 ArkUI_CharPtr GetColumnsTemplate(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -711,6 +736,20 @@ ArkUI_Int32 GetItemFillPolicy(ArkUINodeHandle node)
     return static_cast<int32_t>(GridModelNG::GetItemFillPolicy(frameNode));
 }
 
+void SetSupportLazyLoadingEmptyBranch(ArkUINodeHandle node, ArkUI_Bool support)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetSupportLazyLoadingEmptyBranch(frameNode, support);
+}
+
+ArkUI_Bool GetSupportLazyLoadingEmptyBranch(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return GridModelNG::GetSupportLazyLoadingEmptyBranch(frameNode);
+}
+
 namespace NodeModifier {
 const ArkUIGridModifier* GetGridModifier()
 {
@@ -785,6 +824,9 @@ const ArkUIGridModifier* GetGridModifier()
         .setSyncLoad = SetGridSyncLoad,
         .resetSyncLoad = ResetGridSyncLoad,
         .getSyncLoad = GetGridSyncLoad,
+        .setEditModeOptions = SetGridEditModeOptions,
+        .resetEditModeOptions = ResetGridEditModeOptions,
+        .getEditModeOptions = GetGridEditModeOptions,
         .setGridFadingEdge = SetGridFadingEdge,
         .resetGridFadingEdge = ResetGridFadingEdge,
         .setOnGridScrollIndexCallBack = SetOnGridScrollIndexCallBack,
@@ -811,6 +853,8 @@ const ArkUIGridModifier* GetGridModifier()
         .resetItemFillPolicy = ResetItemFillPolicy,
         .setItemFillPolicy = SetItemFillPolicy,
         .getItemFillPolicy = GetItemFillPolicy,
+        .setSupportLazyLoadingEmptyBranch = SetSupportLazyLoadingEmptyBranch,
+        .getSupportLazyLoadingEmptyBranch = GetSupportLazyLoadingEmptyBranch,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

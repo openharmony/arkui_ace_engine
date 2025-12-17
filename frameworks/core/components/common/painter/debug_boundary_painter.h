@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_ROSEN_DEBUG_BOUNDARY_PAINTER_H
 
 #include <cmath>
+#include "base/utils/macros.h"
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
@@ -31,7 +32,7 @@
 #include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace {
-class DebugBoundaryPainter : public virtual AceType {
+class ACE_FORCE_EXPORT DebugBoundaryPainter : public virtual AceType {
     DECLARE_ACE_TYPE(DebugBoundaryPainter, AceType);
 public:
 #ifndef USE_ROSEN_DRAWING

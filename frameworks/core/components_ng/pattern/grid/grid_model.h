@@ -21,15 +21,16 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/scroll_bar/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/grid/grid_constants.h"
 #include "core/components_ng/pattern/grid/grid_layout_options.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 #include "core/components_v2/grid/grid_position_controller.h"
 #include "core/event/ace_events.h"
-#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
@@ -88,10 +89,12 @@ public:
     virtual void SetOnReachStart(std::function<void()>&& onReachStart) = 0;
     virtual void SetOnReachEnd(std::function<void()>&& onReachEnd) = 0;
     virtual void SetSyncLoad(bool syncLoad) {}
+    virtual void SetEditModeOptions(NG::EditModeOptions& editModeOptions) {};
     virtual void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};
     virtual void ParseResObjRowsGap(const RefPtr<ResourceObject>& resObj) {};
     virtual void ParseResObjColumnsGap(const RefPtr<ResourceObject>& resObj) {};
+    virtual void SetSupportLazyLoadingEmptyBranch(bool enable) {};
 
     virtual DisplayMode GetDisplayMode() const = 0;
 

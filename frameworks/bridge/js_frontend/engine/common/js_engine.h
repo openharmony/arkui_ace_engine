@@ -324,6 +324,9 @@ public:
 
     virtual void CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs) {}
 
+    virtual std::vector<std::optional<std::string>> CallGetStateMgmtInfo(const std::vector<int32_t>& nodeIds,
+        const std::string& propertyName, const std::string& jsonPath) { return {}; }
+
     virtual std::string GetStacktraceMessage()
     {
         return "";

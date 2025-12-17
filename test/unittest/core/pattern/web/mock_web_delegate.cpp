@@ -390,6 +390,7 @@ void ContextMenuResultOhos::CopyImage() const {}
 void ContextMenuResultOhos::Copy() const {}
 void ContextMenuResultOhos::Paste() const {}
 void ContextMenuResultOhos::Cut() const {}
+void ContextMenuResultOhos::RequestPasswordAutoFill() const {}
 void ContextMenuResultOhos::SelectAll() const {}
 void WebWindowNewHandlerOhos::SetWebController(int32_t id) {}
 bool WebWindowNewHandlerOhos::IsFrist() const
@@ -721,7 +722,8 @@ void WebDelegate::UpdateNativeEmbedRuleTag(const std::string& tag) {}
 void WebDelegate::UpdateNativeEmbedRuleType(const std::string& type) {}
 void WebDelegate::UpdateScrollBarColor(const std::string& colorValue) {}
 void WebDelegate::LoadUrl() {}
-void WebDelegate::OnInactive(bool isOfflineWebOffMainTree) {}
+void WebDelegate::OnInactive() {}
+void WebDelegate::SetOfflineWebActiveStatus(int32_t webId, bool isActive) {}
 void WebDelegate::OnActive() {}
 void WebDelegate::OnWebviewHide() {}
 void WebDelegate::OnWebviewShow() {}
@@ -1477,6 +1479,7 @@ void WebDelegate::OnDetectedBlankScreen(
     const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount) {}
 void WebDelegate::UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
     const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold) {}
+void WebDelegate::OnRequestAutofill(int32_t menuType) {}
 void WebDelegate::OnSwitchFreeMultiWindow(bool enable) {}
 void WebDelegate::RegisterFreeMultiWindowListener() {}
 void WebDelegate::UnregisterFreeMultiWindowListener() {}

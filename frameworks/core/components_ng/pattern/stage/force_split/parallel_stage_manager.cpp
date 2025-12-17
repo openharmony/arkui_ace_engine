@@ -63,10 +63,8 @@ void ParallelStageManager::OnModeChange()
             FireParallelPageShow(primaryPage, PageTransitionType::NONE, false);
             return;
         }
-        auto primaryPattern = primaryPage->GetPattern<ParallelPagePattern>();
-        CHECK_NULL_VOID(primaryPattern);
-        auto phPage = primaryPattern->GetOrCreatePlaceHolderPage();
-        MountAndShowPlaceHolderPageIfNeeded(phPage, PageTransitionType::NONE);
+        auto page = GetRelatedOrPlaceHolderPage();
+        MountAndShowRelatedOrPlaceHolderPageIfNeeded(page, PageTransitionType::NONE);
         return;
     }
 
@@ -74,7 +72,8 @@ void ParallelStageManager::OnModeChange()
     TAG_LOGI(AceLogTag::ACE_ROUTER, "page mode change to stack");
     auto lastPattern = lastPage->GetPattern<ParallelPagePattern>();
     CHECK_NULL_VOID(lastPattern);
-    if (lastPattern->GetPageType() != RouterPageType::PLACEHOLDER_PAGE) {
+    auto type = lastPattern->GetPageType();
+    if (type != RouterPageType::PLACEHOLDER_PAGE && type != RouterPageType::RELATED_PAGE) {
         auto lastPrimaryPage = GetLastPrimaryPage();
         if (lastPrimaryPage && lastPage != lastPrimaryPage) {
             FireParallelPageHide(lastPrimaryPage, PageTransitionType::NONE);
@@ -107,14 +106,9 @@ void ParallelStageManager::OnWindowStateChange(bool show)
         return;
     }
 
-    if (lastPattern->GetPageType() != RouterPageType::PLACEHOLDER_PAGE &&
-        lastPattern->GetPageType() != RouterPageType::SECONDARY_PAGE) {
-        return;
-    }
-
-    auto primaryPage = lastPattern->GetPrimaryPage();
+    auto primaryPage = GetLastPrimaryPage();
     if (show) {
-        if (primaryPage) {
+        if (primaryPage && primaryPage != lastPage) {
             auto primaryPattern = primaryPage->GetPattern<ParallelPagePattern>();
             CHECK_NULL_VOID(primaryPattern);
             primaryPattern->OnShow(true);
@@ -124,7 +118,7 @@ void ParallelStageManager::OnWindowStateChange(bool show)
     }
 
     lastPattern->OnHide(true);
-    if (primaryPage) {
+    if (primaryPage && primaryPage != lastPage) {
         auto primaryPattern = primaryPage->GetPattern<ParallelPagePattern>();
         CHECK_NULL_VOID(primaryPattern);
         primaryPattern->OnHide(true);
@@ -151,49 +145,63 @@ RefPtr<FrameNode> ParallelStageManager::GetLastPrimaryPage()
     return nullptr;
 }
 
-void ParallelStageManager::FirePageHideOnPushPage(RouterPageType newPageType,
-    const RefPtr<FrameNode>& lastPage, const RefPtr<FrameNode>& topPhPage, PageTransitionType hideTransitionType)
+void ParallelStageManager::FirePageHideOnPushPage(
+    RouterPageType newPageType, const RefPtr<FrameNode>& lastPage, const RefPtr<FrameNode>& topRelatedOrPhPage,
+    const RefPtr<FrameNode>& prePrimaryPage, PageTransitionType hideTransitionType)
 {
+    auto lastPagePattern = lastPage->GetPattern<ParallelPagePattern>();
+    CHECK_NULL_VOID(lastPagePattern);
+    auto lastPageType = lastPagePattern->GetPageType();
     if (newPageType == RouterPageType::SECONDARY_PAGE) {
         /**
-         * [ PrimaryA | SecondaryA ]  ->  [ PrimaryA | SecondaryB ]
-         * [ PrimaryA | PlaceHolderA ]  ->  [ PrimaryA | SecondaryB ]
-         * [ SecondaryA ]  ->  [ SecondaryB ]
-         *  lastPage -> onPageHide
+         * push/replace: [ PrimaryA | SecondaryA/PlaceHolder/RelatedPage ]  ->  [ PrimaryA | SecondaryB ]
+         *  The last page needs to trigger the onPageHide lifecycle.
+         *
+         * push/replace: [ PrimaryA | empty ]  ->  [ PrimaryA | SecondaryB ]
+         *  The last page(PrimaryA) does not need to trigger the onPageHide lifecycle.
          */
-        FireParallelPageHide(lastPage, hideTransitionType);
+        if (lastPage != prePrimaryPage) {
+            FireParallelPageHide(lastPage, hideTransitionType);
+        }
+        if (!isNewPageReplacing_) {
+            return;
+        }
+        /**
+         * when replacing page in new life cycle.
+         *  step1: PushPage(current step)
+         *  step2: move page node position
+         *  step3: PopPage
+         *
+         *  replace: [ PrimaryA | RelatedPage/PlaceHolder ] -> [ SecondaryA ]
+         *  replace: [ PrimaryA | empty ] -> [ SecondaryA ]
+         *   need to notify PrimaryA's onPageHide
+         */
+        if (((lastPageType == RouterPageType::PLACEHOLDER_PAGE || lastPageType == RouterPageType::RELATED_PAGE) &&
+            prePrimaryPage) || (lastPage == prePrimaryPage)) {
+            FireParallelPageHide(prePrimaryPage, hideTransitionType);
+        }
         return;
     }
     // node -> RouterPageType::PRIMARY_PAGE
-    if (topPhPage) {
+    if (topRelatedOrPhPage) {
         /**
-         * [ PrimaryA | PlaceHolderA ]  ->  [ PrimaryB | PlaceHolderB ]
-         *  PlaceHolderA -> onPageHide
+         * [ PrimaryA | PlaceHolder/Related ]  ->  [ PrimaryB | PlaceHolder/Related ]
          *  PrimaryA -> onPageHide
          */
-        FireParallelPageHide(topPhPage, hideTransitionType);
-        auto topPhPattern = topPhPage->GetPattern<ParallelPagePattern>();
-        CHECK_NULL_VOID(topPhPattern);
-        auto primaryPage = topPhPattern->GetPrimaryPage();
-        if (primaryPage) {
-            FireParallelPageHide(primaryPage, hideTransitionType);
-        } else {
-            TAG_LOGW(AceLogTag::ACE_ROUTER, "placeHolder must has PRIMARY_PAGE");
+        if (prePrimaryPage) {
+            FireParallelPageHide(prePrimaryPage, hideTransitionType);
         }
         return;
     }
     /**
-     * [ PrimaryA | SecondaryA ]  ->  [ PrimaryB | PlaceHolderB ]
-     * [ SecondaryA ] -> [ PrimaryB | PlaceHolderB ]
+     * [ PrimaryA | SecondaryA ]  ->  [ PrimaryB | PlaceHolder/Related ]
+     * [ SecondaryA ] -> [ PrimaryB | PlaceHolder/Related ]
      *  SecondaryA -> onPageHide
      *  PrimaryA? -> onPageHide
      */
     FireParallelPageHide(lastPage, hideTransitionType);
-    auto pattern = lastPage->GetPattern<ParallelPagePattern>();
-    CHECK_NULL_VOID(pattern);
-    auto primaryPage = pattern->GetPrimaryPage();
-    if (primaryPage) {
-        FireParallelPageHide(primaryPage, hideTransitionType);
+    if (prePrimaryPage && prePrimaryPage != lastPage) {
+        FireParallelPageHide(prePrimaryPage, hideTransitionType);
     }
 }
 
@@ -202,9 +210,9 @@ void ParallelStageManager::FirePageShowOnPushPage(const RefPtr<FrameNode>& newTo
 {
     if (newTopPattern->GetPageType() == RouterPageType::SECONDARY_PAGE) {
         /**
-         * [ PrimaryA | SecondaryA ]  ->  [ PrimaryA | SecondaryB ]
-         * [ PrimaryA | PlaceHolderA ]  ->  [ PrimaryA | SecondaryB ]
-         * [ SecondaryA ]  ->  [ SecondaryB ]
+         * push: [ PrimaryA | SecondaryA/RelatedPage/PlaceHolder ]  ->  [ PrimaryA | SecondaryB ]
+         *  SecondaryB -> onPageShow
+         * replace: [ PrimaryA | SecondaryA/RelatedPage/PlaceHolder ] -> [ SecondaryB ]
          *  SecondaryB -> onPageShow
          */
         FireParallelPageShow(newTopPage, showTransitionType);
@@ -213,19 +221,19 @@ void ParallelStageManager::FirePageShowOnPushPage(const RefPtr<FrameNode>& newTo
 
     // newTopPage -> RouterPageType::PRIMARY_PAGE
     /**
-     * [ PrimaryA | SecondaryA ]  ->  [ PrimaryB | PlaceHolderB ]
-     * [ PrimaryA | PlaceHolderA ]  ->  [ PrimaryB | PlaceHolderB ]
-     * [ SecondaryA ] -> [ PrimaryB | PlaceHolderB ]
+     * [ PrimaryA | SecondaryA ]  ->  [ PrimaryB | PlaceHolder/RelatedPage ]
+     * [ PrimaryA | PlaceHolder/RelatedPage ]  ->  [ PrimaryB | PlaceHolder/RelatedPage ]
+     * [ SecondaryA ] -> [ PrimaryB | PlaceHolder/RelatedPage ]
      *  PrimaryB -> onPageShow
-     *  PlaceHolderB -> aboutToAppear
-     *  PlaceHolderB -> onPageShow
+     *  PlaceHolder/RelatedPage -> aboutToAppear?
+     *  PlaceHolder/RelatedPage -> onPageShow
      */
     FireParallelPageShow(newTopPage, showTransitionType);
 
     if (isNewPageReplacing_) {
         /**
          * when replacing page in new life cycle.
-         *  step1: PushPage
+         *  step1: PushPage(current step)
          *  step2: move page node position
          *  step3: PopPage
          *
@@ -235,8 +243,8 @@ void ParallelStageManager::FirePageShowOnPushPage(const RefPtr<FrameNode>& newTo
         return;
     }
 
-    auto newPhPage = newTopPattern->GetOrCreatePlaceHolderPage();
-    MountAndShowPlaceHolderPageIfNeeded(newPhPage, showTransitionType);
+    auto page = GetRelatedOrPlaceHolderPage();
+    MountAndShowRelatedOrPlaceHolderPageIfNeeded(page, showTransitionType);
 }
 
 bool ParallelStageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition,
@@ -252,13 +260,13 @@ bool ParallelStageManager::PushPage(const RefPtr<FrameNode>& node, bool needHide
     newTopPattern->InitOnTouchEvent();
     if (!stagePattern->GetIsSplit() && !isTopFullScreenPageChanged_) {
         bool result = StageManager::PushPage(node, needHideLast, needTransition, std::move(pushIntentPageCallback));
-        auto lastPrimaryPage = RefreshAndGetLastPrimaryPage();
+        auto lastPrimaryPage = GetLastPrimaryPage();
         stagePattern->SetPrimaryPage(lastPrimaryPage);
         return result;
     }
 
-    if (newTopPattern->GetPageType() != RouterPageType::PRIMARY_PAGE &&
-        newTopPattern->GetPageType() != RouterPageType::SECONDARY_PAGE) {
+    if (newTopPattern->GetPageType() != RouterPageType::SECONDARY_PAGE) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "New routerPage must be Secondary page in SplitMode");
         return false;
     }
     bool isEmpty = IsEmptyInSplitMode();
@@ -282,6 +290,8 @@ bool ParallelStageManager::PushPageInSplitMode(const RefPtr<FrameNode>& newPageN
     CHECK_NULL_RETURN(pipeline, false);
     auto newTopPattern = newPageNode->GetPattern<ParallelPagePattern>();
     auto stagePattern = stageNode_->GetPattern<ParallelStagePattern>();
+    CHECK_NULL_RETURN(stagePattern, false);
+    auto prePrimaryPage = stagePattern->GetPrimaryPage();
     auto preTopPage = GetLastPage();
     RefPtr<FrameNode> lastPage = nullptr;
     if (!IsEmptyInSplitMode()) {
@@ -292,8 +302,8 @@ bool ParallelStageManager::PushPageInSplitMode(const RefPtr<FrameNode>& newPageN
         pipeline->FlushPipelineImmediately();
     }
 
-    RefPtr<FrameNode> topPhPage = nullptr;
-    if (!RemovePlaceHolderPageIfExist(topPhPage, false)) {
+    RefPtr<FrameNode> topRelatedOrPhPage = nullptr;
+    if (!RemoveRelatedOrPlaceHolderPageIfExist(topRelatedOrPhPage, false)) {
         return false;
     }
 
@@ -302,7 +312,8 @@ bool ParallelStageManager::PushPageInSplitMode(const RefPtr<FrameNode>& newPageN
     if (!IsEmptyInSplitMode() && needHideLast) {
         hidePageNode = lastPage;
         if (!isNewLifecycle) {
-            FirePageHideOnPushPage(newTopPattern->GetPageType(), lastPage, topPhPage, hideTransitionType);
+            FirePageHideOnPushPage(
+                newTopPattern->GetPageType(), lastPage, topRelatedOrPhPage, prePrimaryPage, hideTransitionType);
         }
     }
 
@@ -313,44 +324,22 @@ bool ParallelStageManager::PushPageInSplitMode(const RefPtr<FrameNode>& newPageN
     newPageNode->MountToParent(stageNode_);
     // then build the total child. Build will trigger page create and onAboutToAppear
     newPageNode->Build(nullptr);
-    // when create PrimaryPage, we need to create PlaceHolderPage at sametime.
-    do {
-        if (newTopPattern->GetPageType() != RouterPageType::PRIMARY_PAGE) {
-            break;
-        }
-        auto newPhPage = newTopPattern->GetOrCreatePlaceHolderPage();
-        if (!newPhPage) {
-            break;
-        }
-        auto newPhPattern = newPhPage->GetPattern<ParallelPagePattern>();
-        if (!newPhPattern) {
-            break;
-        }
-        newPhPage->GetRenderContext()->SyncGeometryProperties(rect);
-        // mount to parent and mark build render tree.
-        newPhPage->MountToParent(stageNode_);
-        if (!newPhPattern->IsPlaceHolderPageBuildCompleted()) {
-            // then build the total child. Build will trigger page create and onAboutToAppear
-            newPhPage->Build(nullptr);
-            newPhPage->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            newPhPattern->SetIsPlaceHolderPageBuildCompleted(true);
-        }
-        stageNode_->RemoveChild(newPhPage);
-    } while (false);
+
     // fire top SecondaryPage lifecycle if need to clear
     if (needClearSecondaryPage_ && !secondaryPageStack_.empty() && preTopPage) {
-        FirePageHideOnPopPage(topPhPage, preTopPage, newPageNode, newTopPattern, hideTransitionType);
+        FirePageHideOnPopPage(topRelatedOrPhPage, preTopPage, newPageNode, newTopPattern, hideTransitionType);
     }
 
     // fire new lifecycle
     if (hidePageNode && needHideLast && isNewLifecycle) {
-        FirePageHideOnPushPage(newTopPattern->GetPageType(), lastPage, topPhPage, hideTransitionType);
+        FirePageHideOnPushPage(
+            newTopPattern->GetPageType(), lastPage, topRelatedOrPhPage, prePrimaryPage, hideTransitionType);
     }
     stageNode_->RebuildRenderContextTree();
 
     FirePageShowOnPushPage(newPageNode, newTopPattern, PageTransitionType::NONE);
 
-    auto lastPrimaryPage = RefreshAndGetLastPrimaryPage();
+    auto lastPrimaryPage = GetLastPrimaryPage();
     stagePattern->SetPrimaryPage(lastPrimaryPage);
 
     stagePattern_->SetCurrentPageIndex(newTopPattern->GetPageInfo()->GetPageId());
@@ -367,11 +356,10 @@ bool ParallelStageManager::PushPageInSplitMode(const RefPtr<FrameNode>& newPageN
     }
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     newPageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
     return true;
 }
 
-bool ParallelStageManager::FirePageHideOnPopPage(const RefPtr<FrameNode>& topPhPage,
+bool ParallelStageManager::FirePageHideOnPopPage(const RefPtr<FrameNode>& relatedOrPhPage,
     const RefPtr<FrameNode>& preTopPage, const RefPtr<FrameNode>& newTopPage,
     const RefPtr<ParallelPagePattern>& newTopPattern, PageTransitionType hideTransitionType)
 {
@@ -386,47 +374,35 @@ bool ParallelStageManager::FirePageHideOnPopPage(const RefPtr<FrameNode>& topPhP
          *  SecondaryA -> onPageHide
          */
         FireParallelPageHide(preTopPage, hideTransitionType);
-        auto prePrimaryPage = preTopPattern->GetPrePrimaryPage();
-        preTopPattern->SetPrePrimaryPage(nullptr);
-        if (isNewPageReplacing_ && prePrimaryPage &&
-            newTopPattern->GetPageType() == RouterPageType::PRIMARY_PAGE && prePrimaryPage != newTopPage) {
-            /**
-             * replace(PrimaryA, single)
-             * stack bottom  -> stack top
-             * [ PrimaryA ] [ SecondaryA ] [ PrimaryB ] [ SecondaryB ] -> [ SecondaryA ] [ PrimaryB ] [ PrimaryA ]
-             *  step1: MovePageToFront
-             *  step2: move page node position
-             *  step3: PopPage
-             *    we need to hide SecondaryB's pre PrimaryPage(that is PrimaryB) in step3.
-             */
-            FireParallelPageHide(prePrimaryPage, hideTransitionType);
-        }
         return true;
     }
     if (preType == RouterPageType::PRIMARY_PAGE) {
         /**
          * replace(SecondaryA, single)
          * stack bottom -> stack top
-         * [ SecondaryA ] [ PrimaryB ] [ PrimaryA ] -> [ PrimaryB ] [ SecondaryA ]
+         * [ SecondaryA ] [ PrimaryB ] -> [ SecondaryA ]
          *  step1: MovePageToFront
+         *             Remove PrimaryB's RelatedPage/PlaceHolder, and then move SecondaryA to top
          *  step2: move page position
-         *  step3: PopPage
-         *    we need to hide PrimaryA's placeHolder page in step3.
+         *             Swap PrimaryB and SecondaryA
+         *  step3: PopPage(current step)
+         *             Remove PrimaryB
+         *  we need to hide PrimaryB's RelatedPage/PlaceHolder in step3.
          */
-        RefPtr<FrameNode> phPage = topPhPage;
-        if (isNewPageReplacing_ && !phPage) {
-            phPage = preTopPattern->GetOrCreatePlaceHolderPage();
+        auto tempRelatedOrPhPage = relatedOrPhPage;
+        if (isNewPageReplacing_ && !tempRelatedOrPhPage) {
+            tempRelatedOrPhPage = GetRelatedOrPlaceHolderPage();
         }
 
         /**
-         * [ PrimaryA | PlaceHolderA ]  ->  [ xxx ]
-         * [ PrimaryA | PlaceHolderA ]  ->  [ xxx | xxx ]
+         * [ PrimaryA | PlaceHolder/RelatedPage ]  ->  [ xxx ]
+         * [ PrimaryA | PlaceHolder/RelatedPage ]  ->  [ xxx | xxx ]
          * [ PrimaryA | noPlaceHolder ]  ->  xxx    (newPageReplacing)
+         *  PlaceHolder/RelatedPage? -> onPageHide
          *  PrimaryA -> onPageHide
-         *  PlaceHolderA? -> onPageHide
          */
-        if (phPage) {
-            FireParallelPageHide(phPage, hideTransitionType);
+        if (tempRelatedOrPhPage) {
+            FireParallelPageHide(tempRelatedOrPhPage, hideTransitionType);
         }
         FireParallelPageHide(preTopPage, hideTransitionType);
         return true;
@@ -435,7 +411,7 @@ bool ParallelStageManager::FirePageHideOnPopPage(const RefPtr<FrameNode>& topPhP
     return false;
 }
 
-bool ParallelStageManager::FirePageShowOnPopPage(const RefPtr<FrameNode>& topPhPage,
+bool ParallelStageManager::FirePageShowOnPopPage(const RefPtr<FrameNode>& relatedOrPhPage,
     const RefPtr<FrameNode>& preTopPage, const RefPtr<ParallelPagePattern>& preTopPattern,
     const RefPtr<FrameNode>& newTopPage, const RefPtr<ParallelPagePattern>& newTopPattern,
     PageTransitionType showTransitionType)
@@ -454,12 +430,12 @@ bool ParallelStageManager::FirePageShowOnPopPage(const RefPtr<FrameNode>& topPhP
         }
         if (newType == RouterPageType::PRIMARY_PAGE) {
             /**
-             * [ PrimaryA | SecondaryA ]  ->  [ PrimaryA | PlaceHolderA ]
-             *  PlaceHolderA -> aboutToAppear
-             *  PlaceHolderA -> onPageShow
+             * [ PrimaryA | SecondaryA ]  ->  [ PrimaryA | PlaceHolder/RelatedPage ]
+             *  PlaceHolder/RelatedPage -> aboutToAppear
+             *  PlaceHolder/RelatedPage -> onPageShow
              */
-            auto newPhPage = newTopPattern->GetOrCreatePlaceHolderPage();
-            MountAndShowPlaceHolderPageIfNeeded(newPhPage, showTransitionType);
+            auto page = GetRelatedOrPlaceHolderPage();
+            MountAndShowRelatedOrPlaceHolderPageIfNeeded(page, showTransitionType);
             return true;
         }
         TAG_LOGW(AceLogTag::ACE_ROUTER, "unexpected newTopPage type: %{public}d when preTopPage type is: %{public}d",
@@ -467,20 +443,15 @@ bool ParallelStageManager::FirePageShowOnPopPage(const RefPtr<FrameNode>& topPhP
         return false;
     }
     if (preType == RouterPageType::PRIMARY_PAGE) {
-        if (!topPhPage && !isNewPageReplacing_) {
-            TAG_LOGW(AceLogTag::ACE_ROUTER, "PrimaryPage has no placeHolder Page in split mode");
+        if (!relatedOrPhPage && !isNewPageReplacing_) {
+            TAG_LOGW(AceLogTag::ACE_ROUTER, "PrimaryPage has no placeHolder/related Page in split mode");
         }
         if (newType == RouterPageType::SECONDARY_PAGE) {
             /**
-             * [ PrimaryA | PlaceHolderA ]  ->  [ PrimaryB | SecondaryA ]
-             * [ PrimaryA | PlaceHolderA ]  ->  [ SecondaryA ]
+             * [ PrimaryA | PlaceHolder/RelatedPage ]  ->  [ PrimaryB | SecondaryA ]
+             * [ PrimaryA | PlaceHolder/RelatedPage ]  ->  [ SecondaryA ]
              *  SecondaryA -> onPageShow
-             *  PrimaryB? -> onPageShow
              */
-            auto newPrimaryPage = newTopPattern->GetPrimaryPage();
-            if (newPrimaryPage) {
-                FireParallelPageShow(newPrimaryPage, showTransitionType);
-            }
             FireParallelPageShow(newTopPage, showTransitionType);
             return true;
         }
@@ -492,8 +463,8 @@ bool ParallelStageManager::FirePageShowOnPopPage(const RefPtr<FrameNode>& topPhP
              *  PlaceHolderB -> onPageShow
              */
             FireParallelPageShow(newTopPage, showTransitionType);
-            auto newPhPage = newTopPattern->GetOrCreatePlaceHolderPage();
-            MountAndShowPlaceHolderPageIfNeeded(newPhPage, showTransitionType);
+            auto page = GetRelatedOrPlaceHolderPage();
+            MountAndShowRelatedOrPlaceHolderPageIfNeeded(page, showTransitionType);
             return true;
         }
         TAG_LOGI(AceLogTag::ACE_ROUTER, "unexpected new Top page type: %{public}d", static_cast<int32_t>(newType));
@@ -510,7 +481,7 @@ bool ParallelStageManager::PopPage(const RefPtr<FrameNode>& pageNode, bool needS
     CHECK_NULL_RETURN(stagePattern, false);
     if (!stagePattern->GetIsSplit() && !isTopFullScreenPageChanged_) {
         bool result = StageManager::PopPage(pageNode, needShowNext, needTransition);
-        auto lastPrimaryPage = RefreshAndGetLastPrimaryPage();
+        auto lastPrimaryPage = GetLastPrimaryPage();
         stagePattern->SetPrimaryPage(lastPrimaryPage);
         return result;
     }
@@ -528,16 +499,16 @@ bool ParallelStageManager::PopPageInSplitMode(bool needShowNext, bool needTransi
 
     const int32_t transitionPageSize = 2;
     const auto& children = stageNode_->GetChildren();
-    int32_t pageNumberExcludePlaceHolder = 0;
-    if (!GetPageNumberExcludePlaceHolderPage(pageNumberExcludePlaceHolder)) {
+    int32_t pageNumber = 0;
+    if (!GetPageNumberExcludeRelatedOrPlaceHolderPage(pageNumber)) {
         return false;
     }
-    needTransition &= (pageNumberExcludePlaceHolder >= transitionPageSize);
+    needTransition &= (pageNumber >= transitionPageSize);
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
-    RefPtr<FrameNode> phPage = nullptr;
-    if (!RemovePlaceHolderPageIfExist(phPage, !isNewPageReplacing_)) {
+    RefPtr<FrameNode> relatedOrPhPage = nullptr;
+    if (!RemoveRelatedOrPlaceHolderPageIfExist(relatedOrPhPage, !isNewPageReplacing_)) {
         return false;
     }
 
@@ -547,21 +518,21 @@ bool ParallelStageManager::PopPageInSplitMode(bool needShowNext, bool needTransi
     CHECK_NULL_RETURN(preTopPattern, false);
     RefPtr<FrameNode> newTopPage = nullptr;
     RefPtr<ParallelPagePattern> newTopPattern = nullptr;
-    if (pageNumberExcludePlaceHolder >= transitionPageSize) {
+    if (pageNumber >= transitionPageSize) {
         newTopPage = AceType::DynamicCast<FrameNode>(*(++children.rbegin()));
         CHECK_NULL_RETURN(newTopPage, false);
         newTopPattern = newTopPage->GetPattern<ParallelPagePattern>();
         CHECK_NULL_RETURN(newTopPattern, false);
     }
 
-    if (!FirePageHideOnPopPage(phPage, preTopPage, newTopPage, newTopPattern, PageTransitionType::NONE)) {
+    if (!FirePageHideOnPopPage(relatedOrPhPage, preTopPage, newTopPage, newTopPattern, PageTransitionType::NONE)) {
         return false;
     }
 
     PageTransitionType showTransitionType = PageTransitionType::NONE;
-    if (needShowNext && pageNumberExcludePlaceHolder >= transitionPageSize) {
+    if (needShowNext && pageNumber >= transitionPageSize) {
         if (!FirePageShowOnPopPage(
-            phPage, preTopPage, preTopPattern, newTopPage, newTopPattern, showTransitionType)) {
+            relatedOrPhPage, preTopPage, preTopPattern, newTopPage, newTopPattern, showTransitionType)) {
             return false;
         }
     }
@@ -571,24 +542,21 @@ bool ParallelStageManager::PopPageInSplitMode(bool needShowNext, bool needTransi
         }
         /**
          * replace(PrimaryC, standard)
-         *  stack bottom -> stack top
-         *  before: [ PrimaryA ] [ SecondaryA ] [PrimaryB ] [SecondaryB ]
-         *  after: [ PrimaryA ] [ SecondaryA ] [PrimaryB ] [PrimaryC ]
+         *  before: [ PrimaryA | RelatedPage/PlaceHolder ]
+         *  after: [ PrimaryC | RelatedPage/PlaceHolder ]
          *  step1: LoadPage (pageC has not yet been recognized as the PrimaryPage before it was created)
-         *  step2: OnPrimaryPageDetected (we won't create placeHolderPage at this step)
+         *             Remove RelatedPage/PlaceHolder, then add PageC
+         *  step2: OnPrimaryPageDetected (we won't mount, show RelatedPage/PlaceHolder at this step)
+         *             recognize PageC as PrimaryC
          *  step3: move page node position
-         *  step4: PopPage (we will create placeHolderPage at this step)
-         *   we need to create, mount, show PrimaryC's placeHolder
+         *             Swap PrimaryA and PrimaryC
+         *  step4: PopPage (we will mount, show RelatedPage/PlaceHolder at this step)
+         *             Add RelatedPage/PlaceHolder, and then remove PrimaryA
          */
         if (newTopPattern->GetPageType() == RouterPageType::PRIMARY_PAGE) {
-            auto newPhPage = newTopPattern->GetOrCreatePlaceHolderPage();
-            MountAndShowPlaceHolderPageIfNeeded(newPhPage, showTransitionType);
+            auto page = GetRelatedOrPlaceHolderPage();
+            MountAndShowRelatedOrPlaceHolderPageIfNeeded(page, showTransitionType);
             break;
-        }
-        RefreshAndGetLastPrimaryPage();
-        auto primaryPage = newTopPattern->GetPrimaryPage();
-        if (primaryPage) {
-            FireParallelPageShow(primaryPage, showTransitionType);
         }
     } while (false);
 
@@ -600,16 +568,15 @@ bool ParallelStageManager::PopPageInSplitMode(bool needShowNext, bool needTransi
 
     stageNode_->RemoveChild(preTopPage);
 
-    auto lastPrimaryPage = RefreshAndGetLastPrimaryPage();
+    auto lastPrimaryPage = GetLastPrimaryPage();
     stagePattern_->SetPrimaryPage(lastPrimaryPage);
 
     preTopPage->SetChildrenInDestroying();
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
     return true;
 }
 
-bool ParallelStageManager::GetPageNumberExcludePlaceHolderPage(int32_t& pageNumber)
+bool ParallelStageManager::GetPageNumberExcludeRelatedOrPlaceHolderPage(int32_t& pageNumber)
 {
     CHECK_NULL_RETURN(stageNode_, false);
     auto stagePattern = stageNode_->GetPattern<ParallelStagePattern>();
@@ -623,7 +590,8 @@ bool ParallelStageManager::GetPageNumberExcludePlaceHolderPage(int32_t& pageNumb
     if (stagePattern->HasDividerNode()) {
         pageNumber--;
     }
-    if (lastPattern->GetPageType() == RouterPageType::PLACEHOLDER_PAGE) {
+    auto type = lastPattern->GetPageType();
+    if (type == RouterPageType::PLACEHOLDER_PAGE || type == RouterPageType::RELATED_PAGE) {
         pageNumber--;
     }
     return true;
@@ -653,37 +621,29 @@ bool ParallelStageManager::FirePageHideOnPopPageToIndex(int32_t popSize)
 
 bool ParallelStageManager::FirePageShowOnPopPageToIndex(
     const RefPtr<ParallelStagePattern>& stagePattern, const RefPtr<FrameNode>& toPage,
-    bool& addNewPhPage, PageTransitionType showTransitionType)
+    bool& addRelatedOrPhPage, PageTransitionType showTransitionType)
 {
     auto pattern = toPage->GetPattern<ParallelPagePattern>();
     CHECK_NULL_RETURN(pattern, false);
     auto type = pattern->GetPageType();
     if (type == RouterPageType::SECONDARY_PAGE) {
         /**
-         * [ xxx ]/[ xxx | xxx ] -> [ SecondaryA ]
-         * [ xxx ]/[ xxx | xxx ] -> [ PrimaryA | SecondaryA ]
-         *  SecondaryA -> onPageShow
-         *  PrimaryA? -> onPageShow
+         * [ SecondaryB ]/[ PrimaryA | xxx ] -> [ SecondaryA ]
+         * [ PrimaryA | SecondaryB ] -> [ PrimaryA | SecondaryA/RelatedPage/PlaceHolder ]
+         *  SecondaryA/RelatedPage/PlaceHolder -> onPageShow
          */
         FireParallelPageShow(toPage, showTransitionType);
-        auto newPrimaryPage = pattern->GetPrimaryPage();
-        if (newPrimaryPage) {
-            FireParallelPageShow(newPrimaryPage, showTransitionType);
-        }
         return true;
     }
     if (type == RouterPageType::PRIMARY_PAGE) {
         /**
-         * [ PrimaryA | PlaceHolderA ] -> [ PrimaryB | PlaceHolderB ]
-         * [ PrimaryA | SecondaryA ] -> [ PrimaryB | PlaceHolderB ]
-         *  PrimaryB -> onPageShow
-         *  PlaceHolderB -> aboutToAppear
-         *  PlaceHolderB -> onPageShow
+         * [ PrimaryA | SecondaryA ] -> [ PrimaryA | PlaceHolder/RelatedPage ]
+         *  PlaceHolder/RelatedPage -> aboutToAppear
+         *  PlaceHolder/RelatedPage -> onPageShow
          */
-        FireParallelPageShow(toPage, showTransitionType);
-        auto newPhPage = pattern->GetOrCreatePlaceHolderPage();
-        MountAndShowPlaceHolderPageIfNeeded(newPhPage, showTransitionType);
-        addNewPhPage = true;
+        auto page = GetRelatedOrPlaceHolderPage();
+        MountAndShowRelatedOrPlaceHolderPageIfNeeded(page, showTransitionType);
+        addRelatedOrPhPage = true;
         return true;
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "invalid dest page type: %{public}d", static_cast<int32_t>(type));
@@ -698,7 +658,7 @@ bool ParallelStageManager::PopPageToIndex(int32_t index, bool needShowNext, bool
     CHECK_NULL_RETURN(stagePattern, false);
     if (!stagePattern->GetIsSplit() && !isTopFullScreenPageChanged_) {
         bool result = StageManager::PopPageToIndex(index, needShowNext, needTransition);
-        auto lastPrimaryPage = RefreshAndGetLastPrimaryPage();
+        auto lastPrimaryPage = GetLastPrimaryPage();
         stagePattern->SetPrimaryPage(lastPrimaryPage);
         return result;
     }
@@ -717,7 +677,7 @@ bool ParallelStageManager::PopPageToIndexInSplitMode(int32_t index, bool needSho
     auto stagePattern = stageNode_->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, false);
     int32_t pageNumber = 0;
-    if (!GetPageNumberExcludePlaceHolderPage(pageNumber)) {
+    if (!GetPageNumberExcludeRelatedOrPlaceHolderPage(pageNumber)) {
         return false;
     }
     const auto& children = stageNode_->GetChildren();
@@ -733,8 +693,8 @@ bool ParallelStageManager::PopPageToIndexInSplitMode(int32_t index, bool needSho
         pipeline->FlushPipelineImmediately();
     }
 
-    RefPtr<FrameNode> phPage = nullptr;
-    if (!RemovePlaceHolderPageIfExist(phPage)) {
+    RefPtr<FrameNode> relatedOrPhPage = nullptr;
+    if (!RemoveRelatedOrPlaceHolderPageIfExist(relatedOrPhPage)) {
         return false;
     }
 
@@ -746,10 +706,10 @@ bool ParallelStageManager::PopPageToIndexInSplitMode(int32_t index, bool needSho
         return false;
     }
 
-    bool addNewPhPage = false;
+    bool addRelatedOrPhPage = false;
     if (needShowNext) {
         if (!FirePageShowOnPopPageToIndex(
-            stagePattern, toPage, addNewPhPage, PageTransitionType::NONE)) {
+            stagePattern, toPage, addRelatedOrPhPage, PageTransitionType::NONE)) {
             return false;
         }
     }
@@ -759,7 +719,7 @@ bool ParallelStageManager::PopPageToIndexInSplitMode(int32_t index, bool needSho
 
     for (int32_t current = 0; current < popSize; ++current) {
         RefPtr<UINode> pageNode = nullptr;
-        if (addNewPhPage) {
+        if (addRelatedOrPhPage) {
             pageNode = *(++children.rbegin());
         } else {
             pageNode = GetLastPage();
@@ -767,11 +727,10 @@ bool ParallelStageManager::PopPageToIndexInSplitMode(int32_t index, bool needSho
         stageNode_->RemoveChild(pageNode);
     }
 
-    auto lastPrimaryPage = RefreshAndGetLastPrimaryPage();
+    auto lastPrimaryPage = GetLastPrimaryPage();
     stagePattern->SetPrimaryPage(lastPrimaryPage);
 
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
     return true;
 }
 
@@ -783,7 +742,7 @@ bool ParallelStageManager::CleanPageStack()
     CHECK_NULL_RETURN(stagePattern, false);
     if (!stagePattern->GetIsSplit() && !isTopFullScreenPageChanged_) {
         bool result = StageManager::CleanPageStack();
-        auto lastPrimaryPage = RefreshAndGetLastPrimaryPage();
+        auto lastPrimaryPage = GetLastPrimaryPage();
         stagePattern->SetPrimaryPage(lastPrimaryPage);
         return result;
     }
@@ -795,12 +754,12 @@ bool ParallelStageManager::CleanPageStackInSplitMode(const RefPtr<ParallelStageP
     auto pipeline = stageNode_->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
 
-    int32_t pageNumberExcludePlaceHolder = 0;
-    if (!GetPageNumberExcludePlaceHolderPage(pageNumberExcludePlaceHolder)) {
+    int32_t pageNumber = 0;
+    if (!GetPageNumberExcludeRelatedOrPlaceHolderPage(pageNumber)) {
         return false;
     }
     constexpr int32_t PAGE_NUMBER = 2;
-    if (pageNumberExcludePlaceHolder < PAGE_NUMBER) {
+    if (pageNumber < PAGE_NUMBER) {
         return false;
     }
     const auto& children = stageNode_->GetChildren();
@@ -809,7 +768,8 @@ bool ParallelStageManager::CleanPageStackInSplitMode(const RefPtr<ParallelStageP
     CHECK_NULL_RETURN(lastPage, false);
     auto lastPattern = lastPage->GetPattern<ParallelPagePattern>();
     CHECK_NULL_RETURN(lastPattern, false);
-    if (lastPattern->GetPageType() == RouterPageType::PLACEHOLDER_PAGE) {
+    auto lastPageType = lastPattern->GetPageType();
+    if (lastPageType == RouterPageType::PLACEHOLDER_PAGE || lastPageType == RouterPageType::RELATED_PAGE) {
         if (children.size() < PAGE_NUMBER) {
             return false;
         }
@@ -821,12 +781,12 @@ bool ParallelStageManager::CleanPageStackInSplitMode(const RefPtr<ParallelStageP
             return false;
         }
         needHidePrimaryPage = false;
-    } else if (lastPattern->GetPageType() == RouterPageType::PRIMARY_PAGE) {
+    } else if (lastPageType == RouterPageType::PRIMARY_PAGE) {
         return false;
     }
 
     bool hasDivider = stagePattern->HasDividerNode();
-    auto popSize = pageNumberExcludePlaceHolder - 1;
+    auto popSize = pageNumber - 1;
     for (int32_t count = 0; count < popSize; ++count) {
         RefPtr<FrameNode> pageNode = nullptr;
         if (hasDivider) {
@@ -842,7 +802,6 @@ bool ParallelStageManager::CleanPageStackInSplitMode(const RefPtr<ParallelStageP
             if (!pagePattern) {
                 break;
             }
-            pagePattern->SetPrimaryPage(nullptr);
             if (pagePattern->GetPageType() != RouterPageType::PRIMARY_PAGE) {
                 break;
             }
@@ -854,11 +813,10 @@ bool ParallelStageManager::CleanPageStackInSplitMode(const RefPtr<ParallelStageP
         } while (false);
         stageNode_->RemoveChild(pageNode);
     }
-    auto lastPrimaryPage = RefreshAndGetLastPrimaryPage();
+    auto lastPrimaryPage = GetLastPrimaryPage();
     stagePattern->SetPrimaryPage(lastPrimaryPage);
 
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
     return true;
 }
 
@@ -870,7 +828,7 @@ bool ParallelStageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool n
     CHECK_NULL_RETURN(stagePattern, false);
     if (!stagePattern->GetIsSplit() && !isTopFullScreenPageChanged_) {
         bool result = StageManager::MovePageToFront(node, needHideLast, needTransition);
-        auto lastPrimaryPage = RefreshAndGetLastPrimaryPage();
+        auto lastPrimaryPage = GetLastPrimaryPage();
         stagePattern->SetPrimaryPage(lastPrimaryPage);
         return result;
     }
@@ -891,32 +849,7 @@ bool ParallelStageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool n
     if (lastPage == node) {
         return true;
     }
-
     return MovePageToFrontInSplitMode(node, needHideLast, needTransition);
-}
-
-RefPtr<FrameNode> ParallelStageManager::RefreshAndGetLastPrimaryPage()
-{
-    CHECK_NULL_RETURN(stageNode_, nullptr);
-    const auto& children = stageNode_->GetChildren();
-    RefPtr<FrameNode> curPrimaryPage = nullptr;
-    for (auto it = children.begin(); it != children.end(); ++it) {
-        auto page = AceType::DynamicCast<FrameNode>(*it);
-        if (!page) {
-            continue;
-        }
-        auto pattern = page->GetPattern<ParallelPagePattern>();
-        if (!pattern) {
-            continue;
-        }
-        auto type = pattern->GetPageType();
-        if (type == RouterPageType::PRIMARY_PAGE) {
-            curPrimaryPage = page;
-        }
-        pattern->SetPrimaryPage(curPrimaryPage);
-    }
-
-    return curPrimaryPage;
 }
 
 void ParallelStageManager::FirePageHideOnMovePageToFront(
@@ -924,10 +857,9 @@ void ParallelStageManager::FirePageHideOnMovePageToFront(
 {
     if (newTopPageType == RouterPageType::SECONDARY_PAGE) {
         /**
-         * [ PrimaryA | PlaceHolderA ]  ->  [ PrimaryA | SecondaryA ]
-         * [ PrimaryA | SecondaryA ]  ->  [ PrimaryA | SecondaryB ]
+         * [ PrimaryA | SecondaryA/PlaceHolder/RelatedPage ]  ->  [ PrimaryA | SecondaryB ]
          * [ SecondaryA ]  ->  [ SecondaryB ]
-         *  preLastPage -> onPageHide
+         *  preLastPage(SecondaryA/PlaceHolder/RelatedPage) -> onPageHide
          */
         FireParallelPageHide(preLastPage, hideTransitionType);
         return;
@@ -940,52 +872,12 @@ void ParallelStageManager::FirePageHideOnMovePageToFront(
 
     // new top page is PrimaryPage
     /**
-     * [ PrimaryA | PlaceHolderA ]  ->  [ PrimaryB | PlaceHolderB ]
-     * [ PrimaryA | SecondaryA ]  ->  [ PrimaryB | PlaceHolderB ]
+     * [ PrimaryA | PlaceHolder/RelatedPage ]  ->  [ PrimaryB | PlaceHolder/RelatedPage ]
+     * [ PrimaryA | SecondaryA ]  ->  [ PrimaryA | PlaceHolder/RelatedPage ]
      * [ SecondaryA ]  ->  [ PrimaryB | PlaceHolderB ]
      *  preLastPage -> onPageHide
-     *  prePrimaryPage? -> onPageHide
      */
     FireParallelPageHide(preLastPage, hideTransitionType);
-    auto pattern = preLastPage->GetPattern<ParallelPagePattern>();
-    CHECK_NULL_VOID(pattern);
-    auto prePrimaryPage = pattern->GetPrimaryPage();
-    if (prePrimaryPage) {
-        FireParallelPageHide(prePrimaryPage, hideTransitionType);
-    }
-}
-
-RefPtr<FrameNode> ParallelStageManager::GetPrePrimaryPage(const RefPtr<FrameNode>& preTopPage)
-{
-    RefPtr<FrameNode> prePrimaryPage = nullptr;
-    const auto& children = stageNode_->GetChildren();
-    auto it = children.rbegin();
-    for (;it != children.rend(); ++it) {
-        if (*it == preTopPage) {
-            return nullptr;
-        }
-    }
-    if (*it != preTopPage) {
-        return nullptr;
-    }
-    // skip preTopPage
-    ++it;
-    // find pre PrimaryPage
-    for (;it != children.rend(); ++it) {
-        auto page = AceType::DynamicCast<FrameNode>(*it);
-        if (!page) {
-            break;
-        }
-        auto pattern = page->GetPattern<ParallelPagePattern>();
-        if (!pattern) {
-            break;
-        }
-        if (pattern->GetPageType() == RouterPageType::PRIMARY_PAGE) {
-            prePrimaryPage = page;
-            break;
-        }
-    }
-    return prePrimaryPage;
 }
 
 void ParallelStageManager::FirePageShowOnMovePageToFront(
@@ -995,47 +887,21 @@ void ParallelStageManager::FirePageShowOnMovePageToFront(
 {
     if (newTopPattern->GetPageType() == RouterPageType::SECONDARY_PAGE) {
         /**
-         * [ PrimaryA | SecondaryA ]  ->  [ PrimaryA | SecondaryB ]
-         * [ PrimaryA | PlaceHolderA ]  ->  [ PrimaryA | SecondaryB ]
+         * [ PrimaryA | SecondaryA/RelatedPage/PlaceHolder ]  ->  [ PrimaryA | SecondaryB ]
          * [ SecondaryA ]  ->  [ SecondaryB ]
          *  SecondaryB -> onPageShow
          */
         FireParallelPageShow(newTopPage, showTransitionType);
-
-        if (preTopPattern->GetPageType() != RouterPageType::PRIMARY_PAGE || !isNewPageReplacing_) {
-            return;
-        }
-
-        /**
-         * replace(SecondaryA, single)
-         * stack bottom -> stack top
-         * [ PrimaryA ] [ SecondaryA ] [PrimaryB ] -> [ PrimaryA ] [ SecondaryA ]
-         *  step1: MovePageToFront
-         *  step2: move page node position
-         *  step3: PopPage
-         *   we need to show SecondaryA's PrimaryPage(that is PrimaryA) in step1.
-         */
-        RefPtr<FrameNode> prePrimaryPage = GetPrePrimaryPage(preTopPage);
-        // show PrimaryA
-        if (prePrimaryPage) {
-            FireParallelPageShow(prePrimaryPage, showTransitionType);
-        }
         return;
     }
 
     // RouterPageType::PRIMARY_PAGE
     /**
-     * [ PrimaryA | PlaceHolderA ]  ->  [ PrimaryB | PlaceHolderB ]
-     * [ PrimaryA | SecondaryA ]  ->  [ PrimaryB | PlaceHolderB ]
-     * [ SecondaryA ]  ->  [ PrimaryB | PlaceHolderB ]
-     *  PrimaryB -> onPageShow
-     *  PlaceHolderB -> ?aboutToAppear
-     *  PlaceHolderB -> onPageShow
+     * [ PrimaryA | SecondaryA ]  ->  [ PrimaryA | RelatedPage/PlaceHolder ]
+     *  RelatedPage/PlaceHolder -> onPageShow
      */
-    FireParallelPageShow(newTopPage, showTransitionType);
-
-    auto newPhPage = newTopPattern->GetOrCreatePlaceHolderPage();
-    MountAndShowPlaceHolderPageIfNeeded(newPhPage, showTransitionType);
+    auto page = GetRelatedOrPlaceHolderPage();
+    MountAndShowRelatedOrPlaceHolderPageIfNeeded(page, showTransitionType);
 }
 
 bool ParallelStageManager::MovePageToFrontInSplitMode(
@@ -1052,10 +918,11 @@ bool ParallelStageManager::MovePageToFrontInSplitMode(
 
     RefPtr<FrameNode> preTopPage = nullptr;
     RefPtr<ParallelPagePattern> preTopPattern = nullptr;
-    RefPtr<FrameNode> prePrimaryPage = nullptr;
+    RefPtr<FrameNode> prePrimaryPage = GetLastPrimaryPage();
     auto lastPattern = lastPage->GetPattern<ParallelPagePattern>();
     CHECK_NULL_RETURN(lastPattern, false);
-    if (lastPattern->GetPageType() == RouterPageType::PLACEHOLDER_PAGE) {
+    auto lastPageType = lastPattern->GetPageType();
+    if (lastPageType == RouterPageType::PLACEHOLDER_PAGE || lastPageType == RouterPageType::RELATED_PAGE) {
         constexpr size_t PAGE_NUM = 3;
         if (children.size() < PAGE_NUM) {
             return false;
@@ -1067,7 +934,6 @@ bool ParallelStageManager::MovePageToFrontInSplitMode(
         if (prePattern->GetPageType() != RouterPageType::PRIMARY_PAGE) {
             return false;
         }
-        prePrimaryPage = prePage;
         preTopPage = prePage;
         preTopPattern = prePattern;
         if (node == prePage) {
@@ -1076,17 +942,14 @@ bool ParallelStageManager::MovePageToFrontInSplitMode(
     } else {
         preTopPage = lastPage;
         preTopPattern = lastPattern;
-        if (lastPattern->GetPageType() == RouterPageType::SECONDARY_PAGE) {
-            prePrimaryPage = lastPattern->GetPrimaryPage();
-        }
     }
 
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
 
-    RefPtr<FrameNode> phPage = nullptr;
-    if (!RemovePlaceHolderPageIfExist(phPage, !isNewPageReplacing_)) {
+    RefPtr<FrameNode> relatedOrPhPage = nullptr;
+    if (!RemoveRelatedOrPlaceHolderPageIfExist(relatedOrPhPage, !isNewPageReplacing_)) {
         return false;
     }
 
@@ -1101,17 +964,11 @@ bool ParallelStageManager::MovePageToFrontInSplitMode(
     FirePageShowOnMovePageToFront(
         preTopPage, preTopPattern, node, newTopPattern, PageTransitionType::NONE);
 
-    auto lastPrimaryPage = RefreshAndGetLastPrimaryPage();
+    auto lastPrimaryPage = GetLastPrimaryPage();
     stagePattern->SetPrimaryPage(lastPrimaryPage);
 
-    if (isNewPageReplacing_ && lastPattern->GetPageType() == RouterPageType::SECONDARY_PAGE) {
-        // save pre primary page for following PopPage when replace page in new life cycle.
-        // @sa FirePageHideOnPopPage()
-        lastPattern->SetPrePrimaryPage(prePrimaryPage);
-    }
-
     RefPtr<FrameNode> outPageNode = nullptr;
-    if (phPage) {
+    if (relatedOrPhPage) {
         outPageNode = prePrimaryPage;
     } else {
         outPageNode = lastPage;
@@ -1120,13 +977,12 @@ bool ParallelStageManager::MovePageToFrontInSplitMode(
     FireAutoSave(outPageNode, node);
 
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
     return true;
 }
 
-bool ParallelStageManager::RemovePlaceHolderPageIfExist(RefPtr<FrameNode>& phPage, bool needHidePlaceHolder)
+bool ParallelStageManager::RemoveRelatedOrPlaceHolderPageIfExist(RefPtr<FrameNode>& page, bool needHidePage)
 {
-    phPage = nullptr;
+    page = nullptr;
     if (IsEmptyInSplitMode()) {
         return true;
     }
@@ -1135,19 +991,20 @@ bool ParallelStageManager::RemovePlaceHolderPageIfExist(RefPtr<FrameNode>& phPag
     auto pattern = lastPage->GetPattern<ParallelPagePattern>();
     CHECK_NULL_RETURN(pattern, false);
 
-    if (pattern->GetPageType() == RouterPageType::PLACEHOLDER_PAGE) {
-        if (needHidePlaceHolder) {
+    auto type = pattern->GetPageType();
+    if (type == RouterPageType::RELATED_PAGE || type == RouterPageType::PLACEHOLDER_PAGE) {
+        if (needHidePage) {
             FireParallelPageHide(lastPage, PageTransitionType::NONE);
         }
 
         stageNode_->RemoveChild(lastPage);
-        phPage = lastPage;
+        page = lastPage;
     }
     return true;
 }
 
-bool ParallelStageManager::OnPrimaryPageDetected(const RefPtr<FrameNode>& primaryPage,
-    LoadPlaceHolderPageCallback&& callback, const std::list<WeakPtr<FrameNode>>& pageStack)
+bool ParallelStageManager::OnPrimaryPageDetected(
+    const RefPtr<FrameNode>& primaryPage, const std::list<WeakPtr<FrameNode>>& pageStack)
 {
     StageOptScope scope(this);
     CHECK_NULL_RETURN(stageNode_, false);
@@ -1155,16 +1012,13 @@ bool ParallelStageManager::OnPrimaryPageDetected(const RefPtr<FrameNode>& primar
     CHECK_NULL_RETURN(stagePattern, false);
 
     auto preLastPrimaryPage = GetLastPrimaryPage();
-
     CHECK_NULL_RETURN(primaryPage, false);
     auto primaryPattern = primaryPage->GetPattern<ParallelPagePattern>();
     CHECK_NULL_RETURN(primaryPattern, false);
-    primaryPattern->SetLoadPlaceHolderPageCallback(std::move(callback));
     primaryPattern->SetPageType(RouterPageType::PRIMARY_PAGE);
 
-    auto curLastPrimaryPage = RefreshAndGetLastPrimaryPage();
+    auto curLastPrimaryPage = GetLastPrimaryPage();
     stagePattern->SetPrimaryPage(curLastPrimaryPage);
-
     if (!stagePattern->GetIsSplit()) {
         return true;
     }
@@ -1178,14 +1032,16 @@ bool ParallelStageManager::OnPrimaryPageDetected(const RefPtr<FrameNode>& primar
     /**
      * example:
      * replace(PrimaryC, standard)
-     *  stack bottom -> stack top
-     *  before: [ PrimaryA ] [ SecondaryA ] [PrimaryB ] [SecondaryB ]
-     *  after: [ PrimaryA ] [ SecondaryA ] [PrimaryB ] [PrimaryC ]
+     *  before: [ PrimaryA | RelatedPage/PlaceHolder ]
+     *  after: [ PrimaryC ] [ RelatedPage/PlaceHolder ]
      *  step1: LoadPage (pageC has not yet been recognized as the PrimaryPage before it was created)
+     *             Remove RelatedPage/PlaceHolder, and then add PageC
      *  step2: OnPrimaryPageDetected (we won't create placeHolderPage at this step)
+     *             recognize PageC as PrimaryPage
      *  step3: move page node position
-     *  step4: PopPage (we will create placeHolderPage at this step)
-     *   we need to create, mount, show PrimaryC's placeHolder
+     *             Swap PrimaryA and PrimaryC
+     *  step4: PopPage (we will mount, show RelatedPage/PlaceHolder at this step)
+     *             Remove PrimaryA, and then mount&show RelatedPage/PlaceHolder
      */
     if (isNewPageReplacing_) {
         return true;
@@ -1206,38 +1062,36 @@ bool ParallelStageManager::OnPrimaryPageDetected(const RefPtr<FrameNode>& primar
         return true;
     }
 
-    auto phPage = primaryPattern->GetOrCreatePlaceHolderPage();
-    MountAndShowPlaceHolderPageIfNeeded(phPage, PageTransitionType::NONE);
+    auto page = GetRelatedOrPlaceHolderPage();
+    MountAndShowRelatedOrPlaceHolderPageIfNeeded(page, PageTransitionType::NONE);
     return true;
 }
 
-void ParallelStageManager::MountAndShowPlaceHolderPageIfNeeded(
-    const RefPtr<FrameNode>& phPage, PageTransitionType showTransitionType)
+void ParallelStageManager::MountAndShowRelatedOrPlaceHolderPageIfNeeded(
+    const RefPtr<FrameNode>& page, PageTransitionType showTransitionType)
 {
     CHECK_NULL_VOID(stageNode_);
-    CHECK_NULL_VOID(phPage);
+    CHECK_NULL_VOID(page);
     auto rect = stageNode_->GetGeometryNode()->GetFrameRect();
     rect.SetOffset({});
-    auto phGeometryNode = phPage->GetGeometryNode();
-    CHECK_NULL_VOID(phGeometryNode);
-    phGeometryNode->SetFrameSize(rect.GetSize());
-    phGeometryNode->SetMarginFrameOffset(rect.GetOffset());
-    phPage->GetRenderContext()->SyncGeometryProperties(rect);
+    auto geometryNode = page->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameSize(rect.GetSize());
+    geometryNode->SetMarginFrameOffset(rect.GetOffset());
+    page->GetRenderContext()->SyncGeometryProperties(rect);
     // mount to parent and mark build render tree.
-    phPage->MountToParent(stageNode_);
-    auto phPattern = phPage->GetPattern<ParallelPagePattern>();
-    CHECK_NULL_VOID(phPattern);
-
-    if (!phPattern->IsPlaceHolderPageBuildCompleted()) {
+    page->MountToParent(stageNode_);
+    auto pattern = page->GetPattern<ParallelPagePattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->IsPageBuildCompleted()) {
         // then build the total child. Build will trigger page create and onAboutToAppear
-        phPage->Build(nullptr);
-        phPage->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        phPattern->SetIsPlaceHolderPageBuildCompleted(true);
+        page->Build(nullptr);
+        page->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        pattern->SetIsPageBuildCompleted(true);
     }
 
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
-    FireParallelPageShow(phPage, showTransitionType, false);
+    FireParallelPageShow(page, showTransitionType, false);
 }
 
 RefPtr<FrameNode> ParallelStageManager::GetLastPage() const
@@ -1351,6 +1205,8 @@ RefPtr<FrameNode> ParallelStageManager::GetFocusPage() const
 {
     auto stageNode = GetStageNode();
     CHECK_NULL_RETURN(stageNode, nullptr);
+    auto stagePattern = stageNode->GetPattern<ParallelStagePattern>();
+    CHECK_NULL_RETURN(stagePattern, nullptr);
     const auto& children = stageNode->GetChildren();
     if (children.empty()) {
         return nullptr;
@@ -1366,9 +1222,7 @@ RefPtr<FrameNode> ParallelStageManager::GetFocusPage() const
         if (frameNode->GetFocusHub() && frameNode->GetFocusHub()->IsCurrentFocus()) {
             return frameNode;
         }
-        auto pattern = frameNode->GetPattern<ParallelPagePattern>();
-        CHECK_NULL_RETURN(pattern, nullptr);
-        auto primaryPage = pattern->GetPrimaryPage();
+        auto primaryPage = stagePattern->GetPrimaryPage();
         if (primaryPage) {
             return primaryPage;
         }
@@ -1460,7 +1314,7 @@ void ParallelStageManager::SyncPageSafeArea(bool KeyboardSafeArea)
         return;
     }
     stageNode_->MarkDirtyNode(changeType);
-    auto needSyncPage = stagePattern->GetPrimaryPage().Upgrade();
+    auto needSyncPage = stagePattern->GetPrimaryPage();
     CHECK_NULL_VOID(needSyncPage);
     if (lastPage->GetPattern<ParallelPagePattern>()->GetPageType() == RouterPageType::PRIMARY_PAGE) {
         needSyncPage = GetLastPage();
@@ -1537,7 +1391,7 @@ std::vector<RefPtr<FrameNode>> ParallelStageManager::GetTopPagesWithTransition()
     auto stagePattern = stageNode->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, pages);
     if (stagePattern->GetIsSplit()) {
-        auto page = stagePattern->GetPrimaryPage().Upgrade();
+        auto page = stagePattern->GetPrimaryPage();
         if (page) {
             pages.push_back(page);
         }
@@ -1561,5 +1415,12 @@ bool ParallelStageManager::IsSplitMode() const
     auto stagePattern = stageNode_->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, false);
     return stagePattern->GetIsSplit();
+}
+
+RefPtr<FrameNode> ParallelStageManager::GetRelatedOrPlaceHolderPage()
+{
+    auto stagePattern = AceType::DynamicCast<ParallelStagePattern>(stagePattern_);
+    CHECK_NULL_RETURN(stagePattern, nullptr);
+    return stagePattern->GetRelatedOrPlaceHolderPage();
 }
 }

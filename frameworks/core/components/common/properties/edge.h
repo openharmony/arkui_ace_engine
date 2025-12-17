@@ -28,7 +28,7 @@
 namespace OHOS::Ace {
 
 // Types of padding and margin. Contains four directions: left, top, right and bottom.
-class ACE_EXPORT Edge {
+class ACE_FORCE_EXPORT Edge {
 public:
     Edge() = default;
     explicit Edge(double value) : Edge(value, value, value, value) {}

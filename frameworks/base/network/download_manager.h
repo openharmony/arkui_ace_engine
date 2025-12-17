@@ -73,6 +73,7 @@ public:
     // Synchronously queries the cache in the preDownLoad module and assigns the result if found.
     virtual bool fetchCachedResult(const std::string& url, std::string& result);
     virtual void* WrapDownloadInfoToNapiValue(void* env, const ImageErrorInfo& errorInfo);
+    virtual void RemoveUrlCache(const std::string& /* url */) {}
 
 private:
     static std::unique_ptr<DownloadManager> instance_;

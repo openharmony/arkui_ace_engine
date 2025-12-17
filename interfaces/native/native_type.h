@@ -119,6 +119,60 @@ typedef struct {
 } ArkUI_GridItemRect;
 
 /**
+
+ * @brief Enumerates the selected indicator type of picker.
+ *
+ * @since 23
+ */
+typedef enum {
+    /** background. */
+    ARKUI_PICKER_INDICATOR_BACKGROUND = 0,
+    /** divider. */
+    ARKUI_PICKER_INDICATOR_DIVIDER = 1,
+} ArkUI_PickerIndicatorType;
+
+/**
+ * @brief style parameters of background indicator.
+ *
+ * @since 23
+ */
+typedef struct {
+    /**  background color, in 0xARGB format, for example, <b>0xFF1122FF</b> */
+    uint32_t backgroundColor;
+    /** radius of the top left corner. */
+    float topLeftRadius;
+    /** radius of the top right corner */
+    float topRightRadius;
+    /** radius of the bottom left corner */
+    float bottomLeftRadius;
+    /** radius of the bottom right corner. */
+    float bottomRightRadius;
+} ArkUI_PickerIndicatorBackground;
+
+/**
+ * @brief style parameters of divider indicator.
+ *
+ * @since 23
+ */
+typedef struct {
+    /** stroke width */
+    float strokeWidth;
+    /** divider color,in 0xARGB format, for example, <b>0xFF1122FF</b> */
+    uint32_t dividerColor;
+    /** the distance between the divider and the beginning of the side of the picker, unit vp. */
+    float startMargin;
+    /** the distance between the divider and the end of the side of the picker (unit: vp). */
+    float endMargin;
+} ArkUI_PickerIndicatorDivider;
+
+/**
+ * @brief Definition of indicator style.
+ *
+ * @since 23
+ */
+typedef struct ArkUI_PickerIndicatorStyle ArkUI_PickerIndicatorStyle;
+
+/**
  * @brief Defines the <b>Grid</b> layout options.
  *
  * @since 21
@@ -2966,6 +3020,53 @@ typedef struct ArkUI_TextCascadePickerRangeContentArray ArkUI_TextCascadePickerR
   * @since 23
   */
 typedef struct ArkUI_SelectionOptions ArkUI_SelectionOptions;
+
+/**
+ * @brief Create the ArkUI_PickerIndicatorStyle instance.
+ *
+ * @param ArkUI_PickerIndictorType, enumeration type.
+ * @return  ArkUI_PickerIndicatorStyle instance. If the instance returns a null pointer,
+ *         it indicates creation failure, and the reason for the failure may be that the address space is full or
+ *         the type not supported.
+ * @since 23
+*/
+ArkUI_PickerIndicatorStyle* OH_ArkUI_PickerIndicatorStyle_Create(ArkUI_PickerIndicatorType type);
+
+/**
+* @brief Destroy the ArkUI_PickerIndicatorStyle instance.
+*
+* @param ArkUI_PickerIndicatorStyle instance to be destroyed.
+* @since 23
+*/
+void OH_ArkUI_PickerIndicatorStyle_Dispose(ArkUI_PickerIndicatorStyle* style);
+
+/**
+* @brief Set the parameters of background style.
+*
+* @param ArkUI_PickerIndicatorStyle instance.
+* @param parameters of background style.
+* @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if success.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} The parameters set need to be consistent with
+*         the type of the created instance. If they are not consistent, this error code will be returned.
+*         This interface only takes effect when the type is "background".
+* @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_PickerIndicatorStyle_ConfigureBackground(ArkUI_PickerIndicatorStyle* style,
+    ArkUI_PickerIndicatorBackground* background);
+
+/**
+* @brief Set the parameters of divider style.
+*
+* @param ArkUI_PickerIndicatorStyle instance.
+* @param parameters of divider style.
+* @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if success.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} The parameters set need to be consistent with
+*         the type of the created instance. If they are not consistent, this error code will be returned.
+*         This interface only takes effect when the type is "divider".
+* @since 23
+*/
+ArkUI_ErrorCode OH_ArkUI_PickerIndicatorStyle_ConfigureDivider(ArkUI_PickerIndicatorStyle* style,
+    ArkUI_PickerIndicatorDivider* divider);
 
 typedef struct {
     float x;
@@ -6816,6 +6917,148 @@ void OH_ArkUI_TextContentBaseController_DeleteBackward(ArkUI_TextContentBaseCont
 void OH_ArkUI_TextContentBaseController_ScrollToVisible(
     ArkUI_TextContentBaseController* controller, int32_t start, int32_t end);
 
+/**
+ * @brief Defines the motion path options for path animation.
+ *
+ * @since 23
+ */
+typedef struct ArkUI_MotionPathOptions ArkUI_MotionPathOptions;
+
+/**
+ * @brief Create an object of the motion path options for path animation.
+ *        In the newly created ArkUI_MotionPathOptions, the "path" value is an empty string, the "from" value is 0,
+ *        the "to" value is 1, and the "rotatable" value is false.
+ *
+ * @return A pointer to the ArkUI_MotionPathOptions.
+ * @since 23
+ */
+ArkUI_MotionPathOptions* OH_ArkUI_MotionPathOptions_Create();
+
+/**
+ * @brief Dispose the ArkUI_MotionPathOptions object.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_MotionPathOptions_Dispose(ArkUI_MotionPathOptions* options);
+
+/**
+ * @brief Sets the the motion path for the animation using an SVG path string. The path supports using "start" and
+ *        "end" as placeholders for the starting and ending points, for example:
+ *        "Mstart.x start.y L50 50 Lend.x end.y Z". Refer to the SVG path format for the path string.
+ *        When set to an empty string, it is equivalent to not setting a path animation.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object.
+ * @param svgPath The motion path for the path animation.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetPath(ArkUI_MotionPathOptions* options, const char* svgPath);
+
+/**
+ * @brief Gets the motion path string in the ArkUI_MotionPathOptions object.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object.
+ * @param svgPathBuffer Buffer pointer to the motion path string.
+ * @param bufferSize The buffer size of the svgPathBuffer parameter.
+ * @param writeLength Indicates the string length actually written to the buffer
+ *                    when returning {@link ARKUI_ERROR_CODE_NO_ERROR}.
+ *                    Indicates the minimum buffer size that can accommodate the target
+ *                    when {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} is returned.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the buffer size is less than the minimum buffer size.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetPath(const ArkUI_MotionPathOptions* options, char* svgPathBuffer,
+    const int32_t bufferSize, int32_t* writeLength);
+
+/**
+ * @brief Sets the starting progress in the ArkUI_MotionPathOptions. Progress refers to the ratio of the length of the
+ *        path that has been traveled to the total length of the entire path. The value range is [0.0, 1.0], and the
+ *        "from" value should be less than or equal to the "to" value; otherwise, an ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE
+ *        error code will be returned.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object.
+ * @param from The starting progress in the ArkUI_MotionPathOptions.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE} if the "from" value is out of range or the "from" value
+ *                 is greater than the "to" value.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetFrom(ArkUI_MotionPathOptions* options, const float from);
+
+/**
+ * @brief Gets the starting progress in the ArkUI_MotionPathOptions object.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object.
+ * @param from The starting progress in the ArkUI_MotionPathOptions.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetFrom(const ArkUI_MotionPathOptions* options, float* from);
+
+/**
+ * @brief Sets the endpoint progress in the ArkUI_MotionPathOptions. Progress refers to the ratio of the length of the
+ *        path that has been traveled to the total length of the entire path. The value range is [0.0, 1.0], and the
+ *        "from" value should be less than or equal to the "to" value; otherwise, an ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE
+ *        error code will be returned.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object.
+ * @param to The endpoint progress in the ArkUI_MotionPathOptions.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE} if the "to" value is out of range or the "to" value
+ *                 is less than the "from" value.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetTo(ArkUI_MotionPathOptions* options, const float to);
+
+/**
+ * @brief Gets the endpoint progress in the ArkUI_MotionPathOptions object.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object.
+ * @param to The endpoint progress in the ArkUI_MotionPathOptions.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetTo(const ArkUI_MotionPathOptions* options, float* to);
+
+/**
+ * @brief Sets the rotatable parameter in the ArkUI_MotionPathOptions. It indicates whether to rotate along the path.
+ *        True means rotating along the path, while false means not rotating along the path.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object.
+ * @param rotatable The rotatable parameter in the ArkUI_MotionPathOptions.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetRotatable(ArkUI_MotionPathOptions* options, const bool rotatable);
+
+/**
+ * @brief Gets the rotatable parameter in the ArkUI_MotionPathOptions.
+ *
+ * @param options Pointer to the ArkUI_MotionPathOptions object.
+ * @param rotatable The rotatable parameter in the ArkUI_MotionPathOptions.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 23
+ */
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetRotatable(const ArkUI_MotionPathOptions* options, bool* rotatable);
+
 /**    
  * @brief Enumerates the MarqueeStartPolicy.
  *
@@ -7025,6 +7268,44 @@ void OH_ArkUI_TextMarqueeOptions_SetUpdatePolicy(ArkUI_TextMarqueeOptions* optio
  * @since 23
  */
 ArkUI_MarqueeUpdatePolicy OH_ArkUI_TextMarqueeOptions_GetUpdatePolicy(ArkUI_TextMarqueeOptions* option);
+
+/**
+ * @brief Defines the selected drag preview style configuration.
+ * @since 23
+ */
+typedef struct ArkUI_SelectedDragPreviewStyle ArkUI_SelectedDragPreviewStyle;
+
+/**
+ * @brief Create a configuration object for selected drag preview style.
+ * @return A pointer to the configuration object.
+ * @since 23
+ */
+ArkUI_SelectedDragPreviewStyle* OH_ArkUI_SelectedDragPreviewStyle_Create();
+
+/**
+ * @brief Dispose a configuration object for selected drag preview style.
+ * @param edges Pointer to the configuration object to be disposed.
+ * @since 23
+ */
+void OH_ArkUI_SelectedDragPreviewStyle_Dispose(ArkUI_SelectedDragPreviewStyle* config);
+
+/**
+ * @brief Sets the color of background for selected drag preview style.
+ * @param config Pointer to the configuration object to be modified.
+ * @param color Background color.
+ * @since 23
+ */
+void OH_ArkUI_SelectedDragPreviewStyle_SetColor(
+    ArkUI_SelectedDragPreviewStyle* config, uint32_t color);
+
+/**
+ * @brief Gets the color of background for selected drag preview style.
+ * @param config Pointer to the configuration object.
+ * @return Returns the background color.
+ * @since 23
+ */
+uint32_t OH_ArkUI_SelectedDragPreviewStyle_GetColor(
+    ArkUI_SelectedDragPreviewStyle* config);
 
 #ifdef __cplusplus
 };

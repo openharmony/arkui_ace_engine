@@ -22,6 +22,7 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/event/ace_event_handler.h"
 #include "core/pipeline/base/composed_component.h"
+#include "core/components_v2/inspector/inspector_composed_element.h"
 
 namespace OHOS::Ace::V2 {
 
@@ -150,6 +151,7 @@ private:
 
     std::string debugLine_;
     std::string viewId_;
+    RefPtr<InspectorComposedElement> DynamicCreateInspectorElement(const std::string tag, const std::string& id);
 };
 
 } // namespace OHOS::Ace::V2

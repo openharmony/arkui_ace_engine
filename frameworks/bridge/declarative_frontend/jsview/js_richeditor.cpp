@@ -1346,6 +1346,33 @@ void JSRichEditor::SetCaretColor(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetCaretColor(color);
 }
 
+void JSRichEditor::SetSelectedDragPreviewStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    const auto& key = NG::StyleManager::SELECTED_DRAG_PREVIEW_COLOR_KEY;
+    UnRegisterResource(key);
+    auto jsonValue = info[0];
+    Color color;
+    if (!jsonValue->IsObject()) {
+        RichEditorModel::GetInstance()->ResetSelectedDragPreviewStyle();
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(jsonValue);
+    auto param = paramObject->GetProperty("color");
+    RefPtr<ResourceObject> resourceObject;
+    if (param->IsUndefined() || param->IsNull() || !ParseJsColorWithResource(param, color, resourceObject)) {
+        RichEditorModel::GetInstance()->ResetSelectedDragPreviewStyle();
+        return;
+    }
+    if (resourceObject && SystemProperties::ConfigChangePerform()) {
+        RegisterResource<Color>(key, resourceObject, color);
+    }
+    RichEditorModel::GetInstance()->SetSelectedDragPreviewStyle(color);
+}
+
+
 void JSRichEditor::SetSelectedBackgroundColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -1674,6 +1701,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("dataDetectorConfig", &JSRichEditor::JsDataDetectorConfig);
     JSClass<JSRichEditor>::StaticMethod("placeholder", &JSRichEditor::SetPlaceholder);
     JSClass<JSRichEditor>::StaticMethod("caretColor", &JSRichEditor::SetCaretColor);
+    JSClass<JSRichEditor>::StaticMethod("selectedDragPreviewStyle", &JSRichEditor::SetSelectedDragPreviewStyle);
     JSClass<JSRichEditor>::StaticMethod("selectedBackgroundColor", &JSRichEditor::SetSelectedBackgroundColor);
     JSClass<JSRichEditor>::StaticMethod("onEditingChange", &JSRichEditor::SetOnEditingChange);
     JSClass<JSRichEditor>::StaticMethod("enterKeyType", &JSRichEditor::SetEnterKeyType);

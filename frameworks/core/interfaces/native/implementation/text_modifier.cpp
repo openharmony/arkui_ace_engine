@@ -14,9 +14,9 @@
  */
 
 #include "core/interfaces/native/implementation/text_controller_peer_impl.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
@@ -172,7 +172,7 @@ TextResponseType Convert(const Ark_TextResponseType& src)
     return responseType;
 }
 
-void AssignArkValue(Ark_MarqueeState& dst, int32_t src)
+void AssignArkValue(Ark_MarqueeState& dst, int32_t src, ConvContext *ctx)
 {
     const int32_t START = 0;
     const int32_t BOUNCE = 1;
@@ -684,6 +684,14 @@ void SetFallbackLineSpacingImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     TextModelStatic::SetFallbackLineSpacing(frameNode, convValue);
 }
+void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                     const Opt_SelectedDragPreviewStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
+    TextModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
+}
 void SetFontImpl(Ark_NativePointer node,
                  const Opt_Font* fontValue,
                  const Opt_FontSettingOptions* options)
@@ -829,6 +837,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetCompressLeadingPunctuationImpl,
         TextAttributeModifier::SetIncludeFontPaddingImpl,
         TextAttributeModifier::SetFallbackLineSpacingImpl,
+        TextAttributeModifier::SetSelectedDragPreviewStyleImpl,
         TextAttributeModifier::SetFontImpl,
         TextAttributeModifier::SetFontWeightImpl,
         TextAttributeModifier::SetSelectionImpl,

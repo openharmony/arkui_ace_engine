@@ -469,6 +469,12 @@ void SelectOverlayManager::OnFontChanged()
     contentOverlayManager->NotifyUpdateToolBar(true);
 }
 
+int32_t SelectOverlayManager::GetTextSelectionHolderId()
+{
+    CHECK_NULL_RETURN(selectContentManager_, -1);
+    return selectContentManager_->GetTextSelectionHolderId();
+}
+
 SelectOverlayManager::~SelectOverlayManager()
 {
     auto pipeline = PipelineBase::GetCurrentContext();

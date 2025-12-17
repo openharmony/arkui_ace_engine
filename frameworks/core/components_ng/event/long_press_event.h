@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@ class GestureEventHub;
 
 class LongPressEvent : public virtual AceType {
     DECLARE_ACE_TYPE(LongPressEvent, AceType);
+
 public:
     explicit LongPressEvent(GestureEventFunc&& callback) : callback_(std::move(callback)) {}
     ~LongPressEvent() override = default;
@@ -53,6 +54,7 @@ private:
 
 class ACE_FORCE_EXPORT LongPressEventActuator : public GestureEventActuator {
     DECLARE_ACE_TYPE(LongPressEventActuator, GestureEventActuator);
+
 public:
     explicit LongPressEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
     ~LongPressEventActuator() override = default;
@@ -85,7 +87,7 @@ public:
 
     void SetLongPressEventType(GestureTypeName typeName);
 
-    void CopyLongPressEvent(const RefPtr<LongPressEventActuator>& longPressEventActuator)
+    virtual void CopyLongPressEvent(const RefPtr<LongPressEventActuator>& longPressEventActuator)
     {
         isForDrag_ = longPressEventActuator->isForDrag_;
         isDisableMouseLeft_ = longPressEventActuator->isDisableMouseLeft_;
@@ -97,6 +99,7 @@ public:
             longPressRecognizer_->SetDuration(originalLongPressRecognizer->GetDuration());
         }
     }
+
 private:
     bool isForDrag_ = false;
     bool isDisableMouseLeft_ = false;
@@ -105,6 +108,64 @@ private:
     RefPtr<LongPressEvent> longPressEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LongPressEventActuator);
+};
+
+using MultiSelectHandler = std::function<void(RefPtr<LongPressRecognizer>& longPressRecognizer)>;
+
+class ACE_FORCE_EXPORT LongPressEventActuatorWithMultiSelect : public LongPressEventActuator {
+    DECLARE_ACE_TYPE(LongPressEventActuatorWithMultiSelect, LongPressEventActuator);
+
+public:
+    explicit LongPressEventActuatorWithMultiSelect(const WeakPtr<GestureEventHub>& gestureEventHub)
+        : LongPressEventActuator(gestureEventHub)
+    {}
+    ~LongPressEventActuatorWithMultiSelect() override = default;
+
+    void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
+        ResponseLinkResult& responseLinkResult) override;
+
+    void CopyLongPressEvent(const RefPtr<LongPressEventActuator>& longPressEventActuator) override
+    {
+        LongPressEventActuator::CopyLongPressEvent(longPressEventActuator);
+        if (AceType::InstanceOf<LongPressEventActuatorWithMultiSelect>(longPressEventActuator)) {
+            auto multiSelectActuator =
+                AceType::DynamicCast<LongPressEventActuatorWithMultiSelect>(longPressEventActuator);
+            multiSelectHandler_ = multiSelectActuator->multiSelectHandler_;
+        }
+    }
+    void SetMultiSelectHandler(MultiSelectHandler&& handler)
+    {
+        multiSelectHandler_ = handler;
+    }
+
+private:
+    MultiSelectHandler multiSelectHandler_;
+};
+
+class LongPressEventActuatorFactory {
+public:
+    static RefPtr<LongPressEventActuator> CreateLongPressEventActuator(
+        const WeakPtr<GestureEventHub>& gestureEventHub, bool withMultiSelect)
+    {
+        if (!withMultiSelect) {
+            return AceType::MakeRefPtr<LongPressEventActuator>(gestureEventHub);
+        } else {
+            return AceType::MakeRefPtr<LongPressEventActuatorWithMultiSelect>(gestureEventHub);
+        }
+    }
+
+    static RefPtr<LongPressEventActuator> CopyLongPressEvent(
+        RefPtr<LongPressEventActuator> source, const WeakPtr<GestureEventHub>& gestureEventHub)
+    {
+        if (!source) {
+            return nullptr;
+        }
+        bool withMultiSelect = AceType::InstanceOf<LongPressEventActuatorWithMultiSelect>(source);
+        auto newActuator = CreateLongPressEventActuator(gestureEventHub, withMultiSelect);
+        newActuator->CopyLongPressEvent(source);
+        return newActuator;
+    }
 };
 
 } // namespace OHOS::Ace::NG

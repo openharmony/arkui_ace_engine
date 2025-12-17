@@ -45,12 +45,9 @@ public:
      */
     static void PreloadGridItems(
         const RefPtr<GridPattern>& pattern, std::list<GridPreloadItem>&& items, const BuildGridItemCallback& buildCb);
-    static void SetOriginalWidth(double originalWidth);
-    static double GetOriginalWidth();
 private:
     // helper to add the GridItem build task to Pipeline
     static void PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern, const BuildGridItemCallback& buildCb);
-    static double originalWidth_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_LAYOUT_UTILS_H

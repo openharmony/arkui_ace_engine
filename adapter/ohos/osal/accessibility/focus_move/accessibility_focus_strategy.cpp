@@ -170,7 +170,12 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindScrollAncestor(
     CHECK_NULL_RETURN(currentNode, AceFocusMoveResult::FIND_FAIL);
     auto supportScrollActionFunc = supportScrollActionFuncs.find(checkAction);
     CHECK_EQUAL_RETURN(supportScrollActionFunc, supportScrollActionFuncs.end(), AceFocusMoveResult::FIND_FAIL);
-    auto parent = currentNode->GetAceParent();
+    std::shared_ptr<FocusRulesCheckNode> parent;
+    if (condition.bypassSelf) {
+        parent = currentNode->GetAceParent();
+    } else {
+        parent = currentNode;
+    }
     while (parent) {
         if (parent->IsAccessibiltyVisible()) {
             if (supportScrollActionFunc->second(parent)) {
@@ -254,19 +259,24 @@ bool AccessibilityFocusStrategy::CanAccessibilityFocus(const std::shared_ptr<Foc
     return isReadable;
 }
 
+bool AccessibilityFocusStrategy::IsRootType(const std::shared_ptr<FocusRulesCheckNode>& currentNode)
+{
+    CHECK_NULL_RETURN(currentNode, false);
+    bool isHit = false;
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, false);
+    auto checkResult = client->CheckNodeIsSpecificType(
+        currentNode, Accessibility::ReadableSpecificType::ROOT_TYPE, isHit);
+    CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, false);
+    return isHit;
+}
+
 std::shared_ptr<FocusRulesCheckNode> AccessibilityFocusStrategy::GetParentNodeStopByRootType(
     const std::shared_ptr<FocusRulesCheckNode>& currentNode, bool& hitRootType)
 {
-    hitRootType = false;
     CHECK_NULL_RETURN(currentNode, nullptr);
-    bool isHit = false;
-    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
-    CHECK_NULL_RETURN(client, nullptr);
-    auto checkResult = client->CheckNodeIsSpecificType(
-        currentNode, Accessibility::ReadableSpecificType::ROOT_TYPE, isHit);
-    CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, nullptr);
-    hitRootType = isHit;
-    CHECK_EQUAL_RETURN(isHit, true, nullptr);
+    hitRootType = IsRootType(currentNode);
+    CHECK_EQUAL_RETURN(hitRootType, true, nullptr);
     auto parent = currentNode->GetAceParent();
     return parent;
 }
@@ -568,15 +578,15 @@ AceFocusMoveResult AccessibilityFocusStrategy::FindPrevReadableNodeToHigherLevel
             HILOG_INFO_FOCUS("result: parent %{public}" PRId64 " is focusable", parent->GetAccessibilityId());
             return AceFocusMoveResult::FIND_SUCCESS;
         }
-        // 3. to higher level
-        oldCurrent = parent;
-        parent = GetParentNodeStopByRootType(oldCurrent, hitRootType);
-        CHECK_EQUAL_RETURN(hitRootType, true, AceFocusMoveResult::FIND_FAIL_IN_ROOT_TYPE);
-        if (parent && parent->IsEmbededTarget()) {   // embededTarget can not find higher node
+        if (parent->IsEmbededTarget()) {   // embededTarget can not find higher node
             HILOG_INFO_FOCUS("result: find higher Embeded");
             targetNode = parent;
             return AceFocusMoveResult::FIND_EMBED_TARGET;
         }
+        // 3. to higher level
+        oldCurrent = parent;
+        parent = GetParentNodeStopByRootType(oldCurrent, hitRootType);
+        CHECK_EQUAL_RETURN(hitRootType, true, AceFocusMoveResult::FIND_FAIL_IN_ROOT_TYPE);
     }
     return AceFocusMoveResult::FIND_FAIL;
 }

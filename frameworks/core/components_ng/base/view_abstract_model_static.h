@@ -204,7 +204,7 @@ public:
     static void BindMenuGesture(FrameNode* frameNode,
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
     static void BindContextMenuStatic(const RefPtr<FrameNode>& targetNode, ResponseType type,
-        std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
+        std::function<void()>&& buildFunc, NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
     static void BindDragWithContextMenuParamsStatic(FrameNode* targetNode, const NG::MenuParam& menuParam);
 
     static void BindContentCover(FrameNode* targetNode, bool isShow,
@@ -397,7 +397,7 @@ void SetGeometryTransitionMultiThread(FrameNode* frameNode, const std::string& i
 void BindMenuMultiThread(FrameNode* frameNode, std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
     const MenuParam& menuParam);
 void BindContextMenuStaticMultiThread(const RefPtr<FrameNode>& targetNode, ResponseType type,
-    std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
+    std::function<void()>&& buildFunc, NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
 // multi thread function end
 } // namespace OHOS::Ace::NG
 

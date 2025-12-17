@@ -240,6 +240,7 @@ public:
     void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) override;
     void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) override;
     void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
+    void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) override;
     void UpdateBlender(const OHOS::Rosen::Blender* blender) override;
 
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
@@ -526,14 +527,14 @@ public:
         isDraggingFlag_ = isDraggingFlag;
     }
 
-    bool GetReDraggingFlag() const
+    bool GetHasKeyFrameCache() const
     {
-        return reDraggingFlag_;
+        return hasKeyFrameCache_;
     }
 
-    void SetReDraggingFlag(bool reDraggingFlag)
+    void SetHasKeyFrameCache(bool hasCache)
     {
-        reDraggingFlag_ = reDraggingFlag;
+        hasKeyFrameCache_ = hasCache;
     }
 
     bool IsOnRenderTree() override
@@ -899,7 +900,7 @@ protected:
     std::function<void()> callbackAnimateEnd_ = nullptr;
     std::function<void()> callbackCachedAnimateAction_ = nullptr;
     bool isDraggingFlag_ = false;
-    bool reDraggingFlag_ = false;
+    bool hasKeyFrameCache_ = false;
     PipelineContext* pipeline_;
 
     template <typename Modifier, RSPropertyType PropertyType, typename ValueType>

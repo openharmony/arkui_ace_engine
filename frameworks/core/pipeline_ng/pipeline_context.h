@@ -90,6 +90,7 @@ class NodeRenderStatusMonitor;
 class MagnifierController;
 class LoadCompleteManager;
 class PageInfo;
+class ContentChangeManager;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -199,6 +200,8 @@ public:
     void RemoveScheduleTask(uint32_t id) override;
 
     std::string GetCurrentPageNameCallback();
+
+    void ReportSelectedText();
 
     const RefPtr<PageInfo> GetLastPageInfo();
 
@@ -402,7 +405,7 @@ public:
 
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
 
-    void AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle);
+    void AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle, bool postByTraverse = false);
 
     bool FlushSafeArea(
         int32_t width, int32_t height, std::map<NG::SafeAreaAvoidType, NG::SafeAreaInsets> safeAvoidAreas);
@@ -1153,6 +1156,8 @@ public:
 
     void GetInspectorTree(bool onlyNeedVisible, ParamConfig config = ParamConfig());
 
+    void GetHitTestInfos(InteractionParamConfig config);
+
     void NotifyAllWebPattern(bool isRegister);
     void AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node);
     void RemoveFrameNodeChangeListener(int32_t nodeId);
@@ -1335,6 +1340,17 @@ public:
 
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
+    void GetStateMgmtInfo(
+        const std::string& componentName, const std::string& propertyName, const std::string& jsonPath);
+    bool IsCustomNodeDeleteInTransition() const
+    {
+        return isCustomNodeDeleteInTransition_;
+    }
+    void SetIsCustomNodeDeleteInTransition(bool isCustomNodeDeleteInTransition)
+    {
+        isCustomNodeDeleteInTransition_ = isCustomNodeDeleteInTransition;
+    }
+    RefPtr<ContentChangeManager>& GetContentChangeManager();
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1394,6 +1410,8 @@ private:
 
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
+    void DumpSimplifyTreeJsonFromTopNavNode(
+        std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> topNavNode, ParamConfig& config);
 
     uint64_t GetResampleStamp() const;
     void ConsumeTouchEvents(std::list<TouchEvent>& touchEvents, std::unordered_map<int, TouchEvent>& idToTouchPoints);
@@ -1674,6 +1692,7 @@ private:
     CancelableCallback<void()> foldStatusDelayTask_;
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
+    bool isCustomNodeDeleteInTransition_ = false;
     AxisEventChecker axisEventChecker_;
     std::set<WeakPtr<UINode>> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
@@ -1697,6 +1716,7 @@ private:
     std::shared_ptr<LoadCompleteManager> loadCompleteMgr_;
     std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
     std::shared_ptr<ResSchedClickOptimizer> clickOptimizer_;
+    RefPtr<ContentChangeManager> contentChangeMgr_;
 };
 
 /**

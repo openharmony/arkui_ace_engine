@@ -253,6 +253,12 @@ void GetPressedModifierKey(ani_long nativePtr, char*** keys, ani_int* length)
         auto result = strcpy_s((*keys)[index], keyStr.length() + 1, keyStr.c_str());
         if (result != 0) {
             TAG_LOGE(AceLogTag::ACE_DRAG, "Drag GetPressedModifierKey error: strcpy_s with error code: %d", result);
+            for (int i = 0; i <= index; i++) {
+                delete[](*keys)[i];
+            }
+            delete[] * keys;
+            *keys = nullptr;
+            *length = 0;
             return;
         }
     }

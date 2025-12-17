@@ -291,6 +291,16 @@ public:
     void SetAncestor(const WeakPtr<UINode>& parent);
     // Tree operation end.
 
+    void SetLastParent(WeakPtr<UINode> lastParent)
+    {
+        lastParent_ = lastParent;
+    }
+
+    WeakPtr<UINode> GetLastParent()
+    {
+        return lastParent_;
+    }
+
     // performance.
     PipelineContext* GetContext() const;
     PipelineContext* GetAttachedContext() const;
@@ -747,7 +757,6 @@ public:
     {
         isNodeAdapter_ = enable;
     }
-    
 
     bool IsArkTsFrameNode() const
     {
@@ -1209,6 +1218,7 @@ public:
     {
         return subtreeIgnoreCount_ != 0;
     }
+    void GetNodeListByComponentName(int32_t depth, std::vector<int32_t>& foundNodeId, const std::string& name);
 
     virtual void DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
 
@@ -1327,7 +1337,7 @@ private:
             child->ClearObserverParentForDrawChildren();
         }
     }
-    
+
     bool CheckThreadSafeNodeTree(bool needCheck);
     virtual bool MaybeRelease() override;
     void DumpBasicInfo(int32_t depth, bool hasJson, const std::string& desc);
@@ -1341,6 +1351,7 @@ private:
     WeakPtr<UINode> parent_; // maybe wrong when not on the tree
     WeakPtr<UINode> adoptParent_; // maybe wrong when not on the tree
     WeakPtr<UINode> ancestor_; // always correct parent ptr, used to remove duplicates when inserting child nodes
+    WeakPtr<UINode> lastParent_; // for dumpinfo of the @Component. don't use ancestor_ because it may be clear.
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool isThreadSafeNode_ = false;

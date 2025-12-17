@@ -45,6 +45,7 @@ constexpr Dimension ARROW_P1_OFFSET_X = 8.0_vp;
 constexpr Dimension ARROW_P2_OFFSET_X = 1.5_vp;
 constexpr Dimension ARROW_P1_OFFSET_Y = 8.0_vp;
 constexpr Dimension ARROW_P2_OFFSET_Y = 0.68_vp;
+constexpr Dimension MIN_KEYBOARD_AVOID_DISTANCE = 8.0_vp;
 
 const std::map<Placement, std::vector<Placement>> PLACEMENT_STATES = {
     { Placement::BOTTOM_LEFT,
@@ -405,7 +406,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     InitializeParam(menuPattern);
     auto needModify = !menuPattern->IsSelectMenu() && !menuPattern->IsSelectOverlayDefaultModeRightClickMenu();
     if (needModify && canExpandCurrentWindow_) {
-        ModifyOffset(position_);
+        ModifyOffset(position_, menuPattern);
     }
     dumpInfo_.originPlacement =
         PlacementUtils::ConvertPlacementToString(props->GetMenuPlacement().value_or(Placement::NONE));
@@ -822,6 +823,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         InitTargetSizeAndPosition(layoutWrapper, isContextMenu, menuPattern);
     }
     CalcWrapperRectForHoverMode(menuPattern);
+    InitializeMenuAvoidKeyboard(menuNode);
 
     const auto& constraint = menuLayoutProperty->GetLayoutConstraint();
     if (!constraint) {
@@ -1813,15 +1815,6 @@ void MenuLayoutAlgorithm::LayoutPreviewMenu(LayoutWrapper* layoutWrapper)
     paintProperty->UpdateEnableArrow(false);
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto menuWrapper = menuPattern->GetMenuWrapper();
-    CHECK_NULL_VOID(menuWrapper);
-    auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(wrapperPattern);
-    if (wrapperPattern->IsHide()) {
-        return;
-    }
     auto parentNode = AceType::DynamicCast<FrameNode>(menuNode->GetParent());
     CHECK_NULL_VOID(parentNode);
     RefPtr<LayoutWrapper> menuLayoutWrapper;
@@ -2595,7 +2588,7 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
     CHECK_NULL_VOID(menuPattern);
 
     float maxAvailableHeight = wrapperRect_.Height();
-    float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
+    float maxSpaceHeight = maxSpaceHeight_.value_or(maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR);
     if (lastPosition_.has_value() && holdEmbeddedMenuPosition_) {
         auto spaceToBottom = GetMenuMaxBottom(menuPattern) - lastPosition_.value().GetY();
         maxSpaceHeight = std::min(maxSpaceHeight, spaceToBottom);
@@ -2623,7 +2616,7 @@ void MenuLayoutAlgorithm::UpdateConstraintSelectHeight(LayoutWrapper* layoutWrap
     CHECK_NULL_VOID(menuPattern);
 
     float maxAvailableHeight = wrapperRect_.Height();
-    float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
+    float maxSpaceHeight = maxSpaceHeight_.value_or(maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR);
     auto layoutProp = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProp);
     auto menuLayoutProps = AceType::DynamicCast<MenuLayoutProperty>(layoutProp);
@@ -2989,7 +2982,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
     CHECK_NULL_VOID(pipelineContext);
     if (canExpandCurrentWindow_ && !menuPattern->IsSelectMenu()) {
         if (!holdTargetOffset) {
-            ModifyOffset(targetOffset_);
+            ModifyOffset(targetOffset_, menuPattern);
             menuPattern->SetTargetOffset(targetOffset_);
         }
         OffsetF offset = GetMenuWrapperOffset(layoutWrapper);
@@ -3629,11 +3622,15 @@ Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuP
     return menuWindowRect;
 }
 
-void MenuLayoutAlgorithm::ModifyOffset(OffsetF& offset)
+void MenuLayoutAlgorithm::ModifyOffset(OffsetF& offset, const RefPtr<MenuPattern>& menuPattern)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "original targetOffset is : %{public}s", offset.ToString().c_str());
     if (isExpandDisplay_) {
-        auto containerId = Container::CurrentId();
+        auto host = menuPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto containerId = context->GetInstanceId();
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindowById(containerId);
         CHECK_NULL_VOID(subwindow);
         offset += displayWindowRect_.GetOffset() - subwindow->GetWindowRect().GetOffset();
@@ -3928,5 +3925,97 @@ RefPtr<SelectTheme> MenuLayoutAlgorithm::GetCurrentSelectTheme(const RefPtr<Fram
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
     return theme;
+}
+
+void MenuLayoutAlgorithm::InitializeMenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode)
+{
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto menuWrapper = menuPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    const auto& menuParam = menuWrapperPattern->GetMenuParam();
+    if (menuParam.keyboardAvoidMode.value_or(MenuKeyboardAvoidMode::NONE) !=
+        MenuKeyboardAvoidMode::TRANSLATE_AND_RESIZE) {
+        return;
+    }
+    auto keyboardTopPosition = GetKeyboardTopPosition(menuNode);
+    CHECK_NULL_VOID(keyboardTopPosition);
+    MenuAvoidKeyboard(menuNode, menuParam.minKeyboardAvoidDistance, keyboardTopPosition.value());
+}
+
+std::optional<float> MenuLayoutAlgorithm::GetKeyboardTopPosition(const RefPtr<FrameNode>& menuNode)
+{
+    CHECK_NULL_RETURN(menuNode, std::nullopt);
+    auto context = menuNode->GetContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, std::nullopt);
+    if (GreatNotEqual(safeAreaManager->GetKeyboardInset().Length(), 0.0f)) {
+        return static_cast<float>(safeAreaManager->GetKeyboardInset().start);
+    }
+    auto currentId = context->GetInstanceId();
+    auto container = AceEngine::Get().GetContainer(currentId);
+    CHECK_NULL_RETURN(container, std::nullopt);
+    if (!container->IsSubContainer()) {
+        return std::nullopt;
+    }
+    auto parentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+    auto parentContainer = AceEngine::Get().GetContainer(parentId);
+    CHECK_NULL_RETURN(parentContainer, std::nullopt);
+    auto parentContext = DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
+    CHECK_NULL_RETURN(parentContext, std::nullopt);
+    auto parentSafeAreaManager = parentContext->GetSafeAreaManager();
+    if (GreatNotEqual(parentSafeAreaManager->GetKeyboardInset().Length(), 0.0f)) {
+        return static_cast<float>(parentSafeAreaManager->GetKeyboardInset().start);
+    }
+    return std::nullopt;
+}
+
+void MenuLayoutAlgorithm::MenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode,
+    const std::optional<Dimension>& minKeyboardAvoidDistance, float keyboardTopPosition)
+{
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+
+    // When the top of the soft keyboard position is larger than the bottom of the menu layout area, the menu does not
+    // need to avoid the soft keyboard.
+    if (LessNotEqual(wrapperRect_.Bottom(), keyboardTopPosition)) {
+        return;
+    }
+    // When the top of the soft keyboard position is smaller than the top of the menu layout area, the menu does not
+    // need to avoid the soft keyboard.
+    if (GreatNotEqual(wrapperRect_.Top(), keyboardTopPosition)) {
+        return;
+    }
+    auto minKeyboardAvoidDistanceValue =
+        minKeyboardAvoidDistance.value_or(MIN_KEYBOARD_AVOID_DISTANCE).ConvertToPx();
+    auto isPreview = menuPattern->GetPreviewMode() != MenuPreviewMode::NONE;
+    auto newRectBottom = keyboardTopPosition - minKeyboardAvoidDistanceValue;
+    // In the preview menu, the bottom of the layout area of the menu is equal to the layout area of the menu
+    // minus the bottom security area. When the top of the soft keyboard position is larger than the bottom of the
+    // layout area of the preview menu, the menu does not need to avoid the soft keyboard.
+    if (isPreview) {
+        if (GreatNotEqual(newRectBottom, wrapperRect_.Bottom() - param_.bottomSecurity)) {
+            return;
+        }
+        param_.bottomSecurity = 0;
+    }
+    auto rectTop = isPreview ? (wrapperRect_.Top() + param_.topSecurity) : wrapperRect_.Top();
+    // If the layout area of the menu is less than or equal to 0 after the soft keyboard is avoided, the theme value is
+    // restored.
+    if (GreatOrEqual(rectTop, newRectBottom)) {
+        newRectBottom = keyboardTopPosition - MIN_KEYBOARD_AVOID_DISTANCE.ConvertToPx();
+    }
+    
+    float maxAvailableHeight = wrapperRect_.Height();
+    // If the menu avoids the soft keyboard, record the maximum height of the original menu and compare it with the
+    // maximum height of the menu layout area after the avoid. The smaller height is used as the maximum height of the
+    // menu.
+    float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
+    wrapperRect_.SetHeight(wrapperRect_.Height() - (wrapperRect_.Bottom() - newRectBottom));
+    maxSpaceHeight_ = std::min<float>(wrapperRect_.Height(), maxSpaceHeight);
 }
 } // namespace OHOS::Ace::NG

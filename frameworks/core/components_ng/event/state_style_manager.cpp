@@ -381,13 +381,21 @@ void StateStyleManager::PostListItemPressStyleTask(UIState state)
         if (frameNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
             auto listGroupPattern = DynamicCast<ListItemGroupPattern>(frameNode->GetPattern());
             CHECK_NULL_VOID(listGroupPattern);
-            listGroupPattern->SetItemPressed(isPressed, nodeId);
+            if (isPressed) {
+                listGroupPattern->SetItemState(ITEM_STATE_PRESSED, nodeId);
+            } else {
+                listGroupPattern->ResetItemState(ITEM_STATE_PRESSED, nodeId);
+            }
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
         if (frameNode->GetTag() == V2::LIST_ETS_TAG) {
             auto listPattern = DynamicCast<ListPattern>(frameNode->GetPattern());
             CHECK_NULL_VOID(listPattern);
-            listPattern->SetItemPressed(isPressed, nodeId);
+            if (isPressed) {
+                listPattern->SetItemState(ITEM_STATE_PRESSED, nodeId);
+            } else {
+                listPattern->ResetItemState(ITEM_STATE_PRESSED, nodeId);
+            }
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
     }

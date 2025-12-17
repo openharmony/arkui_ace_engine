@@ -45,6 +45,7 @@ public:
         REGISTER_WEB_UNFOCUS_EVENT,
         REGISTER_SCROLL_EVENT,
         REGISTER_LIFE_CYCLE_EVENT,
+        REGISTER_SELECT_TEXT_EVENT,
         UNREGISTER_CLICK_EVENT,
         UNREGISTER_SEARCH_EVENT,
         UNREGISTER_TEXT_CHANGE_EVENT,
@@ -53,6 +54,7 @@ public:
         UNREGISTER_WEB_UNFOCUS_EVENT,
         UNREGISTER_SCROLL_EVENT,
         UNREGISTER_LIFE_CYCLE_EVENT,
+        UNREGISTER_SELECT_TEXT_EVENT,
         RESET_ALL_TEXT,
         RESET_TEXT_BY_ID,
         GET_WEB_VIEW_LANGUAGE,
@@ -68,6 +70,12 @@ public:
         SENDCOMMAND_EVENT,
         SEND_COMMAND,
         EXE_APP_AI_FUNCTION,
+        GET_SPECIFIED_CONTENT_OFFSETS,
+        HIGHLIGHT_SPECIFIED_CONTENT,
+        REGISTER_CONTENT_CHANGE,
+        UNREGISTER_CONTENT_CHANGE,
+        GET_HIT_TEST_NODE_INFO_FOR_TOUCH,
+        REQUEST_STATE_MGMT_INFO,
     };
 
     /**
@@ -78,6 +86,15 @@ public:
         ParamConfig config = ParamConfig()) = 0;
     virtual int32_t GetVisibleInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback,
         ParamConfig config = ParamConfig()) = 0;
+
+    /**
+     * @description: define get the node info for touch test interface
+     * @return: result number
+     */
+    virtual int32_t GetLatestHitTestNodeInfosForTouch(
+        const std::function<void(std::string, int32_t, bool)>& eventCallback,
+        InteractionParamConfig config = InteractionParamConfig()) = 0;
+
     /**
      * @description: define SA process and current process connect interface
      * @return: result number
@@ -132,6 +149,26 @@ public:
      * @return: result number
      */
     virtual int32_t RegisterLifeCycleEventCallback(const EventCallback& eventCallback) = 0;
+
+    /**
+     * @description: define register a callback on select text event occur to execute interface
+     * @return: result number
+     */
+    virtual int32_t RegisterSelectTextEventCallback(const EventCallback& eventCallback) = 0;
+
+    /**
+     * @description: define register a callback get select offsets
+     * @return: result number
+     */
+    virtual int32_t GetSpecifiedContentOffsets(int32_t id, const std::string& content,
+        const std::function<void(std::vector<std::pair<float, float>>)>& eventCallback) = 0;
+
+    /**
+     * @description: define register a callback highlight content text
+     * @return: result number
+     */
+    virtual int32_t HighlightSpecifiedContent(int32_t id, const std::string& content,
+        const std::vector<std::string>& nodeIds, const std::string& configs) = 0;
 
     /**
      * @description: define register a callback on SendCommand event occur to execute interface
@@ -204,6 +241,12 @@ public:
      * @return: result number
      */
     virtual int32_t UnregisterLifeCycleEventCallback() = 0;
+
+    /**
+     * @description: define unregister the select text event occur callback last register interface
+     * @return: result number
+     */
+    virtual int32_t UnregisterSelectTextEventCallback() = 0;
 
     /**
      * @description:get web need translate text
@@ -281,6 +324,26 @@ public:
      */
     virtual int32_t ExeAppAIFunction(const std::string& funcName, const std::string& params,
         const std::function<void(uint32_t)>& finishCallback) = 0;
+
+    /**
+     * @description: define register a callback on content change occur to execute interface
+     * @return: result number
+     */
+    virtual int32_t RegisterContentChangeCallback(const ContentChangeConfig& config,
+        const std::function<void(ChangeType type, const std::string& simpleTree)> callback) = 0;
+
+    /**
+     * @description: define unregister the content change occur callback last register interface
+     * @return: result number
+     */
+    virtual int32_t UnregisterContentChangeCallback() = 0;
+
+    /**
+     * @description: define get the values of state variables that meets specified conditions
+     * @return: result number
+     */
+    virtual int32_t GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
+        const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback) = 0;
 };
 class ACE_FORCE_EXPORT ReportService : public OHOS::IRemoteBroker {
 public:
@@ -298,12 +361,17 @@ public:
         REPORT_WEB_UNFOCUS_EVENT,
         REPORT_SCROLL_EVENT,
         REPORT_LIFE_CYCLE_EVENT,
+        REPORT_SELECT_TEXT_EVENT,
         SEND_BASE_INFO,
         SEND_CURRENT_LANGUAGE,
         SEND_TEXT,
         SEND_IMAGES,
         SEND_CURRENT_PAGE_NAME,
         SEND_EXE_APP_AI_FUNCTION_RESULT,
+        SEND_SPECIFIED_CONTENT_OFFSETS,
+        SEND_CONTENT_CHANGE,
+        REPORT_HIT_TEST_NODE_INFOS,
+        REPORT_STATE_MGMT_INFO,
     };
 
     /**
@@ -337,6 +405,11 @@ public:
     virtual void ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart) = 0;
 
     /**
+     * @description: define reports the information of hit test node to the proxy interface
+     */
+    virtual void ReportHitTestNodeInfos(const std::string& data, int32_t partNum, bool isLastPart) = 0;
+
+    /**
      * @description: define reports web unfocus value to the proxy interface
      */
     virtual void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) = 0;
@@ -350,6 +423,16 @@ public:
      * @description: define reports the life cycle event to the proxy interface
      */
     virtual void ReportLifeCycleEvent(const std::string& data) = 0;
+
+    /**
+     * @description: define reports the select text event to the proxy interface
+     */
+    virtual void ReportSelectTextEvent(const std::string& data) = 0;
+
+    /**
+     * @description: define reports the select content offsets to the proxy interface
+     */
+    virtual void SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets) = 0;
 
     /**
      * @description: define send base info value to the proxy interface
@@ -380,6 +463,16 @@ public:
      * @description: define ui send execute application AI function result for sa service
      */
     virtual void SendExeAppAIFunctionResult(uint32_t result) = 0;
+
+    /**
+     * @description: define send the content change to the proxy interface
+     */
+    virtual void SendContentChange(ChangeType type, const std::string& simpleTree) = 0;
+
+    /**
+     * @description: define send the state management info to the proxy interface
+     */
+    virtual void ReportGetStateMgmtInfo(std::vector<std::string> results) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

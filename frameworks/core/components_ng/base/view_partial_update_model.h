@@ -61,7 +61,7 @@ struct NodeInfoPU {
     bool isCustomAppBar = false;
     int32_t codeRow = -1;
     int32_t codeCol = -1;
-
+    int64_t creatorId = -1;
     std::string jsViewName;
     bool isV2 = false;
     NG::ExtraInfo extraInfo;

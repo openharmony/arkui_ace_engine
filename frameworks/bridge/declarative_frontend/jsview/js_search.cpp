@@ -140,6 +140,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("strokeWidth", &JSSearch::SetStrokeWidth);
     JSClass<JSSearch>::StaticMethod("strokeColor", &JSSearch::SetStrokeColor);
     JSClass<JSSearch>::StaticMethod("margin", &JSSearch::JsMargin);
+    JSClass<JSSearch>::StaticMethod("selectedDragPreviewStyle", &JSSearch::SetSelectedDragPreviewStyle);
     JSBindMore();
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -1854,5 +1855,30 @@ void JSSearch::JsMargin(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsMargin(info);
     SearchModel::GetInstance()->SetUserMargin();
+}
+
+void JSSearch::SetSelectedDragPreviewStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    UnregisterResource("selectedDragPreviewStyle");
+    auto jsonValue = info[0];
+    Color color;
+    if (!jsonValue->IsObject()) {
+        SearchModel::GetInstance()->ResetSelectedDragPreviewStyle();
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(jsonValue);
+    auto param = paramObject->GetProperty("color");
+    RefPtr<ResourceObject> resourceObject;
+    if (param->IsUndefined() || param->IsNull() || !ParseJsColor(param, color, resourceObject)) {
+        SearchModel::GetInstance()->ResetSelectedDragPreviewStyle();
+        return;
+    }
+    if (resourceObject && SystemProperties::ConfigChangePerform()) {
+        RegisterResource<Color>("selectedDragPreviewStyleColor", resourceObject, color);
+    }
+    SearchModel::GetInstance()->SetSelectedDragPreviewStyle(color);
 }
 } // namespace OHOS::Ace::Framework

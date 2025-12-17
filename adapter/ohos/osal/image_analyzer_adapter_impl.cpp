@@ -49,6 +49,8 @@ void ImageAnalyzerAdapterImpl::SetImageAnalyzerConfig(void* config, bool isOptio
 
 void* ImageAnalyzerAdapterImpl::GetImageAnalyzerConfig()
 {
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env_, &scope);
     napi_value analyzerConfig = nullptr;
     napi_get_reference_value(env_, analyzerConfigRef_, &analyzerConfig);
 
@@ -64,6 +66,8 @@ void* ImageAnalyzerAdapterImpl::GetImageAnalyzerConfig()
         }
         napi_set_named_property(env_, analyzerConfig, "types", typeNapi);
     }
+    napi_escape_handle(env_, scope, analyzerConfig, &analyzerConfig);
+    napi_close_escapable_handle_scope(env_, scope);
     return analyzerConfig;
 }
 

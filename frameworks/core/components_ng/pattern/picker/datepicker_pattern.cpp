@@ -46,6 +46,7 @@ constexpr uint32_t MIN_MONTH = 1;
 constexpr uint32_t MAX_MONTH = 12;
 constexpr uint32_t MIN_DAY = 1;
 const Dimension PRESS_INTERVAL = 4.0_vp;
+const Dimension FOCUS_RADIUS = 3.0_vp;
 const Dimension FOCUS_INTERVAL = 2.0_vp;
 const Dimension LINE_WIDTH = 1.5_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
@@ -99,44 +100,58 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);
     auto children = host->GetChildren();
-    auto height = pickerTheme->GetDividerSpacing();
-    auto buttonSpace = pickerTheme->GetSelectorItemSpace();
     auto currentFocusStackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     CHECK_NULL_RETURN(currentFocusStackChild, false);
     auto currentFocusButtonNode = DynamicCast<FrameNode>(currentFocusStackChild->GetFirstChild());
     CHECK_NULL_RETURN(currentFocusButtonNode, false);
     for (const auto& child : children) {
-        auto columnNode = DynamicCast<FrameNode>(child->GetLastChild()->GetLastChild());
-        CHECK_NULL_RETURN(columnNode, false);
-        auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
-        auto datePickerColumnNode = DynamicCast<FrameNode>(child->GetLastChild());
-        CHECK_NULL_RETURN(datePickerColumnNode, false);
-        auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
-        CHECK_NULL_RETURN(buttonNode, false);
-        auto buttonConfirmLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-        buttonConfirmLayoutProperty->UpdateType(ButtonType::NORMAL);
-        buttonConfirmLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(selectorItemRadius_));
-        auto standardButtonHeight = static_cast<float>((height - PRESS_INTERVAL).ConvertToPx());
-        auto maxButtonHeight = static_cast<float>(datePickerColumnNode->GetGeometryNode()->GetFrameSize().Height());
+        if (!UpdateFocusStyles(pickerTheme, child, currentFocusButtonNode, host)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool DatePickerPattern::UpdateFocusStyles(const RefPtr<PickerTheme>& pickerTheme, RefPtr<UINode> child,
+    const RefPtr<FrameNode> currentFocusButtonNode, const RefPtr<FrameNode> host)
+{
+    auto height = pickerTheme->GetDividerSpacing();
+    auto buttonSpace = pickerTheme->GetSelectorItemSpace();
+    auto columnNode = DynamicCast<FrameNode>(child->GetLastChild()->GetLastChild());
+    CHECK_NULL_RETURN(columnNode, false);
+    auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
+    auto datePickerColumnNode = DynamicCast<FrameNode>(child->GetLastChild());
+    CHECK_NULL_RETURN(datePickerColumnNode, false);
+    auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
+    CHECK_NULL_RETURN(buttonNode, false);
+    auto buttonConfirmLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    buttonConfirmLayoutProperty->UpdateType(ButtonType::NORMAL);
+    buttonConfirmLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(selectorItemRadius_));
+    auto standardButtonHeight = static_cast<float>((height - PRESS_INTERVAL).ConvertToPx());
+    auto maxButtonHeight = static_cast<float>(datePickerColumnNode->GetGeometryNode()->GetFrameSize().Height());
+    auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
+    if (!useButtonFocusArea_) {
         auto buttonHeight = Dimension(std::min(standardButtonHeight, maxButtonHeight), DimensionUnit::PX);
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(buttonHeight)));
-        auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
-        if (!useButtonFocusArea_) {
-            buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        } else {
-            auto isFocusButton = haveFocus_ && (currentFocusButtonNode == buttonNode);
-            UpdateColumnButtonStyles(columnNode, isFocusButton, false);
-        }
-        buttonNode->MarkModifyDone();
-        buttonNode->MarkDirtyNode();
-        if (GetIsShowInDialog() && GreatNotEqual(standardButtonHeight, maxButtonHeight) &&
-            GreatNotEqual(maxButtonHeight, 0.0f)) {
-            auto parentNode = DynamicCast<FrameNode>(host->GetParent());
-            CHECK_NULL_RETURN(parentNode, false);
-            parentNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-        }
+        buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    } else {
+        auto pickerPadding = pickerTheme->GetPickerPadding();
+        standardButtonHeight = static_cast<float>((height - pickerPadding * RATE).ConvertToPx());
+        auto buttonHeight = Dimension(std::min(standardButtonHeight, maxButtonHeight), DimensionUnit::PX);
+        buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(width - pickerPadding.ConvertToPx() * RATE), CalcLength(buttonHeight)));
+        auto isFocusButton = haveFocus_ && (currentFocusButtonNode == buttonNode);
+        UpdateColumnButtonStyles(columnNode, isFocusButton, false);
+    }
+    buttonNode->MarkModifyDone();
+    buttonNode->MarkDirtyNode();
+    if (GetIsShowInDialog() && GreatNotEqual(standardButtonHeight, maxButtonHeight) &&
+        GreatNotEqual(maxButtonHeight, 0.0f)) {
+        auto parentNode = DynamicCast<FrameNode>(host->GetParent());
+        CHECK_NULL_RETURN(parentNode, false);
+        parentNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
     return true;
 }
@@ -289,17 +304,17 @@ void DatePickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect, float
 
     paintRect.SetRect(focusButtonRect);
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS,
-        static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()),
-        static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()));
+        static_cast<RSScalar>((selectorItemRadius_ + FOCUS_RADIUS).ConvertToPx()),
+        static_cast<RSScalar>((selectorItemRadius_ + FOCUS_RADIUS).ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS,
-        static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()),
-        static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()));
+        static_cast<RSScalar>((selectorItemRadius_ + FOCUS_RADIUS).ConvertToPx()),
+        static_cast<RSScalar>((selectorItemRadius_ + FOCUS_RADIUS).ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS,
-        static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()),
-        static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()));
+        static_cast<RSScalar>((selectorItemRadius_ + FOCUS_RADIUS).ConvertToPx()),
+        static_cast<RSScalar>((selectorItemRadius_ + FOCUS_RADIUS).ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS,
-        static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()),
-        static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()));
+        static_cast<RSScalar>((selectorItemRadius_ + FOCUS_RADIUS).ConvertToPx()),
+        static_cast<RSScalar>((selectorItemRadius_ + FOCUS_RADIUS).ConvertToPx()));
 }
 
 void DatePickerPattern::ColumnPatternInitHapticController()
@@ -654,25 +669,30 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetNeedCallChildrenUpdate(false);
+
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(pickerTheme);
-    auto dialogTheme = context->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
-    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
-    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     auto pickerProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
 
     if (!pickerProperty->GetNormalTextColorSetByUser().value_or(false)) {
+        const auto normalStyle = pickerTheme->GetOptionStyle(false, false);
         pickerProperty->UpdateColor(
             GetTextProperties().normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
     }
 
     if (!pickerProperty->GetDisappearTextColorSetByUser().value_or(false)) {
+        const auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
         pickerProperty->UpdateDisappearColor(
             GetTextProperties().disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    }
+
+    if (!pickerProperty->GetSelectedTextColorSetByUser().value_or(false)) {
+        const auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
+        pickerProperty->UpdateSelectedColor(
+            GetTextProperties().selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
     }
 
     if (isPicker_) {
@@ -681,6 +701,9 @@ void DatePickerPattern::OnColorConfigurationUpdate()
         }
         return;
     }
+
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
     SetBackgroundColor(dialogTheme->GetBackgroundColor());
     auto buttonTitleNode = buttonTitleNode_.Upgrade();
     CHECK_NULL_VOID(buttonTitleNode);

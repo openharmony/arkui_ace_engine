@@ -785,6 +785,7 @@ public:
     {
         return menuLifeCycleCallbackMap_[targetId];
     }
+    bool CheckTargetIdIsValid(int32_t targetId);
 
 private:
     RefPtr<PipelineContext> GetPipelineContext() const;
@@ -800,7 +801,6 @@ private:
     void SaveSheetPageNode(
         const RefPtr<FrameNode>& sheetPageNode, const RefPtr<UINode>& sheetContentNode,
         const RefPtr<FrameNode>& targetNode, bool isStartByUIContext);
-    bool CheckTargetIdIsValid(int32_t targetId);
     void UpdateSheetRender(
         const RefPtr<FrameNode>& sheetPageNode, const NG::SheetStyle& sheetStyle, bool isPartialUpdate);
     void UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle,
@@ -991,6 +991,7 @@ private:
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
     int32_t RemoveOverlayManagerNode();
     void UpdateMenuAnimationOptions(const RefPtr<FrameNode>& menu, AnimationOption& option);
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
     RefPtr<FrameNode> GetLastChildNotRemovingForAtm(const RefPtr<UINode>& atomicNode);
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

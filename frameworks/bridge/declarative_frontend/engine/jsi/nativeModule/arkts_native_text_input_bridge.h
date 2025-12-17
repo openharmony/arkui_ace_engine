@@ -185,13 +185,15 @@ public:
     static ArkUINativeModuleValue ResetCustomKeyboard(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static bool ParseLayoutPolicy(EcmaVM* vm, const Local<JSValueRef> value, bool isWidth);
     static void ParseCounterTextColor(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUIShowCountOptions* showCountOptions,
-        RefPtr<ResourceObject> resourceObjectTextColor, RefPtr<ResourceObject> resourceObjectTextOverflowColor);
+        RefPtr<ResourceObject>& resourceObjectTextColor, RefPtr<ResourceObject>& resourceObjectTextOverflowColor);
     static ArkUINativeModuleValue SetOnWillAttachIME(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnWillAttachIME(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static IMEAttachCallback ParseAndCreateIMEAttachCallback(
         EcmaVM* vm, Local<JSValueRef> callbackArg, FrameNode* frameNode);
     static ArkUINativeModuleValue SetTextDirection(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTextDirection(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSelectedDragPreviewStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSelectedDragPreviewStyle(ArkUIRuntimeCallInfo *runtimeCallInfo);
 
 private:
     static void SetCancelButtonImage(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t style);

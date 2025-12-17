@@ -162,6 +162,9 @@ public:
     }
     bool CreateHomeDestination(const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;
 
+    bool CreateRelatedDestination(
+        const std::string& name, const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;
+
     bool IsStaticStack() override
     {
         return false;
@@ -212,6 +215,7 @@ private:
     void ExecutePopCallbackForHomeNavDestination(const JSRef<JSVal>& param);
     void UpdatePreTopInfo() override;
     bool IsPushOperation();
+    bool CreateEmptyRelatedPage(RefPtr<NG::UINode>& targetNode, RefPtr<NG::NavDestinationGroupNode>& destNode);
 
 private:
     JSRef<JSObject> thisObj_;

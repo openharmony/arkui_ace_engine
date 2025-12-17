@@ -213,6 +213,12 @@ struct TextSelector {
         aiEnd = std::nullopt;
     }
 
+    void ResetHighLightValue()
+    {
+        highlightStart = std::nullopt;
+        highlightEnd = std::nullopt;
+    }
+
     std::string ToString()
     {
         std::string result;
@@ -245,6 +251,9 @@ struct TextSelector {
 
     std::optional<int32_t> aiStart;
     std::optional<int32_t> aiEnd;
+
+    std::optional<int32_t> highlightStart;
+    std::optional<int32_t> highlightEnd;
 
     int32_t charCount = 0;
     RectF firstHandle;

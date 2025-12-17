@@ -20,6 +20,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/ng/entry_page_info.h"
@@ -83,7 +84,51 @@ bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper,
             firstBuildCallback_ = nullptr;
         }
     }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto geometry = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometry, false);
+    auto frameSize = geometry->GetFrameSize();
+    auto widthVp = context->Px2VpWithCurrentDensity(frameSize.Width());
+    auto heightVp = context->Px2VpWithCurrentDensity(frameSize.Height());
+    SizeF curSize(widthVp, heightVp);
+    if (!currentPageSize_.has_value() || currentPageSize_.value() != curSize) {
+        currentPageSize_ = curSize;
+        if (layoutProperty->GetVisibilityValue(VisibleType::INVISIBLE) == VisibleType::VISIBLE) {
+            NotifyRouterPageSizeChange();
+        } else {
+            needNotifySizeChangeWhenVisible_ = true;
+        }
+    }
     return false;
+}
+
+void PagePattern::NotifyRouterPageSizeChange()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto task = [weakPattern = WeakClaim(this)]() {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        UIObserverHandler::GetInstance().NotifyRouterPageSizeChange(
+            pattern->GetPageInfo(), pattern->state_, pattern->currentPageSize_);
+    };
+    context->AddAfterLayoutTask(std::move(task));
+}
+
+void PagePattern::OnVisibleChange(bool isVisible)
+{
+    ContentRootPattern::OnVisibleChange(isVisible);
+    if (!isVisible || !needNotifySizeChangeWhenVisible_) {
+        return;
+    }
+    needNotifySizeChangeWhenVisible_ = false;
+    // InVisible -> Visible
+    NotifyRouterPageSizeChange();
 }
 
 void PagePattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
@@ -117,6 +162,9 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish, P
             auto pipeline = pattern->GetContext();
             if (pipeline) {
                 pipeline->GetLoadCompleteManager()->StopCollect();
+                auto mgr = pipeline->GetContentChangeManager();
+                CHECK_NULL_VOID(mgr);
+                mgr->OnPageTransitionEnd(pattern->GetHost());
             }
         }
         auto host = pattern->GetHost();
@@ -224,7 +272,7 @@ void PagePattern::OnAttachToMainTree()
         SetPageIndexForStatic();
     }
     state_ = RouterPageState::ABOUT_TO_APPEAR;
-    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_, currentPageSize_);
 }
 
 void PagePattern::SetPageIndexForStatic()
@@ -253,7 +301,7 @@ void PagePattern::OnDetachFromMainTree()
     }
 #endif
     state_ = RouterPageState::ABOUT_TO_DISAPPEAR;
-    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_, currentPageSize_);
 }
 
 void PagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -309,11 +357,11 @@ void PagePattern::OnShow(bool isFromWindow)
 #if defined(ENABLE_SPLIT_MODE)
     if (needFireObserver_) {
         state_ = RouterPageState::ON_PAGE_SHOW;
-        UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+        UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_, currentPageSize_);
     }
 #else
     state_ = RouterPageState::ON_PAGE_SHOW;
-    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_, currentPageSize_);
 #endif
     JankFrameReport::GetInstance().StartRecord(pageInfo_->GetFullPath());
     auto pageUrlChecker = container->GetPageUrlChecker();
@@ -376,11 +424,11 @@ void PagePattern::OnHide(bool isFromWindow)
 #if defined(ENABLE_SPLIT_MODE)
     if (needFireObserver_) {
         state_ = RouterPageState::ON_PAGE_HIDE;
-        UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+        UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_, currentPageSize_);
     }
 #else
     state_ = RouterPageState::ON_PAGE_HIDE;
-    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_, currentPageSize_);
 #endif
     auto container = Container::Current();
     if (container) {
@@ -416,11 +464,11 @@ bool PagePattern::OnBackPressed()
 #if defined(ENABLE_SPLIT_MODE)
     if (needFireObserver_) {
         state_ = RouterPageState::ON_BACK_PRESS;
-        UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+        UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_, currentPageSize_);
     }
 #else
     state_ = RouterPageState::ON_BACK_PRESS;
-    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_, currentPageSize_);
 #endif
     if (onBackPressed_) {
         bool result = onBackPressed_();
@@ -905,7 +953,11 @@ void PagePattern::ResetPageTransitionEffect()
 
 void PagePattern::RemoveJsChildImmediately(const RefPtr<FrameNode>& page, PageTransitionType transactionType)
 {
-    if (!CheckEnableCustomNodeDel()) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    if (!context->IsCustomNodeDeleteInTransition()) {
         return;
     }
 

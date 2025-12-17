@@ -14,7 +14,6 @@
  */
 
 #include "arkoala_api_generated.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/particle/particle_model_ng.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -201,9 +200,9 @@ std::list<NG::ParticlePropertyAnimation<float>> ParseAnimationFloatArray(
 bool ParseFloatCurveConfig(const Ark_Union_Tuple_Double_Double_Array_ParticlePropertyAnimationNumberInner& arkObject,
     ParticleFloatPropertyUpdater& updater, float defaultValue, float minValue, float maxValue)
 {
- 
- 
- 
+
+
+
     constexpr int ANIMATION_INDEX = 1;
     if (arkObject.selector != ANIMATION_INDEX) {
         return false;

@@ -91,7 +91,10 @@ static int32_t CallImageGeneratorCreator(napi_env env, napi_value options)
         return CREATOR_INTERNAL_ERROR;
     }
     int32_t errorCode = CREATOR_INTERNAL_ERROR;
-    napi_get_value_int32(env, returnValue, &errorCode);
+    if (napi_get_value_int32(env, returnValue, &errorCode) != napi_ok) {
+        TAG_LOGE(AceLogTag::ACE_SIDEBAR, "parse error code failed when create image generator");
+        return CREATOR_INTERNAL_ERROR;
+    }
     return errorCode;
 }
 
@@ -102,9 +105,15 @@ static napi_value JSShowGeneratorDialog(napi_env env, napi_callback_info info)
     // parse uiContext start
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv[0], &valueType);
-    if (valueType == napi_undefined || valueType != napi_object) {
-        // >>>>------ NOT IMPL YET ------<<<<
+    if (valueType != napi_object) {
         return CreatePromise(env, ERROR_CODE_PARAM_INVALID, FIRST_ARG_TYPE_INCORRECT);
+    }
+    napi_value napiInstanceId = nullptr;
+    napi_get_named_property(env, argv[0], "instanceId_", &napiInstanceId);
+    int32_t instanceId = -1;
+    if (napi_get_value_int32(env, napiInstanceId, &instanceId) != napi_ok) {
+        TAG_LOGE(AceLogTag::ACE_SIDEBAR, "parse instanceId failed when create image generator");
+        return CreatePromise(env, ERROR_CODE_INTERNAL_ERROR, INTERNAL_ERROR_MSG);
     }
     // parse uiContext finish
     napi_value options = argc == 2 ? argv[1] : nullptr;
@@ -121,7 +130,7 @@ static napi_value JSShowGeneratorDialog(napi_env env, napi_callback_info info)
     if (errorCode == CREATOR_INTERNAL_ERROR) {
         return CreatePromise(env, ERROR_CODE_INTERNAL_ERROR, INTERNAL_ERROR_MSG);
     }
-    if (Framework::ImageGeneratorDialogView::Create(-1)) {
+    if (Framework::ImageGeneratorDialogView::Create(instanceId)) {
         return CreatePromise(env, ERROR_CODE_NO_ERROR, "");
     } else {
         return CreatePromise(env, ERROR_CODE_INTERNAL_ERROR, INTERNAL_ERROR_MSG);

@@ -153,6 +153,8 @@ public:
             GetIncludeFontPadding().value_or(false)).c_str(), filter);
         json->PutExtAttr("fallbackLineSpacing", std::to_string(
             GetFallbackLineSpacing().value_or(false)).c_str(), filter);
+        json->PutExtAttr("selectedDragPreviewStyle",
+            GetSelectedDragPreviewStyleValue(GetSelectedDragPreviewStyleColor()).ColorToString().c_str(), filter);
     }
 
     const std::function<void(WeakPtr<NG::FrameNode>)>& GetCancelIconSymbol() const
@@ -175,6 +177,18 @@ public:
             decorations.value()[0] : TextDecoration::NONE;
     }
 
+    Color GetSelectedDragPreviewStyleColor() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, Color::WHITE);
+        auto themeScopeId = host->GetThemeScopeId();
+        auto context = host->GetContext();
+        CHECK_NULL_RETURN(context, Color::WHITE);
+        auto theme = context->GetTheme<TextTheme>(themeScopeId);
+        CHECK_NULL_RETURN(theme, Color::WHITE);
+        return theme->GetDragBackgroundColor();
+    }
+
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, MinFontScale, float, PROPERTY_UPDATE_MEASURE);
@@ -195,6 +209,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationStyle, TextDecorationStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, StrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, StrokeColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedDragPreviewStyle, Color, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(TextLineStyle, TextLineStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextAlign, TextAlign, PROPERTY_UPDATE_MEASURE_SELF);

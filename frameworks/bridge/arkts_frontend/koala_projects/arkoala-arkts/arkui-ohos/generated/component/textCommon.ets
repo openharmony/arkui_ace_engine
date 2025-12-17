@@ -264,6 +264,7 @@ export class TextMenuItemId implements MaterializedBase {
     static readonly SEARCH: TextMenuItemId = TextMenuItemId.getSEARCH()
     static readonly SHARE: TextMenuItemId = TextMenuItemId.getSHARE()
     static readonly autoFill: TextMenuItemId = TextMenuItemId.getAutoFill()
+    static readonly passwordVault: TextMenuItemId = TextMenuItemId.getPasswordVault()
     constructor(peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TextMenuItemId.getFinalizer())
     }
@@ -348,6 +349,11 @@ export class TextMenuItemId implements MaterializedBase {
         const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
         return obj
     }
+    private static getPasswordVault_serialize(): TextMenuItemId {
+        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_getPasswordVault()
+        const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
     public static of(id: ResourceStr): TextMenuItemId {
         const id_casted = id as (ResourceStr)
         return TextMenuItemId.of_serialize(id_casted)
@@ -388,6 +394,9 @@ export class TextMenuItemId implements MaterializedBase {
     }
     private static getAutoFill(): TextMenuItemId {
         return TextMenuItemId.getAutoFill_serialize()
+    }
+    private static getPasswordVault(): TextMenuItemId {
+        return TextMenuItemId.getPasswordVault_serialize()
     }
     equals_serialize(id: TextMenuItemId): boolean {
         const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_equals(this.peer!.ptr, toPeerPtr(id))
@@ -516,6 +525,9 @@ export enum TextDirection {
     RTL = 1,
     DEFAULT = 2,
     AUTO = 3
+}
+export interface SelectedDragPreviewStyle {
+    color?: ResourceColor;
 }
 export class LayoutManager_serializer {
     public static write(buffer: SerializerBase, value: LayoutManager): void {
@@ -1012,6 +1024,59 @@ export class DecorationStyleResult_serializer {
         }
         const styleTmpResult : TextDecorationStyle | undefined = styleTmpBuf
         let value : DecorationStyleResult = ({type: typeTmpResult, color: colorTmpResult, style: styleTmpResult} as DecorationStyleResult)
+        return value
+    }
+}
+export class SelectedDragPreviewStyle_serializer {
+    public static write(buffer: SerializerBase, value: SelectedDragPreviewStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue  = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof Color) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
+            } else if (valueHolderForColorTmpValue instanceof number) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+            } else if (valueHolderForColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
+                valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
+            } else if (valueHolderForColorTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): SelectedDragPreviewStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let colorTmpBuf : ResourceColor | undefined = undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let colorTmpBuf_ : Color | number | string | Resource | undefined
+            if (colorTmpBuf_UnionSelector == (0).toChar()) {
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
+            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
+                colorTmpBuf_ = valueDeserializer.readInt32()
+            } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
+                colorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
+                colorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
+            }
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
+        }
+        const colorTmpResult : ResourceColor | undefined = colorTmpBuf
+        let value : SelectedDragPreviewStyle = ({color: colorTmpResult} as SelectedDragPreviewStyle)
         return value
     }
 }

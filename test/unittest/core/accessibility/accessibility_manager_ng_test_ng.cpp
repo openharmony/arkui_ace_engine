@@ -32,6 +32,7 @@
 #include "frameworks/core/event/pointer_event.h"
 
 #include "accessibility_session_adapter_test.h"
+#include "ui/properties/ui_material.h"
 
 using namespace testing;
 using namespace testing::ext;

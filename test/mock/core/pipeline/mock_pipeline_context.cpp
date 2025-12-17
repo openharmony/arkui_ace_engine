@@ -27,6 +27,7 @@
 #include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
@@ -274,6 +275,9 @@ PipelineContext::PipelineContext()
     }
     if (!loadCompleteMgr_) {
         loadCompleteMgr_ = std::make_shared<LoadCompleteManager>();
+    }
+    if (!contentChangeMgr_) {
+        contentChangeMgr_ = MakeRefPtr<ContentChangeManager>();
     }
 }
 
@@ -756,7 +760,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     }
 }
 
-void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle)
+void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle, bool postByTraverse)
 {
     if (MockPipelineContext::GetCurrent()->UseFlushUITasks())
     {
@@ -1615,6 +1619,11 @@ bool NG::PipelineContext::CheckSourceTypeChange(SourceType currentSourceType)
 const RefPtr<NG::PostEventManager>& NG::PipelineContext::GetPostEventManager()
 {
     return postEventManager_;
+}
+
+RefPtr<NG::ContentChangeManager>& NG::PipelineContext::GetContentChangeManager()
+{
+    return contentChangeMgr_;
 }
 
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,

@@ -641,6 +641,23 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_025, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FormRenderGroupTest_026
+ * @tc.desc: Test SetRenderGroupEnableFlag() function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_026, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_026 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_026");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    EXPECT_TRUE(group);
+    group->SetRenderGroupEnableFlag(true);
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_026 end";
+}
+
+/**
  * @tc.name: FormRenderGroupTest_SetUiContentParams_001
  * @tc.desc: Test SetUiContentParams function.
  * @tc.type: FUNC
@@ -649,12 +666,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_SetUiContentParams_001, TestSi
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_SetUiContentParams_001 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_SetUiContentParams_001");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
-    EXPECT_TRUE(group);
     OHOS::AAFwk::Want want;
     group->SetUiContentParams(want);
     GTEST_LOG_(INFO) << "FormRenderGroupTest_SetUiContentParams_001 end";
-}
 }

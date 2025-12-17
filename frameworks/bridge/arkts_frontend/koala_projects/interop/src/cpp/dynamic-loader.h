@@ -29,7 +29,7 @@ inline void* loadLibrary(const std::string& libPath) {
 
 inline const char* libraryError() {
     static char error[256];
-    interop_snprintf(error, sizeof error, "error %lu", GetLastError());
+    InteropPrintToBufferN(error, sizeof error, "error %lu", GetLastError());
     return error;
 }
 

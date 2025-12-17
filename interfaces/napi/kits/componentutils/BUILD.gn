@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 
 template("napi_componentutils_static") {
   forward_variables_from(invoker, "*")
@@ -27,11 +28,27 @@ template("napi_componentutils_static") {
     if (platform != "ohos" || is_asan) {
       sources += [ "$ace_root/frameworks/base/geometry/matrix4.cpp" ]
     }
+    external_deps = []
+    if (defined(vendor_configs.ace_engine_mistouch_prevention)) {
+      sources += vendor_configs.ace_engine_mistouch_prevention_mode
+      external_deps += [
+        "opencv:libopencv_core",
+        "opencv:libopencv_calib3d",
+        "opencv:libopencv_imgproc",
+        "image_framework:image",
+        "image_framework:image_native",
+        "image_framework:pixelmap",
+        "image_framework:pixelmap_ndk"
+      ]
+    } else {
+      sources += [ "js_mistouch_prevention.cpp" ]
+    }
+    
     deps = []
     if (platform != "" && is_arkui_x) {
       deps += [ "${crossplatform_plugin_root}/libs/napi:napi_$platform" ]
     } else {
-      external_deps = [ "napi:ace_napi" ]
+      external_deps += [ "napi:ace_napi" ]
     }
 
     if (defined(config.libace_target)) {

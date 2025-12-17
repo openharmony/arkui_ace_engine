@@ -275,7 +275,7 @@ float TitleBarLayoutAlgorithm::WidthAfterAvoidMenuBarAndContainerModal(
     CHECK_NULL_RETURN(titleBarGeo, afterAvoidWidth);
     auto pipeline = titleBarNode->GetContext();
     CHECK_NULL_RETURN(pipeline, afterAvoidWidth);
-    auto titleBarOffset = titleBarNode->GetParentGlobalOffsetDuringLayout();
+    auto titleBarOffset = titleBarNode->GetPaintRectOffsetNG();
     RectF avoidArea;
     if (NeedAvoidMenuBar(pipeline)) {
         auto container = Container::Current();

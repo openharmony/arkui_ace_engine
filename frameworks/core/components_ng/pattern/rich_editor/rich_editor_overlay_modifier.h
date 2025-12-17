@@ -76,7 +76,6 @@ private:
     RefPtr<PropertyFloat> scrollOffset_;
     RefPtr<PropertyInt> scrollBarOpacityType_;
     RefPtr<PropertyFloat> textHeight_;
-    WeakPtr<Pattern> pattern_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
     WeakPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
     RefPtr<PropertySizeF> frameSize_;
