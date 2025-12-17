@@ -107,6 +107,8 @@ void SetButtonOptions0Impl(Ark_NativePointer node,
         ButtonModelStatic::SetRole(frameNode, buttonOptions.role);
         ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
         ButtonModelStatic::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
+    } else {
+        ButtonModelStatic::SetType(frameNode, std::nullopt);
     }
     auto labelString = Converter::OptConvert<std::string>(*label);
     if (labelString) {
@@ -129,6 +131,8 @@ void SetButtonOptions1Impl(Ark_NativePointer node,
             ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
         }
         ButtonModelStatic::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
+    } else {
+        ButtonModelStatic::SetType(frameNode, std::nullopt);
     }
     ButtonModelStatic::SetCreateWithLabel(frameNode, false);
 }
