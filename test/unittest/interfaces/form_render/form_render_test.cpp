@@ -1051,7 +1051,8 @@ HWTEST_F(FormRenderTest, FormRenderTest_SetUiContentParams_001, TestSize.Level0)
     formRenderer->SetUiContentParams(renderWant);
     formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
     EXPECT_TRUE(formRenderer->uiContent_);
-    renderWant.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY, "#FFFFFFFF");
+    std::string transparentColor = "#FFFFFFFF";
+    renderWant.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY, transparentColor);
     renderWant.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_ENABLE_BLUR_BACKGROUND_KEY, true);
     formRenderer->SetUiContentParams(renderWant);
 }
