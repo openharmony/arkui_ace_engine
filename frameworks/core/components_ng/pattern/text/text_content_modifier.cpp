@@ -1267,20 +1267,16 @@ TextDirection TextContentModifier::GetTextRaceDirection() const
     CHECK_NULL_RETURN(frameNode, TextDirection::LTR);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, TextDirection::LTR);
-    // 获取文本方向属性，默认为 INHERIT
+    // default INHERIT
     auto textDirection = layoutProperty->GetTextDirectionValue(TextDirection::INHERIT);
     auto layoutDirection = layoutProperty->GetLayoutDirection();
     
-    // textDirection 优先级高于 layoutDirection
     if (textDirection != TextDirection::INHERIT) {
         if (textDirection == TextDirection::AUTO) {
-            // textDirection 为 AUTO 时，返回文本自身字符方向
             return GetTextRaceDirectionByContent();
         }
-        // 直接返回明确的文本方向（LTR 或 RTL）
         return textDirection;
     }
-    // textDirection 为 INHERIT 时，继承原有的 layoutDirection 逻辑
     if (layoutDirection == TextDirection::AUTO) {
         return GetTextRaceDirectionByContent();
     }

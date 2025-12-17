@@ -755,7 +755,7 @@ void TextFieldContentModifier::DoAutoFillDraw(DrawingContext& context)
     paragraph->UpdateColor(defaultCharIndex, length, autoFillEmphasizeCharTextColor_);
 
     auto emphasizeTranslationOffset = autoFillTranslationOffset_->Get();
-    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto isRTL = autoFillController->GetTextDirection(layoutProperty) == TextDirection::RTL;
     canvas.Save();
     auto textShowWidth = std::abs(emphasizeTranslationOffset);
     auto clipRectX0 = contentRect.GetX();

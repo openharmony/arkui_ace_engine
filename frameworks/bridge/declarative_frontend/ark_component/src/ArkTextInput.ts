@@ -1600,6 +1600,23 @@ class TextInputSelectedDragPreviewStyleModifier extends ModifierWithKey<ArkSelec
       return !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
   }
 }
+class TextInputDirectionModifier extends ModifierWithKey<TextDirection> {
+  constructor(value: TextDirection) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputDirection');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetTextDirection(node);
+    }
+    else {
+      getUINativeModule().textInput.setTextDirection(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 
 class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
@@ -2092,6 +2109,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     arkSelectedDragPreviewStyle.color = value?.color;
     modifierWithKey(this._modifiersWithKeys, TextInputSelectedDragPreviewStyleModifier.identity,
         TextInputSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
+    return this;
+  }
+  textDirection(value: TextDirection): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputDirectionModifier.identity, TextInputDirectionModifier, value);
     return this;
   }
 }

@@ -18,6 +18,29 @@
 #include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace {
+namespace StringUtils {
+std::string ToString(const TextFlipDirection& textFlipDirection)
+{
+    static const LinearEnumMapNode<TextFlipDirection, std::string> table[] = {
+        { TextFlipDirection::DOWN, "down" },
+        { TextFlipDirection::UP, "up" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textFlipDirection);
+    return iter != -1 ? table[iter].value : "";
+}
+
+std::string ToString(const TextDirection& textDirection)
+{
+    static const LinearEnumMapNode<TextDirection, std::string> table[] = {
+        { TextDirection::LTR, "LTR" },
+        { TextDirection::RTL, "RTL" },
+        { TextDirection::INHERIT, "DEFAULT" },
+        { TextDirection::AUTO, "AUTO" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textDirection);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
 TextStyle::TextStyle(const std::vector<std::string>& fontFamilies, double fontSize, FontWeight fontWeight,
     FontStyle fontStyle, const Color& textColor)
     : propFontFamilies_(fontFamilies), propFontStyle_(fontStyle), propTextColor_(textColor),
