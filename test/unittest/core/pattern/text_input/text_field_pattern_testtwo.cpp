@@ -1245,6 +1245,14 @@ HWTEST_F(TextFieldPatternTestTwo, ProcessFocusStyle001, TestSize.Level0)
     pattern->inlineSelectAllFlag_ = true;
     pattern->ProcessFocusStyle();
     EXPECT_EQ(pattern->inlineSelectAllFlag_, true);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->hoverAndPressBgColorEnabled_ = true;
+    pattern->ProcessFocusStyle();
+    EXPECT_EQ(pattern->IsTV(), true);
 }
 
 /**
