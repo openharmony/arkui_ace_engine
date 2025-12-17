@@ -639,4 +639,21 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_025, TestSize.Level1)
     EXPECT_TRUE(group->IsManagerDelegateValid(want));
     GTEST_LOG_(INFO) << "FormRenderGroupTest_025 end";
 }
+
+/**
+* @tc.name: FormRenderGroupTest_026
+* @tc.desc: Test SetRenderGroupEnableFlag() function.
+* @tc.type: FUNC
+*/
+HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_026, TestSize.Level0)
+{
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_026 start";
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_026");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    EXPECT_TRUE(group);
+    group->SetRenderGroupEnableFlag(true);
+    GTEST_LOG_(INFO) << "FormRenderGroupTest_026 end";
+}
 }

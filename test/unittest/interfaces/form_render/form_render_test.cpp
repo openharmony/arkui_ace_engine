@@ -795,6 +795,20 @@ HWTEST_F(FormRenderTest, FormRenderTest025, TestSize.Level1)
 }
 
 /**
+* @tc.name: FormRenderTest026
+* @tc.desc: test SetRenderGroupEnableFlag
+* @tc.type: FUNC
+*/
+HWTEST_F(FormRenderTest, FormRenderTest026, TestSize.Level1)
+{
+    auto formRenderer = GetInstance("FormRenderTest026");
+    ASSERT_TRUE(formRenderer);
+    formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
+    EXPECT_TRUE(formRenderer->uiContent_);
+    formRenderer->SetRenderGroupEnableFlag(true);
+}
+
+/**
 * @tc.name: FormRenderTest030
 * @tc.desc: test IsManagerDelegateValid
 * @tc.type: FUNC
