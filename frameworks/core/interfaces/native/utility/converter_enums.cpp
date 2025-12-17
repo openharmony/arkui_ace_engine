@@ -116,6 +116,7 @@ void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissRea
         case ARK_DISMISS_REASON_TOUCH_OUTSIDE: dst = BindSheetDismissReason::TOUCH_OUTSIDE; break;
         case ARK_DISMISS_REASON_CLOSE_BUTTON: dst = BindSheetDismissReason::CLOSE_BUTTON; break;
         case ARK_DISMISS_REASON_SLIDE_DOWN: dst = BindSheetDismissReason::SLIDE_DOWN; break;
+        case ARK_DISMISS_REASON_SLIDE: dst = BindSheetDismissReason::SLIDE; break;
         default: LOGE("Unexpected enum value in Ark_DismissReason: %{public}d", src); break;
     }
 }
@@ -439,6 +440,8 @@ void AssignCast(std::optional<SheetKeyboardAvoidMode>& dst, const Ark_SheetKeybo
         case ARK_SHEET_KEYBOARD_AVOID_MODE_RESIZE_ONLY: dst = SheetKeyboardAvoidMode::RESIZE_ONLY; break;
         case ARK_SHEET_KEYBOARD_AVOID_MODE_TRANSLATE_AND_SCROLL:
             dst = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL; break;
+        case ARK_SHEET_KEYBOARD_AVOID_MODE_POPUP_SHEET:
+            dst = SheetKeyboardAvoidMode::POPUP_SHEET; break;
         default: LOGE("Unexpected enum value in Ark_SheetKeyboardAvoidMode: %{public}d", src);
     }
 }
@@ -471,6 +474,8 @@ void AssignCast(std::optional<SheetType>& dst, const Ark_SheetType& src)
         case ARK_SHEET_TYPE_BOTTOM: dst = SheetType::SHEET_BOTTOM; break;
         case ARK_SHEET_TYPE_CENTER: dst = SheetType::SHEET_CENTER; break;
         case ARK_SHEET_TYPE_POPUP: dst = SheetType::SHEET_POPUP; break;
+        case ARK_SHEET_TYPE_SIDE: dst = SheetType::SHEET_SIDE; break;
+        case ARK_SHEET_TYPE_CONTENT_COVER: dst = SheetType::SHEET_CONTENT_COVER; break;
         default: LOGE("Unexpected enum value in Ark_SheetType: %{public}d", src);
     }
 }
