@@ -353,6 +353,9 @@ void WebSelectOverlay::HideMagnifier()
 
 bool WebSelectOverlay::IsShowMenuOfAutoFill(uint32_t flags, SelectOverlayInfo& selectInfo)
 {
+    if (IS_CALLING_FROM_M114()) {
+        return false;
+    }
     if (!(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_AUTOFILL) ||
         !(selectInfo.isSingleHandle || selectInfo.menuInfo.showCut)) {
         return false;

@@ -833,6 +833,9 @@ void ContextMenuResultOhos::PasteAndMatchStyle() const
 
 void ContextMenuResultOhos::RequestPasswordAutoFill() const
 {
+    if (IS_CALLING_FROM_M114()) {
+        return;
+    }
     if (callback_) {
         callback_->Continue(CI_REQUEST_AUTOFILL, EF_NONE);
     }
