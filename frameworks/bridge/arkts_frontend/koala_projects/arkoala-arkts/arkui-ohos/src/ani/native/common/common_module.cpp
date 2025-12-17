@@ -1779,7 +1779,7 @@ void SetTouchEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, 
 
 ani_array ResolveUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
 {
-    ani_array_int resultArray = nullptr;
+    ani_array resultArray = nullptr;
     const auto* modifier = GetNodeAniModifier();
     CHECK_NULL_RETURN(modifier, resultArray);
     std::vector<int32_t> instance;
