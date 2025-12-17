@@ -6544,18 +6544,18 @@ HWTEST_F(WebSelectOverlayTest, ComputeMenuOffsetTest0, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     /**
-    * @tc.steps: step. Get layoutWrapper and layoutAlgorithm.
+    * @tc.steps: step. Get layoutWrapper and layoutAlgorithm
     * @tc.expected: layoutWrapper and layoutAlgorithm are created successfully
     */
     RefPtr<LayoutWrapperNode> layoutWrapper;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     InitLayoutWrapper(layoutWrapper, geometryNode, infoPtr);
     /**
-    * @tc.steps: step3. set keyboardInset_.
+    * @tc.steps: step3. set keyboardInset_
     */
     InitSafeAreaManager(pipeline);
     /**
-    * @tc.steps: step4. Test cases.
+    * @tc.steps: step4. Test cases
     */
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     infoPtr->firstHandle.paintRect = {0.0f, -1.0f, 0.0f, 0.0f};
@@ -6567,9 +6567,9 @@ HWTEST_F(WebSelectOverlayTest, ComputeMenuOffsetTest0, TestSize.Level1)
     OffsetF windowOffset = {0.0f, 0.0f};
     auto layoutWrapperPtr = AccessibilityManager::RawPtr(layoutWrapper);
     WebSelectOverlay overlay(webPattern);
-    auto ret = overlay.ComputeMenuOffset(layoutWrapperPtr, menuOffset, menuRect, windowOffset, infoPtr);
+    auto ret = !overlay.ComputeMenuOffset(layoutWrapperPtr, menuOffset, menuRect, windowOffset, infoPtr);
     infoPtr->isNewAvoid = true;
-    ret |= overlay.ComputeMenuOffset(layoutWrapperPtr, menuOffset, menuRect, windowOffset, infoPtr);
+    ret |= !overlay.ComputeMenuOffset(layoutWrapperPtr, menuOffset, menuRect, windowOffset, infoPtr);
     infoPtr->isSingleHandle = false;
     ret |= overlay.ComputeMenuOffset(layoutWrapperPtr, menuOffset, menuRect, windowOffset, infoPtr);
     MockPipelineContext::TearDown();
@@ -7014,7 +7014,7 @@ HWTEST_F(WebSelectOverlayTest, WebMenuAvoidStrategyTest003, TestSize.Level1)
     geometryNode->SetFrameSize(SizeF(0.0f, 300.0f));
     WebSelectOverlay overlay(webPattern);
     auto ret = overlay.ComputeMenuOffset(layoutWrapperPtr, menuOffset, menuRect, windowOffset, infoPtr);
-    auto ret1 = NearEqual(menuOffset.GetX(), 0.0f, NEW_EPSILON);
+    auto ret1 = NearEqual(menuOffset.GetX(), -10.0f, NEW_EPSILON);
     MockPipelineContext::TearDown();
     EXPECT_TRUE(ret && ret1);
 }

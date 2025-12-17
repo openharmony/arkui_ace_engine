@@ -1486,9 +1486,6 @@ bool WebSelectOverlay::ComputeMenuOffset(LayoutWrapper *layoutWrapper, OffsetF &
 {
     CHECK_NULL_RETURN(info, false);
     CHECK_NULL_RETURN(layoutWrapper, false);
-    if (info->isSingleHandle) {
-        return false;
-    }
     MenuAvoidStrategyMember member;
     member.layoutWrapper = layoutWrapper;
     member.windowOffset = windowOffset;
@@ -1497,7 +1494,11 @@ bool WebSelectOverlay::ComputeMenuOffset(LayoutWrapper *layoutWrapper, OffsetF &
     member.info = info;
     bool initSuccess = InitMenuAvoidStrategyMember(member);
     if (initSuccess) {
-        MenuAvoidStrategy(menuOffset, member);
+        if (info->isSingleHandle) {
+            SingleHandlePosition(menuOffset, member);
+        } else {
+            MenuAvoidStrategy(menuOffset, member);
+        }
         return true;
     } else {
         return false;
@@ -1537,6 +1538,7 @@ void WebSelectOverlay::InitMenuAvoidStrategyAboutParam(MenuAvoidStrategyMember& 
     member.avoidFromText = theme->GetMenuSpacingWithText().ConvertToPx() +
                                 theme->GetHandleDiameter().ConvertToPx() +
                                 theme->GetHandleDiameterStrokeWidth().ConvertToPx() / 2.0f;
+    member.avoidFromSingleHandle = theme->GetMenuSpacingWithText().ConvertToPx();
 }
 
 void WebSelectOverlay::InitMenuAvoidStrategyAboutKeyboard(MenuAvoidStrategyMember& member, InitStrategyTools& tools)
@@ -1605,6 +1607,14 @@ void WebSelectOverlay::SetDefaultDownPaint(MenuAvoidStrategyMember& member)
         NearEqual(member.downPaint.Top(), member.downPaint.Bottom()) ? fixDownPaint : member.downPaint;
 }
 
+void WebSelectOverlay::SingleHandlePosition(OffsetF& menuOffset, MenuAvoidStrategyMember& member)
+{
+    double upPosition = member.upPaint.Top() - member.avoidFromSingleHandle - member.menuHeight;
+    double downPosition = member.upPaint.Bottom() + member.avoidFromText;
+    double finalPosition = GreatNotEqual(upPosition, member.topArea) ? upPosition : downPosition;
+    menuOffset.SetY(finalPosition);
+}
+
 void WebSelectOverlay::MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyMember& member)
 {
     SetDefaultDownPaint(member);
@@ -1646,7 +1656,7 @@ void WebSelectOverlay::MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyM
 
 bool WebSelectOverlay::QuickMenuIsReallyNeedNewAvoid(MenuAvoidStrategyMember& member)
 {
-    if (!member.info->isNewAvoid) {
+    if (!member.info->isNewAvoid || member.info->isSingleHandle) {
         return false;
     }
     bool upHandleIsNotShow = GreatNotEqual(member.topArea, member.upPaint.Top()) ||
