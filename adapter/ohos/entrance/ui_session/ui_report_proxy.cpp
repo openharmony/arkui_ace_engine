@@ -387,4 +387,22 @@ void UiReportProxy::SendContentChange(ChangeType type, const std::string& simple
         LOGW("SendContentChange send request failed");
     }
 }
+
+void UiReportProxy::ReportGetStateMgmtInfo(std::vector<std::string> results)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ReportGetStateMgmtInfo write interface token failed");
+        return;
+    }
+    if (!messageData.WriteStringVector(results)) {
+        LOGW("ReportGetStateMgmtInfo WriteStringVector failed");
+        return;
+    }
+    if (Remote()->SendRequest(REPORT_STATE_MGMT_INFO, messageData, reply, option) != ERR_NONE) {
+        LOGW("ReportGetStateMgmtInfo send request failed");
+    }
+}
 } // namespace OHOS::Ace

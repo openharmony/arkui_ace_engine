@@ -43,6 +43,8 @@ public:
     using NotifySendCommandAsyncFunction = std::function<int32_t(int32_t id, const std::string& command)>;
     using SendCommandFunction = std::function<void(int32_t value)>;
     using GetHitTestInfoFunction = std::function<void(InteractionParamConfig config)>;
+    using GetStateMgmtInfoFunction = std::function<void(
+        const std::string& componentName, const std::string& propertyName, const std::string& jsonPath)>;
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -172,6 +174,8 @@ public:
     virtual void SaveProcessId(std::string key, int32_t id) {};
     virtual void EraseProcessId(const std::string& key) {};
     virtual void GetWebTranslateText(std::string extraData, bool isContinued) {};
+    virtual void GetStateMgmtInfo(
+        const std::string& componentName, const std::string& propertyName, const std::string& jsonPath) {};
     virtual void SendWebTextToAI(int32_t nodeId, std::string res) {};
     virtual void SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids) {};
     virtual void SendTranslateResult(int32_t nodeId, std::string result) {};
@@ -179,6 +183,7 @@ public:
     virtual void GetPixelMap() {};
     virtual void SendCommand(const std::string& command) {};
     virtual void SaveSendCommandFunction(SendCommandFunction&& function) {};
+    virtual void SaveGetStateMgmtInfoFunction(GetStateMgmtInfoFunction&& callback) {};
     virtual void SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps) {};
     virtual void GetVisibleInspectorTree(ParamConfig config = ParamConfig()) {};
     virtual void RegisterPipeLineExeAppAIFunction(
@@ -190,6 +195,8 @@ public:
     virtual void ReportContentChangeEvent(ChangeType type, const std::string& simpleTree) {};
     virtual void SetStartContentChangeDetectCallback(std::function<void(ContentChangeConfig)>&&) {};
     virtual void SetStopContentChangeDetectCallback(std::function<void()>&&) {};
+    virtual void ReportGetStateMgmtInfo(std::vector<std::string> results) {};
+
 protected:
     UiSessionManager() = default;
     virtual ~UiSessionManager() = default;
@@ -209,6 +216,7 @@ protected:
     GetHitTestInfoFunction getHitTestInfoFunction_ = 0;
     NotifySendCommandFunction notifySendCommandFunction_ = 0;
     NotifySendCommandAsyncFunction notifySendCommandAsyncFunction_ = 0;
+    GetStateMgmtInfoFunction getStateMgmtInfoFunction_ = 0;
     std::shared_ptr<InspectorJsonValue> jsonValue_ = nullptr;
     std::atomic<int32_t> webTaskNums_ = 0;
     std::string baseInfo_;

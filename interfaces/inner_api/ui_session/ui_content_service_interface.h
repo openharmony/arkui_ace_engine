@@ -71,6 +71,7 @@ public:
         REGISTER_CONTENT_CHANGE,
         UNREGISTER_CONTENT_CHANGE,
         GET_HIT_TEST_NODE_INFO_FOR_TOUCH,
+        REQUEST_STATE_MGMT_INFO,
     };
 
     /**
@@ -306,6 +307,13 @@ public:
      * @return: result number
      */
     virtual int32_t UnregisterContentChangeCallback() = 0;
+
+    /**
+     * @description: define get the values of state variables that meets specified conditions
+     * @return: result number
+     */
+    virtual int32_t GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
+        const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback) = 0;
 };
 class ACE_FORCE_EXPORT ReportService : public OHOS::IRemoteBroker {
 public:
@@ -331,6 +339,7 @@ public:
         SEND_EXE_APP_AI_FUNCTION_RESULT,
         SEND_CONTENT_CHANGE,
         REPORT_HIT_TEST_NODE_INFOS,
+        REPORT_STATE_MGMT_INFO,
     };
 
     /**
@@ -417,6 +426,11 @@ public:
      * @description: define send the content change to the proxy interface
      */
     virtual void SendContentChange(ChangeType type, const std::string& simpleTree) = 0;
+
+    /**
+     * @description: define send the state management info to the proxy interface
+     */
+    virtual void ReportGetStateMgmtInfo(std::vector<std::string> results) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

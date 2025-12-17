@@ -2610,7 +2610,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (pipelineContext) {
         pipelineContext->SetIsCustomNodeDeleteInTransition(isCustomNodeDeleteInTransition);
     }
-    
+
     pipeline->SetHasPreviewTextOption(hasPreviewTextOption);
     // Use metadata to control whether the cutout safeArea takes effect.
     bool useCutout = std::any_of(metaData.begin(), metaData.end(),
@@ -5867,6 +5867,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     RegisterExeAppAIFunction(taskExecutor);
     SaveGetHitTestInfoCallback(taskExecutor);
     SetContentChangeDetectCallback(taskExecutor);
+    SaveGetStateMgmtInfoFunction(taskExecutor);
 }
 
 void UIContentImpl::SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6313,5 +6314,22 @@ void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& 
             },
             TaskExecutor::TaskType::UI, "UiSessionContentChangeDetectStop");
     });
+}
+
+void UIContentImpl::SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto getStateMgmtInfoCallback = [weakTaskExecutor = taskExecutor](const std::string& componentName,
+                                        const std::string& propertyName, const std::string& jsonPath) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [componentName, propertyName, jsonPath]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->GetStateMgmtInfo(componentName, propertyName, jsonPath);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionGetStateMgmtInfo");
+    };
+    UiSessionManager::GetInstance()->SaveGetStateMgmtInfoFunction(getStateMgmtInfoCallback);
 }
 } // namespace OHOS::Ace

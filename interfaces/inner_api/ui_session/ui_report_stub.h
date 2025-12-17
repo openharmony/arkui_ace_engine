@@ -205,6 +205,8 @@ public:
     void RegisterContentChangeCallback(
         const std::function<void(ChangeType type, const std::string& simpleTree)> callback);
     void UnregisterContentChangeCallback();
+    void RegisterGetStateMgmtInfoCallback(const std::function<void(std::vector<std::string>)>& callback);
+    void ReportGetStateMgmtInfo(std::vector<std::string> results) override;
 
 private:
     EventCallback clickEventCallback_;
@@ -224,6 +226,7 @@ private:
     std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)> getShowingImageCallback_;
     std::function<void(uint32_t)> exeAppAIFunctionCallback_;
     std::function<void(ChangeType type, const std::string& simpleTree)> contentChangeCallback_;
+    std::function<void(std::vector<std::string>)> getStateMgmtInfoCallback_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_REPORT_STUB_H

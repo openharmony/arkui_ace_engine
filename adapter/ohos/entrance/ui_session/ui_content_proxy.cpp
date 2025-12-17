@@ -882,4 +882,42 @@ int32_t UIContentServiceProxy::UnregisterContentChangeCallback()
     }
     return NO_ERROR;
 }
+
+int32_t UIContentServiceProxy::GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
+    const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback)
+{
+    MessageParcel value;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!value.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetStateMgmtInfo write interface token failed");
+        return FAILED;
+    }
+    if (!value.WriteInt32(processId_)) {
+        LOGW("GetStateMgmtInfo write interface processId failed");
+        return FAILED;
+    }
+    if (!value.WriteString(componentName)) {
+        LOGW("GetStateMgmtInfo write componentName failed");
+        return FAILED;
+    }
+    if (!value.WriteString(propertyName)) {
+        LOGW("GetStateMgmtInfo write propertyName failed");
+        return FAILED;
+    }
+    if (!value.WriteString(jsonPath)) {
+        LOGW("GetStateMgmtInfo write jsonPath failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("GetStateMgmtInfo is nullptr, connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterGetStateMgmtInfoCallback(eventCallback);
+    if (Remote()->SendRequest(REQUEST_STATE_MGMT_INFO, value, reply, option) != ERR_NONE) {
+        LOGW("GetStateMgmtInfo send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
 } // namespace OHOS::Ace

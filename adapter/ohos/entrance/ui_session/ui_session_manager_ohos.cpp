@@ -719,4 +719,30 @@ void UiSessionManagerOhos::SetStopContentChangeDetectCallback(std::function<void
     }
     stopContentChangeDetectCallback_ = stopCallback;
 }
+
+void UiSessionManagerOhos::GetStateMgmtInfo(
+    const std::string& componentName, const std::string& propertyName, const std::string& jsonPath)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (getStateMgmtInfoFunction_) {
+        getStateMgmtInfoFunction_(componentName, propertyName, jsonPath);
+    }
+}
+
+void UiSessionManagerOhos::SaveGetStateMgmtInfoFunction(GetStateMgmtInfoFunction&& callback)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    getStateMgmtInfoFunction_ = std::move(callback);
+}
+
+void UiSessionManagerOhos::ReportGetStateMgmtInfo(std::vector<std::string> results)
+{
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["GetStateMgmtInfo"]]);
+    if (reportService != nullptr) {
+        reportService->ReportGetStateMgmtInfo(results);
+    } else {
+        LOGW("report component event failed, process id:%{public}d", processMap_["GetStateMgmtInfo"]);
+    }
+}
 } // namespace OHOS::Ace
