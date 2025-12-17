@@ -15,6 +15,7 @@
 
 import { CommonTestsV2 } from '../../v2_tests/commonTestsV2'
 import { MonitorTestsV2 } from '../../v2_tests/monitorTestsV2'
+import { SyncMonitorTestsV2 } from '../../v2_tests/monitorTestsV2'
 import { ObserveTestsV2 } from '../../v2_tests/observeTestsV2'
 import { RecycleTestsV2 } from '../../v2_tests/recycleTestsV2'
 import { PageController } from '../../lib/pageController'
@@ -34,6 +35,7 @@ struct Parent {
     setTimeout(() => {
       TestRunner.bind(this)(new CommonTestsV2('V2_common'));
       TestRunner.bind(this)(new MonitorTestsV2('V2_monitor'));
+      TestRunner.bind(this)(new SyncMonitorTestsV2('V2_syncmonitor'));
       TestRunner.bind(this)(new ObserveTestsV2('V2_observe'));
       TestRunner.bind(this)(new RecycleTestsV2('V2_recycle'));
       router.back();
