@@ -1032,6 +1032,13 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::DRAG_START_SUCCESS);
     bool isSwitchedToSubWindow = false;
     dragDropManager->SetIsMouseDrag(info.GetInputEventType() == InputEventType::MOUSE_BUTTON);
+#ifdef ENABLE_ROSEN_BACKEND
+    DragRSTransactionGuard dragRSTransactionGuard;
+    if (data.isSceneBoardTouchDrag && data.sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT) {
+        dragDropManager->InitSyncTransaction();
+        dragDropManager->OpenSyncTransaction();
+    }
+#endif
     if (!needChangeFwkForLeaveWindow && subWindow && TryDoDragStartAnimation(context, subWindow, info, data)) {
         dragDropManager->SetIsReDragStart(pipeline != dragNodePipeline);
         isSwitchedToSubWindow = true;
@@ -1055,10 +1062,25 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     SetPixelMap(nullptr);
     SetDragPreviewPixelMap(nullptr);
     if (data.isSceneBoardTouchDrag) {
+#ifdef ENABLE_ROSEN_BACKEND
+        if (data.sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT) {
+            ACE_SCOPED_TRACE("drag: set drag window visible, touch");
+            auto rsTransaction = dragDropManager->GetRSTransaction();
+            InteractionInterface::GetInstance()->SetDragWindowVisible(true, rsTransaction);
+            dragDropManager->CloseSyncTransaction();
+            dragDropManager->ResetSyncTransaction();
+        } else {
+            pipeline->AddAfterRenderTask([]() {
+                ACE_SCOPED_TRACE("drag: set drag window visible, touch");
+                InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+            });
+        }
+#else
         pipeline->AddAfterRenderTask([]() {
             ACE_SCOPED_TRACE("drag: set drag window visible, touch");
             InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         });
+#endif
     }
     if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && needChangeFwkForLeaveWindow) {
         overlayManager->RemovePixelMap();
@@ -2054,4 +2076,16 @@ void GestureEventHub::SetRecognizerDelayStatus(const RecognizerDelayStatus& reco
     CHECK_NULL_VOID(refereeNG);
     refereeNG->SetRecognizerDelayStatus(recognizerDelayStatus);
 }
+
+#ifdef ENABLE_ROSEN_BACKEND
+DragRSTransactionGuard::~DragRSTransactionGuard()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->CloseSyncTransaction();
+    dragDropManager->ResetSyncTransaction();
+}
+#endif
 } // namespace OHOS::Ace::NG
