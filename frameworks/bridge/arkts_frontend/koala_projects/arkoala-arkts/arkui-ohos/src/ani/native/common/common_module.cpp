@@ -1791,7 +1791,7 @@ ani_array ResolveUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
     ani_class intCls {};
     ani_method intCtor {};
     status = env->FindClass("std.core.Int", &intCls);
-    stauts = env->Class_FindMethod(intCls, "<ctor>","i:", &intCtor);
+    status = env->Class_FindMethod(intCls, "<ctor>","i:", &intCtor);
     ani_object result {};
     for (int i = 0; i < arraySize; ++i) {
         status = env->Object_New(intCls, intCtor, &result, ani_int(instance[i]));
