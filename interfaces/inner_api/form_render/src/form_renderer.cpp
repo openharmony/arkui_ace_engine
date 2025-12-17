@@ -711,18 +711,18 @@ void FormRenderer::SetUiContentParams(const OHOS::AAFwk::Want& want)
 {
     HILOG_INFO("call");
     if (uiContent_ == nullptr) {
-        HILOG_ERROR("SetVisibleChange error, uiContent_ is null!");
+        HILOG_ERROR("SetUiContentParams error, uiContent_ is null!");
         return;
+    }
+    if (want.HasParameter(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY)) {
+        std::string backgroundColor = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
+        uiContent_->SetFormBackgroundColor(backgroundColor);
     }
     bool enableBlurBackground = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_ENABLE_BLUR_BACKGROUND_KEY,
         false);
     if (enableBlurBackground) {
         HILOG_INFO("AttachUIContent SetFormBackgroundColor #00FFFFFF");
         uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
-    }
-    if (want.HasParameter(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY)) {
-        std::string backgroundColor = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
-        uiContent_->SetFormBackgroundColor(backgroundColor);
     }
 }
 } // namespace Ace
