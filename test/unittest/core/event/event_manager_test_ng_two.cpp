@@ -1020,9 +1020,9 @@ HWTEST_F(EventManagerTestNg, GetResamplePointerEvent005, TestSize.Level1)
     std::vector<DragPointerEvent> history;
     std::vector<DragPointerEvent> current;
     DragPointerEvent dragPointerEvent1;
-    dragPointerEvent1.targetWindowId = 1;
+    dragPointerEvent1.displayId = 1;
     DragPointerEvent dragPointerEvent2;
-    dragPointerEvent2.targetWindowId = 2;
+    dragPointerEvent2.displayId = 2;
 
     uint64_t resampleTime1 = 2 * 1000 * 1000;
     std::chrono::nanoseconds nanoseconds1(resampleTime1);
@@ -1051,9 +1051,9 @@ HWTEST_F(EventManagerTestNg, GetResamplePointerEvent006, TestSize.Level1)
     std::vector<DragPointerEvent> history;
     std::vector<DragPointerEvent> current;
     DragPointerEvent dragPointerEvent1;
-    dragPointerEvent1.targetWindowId = 1;
+    dragPointerEvent1.displayId = 1;
     DragPointerEvent dragPointerEvent2;
-    dragPointerEvent2.targetWindowId = 2;
+    dragPointerEvent2.displayId = 2;
 
     uint64_t resampleTime1 = 2 * 1000 * 1000;
     std::chrono::nanoseconds nanoseconds1(resampleTime1);
@@ -1174,9 +1174,9 @@ HWTEST_F(EventManagerTestNg, GetResamplePointerEvent0012, TestSize.Level1)
     std::vector<DragPointerEvent> history;
     std::vector<DragPointerEvent> current;
     DragPointerEvent dragPointerEvent1;
-    dragPointerEvent1.targetWindowId = 1;
+    dragPointerEvent1.displayId = 1;
     DragPointerEvent dragPointerEvent2;
-    dragPointerEvent2.targetWindowId = 1;
+    dragPointerEvent2.displayId = 1;
 
     uint64_t resampleTime1 = 2 * 1000 * 1000;
     std::chrono::nanoseconds nanoseconds1(resampleTime1);
