@@ -68,9 +68,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             stateMgmtConsole.debug(`Both V1 and V2 components are involved. Disabling Parent-Child optimization`)
             ObserveV2.getObserve().isParentChildOptimizable_ = false;
         }
-        if (this.__isEntry__Internal()) {
-            ObserveV2.getObserve().id2cmp_[this.id__()] = new WeakRef(this);
-        }
+        ObserveV2.getObserve().id2ViewV2_[this.id_] = new WeakRef(this);
         stateMgmtConsole.debug(`ViewV2 constructor: Creating @ComponentV2 '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
     }
 
@@ -348,6 +346,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         ObserveV2.getObserve().clearBinding(this.id_);
         delete ObserveV2.getObserve().id2cmp_[this.id_];
+        delete ObserveV2.getObserve().id2ViewV2_[this.id_];
 
         this.updateFuncByElmtId.clear();
         if (this.parent_) {
@@ -1027,7 +1026,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             try {
                 value = JSON.parse(value);
             } catch {
-                stateMgmtConsole.warn('Invalid json string');
+                stateMgmtConsole.error('Invalid json string');
                 return undefined;
             }
         }

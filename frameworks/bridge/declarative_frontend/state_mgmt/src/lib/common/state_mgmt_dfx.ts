@@ -320,8 +320,14 @@ function setAceDebugMode(): void {
 }
 
 function getStateMgmtInfo(nodeIds: Array<number>, propertyName: string, jsonPath: string): Array<string | undefined> {
+  const startTime = Date.now();
+  const timeoutMs = 2000;
+
   const result = [];
   for (const id of nodeIds) {
+    if (Date.now() - startTime > timeoutMs) {
+      break;
+    }
     let value = undefined;
     let view = findViewById(id);
     if (!view) {
@@ -339,20 +345,14 @@ function getStateMgmtInfo(nodeIds: Array<number>, propertyName: string, jsonPath
   return result;
 }
 
-function findViewById(id: number): ViewPU | ViewV2 | undefined {
-  if (SubscriberManager.Has(id)) { // v1
-    const view = SubscriberManager.Find(id);
-    if (view instanceof ViewPU) {
-      return view;
-    }
-  } else if (id in ObserveV2.getObserve().id2cmp_) { // v2
-    const view = ObserveV2.getObserve().id2cmp_[id].deref();
-    if (view instanceof ViewV2) {
-      return view;
-    }
+function findViewById(id: number): PUV2ViewBase | undefined {
+  const v1 = SubscriberManager.Find(id);
+  if (v1 instanceof ViewPU) {
+    return v1;
   }
-  return undefined;
-};
+  const v2 = ObserveV2.getObserve().id2ViewV2_[id]?.deref();
+  return v2 instanceof ViewV2 ? v2 : undefined;
+}
 
 class aceDebugTrace {
   public static begin(...args: any): void {

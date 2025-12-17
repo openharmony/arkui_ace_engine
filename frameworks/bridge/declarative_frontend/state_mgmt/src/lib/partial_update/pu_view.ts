@@ -1254,7 +1254,7 @@ abstract class ViewPU extends PUV2ViewBase
       try {
         value = JSON.parse(value);
       } catch {
-        stateMgmtConsole.warn('Invalid json string');
+        stateMgmtConsole.error('Invalid json string');
         return undefined;
       }
     }
