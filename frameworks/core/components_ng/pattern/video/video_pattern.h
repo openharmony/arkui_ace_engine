@@ -348,7 +348,7 @@ private:
     void UpdateLooping();
     void UpdateSpeed();
     void UpdateMuted();
-    bool PrepareSurface();
+    void PrepareSurface();
 
     bool HasPlayer() const;
 
