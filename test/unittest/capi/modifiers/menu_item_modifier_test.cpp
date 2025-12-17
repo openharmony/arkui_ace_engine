@@ -51,7 +51,9 @@ const auto COLOR_STRING_RES = CreateResource("color_name", ResourceType::STRING)
 
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -65,7 +67,9 @@ const std::vector<ColorTestStep> COLOR_TEST_PLAN_INVALID = {
 
 
 const std::vector<ColorTestStep> COLOR_TEST_PLAN1 = {
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -222,7 +226,8 @@ public:
  */
 HWTEST_F(MenuItemModifierTest, setMenuItemOptionsCustomBuilderTest, TestSize.Level1)
 {
-    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomNodeBuilder, CustomNodeBuilder>(getBuilderCb());
+    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomNodeBuilder, CustomNodeBuilder>(
+        getBuilderCb());
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     ASSERT_EQ(checkEventIcon.has_value(), true);
     EXPECT_EQ(checkEventIcon->resourceId, TEST_RESOURCE_ID);

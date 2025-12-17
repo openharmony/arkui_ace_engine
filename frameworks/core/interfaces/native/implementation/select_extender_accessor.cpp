@@ -24,9 +24,6 @@ void SetDividerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetDivider(frameNode, convValue);
 }
 } // SelectExtenderAccessor
 const GENERATED_ArkUISelectExtenderAccessor* GetSelectExtenderAccessor()

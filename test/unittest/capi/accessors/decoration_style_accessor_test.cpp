@@ -80,7 +80,8 @@ namespace {
         { "ResName:COLORS_RES_0_STR", CreateResource(COLORS_RES_0_STR, ResourceType::COLOR), "#FFFF0000" },
     };
 
-    std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color, std::string>> testFixtureColorsEnumValidValues = {
+    std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color, std::string>>
+        testFixtureColorsEnumValidValues = {
         { "ARK_COLOR_WHITE", ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE, "#FFFFFFFF" },
         { "ARK_COLOR_BLACK", ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK, "#FF000000" },
         { "ARK_COLOR_BLUE", ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE, "#FF0000FF" },

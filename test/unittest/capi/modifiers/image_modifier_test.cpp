@@ -411,7 +411,8 @@ HWTEST_F(ImageModifierTest, setImageOptions_SetStringUrl, testing::ext::TestSize
 
     std::string urlString = "https://www.example.com/xxx.jpg";
     auto image = ArkUnion<Ark_ResourceStr, Ark_String>(ArkValue<Ark_String>(urlString));
-    auto imageRc = ArkUnion<Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ResourceStr>(image);
+    auto imageRc = ArkUnion<Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ResourceStr>(
+        image);
 
     modifier_->setImageOptions(node_, &imageRc, nullptr);
     auto json = GetJsonValue(node_);

@@ -206,7 +206,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderColorTestPlaceholderColorV
 
     // Initial setup
     initValuePlaceholderColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValuePlaceholderColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -245,7 +246,8 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderColorTestPlaceholderColorInvalidVal
 
     // Initial setup
     initValuePlaceholderColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValuePlaceholderColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_ResourceColor inputValuePlaceholderColor = initValuePlaceholderColor;
@@ -610,7 +612,8 @@ HWTEST_F(TextAreaModifierTest, setCaretColorTestCaretColorValidValues, TestSize.
 
     // Initial setup
     initValueCaretColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueCaretColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -649,7 +652,8 @@ HWTEST_F(TextAreaModifierTest, setCaretColorTestCaretColorInvalidValues, TestSiz
 
     // Initial setup
     initValueCaretColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueCaretColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_ResourceColor inputValueCaretColor = initValueCaretColor;
@@ -700,7 +704,8 @@ HWTEST_F(TextAreaModifierTest, setFontColorTestFontColorValidValues, TestSize.Le
 
     // Initial setup
     initValueFontColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueFontColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -739,7 +744,8 @@ HWTEST_F(TextAreaModifierTest, setFontColorTestFontColorInvalidValues, TestSize.
 
     // Initial setup
     initValueFontColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueFontColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_ResourceColor inputValueFontColor = initValueFontColor;
@@ -1303,7 +1309,8 @@ HWTEST_F(TextAreaModifierTest, setCaretStyleTestCaretStyleWidthValidValues, Test
     WriteTo(initValueCaretStyle).width =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(initValueCaretStyle).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueCaretStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -1342,7 +1349,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setCaretStyleTestCaretStyleWidthInvalidV
     WriteTo(initValueCaretStyle).width =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(initValueCaretStyle).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueCaretStyle](const std::string& input, const Opt_Length& value) {
         Opt_CaretStyle inputValueCaretStyle = initValueCaretStyle;
@@ -1385,7 +1393,8 @@ HWTEST_F(TextAreaModifierTest, setCaretStyleTestCaretStyleColorValidValues, Test
     WriteTo(initValueCaretStyle).width =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(initValueCaretStyle).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueCaretStyle](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -1427,7 +1436,8 @@ HWTEST_F(TextAreaModifierTest, setCaretStyleTestCaretStyleColorInvalidValues, Te
     WriteTo(initValueCaretStyle).width =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(initValueCaretStyle).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueCaretStyle](const std::string& input, const Opt_ResourceColor& value) {
         Opt_CaretStyle inputValueCaretStyle = initValueCaretStyle;
@@ -1480,7 +1490,8 @@ HWTEST_F(TextAreaModifierTest, setSelectedBackgroundColorTestSelectedBackgroundC
 
     // Initial setup
     initValueSelectedBackgroundColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsAlpha20EnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsAlpha20EnumValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedBackgroundColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -1519,7 +1530,8 @@ HWTEST_F(TextAreaModifierTest, setSelectedBackgroundColorTestSelectedBackgroundC
 
     // Initial setup
     initValueSelectedBackgroundColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsAlpha20EnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsAlpha20EnumValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedBackgroundColor](
                           const std::string& input, const Opt_ResourceColor& value) {

@@ -180,7 +180,8 @@ HWTEST_F(TextModifierTest, DISABLED_setCaretColorTestCaretColorValidValues, Test
 
     // Initial setup
     initValueCaretColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueCaretColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -219,7 +220,8 @@ HWTEST_F(TextModifierTest, setCaretColorTestCaretColorInvalidValues, TestSize.Le
 
     // Initial setup
     initValueCaretColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueCaretColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_ResourceColor inputValueCaretColor = initValueCaretColor;
@@ -271,7 +273,8 @@ HWTEST_F(TextModifierTest, DISABLED_setSelectedBackgroundColorTestSelectedBackgr
 
     // Initial setup
     initValueSelectedBackgroundColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsAlpha20EnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsAlpha20EnumValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedBackgroundColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -310,7 +313,8 @@ HWTEST_F(TextModifierTest, setSelectedBackgroundColorTestSelectedBackgroundColor
 
     // Initial setup
     initValueSelectedBackgroundColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsAlpha20EnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsAlpha20EnumValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedBackgroundColor](
                           const std::string& input, const Opt_ResourceColor& value) {

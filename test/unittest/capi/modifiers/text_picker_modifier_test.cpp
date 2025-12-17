@@ -230,7 +230,9 @@ const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN2 = {
 
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_BLACK_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -239,7 +241,9 @@ const std::vector<ColorTestStep> COLOR_BLACK_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_BLACK }
 };
 const std::vector<ColorTestStep> COLOR_TRANSPARENT_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -794,8 +798,8 @@ void CreateOptions(Array_TextCascadePickerRangeContent& arrayRoot,
     if (std::get<HAS_VALUES_ID>(value)) {
         auto arkValue = Converter::ArkValue<Array_ResourceStr>(std::get<VALUES_ID>(value), Converter::FC);
         arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_BindableResourceStr_BindableResourceStrArray,
-                Ark_BindableResourceStrArray>(
-                    Converter::ArkUnion<Ark_BindableResourceStrArray, Array_ResourceStr>(arkValue));
+            Ark_BindableResourceStrArray>(Converter::ArkUnion<Ark_BindableResourceStrArray, Array_ResourceStr>(
+                arkValue));
     } else {
         arkTextPickerOptions.value =
             Converter::ArkUnion<Opt_Union_BindableResourceStr_BindableResourceStrArray>(Ark_Empty());

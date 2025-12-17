@@ -46,7 +46,9 @@ const auto COLOR_STRING_RES = CreateResource("color_name", ResourceType::STRING)
 
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -402,8 +404,8 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerColorTest, TestSize.Level1
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid values, color as Ark_arkui_component_enums_Color aka int
-    Ark_DividerStyleOptions dividerOptions = {.color = Converter::ArkValue<Opt_ResourceColor>
-        (Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE))
+    Ark_DividerStyleOptions dividerOptions = {.color = Converter::ArkValue<Opt_ResourceColor>(
+        Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE))
     };
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
@@ -636,8 +638,8 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemGroupDividerColorTest, TestSize.L
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid values, color as Ark_arkui_component_enums_Color aka int
-    Ark_DividerStyleOptions dividerOptions = {.color = Converter::ArkValue<Opt_ResourceColor>
-        (Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE))
+    Ark_DividerStyleOptions dividerOptions = {.color = Converter::ArkValue<Opt_ResourceColor>(
+        Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE))
     };
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);

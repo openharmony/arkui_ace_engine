@@ -407,7 +407,8 @@ HWTEST_F(SwiperModifierTest, DISABLED_setDisplayArrowTestStyleColor, TestSize.Le
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of stubs for ThemeConstants::GetColorByName
     static const std::vector<OneTestStep> testPlan = {
-        { ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE), "#FFFFFFFF" },
+        { ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE), "#FFFFFFFF" },
         { ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
         { ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), "#00000000" },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -944,7 +945,8 @@ HWTEST_F(SwiperModifierTest, DISABLED_setCurveTestBuiltIn, TestSize.Level1)
         Framework::CreateCurve(Framework::CurveIntToString(ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR));
     EXPECT_EQ(checkLinear, Curves::ToString(expectedCurveLinear));
 
-    auto arkCurveInv = ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_curves_Curve>(INVALID_ENUM_VAL<Ark_curves_Curve>);
+    auto arkCurveInv = ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_curves_Curve>(
+        INVALID_ENUM_VAL<Ark_curves_Curve>);
     modifier_->setCurve(node_, &arkCurveInv);
     auto checkInv = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInv, DEFAULT_VALUE);
@@ -963,7 +965,8 @@ HWTEST_F(SwiperModifierTest, DISABLED_setCurveTestCustom, TestSize.Level1)
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, Curves::DEFAULT_CURVE_NAME);
 
-    auto arkCurveCustom = ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_String>("interpolating-spring(1, 1, 28, 34)");
+    auto arkCurveCustom = ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_String>(
+        "interpolating-spring(1, 1, 28, 34)");
     modifier_->setCurve(node_, &arkCurveCustom);
     auto checkCustStr = GetAttrValue<std::string>(node_, PROP_NAME);
     // this can't be exactly check due to SwiperPaintProperty::ToJsonValue supports the built-in Curves only

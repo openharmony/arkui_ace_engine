@@ -222,7 +222,7 @@ void CustomDialogControllerPeerImpl::SetBuilder(
                     };
                     CustomDialogControllerModelStatic::SetOpenDialog(
                         controller->dialogProperties_, controller->dialogs_, weakPeer, std::move(builderFunc));
-                }, reinterpret_cast<Ark_NativePointer>(AceType::RawPtr(frameNode)));
+                    }, reinterpret_cast<Ark_NativePointer>(AceType::RawPtr(frameNode)));
             };
         },
         [](const Ark_ExtendableComponent& src) {

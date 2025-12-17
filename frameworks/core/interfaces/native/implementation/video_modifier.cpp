@@ -369,10 +369,9 @@ void SetOnErrorImpl(Ark_NativePointer node,
             VideoModelStatic::SetOnError(frameNode, onError);
         },
         [](const ErrorCallback_BusinessErrorInterface_Void& src) {
-            LOGI("VideoAttributeModifier::SetOnErrorImpl is not implemented for ErrorCallback_BusinessErrorInterface_Void");
+            LOGI("VideoAttributeModifier::SetOnErrorImpl is not implemented for ErrorCallback");
         },
         [] {});
-
 }
 void SetOnStopImpl(Ark_NativePointer node,
                    const Opt_VoidCallback* value)

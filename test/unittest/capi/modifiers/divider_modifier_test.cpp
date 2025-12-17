@@ -44,7 +44,8 @@ public:
 
 using OneColorStep = std::tuple<Ark_ResourceColor, std::string>;
 const std::vector<OneColorStep> COLOR_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE), "#FFFFFFFF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE),
+        "#FFFFFFFF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(Converter::ArkValue<Ark_Int32>(0x123456)), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(Converter::ArkValue<Ark_Int32>(0.5f)), "#00000000" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(Converter::ArkValue<Ark_String>("#11223344")), "#11223344" },

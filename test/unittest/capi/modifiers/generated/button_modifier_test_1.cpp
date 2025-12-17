@@ -1359,7 +1359,8 @@ HWTEST_F(ButtonModifierTest, setFontColorTestFontColorValidValues, TestSize.Leve
 
     // Initial setup
     initValueFontColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueFontColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -1398,7 +1399,8 @@ HWTEST_F(ButtonModifierTest, setFontColorTestFontColorInvalidValues, TestSize.Le
 
     // Initial setup
     initValueFontColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueFontColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_ResourceColor inputValueFontColor = initValueFontColor;

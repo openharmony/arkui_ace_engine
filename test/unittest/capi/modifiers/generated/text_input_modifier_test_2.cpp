@@ -247,13 +247,17 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorUnde
 
     // Initial setup
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueUnderlineColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -294,13 +298,17 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
 
     // Initial setup
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueUnderlineColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
@@ -340,13 +348,17 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorUnde
 
     // Initial setup
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueUnderlineColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -387,13 +399,17 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
 
     // Initial setup
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueUnderlineColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
@@ -433,13 +449,17 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorUnde
 
     // Initial setup
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueUnderlineColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -480,13 +500,17 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
 
     // Initial setup
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueUnderlineColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
@@ -526,13 +550,17 @@ HWTEST_F(TextInputModifierTest, DISABLED_setUnderlineColorTestUnderlineColorUnde
 
     // Initial setup
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueUnderlineColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -573,13 +601,17 @@ HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColo
 
     // Initial setup
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueUnderlineColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
@@ -900,7 +932,8 @@ HWTEST_F(
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
@@ -938,7 +971,8 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonCancelButtonOptio
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
@@ -979,7 +1013,8 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonCancelBu
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
@@ -1026,7 +1061,8 @@ HWTEST_F(
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
@@ -1077,7 +1113,8 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonCancelBu
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
@@ -1127,7 +1164,8 @@ HWTEST_F(
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
@@ -1175,7 +1213,8 @@ HWTEST_F(TextInputModifierTest, DISABLED_setCancelButtonTestCancelButtonCancelBu
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
@@ -1218,7 +1257,8 @@ HWTEST_F(TextInputModifierTest, setCancelButtonTestCancelButtonCancelButtonOptio
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).size =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(WriteToUnion<Ark_CancelButtonOptions>(WriteTo(initValueCancelButton)).icon).src =
         ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
@@ -1904,7 +1944,8 @@ HWTEST_F(TextInputModifierTest, setDecorationTestDecorationTypeValidValues, Test
     // Initial setup
     WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
     WriteTo(initValueDecoration).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
@@ -1938,7 +1979,8 @@ HWTEST_F(TextInputModifierTest, setDecorationTestDecorationTypeInvalidValues, Te
     // Initial setup
     WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
     WriteTo(initValueDecoration).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
@@ -1972,7 +2014,8 @@ HWTEST_F(TextInputModifierTest, DISABLED_setDecorationTestDecorationColorValidVa
     // Initial setup
     WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
     WriteTo(initValueDecoration).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
@@ -2015,7 +2058,8 @@ HWTEST_F(TextInputModifierTest, setDecorationTestDecorationColorInvalidValues, T
     // Initial setup
     WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
     WriteTo(initValueDecoration).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
@@ -2056,7 +2100,8 @@ HWTEST_F(TextInputModifierTest, setDecorationTestDecorationStyleValidValues, Tes
     // Initial setup
     WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
     WriteTo(initValueDecoration).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 
@@ -2090,7 +2135,8 @@ HWTEST_F(TextInputModifierTest, setDecorationTestDecorationStyleInvalidValues, T
     // Initial setup
     WriteTo(initValueDecoration).type = std::get<1>(Fixtures::testFixtureEnumTextDecorationTypeValidValues[0]);
     WriteTo(initValueDecoration).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValueDecoration).style =
         ArkValue<Opt_TextDecorationStyle>(std::get<1>(Fixtures::testFixtureEnumTextDecorationStyleValidValues[0]));
 

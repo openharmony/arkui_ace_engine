@@ -781,7 +781,8 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockColorTestBlockColorValidValues, Te
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+                std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -815,7 +816,8 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorInvalidValues, TestSize.
         checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(value)));
     }
     // Check invalid union
     checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
@@ -875,7 +877,8 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorResourceColorTestValidValues,
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+                std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -914,7 +917,8 @@ HWTEST_F(SliderModifierTest, setTrackColorResourceColorTestInvalidValues, TestSi
         checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(value)));
     }
     // Check invalid union
     checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
@@ -1029,7 +1033,8 @@ HWTEST_F(SliderModifierTest, DISABLED_setSelectedColorResourceColorTestValidValu
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+                std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -1068,7 +1073,8 @@ HWTEST_F(SliderModifierTest, setSelectedColorResourceColorTestInvalidValues, Tes
         checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(value)));
     }
     // Check invalid union
     checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
@@ -1416,7 +1422,8 @@ HWTEST_F(SliderModifierTest, DISABLED_setBlockBorderColorTestBlockBorderColorVal
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+                std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -1450,7 +1457,8 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorInvalidValue
         checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(value)));
     }
     // Check invalid union
     checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
@@ -1581,7 +1589,8 @@ HWTEST_F(SliderModifierTest, DISABLED_setStepColorTestStepColorValidValues, Test
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+                std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -1615,7 +1624,8 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorInvalidValues, TestSize.Le
         checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(value)));
     }
     // Check invalid union
     checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));

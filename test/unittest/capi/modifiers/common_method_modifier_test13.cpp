@@ -913,7 +913,8 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
         Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE);
 
     Ark_ShadowOptions arkShadowOptions = {
-        .color = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy>(arkUnionColor)
+        .color = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy>(
+            arkUnionColor)
     };
 
     auto arkUnionShadow = Converter::ArkUnion<Ark_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions);
@@ -951,13 +952,17 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto colorArkStr = Converter::ArkValue<Ark_String>(TEST_COLOR_BLUE_STR);
-    auto arkUnionColor = Converter::ArkUnion<Ark_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_String>(colorArkStr);
+    auto arkUnionColor =
+        Converter::ArkUnion<Ark_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_String>(
+            colorArkStr);
 
     Ark_ShadowOptions arkShadowOptions = {
-        .color = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy>(arkUnionColor)
+        .color = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy>(
+            arkUnionColor)
     };
 
-    auto arkUnionShadow = Converter::ArkUnion<Ark_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions);
+    auto arkUnionShadow = Converter::ArkUnion<Ark_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(
+        arkShadowOptions);
 
     Ark_PopupOptions arkOptions = {
         .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
@@ -991,14 +996,17 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
 HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptionsColorResourceTest, TestSize.Level1)
 {
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto arkUnionColor = Converter::ArkUnion<Ark_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_Resource>(
-        TEST_COLOR_RESOURCE);
+    auto arkUnionColor =
+        Converter::ArkUnion<Ark_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_Resource>(
+            TEST_COLOR_RESOURCE);
 
     Ark_ShadowOptions arkShadowOptions = {
-        .color = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy>(arkUnionColor)
+        .color = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy>(
+            arkUnionColor)
     };
 
-    auto arkUnionShadow = Converter::ArkUnion<Ark_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions);
+    auto arkUnionShadow =
+        Converter::ArkUnion<Ark_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions);
 
     Ark_PopupOptions arkOptions = {
         .message = Converter::ArkValue<Ark_String>(ACCESSIBLE_PROP_TEXT_VALUE),
@@ -1035,11 +1043,12 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
     auto colorArkStrategy = Converter::ArkValue<Ark_ColoringStrategy>(
         Ark_ColoringStrategy::ARK_COLORING_STRATEGY_PRIMARY);
-    auto arkUnionColor = Converter::ArkUnion<Ark_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_ColoringStrategy>(
-        colorArkStrategy);
+    auto arkUnionColor = Converter::ArkUnion<Ark_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy,
+        Ark_ColoringStrategy>(colorArkStrategy);
 
     Ark_ShadowOptions arkShadowOptions = {
-        .color = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy>(arkUnionColor)
+        .color = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy>(
+            arkUnionColor)
     };
 
     auto arkUnionShadow = Converter::ArkUnion<Ark_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions);
@@ -1068,11 +1077,12 @@ HWTEST_F(CommonMethodModifierTest13, DISABLED_bindPopupPopupOptionsShadowOptions
 
     // invalid value
     colorArkStrategy = Converter::ArkValue<Ark_ColoringStrategy>(static_cast<Ark_ColoringStrategy>(-1));
-    arkUnionColor = Converter::ArkUnion<Ark_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_ColoringStrategy>(
-        colorArkStrategy);
+    arkUnionColor = Converter::ArkUnion<Ark_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy,
+        Ark_ColoringStrategy>(colorArkStrategy);
 
     arkShadowOptions = {
-        .color = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy>(arkUnionColor)
+        .color = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy>(
+            arkUnionColor)
     };
 
     arkUnionShadow = Converter::ArkUnion<Ark_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions);

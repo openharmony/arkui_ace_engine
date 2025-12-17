@@ -148,7 +148,9 @@ const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN2 = {
 
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },

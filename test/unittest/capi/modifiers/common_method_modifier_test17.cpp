@@ -744,7 +744,8 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsMaskCol
 {
     // color as Ark_arkui_component_enums_Color
     auto arkShow = Converter::ArkValue<Opt_Boolean>(true);
-    auto colorArkColor = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE);
+    auto colorArkColor = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE);
     Ark_PopupMaskType literalColor = { .color = colorArkColor };
     Ark_Union_Boolean_PopupMaskType arkUnionMask;
     TypeHelper::WriteToUnion<Ark_PopupMaskType>(arkUnionMask) = literalColor;

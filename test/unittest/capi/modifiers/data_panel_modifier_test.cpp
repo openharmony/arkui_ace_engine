@@ -444,7 +444,8 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestDefaultValues, TestSi
 // Valid values for attribute 'trackBackgroundColor' of method 'trackBackgroundColor'
 static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>>
     trackBackgroundColorValidValues = {
-    { "#FF0000FF", Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), "#FF0000FF" },
+    { "#FF0000FF", Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), "#FF0000FF" },
     { "#FF123456", Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Color::TRANSPARENT.ToString(), Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f),
         Color::TRANSPARENT.ToString() },
@@ -714,7 +715,8 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestEnumValidValues, TestSize.Leve
 {
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
-        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(value));
         auto color =
             Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);
@@ -755,7 +757,8 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestEnumInvalidValues, TestSize.Le
 {
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(value));
         auto color =
             Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);
@@ -1390,7 +1393,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorEnumValidValues, TestSize
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
-        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(value));
         auto color =
             Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);
@@ -1446,7 +1450,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorEnumInvalidValues, TestSi
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(value));
+        auto resourceColor = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(value));
         auto color =
             Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourceColor);
         colorArray.push_back(color);

@@ -92,8 +92,8 @@ HWTEST_F(TextInputModifierTest, setCaretPositionTestCaretPositionValidValues, Te
         };
 
         Ark_TextInputOptions textInputOptions = {};
-        textInputOptions.text = ArkUnion<Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String, Ark_ResourceStr>(
-            ArkUnion<Ark_ResourceStr, Ark_String>(input));
+        textInputOptions.text = ArkUnion<Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String,
+            Ark_ResourceStr>(ArkUnion<Ark_ResourceStr, Ark_String>(input));
         auto inputValue = ArkValue<Opt_TextInputOptions>(textInputOptions);
         modifier_->setTextInputOptions(node_, &inputValue);
         for (auto index = 0; index <= textLength; index++) {
@@ -288,8 +288,8 @@ HWTEST_F(TextInputModifierTest, setTextInputOptionsTest, TestSize.Level1)
     auto text = ArkUnion<Ark_ResourceStr, Ark_String>(textTestValue);
 
     options.placeholder = ArkValue<Opt_ResourceStr>(placeholder);
-    options.text = ArkUnion<Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String, Ark_ResourceStr>(
-        ArkValue<Ark_ResourceStr>(text));
+    options.text = ArkUnion<Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String,
+        Ark_ResourceStr>(ArkValue<Ark_ResourceStr>(text));
     options.controller = ArkValue<Opt_TextInputController>();
 
     auto optOptions = ArkValue<Opt_TextInputOptions>(options);

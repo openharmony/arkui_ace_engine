@@ -141,7 +141,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontColorTest, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal1, defaultColor.ToString());
 
-    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
+    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
     modifier_->setFontColor(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
@@ -191,7 +192,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setMenuBackgroundColorTest, TestSize.Level
     auto checkVal1 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal1, Color::TRANSPARENT.ToString());
 
-    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
+    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
     modifier_->setMenuBackgroundColor(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
@@ -241,7 +243,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTest, TestSize.Lev
     auto checkVal1 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal1, "#00000000");
 
-    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
+    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
     modifier_->setSelectedOptionBgColor(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
@@ -291,7 +294,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontColorTest, TestSize.L
     auto checkVal1 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal1, THEME_SELECTED_OPTION_FONT_COLOR.ToString());
 
-    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
+    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
     modifier_->setSelectedOptionFontColor(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
@@ -341,7 +345,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setOptionBgColorTest, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal1, Color::TRANSPARENT.ToString());
 
-    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
+    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
     modifier_->setOptionBgColor(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
@@ -391,7 +396,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setOptionFontColorTest, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal1, THEME_FONT_COLOR.ToString());
 
-    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
+    Opt_ResourceColor color = ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
     modifier_->setOptionFontColor(node_, &color);
     auto checkVal2 = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
@@ -1043,7 +1049,8 @@ HWTEST_F(SelectModifierTest, setValueTest, TestSize.Level1)
     ASSERT_NE(modifier_->setValue, nullptr);
 
     for (const auto &[value, expected]: testPlan) {
-        auto inputValue = Converter::ArkUnion<Opt_Union_ResourceStr_Bindable_String_Bindable_Resource, Ark_ResourceStr>(value);
+        auto inputValue =
+            Converter::ArkUnion<Opt_Union_ResourceStr_Bindable_String_Bindable_Resource, Ark_ResourceStr>(value);
         modifier_->setValue(node_, &inputValue);
         auto checkedValue = GetStringAttribute(node_, propName);
         EXPECT_EQ(checkedValue, expected);
@@ -1191,7 +1198,8 @@ HWTEST_F(SelectModifierTest, setDividerTest, TestSize.Level1)
         .strokeWidth = Converter::ArkValue<Opt_Dimension>("11px"),
         .startMargin = Converter::ArkValue<Opt_Dimension>(55.5f),
         .endMargin = Converter::ArkValue<Opt_Dimension>("77px"),
-        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE),
     };
     auto divider = ArkValue<Opt_DividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);

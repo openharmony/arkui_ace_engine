@@ -228,7 +228,8 @@ private:
     {
         auto fontSizePeer = CreateLengthMetricsPeer(std::get<1>(TEST_FONT_SIZE));
         const Ark_TextStyleInterface textStyle = {
-            .fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(TEST_FONT_COLOR)),
+            .fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+                std::get<1>(TEST_FONT_COLOR)),
             .fontFamily =  Converter::ArkUnion<Opt_ResourceStr, Ark_String>(TEST_FONT_FAMILIES[0]),
             .fontSize = Converter::ArkValue<Opt_LengthMetrics>(fontSizePeer),
             .fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(
@@ -246,7 +247,8 @@ private:
     {
         const Ark_DecorationStyleInterface decorationStyle = {
             .type = Converter::ArkValue<Opt_TextDecorationType>(TEST_DCRN_TYPE),
-            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(TEST_DCRN_COLOR)),
+            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+                std::get<1>(TEST_DCRN_COLOR)),
             .style = Converter::ArkValue<Opt_TextDecorationStyle>(TEST_DCRN_STYLE),
         };
         decorationStylePeer = GeneratedModifier::GetDecorationStyleAccessor()->construct(&decorationStyle);
@@ -304,7 +306,8 @@ private:
     void FillBackgroundColor(Ark_StyledStringValue& styledValue)
     {
         Ark_TextBackgroundStyle textBackgroundStyle = {
-            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(TEST_BGCL_COLOR)),
+            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+                std::get<1>(TEST_BGCL_COLOR)),
             .radius = Converter::ArkUnion<
                 Opt_Union_Dimension_BorderRadiuses, Ark_Dimension>(std::get<1>(TEST_BGCL_RADIUS))
         };

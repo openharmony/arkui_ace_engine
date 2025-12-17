@@ -106,7 +106,8 @@ HWTEST_F(ImageModifierTest2, setAlt_ArkResourceUnion_Test, TestSize.Level1)
 
     std::string expectedStr = CHECK_RESOURCE_THEME_STR;
     auto expectedArkResource = Converter::ArkCreate<Ark_Resource>(IMAGE_RES_ID, ResourceType::STRING);
-    auto inputArkResource = Converter::ArkUnion<Ark_Union_String_Resource_image_PixelMap, Ark_Resource>(expectedArkResource);
+    auto inputArkResource = Converter::ArkUnion<Ark_Union_String_Resource_image_PixelMap, Ark_Resource>(
+        expectedArkResource);
     auto optInputArkResource = Converter::ArkValue<Opt_Union_String_Resource_image_PixelMap>(inputArkResource);
     modifier_->setAlt(frameNode, &optInputArkResource);
     auto fullJson = GetJsonValue(node_);

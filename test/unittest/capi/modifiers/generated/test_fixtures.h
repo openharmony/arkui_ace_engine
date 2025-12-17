@@ -463,11 +463,13 @@ extern std::vector<std::tuple<std::string, Ark_ProgressType, std::string>> testF
 extern std::vector<std::tuple<std::string, Ark_ProgressType>> testFixtureProgressTypeInvalidValues;
 
 // Fixture 'ColorsEnum' for type 'Ark_arkui_component_enums_Color'
-extern std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color, std::string>> testFixtureColorsEnumValidValues;
+extern std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color, std::string>>
+    testFixtureColorsEnumValidValues;
 extern std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color>> testFixtureColorsEnumInvalidValues;
 
 // Fixture 'ColorsAlpha20Enum' for type 'Ark_arkui_component_enums_Color'
-extern std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color, std::string>> testFixtureColorsAlpha20EnumValidValues;
+extern std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color, std::string>>
+    testFixtureColorsAlpha20EnumValidValues;
 extern std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color>> testFixtureColorsAlpha20EnumInvalidValues;
 
 // Fixture 'VariableFontWeightEnum' for type 'Ark_FontWeight'

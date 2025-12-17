@@ -389,7 +389,8 @@ HWTEST_F(GaugeModifierTest, setColorsTestDefaultValues, TestSize.Level1)
 }
 
 namespace {
-const auto COLORS_ENUM_RED = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED);
+const auto COLORS_ENUM_RED = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+    ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED);
 const auto COLORS_NUMBER_GREEN = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xF000FF00);
 const auto COLORS_STRING_BLUE = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("rgba(0, 0, 255, 0.5)");
 const auto COLORS_RES_BY_NAME = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(

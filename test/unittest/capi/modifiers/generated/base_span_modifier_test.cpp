@@ -110,7 +110,8 @@ HWTEST_F(BaseSpanModifierTest, DISABLED_setTextBackgroundStyleTestTextBackground
 
     // Initial setup
     WriteTo(initValueTextBackgroundStyle).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
@@ -160,7 +161,8 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleColo
 
     // Initial setup
     WriteTo(initValueTextBackgroundStyle).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
@@ -209,7 +211,8 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
 
     // Initial setup
     WriteTo(initValueTextBackgroundStyle).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
@@ -260,7 +263,8 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
 
     // Initial setup
     WriteTo(initValueTextBackgroundStyle).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
@@ -315,7 +319,8 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
 
     // Initial setup
     WriteTo(initValueTextBackgroundStyle).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
@@ -366,7 +371,8 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
 
     // Initial setup
     WriteTo(initValueTextBackgroundStyle).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
@@ -421,7 +427,8 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
 
     // Initial setup
     WriteTo(initValueTextBackgroundStyle).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
@@ -472,7 +479,8 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
 
     // Initial setup
     WriteTo(initValueTextBackgroundStyle).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
@@ -527,7 +535,8 @@ HWTEST_F(BaseSpanModifierTest, setTextBackgroundStyleTestTextBackgroundStyleRadi
 
     // Initial setup
     WriteTo(initValueTextBackgroundStyle).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =
@@ -578,7 +587,8 @@ HWTEST_F(BaseSpanModifierTest,
 
     // Initial setup
     WriteTo(initValueTextBackgroundStyle).color =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topLeft =
         ArkUnion<Opt_Length, Ark_Float64>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
     WriteToUnion<Ark_BorderRadiuses>(WriteTo(WriteTo(initValueTextBackgroundStyle).radius)).topRight =

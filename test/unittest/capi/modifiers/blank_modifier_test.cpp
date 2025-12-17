@@ -39,7 +39,8 @@ HWTEST_F(BlankModifierTest, DISABLED_BlankModifierTest001, TestSize.Level1)
 
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, "#00000000");
-    Opt_ResourceColor optColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
+    Opt_ResourceColor optColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
     modifier_->setColor(node_, &optColor);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");

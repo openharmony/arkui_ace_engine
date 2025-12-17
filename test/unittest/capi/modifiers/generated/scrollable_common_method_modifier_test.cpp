@@ -197,7 +197,8 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setScrollBarColorTestScrol
 
     // Initial setup
     initValueScrollBarColor =
-        ArkUnion<Opt_Union_Color_Number_String, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_Union_Color_Number_String, Ark_arkui_component_enums_Color>(std::get<1>(
+            Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueScrollBarColor](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_Color_Number_String& value) {
@@ -233,7 +234,8 @@ HWTEST_P(ScrollableCommonMethodModifierTest, setScrollBarColorTestScrollBarColor
 
     // Initial setup
     initValueScrollBarColor =
-        ArkUnion<Opt_Union_Color_Number_String, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_Union_Color_Number_String, Ark_arkui_component_enums_Color>(std::get<1>(
+            Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueScrollBarColor](
                           const std::string& input, const Opt_Union_Color_Number_String& value) {

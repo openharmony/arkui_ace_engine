@@ -1495,7 +1495,8 @@ HWTEST_F(CanvasRendererAccessorTest2, setFillStyleColorTest, TestSize.Level1)
         Ace::Color target;
         bool targetFlag = false;
         EXPECT_CALL(*renderingModel_, SetFillColor(_, _)).WillOnce(DoAll(SaveArg<0>(&target), SaveArg<1>(&targetFlag)));
-        auto style = Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_arkui_component_enums_Color>(actual);
+        auto style = Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern,
+            Ark_arkui_component_enums_Color>(actual);
         accessor_->setFillStyle(peer_, &style);
         EXPECT_EQ(target, expected);
         EXPECT_TRUE(targetFlag);

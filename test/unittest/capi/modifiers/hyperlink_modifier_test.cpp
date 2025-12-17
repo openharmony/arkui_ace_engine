@@ -242,15 +242,18 @@ HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestColorValidValues, TestSize.
     Opt_Union_arkui_component_enums_Color_I32_String_Resource initValueColor;
 
     // Initial setup
-    initValueColor = ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_arkui_component_enums_Color>(
-        std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    initValueColor =
+        ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueColor](const std::string& input,
-                          const Opt_Union_arkui_component_enums_Color_I32_String_Resource& value, const std::string& expectedStr) {
+                          const Opt_Union_arkui_component_enums_Color_I32_String_Resource& value,
+                          const std::string& expectedStr) {
         Opt_Union_arkui_component_enums_Color_I32_String_Resource inputValueColor = initValueColor;
 
         inputValueColor = value;
-        auto optInputValueColor = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_I32_String_Resource>(inputValueColor);
+        auto optInputValueColor = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_I32_String_Resource>(
+            inputValueColor);
         modifier_->setColor(node_, &optInputValueColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
@@ -258,18 +261,23 @@ HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestColorValidValues, TestSize.
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_arkui_component_enums_Color>(value), expected);
+        checkValue(input,
+            ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_arkui_component_enums_Color>(
+                value), expected);
     }
 #ifdef WRONG_FIX
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_Int32>(value), expected);
+        checkValue(
+            input, ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_Int32>(value), expected);
     }
 #endif
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_Resource>(value), expected);
+        checkValue(
+            input, ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_Resource>(value), expected);
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_String>(value), expected);
+        checkValue(
+            input, ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_String>(value), expected);
     }
 }
 
@@ -283,17 +291,20 @@ HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestColorInvalidValues, TestSiz
     Opt_Union_arkui_component_enums_Color_I32_String_Resource initValueColor;
 
     // Initial setup
-    initValueColor = ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_arkui_component_enums_Color>(
-        std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    initValueColor =
+        ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueColor](
-                          const std::string& input, const Opt_Union_arkui_component_enums_Color_I32_String_Resource& value) {
+        const std::string& input, const Opt_Union_arkui_component_enums_Color_I32_String_Resource& value) {
         Opt_Union_arkui_component_enums_Color_I32_String_Resource inputValueColor = initValueColor;
 
-        auto optInputValueColor = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_I32_String_Resource>(inputValueColor);
+        auto optInputValueColor = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_I32_String_Resource>(
+            inputValueColor);
         modifier_->setColor(node_, &optInputValueColor);
         inputValueColor = value;
-        optInputValueColor = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_I32_String_Resource>(inputValueColor);
+        optInputValueColor = Converter::ArkValue<Opt_Union_arkui_component_enums_Color_I32_String_Resource>(
+            inputValueColor);
         modifier_->setColor(node_, &optInputValueColor);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
@@ -305,9 +316,12 @@ HWTEST_F(HyperlinkModifierTest, DISABLED_setColorTestColorInvalidValues, TestSiz
         checkValue(input, ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_arkui_component_enums_Color>(value));
+        checkValue(input,
+            ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_arkui_component_enums_Color>(
+                value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union",
+        ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String_Resource, Ark_Empty>(nullptr));
 }
 } // namespace OHOS::Ace::NG

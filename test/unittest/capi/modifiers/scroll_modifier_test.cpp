@@ -279,7 +279,9 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorString, testing::ext::TestSi
 HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorEnum, testing::ext::TestSize.Level1)
 {
     int32_t testColor = 0xff008000;
-    auto colorUnion = Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN);
+    auto colorUnion =
+        Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_I32_String, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN);
     modifier_->setScrollBarColor(node_, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");

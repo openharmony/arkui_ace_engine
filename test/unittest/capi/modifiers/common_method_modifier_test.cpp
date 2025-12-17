@@ -518,7 +518,8 @@ HWTEST_F(CommonMethodModifierTest, DISABLED_setSharedTransitionTestOptionsCurveT
     EXPECT_EQ(transition, nullptr);
 
     // verify valid type
-    inputOptionCurveValue = ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_EASE_IN);
+    inputOptionCurveValue = ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_curves_Curve>(
+        ARK_CURVES_CURVE_EASE_IN);
     modifier_->setSharedTransition(node_, &OPT_EMPTY_STR, &realInputValue);
     transition = GetTransition();
     ASSERT_TRUE(transition && transition->curve);
@@ -2436,7 +2437,8 @@ HWTEST_F(CommonMethodModifierTest, setOpenAnimationValidValues, TestSize.Level1)
     param.tempo = Converter::ArkValue<Opt_Float64>(2.5f);
     param.playMode = Converter::ArkValue<Opt_PlayMode>(ARK_PLAY_MODE_REVERSE);
     param.finishCallbackType = Converter::ArkValue<Opt_FinishCallbackType>(ARK_FINISH_CALLBACK_TYPE_LOGICALLY);
-    param.curve = Converter::ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_curves_Curve>(ARK_CURVES_CURVE_EASE);
+    param.curve = Converter::ArkUnion<Opt_Union_curves_Curve_String_curves_ICurve, Ark_curves_Curve>(
+        ARK_CURVES_CURVE_EASE);
     Ark_ExpectedFrameRateRange efrr;
     efrr.min = Converter::ArkValue<Ark_Int32>(30);
     efrr.max = Converter::ArkValue<Ark_Int32>(120);

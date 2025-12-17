@@ -906,7 +906,8 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setForegroundColor, TestSize.Level1
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
     static const std::vector<OneTestStep> testPlan = {
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
-            ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE)), "#FFFFFFFF" },
+            ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+                ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE)), "#FFFFFFFF" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
             ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456)), "#FF123456" },
         { ArkUnion<Opt_Union_ResourceColor_ColoringStrategy, Ark_ResourceColor>(
@@ -1481,7 +1482,8 @@ HWTEST_F(CommonMethodModifierTest2, setBorderWidth, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, setBorderColor, TestSize.Level1)
 {
-    auto arkResourceColor = ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE);
+    auto arkResourceColor = ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE);
     auto color = Converter::ArkUnion<Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors, Ark_ResourceColor>(
         arkResourceColor);
     modifier_->setBorderColor(node_, &color);

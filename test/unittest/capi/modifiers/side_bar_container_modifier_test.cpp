@@ -77,7 +77,8 @@ const auto CUSTOM_COLOR_STRING("#FF123456");
 const int CUSTOM_COLOR_INT(0xFF123456);
 const float CUSTOM_COLOR_FLOAT(0.1f);
 
-const Ark_ResourceColor COLOR_COLOR = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN);
+const Ark_ResourceColor COLOR_COLOR = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+    ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN);
 const Ark_ResourceColor COLOR_INT = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(CUSTOM_COLOR_INT);
 const Ark_ResourceColor COLOR_FLOAT = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(CUSTOM_COLOR_FLOAT);
 const Ark_ResourceColor COLOR_STRING = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(CUSTOM_COLOR_STRING);

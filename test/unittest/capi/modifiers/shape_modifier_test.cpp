@@ -65,7 +65,9 @@ constexpr auto X_STR = "10.00vp";
 constexpr auto Y_STR = "20.00vp";
 
 const std::vector<OneTestColorStep> TEST_COLOR_PLAN = {
-    { ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE), "#FFFFFFFF" },
+    { ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE),
+        "#FFFFFFFF" },
     { ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
 #ifdef WRONG_COLOR
     { ArkUnion<Opt_ResourceColor, Ark_Int32>(0), "#00000000" },

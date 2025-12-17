@@ -529,7 +529,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontColorTestFontColorValidValues, Test
 {
     Opt_ResourceColor initValueFontColor;
     initValueFontColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueFontColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -567,7 +568,8 @@ HWTEST_F(SelectModifierTest, setFontColorTestFontColorInvalidValues, TestSize.Le
 
     // Initial setup
     initValueFontColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueFontColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_ResourceColor inputValueFontColor = initValueFontColor;
@@ -619,7 +621,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestSelectedOption
 
     // Initial setup
     initValueSelectedOptionBgColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedOptionBgColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -658,7 +661,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestSelectedOption
 
     // Initial setup
     initValueSelectedOptionBgColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedOptionBgColor](
                           const std::string& input, const Opt_ResourceColor& value) {
@@ -1058,7 +1062,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontColorTestSelectedOpti
 
     // Initial setup
     initValueSelectedOptionFontColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedOptionFontColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -1098,7 +1103,8 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontColorTestSelectedOptionFontCol
 
     // Initial setup
     initValueSelectedOptionFontColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedOptionFontColor](
                           const std::string& input, const Opt_ResourceColor& value) {
@@ -1151,7 +1157,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setOptionBgColorTestOptionBgColorValidValu
 
     // Initial setup
     initValueOptionBgColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueOptionBgColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -1190,7 +1197,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setOptionBgColorTestOptionBgColorInvalidVa
 
     // Initial setup
     initValueOptionBgColor =
-        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueOptionBgColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_ResourceColor inputValueOptionBgColor = initValueOptionBgColor;

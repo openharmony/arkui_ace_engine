@@ -65,19 +65,45 @@ namespace {
         { INVALID_REASON_VALUE, std::nullopt },
     };
     std::vector<std::pair<Opt_ResourceColor, std::string>> colorTestPlan = {
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE), "#FFFFFFFF" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK), "#FF000000" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), "#FF0000FF" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN), "#FFA52A2A" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY), "#FF808080" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN), "#FF008000" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY), "#FF808080" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE), "#FFFFA500" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK), "#FFFFC0CB" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED), "#FFFF0000" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW), "#FFFFFF00" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT), "#00000000" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(static_cast<Ark_arkui_component_enums_Color>(-1)), "#00000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE),
+            "#FFFFFFFF" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK),
+            "#FF000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+            "#FF0000FF" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN),
+            "#FFA52A2A" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY),
+            "#FF808080" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN),
+            "#FF008000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY),
+            "#FF808080" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE),
+            "#FFFFA500" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK),
+            "#FFFFC0CB" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED),
+            "#FFFF0000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW),
+            "#FFFFFF00" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT),
+            "#00000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            static_cast<Ark_arkui_component_enums_Color>(-1)),
+            "#00000000" },
         { Converter::ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr), "#00000000" },
     };
     std::vector<std::pair<Opt_Union_F64_String, double>> arkUnionNumberTestPlan = {

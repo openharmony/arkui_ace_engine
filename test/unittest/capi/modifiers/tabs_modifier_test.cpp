@@ -1225,7 +1225,8 @@ HWTEST_F(TabsModifierTest, setBarBackgroundColorTestDefaultValues, TestSize.Leve
 // Color values for attribute 'barBackgroundColor' of method 'barBackgroundColor'
 static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> barBackgroundColorValues = {
     {"ARK_COLOR_BLUE", Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
-        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), COLOR_BLUE},
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        COLOR_BLUE},
     {"0x123456", Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456), "#FF123456"},
     {"#11223344", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344"},
     {"incorrect_color", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("incorrect_color"), COLOR_TRANSPARENT},

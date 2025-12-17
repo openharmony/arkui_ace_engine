@@ -59,7 +59,8 @@ const std::string TEST_CONTENT_ONE = "ContentTestOne";
 const std::string TEST_CONTENT_TWO = "ContentTestTwo";
 const std::vector<std::tuple<Ark_ResourceColor, std::string>> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
-        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE), "#FF0000FF" },
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
@@ -1614,7 +1615,8 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest, TestSize.Level1)
     modifier_->setTextAreaOptions(node_, &optionsUndef);
 
     Ark_TextAreaOptions optionsInvalid;
-    optionsInvalid.text = Converter::ArkValue<Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String>();
+    optionsInvalid.text =
+        Converter::ArkValue<Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String>();
     optionsInvalid.placeholder = Converter::ArkValue<Opt_ResourceStr>();
     optionsInvalid.controller = Converter::ArkValue<Opt_TextAreaController>();
     auto optionsInvalidDef = Converter::ArkValue<Opt_TextAreaOptions>();
@@ -1635,8 +1637,9 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest, TestSize.Level1)
     // create the external TextAreaController peer and attach modifier to it
     TextAreaControllerPeer peer;
     Ark_TextAreaOptions options;
-    options.text = Converter::ArkUnion<Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String, Ark_ResourceStr>(
-        Converter::ArkUnion<Ark_ResourceStr, Ark_String>(ATTRIBUTE_TEXT_VALUE));
+    options.text = Converter::ArkUnion<
+        Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String, Ark_ResourceStr>(
+            Converter::ArkUnion<Ark_ResourceStr, Ark_String>(ATTRIBUTE_TEXT_VALUE));
     options.placeholder = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(ATTRIBUTE_PLACEHOLDER_VALUE);
     options.controller = Converter::ArkValue<Opt_TextAreaController>(&peer);
     auto optionsDef = Converter::ArkValue<Opt_TextAreaOptions>(options);
@@ -1670,7 +1673,8 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest2, TestSize.Level1)
             const std::string& expectedStr, const Ark_ResourceStr& value) {
         Ark_TextAreaOptions options;
         TextAreaControllerPeer peer;
-        options.text = Converter::ArkUnion<Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String, Ark_ResourceStr>(value);
+        options.text = Converter::ArkUnion<
+            Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String, Ark_ResourceStr>(value);
         options.placeholder = Converter::ArkValue<Opt_ResourceStr>(value);
         options.controller = Converter::ArkValue<Opt_TextAreaController>(&peer);
         auto optionsDef = Converter::ArkValue<Opt_TextAreaOptions>(options);
