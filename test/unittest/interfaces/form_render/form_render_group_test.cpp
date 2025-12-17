@@ -670,3 +670,4 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_SetUiContentParams_001, TestSi
     group->SetUiContentParams(want);
     GTEST_LOG_(INFO) << "FormRenderGroupTest_SetUiContentParams_001 end";
 }
+}
