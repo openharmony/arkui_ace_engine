@@ -128,6 +128,7 @@ ani_boolean GetKeyEventModifierKeyState(
     ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys);
 void SetClickEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer);
 void SetTouchEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer);
+ani_array ResolveUIContext(ani_env* env, [[maybe_unused]]ani_object obj);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE
