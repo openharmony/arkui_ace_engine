@@ -484,6 +484,9 @@ void SubwindowManager::ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, cons
         CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
         manager->AddSubwindowBySearchKey(searchKey, subwindow);
     }
+    if (!subwindow->GetIsReceiveDragEventEnabled()) {
+        subwindow->SetReceiveDragEventEnabled(true);
+    }
     subwindow->ShowPopupNG(targetNode->GetId(), popupInfo, std::move(onWillDismiss), interactiveDismiss);
 }
 
@@ -820,6 +823,9 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
     auto subwindow = GetOrCreateSubWindowByType(SubwindowType::TYPE_DIALOG, dialogProps.isModal);
     CHECK_NULL_RETURN(subwindow, nullptr);
+    if (!subwindow->GetIsReceiveDragEventEnabled()) {
+        subwindow->SetReceiveDragEventEnabled(true);
+    }
     return subwindow->ShowDialogNG(dialogProps, std::move(buildFunc));
 }
 RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNGWithNode(const DialogProperties& dialogProps,
@@ -828,6 +834,9 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNGWithNode(const DialogPropert
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
     auto subwindow = GetOrCreateSubWindowByType(SubwindowType::TYPE_DIALOG, dialogProps.isModal);
     CHECK_NULL_RETURN(subwindow, nullptr);
+    if (!subwindow->GetIsReceiveDragEventEnabled()) {
+        subwindow->SetReceiveDragEventEnabled(true);
+    }
     return subwindow->ShowDialogNGWithNode(dialogProps, customNode);
 }
 void SubwindowManager::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
