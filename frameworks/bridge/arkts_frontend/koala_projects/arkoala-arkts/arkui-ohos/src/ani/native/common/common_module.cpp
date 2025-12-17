@@ -1784,8 +1784,19 @@ ani_array ResolveUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
     CHECK_NULL_RETURN(modifier, resultArray);
     std::vector<int32_t> instance;
     modifier->getCommonAniModifier()->resolveUIContext(instance);
-    env->Array_New_Int(instance.size(), &resultArray);
-    auto status = env->Array_SetRegion_Int(resultArray, 0, instance.size(), instance.data());
+    ani_ref undefined {};
+    auto status = env->GetUndefined(&undefined);
+    auto arraySize = instance.size();
+    env->Array_New(arraySize, undefined, &resultArray);
+    ani_class intCls {};
+    ani_method intCtor {};
+    status = env->FindClass("std.core.Int", &intCls);
+    stauts = env->Class_FindMethod(intCls, "<ctor>","i:", &intCtor);
+    ani_object result {};
+    for (int i = 0; i < arraySize; ++i) {
+        status = env->Object_New(intCls, intCtor, &result, ani_int(instance[i]));
+        status = env->Array_Set(resultArray, i, result);
+    }
     return resultArray;
 }
 } // namespace OHOS::Ace::Ani
