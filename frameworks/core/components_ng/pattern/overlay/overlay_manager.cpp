@@ -5918,6 +5918,9 @@ void OverlayManager::UpdateSheetRender(
     if (sheetStyle.borderColor.has_value()) {
         sheetRenderContext->UpdateBorderColor(sheetStyle.borderColor.value());
     }
+    if (sheetStyle.radiusRenderStrategy.has_value()) {
+        sheetRenderContext->UpdateRenderStrategy(sheetStyle.radiusRenderStrategy.value());
+    }
     if (sheetStyle.shadow.has_value()) {
         sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
     } else if (sheetTheme->IsOuterBorderEnable()) {
