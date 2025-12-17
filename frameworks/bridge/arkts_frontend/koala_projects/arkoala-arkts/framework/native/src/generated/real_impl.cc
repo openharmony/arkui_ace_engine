@@ -4791,6 +4791,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                               const Opt_Boolean* value)
     {
     }
+    void SetSingleLineImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
+    {
+    }
     void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
                                            const Opt_Boolean* value)
     {

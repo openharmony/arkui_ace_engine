@@ -24571,6 +24571,8 @@ typedef struct GENERATED_ArkUIRichEditorModifier {
                                   const Opt_KeyboardAppearance* value);
     void (*setStopBackPress)(Ark_NativePointer node,
                              const Opt_Boolean* value);
+    void (*setSingleLine)(Ark_NativePointer node,
+                          const Opt_Boolean* value);
     void (*setCompressLeadingPunctuation)(Ark_NativePointer node,
                                           const Opt_Boolean* value);
     void (*setIncludeFontPadding)(Ark_NativePointer node,

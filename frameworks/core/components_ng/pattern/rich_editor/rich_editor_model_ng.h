@@ -76,7 +76,8 @@ public:
     void SetScrollBarColor(std::optional<Color> value) override;
     void SetSelectedDragPreviewStyle(const Color& value) override;
     void ResetSelectedDragPreviewStyle() override;
-    void SetSingleLine(bool isEnable) override;
+    void SetSingleLine(bool enabled) override;
+    void ResetSingleLine() override;
 
     static void SetSelectDetectEnable(FrameNode* frameNode, const bool value);
     static bool GetSelectDetectEnable(FrameNode* frameNode);
@@ -136,7 +137,9 @@ public:
     static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
     static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
     static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
-    static void SetSingleLine(FrameNode* frameNode, bool isEnable);
+    static void SetSingleLine(FrameNode* frameNode, bool enabled);
+    static void ResetSingleLine(FrameNode* frameNode);
+    static bool GetSingleLine(FrameNode* frameNode);
 
 private:
     void SetDraggable(bool draggable);

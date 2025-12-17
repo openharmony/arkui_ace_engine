@@ -432,7 +432,8 @@ public:
     virtual void SetScrollBarColor(std::optional<Color> value) {};
     virtual void SetIncludeFontPadding(bool enabled) {};
     virtual void SetFallbackLineSpacing(bool enabled) {};
-    virtual void SetSingleLine(bool iaEnable) {};
+    virtual void SetSingleLine(bool enabled) {};
+    virtual void ResetSingleLine() {};
     virtual void SetSelectedDragPreviewStyle(const Color& value) {};
     virtual void ResetSelectedDragPreviewStyle() {};
 

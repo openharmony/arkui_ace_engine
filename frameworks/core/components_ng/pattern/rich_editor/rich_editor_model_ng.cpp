@@ -809,9 +809,26 @@ void RichEditorModelNG::SetSingleLine(bool isEnable)
     ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SingleLine, isEnable);
 }
 
+void RichEditorModelNG::ResetSingleLine()
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SingleLine, false);
+}
+
 void RichEditorModelNG::SetSingleLine(FrameNode* frameNode, bool isEnable)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SingleLine, isEnable, frameNode);
+}
+
+void RichEditorModelNG::ResetSingleLine(FrameNode* frameNode)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SingleLine, false, frameNode);
+}
+
+bool RichEditorModelNG::GetSingleLine(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RichEditorLayoutProperty, SingleLine, value, frameNode, value);
+    return value;
 }
 
 void RichEditorModelNG::SetSelectDetectEnable(const bool value)
