@@ -203,6 +203,7 @@ private:
     void UpdateTextDecorationColorAlpha();
     void SetTextContentAlingOffsetY(float& paintOffsetY);
     void ContentChangeReport();
+    bool HandleDrawCallback(const RefPtr<ParagraphManager>& pManager, const RefPtr<TextPattern>& textPattern);
 
     std::optional<Dimension> fontSize_;
     float lastFontSize_ = 0.0f;

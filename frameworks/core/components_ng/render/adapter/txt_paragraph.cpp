@@ -1099,4 +1099,11 @@ std::string TxtParagraph::GetDumpInfo()
     CHECK_NULL_RETURN(paragrah, "");
     return paragrah->GetDumpInfo();
 }
+
+std::optional<void*> TxtParagraph::GetRawParagraph()
+{
+    auto paragraph = GetParagraph();
+    CHECK_NULL_RETURN(paragraph, std::nullopt);
+    return static_cast<void*>(paragraph);
+}
 } // namespace OHOS::Ace::NG

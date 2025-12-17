@@ -535,9 +535,35 @@ void TextContentModifier::ReportFaultEvent(RSCanvas& canvas, const RefPtr<Paragr
     }
 }
 
+bool TextContentModifier::HandleDrawCallback(
+    const RefPtr<ParagraphManager>& pManager, const RefPtr<TextPattern>& textPattern)
+{
+    CHECK_NULL_RETURN(pManager, false);
+    CHECK_NULL_RETURN(textPattern, false);
+    auto drawCallback = textPattern->GetExternalDrawCallback();
+    CHECK_NULL_RETURN(drawCallback, false);
+    auto paragraphs = pManager->GetParagraphs();
+    if (paragraphs.size() == 1) {
+        auto paintOffsetY = paintOffset_.GetY();
+        SetTextContentAlingOffsetY(paintOffsetY);
+        auto contentRect = textPattern->GetTextContentRect();
+        float paintOffsetX = AdjustParagraphX(paragraphs.front(), contentRect);
+        auto host = textPattern->GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        return drawCallback(
+            paintOffsetX, paintOffsetY, geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+    }
+    return false;
+}
+
 void TextContentModifier::DrawText(
     RSCanvas& canvas, const RefPtr<ParagraphManager>& pManager, const RefPtr<TextPattern>& textPattern)
 {
+    if (HandleDrawCallback(pManager, textPattern)) {
+        return;
+    }
     auto paintOffsetY = paintOffset_.GetY();
     SetTextContentAlingOffsetY(paintOffsetY);
     auto paragraphs = pManager->GetParagraphs();

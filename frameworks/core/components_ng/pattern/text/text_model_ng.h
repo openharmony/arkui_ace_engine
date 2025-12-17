@@ -278,6 +278,9 @@ public:
     static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
     static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
     static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
+    static void SetExternalDrawCallback(
+        FrameNode* frameNode, std::function<bool(float, float, float, float)>&& callback);
+    static std::optional<void*> GetInnerParagraph(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 
