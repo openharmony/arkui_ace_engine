@@ -467,7 +467,7 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
             return true;
         }
         auto navigation = navigationWeak.Upgrade();
-        CHECK_NULL_RETURN(navigation, false);        
+        CHECK_NULL_RETURN(navigation, false);
         if (navDestination->IsHomeDestination() ||
             navDestination->GetNavDestinationType() == NavDestinationType::RELATED) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will handle back for HomeNavDestination or related NavDestination");
