@@ -92,6 +92,7 @@ public:
     // callbacks that will be called by ImageProvider when load process finishes
     void DataReadyCallback(const RefPtr<ImageObject>& imageObj);
     void SuccessCallback(const RefPtr<CanvasImage>& canvasImage);
+    void RemoveDownloadedImageCache(const ImageSourceInfo& src);
     void FailCallback(const std::string& errorMsg, const ImageErrorInfo& errorInfo = {});
     const std::string GetCurrentLoadingState();
     void ResizableCalcDstSize();
