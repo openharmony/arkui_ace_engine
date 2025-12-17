@@ -88,6 +88,8 @@ public:
     {
         return isTriggerParentToScroll_;
     }
+    void SetTextSelectionHolderId(int32_t id);
+    void RemoveTextSelectionHolderId(int32_t id);
 
 protected:
     OffsetF GetHandleReferenceOffset(const RectF& handleRect);

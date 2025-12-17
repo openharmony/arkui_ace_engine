@@ -75,6 +75,11 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             ReportLifeCycleEvent(result);
             break;
         }
+        case REPORT_SELECT_TEXT_EVENT: {
+            std::string result = data.ReadString();
+            ReportSelectTextEvent(result);
+            break;
+        }
         case SEND_BASE_INFO: {
             std::string result = data.ReadString();
             SendBaseInfo(result);
@@ -116,6 +121,22 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
         case SEND_EXE_APP_AI_FUNCTION_RESULT: {
             uint32_t result = data.ReadUint32();
             SendExeAppAIFunctionResult(result);
+            break;
+        }
+        case SEND_SPECIFIED_CONTENT_OFFSETS: {
+            std::vector<std::pair<float, float>> result;
+            int32_t size = 0;
+            if (!data.ReadInt32(size)) {
+                LOGW("SendSpecifiedContentOffsets size read failed");
+                break;
+            }
+            for (int32_t i = 0; i < size; i++) {
+                float offsetX = data.ReadFloat();
+                float offsetY = data.ReadFloat();
+                std::pair<float, float> value = { offsetX, offsetY };
+                result.push_back(value);
+            }
+            SendSpecifiedContentOffsets(result);
             break;
         }
         case SEND_CONTENT_CHANGE: {
@@ -221,6 +242,20 @@ void UiReportStub::ReportLifeCycleEvent(const std::string& data)
     }
 }
 
+void UiReportStub::ReportSelectTextEvent(const std::string& data)
+{
+    if (selectTextEventCallback_ != nullptr) {
+        selectTextEventCallback_(data);
+    }
+}
+
+void UiReportStub::SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets)
+{
+    if (getSpecifiedContentOffsets_ != nullptr) {
+        getSpecifiedContentOffsets_(offsets);
+    }
+}
+
 void UiReportStub::SendBaseInfo(const std::string& data)
 {
     if (sendBaseInfoCallback_ != nullptr) {
@@ -280,6 +315,17 @@ void UiReportStub::RegisterLifeCycleEventCallback(const EventCallback& eventCall
     lifeCycleEventCallback_ = std::move(eventCallback);
 }
 
+void UiReportStub::RegisterSelectTextEventCallback(const EventCallback& eventCallback)
+{
+    selectTextEventCallback_ = std::move(eventCallback);
+}
+
+void UiReportStub::RegisterGetSpecifiedContentOffsets(
+    const std::function<void(std::vector<std::pair<float, float>>)>& eventCallback)
+{
+    getSpecifiedContentOffsets_ = std::move(eventCallback);
+}
+
 void UiReportStub::RegisterGetWebViewCurrentLanguage(const EventCallback& eventCallback)
 {
     getWebViewCurrentLanguageCallback_ = std::move(eventCallback);
@@ -333,6 +379,11 @@ void UiReportStub::UnregisterScrollEventCallback()
 void UiReportStub::UnregisterLifeCycleEventCallback()
 {
     lifeCycleEventCallback_ = nullptr;
+}
+
+void UiReportStub::UnregisterSelectTextEventCallback()
+{
+    selectTextEventCallback_ = nullptr;
 }
 
 void UiReportStub::SendCurrentLanguage(const std::string& data)

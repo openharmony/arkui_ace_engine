@@ -31,7 +31,7 @@ const RefPtr<CubicCurve> LAND_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2, 0, 0.
 RichEditorOverlayModifier::RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern,
     const WeakPtr<ScrollBarOverlayModifier>& scrollbarOverlayModifier,
     WeakPtr<ScrollEdgeEffect>&& edgeEffect, bool isContentNode)
-    : TextOverlayModifier(), pattern_(pattern), edgeEffect_(edgeEffect),
+    : TextOverlayModifier(pattern), edgeEffect_(edgeEffect),
       scrollBarOverlayModifier_(scrollbarOverlayModifier), isContentNode_(isContentNode)
 {
     caretVisible_ = AceType::MakeRefPtr<PropertyBool>(false);

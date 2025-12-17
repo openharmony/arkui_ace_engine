@@ -37,6 +37,11 @@ public:
         const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback) override;
     virtual int32_t RegisterScrollEventCallback(const EventCallback& eventCallback) override;
     virtual int32_t RegisterLifeCycleEventCallback(const EventCallback& eventCallback) override;
+    virtual int32_t RegisterSelectTextEventCallback(const EventCallback& eventCallback) override;
+    virtual int32_t GetSpecifiedContentOffsets(int32_t id, const std::string& content,
+        const std::function<void(std::vector<std::pair<float, float>>)>& eventCallback) override;
+    virtual int32_t HighlightSpecifiedContent(int32_t id, const std::string& content,
+        const std::vector<std::string>& nodeIds, const std::string& configs) override;
     virtual int32_t SendCommand(int32_t id, const std::string& command) override;
     virtual int32_t SendCommandAsync(int32_t id, const std::string& command) override;
     virtual int32_t SendCommand(const std::string command) override;
@@ -48,6 +53,7 @@ public:
     virtual int32_t UnregisterWebUnfocusEventCallback() override;
     virtual int32_t UnregisterScrollEventCallback() override;
     virtual int32_t UnregisterLifeCycleEventCallback() override;
+    virtual int32_t UnregisterSelectTextEventCallback() override;
     virtual bool IsConnect() override;
     virtual int32_t GetWebViewTranslateText(
         const std::string& data, const std::function<void(int32_t, std::string)>& eventCallback) override;

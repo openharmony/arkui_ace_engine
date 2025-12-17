@@ -93,6 +93,11 @@ public:
     virtual void ReportLifeCycleEvent(const std::string& data) {};
 
     /**
+     * @description: execute callback when select text event occurs
+     */
+    virtual void ReportSelectTextEvent(const std::string& data) {};
+
+    /**
      * @description: get current page inspector tree value
      */
     virtual void GetInspectorTree(ParamConfig config = ParamConfig()) {};
@@ -123,6 +128,7 @@ public:
     virtual void SetComponentChangeEventRegistered(bool status) {};
     virtual void SetScrollEventRegistered(bool status) {};
     virtual void SetLifeCycleEventRegistered(bool status) {};
+    virtual void SetSelectTextEventRegistered(bool status) {};
     virtual bool GetClickEventRegistered()
     {
         return false;
@@ -152,6 +158,10 @@ public:
         return false;
     };
     virtual bool GetLifeCycleEventRegistered()
+    {
+        return false;
+    };
+    virtual bool GetSelectTextEventRegistered()
     {
         return false;
     };
@@ -190,6 +200,16 @@ public:
         std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback) {};
     virtual void ExeAppAIFunction(const std::string& funcName, const std::string& params) {};
     virtual void SendExeAppAIFunctionResult(uint32_t result) {};
+    virtual void GetSpecifiedContentOffsets(int32_t id, const std::string& content) {};
+    virtual void HighlightSpecifiedContent(
+        int32_t id, const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) {};
+    virtual void ReportSelectText() {};
+    virtual void SaveGetSpecifiedContentOffsetsFunction(
+        std::function<std::vector<std::pair<float, float>>(int32_t id, const std::string& content)>&& callback) {};
+    virtual void SaveHighlightSpecifiedContentFunction(std::function<void(int32_t id, const std::string& content,
+        const std::vector<std::string>& nodeIds, const std::string& configs)>&& callback) {};
+    virtual void SaveSelectTextFunction(std::function<void()>&& callback) {};
+    virtual void SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets) {};
     virtual void RegisterContentChangeCallback(const ContentChangeConfig& config) {};
     virtual void UnregisterContentChangeCallback() {};
     virtual void ReportContentChangeEvent(ChangeType type, const std::string& simpleTree) {};
@@ -209,6 +229,7 @@ protected:
     std::atomic<int32_t> componentChangeEventRegisterProcesses_ = 0;
     std::atomic<int32_t> scrollEventRegisterProcesses_ = 0;
     std::atomic<int32_t> lifeCycleEventRegisterProcesses_ = 0;
+    std::atomic<int32_t> selectTextEventRegisterProcesses_ = 0;
     bool webFocusEventRegistered = false;
     InspectorFunction inspectorFunction_ = 0;
     NotifyAllWebFunction notifyWebFunction_ = 0;
@@ -225,6 +246,12 @@ protected:
     std::function<int32_t()> getInstanceIdCallback_;
     std::shared_mutex getInstanceIdCallbackMutex_;
     std::function<std::string()> pipelineContextPageNameCallback_;
+    std::function<std::vector<std::pair<float, float>>(int32_t id,
+        const std::string& content)> getSpecifiedContentOffsetsCallback_;
+    std::function<void(
+        int32_t id, const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs)>
+        highlightSpecifiedContentCallback_;
+    std::function<void()> selectTextCallback_;
     SendCommandFunction sendCommandFunction_ = 0;
     std::function<uint32_t(const std::string& funcName, const std::string& params)> pipelineExeAppAIFunctionCallback_;
     std::function<void(ContentChangeConfig)> startContentChangeDetectCallback_;

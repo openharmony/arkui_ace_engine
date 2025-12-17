@@ -201,6 +201,8 @@ public:
 
     std::string GetCurrentPageNameCallback();
 
+    void ReportSelectedText();
+
     const RefPtr<PageInfo> GetLastPageInfo();
 
     std::string GetNavDestinationPageName(const RefPtr<PageInfo>& pageInfo);

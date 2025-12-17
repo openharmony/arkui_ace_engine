@@ -7886,4 +7886,27 @@ void FrameNode::OnContentChangeUnregister()
         pattern_->OnContentChangeUnregister();
     }
 }
+
+std::vector<std::pair<float, float>> FrameNode::GetSpecifiedContentOffsets(const std::string& content)
+{
+    std::vector<std::pair<float, float>> offsets;
+    auto pattern = GetPattern();
+    CHECK_NULL_RETURN(pattern, offsets);
+    return pattern->GetSpecifiedContentOffsets(content);
+}
+
+void FrameNode::HighlightSpecifiedContent(
+    const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs)
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->HighlightSpecifiedContent(content, nodeIds, configs);
+}
+
+void FrameNode::ReportSelectedText()
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->ReportSelectedText();
+}
 } // namespace OHOS::Ace::NG

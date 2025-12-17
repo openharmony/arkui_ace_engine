@@ -5867,7 +5867,69 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     RegisterExeAppAIFunction(taskExecutor);
     SaveGetHitTestInfoCallback(taskExecutor);
     SetContentChangeDetectCallback(taskExecutor);
+    RegisterGetSpecifiedContentOffsetsCallback(taskExecutor);
+    RegisterHighlightSpecifiedContentCallback(taskExecutor);
+    RegisterSelectTextCallback(taskExecutor);
     SaveGetStateMgmtInfoFunction(taskExecutor);
+}
+
+void UIContentImpl::RegisterGetSpecifiedContentOffsetsCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto getSpecifiedContentOffsetsCallback = [weakTaskExecutor = taskExecutor](int32_t id,
+        const std::string& content) -> std::vector<std::pair<float, float>> {
+    auto taskExecutor = weakTaskExecutor.Upgrade();
+        std::vector<std::pair<float, float>> offsets;
+        CHECK_NULL_RETURN(taskExecutor, offsets);
+        taskExecutor->PostTask(
+            [&offsets, id, content]() {
+                auto node = AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(id));
+                if (!node) {
+                    LOGW("GetSpecifiedContentOffsets no such NodeId");
+                    return;
+                }
+                offsets = node->GetSpecifiedContentOffsets(content);
+                UiSessionManager::GetInstance()->SendSpecifiedContentOffsets(offsets);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionGetSpecifiedContentOffsets");
+        return offsets;
+    };
+    UiSessionManager::GetInstance()->SaveGetSpecifiedContentOffsetsFunction(getSpecifiedContentOffsetsCallback);
+}
+
+void UIContentImpl::RegisterHighlightSpecifiedContentCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto highlightSpecifiedContentCallback = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& content,
+                                                 const std::vector<std::string>& nodeIds, const std::string& configs) {
+    auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [id, content, nodeIds, configs]() {
+                auto node = AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(id));
+                if (!node) {
+                    LOGW("HighlightSpecifiedContent no such NodeId");
+                    return;
+                }
+                node->HighlightSpecifiedContent(content, nodeIds, configs);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionHighlightSpecifiedContent");
+    };
+    UiSessionManager::GetInstance()->SaveHighlightSpecifiedContentFunction(highlightSpecifiedContentCallback);
+}
+
+void UIContentImpl::RegisterSelectTextCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto selectTextCallback = [weakTaskExecutor = taskExecutor]() {
+    auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            []() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->ReportSelectedText();
+            },
+            TaskExecutor::TaskType::UI, "UiSessionSelectText");
+    };
+    UiSessionManager::GetInstance()->SaveSelectTextFunction(selectTextCallback);
 }
 
 void UIContentImpl::SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& taskExecutor)

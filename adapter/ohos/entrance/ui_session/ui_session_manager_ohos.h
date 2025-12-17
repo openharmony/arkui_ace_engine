@@ -41,6 +41,7 @@ public:
         int64_t accessibilityId, const std::string& data, const std::string& type = "") override;
     void ReportScrollEvent(const std::string& data) override;
     void ReportLifeCycleEvent(const std::string& data) override;
+    void ReportSelectTextEvent(const std::string& data) override;
     void SetClickEventRegistered(bool status) override;
     void SetSearchEventRegistered(bool status) override;
     void SetTextChangeEventRegistered(bool status) override;
@@ -48,6 +49,7 @@ public:
     void SetComponentChangeEventRegistered(bool status) override;
     void SetScrollEventRegistered(bool status) override;
     void SetLifeCycleEventRegistered(bool status) override;
+    void SetSelectTextEventRegistered(bool status) override;
     bool GetClickEventRegistered() override;
     bool GetSearchEventRegistered() override;
     bool GetTextChangeEventRegistered() override;
@@ -55,6 +57,18 @@ public:
     bool GetComponentChangeEventRegistered() override;
     bool GetScrollEventRegistered() override;
     bool GetLifeCycleEventRegistered() override;
+    bool GetSelectTextEventRegistered() override;
+    void ReportSelectText() override;
+    void GetSpecifiedContentOffsets(int32_t id, const std::string& content) override;
+    void HighlightSpecifiedContent(int32_t id, const std::string& content, const std::vector<std::string>& nodeIds,
+        const std::string& configs) override;
+    void SaveGetSpecifiedContentOffsetsFunction(
+        std::function<std::vector<std::pair<float, float>>(int32_t id,
+            const std::string& content)>&& callback) override;
+    void SaveHighlightSpecifiedContentFunction(std::function<void(int32_t id, const std::string& content,
+        const std::vector<std::string>& nodeIds, const std::string& configs)>&& callback) override;
+    void SaveSelectTextFunction(std::function<void()>&& callback) override;
+    void SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets) override;
     void GetInspectorTree(ParamConfig config = ParamConfig()) override;
     void SaveInspectorTreeFunction(InspectorFunction&& function) override;
     void AddValueForTree(int32_t id, const std::string& value) override;

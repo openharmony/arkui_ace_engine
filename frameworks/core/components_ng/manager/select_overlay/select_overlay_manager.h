@@ -127,6 +127,8 @@ public:
         return textMenuOptions_.showMode.value_or(TextMenuShowMode::DEFAULT);
     }
 
+    int32_t GetTextSelectionHolderId();
+
 private:
     void DestroyHelper(const RefPtr<FrameNode>& overlay, bool animation = false);
 

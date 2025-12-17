@@ -291,24 +291,6 @@ public:
         return std::make_unique<LinearGradientShader>(gradient, firstPoint, secondPoint);
     }
 
-private:
-    void AdjustPoint(float firstOffset, float lastOffset)
-    {
-        const auto delta = secondPoint_ - firstPoint_;
-        secondPoint_ = firstPoint_ + delta * lastOffset;
-        firstPoint_ = firstPoint_ + delta * firstOffset;
-    }
-
-    static float Deg2rad(float deg)
-    {
-        return static_cast<float>(deg * ACE_PI / 180.0);
-    }
-
-    static float Rad2deg(float rad)
-    {
-        return static_cast<float>(rad * 180.0 / ACE_PI);
-    }
-
     static void EndPointsFromAngle(float angle, const RSSize& size, RSPoint& firstPoint, RSPoint& secondPoint)
     {
         angle = fmod(angle, 360.0f);
@@ -356,6 +338,24 @@ private:
 
         secondPoint = RSPoint(halfWidth + endX, halfHeight - endY);
         firstPoint = RSPoint(halfWidth - endX, halfHeight + endY);
+    }
+
+private:
+    void AdjustPoint(float firstOffset, float lastOffset)
+    {
+        const auto delta = secondPoint_ - firstPoint_;
+        secondPoint_ = firstPoint_ + delta * lastOffset;
+        firstPoint_ = firstPoint_ + delta * firstOffset;
+    }
+
+    static float Deg2rad(float deg)
+    {
+        return static_cast<float>(deg * ACE_PI / 180.0);
+    }
+
+    static float Rad2deg(float rad)
+    {
+        return static_cast<float>(rad * 180.0 / ACE_PI);
     }
 
     static RSPoint DirectionToPoint(
@@ -728,6 +728,12 @@ std::shared_ptr<RSShaderEffect> DrawingDecorationPainter::CreateGradientShader(
         return nullptr;
     }
     return ptr->CreateGradientShader();
+}
+
+void DrawingDecorationPainter::EndPointsFromAngle(float angle, const RSSize& size, RSPoint& firstPoint,
+    RSPoint& secondPoint)
+{
+    LinearGradientShader::EndPointsFromAngle(angle, size, firstPoint, secondPoint);
 }
 
 float DrawingDecorationPainter::DrawingDimensionToPx(const Dimension& value, const SizeF& size, LengthMode type)

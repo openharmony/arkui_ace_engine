@@ -132,6 +132,7 @@ public:
             theme->aiWrite_ = pattern->GetAttr<std::string>("ai_write_menu_name", "Celia writer");
             theme->symbolSize_ = pattern->GetAttr<Dimension>("more_or_back_symbol_size", 24.0_vp);
             theme->symbolColor_ = pattern->GetAttr<Color>("more_or_back_symbol_color", Color());
+            theme->highlightColor_ = pattern->GetAttr<Color>("text_overlay_highlight_color", Color(0x33000000));
         }
 
         void ParseMenuPattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextOverlayTheme>& theme) const
@@ -465,6 +466,11 @@ public:
         return symbolColor_;
     }
 
+    const Color& GetHighlightColor() const
+    {
+        return highlightColor_;
+    }
+
     bool GetEnableSelectionMenu() const
     {
         return enableSelectionMenu_;
@@ -711,6 +717,7 @@ private:
     std::vector<Color> aiMenuFontGradientColors_;
     std::vector<float> aiMenuFontGradientScalars_;
     Color aiMenuSymbolColor_;
+    Color highlightColor_;
     Dimension menuButtonRadius_;
     std::string askCelia_;
     Dimension maxOverlayMenuWidth_ = MAX_OVERLAY_MENU_WIDTH;

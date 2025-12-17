@@ -371,10 +371,13 @@ HWTEST_F(TextTestNg, GetSelectedBackgroundColor001, TestSize.Level1)
     textModelNG.Create(CREATE_VALUE_W);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
+
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
+
     RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
     ASSERT_NE(textLayoutProperty, nullptr);
+
     EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE_W);
 
     /**
@@ -605,6 +608,7 @@ HWTEST_F(TextTestNg, CalcAIMenuPosition001, TestSize.Level1)
      */
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
+
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
 
@@ -771,10 +775,13 @@ HWTEST_F(TextTestNg, OnModifyDone002, TestSize.Level1)
      */
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
+
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
+
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
 

@@ -963,6 +963,15 @@ public:
         return textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE;
     }
 
+    std::vector<std::pair<float, float>> GetSpecifiedContentOffsets(const std::string& content) override;
+    std::vector<int32_t> GetSpecifiedContentIndex(const std::string& content, bool isFirst = false) const;
+    void HighlightSpecifiedContent(
+        const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) override;
+    void ResetHighLightValue();
+    void ReportSelectedText() override;
+    int32_t HighlightStrIndexToPaintRectIndex(int32_t matchIndex, bool isStart);
+    std::u16string TextHighlightSelectedContent(int32_t start, int32_t end);
+
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
     int32_t GetClickedSpanPosition()
@@ -1253,6 +1262,7 @@ private:
     void ResetMouseLeftPressedState();
     void GetPaintOffsetWithoutTransform(OffsetF& paintOffset);
     void ContentChangeByDetaching(PipelineContext*) override;
+    void HighlightDisappearAnimation();
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -1316,6 +1326,12 @@ private:
     bool isTryEntityDragging_ = false;
     bool isRegisteredAreaCallback_ = false;
     OffsetF gestureSelectTextPaintOffset_;
+
+    std::shared_ptr<AnimationUtils::Animation> highlightAppearAnimation_;
+    std::shared_ptr<AnimationUtils::Animation> highlightDisappearAnimation_;
+
+    int32_t highlightAppearAnimationId_ = 0;
+    int32_t highlightDisappearAnimationId_ = 0;
 
     // ----- multi thread state variables -----
     // ----- multi thread state variables end -----

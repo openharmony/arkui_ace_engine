@@ -65,6 +65,16 @@ public:
     void ReportLifeCycleEvent(const std::string& data) override;
 
     /**
+     * @description: receive proxy side communication to report select text value
+     */
+    void ReportSelectTextEvent(const std::string& data) override;
+
+    /**
+     * @description: receive proxy side communication to report select text offsets
+     */
+    void SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets) override;
+
+    /**
      * @description: register a callback when click event occurs execute
      * @param eventCallback callback to be performed
      */
@@ -126,6 +136,19 @@ public:
     void RegisterLifeCycleEventCallback(const EventCallback& eventCallback);
 
     /**
+     * @description: register a callback when get select text event
+     * @param eventCallback callback to be performed
+     */
+    void RegisterSelectTextEventCallback(const EventCallback& eventCallback);
+
+    /**
+     * @description: register a callback when get select text offsets
+     * @param eventCallback callback to be performed
+     */
+    void RegisterGetSpecifiedContentOffsets(
+        const std::function<void(std::vector<std::pair<float, float>>)>& eventCallback);
+
+    /**
      * @description: unregister the click callback last register
      */
     void UnregisterClickEventCallback();
@@ -164,6 +187,11 @@ public:
      * @description: unregister the life cycle event callback last register
      */
     void UnregisterLifeCycleEventCallback();
+
+    /**
+     * @description: unregister the select text event callback last register
+     */
+    void UnregisterSelectTextEventCallback();
 
     /**
      * @description: report whole inspectorTree for SA
@@ -219,6 +247,8 @@ private:
     EventCallback getCurrentPageNameCallback_;
     EventCallback scrollEventCallback_;
     EventCallback lifeCycleEventCallback_;
+    EventCallback selectTextEventCallback_;
+    std::function<void(std::vector<std::pair<float, float>>)> getSpecifiedContentOffsets_;
     std::function<void(int32_t, std::string)> getTranslateTextCallback_;
     std::function<void(std::string, int32_t, bool)> inspectorTreeCallback_;
     std::function<void(std::string, int32_t, bool)> getHitTestNodeInfoCallback_;
