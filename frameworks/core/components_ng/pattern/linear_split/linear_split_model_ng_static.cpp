@@ -25,6 +25,9 @@ RefPtr<FrameNode> LinearSplitModelNGStatic::CreateFrameNode(int32_t nodeId, Spli
     std::string tag = splitType == SplitType::ROW_SPLIT ? V2::ROW_SPLIT_ETS_TAG : V2::COLUMN_SPLIT_ETS_TAG;
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         tag, nodeId, [splitType]() { return AceType::MakeRefPtr<LinearSplitPattern>(splitType); });
+    if (frameNode && frameNode->GetRenderContext()) {
+        frameNode->GetRenderContext()->UpdateClipEdge(true);
+    }
     return frameNode;
 }
 

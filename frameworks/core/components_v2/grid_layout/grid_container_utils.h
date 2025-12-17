@@ -25,6 +25,7 @@
 #include "frameworks/core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace::V2 {
+inline constexpr size_t MAX_NUMBER_BREAKPOINT = 6;
 
 class GridContainerUtils : public AceType {
     DECLARE_ACE_TYPE(GridContainerUtils, AceType);
@@ -47,6 +48,21 @@ public:
     static double ProcessColumnWidth(const std::pair<double, double>& gutter, int32_t columnNum, double size);
     static void InheritGridRowColumns(const RefPtr<V2::GridContainerSize>& gridContainerSize,
         int32_t *containerSizeArray, int32_t size);
+    static void InheritGridRowOption(const RefPtr<V2::GridContainerSize>& gridContainerSize,
+        std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT]);
+    static void InheritGridColumns(const RefPtr<V2::GridContainerSize>& gridContainerSize,
+        std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT]);
+    static void SaveGridRowGutterOptionxResObjXsSmMd(const RefPtr<V2::Gutter>& gutter,
+        RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT]);
+    static void SaveGridRowGutterOptionxResObjLgXlXXl(const RefPtr<V2::Gutter>& gutter,
+        RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT]);
+    static void SaveGridRowGutterOptionyResObjXsSmMd(const RefPtr<V2::Gutter>& gutter,
+        RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT]);
+    static void SaveGridRowGutterOptionyResObjLgXlXXl(const RefPtr<V2::Gutter>& gutter,
+        RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT]);
+    static void InheritGridRowGutterOption(const RefPtr<V2::Gutter>& gutter,
+        std::optional<CalcDimension> (&gutterSizeArray)[MAX_NUMBER_BREAKPOINT],
+        RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT], bool isHorizontal);
 };
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_GRID_COL_UTILS_H
