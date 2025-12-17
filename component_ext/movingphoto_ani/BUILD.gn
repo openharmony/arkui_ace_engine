@@ -21,7 +21,6 @@ component_ext_path = "${ace_root}/component_ext"
 additional_include_dirs = [ "${ace_root}" ]
 
 ohos_shared_library("movingphotoview_ani") {
-  defines = [ "USE_ARK_ENGINE" ]
   sources = [
     "./src/movingphotoview_ani.cpp",
     "./src/ani_utils.cpp",
@@ -45,7 +44,6 @@ ohos_shared_library("movingphotoview_ani") {
     "$ace_root/build:libace_compatible",
     "$ace_root/frameworks/core:ace_container_scope",
     "$ace_root/interfaces/inner_api/ace:ace_uicontent",
-    "$ace_root/interfaces/napi/kits/plugincomponent:plugincomponent",
   ]
 
   external_deps = [
