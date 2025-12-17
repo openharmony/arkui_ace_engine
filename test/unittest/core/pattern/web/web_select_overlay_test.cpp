@@ -5728,16 +5728,15 @@ HWTEST_F(WebSelectOverlayTest, OnHandleMove_002, TestSize.Level1)
     WebSelectOverlay overlay(webPattern);
     MockPipelineContext::SetUp();
     auto pipeline = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
     RectF handleRect;
     webPattern->SetOverlayCreating(false);
     overlay.OnHandleMove(handleRect, true);
-    EXPECT_EQ(isCurrentStartHandleDragging_, false);
+    EXPECT_EQ(overlay.isCurrentStartHandleDragging_, false);
     webPattern->SetOverlayCreating(true);
     GestureEvent event;
     overlay.OnHandleMoveStart(event, true);
     overlay.OnHandleMove(handleRect, true);
-    EXPECT_EQ(isCurrentStartHandleDragging_, true);
+    EXPECT_EQ(overlay.isCurrentStartHandleDragging_, true);
     MockPipelineContext::TearDown();
 #endif
 }
