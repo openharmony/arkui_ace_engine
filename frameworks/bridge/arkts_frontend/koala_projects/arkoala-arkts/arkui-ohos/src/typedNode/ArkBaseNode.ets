@@ -566,6 +566,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setOnGestureRecognizerJudgeBegin1Attribute(callback_, exposeInnerGesture);
         return this
     }
+    public onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined): this {
+        this.getPeer().setOnGestureRecognizerJudgeBegin0Attribute(callback_);
+        return this
+    }
     public shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this {
         this.getPeer().setShouldBuiltInRecognizerParallelWithAttribute(value);
         return this

@@ -179,6 +179,10 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
     modifierWithKey(this._modifiersWithKeys, GridSyncLoadModifier.identity, GridSyncLoadModifier, value);
     return this;
   }
+  editModeOptions(options: EditModeOptions | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, GridEditModeOptionsModifier.identity, GridEditModeOptionsModifier, options);
+    return this;
+  }
   onWillScroll(callback: (xOffset: number, yOffset: number,
     scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): this {
     modifierWithKey(this._modifiersWithKeys, GridOnWillScrollModifier.identity, GridOnWillScrollModifier, callback);
@@ -188,7 +192,7 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
     modifierWithKey(this._modifiersWithKeys, GridOnDidScrollModifier.identity, GridOnDidScrollModifier, callback);
     return this;
   }
-  supportLazyLoadingEmptyBranch(value): this {
+  supportEmptyBranchInLazyLoading(value): this {
     modifierWithKey(this._modifiersWithKeys, GridSupportLazyLoadingEmptyBranchModifier.identity, GridSupportLazyLoadingEmptyBranchModifier, value);
     return this;
   }
@@ -784,6 +788,20 @@ class GridSyncLoadModifier extends ModifierWithKey<boolean> {
       getUINativeModule().grid.resetSyncLoad(node);
     } else {
       getUINativeModule().grid.setSyncLoad(node, this.value);
+    }
+  }
+}
+
+class GridEditModeOptionsModifier extends ModifierWithKey<EditModeOptions | undefined> {
+  constructor(options: EditModeOptions | undefined) {
+    super(options);
+  }
+  static identity: Symbol = Symbol('gridEditModeOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().grid.resetEditModeOptions(node);
+    } else {
+      getUINativeModule().grid.setEditModeOptions(node, this.value);
     }
   }
 }

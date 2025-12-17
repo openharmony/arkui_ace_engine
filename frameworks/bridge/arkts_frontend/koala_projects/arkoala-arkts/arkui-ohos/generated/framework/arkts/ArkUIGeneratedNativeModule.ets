@@ -901,6 +901,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GridAttribute_setSupportAnimation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _GridAttribute_setSupportEmptyBranchInLazyLoading(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _GridAttribute_setOnItemDragStart(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _GridAttribute_setOnItemDragEnter(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -1156,6 +1158,8 @@ export class ArkUIGeneratedNativeModule {
     native static _ListAttribute_setChildrenMainSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ListAttribute_setMaintainVisibleContentPosition(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ListAttribute_setSupportEmptyBranchInLazyLoading(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ListAttribute_setStackFromEnd(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -1637,6 +1641,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RichEditorAttribute_setBindSelectionMenu(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _RichEditorAttribute_setSelectedDragPreviewStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _RichEditorAttribute_setCustomKeyboard(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RichEditorAttribute_setPlaceholder(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -1974,6 +1980,10 @@ export class ArkUIGeneratedNativeModule {
     native static _SelectAttribute_setShowDefaultSelectedIcon(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SelectAttribute_setBackgroundColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SelectAttribute_setKeyboardAvoidMode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SelectAttribute_setMinKeyboardAvoidDistance(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SelectAttribute_setMenuAlign(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -3208,7 +3218,13 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_setEnableSelectedDataDetector(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _WebAttribute_setOnTextSelectionChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _WebAttribute_setEnableImageAnalyzer(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _WebAttribute_setOnMicrophoneCaptureStateChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _WebAttribute_setOnCameraCaptureStateChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _WebAttribute_setRegisterNativeEmbedRule(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -4083,6 +4099,8 @@ export class ArkUIGeneratedNativeModule {
     native static _DragEvent_getVelocity(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _DragEvent_executeDropAnimation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DragEvent_getDisplayId(ptr: KPointer): int32
     @ani.unsafe.Quick
     native static _DragEvent_enableInternalDropAnimation(ptr: KPointer, configuration: KStringPtr): void
     @ani.unsafe.Direct
@@ -4319,8 +4337,14 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNodeExtender_isOnRenderTree(peer: KPointer): boolean
     @ani.unsafe.Direct
     native static _FrameNodeExtender_isOnMainTree(peer: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_applyAttributesFinish(peer: KPointer): void
     @ani.unsafe.Quick
     native static _FrameNodeExtender_convertPoint(peer: KPointer, node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_convertPositionToWindow(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_convertPositionFromWindow(peer: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _FrameNodeExtender_adoptChild(peer: KPointer, child: KPointer): int32
     @ani.unsafe.Direct
@@ -5649,6 +5673,7 @@ export class ArkUIGeneratedNativeModule {
     native static _Scroller_fling(ptr: KPointer, velocity: KDouble): void
     native static _Scroller_scrollPage(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _Scroller_currentOffset(ptr: KPointer): KInteropReturnBuffer
+    native static _Scroller_offset(ptr: KPointer): KInteropReturnBuffer
     native static _Scroller_scrollToIndex(ptr: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _Scroller_scrollBy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _Scroller_isAtEnd(ptr: KPointer): boolean
@@ -6022,6 +6047,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextMenuItemId_getAutoFill(): KPointer
     @ani.unsafe.Direct
+    native static _TextMenuItemId_getPasswordVault(): KPointer
+    @ani.unsafe.Direct
     native static _TextPickerDialog_construct(): KPointer
     @ani.unsafe.Direct
     native static _TextPickerDialog_getFinalizer(): KPointer
@@ -6279,6 +6306,8 @@ export class ArkUIGeneratedNativeModule {
     native static _WebContextMenuResult_undo(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _WebContextMenuResult_pasteAndMatchStyle(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _WebContextMenuResult_requestPasswordAutoFill(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _WebKeyboardController_construct(): KPointer
     @ani.unsafe.Direct

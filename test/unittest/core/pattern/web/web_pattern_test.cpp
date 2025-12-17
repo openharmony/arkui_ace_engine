@@ -409,25 +409,97 @@ HWTEST_F(WebPatternTest, OnWindowShowTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnWindowShowTest012
+ * @tc.name: OnWindowShowTest02
  * @tc.desc: Test OnWindowShow.
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternTest, OnWindowShowTest012, TestSize.Level1)
+HWTEST_F(WebPatternTest, OnWindowShowTest02, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     g_webPattern->OnModifyDone();
-    g_webPattern->isWindowShow_ = false;
-    g_webPattern->isVisible_ = true;
-    g_webPattern->componentVisibility_ = VisibleType::VISIBLE;
-    g_webPattern->offlineWebInited_ = true;
     auto host = g_webPattern->GetHost();
     EXPECT_NE(host, nullptr);
-    host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_OFF_MAINTREE);
-    int webId = g_webPattern->GetWebId();
-    OHOS::NWeb::NWebHelper::Instance().SetNWebActiveStatus(webId, true);
+
+    g_webPattern->isWindowShow_ = false;
+    g_webPattern->isVisible_ = false;
+    
+    g_webPattern->offlineWebInited_ = false;
+    host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_ON_MAINTREE);
     g_webPattern->OnWindowShow();
     EXPECT_FALSE(g_webPattern->isWindowShow_);
+
+    g_webPattern->offlineWebInited_ = false;
+    host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_OFF_MAINTREE);
+    g_webPattern->OnWindowShow();
+    EXPECT_FALSE(g_webPattern->isWindowShow_);
+
+    g_webPattern->offlineWebInited_ = true;
+    host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_ON_MAINTREE);
+    g_webPattern->OnWindowShow();
+    EXPECT_FALSE(g_webPattern->isWindowShow_);
+
+    g_webPattern->offlineWebInited_ = true;
+    host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_OFF_MAINTREE);
+    g_webPattern->OnWindowShow();
+    EXPECT_FALSE(g_webPattern->isWindowShow_);
+#endif
+}
+
+/**
+ * @tc.name: OnWindowShowTest03
+ * @tc.desc: Test OnWindowShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, OnWindowShowTest03, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    g_webPattern->OnModifyDone();
+    auto host = g_webPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    auto layoutProperty = host->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    g_webPattern->offlineWebInited_ = false;
+    host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_OFF_MAINTREE);
+
+    g_webPattern->isWindowShow_ = false;
+    g_webPattern->isVisible_ = true;
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    EXPECT_EQ(layoutProperty->GetVisibility(), VisibleType::INVISIBLE);
+    g_webPattern->OnWindowShow();
+    EXPECT_FALSE(g_webPattern->isWindowShow_);
+
+    g_webPattern->isWindowShow_ = false;
+    g_webPattern->isVisible_ = true;
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    EXPECT_EQ(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
+    g_webPattern->OnWindowShow();
+    EXPECT_TRUE(g_webPattern->isWindowShow_);
+#endif
+}
+
+/**
+ * @tc.name: OnWindowShowTest04
+ * @tc.desc: Test OnWindowShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, OnWindowShowTest04, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    g_webPattern->OnModifyDone();
+    auto host = g_webPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    auto layoutProperty = host->GetLayoutProperty();
+    g_webPattern->offlineWebInited_ = true;
+    host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_ON_MAINTREE);
+
+    g_webPattern->isWindowShow_ = true;
+    g_webPattern->isOfflineWebEvictFrameBuffersEnable_ = false;
+    g_webPattern->OnWindowShow();
+    EXPECT_TRUE(g_webPattern->isWindowShow_);
+
+    g_webPattern->isOfflineWebEvictFrameBuffersEnable_ = true;
+    g_webPattern->OnWindowShow();
+    EXPECT_TRUE(g_webPattern->isWindowShow_);
 #endif
 }
 
@@ -770,8 +842,7 @@ HWTEST_F(WebPatternTest, CleanupWebPatternResource, TestSize.Level1)
 {
     MockPipelineContext::SetUp();
     g_webPattern->offlineWebInited_ = true;
-    int32_t webId = 1;
-    g_webPattern->CleanupWebPatternResource(webId);
+    g_webPattern->CleanupWebPatternResource();
     EXPECT_TRUE(g_webPattern->offlineWebInited_);
     MockPipelineContext::TearDown();
 }

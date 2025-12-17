@@ -838,7 +838,7 @@ void NavDestinationGroupNode::ReleaseTextNodeList()
     textNodeList_.clear();
 }
 
-void NavDestinationGroupNode::CleanContent(bool cleanDirectly, bool allowTransition)
+void NavDestinationGroupNode::CleanContent(bool cleanDirectly, bool allowTransition, bool needSkipClean)
 {
     // cacheNode is cached for pip info, and is no need to clean when clean content node
     if (IsCacheNode()) {
@@ -850,7 +850,7 @@ void NavDestinationGroupNode::CleanContent(bool cleanDirectly, bool allowTransit
     if (shallowBuilder) {
         shallowBuilder->MarkIsExecuteDeepRenderDone(false);
     }
-    if (GetContentNode()) {
+    if (!needSkipClean && GetContentNode()) {
         GetContentNode()->Clean(cleanDirectly, allowTransition);
     }
 }

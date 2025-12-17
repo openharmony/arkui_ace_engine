@@ -455,6 +455,13 @@ HWTEST_F(WithThemeTestNg, WithThemeTest012, TestSize.Level1)
     TokenThemeStorage::GetInstance()->SetIsThemeColorSetByUser(1, 0, 0, true);
     TokenThemeStorage::GetInstance()->SetIsThemeColorSetByUser(1, 0, 1, true);
     EXPECT_TRUE(TokenThemeStorage::GetInstance()->themeColorSetByUser_[1][0][0]);
+
+    /**
+     * @tc.steps3: InitDarkThemeMapWithoutUserSet.
+     * @tc.expected: DarkThemeMap same as LightThemeMap.
+     */
+    TokenThemeStorage::GetInstance()->InitDarkThemeMapWithoutUserSet(1, 1);
+    EXPECT_TRUE(TokenThemeStorage::GetInstance()->themeColorSetByUser_[1][1][0]);
 }
 
 /**

@@ -84,6 +84,12 @@ public:
     void GetVisibleDragViewHandles(RectF& first, RectF& second);
     void IsAIMenuOptionChanged(SelectMenuInfo& menuInfo) override;
     void UpdateAISelectMenu();
+    bool IsTriggerParentToScroll() const
+    {
+        return isTriggerParentToScroll_;
+    }
+    void SetTextSelectionHolderId(int32_t id);
+    void RemoveTextSelectionHolderId(int32_t id);
 
 protected:
     OffsetF GetHandleReferenceOffset(const RectF& handleRect);
@@ -109,6 +115,7 @@ private:
     OffsetF handleGlobalOffset_;
     bool isDraggingFirstHandle_ = true;
     OffsetF hostPaintOffset_;
+    bool isTriggerParentToScroll_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TextSelectOverlay);
 };
 

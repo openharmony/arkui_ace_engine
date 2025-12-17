@@ -807,11 +807,9 @@ void TabsModelNG::SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEv
     CHECK_NULL_VOID(frameNode);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    swiperPattern->SetOnContentDidScroll(std::move(onContentDidScroll));
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnContentDidScroll(std::move(onContentDidScroll));
 }
 
 void TabsModelNG::SetDivider(FrameNode* frameNode, const TabsItemDivider& divider)

@@ -13,26 +13,44 @@
  * limitations under the License.
  */
 
-import { CanvasMode } from "../types/Declaration";
+import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
+import { CanvasMode, ImageGenerateState } from "../types/Declaration";
 import { DoodleBoardArea } from "./DoodleBoardArea";
 import { TextInputArea } from "./TextInputArea";
 import { HomeTitle } from "./TitleArea";
 import { LandscapeSelectFuncArea } from "./UserInteractiveArea";
+import { GeneratingArea } from './CanvasGenerate';
+import { image } from "@kit.ImageKit";
+import { calcAABB } from './ImageOperate';
+
+export class styleItem {
+  name: ResourceStr = 'NA'
+  resourceAddr?: image.PixelMap | ResourceStr
+}
 
 @ComponentV2
 export struct CanvasHome {
   @Local titleName: string = '灵感画布'
   @Local currentCanvasMode: CanvasMode = CanvasMode.GENERAL_MODE;
-
+  @Local currentGenerateState: ImageGenerateState = ImageGenerateState.CONFIGURATION;
+  @Param @Require imageInfoArr: Array<imageGeneration.ImageItem>;
+  @Param @Require styles?: Array<imageGeneration.ImageStyle>;
   @Builder
   homeTitleBuilder() {
-    HomeTitle({ titleName: this.titleName })
+    HomeTitle({
+      titleName: this.titleName,
+      currentGenerateState: this.currentGenerateState
+    })
   }
 
   build() {
     NavDestination() {
       if (this.currentCanvasMode === CanvasMode.GENERAL_MODE) {
-        LandscapeLayout()
+        LandscapeLayout({
+          currentGenerateState: this.currentGenerateState!!,
+          imageInfoArr: this.imageInfoArr,
+          styles: this.styles
+        })
       } else if (this.currentCanvasMode === CanvasMode.DOODLE_MODE) {
 
       }
@@ -44,19 +62,87 @@ export struct CanvasHome {
 
 @ComponentV2
 struct LandscapeLayout {
+  @Param @Require styles?: Array<imageGeneration.ImageStyle>;
+  @Param currentGenerateState: ImageGenerateState = ImageGenerateState.CONFIGURATION;
+  @Event $currentGenerateState: (state: ImageGenerateState) => void = (state: ImageGenerateState) => {
+  };
+  @Param @Require imageInfoArr: Array<imageGeneration.ImageItem>;
+  @Local imageMatrixArr: number[][] =
+    [[
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    ], [
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    ], [
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    ], [
+      1, 0, 0, 0,
+      0, 1, 0, 0,
+      0, 0, 1, 0,
+      0, 0, 0, 1
+    ]]
+
+  private initImageMatrix(): void {
+    let input: imageGeneration.ImageItem[] = [];
+    for (let i = 0; i < this.imageInfoArr.length; i++) {
+      if (this.imageInfoArr[i].rect) {
+        input.push(this.imageInfoArr[i]);
+      }
+    }
+
+    let res: number[][] = calcAABB(input, this.getUIContext().vp2px(386),
+      this.getUIContext().vp2px(386));
+    for (let i = 0; i < res.length; i++) {
+      this.imageMatrixArr[i] = res[i];
+    }
+  }
+
+  aboutToAppear(): void {
+    this.initImageMatrix();
+  }
+
   build() {
     Column() {
       // doodle area
       Row() {
-        DoodleBoardArea()
+        DoodleBoardArea({
+          imageInfoArr: this.imageInfoArr,
+          imageMatrixArr: this.imageMatrixArr
+        })
           .margin({ left: 69, right: 54 })
-        LandscapeSelectFuncArea()
-          .margin({ right: 16 })
+        if (this.currentGenerateState === ImageGenerateState.CONFIGURATION) {
+          LandscapeSelectFuncArea({ imageInfoArr: this.imageInfoArr, imageMatrixArr: this.imageMatrixArr, styles: this.styles })
+            .margin({ right: 16 })
+        }
+
       }
       .margin({ top: 21, bottom: 28 })
       // text input area
-      TextInputArea()
-        .margin({ bottom: 14 })
+      if (this.currentGenerateState === ImageGenerateState.CONFIGURATION) {
+        TextInputArea({
+          changeGenerateState: (state: ImageGenerateState) => {
+            this.$currentGenerateState(state);
+          }
+        })
+          .margin({ bottom: 14 })
+      }
+      if (this.currentGenerateState === ImageGenerateState.GENERATING ||
+        this.currentGenerateState === ImageGenerateState.BEFORE_GENERATED) {
+        GeneratingArea({
+          currentGenerateState: this.currentGenerateState,
+          changeGenerateState: (state: ImageGenerateState) => {
+            this.$currentGenerateState(state);
+          }
+        })
+      }
     }
     .height('100%')
     .width('100%')

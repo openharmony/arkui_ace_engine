@@ -14,10 +14,12 @@
  */
 
 import { promptAction } from "@kit.ArkUI"
+import { ImageGenerateState } from "../types/Declaration";
 
 @ComponentV2
 export struct HomeTitle {
   @Param titleName: string = '__NA__'
+  @Param currentGenerateState: ImageGenerateState = ImageGenerateState.CONFIGURATION;
 
   build() {
     Column() {
@@ -35,8 +37,10 @@ export struct HomeTitle {
         .justifyContent(FlexAlign.Start)
 
         Row() {
-          TitleMenu({ name: 'menu one' })
-            .margin({ right: 8 })
+          if (this.currentGenerateState === ImageGenerateState.CONFIGURATION) {
+            TitleMenu({ name: 'menu one' })
+              .margin({ right: 8 })
+          }
           TitleMenu({ name: 'x_icon' })
         }
         .alignItems(VerticalAlign.Center)

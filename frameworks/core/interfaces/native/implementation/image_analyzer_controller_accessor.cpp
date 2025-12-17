@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 #include "image_analyzer_controller_peer_impl.h"
@@ -21,8 +20,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
-
-void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src)
+void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src, ConvContext* ctx)
 {
     switch (src) {
         case ImageAnalyzerType::SUBJECT: dst = ARK_IMAGE_ANALYZER_TYPE_SUBJECT; break;
@@ -33,7 +31,6 @@ void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src)
             break;
     }
 }
-
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {

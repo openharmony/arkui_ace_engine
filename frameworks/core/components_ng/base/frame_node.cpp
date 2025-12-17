@@ -1102,7 +1102,6 @@ void FrameNode::DumpOverlayInfo()
 void FrameNode::DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json)
 {
     json->Put("$rect", GetTransformRectRelativeToWindow().ToBounds().c_str());
-    json->Put("$debugLine", "");
     if (!propInspectorId_->empty()) {
         json->Put("compid", propInspectorId_.value_or("").c_str());
     }
@@ -1121,6 +1120,7 @@ void FrameNode::DumpSimplifyCommonInfoOnlyForParamConfig(std::shared_ptr<JsonVal
         }
         if (config.interactionInfo) {
             json->Put(TreeKey::SCROLLABLE, accessibilityProperty_->IsScrollable());
+            json->Put(TreeKey::IS_EDITABLE, accessibilityProperty_->IsEditable());
         }
     }
 }
@@ -1246,6 +1246,11 @@ void FrameNode::DumpSimplifyInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& j
 
 void FrameNode::DumpInfo()
 {
+    auto parent = GetLastParent().Upgrade();
+    if (parent) {
+        DumpLog::GetInstance().AddDesc(std::string("LastParentTag: ").append(parent->GetTag()));
+        DumpLog::GetInstance().AddDesc(std::string("LastParentId: ").append(std::to_string(parent->GetId())));
+    }
     DumpCommonInfo();
     DumpOnSizeChangeInfo();
     DumpKeyboardShortcutInfo();
@@ -1764,6 +1769,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
         focusHub->RemoveSelf();
     }
     pattern_->OnDetachFromMainTree();
+    pattern_->ContentChangeByDetaching(context);
     if (eventHub_) {
         eventHub_->OnDetachClear();
     }
@@ -2469,7 +2475,8 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskT
                              "[layoutPriority:%d][pageId:%d][depth:%d]",
                 tag_.c_str(), nodeId_, GetAncestorNodeOfFrame(false) ? GetAncestorNodeOfFrame(false)->GetId() : 0,
                 layoutConstraint.ToString().c_str(), layoutPriority_, hostPageId_, depth_);
-            SetIgnoreLayoutProcess(layoutTaskType == LayoutType::MEASURE_FOR_IGNORE);
+            SetIgnoreLayoutProcess(
+                layoutTaskType == LayoutType::MEASURE_FOR_IGNORE || layoutTaskType == LayoutType::TRAVERSE_FOR_IGNORE);
             Measure(layoutConstraint);
             ResetIgnoreLayoutProcess();
         } else {
@@ -2481,7 +2488,8 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskT
                              "[pageId:%d][depth:%d]",
                 tag_.c_str(), nodeId_, GetAncestorNodeOfFrame(false) ? GetAncestorNodeOfFrame(false)->GetId() : 0,
                 layoutPriority_, hostPageId_, depth_);
-            SetIgnoreLayoutProcess(layoutTaskType == LayoutType::LAYOUT_FOR_IGNORE);
+            SetIgnoreLayoutProcess(
+                layoutTaskType == LayoutType::LAYOUT_FOR_IGNORE || layoutTaskType == LayoutType::TRAVERSE_FOR_IGNORE);
             Layout();
             ResetIgnoreLayoutProcess();
         }
@@ -3412,6 +3420,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 
     AddJudgeToTargetComponent(targetComponent);
     AddNodeToRegisterTouchTest();
+    RecordHitTestNodeInfo();
 
     // first update HitTestResult by children status.
     if (consumed) {
@@ -4437,9 +4446,9 @@ OffsetF FrameNode::ConvertPositionToWindow(OffsetF position, bool fromWindow)
         auto parentOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
         auto parentMatrix = Matrix4::Invert(renderContext->GetRevertMatrix());
         if (fromWindow) {
-            point = point + Offset(parentOffset.GetX(), parentOffset.GetY());
-        } else {
             point = point - Offset(parentOffset.GetX(), parentOffset.GetY());
+        } else {
+            point = point + Offset(parentOffset.GetX(), parentOffset.GetY());
         }
         point = parentMatrix * point;
         if (parent->tag_ == V2::ROOT_ETS_TAG) {
@@ -5172,14 +5181,14 @@ void FrameNode::PostTaskForIgnore()
     PostBundle(std::move(delayMeasureChildren_));
 }
 
-void FrameNode::PostBundle(std::vector<RefPtr<FrameNode>>&& nodes)
+void FrameNode::PostBundle(std::vector<RefPtr<FrameNode>>&& nodes, bool postByTraverse)
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     IgnoreLayoutSafeAreaBundle bundle;
     bundle.second = Claim(this);
     bundle.first = std::move(nodes);
-    pipeline->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
+    pipeline->AddIgnoreLayoutSafeAreaBundle(std::move(bundle), postByTraverse);
 }
 
 bool FrameNode::PostponedTaskForIgnore()
@@ -5236,7 +5245,8 @@ void FrameNode::TraverseForIgnore()
         UpdateIgnoreCount(recheckCount - subtreeIgnoreCount_);
     }
     if (!effectedNodes.empty()) {
-        PostBundle(std::move(effectedNodes));
+        //Post self, keep measure and layout paired
+        PostBundle({}, true);
     }
 }
 
@@ -5245,13 +5255,12 @@ void FrameNode::TraverseSubtreeToPostBundle(std::vector<RefPtr<FrameNode>>& subt
     std::list<RefPtr<FrameNode>> children;
     GenerateOneDepthVisibleFrame(children);
     for (const auto& child : children) {
-        if (!child || !child->SubtreeWithIgnoreChild()) {
+        if (!child || !child->SubtreeWithIgnoreChild() || child->CheckNeedForceMeasureAndLayout()) {
             continue;
         }
         auto property = child->GetLayoutProperty();
         if (property && property->IsIgnoreOptsValid()) {
             subtreeCollection.emplace_back(child);
-            child->SetDelaySelfLayoutForIgnore();
         } else {
             std::vector<RefPtr<FrameNode>> effectedNodes;
             int recheckCount = 0;
@@ -5260,7 +5269,8 @@ void FrameNode::TraverseSubtreeToPostBundle(std::vector<RefPtr<FrameNode>>& subt
                 child->UpdateIgnoreCount(recheckCount - child->subtreeIgnoreCount_);
             }
             if (!effectedNodes.empty()) {
-                child->PostBundle(std::move(effectedNodes));
+                //Post self, keep measure and layout paired
+                child->PostBundle({}, true);
             }
         }
         subtreeRecheck += child->subtreeIgnoreCount_;
@@ -7833,6 +7843,7 @@ void FrameNode::MountToParent(const RefPtr<UINode>& parent,
     int32_t slot, bool silently, bool addDefaultTransition, bool addModalUiextension)
 {
     CHECK_NULL_VOID(parent);
+    SetLastParent(parent);
     parent->AddChild(AceType::Claim(this), slot, silently, addDefaultTransition, addModalUiextension);
     if (SubtreeWithIgnoreChild()) {
         auto parentFrame = GetAncestorNodeOfFrame(false);
@@ -7860,10 +7871,42 @@ void FrameNode::OnContentChangeRegister(const ContentChangeConfig& config)
     }
 }
 
+void FrameNode::RecordHitTestNodeInfo()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto eventMgr = context->GetEventManager();
+    CHECK_NULL_VOID(eventMgr);
+    eventMgr->AddHitTestInfoRecord(AceType::Claim(this));
+}
+
 void FrameNode::OnContentChangeUnregister()
 {
     if (pattern_) {
         pattern_->OnContentChangeUnregister();
     }
+}
+
+std::vector<std::pair<float, float>> FrameNode::GetSpecifiedContentOffsets(const std::string& content)
+{
+    std::vector<std::pair<float, float>> offsets;
+    auto pattern = GetPattern();
+    CHECK_NULL_RETURN(pattern, offsets);
+    return pattern->GetSpecifiedContentOffsets(content);
+}
+
+void FrameNode::HighlightSpecifiedContent(
+    const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs)
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->HighlightSpecifiedContent(content, nodeIds, configs);
+}
+
+void FrameNode::ReportSelectedText()
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->ReportSelectedText();
 }
 } // namespace OHOS::Ace::NG

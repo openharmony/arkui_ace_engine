@@ -251,12 +251,9 @@ HWTEST_F(TabsModelTestNg, SetOnContentDidScroll001, TestSize.Level1)
     model.SetOnContentDidScroll(frameNode, std::move(callback));
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     ASSERT_NE(tabsNode, nullptr);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    ASSERT_NE(swiperNode, nullptr);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    ASSERT_NE(swiperPattern, nullptr);
-    auto callbackPtr = swiperPattern->GetOnContentDidScroll();
-    EXPECT_NE(*callbackPtr, nullptr);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(tabsPattern, nullptr);
+    EXPECT_NE(*tabsPattern->onContentDidScroll_, nullptr);
     CreateDone();
 }
 
@@ -280,12 +277,9 @@ HWTEST_F(TabsModelTestNg, SetOnContentDidScroll002, TestSize.Level1)
     model.SetOnContentDidScroll(frameNode, nullptr);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     ASSERT_NE(tabsNode, nullptr);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    ASSERT_NE(swiperNode, nullptr);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    ASSERT_NE(swiperPattern, nullptr);
-    auto callbackPtr = swiperPattern->GetOnContentDidScroll();
-    EXPECT_EQ(*callbackPtr, nullptr);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(tabsPattern, nullptr);
+    EXPECT_EQ(*tabsPattern->onContentDidScroll_, nullptr);
     CreateDone();
 }
 

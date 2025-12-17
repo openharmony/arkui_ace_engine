@@ -15,12 +15,14 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "generated/type_helpers.h"
 #include "arkoala_api_generated.h"
+
 #include "core/components_ng/pattern/side_bar/side_bar_container_event_hub.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 using namespace testing;
 using namespace testing::ext;

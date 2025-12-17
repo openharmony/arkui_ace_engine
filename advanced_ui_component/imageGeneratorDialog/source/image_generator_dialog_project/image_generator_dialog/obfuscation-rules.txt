@@ -1,0 +1,2 @@
+-keep
+./src/main/ets/**

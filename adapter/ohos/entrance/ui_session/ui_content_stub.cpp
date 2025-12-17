@@ -23,6 +23,7 @@
 
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
 #include "adapter/ohos/entrance/ui_session/content_change_config_impl.h"
+#include "adapter/ohos/entrance/ui_session/get_inspector_tree_config_impl.h"
 
 namespace OHOS::Ace {
 bool UiContentStub::IsSACalling() const
@@ -84,6 +85,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             RegisterLifeCycleEventCallbackInner(data, reply, option);
             break;
         }
+        case REGISTER_SELECT_TEXT_EVENT: {
+            RegisterSelectTextEventCallbackInner(data, reply, option);
+            break;
+        }
         case SENDCOMMAND_ASYNC_EVENT: {
             SendCommandInnerAsync(data, reply, option);
             break;
@@ -122,6 +127,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
         }
         case UNREGISTER_LIFE_CYCLE_EVENT: {
             UnregisterLifeCycleEventCallbackInner(data, reply, option);
+            break;
+        }
+        case UNREGISTER_SELECT_TEXT_EVENT: {
+            UnregisterSelectTextEventCallbackInner(data, reply, option);
             break;
         }
         case RESET_ALL_TEXT: {
@@ -176,12 +185,28 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             ExeAppAIFunctionInner(data, reply, option);
             break;
         }
+        case GET_SPECIFIED_CONTENT_OFFSETS: {
+            GetSpecifiedContentOffsetsInner(data, reply, option);
+            break;
+        }
+        case HIGHLIGHT_SPECIFIED_CONTENT: {
+            HighlightSpecifiedContentInner(data, reply, option);
+            break;
+        }
         case REGISTER_CONTENT_CHANGE: {
             RegisterContentChangeCallbackInner(data, reply, option);
             break;
         }
         case UNREGISTER_CONTENT_CHANGE: {
             UnregisterContentChangeCallbackInner(data, reply, option);
+            break;
+        }
+        case GET_HIT_TEST_NODE_INFO_FOR_TOUCH: {
+            GetHitTestNodeInfoForTouchInner(data, reply, option);
+            break;
+        }
+        case REQUEST_STATE_MGMT_INFO: {
+            GetStateMgmtInfoInner(data, reply, option);
             break;
         }
         default: {
@@ -194,8 +219,13 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
 
 int32_t UiContentStub::GetInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    ParamConfig settedParamConfig = { data.ReadBool(), data.ReadBool(), data.ReadBool() };
-    GetInspectorTree(nullptr, settedParamConfig);
+    GetInspectorTreeConfigImpl* configImplPtr = data.ReadParcelable<GetInspectorTreeConfigImpl>();
+    if (!configImplPtr) {
+        LOGW("GetInspectorTreeInner read GetInspectorTreeConfigImpl failed");
+        return FAILED;
+    }
+    GetInspectorTree(nullptr, configImplPtr->GetConfig());
+    delete configImplPtr;
     return NO_ERROR;
 }
 
@@ -265,6 +295,13 @@ int32_t UiContentStub::RegisterLifeCycleEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     reply.WriteInt32(RegisterLifeCycleEventCallback(nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::RegisterSelectTextEventCallbackInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(RegisterSelectTextEventCallback(nullptr));
     return NO_ERROR;
 }
 
@@ -347,6 +384,13 @@ int32_t UiContentStub::UnregisterLifeCycleEventCallbackInner(
     return NO_ERROR;
 }
 
+int32_t UiContentStub::UnregisterSelectTextEventCallbackInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(UnregisterSelectTextEventCallback());
+    return NO_ERROR;
+}
+
 int32_t UiContentStub::ResetTranslateTextAllInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     reply.WriteInt32(ResetTranslateTextAll());
@@ -424,8 +468,21 @@ int32_t UiContentStub::GetCurrentImagesShowingInner(MessageParcel& data, Message
 
 int32_t UiContentStub::GetVisibleInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    ParamConfig settedParamConfig = { data.ReadBool(), data.ReadBool(), data.ReadBool() };
-    GetVisibleInspectorTree(nullptr, settedParamConfig);
+    GetInspectorTreeConfigImpl* configImplPtr = data.ReadParcelable<GetInspectorTreeConfigImpl>();
+    if (!configImplPtr) {
+        LOGW("GetVisibleInspectorTreeInner read GetInspectorTreeConfigImpl failed");
+        return FAILED;
+    }
+    GetVisibleInspectorTree(nullptr, configImplPtr->GetConfig());
+    delete configImplPtr;
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetHitTestNodeInfoForTouchInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    InteractionParamConfig settedParamConfig = { data.ReadBool() };
+    GetLatestHitTestNodeInfosForTouch(nullptr, settedParamConfig);
     return NO_ERROR;
 }
 
@@ -462,6 +519,39 @@ int32_t UiContentStub::UnregisterContentChangeCallbackInner(
 {
     UiSessionManager::GetInstance()->EraseProcessId("contentChange");
     reply.WriteInt32(UnregisterContentChangeCallback());
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetSpecifiedContentOffsetsInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t id = data.ReadInt32();
+    std::string content = data.ReadString();
+    reply.WriteInt32(GetSpecifiedContentOffsets(id, content, nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::HighlightSpecifiedContentInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t id = data.ReadInt32();
+    std::string content = data.ReadString();
+    int32_t size = data.ReadInt32();
+    std::string configs = data.ReadString();
+    std::vector<std::string> nodeIds;
+    for (int32_t i = 0; i < size; i++) {
+        nodeIds.push_back(data.ReadString());
+    }
+    reply.WriteInt32(HighlightSpecifiedContent(id, content, nodeIds, configs));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetStateMgmtInfoInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t processId = data.ReadInt32();
+    UiSessionManager::GetInstance()->SaveProcessId("GetStateMgmtInfo", processId);
+    std::string componentName = data.ReadString();
+    std::string propertyName = data.ReadString();
+    std::string jsonPath = data.ReadString();
+    reply.WriteInt32(GetStateMgmtInfo(componentName, propertyName, jsonPath, nullptr));
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

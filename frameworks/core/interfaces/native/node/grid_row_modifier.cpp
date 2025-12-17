@@ -116,6 +116,7 @@ void SetBreakpoints(ArkUINodeHandle node, int32_t reference, const ArkUI_Float32
     parsedBreakpoints->reference = static_cast<V2::BreakPointsReference>(reference);
     parsedBreakpoints->breakpoints.clear();
     if (size > 0) {
+        parsedBreakpoints->userDefine = true;
         double width = -1.0;
         for (int32_t i = 0; i < size; i++) {
             CalcDimension valueDimension = Dimension(pointValues[i], DimensionUnit::VP);

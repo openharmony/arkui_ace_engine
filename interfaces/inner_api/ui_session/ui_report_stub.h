@@ -65,6 +65,16 @@ public:
     void ReportLifeCycleEvent(const std::string& data) override;
 
     /**
+     * @description: receive proxy side communication to report select text value
+     */
+    void ReportSelectTextEvent(const std::string& data) override;
+
+    /**
+     * @description: receive proxy side communication to report select text offsets
+     */
+    void SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets) override;
+
+    /**
      * @description: register a callback when click event occurs execute
      * @param eventCallback callback to be performed
      */
@@ -126,6 +136,19 @@ public:
     void RegisterLifeCycleEventCallback(const EventCallback& eventCallback);
 
     /**
+     * @description: register a callback when get select text event
+     * @param eventCallback callback to be performed
+     */
+    void RegisterSelectTextEventCallback(const EventCallback& eventCallback);
+
+    /**
+     * @description: register a callback when get select text offsets
+     * @param eventCallback callback to be performed
+     */
+    void RegisterGetSpecifiedContentOffsets(
+        const std::function<void(std::vector<std::pair<float, float>>)>& eventCallback);
+
+    /**
      * @description: unregister the click callback last register
      */
     void UnregisterClickEventCallback();
@@ -166,9 +189,25 @@ public:
     void UnregisterLifeCycleEventCallback();
 
     /**
+     * @description: unregister the select text event callback last register
+     */
+    void UnregisterSelectTextEventCallback();
+
+    /**
      * @description: report whole inspectorTree for SA
      */
     void ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart) override;
+
+    /**
+     * @description: notify stub side to report the information of hit test node
+     */
+    void ReportHitTestNodeInfos(const std::string& data, int32_t partNum, bool isLastPart) override;
+
+    /**
+     * @description: register a callback when get the info of hit test node
+     * @param eventCallback callback to be performed
+     */
+    void RegisterGetHitTestNodeInfoCallback(const std::function<void(std::string, int32_t, bool)>& eventCallback);
 
     /**
      * @description: report web unfocus value for SA
@@ -194,6 +233,8 @@ public:
     void RegisterContentChangeCallback(
         const std::function<void(ChangeType type, const std::string& simpleTree)> callback);
     void UnregisterContentChangeCallback();
+    void RegisterGetStateMgmtInfoCallback(const std::function<void(std::vector<std::string>)>& callback);
+    void ReportGetStateMgmtInfo(std::vector<std::string> results) override;
 
 private:
     EventCallback clickEventCallback_;
@@ -206,12 +247,16 @@ private:
     EventCallback getCurrentPageNameCallback_;
     EventCallback scrollEventCallback_;
     EventCallback lifeCycleEventCallback_;
+    EventCallback selectTextEventCallback_;
+    std::function<void(std::vector<std::pair<float, float>>)> getSpecifiedContentOffsets_;
     std::function<void(int32_t, std::string)> getTranslateTextCallback_;
     std::function<void(std::string, int32_t, bool)> inspectorTreeCallback_;
+    std::function<void(std::string, int32_t, bool)> getHitTestNodeInfoCallback_;
     std::function<void(int64_t accessibilityId, const std::string& data)> unfocusEvent_;
     std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)> getShowingImageCallback_;
     std::function<void(uint32_t)> exeAppAIFunctionCallback_;
     std::function<void(ChangeType type, const std::string& simpleTree)> contentChangeCallback_;
+    std::function<void(std::vector<std::string>)> getStateMgmtInfoCallback_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_REPORT_STUB_H

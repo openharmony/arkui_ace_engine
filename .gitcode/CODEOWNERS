@@ -251,6 +251,9 @@ advanced_ui_component/toolbar/ @arkuiadvancedcomponent
 advanced_ui_component/toolbarv2/ @arkuiadvancedcomponent
 advanced_ui_component/treeview/ @arkuiadvancedcomponent
 advanced_ui_component_static/multinavigation/ @arkui_navigation
+advanced_ui_component_static/arcbutton/ @arkuipopupwindow_all
+advanced_ui_component_static/arcslider/ @arkuipopupwindow_all
+advanced_ui_component_static/popup/ @arkuipopupwindow_all
 
 [Extend UI Components]
 component_ext/arc_swiper/
@@ -3452,6 +3455,8 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typ
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkWaterFlowNode.ets @arkuiscroll
 frameworks/core/interfaces/native/implementation/children_main_size_accessor.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/children_main_size_peer.h @arkuiscroll
+frameworks/core/interfaces/native/implementation/common_method_modifier_impl.h  @ArkUI_Event
+frameworks/core/interfaces/native/implementation/common_method_modifier.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/flow_item_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/grid_item_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/grid_item_ops_accessor.cpp @arkuiscroll
@@ -3564,6 +3569,7 @@ test/unittest/core/layout/ @arkuilayout1
 test/unittest/core/layout/safe_area/ @arkuilayout1
 test/unittest/core/manager/  @ArkUI_Event
 test/unittest/core/manager/avoid_info_manager_test_ng.cpp  @arkui_navigation
+test/unittest/core/manager/content_change_manager_test_ng.cpp  @arkui_framework_xnode
 test/unittest/core/manager/force_split_manager_test_ng.cpp  @arkui_navigation
 test/unittest/core/manager/safe_area_manager_test_ng.cpp  @arkuilayout1
 test/unittest/core/manager/navigation_manager_test_ng.cpp  @arkui_navigation

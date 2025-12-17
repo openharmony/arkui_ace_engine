@@ -13,10 +13,19 @@
  * limitations under the License.
  */
 
-@Builder export function UserInteractiveTabBarBuilder(name: string) {
+import { AIGenerateOptions } from "../utils/AIGenerateOptions";
+import { styleItem } from "./CanvasFramework"
+
+@Builder export function UserInteractiveTabBarBuilder(index: number, name: string, icon: Resource) {
   UserInteractiveAreaTabBar({
-    name: name
+    index: index,
+    name: name,
+    icon: icon
   })
+}
+
+@Builder export function StyleSelectBuilder(styleItems: Array<styleItem>) {
+  StyleSelect({stylesArray: styleItems})
 }
 
 @ComponentV2
@@ -38,26 +47,153 @@ export struct FunctionAreaPlaceholder {
 
 // style select
 @ComponentV2
+export struct StyleSelect {
+  @Local curSelectedStyle: string | undefined = AIGenerateOptions.getInstance().style;
+  @Param @Require stylesArray: Array<styleItem> = [
+    {
+      name: '插画',
+      resourceAddr: undefined
+    },
+    {
+      name: '写实',
+      resourceAddr: undefined
+    },
+    {
+      name: '油画',
+      resourceAddr: undefined
+    },
+    {
+      name: '水彩',
+      resourceAddr: undefined
+    },
+    {
+      name: '线描',
+      resourceAddr: undefined
+    },
+    {
+      name: '动漫',
+      resourceAddr: undefined
+    },
+
+  ]
+
+  updateSelectIndex(newSelectedStyle: string) {
+    if (this.curSelectedStyle === newSelectedStyle) {
+      this.curSelectedStyle = undefined;
+    } else {
+      this.curSelectedStyle = newSelectedStyle;
+    }
+    AIGenerateOptions.getInstance().style = this.curSelectedStyle;
+  }
+
+  build() {
+    Column() {
+      Scroll() {
+        Column({space: 12 }) {
+          Repeat(this.stylesArray)
+            .each((item) => {
+              Column() {
+                Stack() {
+                  Image(item.item.resourceAddr)
+                    .height(56)
+                    .width(56)
+                    .borderRadius(12)
+                    .borderColor("#000000")
+                    .linearGradient({
+                      angle: 0,
+                      colors: [["#000000", 0], ["#000000", 1]]
+                    })
+                  Column() {
+                    Checkbox()
+                      .select(this.curSelectedStyle === item.item.name)
+                      .opacity(this.curSelectedStyle === item.item.name ? 1.0 : 0.0)
+                      .shape(CheckBoxShape.ROUNDED_SQUARE)
+                      .onClick(() => {
+                        let nameStr: string = ''
+                        if (typeof(item.item.name) === 'string') {
+                          nameStr = item.item.name
+                        } else {
+                          let hostContext = this.getUIContext().getHostContext()
+                          if (hostContext) {
+                            nameStr = hostContext.resourceManager.getStringSync(item.item.name.id)
+                          }
+                        }
+                        this.updateSelectIndex(nameStr)
+                      })
+                      .height(16)
+                      .width(16)
+                      .unselectedColor(Color.Transparent)
+                  }
+                  Column() {
+                    Column() {
+                      Text(item.item.name)
+                        .fontFamily("HarmonyHeiTi")
+                        .fontColor("#FFFFFF")
+                        .fontSize(12)
+                        .fontWeight(500)
+                        .lineHeight(14)
+                        .textAlign(TextAlign.Center)
+                    }
+                    .width(48)
+                    .height(16)
+                  }
+                  .padding({top: 36, bottom: 4})
+                  .width('100%')
+                  .height('100%')
+                }
+                .alignContent(Alignment.TopEnd)
+              }
+              .height(56)
+              .width(56)
+              .onClick(() => {
+                let nameStr: string = ''
+                if (typeof(item.item.name) === 'string') {
+                  nameStr = item.item.name
+                } else {
+                  let hostContext = this.getUIContext().getHostContext()
+                  if (hostContext) {
+                    nameStr = hostContext.resourceManager.getStringSync(item.item.name.id)
+                  }
+                }
+                this.updateSelectIndex(nameStr)
+              })
+            })
+        }
+      }
+      .scrollBar(BarState.Off)
+      .scrollable(ScrollDirection.Vertical)
+      .height(396)
+      .width(56)
+    }
+  }
+}
+// style select END
+
+@ComponentV2
 struct UserInteractiveAreaTabBar {
+  @Param index: number = 0
+  @Consumer('functionAreaSelectedIndex') selectedIndex: number = 0
   @Param name: string = '__NA__'
+  @Param @Require icon?: Resource
 
   build() {
     Column() {
       Column() {
-        Image('')
+        Image(this.icon)
           .width(24)
           .height(24)
+          .opacity(this.index === this.selectedIndex ? 0.9 : 0.6)
       }
       .padding(12)
       .width(48)
       .height(48)
       .margin({bottom: 4})
       .borderRadius(24)
-      .backgroundColor('rgba(0,0,0,0.05)')
+      .backgroundColor(this.index === this.selectedIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.05)')
       Column() {
         Text(this.name)
-          .fontFamily("HarmonyHeiTi")
-          .fontColor("#000000")
+          .fontFamily('HarmonyHeiTi')
+          .fontColor(this.index === this.selectedIndex ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.6)')
           .fontSize(10)
           .fontWeight(500)
       }

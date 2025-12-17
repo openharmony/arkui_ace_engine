@@ -104,6 +104,7 @@ constexpr float KEY_BOARD_TOP_POSITION = 800.0f;
 constexpr float WRAPPER_RECT_HEIGHT_SMALL = 600.0f;
 constexpr float WRAPPER_RECT_HEIGHT_LARGE = 1200.0f;
 constexpr float WRAPPER_RECT_CENTER = 900.0f;
+constexpr Dimension MIN_KEYBOARD_AVOID_DISTANCE = 8.0_vp;
 const std::string EMPTY_TEXT = "";
 const std::string TEXT_TAG = "text";
 const std::string MENU_TAG = "menu";
@@ -1168,18 +1169,15 @@ HWTEST_F(MenuLayout3TwoTestNg, MenuKeyboardAvoidMode003, TestSize.Level1)
     layoutAlgorithm->param_.topSecurity = WRAPPER_RECT_HEIGHT_SMALL;
     minKeyboardAvoidDistance = Dimension(WRAPPER_RECT_HEIGHT_SMALL);
     layoutAlgorithm->MenuAvoidKeyboard(menuNode, minKeyboardAvoidDistance, KEY_BOARD_TOP_POSITION);
-    auto context = menuNode->GetContext();
-    ASSERT_NE(context, nullptr);
-    auto menuTheme = context->GetTheme<MenuTheme>();
-    ASSERT_NE(menuTheme, nullptr);
     auto expectRect =
-        Rect(0.0f, 0.0f, 0.0f, KEY_BOARD_TOP_POSITION - menuTheme->GetMinKeyboardAvoidDistance().ConvertToPx());
+        Rect(0.0f, 0.0f, 0.0f, KEY_BOARD_TOP_POSITION - MIN_KEYBOARD_AVOID_DISTANCE.ConvertToPx());
     EXPECT_EQ(layoutAlgorithm->wrapperRect_, expectRect);
     /**
      * @tc.steps: step5. The test preview menu need to be avoided normally
      * @tc.expected: The menu successfully avoids the soft keyboard
      */
     layoutAlgorithm->param_.topSecurity = 0.0f;
+    layoutAlgorithm->wrapperRect_ = wrapperRect;
     layoutAlgorithm->MenuAvoidKeyboard(menuNode, minKeyboardAvoidDistance, KEY_BOARD_TOP_POSITION);
     expectRect = Rect(0.0f, 0.0f, 0.0f, KEY_BOARD_TOP_POSITION - WRAPPER_RECT_HEIGHT_SMALL);
     EXPECT_EQ(layoutAlgorithm->wrapperRect_, expectRect);

@@ -367,6 +367,14 @@ void SetSupportAnimationImpl(Ark_NativePointer node,
     }
     GridModelStatic::SetSupportAnimation(frameNode, *convValue);
 }
+void SetSupportEmptyBranchInLazyLoadingImpl(Ark_NativePointer node,
+                                            const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto enabled = Converter::OptConvertPtr<bool>(value).value_or(false);
+    GridModelNG::SetSupportLazyLoadingEmptyBranch(frameNode, enabled);
+}
 void SetOnItemDragStartImpl(Ark_NativePointer node,
                             const Opt_OnItemDragStartCallback* value)
 {
@@ -638,6 +646,7 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
         GridAttributeModifier::SetCellLengthImpl,
         GridAttributeModifier::SetLayoutDirectionImpl,
         GridAttributeModifier::SetSupportAnimationImpl,
+        GridAttributeModifier::SetSupportEmptyBranchInLazyLoadingImpl,
         GridAttributeModifier::SetOnItemDragStartImpl,
         GridAttributeModifier::SetOnItemDragEnterImpl,
         GridAttributeModifier::SetOnItemDragMoveImpl,

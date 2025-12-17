@@ -822,10 +822,13 @@ std::string AccessibilityProperty::GetAccessibilitySamePage()
 
 void AccessibilityProperty::SetAccessibilityStateDescription(const std::string& stateDescription)
 {
-    if (stateDescription == accessibilityStateDescription_.value_or("")) {
+    const size_t STATE_DESCRIPTION_MAX_LENGTH = 1000;
+    auto strValue = stateDescription.length() > STATE_DESCRIPTION_MAX_LENGTH ?
+                    stateDescription.substr(0, STATE_DESCRIPTION_MAX_LENGTH) : stateDescription;
+    if (strValue == accessibilityStateDescription_.value_or("")) {
         return;
     }
-    accessibilityStateDescription_ = stateDescription;
+    accessibilityStateDescription_ = strValue;
 }
 
 std::string AccessibilityProperty::GetAccessibilityStateDescription() const

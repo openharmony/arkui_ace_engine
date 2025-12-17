@@ -14,7 +14,6 @@
  */
 
 #include <optional>
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -130,7 +129,7 @@ Ark_Int32 AppendChildImpl(Ark_FrameNode peer,
     CHECK_NULL_RETURN(peerNode, ERROR_CODE_PARAM_INVALID);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peerNode);
     CHECK_NULL_RETURN(currentUINodeRef, ERROR_CODE_PARAM_INVALID);
-    
+
     auto childPeerNode = FrameNodePeer::GetFrameNodeByPeer(child);
     CHECK_NULL_RETURN(childPeerNode, ERROR_CODE_PARAM_INVALID);
     auto childNode = AceType::DynamicCast<UINode>(childPeerNode);
@@ -1074,6 +1073,42 @@ Array_Float64 ConvertPointImpl(Ark_FrameNode peer, Ark_FrameNode node, const Ark
     Array_Float64 resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
     return resultValue;
 }
+
+Array_Float64 ConvertPositionToWindowImpl(Ark_FrameNode peer,
+                                          const Ark_Vector2* positionByLocal)
+{
+    std::vector<float> indexes;
+    ParseArrayFailNumber(indexes);
+    auto errValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    CHECK_NULL_RETURN(positionByLocal, errValue);
+    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(currentNode, errValue);
+    auto xFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByLocal->x));
+    auto yFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByLocal->y));
+    auto offset = currentNode->ConvertPositionToWindow({ xFloat, yFloat }, false);
+    ParseArrayResultNumber(indexes,
+        { PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) });
+    auto resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    return resultValue;
+}
+
+Array_Float64 ConvertPositionFromWindowImpl(Ark_FrameNode peer, const Ark_Vector2* positionByWindow)
+{
+    std::vector<float> indexes;
+    ParseArrayFailNumber(indexes);
+    auto errValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    CHECK_NULL_RETURN(positionByWindow, errValue);
+    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(currentNode, errValue);
+    auto xFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByWindow->x));
+    auto yFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByWindow->y));
+    auto offset = currentNode->ConvertPositionToWindow({ xFloat, yFloat }, true);
+    ParseArrayResultNumber(indexes,
+        { PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) });
+    auto resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    return resultValue;
+}
+
 Ark_Int32 AdoptChildImpl(Ark_FrameNode peer, Ark_FrameNode child)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -1135,6 +1170,14 @@ Ark_Boolean IsOnRenderTreeImpl(Ark_FrameNode peer)
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     return renderContext->IsOnRenderTree();
+}
+void ApplyAttributesFinishImpl(Ark_FrameNode peer)
+{
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(peerNode);
+    auto frameNode = AceType::DynamicCast<FrameNode>(peerNode);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkModifyDone();
 }
 Ark_Boolean IsOnMainTreeImpl(Ark_FrameNode peer)
 {
@@ -1215,6 +1258,9 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::RemoveAdoptedChildImpl,
         FrameNodeExtenderAccessor::IsOnRenderTreeImpl,
         FrameNodeExtenderAccessor::IsOnMainTreeImpl,
+        FrameNodeExtenderAccessor::ConvertPositionToWindowImpl,
+        FrameNodeExtenderAccessor::ConvertPositionFromWindowImpl,
+        FrameNodeExtenderAccessor::ApplyAttributesFinishImpl,
     };
     return &FrameNodeExtenderAccessorImpl;
 }

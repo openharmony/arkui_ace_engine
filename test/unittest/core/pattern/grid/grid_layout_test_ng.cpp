@@ -14,6 +14,7 @@
  */
 
 #include "grid_test_ng.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
@@ -22,9 +23,7 @@
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
-
 
 namespace OHOS::Ace::NG {
 
@@ -38,7 +37,7 @@ public:
 RefPtr<RepeatVirtualScroll2Node> GridLayoutTestNg::CreateRepeatNode(int32_t childCount)
 {
     std::function<std::pair<RIDType, uint32_t>(IndexType)> onGetRid4Index = [](int32_t index) {
-        return std::make_pair(2, 0);
+        return std::make_pair(0, 0);
     };
     std::function<void(IndexType, IndexType)> onRecycleItems = [](int32_t start, int32_t end) {};
     std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)> onActiveRange =
@@ -47,7 +46,7 @@ RefPtr<RepeatVirtualScroll2Node> GridLayoutTestNg::CreateRepeatNode(int32_t chil
     std::function<void()> onPurge = []() {};
     std::function<void()> onUpdateDirty = []() {};
     RefPtr<RepeatVirtualScroll2Node> node = AceType::MakeRefPtr<RepeatVirtualScroll2Node>(
-        2, 2, 5, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
+        0, 0, 0, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge, onUpdateDirty);
     node->arrLen_ = childCount;
     node->totalCount_ = childCount;
     return node;

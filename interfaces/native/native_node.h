@@ -2149,6 +2149,20 @@ typedef enum {
      */
     NODE_PIXEL_ROUND = 109,
     /**
+     * @brief Defines the motion path attribute, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
+     * .object indicates a pointer to the ArkUI_MotionPathOptions. The parameter type is
+     * {@link ArkUI_MotionPathOptions}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
+     * .object indicates a pointer to the ArkUI_MotionPathOptions. The parameter type is
+     * {@link ArkUI_MotionPathOptions}. \n
+     *
+     * @since 23
+     */
+    NODE_MOTION_PATH = 111,
+    /**
      * @brief Defines the response region list attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
@@ -6698,6 +6712,25 @@ typedef enum {
     NODE_LIST_LANES_ITEMFILLPOLICY = 1003018,
 
     /**
+     * @brief Specifies whether to support empty branch rendering in lazy loading mode for the <b>List</b> container. 
+     * This attribute can be set, reset, and obtained as required through APIs. When enabled in lazy loading mode, 
+     * empty branches (items without content) in the <b>List</b> will be rendered and set to width 0 and height 0, 
+     * which may affect the overall layout and scrolling behavior. This is typically used in scenarios where the
+     * data source may have gaps or when maintaining specific layout positions is required.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to support empty branch rendering in lazy loading mode.
+     * <b>0</b>: Disable empty branch support. Empty branches will not be rendered. <b>1</b>: Enable empty branch support. 
+     * Empty branches will be rendered as placeholder items. Default value: <b>0</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether empty branch rendering is enabled. <b>0</b>: Disabled. <b>1</b>: Enabled.\n
+     *
+     * @since 23
+     */
+    NODE_LIST_SUPPORT_EMPTY_BRANCH_IN_LAZY_LOADING = 1003019,
+
+    /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
      * as required through APIs.
      *
@@ -7796,7 +7829,24 @@ typedef enum {
      */
     NODE_GRID_MULTI_SELECTABLE = 1013013,
 
-    NODE_GRID_SUPPORT_LAZY_LOADING_EMPTY_BRANCH = 1013014,
+    /**
+     * @brief Specifies whether to support empty branch rendering in lazy loading mode for the <b>Grid</b> container. 
+     * This attribute can be set, reset, and obtained as required through APIs. When enabled in lazy loading mode, 
+     * empty branches (items without content) in the <b>Grid</b> will be rendered and set to width 0 and height 0, 
+     * which may affect the overall layout and scrolling behavior. This is typically used in scenarios where the
+     * data source may have gaps or when maintaining specific layout positions is required.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to support empty branch rendering in lazy loading mode.
+     * <b>0</b>: Disable empty branch support. Empty branches will not be rendered. <b>1</b>: Enable empty branch support. 
+     * Empty branches will be rendered as placeholder items. Default value: <b>0</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether empty branch rendering is enabled. <b>0</b>: Disabled. <b>1</b>: Enabled.\n
+     *
+     * @since 23
+     */
+    NODE_GRID_SUPPORT_EMPTY_BRANCH_IN_LAZY_LOADING = 1013014,
 
     /**
      * @brief Sets the style of the <b>GridItem</b> component.
@@ -11762,36 +11812,36 @@ int32_t OH_ArkUI_NativeModule_RegisterCommonVisibleAreaApproximateChangeEvent(Ar
 int32_t OH_ArkUI_NativeModule_UnregisterCommonVisibleAreaApproximateChangeEvent(ArkUI_NodeHandle node);
 
 /**
- * @brief Converts a point's coordinates from the target node's coordinate system 
- * to the window's coordinate system.
+ * @brief Converts a point's coordinates with transform from the target node's coordinate system 
+ * to the current window's coordinate system.
  *
- * @param node ArkUI_NodeHandle The target node.
- * @param position The point's coordinates in the target node's local coordinate system, in px.
- * @param windowPosition The converted coordinates in the window's coordinate system, in px.
+ * @param {ArkUI_NodeHandle} node ArkUI_NodeHandle The target node.
+ * @param {ArkUI_IntOffset} localPosition The point's coordinates in the target node's local coordinate system, in px.
+ * @param {ArkUI_IntOffset*} windowPosition The converted coordinates in the current window's coordinate system, in px.
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
  *         {@link ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE} The target node is not on main tree.
  * @since 23
  */
-int32_t OH_ArkUI_NaviteModule_ConvertPositionToWindow(ArkUI_NodeHandle targetNode, ArkUI_IntOffset position,
+int32_t OH_ArkUI_NativeModule_ConvertPositionToWindow(ArkUI_NodeHandle targetNode, ArkUI_IntOffset localPosition,
     ArkUI_IntOffset* windowPosition);
  
 /**
- * @brief Converts a point's coordinates from the window's coordinate system 
+ * @brief Converts a point's coordinates with transform from the window's coordinate system 
  * to the target node's coordinate system.
  *
- * @param node ArkUI_NodeHandle The target node.
- * @param windowPosition The point's coordinates in the window's coordinate system, in px.
- * @param position The converted coordinates in the target node's local coordinate system, in px.
+ * @param {ArkUI_NodeHandle} targetNode ArkUI_NodeHandle The target node.
+ * @param {ArkUI_IntOffset} windowPosition The point's coordinates in the window's coordinate system, in px.
+ * @param {ArkUI_IntOffset*} localPosition The converted coordinates in the target node's local coordinate system, in px.
  * @return Error code.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
  *         {@link ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE} The target node is not on main tree.
  * @since 23
  */
-int32_t OH_ArkUI_NaviteModule_ConvertPositionFromWindow(ArkUI_NodeHandle targetNode, ArkUI_IntOffset windowPosition,
-    ArkUI_IntOffset* position);
+int32_t OH_ArkUI_NativeModule_ConvertPositionFromWindow(ArkUI_NodeHandle targetNode, ArkUI_IntOffset windowPosition,
+    ArkUI_IntOffset* localPosition);
 
 /** 
  * @brief Stop the animation being executed by the Swiper node.

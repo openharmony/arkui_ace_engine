@@ -205,6 +205,7 @@ public:
     std::list<RefPtr<UINode>> removingNodes_;
 protected:
     void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
+    void DumpInfo() override;
 private:
     void OnAttachToMainTree(bool recursive) override
     {

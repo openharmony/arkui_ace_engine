@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT SoleChildElement : public RenderElement {
+class ACE_FORCE_EXPORT SoleChildElement : public RenderElement {
     DECLARE_ACE_TYPE(SoleChildElement, RenderElement);
 
 public:

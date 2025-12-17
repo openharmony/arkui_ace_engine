@@ -13,31 +13,47 @@
  * limitations under the License.
  */
 
-import { FunctionAreaPlaceholder, UserInteractiveTabBarBuilder } from "./UserFunctionArea"
+import { FunctionAreaPlaceholder, StyleSelectBuilder, UserInteractiveTabBarBuilder } from "./UserFunctionArea"
+import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
+import { styleItem } from "./CanvasFramework"
+import { PhotoSelect } from "./PhotoSelect";
 
 @ComponentV2
 export struct LandscapeSelectFuncArea {
+  @Param @Require styles?: Array<imageGeneration.ImageStyle>;
+  private tabBarDefaultBgColor: ResourceColor = 'rgba(0,0,0,0.05)'
+  @Local tabBarStyleBgColor: ResourceColor = this.tabBarDefaultBgColor
+  @Local styleItems: Array<styleItem> = []
+  @Param @Require imageInfoArr: Array<imageGeneration.ImageItem>;
+  @Param @Require imageMatrixArr: number[][];
+  @Provider('functionAreaSelectedIndex') selectedIndex: number = 0
+  aboutToAppear(): void {
+    for (let i = 0; this.styles && i < this.styles?.length; ++i) {
+      this.styleItems.push({ name: this.styles[i].name, resourceAddr: this.styles[i].icon})
+    }
+  }
+
   build() {
-    Tabs() {
+    Tabs({ index: this.selectedIndex }) {
       TabContent() {
-        FunctionAreaPlaceholder()
+        PhotoSelect({imageInfoArr: this.imageInfoArr, imageMatrixArr: this.imageMatrixArr })
       }
-      .tabBar(UserInteractiveTabBarBuilder('图像'))
+      .tabBar(UserInteractiveTabBarBuilder(0, '图像', $r('sys.symbol.style')))
+
+      TabContent() {
+        StyleSelectBuilder(this.styleItems)
+      }
+      .tabBar(UserInteractiveTabBarBuilder(1, '风格', $r('sys.meida.ohos_image_style')))
 
       TabContent() {
         FunctionAreaPlaceholder()
       }
-      .tabBar(UserInteractiveTabBarBuilder('风格'))
+      .tabBar(UserInteractiveTabBarBuilder(2, '比例', $r('sys.symbol.style')))
 
       TabContent() {
         FunctionAreaPlaceholder()
       }
-      .tabBar(UserInteractiveTabBarBuilder('比例'))
-
-      TabContent() {
-        FunctionAreaPlaceholder()
-      }
-      .tabBar(UserInteractiveTabBarBuilder('清晰度'))
+      .tabBar(UserInteractiveTabBarBuilder(3, '清晰度', $r('sys.symbol.style')))
     }
     .barHeight(284)
     .scrollable(false)
@@ -45,5 +61,14 @@ export struct LandscapeSelectFuncArea {
     .barPosition(BarPosition.End)
     .width(118)
     .height(386)
+    .onChange((index: number) => {
+      this.selectedIndex = index
+    })
+    .onAnimationStart((index: number, targetIndex: number, event: TabsAnimationEvent) => {
+      if (index === targetIndex) {
+        return
+      }
+      this.selectedIndex = targetIndex
+    })
   }
 }

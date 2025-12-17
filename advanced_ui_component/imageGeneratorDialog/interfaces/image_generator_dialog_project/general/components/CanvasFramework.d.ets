@@ -13,13 +13,27 @@
  * limitations under the License.
  */
 
-import { CanvasMode } from "../types/Declaration";
+import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
+import { CanvasMode, ImageGenerateState } from "../types/Declaration";
+import image from "@ohos.multimedia.image";
+export declare class styleItem {
+    name: ResourceStr;
+    resourceAddr?: image.PixelMap | ResourceStr;
+}
 @ComponentV2
 export declare struct CanvasHome {
     @Local
     titleName: string;
     @Local
     currentCanvasMode: CanvasMode;
+    @Local
+    currentGenerateState: ImageGenerateState;
+    @Param
+    @Require
+    readonly imageInfoArr: Array<imageGeneration.ImageItem>;
+    @Param
+    @Require
+    readonly styles?: Array<imageGeneration.ImageStyle>;
     @Builder
     homeTitleBuilder(): void;
     build(): void;

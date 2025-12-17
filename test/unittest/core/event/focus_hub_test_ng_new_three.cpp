@@ -995,6 +995,31 @@ HWTEST_F(FocusHubTestNg, FocusToHeadOrTailChild003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalculatePosition001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, CalculatePosition001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+
+    auto frameOffset = frameNode->GetTransformRelativeOffset();
+    auto geometryNode = frameNode->GetGeometryNode();
+    RectF frameRect = RectF(frameOffset, geometryNode->GetFrameRect().GetSize());
+
+    auto focusNode = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    std::list<RefPtr<FocusHub>> focusNodes;
+    focusNode->SetCurrentFocus(true);
+    focusNodes.push_front(focusNode);
+    focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(*(focusNodes.begin())));
+    auto ret = focusHub->CalculatePosition();
+    EXPECT_EQ(ret, true);
+}
+
+/**
  * @tc.name: GetUnfocusableParentFocusNode001
  * @tc.desc:
  * @tc.type: FUNC
@@ -1019,30 +1044,5 @@ HWTEST_F(FocusHubTestNg, GetUnfocusableParentFocusNode001, TestSize.Level1)
     auto res = focusHub->GetUnfocusableParentFocusNode();
     WeakPtr<FocusHub> FocusHub2 = nullptr;
     EXPECT_EQ(res, FocusHub2);
-}
-
-/**
- * @tc.name: CalculatePosition001
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, CalculatePosition001, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
-    eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-
-    auto frameOffset = frameNode->GetTransformRelativeOffset();
-    auto geometryNode = frameNode->GetGeometryNode();
-    RectF frameRect = RectF(frameOffset, geometryNode->GetFrameRect().GetSize());
-
-    auto focusNode = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    std::list<RefPtr<FocusHub>> focusNodes;
-    focusNode->SetCurrentFocus(true);
-    focusNodes.push_front(focusNode);
-    focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(*(focusNodes.begin())));
-    auto ret = focusHub->CalculatePosition();
-    EXPECT_EQ(ret, true);
 }
 } // namespace OHOS::Ace::NG

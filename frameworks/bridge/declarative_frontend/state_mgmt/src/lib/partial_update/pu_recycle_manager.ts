@@ -74,6 +74,15 @@ class RecycleManager {
       })
     })
   }
+
+  public getDumpInfo(): string {
+    const result = Array.from(this.cachedRecycleNodes_.entries())
+      .map(([reuseKey, views]) => ({
+        reuseKey,
+        nodeId: views.map(view => view.id__())
+      }))
+    return JSON.stringify(result);
+  }
 }
 
 class BidirectionalMap {

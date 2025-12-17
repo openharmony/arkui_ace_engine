@@ -16,6 +16,7 @@
 #include "frameworks/bridge/js_frontend/js_command.h"
 
 #include "base/log/event_report.h"
+#include "core/common/dynamic_module_helper.h"
 #include "frameworks/bridge/common/dom/dom_search.h"
 #include "frameworks/bridge/common/dom/dom_textarea.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
@@ -115,9 +116,9 @@ void JsCommandDomElementOperator::UpdateForClock(const RefPtr<DOMNode>& node) co
 void JsCommandDomElementOperator::UpdateForBadge(const RefPtr<DOMNode>& node) const
 {
     if (badgeConfig_) {
-        auto domBadge = AceType::DynamicCast<DOMBadge>(node);
-        if (domBadge) {
-            domBadge->SetBadgeConfig(*badgeConfig_);
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("badge");
+        if (loader) {
+            loader->UpdateDomConfig(node, badgeConfig_.get());
         }
     }
 }

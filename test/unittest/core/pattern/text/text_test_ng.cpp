@@ -371,10 +371,13 @@ HWTEST_F(TextTestNg, GetSelectedBackgroundColor001, TestSize.Level1)
     textModelNG.Create(CREATE_VALUE_W);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
+
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
+
     RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
     ASSERT_NE(textLayoutProperty, nullptr);
+
     EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE_W);
 
     /**
@@ -605,6 +608,7 @@ HWTEST_F(TextTestNg, CalcAIMenuPosition001, TestSize.Level1)
      */
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
+
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
 
@@ -760,22 +764,6 @@ HWTEST_F(TextTestNg, ShowSelectOverlay001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnModifyDone001
- * @tc.desc: Test TextPattern OnModifyDone when frameNode is not nullptr.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, OnModifyDone001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-    pattern->selectOverlayProxy_ = nullptr;
-    pattern->OnModifyDone();
-    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
-}
-
-/**
  * @tc.name: OnModifyDone002
  * @tc.desc: Test TextPattern OnModifyDone longPressEvent.
  * @tc.type: FUNC
@@ -787,10 +775,13 @@ HWTEST_F(TextTestNg, OnModifyDone002, TestSize.Level1)
      */
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
+
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
+
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
 
@@ -808,6 +799,15 @@ HWTEST_F(TextTestNg, OnModifyDone002, TestSize.Level1)
     textPattern->OnModifyDone();
     EXPECT_NE(textPattern->longPressEvent_, nullptr);
     EXPECT_EQ(StringUtils::Str16ToStr8(textPattern->textForDisplay_), TEXT_CONTENT);
+
+    textLayoutProperty->UpdateContent("Hello World");
+    textPattern->textSelector_.baseOffset = 0;
+    textPattern->textSelector_.destinationOffset = 3;
+    textPattern->selectOverlay_->isTriggerParentToScroll_ = true;
+    textPattern->OnModifyDone();
+    EXPECT_EQ(StringUtils::Str16ToStr8(textPattern->textForDisplay_), "Hello World");
+    EXPECT_EQ(textPattern->textSelector_.baseOffset, 0);
+    EXPECT_EQ(textPattern->textSelector_.destinationOffset, 3);
 }
 
 /**
@@ -865,7 +865,6 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
     auto ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(ret);
-    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
 }
 
 /**
@@ -889,7 +888,6 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
     auto ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(ret);
-    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
 }
 
 /**
@@ -920,7 +918,6 @@ HWTEST_F(TextTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
     ret = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(ret);
-    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
 
     SelectOverlayInfo selectOverlayInfo;
     selectOverlayInfo.singleLineHeight = NODE_ID;

@@ -4557,7 +4557,7 @@ bool RosenRenderContext::AddNodeToRsTree()
     auto parentNode = node->GetParentFrameNode();
     CHECK_NULL_RETURN(parentNode, false);
     parentNode->MarkNeedSyncRenderTree();
-    parentNode->RebuildRenderContextTree();
+    parentNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     return true;
 }
 
@@ -7667,9 +7667,8 @@ void RosenRenderContext::FreezeKeyFrameNode(bool freezeFlag)
 
 void RosenRenderContext::RemoveKeyFrameNode()
 {
-    if (reDraggingFlag_) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveKeyFrameNode: not to remove for redragging");
-        reDraggingFlag_ = false;
+    if (GetIsDraggingFlag() || GetHasKeyFrameCache()) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveKeyFrameNode: not to remove for dragging or has animate cache");
         return;
     }
     if (keyFrameNode_) {

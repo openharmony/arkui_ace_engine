@@ -587,8 +587,22 @@ void TextModelNG::SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
         auto textPattern = frameNode->GetPattern<TextPattern>();
         CHECK_NULL_VOID(textPattern);
         TextDetectConfig& textDetectConfigValue = const_cast<TextDetectConfig&>(textDetectConfig);
+        if (!textDetectConfigValue.entityColorFlag) {
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            auto hyperlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
+            CHECK_NULL_VOID(hyperlinkTheme);
+            textDetectConfigValue.entityColor = hyperlinkTheme->GetTextColor();
+        }
+        if (!textDetectConfigValue.entityDecorationColorFlag) {
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            auto hyperlinkTheme = pipeline->GetTheme<HyperlinkTheme>();
+            CHECK_NULL_VOID(hyperlinkTheme);
+            textDetectConfigValue.entityDecorationColor = hyperlinkTheme->GetTextColor();
+        }
         textDetectConfigValue.ReloadResources();
-        textPattern->SetTextDetectConfig(textDetectConfig);
+        textPattern->SetTextDetectConfig(textDetectConfigValue);
     };
     textPattern->AddResObj("dataDetectorConfig", resObj, std::move(updateFunc));
 }

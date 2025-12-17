@@ -787,4 +787,50 @@ HWTEST_F(RelativeContainerMeasureTest, MeasureSelfTest2, TestSize.Level0)
     EXPECT_EQ(relativeContainer->GetGeometryNode()->GetFrameSize(), SizeF(60.0f, 50.0f))
         << relativeContainer->GetGeometryNode()->GetFrameSize().ToString();
 }
+
+/**
+ * @tc.name  : InsertToVerticalReliedOnMap_01
+ * @tc.number: InsertToVerticalReliedOnMapTest_001
+ * @tc.desc  : 测试当节点不存在时,InsertToVerticalReliedOnMap 应该插入新的节点到 map 中
+ */
+HWTEST_F(RelativeContainerMeasureTest, InsertToVerticalReliedOnMap_01, TestSize.Level0) {
+    std::string anchorName = "anchor1";
+    std::string nodeName = "node1";
+    RelativeContainerLayoutAlgorithm algorithm;
+    EXPECT_EQ(algorithm.verticalRelyMap_.find(nodeName), algorithm.verticalRelyMap_.end());
+
+    algorithm.InsertToVerticalReliedOnMap(anchorName, nodeName);
+
+    auto iter = algorithm.verticalRelyMap_.find(nodeName);
+    EXPECT_NE(iter, algorithm.verticalRelyMap_.end());
+    EXPECT_EQ(iter->second.size(), 1);
+    EXPECT_EQ(iter->second.count(anchorName), 1);
+}
+
+/**
+ * @tc.name  : InsertToVerticalReliedOnMap_02
+ * @tc.number: InsertToVerticalReliedOnMapTest_002
+ * @tc.desc  : 测试当节点已存在时,InsertToVerticalReliedOnMap 应该将 anchor 插入到已存在的节点中
+ */
+HWTEST_F(RelativeContainerMeasureTest, InsertToVerticalReliedOnMap_02, TestSize.Level0) {
+    std::string anchorName1 = "anchor1";
+    std::string anchorName2 = "anchor2";
+    std::string nodeName = "node1";
+
+    // 先插入一个节点
+    RelativeContainerLayoutAlgorithm algorithm;
+    algorithm.InsertToVerticalReliedOnMap(anchorName1, nodeName);
+
+    // 节点存在,应该插入 anchor 到已存在的节点中
+    EXPECT_EQ(algorithm.verticalRelyMap_.find(nodeName)->second.size(), 1);
+    EXPECT_EQ(algorithm.verticalRelyMap_.find(nodeName)->second.count(anchorName1), 1);
+
+    // 再次插入 anchor
+    algorithm.InsertToVerticalReliedOnMap(anchorName2, nodeName);
+
+    // 节点的 anchor 集合应该包含两个 anchor
+    EXPECT_EQ(algorithm.verticalRelyMap_.find(nodeName)->second.size(), 2);
+    EXPECT_EQ(algorithm.verticalRelyMap_.find(nodeName)->second.count(anchorName1), 1);
+    EXPECT_EQ(algorithm.verticalRelyMap_.find(nodeName)->second.count(anchorName2), 1);
+}
 } // namespace OHOS::Ace::NG

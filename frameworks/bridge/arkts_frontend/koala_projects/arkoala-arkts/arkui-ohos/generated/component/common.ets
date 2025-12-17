@@ -670,6 +670,7 @@ export interface DragEvent {
     getVelocity(): double
     executeDropAnimation(customDropAnimation: (() => void)): void
     startDataLoading(options: unifiedDataChannel.GetDataParams): string | undefined
+    getDisplayId(): int32
     enableInternalDropAnimation(configuration: string): void
 }
 export class DragEventInternal implements MaterializedBase,DragEvent {
@@ -768,6 +769,9 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     public startDataLoading(options: unifiedDataChannel.GetDataParams): string | undefined {
         return hookDragEventStartDataLoading(this, options)
     }
+    public getDisplayId(): int32 {
+        return this.getDisplayId_serialize()
+    }
     public enableInternalDropAnimation(configuration: string): void {
         const configuration_casted = configuration as (string)
         this.enableInternalDropAnimation_serialize(configuration_casted)
@@ -857,6 +861,10 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         thisSerializer.holdAndWriteCallback(customDropAnimation)
         ArkUIGeneratedNativeModule._DragEvent_executeDropAnimation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    getDisplayId_serialize(): int32 {
+        const retval  = ArkUIGeneratedNativeModule._DragEvent_getDisplayId(this.peer!.ptr)
+        return retval
     }
     enableInternalDropAnimation_serialize(configuration: string): void {
         ArkUIGeneratedNativeModule._DragEvent_enableInternalDropAnimation(this.peer!.ptr, configuration)
@@ -7271,6 +7279,10 @@ export enum HapticFeedbackMode {
     ENABLED = 1,
     AUTO = 2
 }
+export enum MenuKeyboardAvoidMode {
+    NONE = 0,
+    TRANSLATE_AND_RESIZE = 1
+}
 export interface ContextMenuOptions {
     offset?: Position;
     placement?: Placement;
@@ -7303,6 +7315,8 @@ export interface ContextMenuOptions {
     previewScaleMode?: PreviewScaleMode;
     availableLayoutArea?: AvailableLayoutArea;
     anchorPosition?: Position;
+    keyboardAvoidMode?: MenuKeyboardAvoidMode;
+    minKeyboardAvoidDistance?: LengthMetrics;
 }
 export interface MenuOptions extends ContextMenuOptions {
     title?: ResourceStr;
@@ -18247,6 +18261,22 @@ export class ContextMenuOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForKeyboardAvoidMode  = value.keyboardAvoidMode
+        if (valueHolderForKeyboardAvoidMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForKeyboardAvoidModeTmpValue  = (valueHolderForKeyboardAvoidMode as MenuKeyboardAvoidMode)
+            valueSerializer.writeInt32(valueHolderForKeyboardAvoidModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForMinKeyboardAvoidDistance  = value.minKeyboardAvoidDistance
+        if (valueHolderForMinKeyboardAvoidDistance !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMinKeyboardAvoidDistanceTmpValue  = valueHolderForMinKeyboardAvoidDistance!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForMinKeyboardAvoidDistanceTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ContextMenuOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -18663,7 +18693,19 @@ export class ContextMenuOptions_serializer {
             anchorPositionTmpBuf = Position_serializer.read(valueDeserializer)
         }
         const anchorPositionTmpResult : Position | undefined = anchorPositionTmpBuf
-        let value : ContextMenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult} as ContextMenuOptions)
+        const keyboardAvoidModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let keyboardAvoidModeTmpBuf : MenuKeyboardAvoidMode | undefined = undefined
+        if ((keyboardAvoidModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            keyboardAvoidModeTmpBuf = MenuKeyboardAvoidMode.fromValue(valueDeserializer.readInt32())
+        }
+        const keyboardAvoidModeTmpResult : MenuKeyboardAvoidMode | undefined = keyboardAvoidModeTmpBuf
+        const minKeyboardAvoidDistanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let minKeyboardAvoidDistanceTmpBuf : LengthMetrics | undefined = undefined
+        if ((minKeyboardAvoidDistanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            minKeyboardAvoidDistanceTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const minKeyboardAvoidDistanceTmpResult : LengthMetrics | undefined = minKeyboardAvoidDistanceTmpBuf
+        let value : ContextMenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult} as ContextMenuOptions)
         return value
     }
 }
@@ -19832,6 +19874,22 @@ export class MenuOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForKeyboardAvoidMode  = value.keyboardAvoidMode
+        if (valueHolderForKeyboardAvoidMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForKeyboardAvoidModeTmpValue  = (valueHolderForKeyboardAvoidMode as MenuKeyboardAvoidMode)
+            valueSerializer.writeInt32(valueHolderForKeyboardAvoidModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForMinKeyboardAvoidDistance  = value.minKeyboardAvoidDistance
+        if (valueHolderForMinKeyboardAvoidDistance !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMinKeyboardAvoidDistanceTmpValue  = valueHolderForMinKeyboardAvoidDistance!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForMinKeyboardAvoidDistanceTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForTitle  = value.title
         if (valueHolderForTitle !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -20272,6 +20330,18 @@ export class MenuOptions_serializer {
             anchorPositionTmpBuf = Position_serializer.read(valueDeserializer)
         }
         const anchorPositionTmpResult : Position | undefined = anchorPositionTmpBuf
+        const keyboardAvoidModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let keyboardAvoidModeTmpBuf : MenuKeyboardAvoidMode | undefined = undefined
+        if ((keyboardAvoidModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            keyboardAvoidModeTmpBuf = MenuKeyboardAvoidMode.fromValue(valueDeserializer.readInt32())
+        }
+        const keyboardAvoidModeTmpResult : MenuKeyboardAvoidMode | undefined = keyboardAvoidModeTmpBuf
+        const minKeyboardAvoidDistanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let minKeyboardAvoidDistanceTmpBuf : LengthMetrics | undefined = undefined
+        if ((minKeyboardAvoidDistanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            minKeyboardAvoidDistanceTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const minKeyboardAvoidDistanceTmpResult : LengthMetrics | undefined = minKeyboardAvoidDistanceTmpBuf
         const titleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let titleTmpBuf : ResourceStr | undefined = undefined
         if ((titleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

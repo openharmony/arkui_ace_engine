@@ -35,6 +35,7 @@
 #include "base/log/log.h"
 #include "base/resource/asset_manager.h"
 #include "base/utils/linear_map.h"
+#include "base/utils/macros.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
@@ -287,19 +288,7 @@ inline FontStyle ConvertStrToFontStyle(const std::string& fontStyle)
     return fontStyle == DOM_TEXT_FONT_STYLE_ITALIC ? FontStyle::ITALIC : FontStyle::NORMAL;
 }
 
-inline TextAlign ConvertStrToTextAlign(const std::string& align)
-{
-    static const LinearMapNode<TextAlign> textAlignTable[] = {
-        { DOM_CENTER, TextAlign::CENTER },
-        { DOM_END, TextAlign::END },
-        { DOM_LEFT, TextAlign::LEFT },
-        { DOM_RIGHT, TextAlign::RIGHT },
-        { DOM_START, TextAlign::START },
-    };
-
-    auto index = BinarySearchFindIndex(textAlignTable, ArraySize(textAlignTable), align.c_str());
-    return index < 0 ? TextAlign::CENTER : textAlignTable[index].value;
-}
+ACE_FORCE_EXPORT TextAlign ConvertStrToTextAlign(const std::string& align);
 
 inline TextOverflow ConvertStrToTextOverflow(const std::string& overflow)
 {

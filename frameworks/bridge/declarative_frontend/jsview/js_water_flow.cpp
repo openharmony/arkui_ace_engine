@@ -95,7 +95,8 @@ void ParseScroller(const JSRef<JSObject>& obj)
 } // namespace
 
 void UpdateSections(
-    const JSCallbackInfo& args, const JSRef<JSVal>& sections, RefPtr<NG::WaterFlowSections>& waterFlowSections)
+    const JSCallbackInfo& args, const JSRef<JSVal>& sections,
+    RefPtr<NG::WaterFlowSections>& waterFlowSections, NG::FrameNode* frameNode)
 {
     CHECK_NULL_VOID(waterFlowSections);
     auto sectionsObject = JSRef<JSObject>::Cast(sections);
@@ -109,7 +110,10 @@ void UpdateSections(
     }
     CHECK_NULL_VOID(nativeSection->IsObject());
     auto nativeSectionObj = JSRef<JSObject>::Cast(nativeSection);
-    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (!frameNode) {
+        frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    }
+    CHECK_NULL_VOID(frameNode);
     JSWaterFlowSections* section = nativeSectionObj->Unwrap<JSWaterFlowSections>();
     CHECK_NULL_VOID(section);
     if (section->IsBound(frameNode)) {
@@ -147,7 +151,7 @@ void UpdateWaterFlowSections(const JSCallbackInfo& args, const JSRef<JSVal>& sec
 {
     auto waterFlowSections = WaterFlowModel::GetInstance()->GetOrCreateWaterFlowSections();
     CHECK_NULL_VOID(waterFlowSections);
-    UpdateSections(args, sections, waterFlowSections);
+    UpdateSections(args, sections, waterFlowSections, nullptr);
 }
 
 void JSWaterFlow::UpdateWaterFlowSectionsByFrameNode(
@@ -155,7 +159,7 @@ void JSWaterFlow::UpdateWaterFlowSectionsByFrameNode(
 {
     auto waterFlowSections = NG::WaterFlowModelNG::GetOrCreateWaterFlowSections(frameNode);
     CHECK_NULL_VOID(waterFlowSections);
-    UpdateSections(args, sections, waterFlowSections);
+    UpdateSections(args, sections, waterFlowSections, frameNode);
 }
 
 RefPtr<NG::UINode> SetWaterFlowBuilderNode(const JSRef<JSObject>& footerJsObject)

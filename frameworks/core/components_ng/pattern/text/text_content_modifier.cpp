@@ -26,6 +26,7 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/render/adapter/animated_image.h"
@@ -398,6 +399,8 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     } else {
         DrawFadeout(drawingContext, info);
     }
+
+    ContentChangeReport();
 }
 
 void TextContentModifier::DrawContent(DrawingContext& drawingContext, const FadeoutInfo& fadeoutInfo)
@@ -563,6 +566,23 @@ void TextContentModifier::SetTextContentAlingOffsetY(float& paintOffsetY)
     }
     auto alignOffsetY = pattern->TextContentAlignOffsetY();
     paintOffsetY = paintOffsetY + alignOffsetY;
+}
+
+void TextContentModifier::ContentChangeReport()
+{
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textPattern);
+    auto host = textPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    if (!mgr->IsTextAABBCollecting() || host->GetTag() == "SymbolGlyph") {
+        return;
+    }
+    auto textRect = host->GetTransformRectRelativeToWindow();
+    mgr->OnTextChangeEnd(textRect);
 }
 
 void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext, const FadeoutInfo& info,

@@ -39,7 +39,8 @@ public:
     ~JSView() override = default;
     virtual void Destroy(JSView* parentCustomView) = 0;
 
-    virtual RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false)
+    virtual RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false,
+        int64_t creatorId = -1)
     {
         LOGE("Internal error. Not implemented");
         return nullptr;
@@ -179,6 +180,9 @@ public:
     virtual void OnDumpInfo(const std::vector<std::string>& params) {}
 
     static JSView* GetNativeView(JSRef<JSObject> obj);
+    void JsSetCreatorId(int64_t creatorId);
+    int64_t GetCreatorId() const;
+
 protected:
     RefPtr<ViewFunctions> jsViewFunction_;
     bool needsUpdate_ = false;
@@ -191,6 +195,7 @@ protected:
     // set on the root JSView of the card and inherited by all child JSViews
     // -1 means not part of a card
     int64_t cardId_ = -1;
+    int64_t creatorId_ = -1;
     std::function<void()> notifyRenderDone_;
 
 private:
@@ -216,7 +221,8 @@ public:
     // TODO: delete this after the toolchain for partial update is ready.
     RefPtr<AceType> InternalRender();
 
-    RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false) override;
+    RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false,
+        int64_t creatorId = -1) override;
 
     void MarkNeedUpdate() override;
 
@@ -338,7 +344,8 @@ public:
 
     void SetPrebuildPhase(PrebuildPhase prebuildPhase, int64_t deadline = 0) override;
 
-    RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false) override;
+    RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false,
+        int64_t creatorId = -1) override;
 
     static void Create(const JSCallbackInfo& info);
     static void CreateRecycle(const JSCallbackInfo& info);

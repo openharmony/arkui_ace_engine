@@ -30,7 +30,6 @@
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
@@ -710,11 +709,6 @@ public:
         animateCanOverScroll_ = isScrollable && animateCanOverScroll;
     }
 
-    virtual std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems()
-    {
-        std::vector<RefPtr<FrameNode>> children;
-        return children;
-    }
     void InitScrollBarGestureEvent();
 
     virtual void InitScrollBarClickEvent();
@@ -1191,6 +1185,7 @@ private:
     void SetOnHiddenChangeForParent();
     virtual void ResetForExtScroll() {};
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
+    void ContentChangeReport(RefPtr<FrameNode>& keyNode);
 
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;

@@ -58,6 +58,11 @@ public:
     void ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart) override;
 
     /**
+     * @description: notify stub side to report the information of hit test node
+     */
+    void ReportHitTestNodeInfos(const std::string& data, int32_t partNum, bool isLastPart) override;
+
+    /**
      * @description: notify stub side to report web unfocus value
      */
     void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) override;
@@ -73,6 +78,16 @@ public:
     void ReportLifeCycleEvent(const std::string& data) override;
 
     /**
+     * @description: notify stub side to report select text value
+     */
+    void ReportSelectTextEvent(const std::string& data) override;
+
+    /**
+     * @description: notify stub side to report select text offsets
+     */
+    void SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets) override;
+
+    /**
      * @description: notify stub side to report web unfocus value
      */
     void SendBaseInfo(const std::string& data) override;
@@ -83,6 +98,7 @@ public:
     void SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) override;
     void SendExeAppAIFunctionResult(uint32_t result) override;
     void SendContentChange(ChangeType type, const std::string& simpleTree) override;
+    void ReportGetStateMgmtInfo(std::vector<std::string> results) override;
 
 private:
     static inline BrokerDelegator<UiReportProxy> delegator_;

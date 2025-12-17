@@ -25,14 +25,15 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-GridIrregularFiller::FillParameters GetFillParameters(const RefPtr<FrameNode>& host, const GridLayoutInfo& info)
+GridIrregularFiller::FillParameters GetFillParameters(const RefPtr<FrameNode>& host, const GridLayoutInfo& info,
+    double originalWidth)
 {
     const auto& contentSize = host->GetGeometryNode()->GetContentSize();
     auto props = AceType::DynamicCast<GridLayoutProperty>(host->GetLayoutProperty());
     auto crossGap = GridUtils::GetCrossGap(props, contentSize, info.axis_);
     auto mainGap = GridUtils::GetMainGap(props, contentSize, info.axis_);
     std::string args = info.axis_ == Axis::VERTICAL
-                           ? props->GetFinalColumnsTemplate(GridLayoutUtils::GetOriginalWidth()).value_or("")
+                           ? props->GetFinalColumnsTemplate(originalWidth).value_or("")
                            : props->GetRowsTemplate().value_or("");
     const float crossSize = contentSize.CrossSize(info.axis_);
     auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), crossSize, crossGap, info.GetChildrenCount());
@@ -129,8 +130,7 @@ float GridIrregularLayoutAlgorithm::MeasureSelf(const RefPtr<GridLayoutProperty>
 {
     // set self size
     frameSize_ = CreateIdealSize(props->GetLayoutConstraint().value(), info_.axis_, props->GetMeasureType(), true);
-    double originalWidth = frameSize_.Width();
-    GridLayoutUtils::SetOriginalWidth(originalWidth);
+    originalWidth_ = frameSize_.Width();
     wrapper_->GetGeometryNode()->SetFrameSize(frameSize_);
 
     // set content size
@@ -156,7 +156,7 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
         args = props->GetRowsTemplate().value_or("");
     } else {
         info_.axis_ = Axis::VERTICAL;
-        args = props->GetFinalColumnsTemplate(GridLayoutUtils::GetOriginalWidth()).value_or("");
+        args = props->GetFinalColumnsTemplate(originalWidth_).value_or("");
     }
 
     const float crossSize = contentSize.CrossSize(info_.axis_);
@@ -737,8 +737,9 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
 
     auto wrapper = wrapper_->GetHostNode();
     CHECK_NULL_VOID(wrapper);
+    double originalWidth = originalWidth_;
     GridLayoutUtils::PreloadGridItems(wrapper->GetPattern<GridPattern>(), std::move(itemsToPreload),
-        [](const RefPtr<FrameNode>& host, int32_t itemIdx) {
+        [originalWidth](const RefPtr<FrameNode>& host, int32_t itemIdx) {
             CHECK_NULL_RETURN(host, false);
             auto pattern = host->GetPattern<GridPattern>();
             CHECK_NULL_RETURN(pattern, false);
@@ -747,8 +748,8 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             auto& info = pattern->GetMutableLayoutInfo();
             GridIrregularFiller filler(&info, RawPtr(host));
             const auto pos = info.GetItemPos(itemIdx);
-            auto constraint =
-                filler.MeasureItem(GetFillParameters(host, info), itemIdx, pos.first, pos.second, true).second;
+            auto constraint = filler.MeasureItem(GetFillParameters(host, info, originalWidth),
+                itemIdx, pos.first, pos.second, true).second;
 
             auto item = DynamicCast<FrameNode>(host->GetChildByIndex(itemIdx, true));
             CHECK_NULL_RETURN(item, false);

@@ -137,6 +137,32 @@ void UiReportProxy::ReportInspectorTreeValue(const std::string& data, int32_t pa
     }
 }
 
+void UiReportProxy::ReportHitTestNodeInfos(const std::string& data, int32_t partNum, bool isLastPart)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option;
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ReportHitTestNodeInfos write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(data)) {
+        LOGW("ReportHitTestNodeInfos write data  failed");
+        return;
+    }
+    if (!messageData.WriteInt32(partNum)) {
+        LOGW("ReportHitTestNodeInfos write data  failed");
+        return;
+    }
+    if (!messageData.WriteBool(isLastPart)) {
+        LOGW("ReportHitTestNodeInfos write data  failed");
+        return;
+    }
+    if (Remote()->SendRequest(REPORT_HIT_TEST_NODE_INFOS, messageData, reply, option) != ERR_NONE) {
+        LOGW("ReportHitTestNodeInfos send request failed");
+    }
+}
+
 void UiReportProxy::OnComponentChange(const std::string& key, const std::string& value)
 {
     if (UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
@@ -201,6 +227,48 @@ void UiReportProxy::ReportLifeCycleEvent(const std::string& data)
     }
     if (Remote()->SendRequest(REPORT_LIFE_CYCLE_EVENT, messageData, reply, option) != ERR_NONE) {
         LOGW("ReportLifeCycleEvent send request failed");
+    }
+}
+
+void UiReportProxy::ReportSelectTextEvent(const std::string& data)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option;
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ReportLifeCycleEvent write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(data)) {
+        LOGW("ReportLifeCycleEvent write data  failed");
+        return;
+    }
+    if (Remote()->SendRequest(REPORT_SELECT_TEXT_EVENT, messageData, reply, option) != ERR_NONE) {
+        LOGW("ReportLifeCycleEvent send request failed");
+    }
+}
+
+void UiReportProxy::SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendSpecifiedContentOffsets write interface token failed");
+        return;
+    }
+    if (!messageData.WriteInt32(offsets.size())) {
+        LOGW("SendSpecifiedContentOffsets write size failed");
+        return;
+    }
+    for (auto& offset : offsets) {
+        if (!messageData.WriteFloat(offset.first) || (!messageData.WriteFloat(offset.second))) {
+            LOGW("SendSpecifiedContentOffsets write data failed");
+            return;
+        }
+    }
+    if (Remote()->SendRequest(SEND_SPECIFIED_CONTENT_OFFSETS, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendSpecifiedContentOffsets send request failed");
     }
 }
 
@@ -359,6 +427,24 @@ void UiReportProxy::SendContentChange(ChangeType type, const std::string& simple
 
     if (Remote()->SendRequest(SEND_CONTENT_CHANGE, messageData, reply, option) != ERR_NONE) {
         LOGW("SendContentChange send request failed");
+    }
+}
+
+void UiReportProxy::ReportGetStateMgmtInfo(std::vector<std::string> results)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ReportGetStateMgmtInfo write interface token failed");
+        return;
+    }
+    if (!messageData.WriteStringVector(results)) {
+        LOGW("ReportGetStateMgmtInfo WriteStringVector failed");
+        return;
+    }
+    if (Remote()->SendRequest(REPORT_STATE_MGMT_INFO, messageData, reply, option) != ERR_NONE) {
+        LOGW("ReportGetStateMgmtInfo send request failed");
     }
 }
 } // namespace OHOS::Ace

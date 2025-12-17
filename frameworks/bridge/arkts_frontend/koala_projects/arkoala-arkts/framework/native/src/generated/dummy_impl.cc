@@ -11620,6 +11620,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                         const Opt_SelectedDragPreviewStyle* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSelectedDragPreviewStyle(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetCustomKeyboardImpl(Ark_NativePointer node,
                                const Opt_Union_CustomBuilder_ComponentContent* value,
                                const Opt_KeyboardOptions* options)
@@ -13999,6 +14011,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setBackgroundColor(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetKeyboardAvoidModeImpl(Ark_NativePointer node,
+                                  const Opt_MenuKeyboardAvoidMode* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setKeyboardAvoidMode(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetMinKeyboardAvoidDistanceImpl(Ark_NativePointer node,
+                                         const Opt_LengthMetrics* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setMinKeyboardAvoidDistance(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -21713,6 +21749,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
+                                      const Opt_TextSelectionChangeCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnTextSelectionChange(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
                                     const Opt_Boolean* value)
     {
@@ -21721,6 +21769,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setEnableImageAnalyzer(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnMicrophoneCaptureStateChangeImpl(Ark_NativePointer node,
+                                               const Opt_OnMicrophoneCaptureStateChangeCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnMicrophoneCaptureStateChange(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnCameraCaptureStateChangeImpl(Ark_NativePointer node,
+                                           const Opt_OnCameraCaptureStateChangeCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnCameraCaptureStateChange(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -23254,6 +23326,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorAttributeModifier::SetIncludeFontPaddingImpl,
             RichEditorAttributeModifier::SetFallbackLineSpacingImpl,
             RichEditorAttributeModifier::SetBindSelectionMenuImpl,
+            RichEditorAttributeModifier::SetSelectedDragPreviewStyleImpl,
             RichEditorAttributeModifier::SetCustomKeyboardImpl,
             RichEditorAttributeModifier::SetPlaceholderImpl,
         };
@@ -23532,6 +23605,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SelectAttributeModifier::SetShowInSubWindowImpl,
             SelectAttributeModifier::SetShowDefaultSelectedIconImpl,
             SelectAttributeModifier::SetBackgroundColorImpl,
+            SelectAttributeModifier::SetKeyboardAvoidModeImpl,
+            SelectAttributeModifier::SetMinKeyboardAvoidDistanceImpl,
             SelectAttributeModifier::SetMenuAlignImpl,
         };
         return &ArkUISelectModifierImpl;
@@ -24321,7 +24396,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetBlankScreenDetectionConfigImpl,
             WebAttributeModifier::SetZoomControlAccessImpl,
             WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
+            WebAttributeModifier::SetOnTextSelectionChangeImpl,
             WebAttributeModifier::SetEnableImageAnalyzerImpl,
+            WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
+            WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
             WebAttributeModifier::SetBindSelectionMenuImpl,
         };
@@ -30467,6 +30545,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Ark_Int32 GetDisplayIdImpl(Ark_DragEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("getDisplayId(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
     void EnableInternalDropAnimationImpl(Ark_DragEvent peer,
                                          const Ark_String* configuration)
     {
@@ -32017,6 +32107,38 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append("[return 0] \n");
         appendGroupedLog(1, out);
         return 0;
+    }
+    Array_Float64 ConvertPositionToWindowImpl(Ark_FrameNode peer,
+                                              const Ark_Vector2* positionByLocal)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("convertPositionToWindow(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, positionByLocal);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Array_Float64 ConvertPositionFromWindowImpl(Ark_FrameNode peer,
+                                                const Ark_Vector2* positionByWindow)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("convertPositionFromWindow(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, positionByWindow);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
     }
     } // FrameNodeExtenderAccessor
     namespace FrictionMotionAccessor {
@@ -41693,6 +41815,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
+    Opt_OffsetResult OffsetImpl(Ark_Scroller peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("offset(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     void ScrollToIndexImpl(Ark_VMContext vmContext,
                            Ark_Scroller peer,
                            Ark_Int32 value,
@@ -44532,6 +44666,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_TextMenuItemId>(300);
     }
+    Ark_TextMenuItemId GetPasswordVaultImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_TextMenuItemId>(300);
+        }
+        string out("getPasswordVault(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_TextMenuItemId>(300)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_TextMenuItemId>(300);
+    }
     } // TextMenuItemIdAccessor
     namespace TextPickerDialogAccessor {
     void DestroyPeerImpl(Ark_TextPickerDialog peer)
@@ -46258,6 +46404,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("pasteAndMatchStyle(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void RequestPasswordAutoFillImpl(Ark_WebContextMenuResult peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("requestPasswordAutoFill(");
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -48008,6 +48164,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DragEventAccessor::GetVelocityYImpl,
             DragEventAccessor::GetVelocityImpl,
             DragEventAccessor::ExecuteDropAnimationImpl,
+            DragEventAccessor::GetDisplayIdImpl,
             DragEventAccessor::EnableInternalDropAnimationImpl,
             DragEventAccessor::GetDragBehaviorImpl,
             DragEventAccessor::SetDragBehaviorImpl,
@@ -48244,6 +48401,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::RemoveAdoptedChildImpl,
             FrameNodeExtenderAccessor::IsOnRendertreeImpl,
             FrameNodeExtenderAccessor::IsOnMainTreeImpl,
+            FrameNodeExtenderAccessor::ConvertPositionToWindowImpl,
+            FrameNodeExtenderAccessor::ConvertPositionFromWindowImpl,
         };
         return &FrameNodeExtenderAccessorImpl;
     }
@@ -49764,6 +49923,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollerAccessor::FlingImpl,
             ScrollerAccessor::ScrollPageImpl,
             ScrollerAccessor::CurrentOffsetImpl,
+            ScrollerAccessor::OffsetImpl,
             ScrollerAccessor::ScrollToIndexImpl,
             ScrollerAccessor::ScrollByImpl,
             ScrollerAccessor::IsAtEndImpl,
@@ -50309,6 +50469,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextMenuItemIdAccessor::GetTRANSLATEImpl,
             TextMenuItemIdAccessor::GetSEARCHImpl,
             TextMenuItemIdAccessor::GetSHAREImpl,
+            TextMenuItemIdAccessor::GetAutoFillImpl,
+            TextMenuItemIdAccessor::GetPasswordVaultImpl,
         };
         return &TextMenuItemIdAccessorImpl;
     }
@@ -50603,6 +50765,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebContextMenuResultAccessor::RedoImpl,
             WebContextMenuResultAccessor::UndoImpl,
             WebContextMenuResultAccessor::PasteAndMatchStyleImpl,
+            WebContextMenuResultAccessor::RequestPasswordAutoFillImpl,
         };
         return &WebContextMenuResultAccessorImpl;
     }

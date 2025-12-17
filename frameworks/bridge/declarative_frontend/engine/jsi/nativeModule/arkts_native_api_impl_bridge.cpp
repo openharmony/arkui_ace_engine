@@ -294,6 +294,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetPageInfoByUniqueId(ArkUIRuntimeCall
         const char* routerPageKeys[] = { "context", "index", "name", "path", "state", "pageId" };
         auto routerPageObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(routerPageKeys), routerPageKeys,
             routerPageValues);
+        if (routerPageResult->size.has_value()) {
+            Local<JSValueRef> sizeValues[] = {
+                panda::NumberRef::New(vm, routerPageResult->size.value().Width()),
+                panda::NumberRef::New(vm, routerPageResult->size.value().Height()) };
+            const char* sizeKeys[] = { "width", "height" };
+            auto sizeObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(sizeKeys), sizeKeys, sizeValues);
+            routerPageObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "size"), sizeObj);
+        }
         pageInfo->Set(vm, panda::StringRef::NewFromUtf8(vm, "routerPageInfo"), routerPageObj);
     }
 
@@ -312,6 +320,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetPageInfoByUniqueId(ArkUIRuntimeCall
             "mode", "uniqueId" };
         auto navDestinationObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(navDestinationKeys),
             navDestinationKeys, navDestinationValues);
+        if (navDestinationResult->size.has_value()) {
+            Local<JSValueRef> sizeValues[] = {
+                panda::NumberRef::New(vm, navDestinationResult->size.value().Width()),
+                panda::NumberRef::New(vm, navDestinationResult->size.value().Height()) };
+            const char* sizeKeys[] = { "width", "height" };
+            auto sizeObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(sizeKeys), sizeKeys, sizeValues);
+            navDestinationObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "size"), sizeObj);
+        }
         pageInfo->Set(vm, panda::StringRef::NewFromUtf8(vm, "navDestinationInfo"), navDestinationObj);
     }
 
@@ -1042,6 +1058,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetScrollBarColor));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetScrollBarColor));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedDragPreviewStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetSelectedDragPreviewStyle));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedDragPreviewStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetSelectedDragPreviewStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "richEditor"), richEditor);
 
     auto linearIndicator = panda::ObjectRef::New(vm);
@@ -1983,30 +2003,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
 
     RegisterSymbolGlyphAttributes(object, vm);
 
-    auto symbolSpan = panda::ObjectRef::New(vm);
-    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::SetFontColor));
-    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::ResetFontColor));
-    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::SetFontSize));
-    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::ResetFontSize));
-    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontWeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::SetFontWeight));
-    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontWeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::ResetFontWeight));
-    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEffectStrategy"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::SetEffectStrategy));
-    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEffectStrategy"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::ResetEffectStrategy));
-    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRenderingStrategy"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::SetRenderingStrategy));
-    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRenderingStrategy"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::ResetRenderingStrategy));
-    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setId"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::SetId));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "symbolSpan"), symbolSpan);
+    RegisterSymbolSpanAttributes(object, vm);
 
 #ifdef MODEL_COMPONENT_SUPPORTED
     auto component3D = panda::ObjectRef::New(vm);
@@ -2902,6 +2899,10 @@ void ArkUINativeModule::RegisterGridAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetSyncLoad));
     grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSyncLoad"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetSyncLoad));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEditModeOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetEditModeOptions));
+    grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEditModeOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::ResetEditModeOptions));
     grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGridScroller"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GridBridge::SetGridScroller));
     grid->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGridLayoutOptions"),
@@ -3503,14 +3504,18 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::ApplyAttributesFinish));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "convertPoint"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::ConvertPoint));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"), frameNode);
-
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "convertPositionToWindow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::ConvertPositionToWindow));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "convertPositionFromWindow"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::ConvertPositionFromWindow));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "adoptChild"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::AdoptChild));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeAdoptedChild"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::RemoveAdoptedChild));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "isOnRenderTree"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::IsOnRenderTree));
+
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"), frameNode);
 }
 
 void ArkUINativeModule::RegisterLineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
@@ -5029,6 +5034,10 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetListSyncLoad));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListSyncLoad"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListSyncLoad));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEditModeOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetEditModeOptions));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEditModeOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetEditModeOptions));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListNestedScroll"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetListNestedScroll));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListNestedScroll"),
@@ -5149,6 +5158,8 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetOnListReachEnd));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnReachEnd"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetOnListReachEnd));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSupportEmptyBranchInLazyLoading"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetSupportEmptyBranchInLazyLoading));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "list"), list);
 }
 
@@ -6272,8 +6283,10 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormLite(Local<panda::ObjectRef
     RegisterGlobalMethods(object, vm);
     RegisterCommonAttributes(object, vm);
     RegisterNativeUtils(object, vm);
+    RegisterColumnAttributes(object, vm);
     RegisterStackAttributes(object, vm);
     RegisterTextAttributes(object, vm);
+    RegisterRenderNodeAttributes(object, vm);
     RegisterFrameNodeAttributesForm(object, vm);
     RegisterNodeContainerAttributes(object, vm);
     RegisterRowAttributes(object, vm);
@@ -6293,16 +6306,19 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     if (!isLiteSetRegistered) {
         RegisterArkUINativeModuleFormLite(object, vm);
     }
-    RegisterColumnAttributes(object, vm);
     RegisterBadgeAttributes(object, vm);
     RegisterBlankAttributes(object, vm);
     RegisterCanvasAttributes(object, vm);
     RegisterCheckboxAttributes(object, vm);
+    RegisterCheckboxGroupAttributes(object, vm);
     RegisterCommonShapeAttributes(object, vm);
+    RegisterCounterAttributes(object, vm);
     RegisterDataPanelAttributes(object, vm);
     RegisterDividerAttributes(object, vm);
     RegisterFlexAttributes(object, vm);
     RegisterGaugeAttributes(object, vm);
+    RegisterGridColAttributes(object, vm);
+    RegisterGridRowAttributes(object, vm);
     RegisterIndicatorComponentAttributes(object, vm);
     RegisterImageAnimatorAttributes(object, vm);
     RegisterLineAttributes(object, vm);
@@ -6318,9 +6334,12 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     RegisterRadioAttributes(object, vm);
     RegisterRatingAttributes(object, vm);
     RegisterRectAttributes(object, vm);
+    RegisterRelativeContainerAttributes(object, vm);
+    RegisterSpanAttributes(object, vm);
     RegisterShapeAttributes(object, vm);
     RegisterSliderAttributes(object, vm);
     RegisterSwiperAttributes(object, vm);
+    RegisterSymbolSpanAttributes(object, vm);
     RegisterTabAttributes(object, vm);
     RegisterTextClockAttributes(object, vm);
     RegisterTextTimerAttributes(object, vm);
@@ -7790,6 +7809,34 @@ void ArkUINativeModule::RegisterSymbolGlyphAttributes(Local<panda::ObjectRef> ob
     symbolGlyph->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShaderStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolGlyphBridge::ResetShaderStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "symbolGlyph"), symbolGlyph);
+}
+
+void ArkUINativeModule::RegisterSymbolSpanAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto symbolSpan = panda::ObjectRef::New(vm);
+    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::SetFontColor));
+    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::ResetFontColor));
+    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::SetFontSize));
+    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::ResetFontSize));
+    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::SetFontWeight));
+    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontWeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::ResetFontWeight));
+    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEffectStrategy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::SetEffectStrategy));
+    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEffectStrategy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::ResetEffectStrategy));
+    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRenderingStrategy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::SetRenderingStrategy));
+    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRenderingStrategy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::ResetRenderingStrategy));
+    symbolSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SymbolSpanBridge::SetId));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "symbolSpan"), symbolSpan);
 }
 
 void ArkUINativeModule::RegisterRelativeContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

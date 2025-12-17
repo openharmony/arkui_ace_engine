@@ -13,9 +13,22 @@
  * limitations under the License.
  */
 
+import { styleItem } from "./CanvasFramework";
 @Builder
-export declare function UserInteractiveTabBarBuilder(z6: string): void;
+export declare function UserInteractiveTabBarBuilder(index: number, name: string, icon: Resource): void;
+@Builder
+export declare function StyleSelectBuilder(styleItems: Array<styleItem>): void;
 @ComponentV2
 export declare struct FunctionAreaPlaceholder {
+    build(): void;
+}
+@ComponentV2
+export declare struct StyleSelect {
+    @Local
+    curSelectedStyle: string | undefined;
+    @Param
+    @Require
+    readonly stylesArray: Array<styleItem>;
+    updateSelectIndex(newSelectedStyle: string): void;
     build(): void;
 }

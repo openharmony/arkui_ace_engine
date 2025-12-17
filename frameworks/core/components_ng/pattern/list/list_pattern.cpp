@@ -17,6 +17,7 @@
 
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
+#include "base/log/event_report.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "base/memory/referenced.h"
@@ -49,6 +50,7 @@ constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
 constexpr int DEFAULT_HEADER_VALUE = 2;
 constexpr int DEFAULT_FOOTER_VALUE = 3;
+constexpr int DEFAULT_PREDICT_ERROR_TIMES = 50;
 #ifdef SUPPORT_DIGITAL_CROWN
 constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
 #endif
@@ -308,7 +310,42 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     UpdateListDirectionInCardStyle();
     snapTrigByScrollBar_ = false;
     ChangeCanStayOverScroll();
+    CheckValidPredictItem();
     return true;
+}
+
+void ListPattern::CheckValidPredictItem()
+{
+    if (!predictLayoutParamV2_.has_value()) {
+        predictItemTimes_.clear();
+        return;
+    }
+
+    std::unordered_set<int32_t> currentFrameItems;
+    currentFrameItems.reserve(predictLayoutParamV2_.value().items.size());
+    for (auto& item : predictLayoutParamV2_.value().items) {
+        currentFrameItems.insert(item.index);
+    }
+
+    for (auto it = predictItemTimes_.begin(); it != predictItemTimes_.end();) {
+        int id = it->first;
+        if (currentFrameItems.count(id)) {
+            it->second++;
+            if (it->second == DEFAULT_PREDICT_ERROR_TIMES) {
+                EventReport::ReportScrollableErrorEvent("List", ScrollableErrorType::PRELOAD_ERROR,
+                    "Infinite List Preloading");
+            }
+            currentFrameItems.erase(id);
+            ++it;
+        } else {
+            it->second = 0;
+            it = predictItemTimes_.erase(it);
+        }
+    }
+
+    for (auto id : currentFrameItems) {
+        predictItemTimes_[id] = 1;
+    }
 }
 
 void ListPattern::UpdateListDirectionInCardStyle()
@@ -3331,6 +3368,15 @@ void ListPattern::CreatePositionInfo(std::unique_ptr<JsonValue>& json)
         children->Put(child);
     }
     json->Put("itemPosition", children);
+}
+
+void ListPattern::DumpInfo()
+{
+    auto property = GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    DumpLog::GetInstance().AddDesc(
+        std::string("ListCacheCount: ")
+        .append(std::to_string(property->GetCachedCountWithDefault())));
 }
 
 void ListPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)

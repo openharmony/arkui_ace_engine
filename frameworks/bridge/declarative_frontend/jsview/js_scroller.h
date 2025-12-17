@@ -38,6 +38,7 @@ public:
     void Fling(const JSCallbackInfo& args);
     void ScrollPage(const JSCallbackInfo& args);
     void CurrentOffset(const JSCallbackInfo& args);
+    void Offset(const JSCallbackInfo& args);
     void ScrollToIndex(const JSCallbackInfo& args);
     void ScrollBy(const JSCallbackInfo& args);
     void IsAtEnd(const JSCallbackInfo& args);

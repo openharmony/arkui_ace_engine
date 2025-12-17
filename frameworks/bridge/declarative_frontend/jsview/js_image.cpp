@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+
 #include "base/network/download_manager.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #ifndef PREVIEW
@@ -504,7 +505,7 @@ void ParseImageAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius,
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
             CalcDimension result;
             ResourceParseUtils::ParseResDimensionVp(resObj, result);
-            borderRadius.radiusTopLeft = result;
+            borderRadius.radiusTopStart = result;
         };
         borderRadius.AddResource("borderRadius.topLeft", topLeftResObj, std::move(updateFunc));
     }
@@ -512,7 +513,7 @@ void ParseImageAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius,
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
             CalcDimension result;
             ResourceParseUtils::ParseResDimensionVp(resObj, result);
-            borderRadius.radiusTopRight = result;
+            borderRadius.radiusTopEnd = result;
         };
         borderRadius.AddResource("borderRadius.topRight", topRightResObj, std::move(updateFunc));
     }
@@ -520,7 +521,7 @@ void ParseImageAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius,
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
             CalcDimension result;
             ResourceParseUtils::ParseResDimensionVp(resObj, result);
-            borderRadius.radiusBottomLeft = result;
+            borderRadius.radiusBottomStart = result;
         };
         borderRadius.AddResource("borderRadius.bottomLeft", bottomLeftResObj, std::move(updateFunc));
     }
@@ -528,7 +529,7 @@ void ParseImageAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius,
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
             CalcDimension result;
             ResourceParseUtils::ParseResDimensionVp(resObj, result);
-            borderRadius.radiusBottomRight = result;
+            borderRadius.radiusBottomEnd = result;
         };
         borderRadius.AddResource("borderRadius.bottomRight", bottomRightResObj, std::move(updateFunc));
     }
@@ -565,15 +566,11 @@ void JSImage::SetImageLengthMetricsBorderRadiusWithResObj(JSRef<JSObject>& objec
         JSRef<JSObject> endObj = JSRef<JSObject>::Cast(object->GetProperty(BOTTOM_END_PROPERTY));
         ParseJsLengthMetricsVpWithResObj(endObj, bottomRight, bottomRightResObj);
     }
-    borderRadiusProperty.radiusTopLeft = topLeft;
-    borderRadiusProperty.radiusTopRight = topRight;
-    borderRadiusProperty.radiusBottomLeft = bottomLeft;
-    borderRadiusProperty.radiusBottomRight = bottomRight;
-    borderRadiusProperty.multiValued = true;
     ParseImageAllBorderRadiusesResObj(
         borderRadiusProperty, topLeftResObj, topRightResObj, bottomLeftResObj, bottomRightResObj);
-    ImageModel::GetInstance()->SetBorderRadius(borderRadiusProperty);
-    ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadiusProperty);
+    ImageModel::GetInstance()->SetBorderRadius(GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
+    ViewAbstractModel::GetInstance()->SetBorderRadius(
+        GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
 }
 
 void JSImage::SetImageBorderRadiusWithResObj(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
@@ -588,15 +585,11 @@ void JSImage::SetImageBorderRadiusWithResObj(JSRef<JSObject>& object, CalcDimens
     GetBorderRadiusResObj("topRight", object, topRight, topRightResObj);
     GetBorderRadiusResObj("bottomLeft", object, bottomLeft, bottomLeftResObj);
     GetBorderRadiusResObj("bottomRight", object, bottomRight, bottomRightResObj);
-    borderRadiusProperty.radiusTopLeft = topLeft;
-    borderRadiusProperty.radiusTopRight = topRight;
-    borderRadiusProperty.radiusBottomLeft = bottomLeft;
-    borderRadiusProperty.radiusBottomRight = bottomRight;
-    borderRadiusProperty.multiValued = true;
     ParseImageAllBorderRadiusesResObj(
         borderRadiusProperty, topLeftResObj, topRightResObj, bottomLeftResObj, bottomRightResObj);
-    ImageModel::GetInstance()->SetBorderRadius(borderRadiusProperty);
-    ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadiusProperty);
+    ImageModel::GetInstance()->SetBorderRadius(GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
+    ViewAbstractModel::GetInstance()->SetBorderRadius(
+        GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
 }
 void JSImage::ParseBorderRadius(const JSRef<JSVal>& args)
 {

@@ -2075,6 +2075,8 @@ public:
         JSClass<JSContextMenuResult>::CustomMethod("undo", &JSContextMenuResult::Undo);
         JSClass<JSContextMenuResult>::CustomMethod("redo", &JSContextMenuResult::Redo);
         JSClass<JSContextMenuResult>::CustomMethod("pasteAndMatchStyle", &JSContextMenuResult::PasteAndMatchStyle);
+        JSClass<JSContextMenuResult>::CustomMethod("requestPasswordAutoFill",
+            &JSContextMenuResult::RequestPasswordAutoFill);
         JSClass<JSContextMenuResult>::Bind(
             globalObj, &JSContextMenuResult::Constructor, &JSContextMenuResult::Destructor);
     }
@@ -2148,6 +2150,13 @@ public:
         RETURN_IF_CALLING_FROM_M114();
         if (result_) {
             result_->PasteAndMatchStyle();
+        }
+    }
+
+    void RequestPasswordAutoFill(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->RequestPasswordAutoFill();
         }
     }
 

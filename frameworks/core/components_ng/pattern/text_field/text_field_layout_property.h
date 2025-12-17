@@ -96,13 +96,6 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto themeScopeId = host->GetThemeScopeId();
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto theme = context->GetTheme<TextTheme>(themeScopeId);
-        CHECK_NULL_VOID(theme);
         json->PutExtAttr("showPasswordIcon", propShowPasswordIcon_.value_or(true), filter);
         json->PutExtAttr("showPassword", propShowPasswordText_.value_or(false), filter);
         json->PutExtAttr("errorText", UtfUtils::Str16DebugToStr8(propErrorText_.value_or(u"")).c_str(), filter);
@@ -145,8 +138,6 @@ public:
         json->PutExtAttr("textIndent", GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
         json->PutExtAttr("stopBackPress", GetStopBackPress().value_or(true), filter);
         json->PutExtAttr("onlyBetweenLines", GetIsOnlyBetweenLines().value_or(false) ? "true" : "false", filter);
-        json->PutExtAttr("selectedDragPreviewStyle",
-        GetSelectedDragPreviewStyleValue(theme->GetDragBackgroundColor()).ColorToString().c_str(), filter);
         ToJsonValueMore(json, filter);
     }
 
@@ -163,7 +154,7 @@ public:
         json->PutExtAttr("fallbackLineSpacing", std::to_string(
             GetFallbackLineSpacing().value_or(false)).c_str(), filter);
         json->PutExtAttr("selectedDragPreviewStyle",
-            GetSelectedDragPreviewStyleValue(Color::WHITE).ColorToString().c_str(), filter);
+            GetSelectedDragPreviewStyleValue(GetSelectedDragPreviewStyleColor()).ColorToString().c_str(), filter);
     }
 
     const std::function<void(WeakPtr<NG::FrameNode>)>& GetCancelIconSymbol() const
@@ -184,6 +175,18 @@ public:
         }
         return decorations.value().size() > 0 ?
             decorations.value()[0] : TextDecoration::NONE;
+    }
+
+    Color GetSelectedDragPreviewStyleColor() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, Color::WHITE);
+        auto themeScopeId = host->GetThemeScopeId();
+        auto context = host->GetContext();
+        CHECK_NULL_RETURN(context, Color::WHITE);
+        auto theme = context->GetTheme<TextTheme>(themeScopeId);
+        CHECK_NULL_RETURN(theme, Color::WHITE);
+        return theme->GetDragBackgroundColor();
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);

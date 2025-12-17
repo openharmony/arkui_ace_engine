@@ -309,6 +309,7 @@ export class RenderNode implements MaterializedBase {
     }
     set markNodeGroup(markNodeGroup: boolean) {
         this.setMarkNodeGroup(markNodeGroup)
+        this.markNodeGroupValue = markNodeGroup;
     }
     get lengthMetricsUnit(): LengthMetricsUnit {
         return this.lengthMetricsUnitValue

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 
 #ifdef WEB_SUPPORTED
@@ -24,8 +23,8 @@
 #include "core/interfaces/native/implementation/controller_handler_peer_impl.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #endif // WEB_SUPPORTED
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
@@ -117,7 +116,7 @@ ScriptRegexItems Convert(const Array_ScriptItem& src)
             scriptRegexItems.insert(std::make_pair(script, regexRules));
         }
     }
- 
+
     return scriptRegexItems;
 }
 
@@ -265,6 +264,12 @@ void SetWebOptionsImpl(Ark_NativePointer node,
         WebModelStatic::SetWebIdCallback(frameNode, std::move(controller->setWebIdFunc));
         WebModelStatic::SetHapPathCallback(frameNode, std::move(controller->setHapPathFunc));
         WebModelStatic::SetWebDetachCallback(frameNode, std::move(controller->setWebDetachFunc));
+        auto fileSelectorShowFromUserCallback = [callback = std::move(controller->defaultOnShowFileSelectorFunc),
+                                                    weakNode = AceType::WeakClaim(frameNode),
+                                                    instanceId = Container::CurrentId()](const BaseEventInfo* info) {
+            WebAttributeModifier::DefaultOnShowFileSelector(std::move(callback), weakNode, instanceId, info);
+        };
+        WebModelStatic::SetDefaultFileSelectorShow(frameNode, std::move(fileSelectorShowFromUserCallback));
         /* This controller is only used to pass the hook function for initializing the webviewController.
          * After passing, the corresponding memory needs to be released.
          */
@@ -2862,6 +2867,27 @@ void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 
+void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
+                                  const Opt_TextSelectionChangeCallback* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onTextSelectionChange = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> void {
+        OnTextSelectionChange(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetOnTextSelectionChange(frameNode, onTextSelectionChange);
+#endif // WEB_SUPPORTED
+}
+
 void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
                                  const Opt_Boolean* value)
 {
@@ -2870,6 +2896,47 @@ void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     WebModelStatic::SetEnableImageAnalyzer(frameNode, convValue.value_or(true));
+#endif // WEB_SUPPORTED
+}
+void SetOnMicrophoneCaptureStateChangeImpl(Ark_NativePointer node,
+                                           const Opt_OnMicrophoneCaptureStateChangeCallback* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onMicrophoneCaptureStateChange = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnMicrophoneCaptureStateChange(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetMicrophoneCaptureStateChangedId(frameNode, onMicrophoneCaptureStateChange);
+#endif // WEB_SUPPORTED
+}
+
+void SetOnCameraCaptureStateChangeImpl(Ark_NativePointer node,
+                                       const Opt_OnCameraCaptureStateChangeCallback* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onCameraCaptureStateChange = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnCameraCaptureStateChange(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetCameraCaptureStateChangedId(frameNode, onCameraCaptureStateChange);
 #endif // WEB_SUPPORTED
 }
 } // WebAttributeModifier
@@ -3014,7 +3081,10 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetBlankScreenDetectionConfigImpl,
         WebAttributeModifier::SetZoomControlAccessImpl,
         WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
+        WebAttributeModifier::SetOnTextSelectionChangeImpl,
         WebAttributeModifier::SetEnableImageAnalyzerImpl,
+        WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
+        WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
     };

@@ -65,6 +65,7 @@ public:
     void RecycleForm(std::string& statusData);
     void RecoverForm(const std::string& statusData);
     void GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) const;
+    void SetRenderGroupEnableFlag(bool isEnable);
     void SetVisibleChange(bool isVisible);
     void UpdateFormSize(float width, float height, float borderWidth, float formViewScale);
     bool IsManagerDelegateValid(const OHOS::AAFwk::Want& want);
@@ -80,6 +81,7 @@ private:
     std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode();
     void SetUIContentProperty(const OHOS::AAFwk::Want &want);
 
+    bool disableUIFirst_ = false;
     bool allowUpdate_ = true;
     bool obscurationMode_ = false;
     float width_ = 0.0f;
@@ -91,6 +93,7 @@ private:
     std::string backgroundColor_;
     AppExecFwk::Constants::RenderingMode renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
     bool enableBlurBackground_ = false;
+    bool deleteBackgroundImage_ = false;
     std::vector<std::string> cachedInfos_;
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;

@@ -191,6 +191,12 @@ void JSGridItem::SetSelected(const JSCallbackInfo& info)
     }
 }
 
+void JSGridItem::BindContextMenu(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBindContextMenu(info);
+    GridItemModel::GetInstance()->BindContextMenu();
+}
+
 void JSGridItem::JSBind(BindingTarget globalObj)
 {
     JSClass<JSGridItem>::Declare("GridItem");
@@ -217,6 +223,7 @@ void JSGridItem::JSBind(BindingTarget globalObj)
     JSClass<JSGridItem>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSGridItem>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSGridItem>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSGridItem>::StaticMethod("bindContextMenu", &JSGridItem::BindContextMenu);
 
     JSClass<JSGridItem>::InheritAndBind<JSContainerBase>(globalObj);
 }

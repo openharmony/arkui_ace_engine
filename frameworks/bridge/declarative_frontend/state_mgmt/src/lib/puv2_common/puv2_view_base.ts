@@ -118,6 +118,8 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   private activeChangeListenerForInterop_: Set<(active: boolean) => void> = new Set<(active: boolean) => void>();
 
+  protected __isEntryValue__Internal = false;
+
   constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
     super(true);
     this.nativeViewPartialUpdate = new NativeViewPartialUpdate(this);
@@ -137,6 +139,9 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       this.setCardId(parent.getCardId());
       // Call below will set this parent_ to parent as well
       parent.addChild(this as unknown as IView); // FIXME
+      this.nativeViewPartialUpdate.setCreatorId(parent.id__());
+    } else {
+      this.__isEntryValue__Internal = true;
     }
 
     this.isCompFreezeAllowed_ = this.isCompFreezeAllowed_ || (this.parent_ && this.parent_.isCompFreezeAllowed());
@@ -388,6 +393,8 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   }
 
   protected abstract debugInfoStateVars(): string;
+
+  public abstract getRecycleDump(): string;
 
   public isViewActive(): boolean {
     return this.activeCount_ > 0;
@@ -843,6 +850,9 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
           view.dumpReport();
           this.sendStateInfo('{}');
           break;
+        case 'RecyclePool':
+          DumpLog.addDesc('RecyclePool: ' + this.getRecycleDump());
+          break;
         default:
           DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
       }
@@ -1007,5 +1017,26 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
         listener(active);
       });
     }
+  }
+
+  public __isEntry__Internal(): boolean {
+    return this.__isEntryValue__Internal;
+  }
+
+  public abstract __getPathValueFromJson__Internal(propertyName: string, jsonPath: string): string | undefined;
+
+  protected __findPathValueInJson__Internal(jsonValue: Object, jsonPath: string): string | undefined {
+    const paths = jsonPath.split('/').filter(path => path.length > 0);
+    let current = jsonValue;
+    for (const path of paths) {
+      if (current === null || current === undefined) {
+        return undefined;
+      }
+      if ((typeof current !== 'object') || !Object.prototype.hasOwnProperty.call(current, path)) {
+        return undefined;
+      }
+      current = current[path];
+    }
+    return typeof current === 'string' ? current : undefined;
   }
 } // class PUV2ViewBase

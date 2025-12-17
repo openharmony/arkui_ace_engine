@@ -38,6 +38,7 @@ private:
     int32_t RegisterWebUnfocusEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t RegisterScrollEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t RegisterLifeCycleEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t RegisterSelectTextEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t SendCommandInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t SendCommandInnerAsync(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t SendCommandKeyCodeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
@@ -50,6 +51,7 @@ private:
     int32_t UnregisterWebUnfocusEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t UnregisterScrollEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t UnregisterLifeCycleEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t UnregisterSelectTextEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t ResetTranslateTextAllInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t ResetTranslateTextInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetWebViewCurrentLanguageInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
@@ -59,11 +61,15 @@ private:
     int32_t SendTranslateResultStrInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetCurrentPageNameInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t EndWebViewTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t GetSpecifiedContentOffsetsInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t HighlightSpecifiedContentInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetCurrentImagesShowingInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetVisibleInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t GetHitTestNodeInfoForTouchInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t ExeAppAIFunctionInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t RegisterContentChangeCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t UnregisterContentChangeCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t GetStateMgmtInfoInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
 
     bool IsSACalling() const;
 };

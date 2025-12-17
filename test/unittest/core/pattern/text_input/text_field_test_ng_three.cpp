@@ -1034,45 +1034,6 @@ HWTEST_F(TextFieldTestNgThree, SetUnitNode006, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetUnitNode007
- * @tc.desc: Test SetUnitNode
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldTestNgThree, SetUnitNode007, TestSize.Level1)
-{
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextFieldPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-    textFieldPattern->responseArea_ = nullptr;
-    textFieldPattern->unitNode_ =
-        AceType::DynamicCast<NG::UINode>(AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>()));
-    RefPtr<NG::UINode> unitNode =
-        AceType::DynamicCast<NG::UINode>(AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>()));
-    textFieldPattern->SetUnitNode(unitNode);
-    EXPECT_EQ(textFieldPattern->responseArea_, nullptr);
-}
-
-/**
- * @tc.name: SetUnitNode008
- * @tc.desc: Test SetUnitNode
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldTestNgThree, SetUnitNode008, TestSize.Level1)
-{
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextFieldPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-    textFieldPattern->responseArea_ = nullptr;
-    textFieldPattern->unitNode_ = nullptr;
-    RefPtr<NG::UINode> unitNode =
-        AceType::DynamicCast<NG::UINode>(AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>()));
-    textFieldPattern->SetUnitNode(unitNode);
-    EXPECT_EQ(textFieldPattern->responseArea_, nullptr);
-}
-
-/**
  * @tc.name: IsStopEditWhenCloseKeyboard001
  * @tc.desc: Test IsStopEditWhenCloseKeyboard
  * @tc.type: FUNC

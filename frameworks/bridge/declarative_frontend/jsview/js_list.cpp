@@ -647,6 +647,22 @@ void JSList::SetSyncLoad(const JSCallbackInfo& args)
     ListModel::GetInstance()->SetSyncLoad(enabled);
 }
 
+void JSList::SetEditModeOptions(const JSCallbackInfo& info)
+{
+    NG::EditModeOptions options;
+    if (info.Length() >= 1) {
+        auto value = info[0];
+        if (value->IsObject()) {
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(value);
+            auto gatherAnimation = obj->GetProperty("enableGatherSelectedItemsAnimation");
+            if (gatherAnimation->IsBoolean()) {
+                options.enableGatherSelectedItemsAnimation = gatherAnimation->ToBoolean();
+            }
+        }
+    }
+    ListModel::GetInstance()->SetEditModeOptions(options);
+}
+
 void JSList::SetScrollSnapAnimationSpeed(const JSCallbackInfo& args)
 {
     ScrollSnapAnimationSpeed speed = ScrollSnapAnimationSpeed::NORMAL;
@@ -982,6 +998,16 @@ void JSList::ScrollFrameBeginCallback(const JSCallbackInfo& args)
     }
 }
 
+void JSList::SetSupportEmptyBranchInLazyLoading(const JSCallbackInfo& args)
+{
+    bool supportEmptyBranch = false;
+    JSRef<JSVal> arg0 = args[0];
+    if (arg0->IsBoolean()) {
+        supportEmptyBranch = arg0->ToBoolean();
+    }
+    ListModel::GetInstance()->SetSupportEmptyBranchInLazyLoading(supportEmptyBranch);
+}
+
 void JSList::JSBind(BindingTarget globalObj)
 {
     JSClass<JSList>::Declare("List");
@@ -1011,8 +1037,10 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("friction", &JSList::SetFriction);
     JSClass<JSList>::StaticMethod("focusWrapMode", &JSList::SetFocusWrapMode);
     JSClass<JSList>::StaticMethod("maintainVisibleContentPosition", &JSList::MaintainVisibleContentPosition);
+    JSClass<JSList>::StaticMethod("supportEmptyBranchInLazyLoading", &JSList::SetSupportEmptyBranchInLazyLoading);
     JSClass<JSList>::StaticMethod("stackFromEnd", &JSList::SetStackFromEnd);
     JSClass<JSList>::StaticMethod("syncLoad", &JSList::SetSyncLoad);
+    JSClass<JSList>::StaticMethod("editModeOptions", &JSList::SetEditModeOptions);
     JSClass<JSList>::StaticMethod("scrollSnapAnimationSpeed", &JSList::SetScrollSnapAnimationSpeed);
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);

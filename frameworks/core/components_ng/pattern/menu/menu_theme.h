@@ -65,6 +65,7 @@ public:
             theme->symbolId_ = themeConstants->GetSymbolByName("sys.symbol.checkmark");
             theme->embeddedExpandIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_down");
             theme->stackExpandIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_forward");
+            theme->textRightClickMenuEndIconId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_right");
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -136,7 +137,6 @@ public:
             theme->menuHapticFeedback_ =
                 pattern->GetAttr<std::string>("menu_haptic_feedback", "haptic.long_press_medium");
             theme->menuOutlineColor_ = Color(MENU_OUTLINE_COLOR);
-            theme->minKeyboardAvoidDistance_ = pattern->GetAttr<Dimension>("menu_min_keyboard_avoid_distance", 8.0_vp);
             ParseWideScreenAttrs(theme, pattern);
         }
 
@@ -422,14 +422,14 @@ public:
         return stackExpandIconId_;
     }
 
+    uint32_t GetTextRightClickMenuEndIconId() const
+    {
+        return textRightClickMenuEndIconId_;
+    }
+
     Color GetMenuOutlineColor() const
     {
         return menuOutlineColor_;
-    }
-
-    Dimension GetMinKeyboardAvoidDistance()
-    {
-        return minKeyboardAvoidDistance_;
     }
 
 protected:
@@ -491,8 +491,8 @@ private:
     std::string menuHapticFeedback_;
     uint32_t embeddedExpandIconId_ = 0;
     uint32_t stackExpandIconId_ = 0;
+    uint32_t textRightClickMenuEndIconId_ = 0;
     Color menuOutlineColor_ = Color(MENU_OUTLINE_COLOR);
-    Dimension minKeyboardAvoidDistance_ = Dimension();
 };
 
 } // namespace OHOS::Ace::NG

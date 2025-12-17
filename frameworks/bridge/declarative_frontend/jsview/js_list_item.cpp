@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -204,6 +204,12 @@ void JSListItem::SetSelected(const JSCallbackInfo& info)
         };
         ListItemModel::GetInstance()->SetSelectChangeEvent(std::move(changeEvent));
     }
+}
+
+void JSListItem::BindContextMenu(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsBindContextMenu(info);
+    ListItemModel::GetInstance()->BindContextMenu();
 }
 
 void JSListItem::JsParseDeleteArea(const JsiExecutionContext& context, const JSRef<JSVal>& jsValue,
@@ -472,6 +478,7 @@ void JSListItem::JSBind(BindingTarget globalObj)
     JSClass<JSListItem>::StaticMethod("borderRadius", &JSListItem::JsBorderRadius);
     JSClass<JSListItem>::StaticMethod("swipeAction", &JSListItem::SetSwiperAction);
     JSClass<JSListItem>::StaticMethod("selected", &JSListItem::SetSelected);
+    JSClass<JSListItem>::StaticMethod("bindContextMenu", &JSListItem::BindContextMenu);
 
     JSClass<JSListItem>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSListItem>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);

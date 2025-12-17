@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,12 +33,13 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
+#include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
+#include "ui/properties/ui_material.h"
 
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -857,6 +858,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     taskExecutor->PostDelayedTask(
         preDragStatusCallback, TaskExecutor::TaskType::UI, curDuration, "ArkUIPreDragLongPressTimer");
 }
+
 void DragEventActuator::ResetDragStatus()
 {
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -1096,6 +1098,9 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     auto optionsFromModifier = frameNode->GetDragPreviewOption().options;
     if (optionsFromModifier.blurbgEffect.backGroundEffect.radius.IsValid()) {
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundEffect, optionsFromModifier.blurbgEffect.backGroundEffect, imageNode);
+    }
+    if (optionsFromModifier.material) {
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(imageNode), AceType::RawPtr(optionsFromModifier.material));
     }
 }
 
@@ -1798,7 +1803,7 @@ RefPtr<FrameNode> DragEventActuator::CreateGatherNode(const RefPtr<DragEventActu
     }
     auto fatherNode = actuator->itemParentNode_.Upgrade();
     CHECK_NULL_RETURN(fatherNode, nullptr);
-    auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
+    auto scrollPattern = fatherNode->GetPattern<SelectableContainerPattern>();
     CHECK_NULL_RETURN(scrollPattern, nullptr);
     auto children = scrollPattern->GetVisibleSelectedItems();
     if (children.empty()) {
@@ -1984,21 +1989,8 @@ bool DragEventActuator::IsSelectedItemNode(const RefPtr<UINode>& uiNode)
     if (!isAllowedDrag) {
         return false;
     }
-    if (frameNode->GetTag() == V2::GRID_ITEM_ETS_TAG) {
-        auto itemPattern = frameNode->GetPattern<GridItemPattern>();
-        CHECK_NULL_RETURN(itemPattern, false);
-        if (itemPattern->IsSelected()) {
-            return true;
-        }
-    }
-    if (frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
-        auto itemPattern = frameNode->GetPattern<ListItemPattern>();
-        CHECK_NULL_RETURN(itemPattern, false);
-        if (itemPattern->IsSelected()) {
-            return true;
-        }
-    }
-    return false;
+
+    return SelectableUtils::IsSelectedItemNode(frameNode);
 }
 
 void DragEventActuator::FindItemParentNode(const RefPtr<FrameNode>& frameNode)
@@ -2023,7 +2015,7 @@ bool DragEventActuator::IsNeedGather() const
 {
     auto fatherNode = itemParentNode_.Upgrade();
     CHECK_NULL_RETURN(fatherNode, false);
-    auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
+    auto scrollPattern = fatherNode->GetPattern<SelectableContainerPattern>();
     CHECK_NULL_RETURN(scrollPattern, false);
     auto children = scrollPattern->GetVisibleSelectedItems();
     if (!isSelectedItemNode_ || children.empty()) {

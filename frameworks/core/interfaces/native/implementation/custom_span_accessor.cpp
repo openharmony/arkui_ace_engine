@@ -16,14 +16,13 @@
 #include "custom_span_peer.h"
 #include "draw_context_peer.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
-void AssignArkValue(Ark_CustomSpanDrawInfo& dst, const CustomSpanOptions& src)
+void AssignArkValue(Ark_CustomSpanDrawInfo& dst, const CustomSpanOptions& src, ConvContext *ctx)
 {
     dst.x = ArkValue<Ark_Float64>(src.x);
     dst.lineTop = ArkValue<Ark_Float64>(src.lineTop);
@@ -31,12 +30,12 @@ void AssignArkValue(Ark_CustomSpanDrawInfo& dst, const CustomSpanOptions& src)
     dst.baseline = ArkValue<Ark_Float64>(src.baseline);
 }
 
-void AssignArkValue(Ark_CustomSpanMeasureInfo& dst, const CustomSpanMeasureInfo& src)
+void AssignArkValue(Ark_CustomSpanMeasureInfo& dst, const CustomSpanMeasureInfo& src, ConvContext *ctx)
 {
     dst.fontSize = ArkValue<Ark_Float64>(src.fontSize);
 }
 
-void AssignArkValue(Ark_CustomSpanMetrics& dst, const CustomSpanMetrics& src)
+void AssignArkValue(Ark_CustomSpanMetrics& dst, const CustomSpanMetrics& src, ConvContext *ctx)
 {
     dst.width = ArkValue<Ark_Float64>(src.width);
     dst.height = ArkValue<Opt_Float64>(src.height);

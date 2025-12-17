@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,12 +24,12 @@
 #include "core/components_ng/pattern/grid/grid_item_model.h"
 #include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
-#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT GridItemPattern : public Pattern {
-    DECLARE_ACE_TYPE(GridItemPattern, Pattern);
+class ACE_EXPORT GridItemPattern : public SelectableItemPattern {
+    DECLARE_ACE_TYPE(GridItemPattern, SelectableItemPattern);
 
 public:
     explicit GridItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
@@ -117,16 +117,6 @@ public:
 
     void MarkIsSelected(bool isSelected);
 
-    bool IsSelected() const
-    {
-        return isSelected_;
-    }
-
-    void SetSelected(bool selected)
-    {
-        isSelected_ = selected;
-    }
-
     void SetIrregularItemInfo(GridItemIndexInfo info)
     {
         irregularItemInfo_ = info;
@@ -190,7 +180,6 @@ private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     bool forceRebuild_ = false;
     bool selectable_ = true;
-    bool isSelected_ = false;
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchListener_;

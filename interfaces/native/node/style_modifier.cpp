@@ -1847,6 +1847,29 @@ void ResetPixelRound(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getCommonModifier()->resetPixelRound(node->uiNodeHandle);
 }
 
+int32_t SetMotionPath(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!node || !item || !node->uiNodeHandle) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* options = reinterpret_cast<ArkUI_MotionPathOptions*>(item->object);
+    CHECK_NULL_RETURN(options, ERROR_CODE_PARAM_INVALID);
+    const char* path = options->path;
+    ArkUI_Float32 from = options->from;
+    ArkUI_Float32 to = options->to;
+    ArkUI_Bool rotatable = options->rotatable;
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setMotionPath(node->uiNodeHandle, path, from, to, rotatable);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetMotionPath(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_VOID(node);
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetMotionPath(node->uiNodeHandle);
+}
+
 void FillPolicyFromVec(int32_t* vec, int32_t offset, ArkUI_OptionalCalcPolicy& calcPolicy)
 {
     if (vec[offset] == -1) {
@@ -1870,6 +1893,29 @@ const ArkUI_AttributeItem* GetPixelRound(ArkUI_NodeHandle node)
     FillPolicyFromVec(values, NUM_2, policy->end);
     FillPolicyFromVec(values, NUM_3, policy->bottom);
     g_attributeItem.object = policy;
+    return &g_attributeItem;
+}
+
+const ArkUI_AttributeItem* GetMotionPath(ArkUI_NodeHandle node)
+{
+    static ArkUI_MotionPathOptions motionPathOptions { nullptr, 0.0f, 1.0f, false };
+    if (motionPathOptions.path != nullptr) {
+        delete[] motionPathOptions.path;
+        motionPathOptions.path = nullptr;
+    }
+    g_attributeItem.size = NUM_0;
+    auto* fullImpl = GetFullImpl();
+    if (!fullImpl->getNodeModifiers()->getCommonModifier()->getMotionPath(node->uiNodeHandle, &motionPathOptions)) {
+        auto optionPath = new (std::nothrow) char[1];
+        optionPath[0] = '\0';
+        motionPathOptions.path = optionPath;
+        motionPathOptions.from = 0.0f;
+        motionPathOptions.to = 1.0f;
+        motionPathOptions.rotatable = false;
+        g_attributeItem.object = &motionPathOptions;
+        return &g_attributeItem;
+    }
+    g_attributeItem.object = &motionPathOptions;
     return &g_attributeItem;
 }
 
@@ -7896,6 +7942,33 @@ const ArkUI_AttributeItem* GetListScrollAnimationSpeed(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetListSupportEmptyBranchInLazyLoading(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    bool enable = false;
+    if (item == nullptr || item->size < NUM_1 || !InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    } else {
+        enable = item->value[0].i32;
+    }
+    GetFullImpl()->getNodeModifiers()->getListModifier()->setSupportEmptyBranchInLazyLoading(
+        node->uiNodeHandle, enable);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetListSupportEmptyBranchInLazyLoading(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getListModifier()->setSupportEmptyBranchInLazyLoading(
+        node->uiNodeHandle, false);
+}
+
+const ArkUI_AttributeItem* GetListSupportEmptyBranchInLazyLoading(ArkUI_NodeHandle node)
+{
+    ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getListModifier()->getSupportEmptyBranchInLazyLoading(
+        node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
 // TextArea
 int32_t SetTextAreaPlaceholderFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -8127,9 +8200,11 @@ int32_t SetTextInputShowCounter(ArkUI_NodeHandle node, const ArkUI_AttributeItem
     }
     auto* config = reinterpret_cast<ArkUI_ShowCounterConfig*>(item->object);
     if (config && config->counterTextColor.isSet) {
+        showCountOptions.counterTextColorIsSet = config->counterTextColor.isSet;
         showCountOptions.counterTextColor = config->counterTextColor.value;
     }
     if (config && config->counterTextOverflowColor.isSet) {
+        showCountOptions.counterTextOverflowColorIsSet = config->counterTextOverflowColor.isSet;
         showCountOptions.counterTextOverflowColor = config->counterTextOverflowColor.value;
     }
     ArkUIShowCountOptions* options = &showCountOptions;
@@ -8162,14 +8237,8 @@ const ArkUI_AttributeItem* GetTextAreaShowCounter(ArkUI_NodeHandle node)
     // highlightBorder
     g_numberValues[NUM_2].i32 = options.highlightBorder;
     ArkUI_ShowCounterConfig* config = new ArkUI_ShowCounterConfig;
-    if (options.counterTextColor != -1) {
-        config->counterTextColor.value = options.counterTextColor;
-        config->counterTextColor.isSet = 1;
-    }
-    if (options.counterTextOverflowColor != -1) {
-        config->counterTextOverflowColor.value = options.counterTextOverflowColor;
-        config->counterTextOverflowColor.isSet = 1;
-    }
+    config->counterTextColor.value = options.counterTextColor;
+    config->counterTextOverflowColor.value = options.counterTextOverflowColor;
     g_attributeItem.object = config;
     return &g_attributeItem;
 }
@@ -8186,14 +8255,8 @@ const ArkUI_AttributeItem* GetTextInputShowCounter(ArkUI_NodeHandle node)
     // highlightBorder
     g_numberValues[NUM_2].i32 = options.highlightBorder;
     ArkUI_ShowCounterConfig* config = new ArkUI_ShowCounterConfig;
-    if (options.counterTextColor != -1) {
-        config->counterTextColor.value = options.counterTextColor;
-        config->counterTextColor.isSet = 1;
-    }
-    if (options.counterTextOverflowColor != -1) {
-        config->counterTextOverflowColor.value = options.counterTextOverflowColor;
-        config->counterTextOverflowColor.isSet = 1;
-    }
+    config->counterTextColor.value = options.counterTextColor;
+    config->counterTextOverflowColor.value = options.counterTextOverflowColor;
     g_attributeItem.object = config;
     return &g_attributeItem;
 }
@@ -18041,14 +18104,14 @@ const ArkUI_AttributeItem* GetGridSupportAnimation(ArkUI_NodeHandle node)
 
 int32_t SetGridSupportLazyLoadingEmptyBranch(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    bool supportLazyLoadingEmptyBranch = false;
+    bool enable = false;
     if (item == nullptr || item->size < NUM_1 || !InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     } else {
-        supportLazyLoadingEmptyBranch = item->value[0].i32;
+        enable = item->value[0].i32;
     }
     GetFullImpl()->getNodeModifiers()->getGridModifier()->setSupportLazyLoadingEmptyBranch(
-        node->uiNodeHandle, supportLazyLoadingEmptyBranch);
+        node->uiNodeHandle, enable);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -18478,7 +18541,7 @@ void ResetIgnoreLayoutSafeArea(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetIgnoreLayoutSafeArea(ArkUI_NodeHandle node)
 {
     auto resultValue =
-        GetFullImpl()->getNodeModifiers()->getCommonModifier()->getIgnoreLayoutSafeArea(node->uiNodeHandle);
+        GetFullImpl()->getNodeModifiers()->getCommonModifier()->getIgnoreLayoutSafeAreaOpts(node->uiNodeHandle);
     g_numberValues[NUM_0].u32 = resultValue.type;
     g_numberValues[NUM_1].u32 = resultValue.edges;
     return &g_attributeItem;
@@ -18599,20 +18662,20 @@ int32_t SetBorderRadiusType(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
         type = item->value[NUM_0].i32;
     }
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBorderRadiusType(node->uiNodeHandle, type);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setRenderStrategy(node->uiNodeHandle, type);
     return ERROR_CODE_NO_ERROR;
 }
 
 void ResetBorderRadiusType(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->resetBorderRadiusType(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetRenderStrategy(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetBorderRadiusType(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getCommonModifier()->getBorderRadiusType(node->uiNodeHandle);
+    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getCommonModifier()->getRenderStrategy(node->uiNodeHandle);
     if (g_numberValues[0].i32 < 0 || g_numberValues[0].i32 > 1) {
         return nullptr;
     }
@@ -18882,7 +18945,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetAllowForceDark,
         SetPixelRound,
         nullptr,
-        nullptr,
+        SetMotionPath,
         SetHoverEffect,
         SetFocusScopeId,
         SetFocusScopePriority,
@@ -19017,7 +19080,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetAllowForceDark,
         GetPixelRound,
         nullptr,
-        nullptr,
+        GetMotionPath,
         GetHoverEffect,
         GetFocusScopeId,
         GetFocusPriority,
@@ -19156,7 +19219,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetAllowForceDark,
         ResetPixelRound,
         nullptr,
-        nullptr,
+        ResetMotionPath,
         ResetHoverEffect,
         ResetFocusScopeId,
         ResetFocusScopePriority,
@@ -20282,7 +20345,7 @@ int32_t SetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
         SetListScrollToIndex, SetListAlignListItem, SetListChildrenMainSize, SetListInitialIndex, SetListDivider,
         SetListScrollToItemInGroup, SetListLanes, SetListScrollSnapAlign, SetListMaintainVisibleContentPosition,
         SetListStackFromEnd, SetListFocusWrapMode, SetListSyncLoad, SetListScrollAnimationSpeed,
-        SetListItemFillPolicy };
+        SetListItemFillPolicy, SetListSupportEmptyBranchInLazyLoading };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -20295,7 +20358,7 @@ const ArkUI_AttributeItem* GetListAttribute(ArkUI_NodeHandle node, int32_t subTy
     static Getter* getters[] = { GetListDirection, GetListSticky, GetListSpace, GetListNodeAdapter, GetListCachedCount,
         nullptr, GetListAlignListItem, nullptr, GetListInitialIndex, GetListDivider, nullptr, GetListLanes,
         GetListScrollSnapAlign, GetListMaintainVisibleContentPosition, GetListStackFromEnd, GetListFocusWrapMode,
-        GetListSyncLoad, GetListScrollAnimationSpeed, GetListItemFillPolicy };
+        GetListSyncLoad, GetListScrollAnimationSpeed, GetListItemFillPolicy, GetListSupportEmptyBranchInLazyLoading };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return &g_attributeItem;
@@ -20309,7 +20372,7 @@ void ResetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetListCachedCount, nullptr, ResetListAlignListItem, ResetListChildrenMainSize, ResetListInitialIndex,
         ResetListDivider, nullptr, ResetListLanes, ResetListScrollSnapAlign, ResetListMaintainVisibleContentPosition,
         ResetListStackFromEnd, ResetListFocusWrapMode, ResetListSyncLoad, ResetListScrollAnimationSpeed,
-        ResetListItemFillPolicy };
+        ResetListItemFillPolicy, ResetListSupportEmptyBranchInLazyLoading };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

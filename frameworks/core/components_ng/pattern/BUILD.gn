@@ -509,6 +509,8 @@ build_component_ng("pattern_ng") {
     "scrollable/scrollable_pattern_multi_thread.cpp",
     "scrollable/scrollable_utils.cpp",
     "scrollable/scroller_observer_manager.cpp",
+    "scrollable/selectable_item_event_hub.cpp",
+    "scrollable/selectable_utils.cpp",
     "search/search_event_hub.cpp",
     "search/search_gesture_event_hub.cpp",
     "search/search_layout_algorithm.cpp",

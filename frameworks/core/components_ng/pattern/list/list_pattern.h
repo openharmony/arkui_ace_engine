@@ -30,7 +30,7 @@
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -53,11 +53,14 @@ struct ListScrollTarget {
     float targetOffset;
 };
 
-class ListPattern : public ScrollablePattern {
-    DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
+class ListPattern : public SelectableContainerPattern {
+    DECLARE_ACE_TYPE(ListPattern, SelectableContainerPattern);
 
 public:
-    ListPattern() : ScrollablePattern(EdgeEffect::SPRING, false) {}
+    ListPattern() : SelectableContainerPattern()
+    {
+        SetEdgeEffect(EdgeEffect::SPRING, false);
+    }
     ~ListPattern() override = default;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -344,6 +347,7 @@ public:
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
+    void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void GetEventDumpInfo() override;
@@ -493,6 +497,16 @@ public:
             return scrollable_->GetListSnapSpeed();
         }
         return listSnapSpeed_;
+    }
+
+    void SetEditModeOptions(EditModeOptions& editModeOptions)
+    {
+        editModeOptions_ = editModeOptions;
+    }
+
+    EditModeOptions GetEditModeOptions() const override
+    {
+        return editModeOptions_;
     }
 
 protected:
@@ -653,6 +667,7 @@ private:
     RefPtr<FocusHub> GetChildFocusHubInGroup(int32_t indexInList, int32_t indexInListItemGroup) const;
     void ResetForExtScroll() override;
     bool LayoutReachEnd(float currentEndPos, float endMainPos, int32_t currentIndex);
+    void CheckValidPredictItem();
 
     std::optional<int32_t> focusIndex_;
     std::optional<int32_t> focusGroupIndex_;
@@ -712,6 +727,9 @@ private:
     int32_t draggingIndex_ = -1;
     bool heightEstimated_ = false;
     ScrollSnapAnimationSpeed listSnapSpeed_ = ScrollSnapAnimationSpeed::NORMAL;
+
+    EditModeOptions editModeOptions_;
+    std::unordered_map<int32_t, int32_t> predictItemTimes_;
 };
 } // namespace OHOS::Ace::NG
 

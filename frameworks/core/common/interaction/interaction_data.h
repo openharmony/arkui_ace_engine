@@ -63,6 +63,7 @@ struct DragDataCore {
     int32_t version { 0 };
     int64_t totalSize { -1 };
     std::string summaryTag;
+    int32_t materialId { -1 };
 };
 
 struct DragBundleInfo {

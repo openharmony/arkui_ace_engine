@@ -824,6 +824,7 @@ private:
     NavigateChangeInfo ConvertNavDestinationContext(const RefPtr<NavDestinationContext>& context);
     void LoadCompleteManagerStartCollect();
     void LoadCompleteManagerStopCollect();
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
 
     //-------for force split------- begin------
     bool IsNavBarValid();

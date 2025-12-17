@@ -14,13 +14,15 @@
  */
 
 #include "custom_node_ani_modifier.h"
- 
+
 #include <memory>
- 
+
 #include "base/log/log.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/custom/custom_node_static.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 #include "core/interfaces/native/implementation/navigation_context.h"
@@ -101,7 +103,7 @@ void QueryRouterPageInfo(ani_long node, ArkUIRouterPageInfo& info)
 {
     auto customNode = reinterpret_cast<CustomNode*>(node);
     CHECK_NULL_VOID(customNode);
-    
+
     auto curNode = GetTargetNode(AceType::Claim(customNode), V2::PAGE_ETS_TAG, false, false);
     auto pageNode = AceType::DynamicCast<FrameNode>(curNode);
     CHECK_NULL_VOID(pageNode);
@@ -165,7 +167,7 @@ void QueryNavDestinationInfo(ani_long node, ArkUINavDestinationInfo& info)
 {
     auto customNode = reinterpret_cast<CustomNode*>(node);
     CHECK_NULL_VOID(customNode);
-    
+
     // get navdestination node
     auto current = GetTargetNode(AceType::Claim(customNode), V2::NAVDESTINATION_VIEW_ETS_TAG, false, false);
     CHECK_NULL_VOID(current);

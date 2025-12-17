@@ -1732,6 +1732,34 @@ export class FrameNodeExtender {
         const returnResult : Array<double> = buffer
         return returnResult
     }
+    static convertPositionToWindow_serialize(peer: FrameNode, positionByLocal: Vector2): Array<double> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Vector2_serializer.write(thisSerializer, positionByLocal)
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_convertPositionToWindow(extractors.toFrameNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<double> = new Array<double>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = retvalDeserializer.readFloat64()
+        }
+        const returnResult : Array<double> = buffer
+        return returnResult
+    }
+    static convertPositionFromWindow_serialize(peer: FrameNode, positionByWindow: Vector2): Array<double> {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        Vector2_serializer.write(thisSerializer, positionByWindow)
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_convertPositionFromWindow(extractors.toFrameNodePtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<double> = new Array<double>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = retvalDeserializer.readFloat64()
+        }
+        const returnResult : Array<double> = buffer
+        return returnResult
+    }
     static adoptChild_serialize(peer: FrameNode, child: FrameNode): int32 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_adoptChild(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(child))
         return retval
@@ -1743,6 +1771,9 @@ export class FrameNodeExtender {
     static isOnMainTree_serialize(peer: FrameNode): boolean {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_isOnMainTree(extractors.toFrameNodePtr(peer))
         return retval
+    }
+    static applyAttributesFinish_serialize(peer: FrameNode): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_applyAttributesFinish(extractors.toFrameNodePtr(peer))
     }
     static removeAdoptedChild_serialize(peer: FrameNode, child: FrameNode): int32 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_removeAdoptedChild(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(child))
@@ -2034,6 +2065,16 @@ export class FrameNodeExtender {
         const vector2_casted = vector2 as (Vector2)
         return FrameNodeExtender.convertPoint_serialize(peer_casted, node_casted, vector2_casted)
     }
+    public static convertPositionToWindow(peer: FrameNode, positionByLocal: Vector2): Array<double> {
+        const peer_casted = peer as (FrameNode)
+        const positionByLocal_casted = positionByLocal as (Vector2)
+        return FrameNodeExtender.convertPositionToWindow_serialize(peer_casted, positionByLocal_casted)
+    }
+    public static convertPositionFromWindow(peer: FrameNode, positionByWindow: Vector2): Array<double> {
+        const peer_casted = peer as (FrameNode)
+        const positionByWindow_casted = positionByWindow as (Vector2)
+        return FrameNodeExtender.convertPositionFromWindow_serialize(peer_casted, positionByWindow_casted)
+    }
     public static adoptChild(peer: FrameNode, child: FrameNode): int32 {
         const peer_casted = peer as (FrameNode)
         const child_casted = child as (FrameNode)
@@ -2051,6 +2092,10 @@ export class FrameNodeExtender {
     public static isOnMainTree(peer: FrameNode): boolean {
         const peer_casted = peer as (FrameNode)
         return FrameNodeExtender.isOnMainTree_serialize(peer_casted)
+    }
+    public static applyAttributesFinish(peer: FrameNode): void {
+        const peer_casted = peer as (FrameNode)
+        FrameNodeExtender.applyAttributesFinish_serialize(peer_casted)
     }
 }
 export class GestureOps {

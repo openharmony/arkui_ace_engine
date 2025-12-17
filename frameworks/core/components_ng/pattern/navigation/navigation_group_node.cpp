@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -866,6 +867,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             context->MarkNeedFlushMouseEvent();
             CHECK_NULL_VOID(preNavDesNode);
             preNavDesNode->AddToOcclusionMap(false);
+            navigation->ContentChangeReport(curNavDesNode);
         };
     AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
         auto navigation = weakNavigation.Upgrade();
@@ -1115,6 +1117,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                     curNavDestination->SystemTransitionPushFinish(true, curAnimationId);
                 }
             }
+            navigation->ContentChangeReport(curNode);
             navigation->RemoveDialogDestination();
             auto id = navigation->GetTopDestination() ? navigation->GetTopDestination()->GetAccessibilityId() : -1;
             navigation->OnAccessibilityEvent(
@@ -1247,6 +1250,7 @@ void NavigationGroupNode::TransitionWithReplace(
         auto context = navigationNode->GetContextWithCheck();
         CHECK_NULL_VOID(context);
         context->MarkNeedFlushMouseEvent();
+        navigationNode->ContentChangeReport(curNode);
     };
     AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
         auto navigation = weakNavigation.Upgrade();
@@ -1792,6 +1796,8 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
             navigation->LoadCompleteManagerStopCollect();
+            auto curNode = weakCurNode.Upgrade();
+            navigation->ContentChangeReport(curNode);
             navigation->isOnAnimation_ = false;
             navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(), "onPageChange");
@@ -1954,6 +1960,8 @@ void NavigationGroupNode::TransitionWithDialogPush(const RefPtr<FrameNode>& preN
             UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(), "onPageChange");
             navigation->isOnAnimation_ = false;
             navigation->CleanPushAnimations();
+            auto curNode = weakCurNode.Upgrade();
+            navigation->ContentChangeReport(curNode);
         };
     AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weak = WeakPtr(navigationPattern)]() {
         auto pattern = weak.Upgrade();
@@ -2662,5 +2670,14 @@ void NavigationGroupNode::LoadCompleteManagerStopCollect()
     if (context) {
         context->GetLoadCompleteManager()->StopCollect();
     }
+}
+
+void NavigationGroupNode::ContentChangeReport(RefPtr<FrameNode>& keyNode)
+{
+    auto context = GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    auto mgr = context->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnPageTransitionEnd(keyNode);
 }
 } // namespace OHOS::Ace::NG

@@ -31,6 +31,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/touch_event.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -3810,6 +3811,11 @@ void SheetPresentationPattern::OnAppear()
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         SendMessagesAfterFirstTransitionIn(true);
     }
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnDialogChangeEnd(GetHost());
 }
 
 bool SheetPresentationPattern::IsNeedChangeScrollHeight(float height)
@@ -3854,6 +3860,11 @@ void SheetPresentationPattern::OnDisappear()
         onDisappear_();
     }
     isDismissProcess_ = false;
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnDialogChangeEnd(GetHost());
 }
 
 void SheetPresentationPattern::OnFontScaleConfigurationUpdate()

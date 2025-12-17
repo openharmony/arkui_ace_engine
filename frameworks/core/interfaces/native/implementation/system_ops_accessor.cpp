@@ -19,7 +19,6 @@
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -127,7 +126,7 @@ Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
     CHECK_NULL_RETURN(resourceWrapper, errValue);
     if (resId == -1) {
         auto optParams = Converter::OptConvert<std::vector<Ark_Union_String_I32_I64_F64_Resource>>(res->params);
-        
+
         if (!optParams.has_value() || optParams->size() < 1) {
             return errValue;
         }

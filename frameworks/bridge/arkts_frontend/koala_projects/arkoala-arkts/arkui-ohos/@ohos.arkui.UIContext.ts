@@ -473,8 +473,30 @@ export const enum KeyboardAvoidMode {
     NONE = 4,
 }
 
+export class ResolvedUIContext extends UIContextImpl {
+    public strategy: ResolveStrategy = ResolveStrategy.UNDEFINED;
+    constructor(instanceId: int32, strategy: ResolveStrategy) {
+        super(instanceId);
+        this.strategy = strategy;
+    }
+}
+
+export const enum ResolveStrategy {
+    CALLING_SCOPE = 0,
+    LAST_FOCUS = 1,
+    MAX_INSTANCE_ID = 2,
+    UNIQUE = 3,
+    LAST_FOREGROUND = 4,
+    UNDEFINED = 5
+}
+
 export class UIContext {
     constructor() {
+    }
+    
+    static resolveUIContext(): ResolvedUIContext {
+        let instance = UIContextUtil.resolveUIContext();
+        return new ResolvedUIContext(instance[0] as int32, instance[1] as ResolveStrategy);
     }
     static getFocusedUIContext(): UIContext | undefined {
         const instanceId = ArkUIAniModule._Common_GetFocused_InstanceId();
@@ -515,7 +537,7 @@ export class UIContext {
     getFrameNodeByNodeId(id: number): FrameNode | null {
         throw Error("getFrameNodeByNodeId not implemented in UIContext!")
     }
-    getFrameNodeByUniqueId(id: number): FrameNode | null {
+    getFrameNodeByUniqueId(id: int): FrameNode | null {
         throw Error("getFrameNodeByUniqueId not implemented in UIContext!")
     }
     getNavigationInfoByUniqueId(id: int64): uiObserver.NavigationInfo | undefined {

@@ -441,6 +441,7 @@ private:
     LoadFailNotifyTask CreateLoadFailCallbackForAltError();
 
     void OnColorConfigurationUpdate() override;
+    void OnDpiConfigurationUpdate() override;
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
     ImageDfxConfig CreateImageDfxConfig(const ImageSourceInfo& src);

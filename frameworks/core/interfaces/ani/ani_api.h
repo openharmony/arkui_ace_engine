@@ -87,6 +87,7 @@ typedef struct webview_WebviewControllerPeer {
     std::function<void(int32_t)> setWebIdFunc = nullptr;
     std::function<void(const std::string&)> setHapPathFunc = nullptr;
     std::function<void(int32_t)> setWebDetachFunc = nullptr;
+    std::function<void(void*, void*, std::function<void(void*)>)> defaultOnShowFileSelectorFunc = nullptr;
 } WebviewControllerPeer;
 
 typedef struct NodeAdapterInfo {
@@ -577,6 +578,7 @@ struct ArkUIAniCommonModifier {
     void (*getKeyEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
     ani_boolean (*setClickEventPreventDefault)(ani_long nativePtr);
     ani_boolean (*setTouchEventPreventDefault)(ani_long nativePtr);
+    void(*resolveUIContext)(std::vector<int32_t>& instance);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;

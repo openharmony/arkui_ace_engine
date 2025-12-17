@@ -237,13 +237,7 @@ void SetAnimationCurveImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    RefPtr<Curve> curve = nullptr;
-    if (value->value.selector == 1) {
-        curve = value->value.value1->handler;
-    } else if (value->value.selector == 0) {
-        curve = CreateCurve(static_cast<int>(value->value.value0), true);
-    }
+    auto curve = Converter::OptConvertPtr<RefPtr<Curve>>(value).value_or(nullptr);
     if (!curve) {
         curve = Framework::CreateCurve(std::string(), true);
     }

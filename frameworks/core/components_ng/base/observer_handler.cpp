@@ -77,7 +77,7 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     scope = pathInfo->Scope();
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
         pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId,
-        GetNavigationUniqueId(pattern));
+        GetNavigationUniqueId(pattern), pattern->GetCurrentNavDestinationSize());
     auto navigationStack = context->GetNavigationStack().Upgrade();
     if (navigationStack && navigationStack->IsStaticStack()) {
         auto navigationStackExtend = navigationStack->GetNavigationStackExtend();
@@ -106,7 +106,8 @@ void UIObserverHandler::NotifyNavigationStateChangeForAni(
     auto uniqueId = host->GetId();
 
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
-        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId);
+        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId,
+        GetNavigationUniqueId(pattern), pattern->GetCurrentNavDestinationSize());
     auto navigationStack = context->GetNavigationStack().Upgrade();
     if (navigationStack && navigationStack->IsStaticStack()) {
         auto navigationStackExtend = navigationStack->GetNavigationStackExtend();
@@ -143,7 +144,8 @@ void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& wea
     }
 }
 
-void UIObserverHandler::NotifyRouterPageStateChangeForAni(const RefPtr<PageInfo>& pageInfo, RouterPageState state)
+void UIObserverHandler::NotifyRouterPageStateChangeForAni(
+    const RefPtr<PageInfo>& pageInfo, RouterPageState state, const std::optional<SizeF>& size)
 {
     CHECK_NULL_VOID(pageInfo);
     CHECK_NULL_VOID(routerPageHandleFuncForAni_);
@@ -161,13 +163,14 @@ void UIObserverHandler::NotifyRouterPageStateChangeForAni(const RefPtr<PageInfo>
     std::string name = pageInfo->GetPageUrl();
     std::string path = pageInfo->GetPagePath();
     std::string pageId = std::to_string(pageInfo->GetPageId());
-    RouterPageInfoNG routerPageInfo(index, name, path, state, pageId);
+    RouterPageInfoNG routerPageInfo(index, name, path, state, pageId, size);
     routerPageHandleFuncForAni_(info, routerPageInfo);
 }
 
-void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state)
+void UIObserverHandler::NotifyRouterPageStateChange(
+    const RefPtr<PageInfo>& pageInfo, RouterPageState state, const std::optional<SizeF>& size)
 {
-    NotifyRouterPageStateChangeForAni(pageInfo, state);
+    NotifyRouterPageStateChangeForAni(pageInfo, state, size);
     CHECK_NULL_VOID(pageInfo);
     CHECK_NULL_VOID(routerPageHandleFunc_);
     auto container = Container::Current();
@@ -184,7 +187,7 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
     std::string name = pageInfo->GetPageUrl();
     std::string path = pageInfo->GetPagePath();
     std::string pageId = std::to_string(pageInfo->GetPageId());
-    RouterPageInfoNG routerPageInfo(index, name, path, state, pageId);
+    RouterPageInfoNG routerPageInfo(index, name, path, state, pageId, size);
     routerPageHandleFunc_(info, routerPageInfo);
 }
 
@@ -325,6 +328,49 @@ void UIObserverHandler::NotifyTabChange(const TabContentInfo& info)
     }
 }
 
+void UIObserverHandler::NotifyRouterPageSizeChange(
+    const RefPtr<PageInfo>& pageInfo, RouterPageState state, const std::optional<SizeF>& size)
+{
+    CHECK_NULL_VOID(pageInfo);
+    CHECK_NULL_VOID(routerPageSizeChangeHandleFunc_);
+    int32_t index = pageInfo->GetPageIndex();
+    std::string name = pageInfo->GetPageUrl();
+    std::string path = pageInfo->GetPagePath();
+    std::string pageId = std::to_string(pageInfo->GetPageId());
+    RouterPageInfoNG routerPageInfo(index, name, path, state, pageId, size);
+    routerPageSizeChangeHandleFunc_(routerPageInfo);
+}
+
+void UIObserverHandler::NotifyNavDestinationSizeChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state)
+{
+    if (navDestinationSizeChangeHandleFunc_ == nullptr && navDestinationSizeChangeByUniqueIdHandleFunc_ == nullptr) {
+        return;
+    }
+    auto ref = weakPattern.Upgrade();
+    CHECK_NULL_VOID(ref);
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(ref);
+    CHECK_NULL_VOID(pattern);
+    auto context = pattern->GetNavDestinationContext();
+    CHECK_NULL_VOID(context);
+    auto pathInfo = pattern->GetNavPathInfo();
+    CHECK_NULL_VOID(pathInfo);
+    auto host = AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetHost());
+    CHECK_NULL_VOID(host);
+    NavDestinationMode mode = host->GetNavDestinationMode();
+    auto uniqueId = host->GetId();
+    std::shared_ptr<NavPathInfoScope> scope = nullptr;
+    scope = pathInfo->Scope();
+    NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
+        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId,
+        GetNavigationUniqueId(pattern), pattern->GetCurrentNavDestinationSize());
+    if (navDestinationSizeChangeHandleFunc_) {
+        navDestinationSizeChangeHandleFunc_(info);
+    }
+    if (navDestinationSizeChangeByUniqueIdHandleFunc_) {
+        navDestinationSizeChangeByUniqueIdHandleFunc_(info);
+    }
+}
+
 UIObserverHandler::NavDestinationSwitchHandleFunc UIObserverHandler::GetHandleNavDestinationSwitchFunc()
 {
     return navDestinationSwitchHandleFunc_;
@@ -372,6 +418,9 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavDestinationInfo(con
             infoPtr->interopParam = navigationStackExtend->GetSerializedParamByIndex(host->GetIndex());
         }
     }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
+        infoPtr->size = pattern->GetCurrentNavDestinationSize();
+    }
     return infoPtr;
 }
 
@@ -393,12 +442,26 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationInnerState(c
 {
     CHECK_NULL_RETURN(node, nullptr);
     auto current = AceType::DynamicCast<UINode>(node);
-    while (current) {
-        if (current->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG &&
-            current->GetParent()->GetTag() == V2::NAVIGATION_CONTENT_ETS_TAG) {
+    for (; current; current = current->GetFirstChild()) {
+        if (current->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            continue;
+        }
+        auto parent = current->GetParent();
+        CHECK_NULL_CONTINUE(parent);
+        const auto& parentTag = parent->GetTag();
+        // NavDestination in stack or home NavDestination in forceSplit mode.
+        if (parentTag == V2::NAVIGATION_CONTENT_ETS_TAG || parentTag == V2::PRIMARY_CONTENT_NODE_ETS_TAG) {
             break;
         }
-        current = current->GetFirstChild();
+        if (parentTag != V2::NAVIGATION_VIEW_ETS_TAG) {
+            continue;
+        }
+        auto destNode = AceType::DynamicCast<NavDestinationGroupNode>(current);
+        CHECK_NULL_CONTINUE(destNode);
+        // related NavDestination in forceSplit mode.
+        if (destNode->GetNavDestinationType() == NavDestinationType::RELATED) {
+            break;
+        }
     }
     CHECK_NULL_RETURN(current, nullptr);
     return GetNavDestinationInfo(current);
@@ -408,13 +471,26 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationOuterState(c
 {
     CHECK_NULL_RETURN(node, nullptr);
     auto current = AceType::DynamicCast<UINode>(node);
-    while (current) {
-        CHECK_NULL_RETURN(current->GetParent(), nullptr);
-        if (current->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG &&
-            current->GetParent()->GetTag() == V2::NAVIGATION_CONTENT_ETS_TAG) {
+    for (; current; current = current->GetParent()) {
+        if (current->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            continue;
+        }
+        auto parent = current->GetParent();
+        CHECK_NULL_CONTINUE(parent);
+        const auto& parentTag = parent->GetTag();
+        // NavDestination in stack or home NavDestination in forceSplit mode.
+        if (parentTag == V2::NAVIGATION_CONTENT_ETS_TAG || parentTag == V2::PRIMARY_CONTENT_NODE_ETS_TAG) {
             break;
         }
-        current = current->GetParent();
+        if (parentTag != V2::NAVIGATION_VIEW_ETS_TAG) {
+            continue;
+        }
+        auto destNode = AceType::DynamicCast<NavDestinationGroupNode>(current);
+        CHECK_NULL_CONTINUE(destNode);
+        // related NavDestination in forceSplit mode.
+        if (destNode->GetNavDestinationType() == NavDestinationType::RELATED) {
+            break;
+        }
     }
     CHECK_NULL_RETURN(current, nullptr);
     return GetNavDestinationInfo(current);
@@ -465,12 +541,16 @@ std::shared_ptr<RouterPageInfoNG> UIObserverHandler::GetRouterPageState(const Re
     std::string name = pageInfo->GetPageUrl();
     std::string path = pageInfo->GetPagePath();
     std::string pageId = std::to_string(pageInfo->GetPageId());
-    return std::make_shared<RouterPageInfoNG>(
+    auto info = std::make_shared<RouterPageInfoNG>(
         index,
         name,
         path,
         RouterPageState(pattern->GetPageState()),
         pageId);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
+        info->size = pattern->GetCurrentPageSize();
+    }
+    return info;
 }
 
 void UIObserverHandler::HandleDrawCommandSendCallBack()
@@ -695,6 +775,22 @@ void UIObserverHandler::SetSwiperContentUpdateHandleFunc(SwiperContentUpdateHand
 void UIObserverHandler::SetSwiperContentObservrEmptyFunc(SwiperContentObservrEmptyFunc&& func)
 {
     swiperContentObservrEmptyFunc_ = std::move(func);
+}
+
+void UIObserverHandler::SetRouterPageSizeChangeHandleFunc(RouterPageSizeChangeHandleFunc func)
+{
+    routerPageSizeChangeHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetNavDestinationSizeChangeHandleFunc(NavDestinationSizeChangeHandleFunc func)
+{
+    navDestinationSizeChangeHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetNavDestinationSizeChangeByUniqueIdHandleFunc(
+    NavDestinationSizeChangeByUniqueIdHandleFunc func)
+{
+    navDestinationSizeChangeByUniqueIdHandleFunc_ = func;
 }
 
 napi_value UIObserverHandler::GetUIContextValue()

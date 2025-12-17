@@ -37,13 +37,13 @@ using namespace testing::ext;
 using namespace AccessorTestFixtures;
 
 namespace Converter {
-    void AssignArkValue(Ark_unifiedDataChannel_UnifiedData& arkData, const RefPtr<UnifiedData>& data)
-    {
-        auto peer = PeerUtils::CreatePeer<unifiedDataChannel_UnifiedDataPeer>();
-        peer->unifiedData = data;
-        arkData = peer;
-    }
+void AssignArkValue(Ark_unifiedDataChannel_UnifiedData& arkData, const RefPtr<UnifiedData>& data, ConvContext *ctx)
+{
+    auto peer = PeerUtils::CreatePeer<unifiedDataChannel_UnifiedDataPeer>();
+    peer->unifiedData = data;
+    arkData = peer;
 }
+} // namespace Converter
 
 namespace {
     using namespace Converter;
@@ -184,7 +184,7 @@ HWTEST_F(DragEventAccessorTest, GetPreviewRectTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, SetDataTest, TestSize.Level1)
 {
-    auto unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
+    RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
     auto arkUnifiedData = ArkValue<Ark_unifiedDataChannel_UnifiedData>(unifiedData);
     accessor_->setData(peer_, arkUnifiedData);
     ASSERT_NE(dragEvent_->GetData(), nullptr);
@@ -199,7 +199,7 @@ HWTEST_F(DragEventAccessorTest, SetDataTest, TestSize.Level1)
  */
 HWTEST_F(DragEventAccessorTest, GetDataTest, TestSize.Level1)
 {
-    auto unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
+    RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
     auto arkUnifiedData = ArkValue<Ark_unifiedDataChannel_UnifiedData>(unifiedData);
     accessor_->setData(peer_, arkUnifiedData);
     auto getDataOpt = accessor_->getData(peer_);

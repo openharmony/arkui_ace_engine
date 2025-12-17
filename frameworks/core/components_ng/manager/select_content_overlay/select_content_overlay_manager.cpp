@@ -1126,6 +1126,27 @@ void SelectContentOverlayManager::SetHoldSelectionCallback(int32_t id, const Hol
     holdSelectionInfo_ = selectionInfo;
 }
 
+int32_t SelectContentOverlayManager::GetTextSelectionHolderId()
+{
+    return textSelectHolderId_;
+}
+
+void SelectContentOverlayManager::RemoveTextSelectionHolderId(int32_t id)
+{
+    if (id != textSelectHolderId_) {
+        return;
+    }
+    textSelectHolderId_ = -1;
+}
+
+void SelectContentOverlayManager::SetTextSelectionHolderId(int32_t id)
+{
+    if (id == textSelectHolderId_) {
+        return;
+    }
+    textSelectHolderId_ = id;
+}
+
 void SelectContentOverlayManager::RemoveHoldSelectionCallback(int32_t id)
 {
     CHECK_NULL_VOID(holdSelectionInfo_);

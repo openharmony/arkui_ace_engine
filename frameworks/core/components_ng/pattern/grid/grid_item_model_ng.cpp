@@ -138,6 +138,15 @@ void GridItemModelNG::SetOnSelect(SelectFunc&& onSelect)
     eventHub->SetOnSelect(std::move(onSelect));
 }
 
+void GridItemModelNG::BindContextMenu()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->BindContextMenu();
+}
+
 void GridItemModelNG::SetForceRebuild(FrameNode* frameNode, bool value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -204,7 +213,7 @@ void GridItemModelNG::SetColumnEnd(FrameNode* frameNode, int32_t columnEnd)
 void GridItemModelNG::SetGridItemStyle(FrameNode* frameNode, GridItemStyle gridItemStyle)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPatternPtr<GridItemPattern>();
+    auto pattern = frameNode->GetPattern<GridItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateGridItemStyle(gridItemStyle);
 }
@@ -212,7 +221,7 @@ void GridItemModelNG::SetGridItemStyle(FrameNode* frameNode, GridItemStyle gridI
 GridItemStyle GridItemModelNG::GetGridItemStyle(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, GridItemStyle::NONE);
-    auto pattern = frameNode->GetPatternPtr<GridItemPattern>();
+    auto pattern = frameNode->GetPattern<GridItemPattern>();
     CHECK_NULL_RETURN(pattern, GridItemStyle::NONE);
     return pattern->GetGridItemStyle();
 }

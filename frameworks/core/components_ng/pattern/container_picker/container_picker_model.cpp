@@ -272,6 +272,7 @@ PickerIndicatorStyle ContainerPickerModel::GetIndicatorStyle(FrameNode* frameNod
             borderRadius.radiusBottomLeft = Dimension();
             borderRadius.radiusBottomRight = Dimension();
         }
+        style.borderRadius = borderRadius;
     }
     return style;
 }

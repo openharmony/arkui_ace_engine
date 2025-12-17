@@ -14,14 +14,13 @@
  */
 
 #include "core/common/multi_thread_build_manager.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components/common/layout/constants.h"
+#include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -100,7 +99,7 @@ void SetOnClickImpl(Ark_NativePointer node,
             message = secEventValue->GetString("message", message);
         }
 #endif
-        const auto event = Converter::ArkClickEventSync(info);
+        const auto event = Converter::SyncEvent<Ark_ClickEvent>(info);
         auto arkResult = Converter::ArkValue<Ark_PasteButtonOnClickResult>(res);
         auto error = Converter::ArkValue<Opt_BusinessError>();
         arkCallback.InvokeSync(event.ArkValue(), arkResult, error);

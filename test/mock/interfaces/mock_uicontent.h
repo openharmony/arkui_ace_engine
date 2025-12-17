@@ -68,6 +68,8 @@ public:
     MOCK_METHOD0(GetBackgroundColor, uint32_t());
     MOCK_METHOD1(SetBackgroundColor, void(uint32_t color));
     MOCK_METHOD1(SetFormBackgroundColor, void(const std::string& color));
+    MOCK_METHOD1(SetFormRenderingMode, void(int8_t renderMode));
+    MOCK_METHOD1(SetFormEnableBlurBackground, void(bool enableBlurBackground));
     MOCK_METHOD2(SetWindowContainerColor, void(uint32_t activeColor, uint32_t inactiveColor));
     MOCK_METHOD2(DumpInfo, void(const std::vector<std::string>& params, std::vector<std::string>& info));
     MOCK_METHOD1(SetNextFrameLayoutCallback, void(std::function<void()>&& callback));

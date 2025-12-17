@@ -362,7 +362,7 @@ void SetDomAttributesWithObject(const shared_ptr<JsRuntime>& runtime, const std:
         StepperLabels label;
         stepperBridge->GetAttrLabel(runtime, value, label);
         command.SetStepperLabel(label);
-    } else if (keyStr == DOM_BADGE_CONFIG) {
+    } else if (keyStr == "config") {
         auto badgeBridge = AceType::MakeRefPtr<JsiBadgeBridge>();
         badgeBridge->ParseBadgeConfig(runtime, value);
         command.SetBadgeConfig(badgeBridge->GetBadgeConfig());

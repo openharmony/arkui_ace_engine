@@ -75,6 +75,11 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             ReportLifeCycleEvent(result);
             break;
         }
+        case REPORT_SELECT_TEXT_EVENT: {
+            std::string result = data.ReadString();
+            ReportSelectTextEvent(result);
+            break;
+        }
         case SEND_BASE_INFO: {
             std::string result = data.ReadString();
             SendBaseInfo(result);
@@ -118,10 +123,39 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             SendExeAppAIFunctionResult(result);
             break;
         }
+        case SEND_SPECIFIED_CONTENT_OFFSETS: {
+            std::vector<std::pair<float, float>> result;
+            int32_t size = 0;
+            if (!data.ReadInt32(size)) {
+                LOGW("SendSpecifiedContentOffsets size read failed");
+                break;
+            }
+            for (int32_t i = 0; i < size; i++) {
+                float offsetX = data.ReadFloat();
+                float offsetY = data.ReadFloat();
+                std::pair<float, float> value = { offsetX, offsetY };
+                result.push_back(value);
+            }
+            SendSpecifiedContentOffsets(result);
+            break;
+        }
         case SEND_CONTENT_CHANGE: {
             ChangeType type = static_cast<ChangeType>(data.ReadInt32());
             std::string simpleTree = data.ReadString();
             SendContentChange(type, simpleTree);
+            break;
+        }
+        case REPORT_HIT_TEST_NODE_INFOS: {
+            std::string result = data.ReadString();
+            int32_t partNum = data.ReadInt32();
+            bool isLastPart = data.ReadBool();
+            ReportHitTestNodeInfos(result, partNum, isLastPart);
+            break;
+        }
+        case REPORT_STATE_MGMT_INFO: {
+            std::vector<std::string> results;
+            data.ReadStringVector(&results);
+            ReportGetStateMgmtInfo(results);
             break;
         }
         default: {
@@ -174,6 +208,19 @@ void UiReportStub::ReportInspectorTreeValue(const std::string& data, int32_t par
     }
 }
 
+void UiReportStub::ReportHitTestNodeInfos(const std::string& data, int32_t partNum, bool isLastPart)
+{
+    if (getHitTestNodeInfoCallback_ != nullptr) {
+        getHitTestNodeInfoCallback_(data, partNum, isLastPart);
+    }
+}
+
+void UiReportStub::RegisterGetHitTestNodeInfoCallback(
+    const std::function<void(std::string, int32_t, bool)>& eventCallback)
+{
+    getHitTestNodeInfoCallback_ = std::move(eventCallback);
+}
+
 void UiReportStub::ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data)
 {
     if (unfocusEvent_ != nullptr) {
@@ -192,6 +239,20 @@ void UiReportStub::ReportLifeCycleEvent(const std::string& data)
 {
     if (lifeCycleEventCallback_ != nullptr) {
         lifeCycleEventCallback_(data);
+    }
+}
+
+void UiReportStub::ReportSelectTextEvent(const std::string& data)
+{
+    if (selectTextEventCallback_ != nullptr) {
+        selectTextEventCallback_(data);
+    }
+}
+
+void UiReportStub::SendSpecifiedContentOffsets(const std::vector<std::pair<float, float>>& offsets)
+{
+    if (getSpecifiedContentOffsets_ != nullptr) {
+        getSpecifiedContentOffsets_(offsets);
     }
 }
 
@@ -254,6 +315,17 @@ void UiReportStub::RegisterLifeCycleEventCallback(const EventCallback& eventCall
     lifeCycleEventCallback_ = std::move(eventCallback);
 }
 
+void UiReportStub::RegisterSelectTextEventCallback(const EventCallback& eventCallback)
+{
+    selectTextEventCallback_ = std::move(eventCallback);
+}
+
+void UiReportStub::RegisterGetSpecifiedContentOffsets(
+    const std::function<void(std::vector<std::pair<float, float>>)>& eventCallback)
+{
+    getSpecifiedContentOffsets_ = std::move(eventCallback);
+}
+
 void UiReportStub::RegisterGetWebViewCurrentLanguage(const EventCallback& eventCallback)
 {
     getWebViewCurrentLanguageCallback_ = std::move(eventCallback);
@@ -307,6 +379,11 @@ void UiReportStub::UnregisterScrollEventCallback()
 void UiReportStub::UnregisterLifeCycleEventCallback()
 {
     lifeCycleEventCallback_ = nullptr;
+}
+
+void UiReportStub::UnregisterSelectTextEventCallback()
+{
+    selectTextEventCallback_ = nullptr;
 }
 
 void UiReportStub::SendCurrentLanguage(const std::string& data)
@@ -371,6 +448,18 @@ void UiReportStub::SendContentChange(ChangeType type, const std::string& simpleT
 {
     if (contentChangeCallback_) {
         contentChangeCallback_(type, simpleTree);
+    }
+}
+
+void UiReportStub::RegisterGetStateMgmtInfoCallback(const std::function<void(std::vector<std::string>)>& eventCallback)
+{
+    getStateMgmtInfoCallback_ = std::move(eventCallback);
+}
+
+void UiReportStub::ReportGetStateMgmtInfo(std::vector<std::string> results)
+{
+    if (getStateMgmtInfoCallback_) {
+        getStateMgmtInfoCallback_(results);
     }
 }
 } // namespace OHOS::Ace

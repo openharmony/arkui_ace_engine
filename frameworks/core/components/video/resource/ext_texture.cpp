@@ -52,9 +52,15 @@ ExtTexture::~ExtTexture()
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
         resRegister->UnregisterEvent(MakeEventHash(TEXTURE_METHOD_REFRESH));
+        resRegister->UnregisterEvent(MakeEventHash(TEXTURE_METHOD_ONCHANGED));
     } else {
         WeakPtr<PlatformResRegister> weak = resRegister;
         platformTaskExecutor.PostTask([eventHash = MakeEventHash(TEXTURE_METHOD_REFRESH), weak] {
+            auto resRegister = weak.Upgrade();
+            CHECK_NULL_VOID(resRegister);
+            resRegister->UnregisterEvent(eventHash);
+        }, "ArkUIVideoExtTextureUnregisterEvent");
+        platformTaskExecutor.PostTask([eventHash = MakeEventHash(TEXTURE_METHOD_ONCHANGED), weak] {
             auto resRegister = weak.Upgrade();
             CHECK_NULL_VOID(resRegister);
             resRegister->UnregisterEvent(eventHash);
@@ -163,7 +169,7 @@ void ExtTexture::AttachToGLContext(int64_t textureId, bool isAttach)
 void ExtTexture::UpdateTextureImage(std::vector<float>& matrix)
 {
     CallSyncResRegisterMethod(MakeMethodHash(UPDATE_TEXTURE_IMAGE), PARAM_NONE,
-        [this, &matrix](std::string& result) mutable {
+        [this, &matrix](std::string& result) {
             GetFloatArrayParam(result, "transform", matrix);
     });
 }
@@ -184,7 +190,7 @@ void* ExtTexture::AttachNativeWindow()
     
     void* nativeWindow = nullptr;
     CallSyncResRegisterMethod(MakeMethodHash(ATTACH_NATIVE_WINDOW), PARAM_NONE,
-        [this, &nativeWindow](std::string& result) mutable {
+        [this, &nativeWindow](std::string& result) {
             nativeWindow = reinterpret_cast<void*>(GetInt64Param(result, NATIVE_WINDOW));
     });
     return nativeWindow;
@@ -193,7 +199,7 @@ void* ExtTexture::AttachNativeWindow()
 void ExtTexture::GetTextureIsVideo(int32_t& type)
 {
     CallSyncResRegisterMethod(MakeMethodHash(TEXTURE_IS_VIDEO), "",
-        [this, &type](std::string& result) mutable {
+        [this, &type](std::string& result) {
             type = GetIntParam(result, "type");
     });
 }

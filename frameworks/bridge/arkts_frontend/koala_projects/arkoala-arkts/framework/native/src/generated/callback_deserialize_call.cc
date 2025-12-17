@@ -4932,6 +4932,24 @@ void deserializeAndCallSyncOnAlphabetIndexerSelectCallback(Ark_VMContext vmConte
     Ark_Int32 index = thisDeserializer.readInt32();
     callSyncMethod(vmContext, resourceId, index);
 }
+void deserializeAndCallOnCameraCaptureStateChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_CameraCaptureStateChangeInfo event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnCameraCaptureStateChangeCallback))));
+    thisDeserializer.readPointer();
+    Ark_CameraCaptureStateChangeInfo event = CameraCaptureStateChangeInfo_serializer::read(thisDeserializer);
+    _call(_resourceId, event);
+}
+void deserializeAndCallSyncOnCameraCaptureStateChangeCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_CameraCaptureStateChangeInfo event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnCameraCaptureStateChangeCallback))));
+    Ark_CameraCaptureStateChangeInfo event = CameraCaptureStateChangeInfo_serializer::read(thisDeserializer);
+    callSyncMethod(vmContext, resourceId, event);
+}
 void deserializeAndCallOnCheckboxChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -5299,6 +5317,24 @@ void deserializeAndCallSyncOnMenuItemClickCallback(Ark_VMContext vmContext, KSer
     Ark_TextRange range = TextRange_serializer::read(thisDeserializer);
     Callback_Boolean_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Boolean_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Boolean_Void))))};
     callSyncMethod(vmContext, resourceId, menuItem, range, continuationResult);
+}
+void deserializeAndCallOnMicrophoneCaptureStateChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_MicrophoneCaptureStateChangeInfo event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnMicrophoneCaptureStateChangeCallback))));
+    thisDeserializer.readPointer();
+    Ark_MicrophoneCaptureStateChangeInfo event = MicrophoneCaptureStateChangeInfo_serializer::read(thisDeserializer);
+    _call(_resourceId, event);
+}
+void deserializeAndCallSyncOnMicrophoneCaptureStateChangeCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_MicrophoneCaptureStateChangeInfo event)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnMicrophoneCaptureStateChangeCallback))));
+    Ark_MicrophoneCaptureStateChangeInfo event = MicrophoneCaptureStateChangeInfo_serializer::read(thisDeserializer);
+    callSyncMethod(vmContext, resourceId, event);
 }
 void deserializeAndCallOnMoveHandler(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -6939,6 +6975,24 @@ void deserializeAndCallSyncTextPickerScrollStopCallback(Ark_VMContext vmContext,
     Ark_Union_I32_Array_I32 index = static_cast<Ark_Union_I32_Array_I32>(indexTmpBuf);
     callSyncMethod(vmContext, resourceId, value, index);
 }
+void deserializeAndCallTextSelectionChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String selectionText)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TextSelectionChangeCallback))));
+    thisDeserializer.readPointer();
+    Ark_String selectionText = static_cast<Ark_String>(thisDeserializer.readString());
+    _call(_resourceId, selectionText);
+}
+void deserializeAndCallSyncTextSelectionChangeCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String selectionText)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TextSelectionChangeCallback))));
+    Ark_String selectionText = static_cast<Ark_String>(thisDeserializer.readString());
+    callSyncMethod(vmContext, resourceId, selectionText);
+}
 void deserializeAndCallTextTimerModifierBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -7421,6 +7475,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_OnAlphabetIndexerPopupSelectCallback: return deserializeAndCallOnAlphabetIndexerPopupSelectCallback(thisArray, thisLength);
         case Kind_OnAlphabetIndexerRequestPopupDataCallback: return deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(thisArray, thisLength);
         case Kind_OnAlphabetIndexerSelectCallback: return deserializeAndCallOnAlphabetIndexerSelectCallback(thisArray, thisLength);
+        case Kind_OnCameraCaptureStateChangeCallback: return deserializeAndCallOnCameraCaptureStateChangeCallback(thisArray, thisLength);
         case Kind_OnCheckboxChangeCallback: return deserializeAndCallOnCheckboxChangeCallback(thisArray, thisLength);
         case Kind_OnCheckboxGroupChangeCallback: return deserializeAndCallOnCheckboxGroupChangeCallback(thisArray, thisLength);
         case Kind_OnContentScrollCallback: return deserializeAndCallOnContentScrollCallback(thisArray, thisLength);
@@ -7439,6 +7494,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_OnLargestContentfulPaintCallback: return deserializeAndCallOnLargestContentfulPaintCallback(thisArray, thisLength);
         case Kind_OnLinearIndicatorChangeCallback: return deserializeAndCallOnLinearIndicatorChangeCallback(thisArray, thisLength);
         case Kind_OnMenuItemClickCallback: return deserializeAndCallOnMenuItemClickCallback(thisArray, thisLength);
+        case Kind_OnMicrophoneCaptureStateChangeCallback: return deserializeAndCallOnMicrophoneCaptureStateChangeCallback(thisArray, thisLength);
         case Kind_OnMoveHandler: return deserializeAndCallOnMoveHandler(thisArray, thisLength);
         case Kind_OnNativeEmbedObjectParamChangeCallback: return deserializeAndCallOnNativeEmbedObjectParamChangeCallback(thisArray, thisLength);
         case Kind_OnNativeEmbedVisibilityChangeCallback: return deserializeAndCallOnNativeEmbedVisibilityChangeCallback(thisArray, thisLength);
@@ -7504,6 +7560,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_TextFieldValueCallback: return deserializeAndCallTextFieldValueCallback(thisArray, thisLength);
         case Kind_TextPickerEnterSelectedAreaCallback: return deserializeAndCallTextPickerEnterSelectedAreaCallback(thisArray, thisLength);
         case Kind_TextPickerScrollStopCallback: return deserializeAndCallTextPickerScrollStopCallback(thisArray, thisLength);
+        case Kind_TextSelectionChangeCallback: return deserializeAndCallTextSelectionChangeCallback(thisArray, thisLength);
         case Kind_TextTimerModifierBuilder: return deserializeAndCallTextTimerModifierBuilder(thisArray, thisLength);
         case Kind_TimerCallback: return deserializeAndCallTimerCallback(thisArray, thisLength);
         case Kind_ToggleModifierBuilder: return deserializeAndCallToggleModifierBuilder(thisArray, thisLength);
@@ -7750,6 +7807,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_OnAlphabetIndexerPopupSelectCallback: return deserializeAndCallSyncOnAlphabetIndexerPopupSelectCallback(vmContext, thisArray, thisLength);
         case Kind_OnAlphabetIndexerRequestPopupDataCallback: return deserializeAndCallSyncOnAlphabetIndexerRequestPopupDataCallback(vmContext, thisArray, thisLength);
         case Kind_OnAlphabetIndexerSelectCallback: return deserializeAndCallSyncOnAlphabetIndexerSelectCallback(vmContext, thisArray, thisLength);
+        case Kind_OnCameraCaptureStateChangeCallback: return deserializeAndCallSyncOnCameraCaptureStateChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnCheckboxChangeCallback: return deserializeAndCallSyncOnCheckboxChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnCheckboxGroupChangeCallback: return deserializeAndCallSyncOnCheckboxGroupChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnContentScrollCallback: return deserializeAndCallSyncOnContentScrollCallback(vmContext, thisArray, thisLength);
@@ -7768,6 +7826,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_OnLargestContentfulPaintCallback: return deserializeAndCallSyncOnLargestContentfulPaintCallback(vmContext, thisArray, thisLength);
         case Kind_OnLinearIndicatorChangeCallback: return deserializeAndCallSyncOnLinearIndicatorChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnMenuItemClickCallback: return deserializeAndCallSyncOnMenuItemClickCallback(vmContext, thisArray, thisLength);
+        case Kind_OnMicrophoneCaptureStateChangeCallback: return deserializeAndCallSyncOnMicrophoneCaptureStateChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnMoveHandler: return deserializeAndCallSyncOnMoveHandler(vmContext, thisArray, thisLength);
         case Kind_OnNativeEmbedObjectParamChangeCallback: return deserializeAndCallSyncOnNativeEmbedObjectParamChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnNativeEmbedVisibilityChangeCallback: return deserializeAndCallSyncOnNativeEmbedVisibilityChangeCallback(vmContext, thisArray, thisLength);
@@ -7833,6 +7892,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_TextFieldValueCallback: return deserializeAndCallSyncTextFieldValueCallback(vmContext, thisArray, thisLength);
         case Kind_TextPickerEnterSelectedAreaCallback: return deserializeAndCallSyncTextPickerEnterSelectedAreaCallback(vmContext, thisArray, thisLength);
         case Kind_TextPickerScrollStopCallback: return deserializeAndCallSyncTextPickerScrollStopCallback(vmContext, thisArray, thisLength);
+        case Kind_TextSelectionChangeCallback: return deserializeAndCallSyncTextSelectionChangeCallback(vmContext, thisArray, thisLength);
         case Kind_TextTimerModifierBuilder: return deserializeAndCallSyncTextTimerModifierBuilder(vmContext, thisArray, thisLength);
         case Kind_TimerCallback: return deserializeAndCallSyncTimerCallback(vmContext, thisArray, thisLength);
         case Kind_ToggleModifierBuilder: return deserializeAndCallSyncToggleModifierBuilder(vmContext, thisArray, thisLength);

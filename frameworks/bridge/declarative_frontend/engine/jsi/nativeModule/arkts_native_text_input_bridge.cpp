@@ -1919,8 +1919,8 @@ ArkUINativeModuleValue TextInputBridge::ResetSelectAll(ArkUIRuntimeCallInfo* run
 }
 
 void TextInputBridge::ParseCounterTextColor(ArkUIRuntimeCallInfo* runtimeCallInfo,
-    ArkUIShowCountOptions* showCountOptions, RefPtr<ResourceObject> resourceObjectTextColor,
-    RefPtr<ResourceObject> resourceObjectTextOverflowColor)
+    ArkUIShowCountOptions* showCountOptions, RefPtr<ResourceObject>& resourceObjectTextColor,
+    RefPtr<ResourceObject>& resourceObjectTextOverflowColor)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> counterTextColorArg = runtimeCallInfo->GetCallArgRef(NUM_4);

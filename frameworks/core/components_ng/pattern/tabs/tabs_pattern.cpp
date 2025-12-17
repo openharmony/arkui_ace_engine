@@ -971,6 +971,48 @@ void TabsPattern::SetOnUnselectedEvent(std::function<void(const BaseEventInfo*)>
     }
 }
 
+void TabsPattern::SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll)
+{
+    onContentDidScroll_ = std::make_shared<ContentDidScrollEvent>(onContentDidScroll);
+
+    auto toSwiperCallback = [weakThis = WeakPtr<TabsPattern>(AceType::Claim(this))](
+                                int32_t selectedIndex, int32_t index, float position, float mainAxisLength) mutable {
+        auto tabsPattern = weakThis.Upgrade();
+        CHECK_NULL_VOID(tabsPattern);
+        auto host = tabsPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+        CHECK_NULL_VOID(tabsNode);
+        auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+        CHECK_NULL_VOID(swiperNode);
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_VOID(swiperPattern);
+        auto swiperController = swiperPattern->GetSwiperController();
+        CHECK_NULL_VOID(swiperController);
+        const auto& turnPageRateCallback = swiperController->GetTurnPageRateCallback();
+        if (swiperPattern->IsTranslateAnimationRunning() && turnPageRateCallback) {
+            auto swipingIndexAndRate = swiperPattern->GetIndicatorProgress();
+            if (!NearZero(swipingIndexAndRate.second)) {
+                turnPageRateCallback(swipingIndexAndRate.first, swipingIndexAndRate.second);
+            }
+        }
+        auto event = *tabsPattern->onContentDidScroll_;
+        if (event) {
+            event(selectedIndex, index, position, mainAxisLength);
+        }
+    };
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetOnContentDidScroll(std::move(toSwiperCallback));
+}
+
 void TabsPattern::OnColorModeChange(uint32_t colorMode)
 {
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
@@ -1002,33 +1044,7 @@ void TabsPattern::OnColorModeChange(uint32_t colorMode)
 
 void TabsPattern::DumpInfo()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
-    CHECK_NULL_VOID(tabsNode);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto callbackPtr = swiperPattern->GetOnContentDidScroll();
-    CHECK_NULL_VOID(callbackPtr);
-    DumpLog::GetInstance().AddDesc(std::string("isBindonContentDidScroll: ").append(
-        *callbackPtr ? "true" : "false"));
-}
-
-void TabsPattern::DumpAdvanceInfo()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
-    CHECK_NULL_VOID(tabsNode);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto callbackPtr = swiperPattern->GetOnContentDidScroll();
-    CHECK_NULL_VOID(callbackPtr);
-    DumpLog::GetInstance().AddDesc(std::string("isBindonContentDidScroll: ").append(
-        *callbackPtr ? "true" : "false"));
+    DumpLog::GetInstance().AddDesc(std::string("isBindonContentDidScroll: ")
+            .append((onContentDidScroll_ && *onContentDidScroll_) ? "true" : "false"));
 }
 } // namespace OHOS::Ace::NG

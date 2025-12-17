@@ -14,8 +14,8 @@
  */
 
 #include "arkoala_api_generated.h"
+#include "nav_destination_context_peer.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #if !defined(PREVIEW)

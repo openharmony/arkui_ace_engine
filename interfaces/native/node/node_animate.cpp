@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <securec.h>
 
 #include "animate_impl.h"
 #include "node/node_model.h"
@@ -724,6 +725,127 @@ void OH_ArkUI_Curve_DisposeCurve(ArkUI_CurveHandle curveHandle)
     return OHOS::Ace::AnimateModel::DisposeCurve(curveHandle);
 }
 
+ArkUI_MotionPathOptions* OH_ArkUI_MotionPathOptions_Create()
+{
+    ArkUI_MotionPathOptions* options = new ArkUI_MotionPathOptions;
+    auto path = new char[1];
+    path[0] = '\0';
+    options->path = path;
+    options->from = 0.0f;
+    options->to = 1.0f;
+    options->rotatable = false;
+    return options;
+}
+
+void OH_ArkUI_MotionPathOptions_Dispose(ArkUI_MotionPathOptions* options)
+{
+    if (!options) {
+        return;
+    }
+    if (options->path) {
+        delete[] options->path;
+        options->path = nullptr;
+    }
+    delete options;
+}
+
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetPath(ArkUI_MotionPathOptions* options, const char* svgPath)
+{
+    if (!options || !svgPath) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (options->path != nullptr) {
+        delete[] options->path;
+        options->path = nullptr;
+    }
+    size_t len = strlen(svgPath) + 1;
+    auto path = new char[len];
+    if (strcpy_s(path, len, svgPath) != 0) {
+        delete[] path;
+        path = nullptr;
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    options->path = path;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetPath(
+    const ArkUI_MotionPathOptions* options, char* svgPathBuffer, const int32_t bufferSize, int32_t* writeLength)
+{
+    if (!options || !options->path || !svgPathBuffer || bufferSize <= 0 || !writeLength) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+
+    int32_t srcLen = static_cast<int32_t>(strlen(options->path));
+    *writeLength = srcLen + 1;
+    if ((srcLen + 1) > bufferSize) {
+        return ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
+    }
+    if (!strcpy_s(svgPathBuffer, bufferSize, options->path)) {
+        return ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetFrom(ArkUI_MotionPathOptions* options, const float from)
+{
+    if (!options) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (from < 0 || from > 1 || from > options->to) {
+        return ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE;
+    }
+    options->from = from;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetFrom(const ArkUI_MotionPathOptions* options, float* from)
+{
+    if (!options || !from) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *from = options->from;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetTo(ArkUI_MotionPathOptions* options, const float to)
+{
+    if (!options) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (to < 0 || to > 1 || to < options->from) {
+        return ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE;
+    }
+    options->to = to;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetTo(const ArkUI_MotionPathOptions* options, float* to)
+{
+    if (!options || !to) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *to = options->to;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_SetRotatable(ArkUI_MotionPathOptions* options, const bool rotatable)
+{
+    if (!options) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    options->rotatable = rotatable;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_MotionPathOptions_GetRotatable(const ArkUI_MotionPathOptions* options, bool* rotatable)
+{
+    if (!options || !rotatable) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    *rotatable = options->rotatable;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
 #ifdef __cplusplus
 };
 #endif

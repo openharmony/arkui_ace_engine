@@ -7633,6 +7633,10 @@ class ArkGridComponent extends ArkScrollable {
     modifierWithKey(this._modifiersWithKeys, GridSyncLoadModifier.identity, GridSyncLoadModifier, value);
     return this;
   }
+  editModeOptions(options) {
+    modifierWithKey(this._modifiersWithKeys, GridEditModeOptionsModifier.identity, GridEditModeOptionsModifier, options);
+    return this;
+  }
   onWillScroll(callback) {
     modifierWithKey(this._modifiersWithKeys, GridOnWillScrollModifier.identity, GridOnWillScrollModifier, callback);
     return this;
@@ -7641,7 +7645,7 @@ class ArkGridComponent extends ArkScrollable {
     modifierWithKey(this._modifiersWithKeys, GridOnDidScrollModifier.identity, GridOnDidScrollModifier, callback);
     return this;
   }
-  supportLazyLoadingEmptyBranch(value) {
+  supportEmptyBranchInLazyLoading(value) {
     modifierWithKey(this._modifiersWithKeys, GridSupportLazyLoadingEmptyBranchModifier.identity, GridSupportLazyLoadingEmptyBranchModifier, value);
     return this;
   }
@@ -7956,7 +7960,7 @@ class GridSupportLazyLoadingEmptyBranchModifier extends ModifierWithKey {
     }
   }
 }
-GridSupportLazyLoadingEmptyBranchModifier.identity = Symbol('supportLazyLoadingEmptyBranch');
+GridSupportLazyLoadingEmptyBranchModifier.identity = Symbol('gridSupportEmptyBranchInLazyLoading');
 class GridOnReachStartModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -8215,6 +8219,20 @@ class GridSyncLoadModifier extends ModifierWithKey {
   }
 }
 GridSyncLoadModifier.identity = Symbol('gridSyncLoad');
+class GridEditModeOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetEditModeOptions(node);
+    }
+    else {
+      getUINativeModule().grid.setEditModeOptions(node, this.value);
+    }
+  }
+}
+GridEditModeOptionsModifier.identity = Symbol('gridEditModeOptions');
 // @ts-ignore
 if (globalThis.Grid !== undefined) {
   globalThis.Grid.attributeModifier = function (modifier) {
@@ -10375,6 +10393,25 @@ class RichEditorOnWillChangeModifier extends ModifierWithKey {
 }
 RichEditorOnWillChangeModifier.identity = Symbol('richEditorOnWillChange');
 
+class RichEditorSelectedDragPreviewStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetSelectedDragPreviewStyle(node);
+    }
+    else {
+      getUINativeModule().richEditor.setSelectedDragPreviewStyle(node, this.value.color);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value) ||
+    !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
+  }
+}
+RichEditorSelectedDragPreviewStyleModifier.identity = Symbol('richEditorSelectedDragPreviewStyle');
+
 class RichEditorOnDidChangeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10975,6 +11012,13 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   scrollBarColor(style) {
     modifierWithKey(this._modifiersWithKeys, RichEditorScrollBarColorModifier.identity, RichEditorScrollBarColorModifier, style);
+    return this;
+  }
+  selectedDragPreviewStyle(value) {
+    let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();
+    arkSelectedDragPreviewStyle.color = value?.color;
+    modifierWithKey(this._modifiersWithKeys, RichEditorSelectedDragPreviewStyleModifier.identity,
+      RichEditorSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
     return this;
   }
   includeFontPadding(enable) {
@@ -24368,7 +24412,7 @@ class MinKeyboardAvoidDistanceModifier extends ModifierWithKey {
   }
 }
 MinKeyboardAvoidDistanceModifier.identity = Symbol('minKeyboardAvoidDistance');
-class SelectOnSelectModifier extends ModifierWithKey{
+class SelectOnSelectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
@@ -36331,6 +36375,19 @@ class ListSyncLoadModifier extends ModifierWithKey {
   }
 }
 ListSyncLoadModifier.identity = Symbol('listSyncLoad');
+class ListEditModeOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetEditModeOptions(node);
+    } else {
+      getUINativeModule().list.setEditModeOptions(node, this.value);
+    }
+  }
+}
+ListEditModeOptionsModifier.identity = Symbol('listEditModeOptions');
 class ListNestedScrollModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -36696,6 +36753,21 @@ class ListInitialScrollerModifier extends ModifierWithKey {
 }
 ListInitialScrollerModifier.identity = Symbol('listInitialScroller');
 
+class ListSupportEmptyBranchInLazyLoading extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.setSupportEmptyBranchInLazyLoading(node, false);
+    }
+    else {
+      getUINativeModule().list.setSupportEmptyBranchInLazyLoading(node, this.value);
+    }
+  }
+}
+ListSupportEmptyBranchInLazyLoading.identity = Symbol('listSupportEmptyBranchInLazyLoading');
+
 class ArkListComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -36826,6 +36898,10 @@ class ArkListComponent extends ArkScrollable {
       ListSyncLoadModifier, value);
     return this;
   }
+  editModeOptions(options) {
+    modifierWithKey(this._modifiersWithKeys, ListEditModeOptionsModifier.identity, ListEditModeOptionsModifier, options);
+    return this;
+  }
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, ListClipModifier.identity, ListClipModifier, value);
     return this;
@@ -36903,6 +36979,10 @@ class ArkListComponent extends ArkScrollable {
   }
   childrenMainSize(value) {
     modifierWithKey(this._modifiersWithKeys, ListChildrenMainSizeModifier.identity, ListChildrenMainSizeModifier, value);
+    return this;
+  }
+  supportEmptyBranchInLazyLoading(value) {
+    modifierWithKey(this._modifiersWithKeys, ListSupportEmptyBranchInLazyLoading.identity, ListSupportEmptyBranchInLazyLoading, value);
     return this;
   }
 }
@@ -37518,7 +37598,7 @@ class SwiperDisplayCountModifier extends ModifierWithKey {
     }
     else if (typeof this.stageValue.value === 'object' &&
       typeof this.value.value === 'object') {
-      return this.stageValue.value.minSize !== this.value.value.minSize;
+      return this.stageValue.value !== this.value.value;
     }
     else {
       return !isBaseOrResourceEqual(this.stageValue.value, this.value.value);

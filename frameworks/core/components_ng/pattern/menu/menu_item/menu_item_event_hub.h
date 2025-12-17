@@ -71,6 +71,16 @@ public:
         return onSelect_;
     }
 
+    inline void SetSelectOverlayMenuOnClick(const std::function<void()>& onClickFunc)
+    {
+        selectOverlayMenuOnClick_ = onClickFunc;
+    }
+
+    inline MenuJSCallback& GetSelectOverlayMenuOnClick()
+    {
+        return selectOverlayMenuOnClick_;
+    }
+
 private:
     // callback of menuItem
     std::function<void(bool)> onChange_;
@@ -78,6 +88,7 @@ private:
     MenuJSCallback menuOnClick_;
     // callback of select component
     OnSelectEvent onSelect_;
+    MenuJSCallback selectOverlayMenuOnClick_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemEventHub);
 };

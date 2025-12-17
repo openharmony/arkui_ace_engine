@@ -1878,8 +1878,8 @@ RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseChainedTransition(
         CHECK_NULL_RETURN(container, nullptr);
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_RETURN(pipelineContext, nullptr);
-        auto animationOptionResult = std::make_shared<AnimationOption>(
-            JSViewContext::CreateAnimation(propAnimationOption, pipelineContext->IsFormRenderExceptDynamicComponent()));
+        auto animationOptionResult = std::make_shared<AnimationOption>(JSViewContext::CreateAnimation(
+            context, propAnimationOption, pipelineContext->IsFormRenderExceptDynamicComponent()));
         // The maximum of the form-animation-playback duration value is 1000 ms.
         if (pipelineContext->IsFormRenderExceptDynamicComponent() && pipelineContext->IsFormAnimation()) {
             auto formAnimationTimeInterval = GetFormAnimationTimeInterval(pipelineContext);
@@ -10525,7 +10525,10 @@ bool JSViewAbstract::ParseAIEntityColor(const JSRef<JSObject>& obj, TextDetectCo
 {
     RefPtr<ResourceObject> resObj;
     JSRef<JSVal> entityColorValue = obj->GetProperty("color");
-    ParseJsColor(entityColorValue, textDetectConfig.entityColor, resObj);
+    auto colorFlagByUser = ParseJsColor(entityColorValue, textDetectConfig.entityColor, resObj);
+    if (colorFlagByUser) {
+        textDetectConfig.entityColorFlag = true;
+    }
     TextDetectConfig::RegisterColorResource(textDetectConfig, resObj);
 
     JSRef<JSVal> decorationValue = obj->GetProperty("decoration");
@@ -10546,6 +10549,11 @@ bool JSViewAbstract::ParseAIEntityColor(const JSRef<JSObject>& obj, TextDetectCo
     RefPtr<ResourceObject> decoColorResObj;
     if (!ParseJsColor(colorValue, textDetectConfig.entityDecorationColor, decoColorResObj)) {
         textDetectConfig.entityDecorationColor = textDetectConfig.entityColor;
+        if (colorFlagByUser) {
+            textDetectConfig.entityDecorationColorFlag = true;
+        }
+    } else {
+        textDetectConfig.entityDecorationColorFlag = true;
     }
     TextDetectConfig::RegisterDecoColorResource(textDetectConfig, decoColorResObj);
     if (styleValue->IsNumber()) {

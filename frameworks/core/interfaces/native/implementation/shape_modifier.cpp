@@ -16,32 +16,16 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_model_static.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
-#include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
+
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "pixel_map.h"
 #include "base/image/pixel_map.h"
 #endif
 
 static const double STROKE_MITER_LIMIT_MIN_VALUE = 1.0;
-
-namespace {
-OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> ConvertPixelMap(const Opt_image_PixelMap* value)
-{
-#if defined(PIXEL_MAP_SUPPORTED)
-    CHECK_NULL_RETURN(value, nullptr);
-    CHECK_EQUAL_RETURN(value->tag, InteropTag::INTEROP_TAG_UNDEFINED, nullptr);
-    auto arkPixelMap = value->value;
-    CHECK_NULL_RETURN(arkPixelMap, nullptr);
-    return arkPixelMap->pixelMap;
-#else
-    return nullptr;
-#endif
-}
-} // namespace
 
 namespace OHOS::Ace::NG {
 struct ShapeOptions {
@@ -83,7 +67,8 @@ void SetShapeOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetFocusable(frameNode, true);
-    ShapeModelStatic::InitBox(frameNode, ConvertPixelMap(value));
+    auto pixelMap = Converter::OptConvertPtr<RefPtr<PixelMap>>(value).value_or(nullptr);
+    ShapeModelStatic::InitBox(frameNode, pixelMap);
 }
 } // ShapeInterfaceModifier
 namespace ShapeAttributeModifier {

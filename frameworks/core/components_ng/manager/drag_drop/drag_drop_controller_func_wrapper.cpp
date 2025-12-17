@@ -29,6 +29,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/common/container_consts.h"
+#include "ui/properties/ui_material.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -189,6 +190,9 @@ void DragControllerFuncWrapper::UpdatePreviewAttr(
     auto optionsFromModifier = dragPreviewOption.options;
     if (optionsFromModifier.blurbgEffect.backGroundEffect.radius.IsValid()) {
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundEffect, optionsFromModifier.blurbgEffect.backGroundEffect, imageNode);
+    }
+    if (optionsFromModifier.material) {
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(imageNode), AceType::RawPtr(optionsFromModifier.material));
     }
     imageContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
 }

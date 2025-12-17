@@ -225,6 +225,7 @@ bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
     info.SetRawDeltaX(event.rawDeltaX);
     info.SetRawDeltaY(event.rawDeltaY);
     info.SetPressedButtons(event.pressedButtonsArray);
+    info.SetIsRightButtonEventFromDoulbeTap(event.isRightButtonEventFromDoulbeTap);
     // onMouseCallback_ may be overwritten in its invoke so we copy it first
     auto onMouseCallback = onMouseCallback_;
     onMouseCallback(info);
@@ -267,6 +268,7 @@ MouseEvent MouseEvent::operator-(const Offset& offset) const
     mouseEvent.rawDeltaX = rawDeltaX;
     mouseEvent.rawDeltaY = rawDeltaY;
     mouseEvent.pressedButtonsArray = pressedButtonsArray;
+    mouseEvent.isRightButtonEventFromDoulbeTap = isRightButtonEventFromDoulbeTap;
     return mouseEvent;
 }
 

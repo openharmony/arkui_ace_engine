@@ -13,7 +13,26 @@
  * limitations under the License.
  */
 
+import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
+import { styleItem } from "./CanvasFramework";
 @ComponentV2
 export declare struct LandscapeSelectFuncArea {
+    @Param
+    @Require
+    readonly styles?: Array<imageGeneration.ImageStyle>;
+    private tabBarDefaultBgColor;
+    @Local
+    tabBarStyleBgColor: ResourceColor;
+    @Local
+    styleItems: Array<styleItem>;
+    @Param
+    @Require
+    readonly imageInfoArr: Array<imageGeneration.ImageItem>;
+    @Param
+    @Require
+    readonly imageMatrixArr: number[][];
+    @Provider('functionAreaSelectedIndex')
+    selectedIndex: number;
+    aboutToAppear(): void;
     build(): void;
 }

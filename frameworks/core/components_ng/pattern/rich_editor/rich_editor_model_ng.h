@@ -74,6 +74,8 @@ public:
     void SetKeyboardAppearance(KeyboardAppearance value) override;
     void SetSupportStyledUndo(bool enabled) override;
     void SetScrollBarColor(std::optional<Color> value) override;
+    void SetSelectedDragPreviewStyle(const Color& value) override;
+    void ResetSelectedDragPreviewStyle() override;
     void SetSingleLine(bool isEnable) override;
 
     static void SetSelectDetectEnable(FrameNode* frameNode, const bool value);
@@ -131,6 +133,9 @@ public:
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled);
     static void SetSupportStyledUndo(FrameNode* frameNode, bool enabled);
     static void SetScrollBarColor(FrameNode* frameNode, std::optional<Color> value);
+    static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
+    static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
+    static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
     static void SetSingleLine(FrameNode* frameNode, bool isEnable);
 
 private:

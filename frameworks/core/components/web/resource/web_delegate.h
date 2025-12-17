@@ -317,8 +317,9 @@ class ContextMenuResultOhos : public ContextMenuResult {
     DECLARE_ACE_TYPE(ContextMenuResultOhos, ContextMenuResult);
 
 public:
-    explicit ContextMenuResultOhos(std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback)
-        : callback_(callback) {}
+    explicit ContextMenuResultOhos(std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback,
+                                   const WeakPtr<WebDelegate>& delegate)
+        : callback_(callback), delegate_(delegate) {}
 
     void Cancel() const override;
     void CopyImage() const override;
@@ -329,9 +330,11 @@ public:
     void Undo() const override;
     void Redo() const override;
     void PasteAndMatchStyle() const override;
+    void RequestPasswordAutoFill() const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuCallback> callback_;
+    WeakPtr<WebDelegate> delegate_;
 };
 
 class WebGeolocationOhos : public WebGeolocation {
@@ -1122,8 +1125,9 @@ public:
     void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
     void ReleaseResizeHold();
     bool GetPendingSizeStatus();
-    void OnInactive(bool isOfflineWebOffMainTree = false);
+    void OnInactive();
     void OnActive();
+    void SetOfflineWebActiveStatus(int32_t webId, bool isActive);
     void GestureBackBlur();
     void OnWebviewHide();
     void OnWebviewShow();
@@ -1507,6 +1511,7 @@ public:
     void OnPdfScrollAtBottom(const std::string& url);
     void OnPdfLoadEvent(int32_t result, const std::string& url);
     void SetImeShow(bool visible);
+    void OnRequestAutofill(int32_t menuType);
 
     bool HasOnNativeEmbedGestureEventV2()
     {

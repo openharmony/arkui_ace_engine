@@ -17,13 +17,21 @@ import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
 @ComponentV2
 export declare struct ImageGeneratorDialog {
     stack: NavPathStack;
-    options?: imageGeneration.GeneratorDialogOptions;
+    @Param
+    @Require
+    readonly options?: imageGeneration.GeneratorDialogOptions;
     @Local
     width_: Dimension;
     @Local
     height_: Dimension;
+    private MAX_IMAGE_COUNT;
+    @Local
+    imageInfoArr: Array<imageGeneration.ImageItem>;
+    @Local
+    stylesArr: Array<imageGeneration.ImageStyle>;
     @Builder
-    pageMap(s2: string): void;
+    pageMap(name: string): void;
+    private initImageInfoArr;
     aboutToAppear(): void;
     build(): void;
 }

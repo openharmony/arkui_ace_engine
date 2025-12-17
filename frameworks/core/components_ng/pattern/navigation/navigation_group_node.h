@@ -425,6 +425,7 @@ private:
     bool HandleBackForHomeOrRelatedDestination();
     void LoadCompleteManagerStartCollect();
     void LoadCompleteManagerStopCollect();
+    void ContentChangeReport(RefPtr<FrameNode>& keyNode);
 
     std::optional<bool> useHomeDestination_;
     RefPtr<UINode> customHomeNode_;

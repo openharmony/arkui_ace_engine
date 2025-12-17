@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_default.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -24,6 +25,7 @@
 
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #undef private
 #undef protected
@@ -1635,8 +1637,12 @@ HWTEST_F(DatePickerTestThree, DatePickerTest017, TestSize.Level1)
     auto pipeline = MockPipelineContext::GetCurrent();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     ASSERT_NE(pickerTheme, nullptr);
-    pickerTheme->disappearOptionStyle_.propTextColor_ = Color::RED;
-    pickerTheme->normalOptionStyle_.propTextColor_ = Color::RED;
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    DatePickerModelNG::GetInstance()->SetNormalTextStyle(pickerTheme, textStyle);
+    DatePickerModelNG::GetInstance()->SetSelectedTextStyle(pickerTheme, textStyle);
+    DatePickerModelNG::GetInstance()->SetDisappearTextStyle(pickerTheme, textStyle);
+
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -1658,16 +1664,21 @@ HWTEST_F(DatePickerTestThree, DatePickerTest017, TestSize.Level1)
     datePickerPattern->SetbuttonTitleNode(buttonTitleNode);
     datePickerPattern->SetContentRowNode(contentRow);
     contentRow->MountToParent(contentColumn);
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PickerTheme>()));
-    auto context = datePickerNode->GetContext();
-    ASSERT_NE(context, nullptr);
-    datePickerPattern->OnColorConfigurationUpdate();
+    datePickerPattern->SetPickerTag(false);
+
     auto pickerProperty = datePickerNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
-    EXPECT_EQ(pickerProperty->GetColor(), Color::RED);
-    EXPECT_EQ(pickerProperty->GetDisappearColor(), Color::RED);
+    ASSERT_NE(pickerProperty, nullptr);
+    g_isConfigChangePerform = true;
+    EXPECT_TRUE(SystemProperties::ConfigChangePerform());
+    EXPECT_FALSE(pickerProperty->GetNormalTextColorSetByUser().value_or(false));
+    EXPECT_FALSE(pickerProperty->GetSelectedTextColorSetByUser().value_or(false));
+    EXPECT_FALSE(pickerProperty->GetDisappearTextColorSetByUser().value_or(false));
+    EXPECT_FALSE(datePickerPattern->isPicker_);
+    datePickerPattern->OnColorConfigurationUpdate();
+
+    EXPECT_NE(pickerProperty->GetColor().value(), Color::RED);
+    EXPECT_NE(pickerProperty->GetSelectedColor().value(), Color::RED);
+    EXPECT_NE(pickerProperty->GetDisappearColor().value(), Color::RED);
 }
 
 /**

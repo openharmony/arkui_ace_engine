@@ -55,6 +55,7 @@ ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
     if (!isDarkSet) {
         darkColors = lightColors; // if darkColors is not set, use lightColors
         darkResObjs = lightResObjs; // if darkColors is not set, use lightResObjs
+        TokenThemeStorage::GetInstance()->InitDarkThemeMapWithoutUserSet(themeId, true);
     } else if (!darkColorsArg->IsArray(vm) ||
     !HandleThemeColorsArg(vm, darkColorsArg, darkColors, darkResObjs, themeId, true)) {
         TAG_LOGD(AceLogTag::ACE_THEME, "Handle Theme darkColors to array failed");

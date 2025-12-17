@@ -390,7 +390,6 @@ HWTEST_F(SelectPatternTwoTestNg, BindMenuTouch014, TestSize.Level1)
     touchLocationInfo.SetTouchType(TouchType::MOVE);
     touchInfoMove.AddTouchLocationInfo(std::move(touchLocationInfo));
     EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfoMove));
-    ViewStackProcessor::GetInstance()->ClearStack();
 }
 
 /**

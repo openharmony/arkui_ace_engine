@@ -3782,14 +3782,17 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNodeInnerAfterRender(
     const AccessibilityEvent& accessibilityEvent, const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context)
 {
     CHECK_NULL_VOID(context);
-    if (!context) {
-        return;
-    }
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     if (ngPipeline) {
         ngPipeline->AddAfterRenderTask(
-            [weak = WeakClaim(this), accessibilityEvent, node, context]() {
+            [weak = WeakClaim(this), weakNode = WeakClaim(AceType::RawPtr(node)),
+                weakContext = WeakClaim(AceType::RawPtr(context)), accessibilityEvent]() {
                 auto jsAccessibilityManager = weak.Upgrade();
+                CHECK_NULL_VOID(jsAccessibilityManager);
+                auto node = weakNode.Upgrade();
+                CHECK_NULL_VOID(node);
+                auto context = weakContext.Upgrade();
+                CHECK_NULL_VOID(context);
                 jsAccessibilityManager->SendEventToAccessibilityWithNodeInner(accessibilityEvent, node, context);
             }
         );
@@ -3901,15 +3904,13 @@ void JsAccessibilityManager::SendAccessibilityAsyncEventInner(const Accessibilit
 void JsAccessibilityManager::SendAccessibilityAsyncEventInnerAfterRender(const AccessibilityEvent& accessibilityEvent)
 {
     auto context = GetPipelineContext().Upgrade();
-    if (!context) {
-        return;
-    }
+    CHECK_NULL_VOID(context);
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
-
     if (ngPipeline) {
         ngPipeline->AddAfterRenderTask(
             [weak = WeakClaim(this), accessibilityEvent]() {
                 auto jsAccessibilityManager = weak.Upgrade();
+                CHECK_NULL_VOID(jsAccessibilityManager);
                 jsAccessibilityManager->SendAccessibilityAsyncEventInner(accessibilityEvent);
             }
         );
@@ -7166,9 +7167,19 @@ void JsAccessibilityManager::WebFocusMoveSearchNG(int64_t elementId, int32_t dir
     if (node) {
         UpdateWebAccessibilityElementInfo(node, commonProperty, info, webPattern);
     } else {
-        auto webNode = webPattern->GetHost();
-        CHECK_NULL_VOID(webNode);
-        UpdateAccessibilityElementInfo(webNode, commonProperty, info, ngPipeline);
+        int64_t webId = webNode->GetAccessibilityId();
+        int32_t mode = 0;
+        std::list<AccessibilityElementInfo> infos;
+        SearchElementInfoByAccessibilityIdNG(webId, mode, infos, context, NG::UI_EXTENSION_OFFSET_MAX);
+        TAG_LOGD(AceLogTag::ACE_WEB,
+            "JsAccessibilityManager WebFocusMoveSearchNG infos.size: %{public}zu, webId:  %{public}" PRId64,
+            infos.size(),
+            webId);
+        if (!infos.empty()) {
+            info = infos.front();
+        } else {
+            UpdateAccessibilityElementInfo(webNode, commonProperty, info, ngPipeline);
+        }
     }
 }
 

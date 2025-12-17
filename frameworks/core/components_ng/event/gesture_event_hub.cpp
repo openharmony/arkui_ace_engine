@@ -21,6 +21,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
@@ -1041,8 +1042,8 @@ void GestureEventHub::CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub)
 
     auto originalLongPressEventActuator = gestureEventHub->longPressEventActuator_;
     if (originalLongPressEventActuator) {
-        longPressEventActuator_ = MakeRefPtr<LongPressEventActuator>(WeakClaim(this));
-        longPressEventActuator_->CopyLongPressEvent(originalLongPressEventActuator);
+        longPressEventActuator_ =
+            LongPressEventActuatorFactory::CopyLongPressEvent(originalLongPressEventActuator, WeakClaim(this));
     }
 
     auto originalDragEventActuator = gestureEventHub->dragEventActuator_;
@@ -1341,11 +1342,12 @@ void GestureEventHub::SetRedirectClick(bool redirectClick)
     redirectClick_ = redirectClick;
 }
 
-void GestureEventHub::SetLongPressEvent(
-    const RefPtr<LongPressEvent>& event, bool isForDrag, bool isDisableMouseLeft, int32_t duration)
+void GestureEventHub::SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag, bool isDisableMouseLeft,
+    int32_t duration, bool withMultiSelect)
 {
     if (!longPressEventActuator_) {
-        longPressEventActuator_ = MakeRefPtr<LongPressEventActuator>(WeakClaim(this));
+        longPressEventActuator_ =
+            LongPressEventActuatorFactory::CreateLongPressEventActuator(WeakClaim(this), withMultiSelect);
         longPressEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
     }
     longPressEventActuator_->SetLongPressEvent(event, isForDrag, isDisableMouseLeft);

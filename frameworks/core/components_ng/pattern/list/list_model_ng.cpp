@@ -19,6 +19,7 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
@@ -625,6 +626,10 @@ bool ListModelNG::GetShowCached(FrameNode* frameNode)
 
 void ListModelNG::SetCacheRange(FrameNode* frameNode, int32_t min, int32_t max)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    context->GetStatisticEventReporter()->SendEvent(StatisticEventType::CALL_SET_CACHE_RANGE);
     CacheRange range { min, max };
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CacheRange, range, frameNode);
 }
@@ -1015,6 +1020,29 @@ bool ListModelNG::GetListSyncLoad(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, true);
     auto value = frameNode->GetLayoutProperty<ListLayoutProperty>()->GetSyncLoad().value_or(true);
     return value;
+}
+
+void ListModelNG::SetEditModeOptions(EditModeOptions& editModeOptions)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetEditModeOptions(frameNode, editModeOptions);
+}
+
+void ListModelNG::SetEditModeOptions(FrameNode* frameNode, EditModeOptions& editModeOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEditModeOptions(editModeOptions);
+}
+
+EditModeOptions ListModelNG::GetEditModeOptions(FrameNode* frameNode)
+{
+    EditModeOptions options;
+    CHECK_NULL_RETURN(frameNode, options);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, options);
+    return pattern->GetEditModeOptions();
 }
 
 int32_t ListModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
@@ -1620,5 +1648,24 @@ ScrollSnapAnimationSpeed ListModelNG::GetScrollSnapAnimationSpeed(FrameNode* fra
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_RETURN(pattern, ScrollSnapAnimationSpeed::NORMAL);
     return pattern->GetSnapSpeed();
+}
+
+void ListModelNG::SetSupportEmptyBranchInLazyLoading(bool supportEmptyBranch)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, SupportLazyLoadingEmptyBranch, supportEmptyBranch);
+}
+
+void ListModelNG::SetSupportEmptyBranchInLazyLoading(FrameNode* frameNode, bool supportEmptyBranch)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, SupportLazyLoadingEmptyBranch, supportEmptyBranch, frameNode);
+}
+
+bool ListModelNG::GetSupportEmptyBranchInLazyLoading(FrameNode* frameNode)
+{
+    bool enable = false;
+    CHECK_NULL_RETURN(frameNode, enable);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        ListLayoutProperty, SupportLazyLoadingEmptyBranch, enable, frameNode, false);
+    return enable;
 }
 } // namespace OHOS::Ace::NG

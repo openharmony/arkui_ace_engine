@@ -132,9 +132,6 @@ void JSTabsController::ChangeIndex(int32_t index)
         }
         TAG_LOGI(AceLogTag::ACE_TABS, "changeIndex %{public}d", index);
         tabsController->SwipeTo(index);
-    } else {
-        EventReport::ReportScrollableErrorEvent(
-            "Tabs", ScrollableErrorType::CONTROLLER_NOT_BIND, "changeIndex: Tabs controller not bind.");
     }
 
 #ifndef NG_BUILD
@@ -157,8 +154,6 @@ void JSTabsController::PreloadItems(const JSCallbackInfo& args)
     napi_create_promise(env, &asyncContext->deferred, &promise);
     auto tabsController = tabsControllerWeak_.Upgrade();
     if (!tabsController) {
-        EventReport::ReportScrollableErrorEvent(
-            "Tabs", ScrollableErrorType::CONTROLLER_NOT_BIND, "preloadItems: Tabs controller not bind.");
         ReturnPromise(args, promise);
         return;
     }
@@ -188,11 +183,7 @@ void JSTabsController::SetTabBarTranslate(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
     auto tabsController = tabsControllerWeak_.Upgrade();
-    if (!tabsController) {
-        EventReport::ReportScrollableErrorEvent(
-            "Tabs", ScrollableErrorType::CONTROLLER_NOT_BIND, "setTabBarTranslate: Tabs controller not bind.");
-        return;
-    }
+    CHECK_NULL_VOID(tabsController);
 
     if (args.Length() <= 0) {
         return;
@@ -228,11 +219,7 @@ void JSTabsController::SetTabBarOpacity(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
     auto tabsController = tabsControllerWeak_.Upgrade();
-    if (!tabsController) {
-        EventReport::ReportScrollableErrorEvent(
-            "Tabs", ScrollableErrorType::CONTROLLER_NOT_BIND, "setTabBarOpacity: Tabs controller not bind.");
-        return;
-    }
+    CHECK_NULL_VOID(tabsController);
 
     if (args.Length() <= 0) {
         return;

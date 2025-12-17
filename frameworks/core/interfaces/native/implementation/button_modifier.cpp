@@ -18,7 +18,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/button/button_model_static.h"
 #include "core/components_ng/pattern/button/button_request_data.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -107,6 +107,8 @@ void SetButtonOptions0Impl(Ark_NativePointer node,
         ButtonModelStatic::SetRole(frameNode, buttonOptions.role);
         ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
         ButtonModelStatic::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
+    } else {
+        ButtonModelStatic::SetType(frameNode, std::nullopt);
     }
     auto labelString = Converter::OptConvert<std::string>(*label);
     if (labelString) {
@@ -129,6 +131,8 @@ void SetButtonOptions1Impl(Ark_NativePointer node,
             ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
         }
         ButtonModelStatic::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
+    } else {
+        ButtonModelStatic::SetType(frameNode, std::nullopt);
     }
     ButtonModelStatic::SetCreateWithLabel(frameNode, false);
 }

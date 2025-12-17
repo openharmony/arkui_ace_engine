@@ -15,15 +15,19 @@
 
 #include <gtest/gtest.h>
 
+#include "arkoala_api_generated.h"
+#include "generated/test_fixtures.h"
+#include "generated/type_helpers.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/components_ng/pattern/image/image_event_hub.h"
-#include "generated/test_fixtures.h"
 #include "point_light_test.h"
-#include "generated/type_helpers.h"
-#include "arkoala_api_generated.h"
-#include "test/unittest/capi/stubs/ace_pixelmap_stub.h"
+
 #include "core/components/image/image_theme.h"
+#include "core/components_ng/pattern/image/image_event_hub.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "test/unittest/capi/stubs/ace_pixelmap_stub.h"
 
 using namespace testing;
 using namespace testing::ext;

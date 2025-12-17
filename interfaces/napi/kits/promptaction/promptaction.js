@@ -15,6 +15,16 @@
 
 const __prompt__ = requireInternal('promptAction');
 
+let CommonState;
+(function (CommonState) {
+    CommonState[CommonState.UNINITIALIZED = 0] = 'UNINITIALIZED';
+    CommonState[CommonState.INITIALIZED = 1] = 'INITIALIZED';
+    CommonState[CommonState.APPEARING = 2] = 'APPEARING';
+    CommonState[CommonState.APPEARED = 3] = 'APPEARED';
+    CommonState[CommonState.DISAPPEARING = 4] = 'DISAPPEARING';
+    CommonState[CommonState.DISAPPEARED = 5] = 'DISAPPEARED';
+})(CommonState || (CommonState = {}));
+
 const CommonController = class CommonController {
     constructor() {};
     close() {};
@@ -137,6 +147,7 @@ let ImmersiveMode;
 })(ImmersiveMode || (ImmersiveMode = {}));
 
 export default {
+    CommonState,
     CommonController,
     DialogController,
     showToast,

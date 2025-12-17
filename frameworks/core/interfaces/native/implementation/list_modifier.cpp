@@ -345,6 +345,14 @@ void SetMaintainVisibleContentPositionImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<bool>(*value);
     ListModelStatic::SetListMaintainVisibleContentPosition(frameNode, convValue);
 }
+void SetSupportEmptyBranchInLazyLoadingImpl(Ark_NativePointer node,
+                                            const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto enable = Converter::OptConvert<bool>(*value).value_or(false);
+    ListModelNG::SetSupportEmptyBranchInLazyLoading(frameNode, enable);
+}
 void SetStackFromEndImpl(Ark_NativePointer node,
                          const Opt_Boolean* value)
 {
@@ -628,6 +636,7 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::SetScrollSnapAlignImpl,
         ListAttributeModifier::SetChildrenMainSizeImpl,
         ListAttributeModifier::SetMaintainVisibleContentPositionImpl,
+        ListAttributeModifier::SetSupportEmptyBranchInLazyLoadingImpl,
         ListAttributeModifier::SetStackFromEndImpl,
         ListAttributeModifier::SetOnScrollIndexImpl,
         ListAttributeModifier::SetOnScrollVisibleContentChangeImpl,

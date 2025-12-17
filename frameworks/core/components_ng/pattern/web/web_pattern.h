@@ -94,6 +94,7 @@ namespace OHOS::Ace::NG {
 class WebAccessibilityChildTreeCallback;
 class ViewDataCommon;
 class TransitionalNodeInfo;
+class WebDomDocument;
 
 namespace {
 
@@ -115,6 +116,12 @@ enum class WebInfoType : int32_t {
     TYPE_TABLET,
     TYPE_2IN1,
     TYPE_UNKNOWN
+};
+
+enum class WebMenuType : int32_t {
+    TYPE_CONTEXTMENU,
+    TYPE_QUICKMENU,
+    TYPE_UNKNOWN_MENU
 };
 
 struct PipInfo {
@@ -695,10 +702,13 @@ public:
     bool HandleAutoFillEvent();
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson);
-    bool RequestAutoFill(AceAutoFillType autoFillType);
-    bool RequestAutoFill(AceAutoFillType autoFillType, const std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos);
+    bool RequestAutoFill(AceAutoFillType autoFillType,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
+    bool RequestAutoFill(AceAutoFillType autoFillType, const std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
     bool RequestAutoFill(bool& isPopup, bool isNewPassWord, const AceAutoFillTriggerType& triggerType);
     bool RequestAutoSave();
+    void RequestPasswordAutoFill(WebMenuType menuType);
     bool UpdateAutoFillPopup();
     bool CloseAutoFillPopup();
     void OnCompleteSwapWithNewSize();
@@ -881,6 +891,8 @@ public:
     void OnColorConfigurationUpdate() override;
     void RecordWebEvent(bool isInit = false) override;
     bool RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback);
+    void DumpSimplifyInfoOnlyForParamConfig(
+        std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig()) override;
 
     bool IsPreviewImageNodeExist() const
     {
@@ -1059,7 +1071,7 @@ private:
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    void CleanupWebPatternResource(int32_t webId);
+    void CleanupWebPatternResource();
 
     void OnWindowShow() override;
     void OnWindowHide() override;
@@ -1329,7 +1341,7 @@ private:
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
     void InitMagnifier();
-    void ShowMagnifier(int centerOffsetX, int centerOffsetY);
+    void ShowMagnifier(int centerOffsetX, int centerOffsetY, bool isMove = false);
     void HideMagnifier();
     void OnMagnifierHandleMove(const RectF& handleRect, bool isFirst);
     int32_t GetBufferSizeByDeviceType();
@@ -1339,6 +1351,8 @@ private:
         const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
     bool MenuAvoidKeyboard(bool hideOrClose, double height = 0.0f);
     int32_t GetVisibleViewportAvoidHeight();
+
+    void ShiftFocusAfterAutoFill(AceAutoFillType focusType);
 
     void HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer);
     void FormatIndex(int32_t& startIndex, int32_t& endIndex);
@@ -1446,6 +1460,7 @@ private:
     bool isVisible_ = true;
     bool isVisibleActiveEnable_ = true;
     bool isMemoryLevelEnable_ = true;
+    bool isOfflineWebEvictFrameBuffersEnable_ = false;
     OffsetF fitContentOffset_;
     bool isFirstFlingScrollVelocity_ = true;
     bool isScrollStarted_ = false;
@@ -1521,6 +1536,8 @@ private:
     uint32_t windowId_ = 0;
     int64_t focusedAccessibilityId_ = -1;
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
+    bool isEditableOnContextMenu_ = false;
+    WebMenuType autoFillMenuType_ = WebMenuType::TYPE_UNKNOWN_MENU;
     bool isRenderModeInit_ = false;
     bool isAutoFillClosing_ = true;
     std::shared_ptr<ViewDataCommon> viewDataCommon_;
@@ -1591,6 +1608,9 @@ private:
 
     OHNativeWindow* pipNativeWindow_ = nullptr;
     std::mutex pipNativeWindowMutex_;
+    int showMagnifierFingerId_ = -1;
+
+    std::unique_ptr<WebDomDocument> webDomDocument_;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

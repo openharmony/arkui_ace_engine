@@ -915,6 +915,18 @@ void WebModelStatic::SetOnFileSelectorShow(
     webEventHub->SetOnFileSelectorShowEvent(std::move(uiCallback));
 }
 
+void WebModelStatic::SetDefaultFileSelectorShow(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) {
+        func(info.get());
+    };
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetDefaultFileSelectorShowCallback(std::move(uiCallback));
+}
+
 void WebModelStatic::SetOnDetectedBlankScreen(
     FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
 {
@@ -1459,6 +1471,20 @@ void WebModelStatic::SetEnableSelectedDataDetector(FrameNode* frameNode, bool is
     webPatternStatic->UpdateEnableSelectedDataDetector(isEnabled);
 }
 
+void WebModelStatic::SetOnTextSelectionChange(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto func = callback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo> &info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnTextSelectionChangeEvent(std::move(uiCallback));
+}
+
 void WebModelStatic::SetEnableImageAnalyzer(FrameNode* frameNode, bool isEnabled)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1568,5 +1594,25 @@ void WebModelStatic::SetJavaScriptProxy(FrameNode* frameNode, std::function<void
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->SetJsProxyCallback(std::move(callback));
+}
+
+void WebModelStatic::SetCameraCaptureStateChangedId(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnCameraCaptureStateChangedEvent(std::move(uiCallback));
+}
+
+void WebModelStatic::SetMicrophoneCaptureStateChangedId(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnMicrophoneCaptureStateChangedEvent(std::move(uiCallback));
 }
 } // namespace OHOS::Ace::NG

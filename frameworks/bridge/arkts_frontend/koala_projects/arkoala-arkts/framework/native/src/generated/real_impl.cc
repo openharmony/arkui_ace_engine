@@ -4810,6 +4810,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                   const Opt_SelectionMenuOptions* options)
     {
     }
+    void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                         const Opt_SelectedDragPreviewStyle* value)
+    {
+    }
     void SetCustomKeyboardImpl(Ark_NativePointer node,
                                const Opt_Union_CustomBuilder_ComponentContent* value,
                                const Opt_KeyboardOptions* options)
@@ -5639,6 +5643,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetBackgroundColorImpl(Ark_NativePointer node,
                                 const Opt_ResourceColor* value)
+    {
+    }
+    void SetKeyboardAvoidModeImpl(Ark_NativePointer node,
+                                  const Opt_MenuKeyboardAvoidMode* value)
+    {
+    }
+    void SetMinKeyboardAvoidDistanceImpl(Ark_NativePointer node,
+                                         const Opt_LengthMetrics* value)
     {
     }
     void SetMenuAlignImpl(Ark_NativePointer node,
@@ -8301,8 +8313,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                            const Opt_Boolean* value)
     {
     }
+    void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
+                                      const Opt_TextSelectionChangeCallback* value)
+    {
+    }
     void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
                                     const Opt_Boolean* value)
+    {
+    }
+    void SetOnMicrophoneCaptureStateChangeImpl(Ark_NativePointer node,
+                                               const Opt_OnMicrophoneCaptureStateChangeCallback* value)
+    {
+    }
+    void SetOnCameraCaptureStateChangeImpl(Ark_NativePointer node,
+                                           const Opt_OnCameraCaptureStateChangeCallback* value)
     {
     }
     void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
@@ -9703,6 +9727,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorAttributeModifier::SetIncludeFontPaddingImpl,
             RichEditorAttributeModifier::SetFallbackLineSpacingImpl,
             RichEditorAttributeModifier::SetBindSelectionMenuImpl,
+            RichEditorAttributeModifier::SetSelectedDragPreviewStyleImpl,
             RichEditorAttributeModifier::SetCustomKeyboardImpl,
             RichEditorAttributeModifier::SetPlaceholderImpl,
         };
@@ -9981,6 +10006,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SelectAttributeModifier::SetShowInSubWindowImpl,
             SelectAttributeModifier::SetShowDefaultSelectedIconImpl,
             SelectAttributeModifier::SetBackgroundColorImpl,
+            SelectAttributeModifier::SetKeyboardAvoidModeImpl,
+            SelectAttributeModifier::SetMinKeyboardAvoidDistanceImpl,
             SelectAttributeModifier::SetMenuAlignImpl,
         };
         return &ArkUISelectModifierImpl;
@@ -10770,7 +10797,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetBlankScreenDetectionConfigImpl,
             WebAttributeModifier::SetZoomControlAccessImpl,
             WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
+            WebAttributeModifier::SetOnTextSelectionChangeImpl,
             WebAttributeModifier::SetEnableImageAnalyzerImpl,
+            WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
+            WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
             WebAttributeModifier::SetBindSelectionMenuImpl,
         };
@@ -13192,6 +13222,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                   const Callback_Void* customDropAnimation)
     {
     }
+    Ark_Int32 GetDisplayIdImpl(Ark_DragEvent peer)
+    {
+        return {};
+    }
     void EnableInternalDropAnimationImpl(Ark_DragEvent peer,
                                          const Ark_String* configuration)
     {
@@ -13764,6 +13798,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
        return {};
     }
     Ark_Boolean IsOnMainTreeImpl(Ark_FrameNode peer)
+    {
+        return {};
+    }
+    Array_Float64 ConvertPositionToWindowImpl(Ark_FrameNode peer,
+                                              const Ark_Vector2* positionByLocal)
+    {
+        return {};
+    }
+    Array_Float64 ConvertPositionFromWindowImpl(Ark_FrameNode peer,
+                                                const Ark_Vector2* positionByWindow)
     {
         return {};
     }
@@ -17342,6 +17386,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Opt_OffsetResult OffsetImpl(Ark_Scroller peer)
+    {
+        return {};
+    }
     void ScrollToIndexImpl(Ark_VMContext vmContext,
                            Ark_Scroller peer,
                            Ark_Int32 value,
@@ -18465,6 +18513,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_TextMenuItemId GetPasswordVaultImpl()
+    {
+        return {};
+    }
     } // TextMenuItemIdAccessor
     namespace TextPickerDialogAccessor {
     void DestroyPeerImpl(Ark_TextPickerDialog peer)
@@ -19086,6 +19138,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void PasteAndMatchStyleImpl(Ark_WebContextMenuResult peer)
+    {
+    }
+    void RequestPasswordAutoFillImpl(Ark_WebContextMenuResult peer)
     {
     }
     } // WebContextMenuResultAccessor
@@ -20288,6 +20343,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DragEventAccessor::GetVelocityYImpl,
             DragEventAccessor::GetVelocityImpl,
             DragEventAccessor::ExecuteDropAnimationImpl,
+            DragEventAccessor::GetDisplayIdImpl,
             DragEventAccessor::EnableInternalDropAnimationImpl,
             DragEventAccessor::GetDragBehaviorImpl,
             DragEventAccessor::SetDragBehaviorImpl,
@@ -20522,6 +20578,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::GetCommonEventImpl,
             FrameNodeExtenderAccessor::IsOnRenderTreeImpl,
             FrameNodeExtenderAccessor::IsOnMainTreeImpl,
+            FrameNodeExtenderAccessor::ConvertPositionToWindowImpl,
+            FrameNodeExtenderAccessor::ConvertPositionFromWindowImpl,
         };
         return &FrameNodeExtenderAccessorImpl;
     }
@@ -22043,6 +22101,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollerAccessor::FlingImpl,
             ScrollerAccessor::ScrollPageImpl,
             ScrollerAccessor::CurrentOffsetImpl,
+            ScrollerAccessor::OffsetImpl,
             ScrollerAccessor::ScrollToIndexImpl,
             ScrollerAccessor::ScrollByImpl,
             ScrollerAccessor::IsAtEndImpl,
@@ -22590,6 +22649,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextMenuItemIdAccessor::GetTRANSLATEImpl,
             TextMenuItemIdAccessor::GetSEARCHImpl,
             TextMenuItemIdAccessor::GetSHAREImpl,
+            TextMenuItemIdAccessor::GetAutoFillImpl,
+            TextMenuItemIdAccessor::GetPasswordVaultImpl,
         };
         return &TextMenuItemIdAccessorImpl;
     }

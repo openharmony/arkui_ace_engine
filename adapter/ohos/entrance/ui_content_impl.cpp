@@ -2610,7 +2610,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (pipelineContext) {
         pipelineContext->SetIsCustomNodeDeleteInTransition(isCustomNodeDeleteInTransition);
     }
-    
+
     pipeline->SetHasPreviewTextOption(hasPreviewTextOption);
     // Use metadata to control whether the cutout safeArea takes effect.
     bool useCutout = std::any_of(metaData.begin(), metaData.end(),
@@ -3349,7 +3349,7 @@ void UIContentImpl::AddKeyFrameNodeCallback(const std::function<
     addNodeCallback_ = callback;
 }
 
-void UIContentImpl::LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFrameNode>& keyFrameNode)
+void UIContentImpl::LinkKeyFrameNode()
 {
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -3357,12 +3357,17 @@ void UIContentImpl::LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFra
     auto pipelineContext = container->GetPipelineContext();
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
+    auto rootElement = context->GetRootElement();
+    CHECK_NULL_VOID(rootElement);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
+    CHECK_NULL_VOID(rosenRenderContext);
 #ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
         CHECK_NULL_VOID(window_);
         auto surfaceNode = window_->GetSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
+        auto keyFrameNode = rosenRenderContext->GetKeyFrameNode();
         CHECK_NULL_VOID(keyFrameNode);
         keyFrameNode->SetRSUIContext(surfaceNode->GetRSUIContext());
         TAG_LOGD(AceLogTag::ACE_WINDOW, "AddChild surfaceNode %{public}" PRIu64 "keyFrameNode %{public}" PRIu64 "",
@@ -3372,10 +3377,6 @@ void UIContentImpl::LinkKeyFrameNode(std::shared_ptr<OHOS::Rosen::RSWindowKeyFra
 #endif
 #endif
     TAG_LOGD(AceLogTag::ACE_WINDOW, "LinkKeyFrameNode.");
-    auto rootElement = context->GetRootElement();
-    CHECK_NULL_VOID(rootElement);
-    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
-    CHECK_NULL_VOID(rosenRenderContext);
     rosenRenderContext->LinkKeyFrameNodeToRootNode(context->GetRootElement());
 }
 
@@ -3387,6 +3388,7 @@ void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config,
     TAG_LOGD(AceLogTag::ACE_WINDOW, "CacheAnimateInfo.");
     cachedAnimateFlag_.store(true);
     cachedConfig_ = config;
+    cachedConfig_.SetKeyFrameConfigCacheState(true);
     cachedReason_ = reason;
     cachedRsTransaction_ = rsTransaction;
     cachedAvoidAreas_ = avoidAreas;
@@ -3416,6 +3418,13 @@ void UIContentImpl::ExecKeyFrameCachedAnimateAction()
         };
         taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay,
             "ArkUIExecKeyFrameCachedAnimateTask", PriorityType::HIGH);
+        auto context = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+        CHECK_NULL_VOID(context);
+        auto rootElement = context->GetRootElement();
+        CHECK_NULL_VOID(rootElement);
+        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
+        CHECK_NULL_VOID(rosenRenderContext);
+        rosenRenderContext->SetHasKeyFrameCache(false);
     }
     cachedAnimateFlag_.store(false);
 }
@@ -3479,10 +3488,10 @@ void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
         return;
     }
     rosenRenderContext->CreateKeyFrameNode();
-    keyFrameNode_ = rosenRenderContext->GetKeyFrameNode();
-    if (addNodeCallback_ && keyFrameNode_) {
+    auto keyFrameNode = rosenRenderContext->GetKeyFrameNode();
+    if (addNodeCallback_ && keyFrameNode) {
         TAG_LOGI(AceLogTag::ACE_WINDOW, "rsTransaction addNodeCallback_.");
-        addNodeCallback_(keyFrameNode_, rsTransaction);
+        addNodeCallback_(keyFrameNode, rsTransaction);
     }
     CloseSyncTransaction(transactionController, transactionHandler);
     std::function<void()> callbackCachedAnimation = std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
@@ -3506,24 +3515,27 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_RETURN(context, true);
 
+    bool fromAnimateCache = config.GetKeyFrameConfig().fromAnimateCache_;
     bool animateRes = true;
     auto rootElement = context->GetRootElement();
     CHECK_NULL_RETURN(rootElement, true);
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
     CHECK_NULL_RETURN(rosenRenderContext, true);
+    if ((reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START ||
+        reason == OHOS::Rosen::WindowSizeChangeReason::DRAG) &&
+        !rosenRenderContext->GetIsDraggingFlag()) {
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "keyframe start policy");
+        rosenRenderContext->SetIsDraggingFlag(true);
+        KeyFrameDragStartPolicy(context);
+        return true;
+    }
+
     switch (reason) {
-        case OHOS::Rosen::WindowSizeChangeReason::DRAG_START:
-            if (!rosenRenderContext->GetIsDraggingFlag()) {
-                if (rosenRenderContext->GetKeyFrameNode()) {
-                    rosenRenderContext->SetReDraggingFlag(true);
-                }
-                rosenRenderContext->SetIsDraggingFlag(true);
-                KeyFrameDragStartPolicy(context);
-            }
-            return true;
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_END:
-            rosenRenderContext->SetIsDraggingFlag(false);
-            rosenRenderContext->SetReDraggingFlag(false);
+            TAG_LOGD(AceLogTag::ACE_WINDOW, "keyframe stop policy: from cache %{public}d", fromAnimateCache);
+            if (!fromAnimateCache) {
+                rosenRenderContext->SetIsDraggingFlag(false);
+            }
             [[fallthrough]];
         case OHOS::Rosen::WindowSizeChangeReason::DRAG:
             animateRes = rosenRenderContext->SetKeyFrameNodeOpacityAnimation(
@@ -3532,6 +3544,7 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
                 reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END);
             if (!animateRes) {
                 CacheAnimateInfo(config, reason, rsTransaction, avoidAreas);
+                rosenRenderContext->SetHasKeyFrameCache(true);
                 return true;
             }
             return false;
@@ -5852,7 +5865,87 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     sendCommandCallbackInner(taskExecutor);
     SaveGetCurrentInstanceId();
     RegisterExeAppAIFunction(taskExecutor);
+    SaveGetHitTestInfoCallback(taskExecutor);
     SetContentChangeDetectCallback(taskExecutor);
+    RegisterGetSpecifiedContentOffsetsCallback(taskExecutor);
+    RegisterHighlightSpecifiedContentCallback(taskExecutor);
+    RegisterSelectTextCallback(taskExecutor);
+    SaveGetStateMgmtInfoFunction(taskExecutor);
+}
+
+void UIContentImpl::RegisterGetSpecifiedContentOffsetsCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto getSpecifiedContentOffsetsCallback = [weakTaskExecutor = taskExecutor](int32_t id,
+        const std::string& content) -> std::vector<std::pair<float, float>> {
+    auto taskExecutor = weakTaskExecutor.Upgrade();
+        std::vector<std::pair<float, float>> offsets;
+        CHECK_NULL_RETURN(taskExecutor, offsets);
+        taskExecutor->PostTask(
+            [&offsets, id, content]() {
+                auto node = AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(id));
+                if (!node) {
+                    LOGW("GetSpecifiedContentOffsets no such NodeId");
+                    return;
+                }
+                offsets = node->GetSpecifiedContentOffsets(content);
+                UiSessionManager::GetInstance()->SendSpecifiedContentOffsets(offsets);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionGetSpecifiedContentOffsets");
+        return offsets;
+    };
+    UiSessionManager::GetInstance()->SaveGetSpecifiedContentOffsetsFunction(getSpecifiedContentOffsetsCallback);
+}
+
+void UIContentImpl::RegisterHighlightSpecifiedContentCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto highlightSpecifiedContentCallback = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& content,
+                                                 const std::vector<std::string>& nodeIds, const std::string& configs) {
+    auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [id, content, nodeIds, configs]() {
+                auto node = AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(id));
+                if (!node) {
+                    LOGW("HighlightSpecifiedContent no such NodeId");
+                    return;
+                }
+                node->HighlightSpecifiedContent(content, nodeIds, configs);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionHighlightSpecifiedContent");
+    };
+    UiSessionManager::GetInstance()->SaveHighlightSpecifiedContentFunction(highlightSpecifiedContentCallback);
+}
+
+void UIContentImpl::RegisterSelectTextCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto selectTextCallback = [weakTaskExecutor = taskExecutor]() {
+    auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            []() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->ReportSelectedText();
+            },
+            TaskExecutor::TaskType::UI, "UiSessionSelectText");
+    };
+    UiSessionManager::GetInstance()->SaveSelectTextFunction(selectTextCallback);
+}
+
+void UIContentImpl::SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto getHitTestInfoCallback = [weakTaskExecutor = taskExecutor](InteractionParamConfig config) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [config]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->GetHitTestInfos(config);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionGetHitTestInfos");
+    };
+    UiSessionManager::GetInstance()->SaveGetHitTestInfoCallback(getHitTestInfoCallback);
 }
 
 void UIContentImpl::SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6283,5 +6376,22 @@ void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& 
             },
             TaskExecutor::TaskType::UI, "UiSessionContentChangeDetectStop");
     });
+}
+
+void UIContentImpl::SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto getStateMgmtInfoCallback = [weakTaskExecutor = taskExecutor](const std::string& componentName,
+                                        const std::string& propertyName, const std::string& jsonPath) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [componentName, propertyName, jsonPath]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->GetStateMgmtInfo(componentName, propertyName, jsonPath);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionGetStateMgmtInfo");
+    };
+    UiSessionManager::GetInstance()->SaveGetStateMgmtInfoFunction(getStateMgmtInfoCallback);
 }
 } // namespace OHOS::Ace

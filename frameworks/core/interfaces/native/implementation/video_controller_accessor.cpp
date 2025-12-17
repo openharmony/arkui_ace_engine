@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/video_controller_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"

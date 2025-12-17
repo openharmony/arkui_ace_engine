@@ -832,7 +832,6 @@ class MinKeyboardAvoidDistanceModifier extends ModifierWithKey<Optional<LengthMe
   }
 }
 
-
 class SelectOnSelectModifier extends ModifierWithKey<(value: OnSelectCallback) => void> {
   constructor(value: OnSelectCallback) {
     super(value);

@@ -279,7 +279,7 @@ Opt_ContextMenuOptions getContextMenuOptions(Ark_ContextMenuOptions options = {}
 } // namespace
 
 namespace Converter {
-void AssignArkValue(Ark_TransitionEffect& dst, const RefPtr<NG::ChainedTransitionEffect>& src)
+void AssignArkValue(Ark_TransitionEffect& dst, const RefPtr<NG::ChainedTransitionEffect>& src, ConvContext *ctx)
 {
     const auto peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
     peer->handler = src;

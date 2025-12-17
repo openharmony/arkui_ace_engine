@@ -21,6 +21,7 @@ namespace OHOS::Ace::NG {
 namespace {
     constexpr uint32_t NORMAL_VALUE_ARRAY_STEP = 2;
     constexpr DisplayMode DEFAULT_BAR_STATE_VALUE = DisplayMode::AUTO;
+    const uint32_t ERROR_UINT_CODE = -1;
 }
 
 constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
@@ -778,6 +779,47 @@ void ResetRichEditorScrollBarColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetScrollBarColor(frameNode, std::nullopt);
 }
+
+void SetRichEditorSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
+    RichEditorModelNG::SetSelectedDragPreviewStyle(frameNode, result);
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!resRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+        }
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resObj) {
+            pattern->RegisterResource<Color>("selectedDragPreviewStyle", resObj, result);
+        }
+    }
+}
+
+void ResetRichEditorSelectedDragPreviewStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::ResetSelectedDragPreviewStyle(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("selectedDragPreviewStyle");
+    }
+}
+
+ArkUI_Uint32 GetRichEditorSelectedDragPreviewStyle(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return RichEditorModelNG::GetSelectedDragPreviewStyle(frameNode).GetValue();
+}
+
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
@@ -860,7 +902,10 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .setRichEditorUndoStyle = SetRichEditorUndoStyle,
         .resetRichEditorUndoStyle = ResetRichEditorUndoStyle,
         .setRichEditorScrollBarColor = SetRichEditorScrollBarColor,
-        .resetRichEditorScrollBarColor = ResetRichEditorScrollBarColor
+        .resetRichEditorScrollBarColor = ResetRichEditorScrollBarColor,
+        .setRichEditorSelectedDragPreviewStyle = SetRichEditorSelectedDragPreviewStyle,
+        .resetRichEditorSelectedDragPreviewStyle = ResetRichEditorSelectedDragPreviewStyle,
+        .getRichEditorSelectedDragPreviewStyle = GetRichEditorSelectedDragPreviewStyle
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

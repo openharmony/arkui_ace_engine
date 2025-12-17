@@ -1293,6 +1293,16 @@ void DeclarativeFrontend::CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs)
     }
 }
 
+std::vector<std::optional<std::string>> DeclarativeFrontend::CallGetStateMgmtInfo(const std::vector<int32_t>& nodeIds,
+    const std::string& propertyName, const std::string& jsonPath)
+{
+    if (jsEngine_) {
+        return jsEngine_->CallGetStateMgmtInfo(nodeIds, propertyName, jsonPath);
+    }
+    LOGW("CallGetStateMgmtInfo: jsEngine_ is null, return empty result.");
+    return {};
+}
+
 std::string DeclarativeFrontend::GetPagePathByUrl(const std::string& url) const
 {
     if (!delegate_) {

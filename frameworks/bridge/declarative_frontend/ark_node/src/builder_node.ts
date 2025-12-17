@@ -317,7 +317,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this.updateEnd();
     __JSScopeUtil__.restoreInstanceId();
   }
-  protected UpdateElement(elmtId: number): void {
+  public UpdateElement(elmtId: number): void {
     // do not process an Element that has been marked to be deleted
     const obj: UpdateFunc | UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(elmtId);
     const updateFunc = (typeof obj === 'object') ? obj.getUpdateFunc() : null;
@@ -522,6 +522,9 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     return this._nativeRef?.getNativeHandle();
   }
   public dispose(): void {
+    if (this.isDisposed()) {
+      return;
+    }
     this.disposable_.dispose();
     if (this.nodePtr_) {
       getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),

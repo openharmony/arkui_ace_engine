@@ -307,6 +307,54 @@ HWTEST_F(WebPatternWebTest, InitInOfflineMode_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitInOfflineMode_003
+ * @tc.desc: InitInOfflineMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, InitInOfflineMode_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    webPattern->offlineWebInited_ = false;
+    webPattern->isOfflineWebEvictFrameBuffersEnable_ = false;
+    webPattern->InitInOfflineMode();
+    EXPECT_TRUE(webPattern->offlineWebInited_);
+#endif
+}
+
+/**
+ * @tc.name: InitInOfflineMode_004
+ * @tc.desc: InitInOfflineMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, InitInOfflineMode_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    webPattern->offlineWebInited_ = false;
+    webPattern->isOfflineWebEvictFrameBuffersEnable_ = true;
+    webPattern->InitInOfflineMode();
+    EXPECT_TRUE(webPattern->offlineWebInited_);
+#endif
+}
+
+/**
  * @tc.name: IsNeedResizeVisibleViewport
  * @tc.desc: IsNeedResizeVisibleViewport.
  * @tc.type: FUNC
@@ -493,6 +541,31 @@ HWTEST_F(WebPatternWebTest, OnDetachContextAllFalse, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->tooltipId_ = 1;
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
+    EXPECT_EQ(webPattern->tooltipId_, -1);
+#endif
+}
+
+/**
+ * @tc.name: OnDetachContextOfflineWeb
+ * @tc.desc: OnDetachContext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, OnDetachContextOfflineWeb, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->tooltipId_ = 1;
+    webPattern->offlineWebInited_ = true;
     auto pipelineContext = MockPipelineContext::GetCurrent();
     webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
     EXPECT_EQ(webPattern->tooltipId_, -1);
@@ -1055,6 +1128,38 @@ HWTEST_F(WebPatternWebTest, HandleTouchUp, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleTouchUp_002
+ * @tc.desc: HandleTouchUp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, HandleTouchUp_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    TouchEventInfo info("info");
+    TouchLocationInfo touchInfo(1);
+    info.changedTouches_.push_back(touchInfo);
+    webPattern->showMagnifierFingerId_ = 0;
+    webPattern->HandleTouchUp(info, true);
+    EXPECT_EQ(webPattern->showMagnifierFingerId_, 0);
+    TouchEventInfo info2("info");
+    TouchLocationInfo touchInfo2(0);
+    info2.changedTouches_.push_back(touchInfo2);
+    webPattern->isNeedInterceptedTouchEvent_ = false;
+    webPattern->HandleTouchUp(info, true);
+    EXPECT_EQ(webPattern->showMagnifierFingerId_, -1);
+#endif
+}
+
+/**
  * @tc.name: HandleTouchMove
  * @tc.desc: HandleTouchMove.
  * @tc.type: FUNC
@@ -1082,6 +1187,35 @@ HWTEST_F(WebPatternWebTest, HandleTouchMove, TestSize.Level1)
     webPattern->overlayCreating_ = true;
     webPattern->HandleTouchMove(info, true);
     manager->isDragged_ = true;
+    webPattern->HandleTouchMove(info, true);
+    ASSERT_EQ(webPattern->imageAnalyzerManager_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: HandleTouchMove_002
+ * @tc.desc: HandleTouchMove.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, HandleTouchMove_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    webPattern->ShowMagnifier(1, 1);
+    TouchEventInfo info("info");
+    TouchLocationInfo touchInfo(1);
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    auto manager = pipeline->GetDragDropManager();
+    info.changedTouches_.push_back(touchInfo);
+    webPattern->showMagnifierFingerId_ = 1;
     webPattern->HandleTouchMove(info, true);
     ASSERT_EQ(webPattern->imageAnalyzerManager_, nullptr);
 #endif
@@ -1118,6 +1252,38 @@ HWTEST_F(WebPatternWebTest, HandleTouchCancel, TestSize.Level1)
     TouchEventInfo info("info");
     webPattern->HandleTouchCancel(info);
     EXPECT_TRUE(webPattern->isTouchUpEvent_);
+#endif
+}
+
+/**
+ * @tc.name: HandleTouchCancel_002
+ * @tc.desc: HandleTouchCancel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, HandleTouchCancel_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    TouchEventInfo info("info");
+    TouchLocationInfo touchInfo(1);
+    info.changedTouches_.push_back(touchInfo);
+    webPattern->showMagnifierFingerId_ = 0;
+    webPattern->HandleTouchCancel(info);
+    EXPECT_EQ(webPattern->showMagnifierFingerId_, 0);
+    TouchEventInfo info2("info");
+    TouchLocationInfo touchInfo2(0);
+    info2.changedTouches_.push_back(touchInfo2);
+    webPattern->isNeedInterceptedTouchEvent_ = false;
+    webPattern->HandleTouchCancel(info);
+    EXPECT_EQ(webPattern->showMagnifierFingerId_, -1);
 #endif
 }
 

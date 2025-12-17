@@ -36,7 +36,7 @@ import { DrawableDescriptor } from '@ohos.arkui.drawableDescriptor';
 import { default as uiObserver }  from '@ohos/arkui/observer';
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
 import { TextModifier } from 'arkui.TextModifier'
-import { NodeAdapter } from 'arkui.FrameNode'
+import { NodeAdapter, FrameNode } from 'arkui.FrameNode'
 import { Scene } from '@ohos.graphics.scene';
 import { RectShape, CircleShape, EllipseShape, PathShape } from '@ohos.arkui.shape';
 import curves from '@ohos.curves';
@@ -118,6 +118,7 @@ export class ArkUIAniModule {
     native static _SetDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
     native static _SetFrameNodeDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
     native static _SetDrawModifier(ptr: KPointer, flag: KInt, drawModifier: DrawModifier): void
+    native static _SetCustomCallbackWithCheck(ptr: KPointer, node: FrameNode): void
     native static _Invalidate(ptr: KPointer): void
     native static _SetWaterFlowSection(ptr: KPointer, sections: WaterFlowSections): void
     native static _SetWaterFlowFooterContent(ptr: KPointer, footerContent: KPointer): void
@@ -312,7 +313,7 @@ export class ArkUIAniModule {
     // for UIContext without window
     native static _CreateWindowFreeContainer(context: common.Context): KInt
     native static _DestroyWindowFreeContainer(instanceId: KInt): void
-
+    native static _ResolveUIContext(): Array<KInt>
     native static _CheckIsUIThread(id: KInt): KBoolean
     native static _IsDebugMode(id: KInt): KBoolean
     native static _OnMeasure_InnerMeasure(ptr: KPointer): void

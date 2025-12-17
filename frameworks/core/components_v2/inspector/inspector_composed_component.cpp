@@ -15,9 +15,10 @@
 
 #include "core/components_v2/inspector/inspector_composed_component.h"
 
+#include "compatible/components/component_loader.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_v2/inspector/actionsheetdialog_composed_element.h"
 #include "core/components_v2/inspector/alertdialog_composed_element.h"
-#include "core/components_v2/inspector/badge_composed_element.h"
 #include "core/components_v2/inspector/blank_composed_element.h"
 #include "core/components_v2/inspector/button_composed_element.h"
 #include "core/components_v2/inspector/calendar_composed_element.h"
@@ -46,7 +47,6 @@
 #include "core/components_v2/inspector/list_item_composed_element.h"
 #include "core/components_v2/inspector/list_item_group_composed_element.h"
 #include "core/components_v2/inspector/loading_progress_composed_element.h"
-#include "core/components_v2/inspector/marquee_composed_element.h"
 #include "core/components_v2/inspector/menu_composed_element.h"
 #include "core/components_v2/inspector/navigation_composed_element.h"
 #include "core/components_v2/inspector/navigation_menus_composed_element.h"
@@ -98,7 +98,11 @@ namespace OHOS::Ace::V2 {
 namespace {
 
 using CreateElementFunc = std::function<RefPtr<InspectorComposedElement>(const std::string& id)>;
-
+RefPtr<InspectorComposedElement> DynamicCreateInspectorElement(const std::string tag, const std::string& id)
+{
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName(tag.c_str());
+    return loader ? loader->CreateInspectorElement(id) : nullptr;
+}
 const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { COLUMN_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ColumnComposedElement>(id); } },
     { COLUMN_SPLIT_COMPONENT_TAG,
@@ -156,7 +160,8 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { SCROLL_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ScrollComposedElement>(id); } },
     { CALENDAR_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::CalendarComposedElement>(id); } },
-    { BADGE_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::BadgeComposedElement>(id); } },
+    { BADGE_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(BADGE_COMPONENT_TAG, id); } },
     { SEARCH_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SearchComposedElement>(id); } },
     { FORM_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { PLUGIN_COMPONENT_TAG,
@@ -203,7 +208,7 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) { return AceType::MakeRefPtr<V2::TextTimerComposedElement>(id); } },
     { SELECT_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SelectComposedElement>(id); } },
     { MARQUEE_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::MarqueeComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(MARQUEE_COMPONENT_TAG, id); } },
     { TEXTCLOCK_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::TextClockComposedElement>(id); } },
     { TEXT_PICKER_COMPONENT_TAG,
