@@ -17,8 +17,10 @@
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
+#include "base/error/error_code.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/components_ng/render/adapter/component_snapshot.h"
 
 namespace OHOS::Ace {
 const std::set<std::string> UiTranslateManagerImpl::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene",
@@ -143,6 +145,233 @@ void UiTranslateManagerImpl::SendPixelMap()
 {
     LOGI("manager start sendPixelMap");
     UiSessionManager::GetInstance()->SendPixelMap(pixelMap_);
+}
+
+void UiTranslateManagerImpl::AddArkUIComponentPixelMap(
+    int32_t componentId, std::shared_ptr<Media::PixelMap>& componentPixelMap)
+{
+    arkUIComponentImages_.emplace(componentId, componentPixelMap);
+}
+
+void UiTranslateManagerImpl::AddArkWebImageMap(
+    int32_t webId, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>& webImageMap)
+{
+    arkWebImages_.emplace(webId, webImageMap);
+}
+
+void UiTranslateManagerImpl::TraverseAddArkUIComponentImages(const size_t componentQueryCnt,
+    const std::vector<int32_t>& arkUIIds)
+{
+    arkUIQueryErrorCode_ = MultiImageQueryErrorCode::OK;
+    if (taskExecutor_ == nullptr) {
+        arkUIQueryErrorCode_ = MultiImageQueryErrorCode::INVALID_ID;
+        for (size_t i = 0; i < componentQueryCnt; ++i) {
+            arkUIComponentImages_.emplace(arkUIIds[i], nullptr);
+        }
+        return;
+    }
+    std::weak_ptr<UiTranslateManagerImpl> weak = shared_from_this();
+    bool finishInTime = taskExecutor_->PostSyncTaskTimeout(
+        [weak, componentQueryCnt, arkUIIds]() {
+            auto uiTranslateManagerImpl = weak.lock();
+            CHECK_NULL_VOID(uiTranslateManagerImpl);
+            ACE_SCOPED_TRACE("TraverseAddArkUIComponentImages GetPixelMapFromFrameNode");
+            for (size_t i = 0; i < componentQueryCnt; ++i) {
+                std::shared_ptr<Media::PixelMap> componentPixelMap = nullptr;
+                uiTranslateManagerImpl->GetPixelMapFromFrameNode(arkUIIds[i], componentPixelMap);
+                uiTranslateManagerImpl->AddArkUIComponentPixelMap(arkUIIds[i], componentPixelMap);
+            }
+        },
+        TaskExecutor::TaskType::UI, QUERY_IMAGES_TIMEOUT_TIME, "ArkUIAddComponentImagesDuringMultiQuery");
+    arkUIQueryErrorCode_ = finishInTime ? MultiImageQueryErrorCode::OK : MultiImageQueryErrorCode::TIMEOUT;
+    if (arkUIQueryErrorCode_ == MultiImageQueryErrorCode::TIMEOUT) {
+        for (size_t i = arkUIComponentImages_.size(); i < componentQueryCnt; ++i) {
+            arkUIComponentImages_.emplace(arkUIIds[i], nullptr);
+        }
+    }
+}
+
+void UiTranslateManagerImpl::TraverseAddArkWebImages(const std::vector<int32_t>& webImageIds, int32_t windowId,
+    int32_t webComponentId, const std::function<void(int32_t, const std::map<int32_t,
+    std::shared_ptr<Media::PixelMap>>&, MultiImageQueryErrorCode)>& webQueryCallback)
+{
+    auto frameNode =
+        AceType::DynamicCast<NG::FrameNode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(webComponentId));
+    if (frameNode == nullptr || frameNode->GetPattern<NG::WebPattern>() == nullptr) {
+        arkWebQueryErrorCode_ = MultiImageQueryErrorCode::INVALID_ID;
+        std::map<int32_t, std::shared_ptr<Media::PixelMap>> emptyMap;
+        for (auto webImageId : webImageIds) {
+            emptyMap.emplace(webImageId, nullptr);
+        }
+        arkWebImages_.emplace(webComponentId, std::move(emptyMap));
+        return;
+    }
+    frameNode->GetPattern<NG::WebPattern>()->GetImagesByIDs(webImageIds, windowId, webQueryCallback);
+}
+
+void UiTranslateManagerImpl::PostArkWebQueryTasksToSingleWeb(std::weak_ptr<UiTranslateManagerImpl> weak,
+    const std::vector<int32_t>& webImageIds, int32_t webId, int32_t windowId)
+{
+    taskExecutor_->PostTask(
+        [weak, webImageIds, webId, windowId]() mutable {
+            auto uiTranslateManagerImpl = weak.lock();
+            CHECK_NULL_VOID(uiTranslateManagerImpl);
+            auto getWebImagesCallback =
+                [weak, webId, webImageIds](int32_t windowId, const std::map<int32_t,
+                    std::shared_ptr<Media::PixelMap>>& imagesInOneWeb, MultiImageQueryErrorCode errorCode) {
+                        auto uiTranslateManagerImpl = weak.lock();
+                        CHECK_NULL_VOID(uiTranslateManagerImpl);
+                        uiTranslateManagerImpl->SetArkWebQueryErrorCode(errorCode);
+                        if (errorCode == MultiImageQueryErrorCode::TIMEOUT) {
+                            std::map<int32_t, std::shared_ptr<Media::PixelMap>> emptyMap;
+                            for (auto webImageId : webImageIds) {
+                                emptyMap.emplace(webImageId, nullptr);
+                            }
+                            uiTranslateManagerImpl->AddArkWebImageMap(webId, emptyMap);
+                        } else {
+                            uiTranslateManagerImpl->AddArkWebImageMap(webId, imagesInOneWeb);
+                        }
+                        uiTranslateManagerImpl->SendArkWebImagesById();
+                    };
+            uiTranslateManagerImpl->TraverseAddArkWebImages(webImageIds, windowId, webId, getWebImagesCallback);
+        },
+        TaskExecutor::TaskType::UI, "ArkWebAddImagesDuringMultiQuery");
+}
+
+void UiTranslateManagerImpl::PostArkWebQueryTasks(std::map<int32_t, std::vector<int32_t>>& localArkWebs,
+    std::weak_ptr<UiTranslateManagerImpl> weak, int32_t windowId)
+{
+    for (const auto& webIter : localArkWebs) {
+        PostArkWebQueryTasksToSingleWeb(weak, webIter.second, webIter.first, windowId);
+    }
+}
+
+void UiTranslateManagerImpl::AdjustArkWebImagesQueryCnt(size_t remainQueryCnt,
+    std::map<int32_t, std::vector<int32_t>>& localArkWebs,
+    const std::map<int32_t, std::vector<int32_t>>& arkWebs)
+{
+    int32_t queryTaskCnt = 0;
+    for (const auto& websIter : arkWebs) {
+        if (remainQueryCnt == 0) {
+            break;
+        }
+        ++queryTaskCnt;
+        auto& currentWebImageIds = websIter.second;
+        size_t currentSize = std::min(remainQueryCnt, currentWebImageIds.size());
+        remainQueryCnt -= currentSize;
+        for (size_t i = 0; i < currentSize; ++i) {
+            localArkWebs[websIter.first].emplace_back(currentWebImageIds[i]);
+        }
+    }
+    arkWebGetImagesTaskCnt_ = queryTaskCnt;
+}
+
+void UiTranslateManagerImpl::GetMultiImagesById(uint32_t windowId, const std::vector<int32_t>& arkUIIds,
+    const std::map<int32_t, std::vector<int32_t>>& arkWebs)
+{
+    windowId_ = windowId;
+    size_t totalQueryCnt = 20;
+    std::map<int32_t, std::vector<int32_t>> localArkWebs;
+    size_t componentQueryCnt = std::min(totalQueryCnt, arkUIIds.size());
+    size_t webQueryCnt = totalQueryCnt - componentQueryCnt;
+    std::weak_ptr<UiTranslateManagerImpl> weak = shared_from_this();
+    if (webQueryCnt > 0) {
+        AdjustArkWebImagesQueryCnt(webQueryCnt, localArkWebs, arkWebs);
+    } else {
+        arkWebGetImagesTaskCnt_ = 0;
+    }
+    if (taskExecutor_) {
+        taskExecutor_->PostTask(
+            [weak, componentQueryCnt, arkUIIds]() {
+                auto uiTranslateManagerImpl = weak.lock();
+                CHECK_NULL_VOID(uiTranslateManagerImpl);
+                uiTranslateManagerImpl->TraverseAddArkUIComponentImages(componentQueryCnt, arkUIIds);
+                uiTranslateManagerImpl->SendArkUIImagesById();
+            },
+            TaskExecutor::TaskType::UI, "ArkUIHandleTranslateManagerGetArkUIImagesByIds");
+        PostArkWebQueryTasks(localArkWebs, weak, windowId);
+    } else {
+        LOGE("UiTranslateManagerImpl::GetMultiImagesById taskExecutor_ doesn't exist");
+    }
+}
+
+void UiTranslateManagerImpl::SetArkUIQueryErrorCode(MultiImageQueryErrorCode errorCode)
+{
+    arkUIQueryErrorCode_ = errorCode;
+}
+
+void UiTranslateManagerImpl::SetArkWebQueryErrorCode(MultiImageQueryErrorCode errorCode)
+{
+    arkWebQueryErrorCode_ = errorCode;
+}
+
+void UiTranslateManagerImpl::GetPixelMapFromImageTypeNode(RefPtr<NG::FrameNode> frameNode,
+    std::shared_ptr<Media::PixelMap>& componentPixelMap)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto frameNodeId = frameNode->GetId();
+    NG::SnapshotOptions options;
+    if (frameNode->GetTag() == V2::IMAGE_ETS_TAG) {
+        auto imagePattern = frameNode->GetPattern<NG::ImagePattern>();
+        if (imagePattern == nullptr) {
+            const auto& result = NG::ComponentSnapshot::GetSyncByUniqueId(frameNodeId, options);
+            componentPixelMap = result.first == OHOS::Ace::ERROR_CODE_NO_ERROR ? result.second : nullptr;
+            return;
+        }
+        imagePattern->AddPixelMapToUiManager();
+        auto canvasImage = imagePattern->GetCanvasImage();
+        if (canvasImage == nullptr) {
+            const auto& result = NG::ComponentSnapshot::GetSyncByUniqueId(frameNodeId, options);
+            componentPixelMap = result.first == OHOS::Ace::ERROR_CODE_NO_ERROR ? result.second : nullptr;
+            return;
+        }
+        auto canvasImagePixelMap = canvasImage->GetPixelMap();
+        if (canvasImagePixelMap == nullptr) {
+            const auto& result = NG::ComponentSnapshot::GetSyncByUniqueId(frameNodeId, options);
+            componentPixelMap = result.first == OHOS::Ace::ERROR_CODE_NO_ERROR ? result.second : nullptr;
+            return;
+        }
+        componentPixelMap = canvasImagePixelMap->GetPixelMapSharedPtr();
+        if (componentPixelMap == nullptr) {
+            const auto& result = NG::ComponentSnapshot::GetSyncByUniqueId(frameNodeId, options);
+            componentPixelMap = result.first == OHOS::Ace::ERROR_CODE_NO_ERROR ? result.second : nullptr;
+            return;
+        }
+    } else {
+        const auto& result = NG::ComponentSnapshot::GetSyncByUniqueId(frameNodeId, options);
+        componentPixelMap = result.first == OHOS::Ace::ERROR_CODE_NO_ERROR ? result.second : nullptr;
+        return;
+    }
+}
+
+void UiTranslateManagerImpl::GetPixelMapFromFrameNode(int32_t frameNodeId,
+    std::shared_ptr<Media::PixelMap>& componentPixelMap)
+{
+    auto frameNode =
+        AceType::DynamicCast<NG::FrameNode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(frameNodeId));
+    if (frameNode == nullptr) {
+        LOGW("UiTranslateManagerImpl::GetPixelMapFromFrameNode Node%{public}d doesn't exist", frameNodeId);
+        arkUIQueryErrorCode_ = MultiImageQueryErrorCode::INVALID_ID;
+        return;
+    }
+    GetPixelMapFromImageTypeNode(frameNode, componentPixelMap);
+}
+
+void UiTranslateManagerImpl::SendArkUIImagesById()
+{
+    UiSessionManager::GetInstance()->SendArkUIImagesById(windowId_, arkUIComponentImages_, arkUIQueryErrorCode_);
+    arkUIComponentImages_.clear();
+    arkUIQueryErrorCode_ = MultiImageQueryErrorCode::OK;
+}
+
+void UiTranslateManagerImpl::SendArkWebImagesById()
+{
+    if (--arkWebGetImagesTaskCnt_ <= 0) {
+        UiSessionManager::GetInstance()->SendArkWebImagesById(windowId_, arkWebImages_, arkWebQueryErrorCode_);
+        arkWebImages_.clear();
+        arkWebQueryErrorCode_ = MultiImageQueryErrorCode::OK;
+        arkWebGetImagesTaskCnt_ = INT32_MAX;
+    }
 }
 
 void UiTranslateManagerImpl::AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)

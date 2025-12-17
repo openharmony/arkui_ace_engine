@@ -469,6 +469,11 @@ void UiSessionManagerOhos::SaveGetPixelMapFunction(GetPixelMapFunction&& functio
     getPixelMapFunction_ = std::move(function);
 }
 
+void UiSessionManagerOhos::SaveGetImagesByIdFunction(GetImagesByIdFunction&& function)
+{
+    getImagesByIdFunction_ = std::move(function);
+}
+
 void UiSessionManagerOhos::SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager,
     int32_t instanceId)
 {
@@ -688,6 +693,41 @@ void UiSessionManagerOhos::GetPixelMap()
         getPixelMapFunction_();
     } else {
         LOGW("get pixelMap func is nullptr");
+    }
+}
+
+void UiSessionManagerOhos::GetMultiImagesById(const std::vector<int32_t>& arkUIIds,
+    const std::map<int32_t, std::vector<int32_t>>& arkWebs)
+{
+    if (getImagesByIdFunction_) {
+        getImagesByIdFunction_(arkUIIds, arkWebs);
+    } else {
+        LOGW("get images by id function is nullptr");
+    }
+}
+
+void UiSessionManagerOhos::SendArkUIImagesById(int32_t windowId,
+    const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>& componentImages,
+    MultiImageQueryErrorCode arkUIErrorCode)
+{
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["getArkUIImages"]]);
+    if (reportService != nullptr) {
+        reportService->SendArkUIImagesById(windowId, componentImages, arkUIErrorCode);
+    } else {
+        LOGW("send ArkUI images failed,process id:%{public}d", processMap_["getArkUIImages"]);
+    }
+}
+
+void UiSessionManagerOhos::SendArkWebImagesById(int32_t windowId, const std::map<int32_t, std::map<int32_t,
+    std::shared_ptr<Media::PixelMap>>>& webImages, MultiImageQueryErrorCode arkWebErrorCode)
+{
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["getArkWebImages"]]);
+    if (reportService != nullptr) {
+        reportService->SendArkWebImagesById(windowId, webImages, arkWebErrorCode);
+    } else {
+        LOGW("send ArkWeb images failed,process id:%{public}d", processMap_["getArkWebImages"]);
     }
 }
 

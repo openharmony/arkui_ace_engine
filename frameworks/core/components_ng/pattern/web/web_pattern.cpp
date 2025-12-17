@@ -9230,6 +9230,13 @@ void WebPattern::GetTranslateText(std::string extraData, std::function<void(std:
         }, TaskExecutor::TaskType::UI, "ArkUIWebGetTranslateText");
 }
 
+void WebPattern::GetImagesByIDs(const std::vector<int32_t>& imageIds, int32_t windowId,
+    const std::function<void(int32_t, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>&,
+    MultiImageQueryErrorCode)>& arkWebfinishCallback)
+{
+    return;
+}
+
 void WebPattern::SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids)
 {
     return;

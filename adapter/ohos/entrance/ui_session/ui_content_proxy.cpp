@@ -69,7 +69,7 @@ int32_t UIContentServiceProxy::GetVisibleInspectorTree(
 
     GetInspectorTreeConfigImpl configImpl(config);
     if (!data.WriteParcelable(&configImpl)) {
-        LOGW("GetInspectorTree write config failed");
+        LOGW("GetVisibleInspectorTree write config failed");
         return FAILED;
     }
 
@@ -887,6 +887,56 @@ int32_t UIContentServiceProxy::GetCurrentImagesShowing(
     report_->RegisterGetShowingImageCallback(finishCallback);
     if (Remote()->SendRequest(GET_CURRENT_SHOWING_IMAGE, data, reply, option) != ERR_NONE) {
         LOGW("GetCurrentImagesShowing send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::GetImagesById(
+    const std::vector<int32_t>& arkUIIds,
+    const std::function<void(int32_t, const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>&,
+        MultiImageQueryErrorCode)>& arkUIfinishCallback,
+    const std::map<int32_t, std::vector<int32_t>>& arkWebs,
+    const std::function<void(int32_t, const std::map<int32_t, std::map<int32_t,
+        std::shared_ptr<Media::PixelMap>>>&, MultiImageQueryErrorCode)>& arkWebfinishCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetImagesById write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(processId_)) {
+        LOGW("GetImagesById write processId failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32Vector(arkUIIds)) {
+        LOGW("GetImagesById write arkUIIds failed");
+        return FAILED;
+    }
+    size_t mapSize = arkWebs.size();
+    if (!data.WriteUint64(mapSize)) {
+        LOGW("GetImagesById write arkWebs mapSize failed");
+        return FAILED;
+    }
+    for (const auto& mapIter : arkWebs) {
+        if (!data.WriteInt32(mapIter.first)) {
+            LOGW("GetImagesById write arkWebs' Key id: %{public}d failed", mapIter.first);
+            return FAILED;
+        }
+        if (!data.WriteInt32Vector(mapIter.second)) {
+            LOGW("GetImagesById write arkWebs' value id: %{public}d failed", mapIter.first);
+            return FAILED;
+        }
+    }
+    if (report_ == nullptr) {
+        LOGW("GetImagesById report_ is nullptr,connect is not executed");
+        return FAILED;
+    }
+    report_->RegisterGetImagesByIdCallback(arkUIfinishCallback, arkWebfinishCallback);
+    if (Remote()->SendRequest(GET_MULTI_IMAGES_BY_ID, data, reply, option) != ERR_NONE) {
+        LOGW("GetImagesById send request failed");
         return REPLY_ERROR;
     }
     return NO_ERROR;

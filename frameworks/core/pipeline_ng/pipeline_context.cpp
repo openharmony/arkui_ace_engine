@@ -6983,6 +6983,11 @@ void PipelineContext::GetAllPixelMap()
     uiTranslateManager_->GetAllPixelMap(pageNode);
 }
 
+std::shared_ptr<UiTranslateManagerImpl> PipelineContext::GetUiTranslateManagerImpl()
+{
+    return uiTranslateManager_;
+}
+
 void PipelineContext::SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
 {
     auto offSetPosX_ = displayWindowRectInfo_.Left() - displayWindowRectInfo.Left();
