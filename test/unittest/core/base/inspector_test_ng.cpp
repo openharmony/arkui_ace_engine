@@ -474,6 +474,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg009, TestSize.Level1)
     nodePtr = Inspector::GetFrameNodeByKey("two");
     EXPECT_EQ(nodePtr, nullptr);
     MockPipelineContext::pipeline_ = pipeline_bak;
+    Inspector::RemoveOffscreenNode(ONE);
 }
 
 /**
@@ -774,10 +775,10 @@ HWTEST_F(InspectorTestNg, InspectorTestNg021, TestSize.Level1)
  */
 HWTEST_F(InspectorTestNg, AddOffscreenNode_001, TestSize.Level1)
 {
-    int32_t num = Inspector::offscreenNodes.size();
+    int32_t num = Inspector::GetOffscreenNodesSize();
     RefPtr<FrameNode> one = nullptr;
     Inspector::AddOffscreenNode(one);
-    EXPECT_EQ(Inspector::offscreenNodes.size(), num);
+    EXPECT_EQ(Inspector::GetOffscreenNodesSize(), num);
 
     auto id = ElementRegister::GetInstance()->MakeUniqueId();
     one = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
@@ -785,10 +786,11 @@ HWTEST_F(InspectorTestNg, AddOffscreenNode_001, TestSize.Level1)
     ASSERT_NE(context, nullptr);
 
     context->stageManager_ = AceType::MakeRefPtr<StageManager>(one);
-    num = Inspector::offscreenNodes.size();
+    num = Inspector::GetOffscreenNodesSize();
     Inspector::AddOffscreenNode(one);
-    EXPECT_EQ(Inspector::offscreenNodes.size(), num + 1);
+    EXPECT_EQ(Inspector::GetOffscreenNodesSize(), num + 1);
     context->stageManager_ = nullptr;
+    Inspector::RemoveOffscreenNode(one);
 }
 
 /**
@@ -798,10 +800,10 @@ HWTEST_F(InspectorTestNg, AddOffscreenNode_001, TestSize.Level1)
  */
 HWTEST_F(InspectorTestNg, RemoveOffscreenNode_001, TestSize.Level1)
 {
-    int32_t num = Inspector::offscreenNodes.size();
+    int32_t num = Inspector::GetOffscreenNodesSize();
     RefPtr<FrameNode> one = nullptr;
     Inspector::RemoveOffscreenNode(one);
-    EXPECT_EQ(Inspector::offscreenNodes.size(), num);
+    EXPECT_EQ(Inspector::GetOffscreenNodesSize(), num);
 
     auto id = ElementRegister::GetInstance()->MakeUniqueId();
     one = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
@@ -809,10 +811,10 @@ HWTEST_F(InspectorTestNg, RemoveOffscreenNode_001, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     context->stageManager_ = AceType::MakeRefPtr<StageManager>(one);
     Inspector::AddOffscreenNode(one);
-    num = Inspector::offscreenNodes.size();
+    num = Inspector::GetOffscreenNodesSize();
 
     Inspector::RemoveOffscreenNode(one);
-    EXPECT_EQ(Inspector::offscreenNodes.size(), num - 1);
+    EXPECT_EQ(Inspector::GetOffscreenNodesSize(), num - 1);
     context->stageManager_ = nullptr;
 }
 
@@ -829,11 +831,12 @@ HWTEST_F(InspectorTestNg, GetOffScreenTreeNodes_001, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     context->stageManager_ = AceType::MakeRefPtr<StageManager>(one);
     Inspector::AddOffscreenNode(one);
-    int32_t num = Inspector::offscreenNodes.size();
+    int32_t num = Inspector::GetOffscreenNodesSize();
     NG::InspectorTreeMap offNodes;
     Inspector::GetOffScreenTreeNodes(offNodes);
     EXPECT_EQ(offNodes.size(), num);
     context->stageManager_ = nullptr;
+    Inspector::RemoveOffscreenNode(one);
 }
 
 /**
@@ -1872,5 +1875,58 @@ HWTEST_F(InspectorTestNg, GetElementRegisterNodes_001, TestSize.Level1)
     EXPECT_TRUE(it != treesInfos.end());
     it = treesInfos.find(id2);
     EXPECT_TRUE(it != treesInfos.end());
+}
+
+/**
+ * @tc.name: InspectorMultiThreadTest001
+ * @tc.desc: Multi Thread Test the operation of GetFrameNodeByKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorMultiThreadTest001, TestSize.Level1)
+{
+    std::array<RefPtr<FrameNode>, 30> arr = {};
+    for (int32_t index = 0 ; index < 30; index++) {
+        std::string inspectorId = "node" + std::to_string(index);
+        auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+        frameNode->UpdateInspectorId(inspectorId);
+        arr[index] = frameNode;
+    }
+    std::thread work1([arr]() {
+            for (int32_t index = 0; index < 15; index++) {
+                Inspector::AddOffscreenNode(arr[index]);
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            for (int32_t index = 0; index < 15; index++) {
+                std::string inspectorId = "node" + std::to_string(index);
+                EXPECT_EQ(Inspector::GetFrameNodeByKey(inspectorId), arr[index]);
+            }
+            for (int32_t index = 15; index < 30; index++) {
+                std::string inspectorId = "node" + std::to_string(index);
+                EXPECT_EQ(Inspector::GetFrameNodeByKey(inspectorId), nullptr);
+            }
+            for (int32_t index = 0; index < 15; index++) {
+                Inspector::RemoveOffscreenNode(arr[index]);
+            }
+    });
+    std::thread work2([arr]() {
+            for (int32_t index = 15; index < 30; index++) {
+                Inspector::AddOffscreenNode(arr[index]);
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            for (int32_t index = 0; index < 15; index++) {
+                std::string inspectorId = "node" + std::to_string(index);
+                EXPECT_EQ(Inspector::GetFrameNodeByKey(inspectorId), nullptr);
+            }
+            for (int32_t index = 15; index < 30; index++) {
+                std::string inspectorId = "node" + std::to_string(index);
+                EXPECT_EQ(Inspector::GetFrameNodeByKey(inspectorId), arr[index]);
+            }
+            for (int32_t index = 15; index < 30; index++) {
+                Inspector::RemoveOffscreenNode(arr[index]);
+            }
+    });
+    work1.join();
+    work2.join();
 }
 } // namespace OHOS::Ace::NG
