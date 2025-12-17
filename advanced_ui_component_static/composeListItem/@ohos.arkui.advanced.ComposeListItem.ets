@@ -1273,9 +1273,40 @@ export struct ComposeListItem {
   aboutToAppear() {
     this.fontSizeScale = this.decideFontSizeScale();
     this.onPropChange();
+      try {
+      let context: UIContext = this.getUIContext();
+      if (context.getHostContext() !== undefined) {
+        let hostContext: common.UIAbilityContext = context.getHostContext() as common.UIAbilityContext
+        this.applicationContext = hostContext.getApplicationContext();
+        try {
+          this.callbackId = this.applicationContext.onEnvironment(this.envCallback);
+        } catch (paramError) {
+          hilog.error(0x3900, 'Ace',
+            `ComposeListItem Faild to get environment param error `);
+        }
+      }
+    } catch (paramError) {
+      let code = (paramError as ClassCastError).code;
+      let message = (paramError as ClassCastError).message;
+      hilog.error(0x3900, 'Ace',
+        `ComposeListItem Faild to get environment param error: ${code}, ${message}`);
+    }
     if (IS_SUPPORT_SUBCOMPONENT_EVENT) {
       this.onFontSizeScaleChange();
     }
+  }
+
+  aboutToDisappear(): void {
+    if (this.callbackId) {
+      let context: UIContext = this.getUIContext();
+      if (context.getHostContext() !== undefined) {
+        this.applicationContext.offEnvironment(this.callbackId as Int,
+          (err: BusinessError<void> | null): void => {
+            hilog.info(0x0000, 'testTag', `applicationContext off environment err: code ${err?.code}`);
+          })
+      }
+    }
+    this.callbackId = 0;
   }
 
   calculatedRightWidth(): string {
