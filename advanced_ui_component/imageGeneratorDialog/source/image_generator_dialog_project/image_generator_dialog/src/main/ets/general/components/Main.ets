@@ -27,12 +27,16 @@ export struct ImageGeneratorDialog {
   private MAX_IMAGE_COUNT: number = 4;
   @Local imageInfoArr: Array<imageGeneration.ImageItem> = [];
   @Local stylesArr: Array<imageGeneration.ImageStyle> = [];
+  @Local userPrompt: string = '';
 
   @Builder
   pageMap(name: string) {
     if (name === 'home') {
-      CanvasHome({ imageInfoArr: this.imageInfoArr, styles: this.options?.imageGenerationModel?.getModelSupportStyles()})
-      // CanvasHome({ imageInfoArr: this.imageInfoArr, styles: this.stylesArr})
+      CanvasHome({
+        imageInfoArr: this.imageInfoArr,
+        styles: this.options?.imageGenerationModel?.getModelSupportStyles(),
+        userPrompt: this.userPrompt
+      })
     } else if (name === 'textTouchUp') {
       TextTouchUpComponent()
     }
@@ -56,8 +60,16 @@ export struct ImageGeneratorDialog {
       this.imageInfoArr.push({ image: undefined, url: Constants.NOT_SELECTED_NAME })
     }
   }
+
+  private initUserPrompt(): void {
+    if (this.options && this.options.content) {
+      this.userPrompt = this.options.content.toString();
+    }
+  }
+
   aboutToAppear(): void {
     this.initImageInfoArr();
+    this.initUserPrompt();
     for (let i = 0; i < this.MAX_IMAGE_COUNT; ++i) {
       this.stylesArr.push({ name: '' + i, icon: $r('sys.symbol.style')})
     }

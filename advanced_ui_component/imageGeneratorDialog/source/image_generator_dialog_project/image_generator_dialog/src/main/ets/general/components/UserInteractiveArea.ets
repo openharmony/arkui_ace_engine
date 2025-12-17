@@ -27,6 +27,8 @@ export struct LandscapeSelectFuncArea {
   @Param @Require imageInfoArr: Array<imageGeneration.ImageItem>;
   @Param @Require imageMatrixArr: number[][];
   @Provider('functionAreaSelectedIndex') selectedIndex: number = 0
+  @Event setImgCounts: (count: number) => void;
+
   aboutToAppear(): void {
     for (let i = 0; this.styles && i < this.styles?.length; ++i) {
       this.styleItems.push({ name: this.styles[i].name, resourceAddr: this.styles[i].icon})
@@ -36,14 +38,18 @@ export struct LandscapeSelectFuncArea {
   build() {
     Tabs({ index: this.selectedIndex }) {
       TabContent() {
-        PhotoSelect({imageInfoArr: this.imageInfoArr, imageMatrixArr: this.imageMatrixArr })
+        PhotoSelect({
+          imageInfoArr: this.imageInfoArr,
+          imageMatrixArr: this.imageMatrixArr,
+          setImgCounts: this.setImgCounts
+        })
       }
       .tabBar(UserInteractiveTabBarBuilder(0, '图像', $r('sys.symbol.style')))
 
       TabContent() {
         StyleSelectBuilder(this.styleItems)
       }
-      .tabBar(UserInteractiveTabBarBuilder(1, '风格', $r('sys.meida.ohos_image_style')))
+      .tabBar(UserInteractiveTabBarBuilder(1, '风格', $r('sys.symbol.style')))
 
       TabContent() {
         FunctionAreaPlaceholder()
