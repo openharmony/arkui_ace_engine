@@ -51,15 +51,27 @@ class ResourceThunk implements Thunk {
         this.releaser = releaser;
     }
 
-
     clean(): void {
-        InteropNativeModule._CallCallbackResourceReleaser(this.releaser, this.resourceId)
+        try {
+            InteropNativeModule._CallCallbackResourceReleaser(this.releaser, this.resourceId);
+        } catch (error) {
+            console.error('Failed to release callback resource:', error);
+        }
     }
 }
 
 export function resourceFinalizerRegister(value: object, resource: CallbackResource) {
-    InteropNativeModule._CallCallbackResourceHolder(resource.hold, resource.resourceId)
-    finalizerRegister(value, new ResourceThunk(resource.resourceId, resource.release))
+    if (resource.hold === nullptr || resource.release === nullptr) {
+        throw new Error('Invalid CallbackResource: hold and release must not be null');
+    }
+
+    finalizerRegister(value, new ResourceThunk(resource.resourceId, resource.release));
+
+    try {
+        InteropNativeModule._CallCallbackResourceHolder(resource.hold, resource.resourceId);
+    } catch (error) {
+        console.error('Failed to hold callback resource:', error);
+    }
 }
 
 /**
