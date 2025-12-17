@@ -26,7 +26,7 @@ import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { DrawContext, LengthMetrics, ColorMetrics } from "arkui.Graphics"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, ResponseRegionSupportedTool, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction, TipsAnchorType } from "./enums"
 import { IntentionCode } from "@ohos.multimodalInput.intentionCode"
-import { Position_serializer, DirectionalEdgesT_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Bias, Font, Bias_serializer, Area_serializer, Font_serializer } from "./units"
+import { Position_serializer, DirectionalEdgesT_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, ResourceStr, AccessibilityOptions, Bias, Font, Bias_serializer, Area_serializer, Font_serializer } from "./units"
 import { Resource_serializer } from "./../framework/resource"
 import { Resource } from "global.resource"
 import { TextRange_serializer, TextRange } from "./textCommon"
@@ -39,6 +39,7 @@ import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, 
 import { uiMaterial_Material_serializer } from "./../framework/ohos.arkui.uiMaterial"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback } from "./styledString"
+import { ArkThemeScopeManager } from "#arktheme"
 import { ComponentContent_serializer } from "./../ComponentContent"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -4805,6 +4806,39 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setSystemMaterial(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setAccessibilityStateDescriptionAttribute(value: string | Resource | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityStateDescription(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setAccessibilityActionOptionsAttribute(value: AccessibilityActionOptions | undefined): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            AccessibilityActionOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityActionOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setExpandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (types !== undefined) {
@@ -7928,6 +7962,12 @@ export interface CommonMethod {
     systemMaterial(value: uiMaterial.Material | undefined): this {
         throw new Error("Unimplemented method systemMaterial")
     }
+    accessibilityStateDescription(value: string | Resource | undefined): this {
+        throw new Error("Unimplemented method accessibilityStateDescription")
+    }
+    accessibilityActionOptions(value: AccessibilityActionOptions | undefined): this {
+        throw new Error("Unimplemented method accessibilityActionOptions")
+    }
     customProperty(name: string, value: CustomProperty): this {
         throw new Error("Unimplemented method customProperty")
     }
@@ -8244,6 +8284,8 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onSizeChange_value?: SizeChangeCallback | undefined
     accessibilityFocusDrawLevel_value?: FocusDrawLevel | undefined
     systemMaterial_value?: uiMaterial.Material | undefined
+    accessibilityStateDescription_value?: string | Resource | undefined
+    accessibilityActionOptions_value?: AccessibilityActionOptions | undefined
     width(value: Length | LayoutPolicy | undefined): this {
         return this
     }
@@ -8737,6 +8779,12 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     systemMaterial(value: uiMaterial.Material | undefined): this {
+        return this
+    }
+    accessibilityStateDescription(value: string | Resource | undefined): this {
+        return this
+    }
+    accessibilityActionOptions(value: AccessibilityActionOptions | undefined): this {
         return this
     }
     customProperty(name: string, value: CustomProperty): this {
@@ -10593,6 +10641,22 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("systemMaterial")) {
             const value_casted = value as (uiMaterial.Material | undefined)
             this.getPeer()?.setSystemMaterialAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public accessibilityStateDescription(value: string | Resource | undefined): this {
+        if (this.checkPriority("accessibilityStateDescription")) {
+            const value_casted = value as (string | Resource | undefined)
+            this.getPeer()?.setAccessibilityStateDescriptionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public accessibilityActionOptions(value: AccessibilityActionOptions | undefined): this {
+        if (this.checkPriority("accessibilityActionOptions")) {
+            const value_casted = value as (AccessibilityActionOptions | undefined)
+            this.getPeer()?.setAccessibilityActionOptionsAttribute(value_casted)
             return this
         }
         return this

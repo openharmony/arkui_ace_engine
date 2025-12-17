@@ -252,6 +252,9 @@ export interface ChainWeightOptions {
 export interface AccessibilityOptions {
     accessibilityPreferred?: boolean;
 }
+export interface AccessibilityActionOptions {
+    scrollStep?: int32;
+}
 export class ColorFilter_serializer {
     public static write(buffer: SerializerBase, value: ColorFilter): void {
         let valueSerializer : SerializerBase = buffer
@@ -261,6 +264,30 @@ export class ColorFilter_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return ColorFilterInternal.fromPtr(ptr)
+    }
+}
+export class AccessibilityActionOptions_serializer {
+    public static write(buffer: SerializerBase, value: AccessibilityActionOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForScrollStep  = value.scrollStep
+        if (valueHolderForScrollStep !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForScrollStepTmpValue  = valueHolderForScrollStep!
+            valueSerializer.writeInt32(valueHolderForScrollStepTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): AccessibilityActionOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const scrollStepTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let scrollStepTmpBuf : int32 | undefined = undefined
+        if ((scrollStepTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            scrollStepTmpBuf = valueDeserializer.readInt32()
+        }
+        const scrollStepTmpResult : int32 | undefined = scrollStepTmpBuf
+        let value : AccessibilityActionOptions = ({scrollStep: scrollStepTmpResult} as AccessibilityActionOptions)
+        return value
     }
 }
 export class AccessibilityOptions_serializer {

@@ -1810,6 +1810,8 @@ typedef struct WebKeyboardCallback WebKeyboardCallback;
 typedef struct Opt_WebKeyboardCallback Opt_WebKeyboardCallback;
 typedef struct WorkerEventListener WorkerEventListener;
 typedef struct Opt_WorkerEventListener Opt_WorkerEventListener;
+typedef struct Ark_AccessibilityActionOptions Ark_AccessibilityActionOptions;
+typedef struct Opt_AccessibilityActionOptions Opt_AccessibilityActionOptions;
 typedef struct Ark_AccessibilityOptions Ark_AccessibilityOptions;
 typedef struct Opt_AccessibilityOptions Opt_AccessibilityOptions;
 typedef struct Ark_AdsBlockedDetails Ark_AdsBlockedDetails;
@@ -13669,6 +13671,14 @@ typedef struct Opt_WorkerEventListener {
     Ark_Tag tag;
     WorkerEventListener value;
 } Opt_WorkerEventListener;
+typedef struct Ark_AccessibilityActionOptions {
+    /* kind: Interface */
+    Opt_Int32 scrollStep;
+} Ark_AccessibilityActionOptions;
+typedef struct Opt_AccessibilityActionOptions {
+    Ark_Tag tag;
+    Ark_AccessibilityActionOptions value;
+} Opt_AccessibilityActionOptions;
 typedef struct Ark_AccessibilityOptions {
     /* kind: Interface */
     Opt_Boolean accessibilityPreferred;
@@ -23270,6 +23280,10 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                            const Opt_FocusDrawLevel* value);
     void (*setSystemMaterial)(Ark_NativePointer node,
                               const Opt_uiMaterial_Material* value);
+    void (*setAccessibilityStateDescription)(Ark_NativePointer node,
+                                             const Opt_Union_String_Resource* value);
+    void (*setAccessibilityActionOptions)(Ark_NativePointer node,
+                                          const Opt_AccessibilityActionOptions* value);
     void (*setExpandSafeArea)(Ark_NativePointer node,
                               const Opt_Array_SafeAreaType* types,
                               const Opt_Array_SafeAreaEdge* edges);

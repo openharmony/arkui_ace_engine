@@ -2199,6 +2199,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                             const Opt_FocusDrawLevel* value)
     {
     }
+    void SetAccessibilityStateDescriptionImpl(Ark_NativePointer node,
+                                              const Opt_Union_String_Resource* value)
+    {
+    }
+    void SetAccessibilityActionOptionsImpl(Ark_NativePointer node,
+                                           const Opt_AccessibilityActionOptions* value)
+    {
+    }
     void SetExpandSafeAreaImpl(Ark_NativePointer node,
                                const Opt_Array_SafeAreaType* types,
                                const Opt_Array_SafeAreaEdge* edges)
@@ -8768,6 +8776,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnTouchInterceptImpl,
             CommonMethodModifier::SetOnSizeChangeImpl,
             CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
+            CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
+            CommonMethodModifier::SetAccessibilityActionOptionsImpl,
             CommonMethodModifier::SetExpandSafeAreaImpl,
             CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
             CommonMethodModifier::SetBackgroundImpl,
