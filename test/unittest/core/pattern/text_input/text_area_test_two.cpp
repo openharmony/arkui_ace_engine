@@ -911,4 +911,26 @@ HWTEST_F(TextAreaTestTwo, ToJsonValue112, TestSize.Level1)
     layoutProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("selectedDragPreviewStyle"), "#FFFFFFFF");
 }
+
+/**
+ * @tc.name: CloseHandleAndSelect002
+ * @tc.desc: Test CloseHandleAndSelect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, CloseHandleAndSelect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetIsOnlyBetweenLines(true); });
+
+    /**
+     * @tc.steps: step2. run CloseHandleAndSelect().
+     */
+    auto showSelect = true;
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->CloseHandleAndSelect();
+    showSelect = pattern_->showSelect_;
+    EXPECT_EQ(showSelect, false);
+}
 } // namespace OHOS::Ace::NG
