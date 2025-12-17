@@ -3452,6 +3452,8 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typ
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkWaterFlowNode.ets @arkuiscroll
 frameworks/core/interfaces/native/implementation/children_main_size_accessor.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/children_main_size_peer.h @arkuiscroll
+frameworks/core/interfaces/native/implementation/common_method_modifier_impl.h  @ArkUI_Event
+frameworks/core/interfaces/native/implementation/common_method_modifier.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/flow_item_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/grid_item_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/implementation/grid_item_ops_accessor.cpp @arkuiscroll
