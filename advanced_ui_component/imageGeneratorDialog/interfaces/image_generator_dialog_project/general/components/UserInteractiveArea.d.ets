@@ -33,6 +33,8 @@ export declare struct LandscapeSelectFuncArea {
     readonly imageMatrixArr: number[][];
     @Provider('functionAreaSelectedIndex')
     selectedIndex: number;
+    @Event
+    setImgCounts: (count: number) => void;
     aboutToAppear(): void;
     build(): void;
 }

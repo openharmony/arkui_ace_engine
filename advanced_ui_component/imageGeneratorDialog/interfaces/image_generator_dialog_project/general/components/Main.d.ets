@@ -29,9 +29,12 @@ export declare struct ImageGeneratorDialog {
     imageInfoArr: Array<imageGeneration.ImageItem>;
     @Local
     stylesArr: Array<imageGeneration.ImageStyle>;
+    @Local
+    userPrompt: string;
     @Builder
     pageMap(name: string): void;
     private initImageInfoArr;
+    private initUserPrompt;
     aboutToAppear(): void;
     build(): void;
 }

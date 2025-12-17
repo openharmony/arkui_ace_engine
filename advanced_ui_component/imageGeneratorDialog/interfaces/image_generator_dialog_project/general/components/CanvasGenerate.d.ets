@@ -37,8 +37,8 @@ export declare struct GenerateProgress {
     private isForeground;
     private canvasGenerateProgressChangeCallback;
     @Monitor('currentGenerateState')
-    currentGenerateStateChangeMonitor(h5: IMonitor): void;
-    getEstimatedTime(f5: number): number;
+    currentGenerateStateChangeMonitor(monitor: IMonitor): void;
+    getEstimatedTime(imageNumber: number): number;
     aboutToAppear(): void;
     aboutToDisappear(): void;
     createApplicationListener(): void;

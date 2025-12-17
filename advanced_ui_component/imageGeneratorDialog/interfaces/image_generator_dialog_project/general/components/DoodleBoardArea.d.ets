@@ -28,6 +28,6 @@ export declare struct DoodleBoardArea {
     private getImageWidth;
     private setMatrix;
     @Builder
-    ImageBuilder(j7: number): void;
+    ImageBuilder(index: number): void;
     build(): void;
 }

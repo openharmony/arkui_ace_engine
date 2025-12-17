@@ -35,6 +35,8 @@ export struct CanvasHome {
   @Local currentGenerateState: ImageGenerateState = ImageGenerateState.CONFIGURATION;
   @Param @Require imageInfoArr: Array<imageGeneration.ImageItem>;
   @Param @Require styles?: Array<imageGeneration.ImageStyle>;
+  @Param userPrompt: string = '';
+
   @Builder
   homeTitleBuilder() {
     HomeTitle({
@@ -49,7 +51,8 @@ export struct CanvasHome {
         LandscapeLayout({
           currentGenerateState: this.currentGenerateState!!,
           imageInfoArr: this.imageInfoArr,
-          styles: this.styles
+          styles: this.styles,
+          userPrompt: this.userPrompt
         })
       } else if (this.currentCanvasMode === CanvasMode.DOODLE_MODE) {
 
@@ -90,6 +93,9 @@ struct LandscapeLayout {
       0, 0, 0, 1
     ]]
 
+  @Local imgCounts: number = 0;
+  @Param userPrompt: string = '';
+
   private initImageMatrix(): void {
     let input: imageGeneration.ImageItem[] = [];
     for (let i = 0; i < this.imageInfoArr.length; i++) {
@@ -110,40 +116,51 @@ struct LandscapeLayout {
   }
 
   build() {
-    Column() {
-      // doodle area
-      Row() {
-        DoodleBoardArea({
-          imageInfoArr: this.imageInfoArr,
-          imageMatrixArr: this.imageMatrixArr
-        })
-          .margin({ left: 69, right: 54 })
-        if (this.currentGenerateState === ImageGenerateState.CONFIGURATION) {
-          LandscapeSelectFuncArea({ imageInfoArr: this.imageInfoArr, imageMatrixArr: this.imageMatrixArr, styles: this.styles })
-            .margin({ right: 16 })
+    Scroll() {
+      Column() {
+        // doodle area
+        Row() {
+          DoodleBoardArea({
+            imageInfoArr: this.imageInfoArr,
+            imageMatrixArr: this.imageMatrixArr
+          })
+            .margin({ left: 69, right: 54 })
+          if (this.currentGenerateState === ImageGenerateState.CONFIGURATION) {
+            LandscapeSelectFuncArea({
+              imageInfoArr: this.imageInfoArr,
+              imageMatrixArr: this.imageMatrixArr,
+              styles: this.styles,
+              setImgCounts: (count: number) => {
+                this.imgCounts = count;
+              }
+            })
+              .margin({ right: 16 })
+          }
         }
-
-      }
-      .margin({ top: 21, bottom: 28 })
-      // text input area
-      if (this.currentGenerateState === ImageGenerateState.CONFIGURATION) {
-        TextInputArea({
-          changeGenerateState: (state: ImageGenerateState) => {
-            this.$currentGenerateState(state);
-          }
-        })
-          .margin({ bottom: 14 })
-      }
-      if (this.currentGenerateState === ImageGenerateState.GENERATING ||
-        this.currentGenerateState === ImageGenerateState.BEFORE_GENERATED) {
-        GeneratingArea({
-          currentGenerateState: this.currentGenerateState,
-          changeGenerateState: (state: ImageGenerateState) => {
-            this.$currentGenerateState(state);
-          }
-        })
+        .margin({ top: 21, bottom: 28 })
+        // text input area
+        if (this.currentGenerateState === ImageGenerateState.CONFIGURATION) {
+          TextInputArea({
+            changeGenerateState: (state: ImageGenerateState) => {
+              this.$currentGenerateState(state);
+            },
+            imgCounts: this.imgCounts,
+            userPrompt: this.userPrompt
+          })
+            .margin({ bottom: 14 })
+        }
+        if (this.currentGenerateState === ImageGenerateState.GENERATING ||
+          this.currentGenerateState === ImageGenerateState.BEFORE_GENERATED) {
+          GeneratingArea({
+            currentGenerateState: this.currentGenerateState,
+            changeGenerateState: (state: ImageGenerateState) => {
+              this.$currentGenerateState(state);
+            }
+          })
+        }
       }
     }
+    .scrollBar(BarState.Off)
     .height('100%')
     .width('100%')
   }

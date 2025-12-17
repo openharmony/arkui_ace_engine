@@ -15,8 +15,8 @@
 
 import { Position } from '@ohos.arkui.node';
 import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
-export declare function calcAABB(t13: imageGeneration.ImageItem[], u13: number, v13: number): number[][];
-export declare function mat4toImageItem(l13: number[], m13: number, n13: number): imageGeneration.ImageItem;
+export declare function calcAABB(input: imageGeneration.ImageItem[], width: number, height: number): number[][];
+export declare function mat4toImageItem(matrix: number[], width: number, height: number): imageGeneration.ImageItem;
 @ComponentV2
 export declare struct ImageOperate {
     @Param
@@ -56,7 +56,7 @@ export declare struct ImageOperate {
     touches: Map<number, Position>;
     aboutToAppear(): void;
     calcMatrix(): void;
-    handleTouchOpt(l10: number, m10: TouchType, n10: Position): void;
-    calcPointPos(e10: Position): Position;
+    handleTouchOpt(id: number, type: TouchType, pos: Position): void;
+    calcPointPos(input: Position): Position;
     build(): void;
 }

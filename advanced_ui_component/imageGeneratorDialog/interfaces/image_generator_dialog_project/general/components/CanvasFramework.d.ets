@@ -34,6 +34,8 @@ export declare struct CanvasHome {
     @Param
     @Require
     readonly styles?: Array<imageGeneration.ImageStyle>;
+    @Param
+    readonly userPrompt: string;
     @Builder
     homeTitleBuilder(): void;
     build(): void;
