@@ -81,6 +81,7 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         env->WeakReference_GetReference(*weakRef, &released, &localRef);
         if (!released) {
             env->Object_CallMethod_Void(static_cast<ani_object>(localRef), onPageShowMethod);
+            env->Reference_Delete(localRef);
         }
     };
 
@@ -97,6 +98,7 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         env->WeakReference_GetReference(*weakRef, &released, &localRef);
         if (!released) {
             env->Object_CallMethod_Void(static_cast<ani_object>(localRef), onPageHideMethod);
+            env->Reference_Delete(localRef);
         }
     };
 
@@ -114,6 +116,7 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         env->WeakReference_GetReference(*weakRef, &released, &localRef);
         if (!released) {
             env->Object_CallMethod_Boolean(static_cast<ani_object>(localRef), onBackPressMethod, &result);
+            env->Reference_Delete(localRef);
         }
         return result;
     };
@@ -131,6 +134,7 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         env->WeakReference_GetReference(*weakRef, &released, &localRef);
         if (!released) {
             env->Object_CallMethod_Void(static_cast<ani_object>(localRef), pageTransitionMethod);
+            env->Reference_Delete(localRef);
         }
     };
 
@@ -151,6 +155,7 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
 
         if (!released) {
             env->Object_CallMethod_Void(static_cast<ani_object>(localRef), onCleanupMethod);
+            env->Reference_Delete(localRef);
         }
     };
 
@@ -168,6 +173,7 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         env->WeakReference_GetReference(*weakRef, &released, &localRef);
         if (!released) {
             env->Object_CallMethod_Ref(static_cast<ani_object>(localRef), onDumpInspectorMethod, &result);
+            env->Reference_Delete(localRef);
         }
         ani_string aniStr = static_cast<ani_string>(result);
         return AniUtils::ANIStringToStdString(env, aniStr);
@@ -188,6 +194,7 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         env->WeakReference_GetReference(*weakRef, &released, &localRef);
         if (!released) {
             env->Object_CallMethod_Void(static_cast<ani_object>(localRef), setActiveMethod, param1, param2);
+            env->Reference_Delete(localRef);
         }
     };
 
