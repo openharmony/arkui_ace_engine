@@ -11047,6 +11047,10 @@ class ArkRichEditorComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, RichEditorFallbackLineSpacingModifier.identity, RichEditorFallbackLineSpacingModifier, enable);
     return this;
   }
+  singleLine(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorSingleLineModifier.identity, RichEditorSingleLineModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.RichEditor !== undefined) {
