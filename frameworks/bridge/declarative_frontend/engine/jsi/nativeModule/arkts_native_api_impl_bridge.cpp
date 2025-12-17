@@ -1064,7 +1064,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetSelectedDragPreviewStyle));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSingleLine"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetSingleLine));
-    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSingleLiner"),
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSingleLine"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetSingleLine));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "richEditor"), richEditor);
 
