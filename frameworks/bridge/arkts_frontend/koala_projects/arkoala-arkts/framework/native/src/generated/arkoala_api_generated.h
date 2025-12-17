@@ -2030,6 +2030,8 @@ typedef struct Ark_EdgeStyles Ark_EdgeStyles;
 typedef struct Opt_EdgeStyles Opt_EdgeStyles;
 typedef struct Ark_EditMenuOptions Ark_EditMenuOptions;
 typedef struct Opt_EditMenuOptions Opt_EditMenuOptions;
+typedef struct Ark_EditModeOptions Ark_EditModeOptions;
+typedef struct Opt_EditModeOptions Opt_EditModeOptions;
 typedef struct Ark_EllipseOptions Ark_EllipseOptions;
 typedef struct Opt_EllipseOptions Opt_EllipseOptions;
 typedef struct Ark_EmbedOptions Ark_EmbedOptions;
@@ -14507,6 +14509,14 @@ typedef struct Opt_EditMenuOptions {
     Ark_Tag tag;
     Ark_EditMenuOptions value;
 } Opt_EditMenuOptions;
+typedef struct Ark_EditModeOptions {
+    /* kind: Interface */
+    Opt_Boolean enableGatherSelectedItemsAnimation;
+} Ark_EditModeOptions;
+typedef struct Opt_EditModeOptions {
+    Ark_Tag tag;
+    Ark_EditModeOptions value;
+} Opt_EditModeOptions;
 typedef struct Ark_EllipseOptions {
     /* kind: Interface */
     Opt_Union_String_F64 width;
@@ -23721,6 +23731,8 @@ typedef struct GENERATED_ArkUIGridModifier {
                         const Opt_Union_F64_Resource* value);
     void (*setAlignItems)(Ark_NativePointer node,
                           const Opt_GridItemAlignment* value);
+    void (*setEditModeOptions)(Ark_NativePointer node,
+                               const Opt_EditModeOptions* value);
     void (*setOnScrollFrameBegin)(Ark_NativePointer node,
                                   const Opt_OnScrollFrameBeginCallback* value);
     void (*setOnWillScroll)(Ark_NativePointer node,
@@ -24005,6 +24017,8 @@ typedef struct GENERATED_ArkUIListModifier {
                                                const Opt_Boolean* value);
     void (*setStackFromEnd)(Ark_NativePointer node,
                             const Opt_Boolean* value);
+    void (*setEditModeOptions)(Ark_NativePointer node,
+                               const Opt_EditModeOptions* value);
     void (*setOnScrollIndex)(Ark_NativePointer node,
                              const Opt_Callback_I32_I32_I32_Void* value);
     void (*setOnScrollVisibleContentChange)(Ark_NativePointer node,

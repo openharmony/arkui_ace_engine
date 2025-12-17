@@ -9166,6 +9166,9 @@ export enum EffectEdge {
     START = 1,
     END = 2
 }
+export interface EditModeOptions {
+    enableGatherSelectedItemsAnimation?: boolean;
+}
 export interface BackgroundBrightnessOptions {
     rate: double;
     lightUpDegree: double;
@@ -12364,6 +12367,30 @@ export class EdgeEffectOptions_serializer {
         }
         const effectEdgeTmpResult : int32 | undefined = effectEdgeTmpBuf
         let value : EdgeEffectOptions = ({alwaysEnabled: alwaysEnabledTmpResult, effectEdge: effectEdgeTmpResult} as EdgeEffectOptions)
+        return value
+    }
+}
+export class EditModeOptions_serializer {
+    public static write(buffer: SerializerBase, value: EditModeOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForEnableGatherSelectedItemsAnimation  = value.enableGatherSelectedItemsAnimation
+        if (valueHolderForEnableGatherSelectedItemsAnimation !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableGatherSelectedItemsAnimationTmpValue  = valueHolderForEnableGatherSelectedItemsAnimation!
+            valueSerializer.writeBoolean(valueHolderForEnableGatherSelectedItemsAnimationTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): EditModeOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const enableGatherSelectedItemsAnimationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableGatherSelectedItemsAnimationTmpBuf : boolean | undefined = undefined
+        if ((enableGatherSelectedItemsAnimationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableGatherSelectedItemsAnimationTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableGatherSelectedItemsAnimationTmpResult : boolean | undefined = enableGatherSelectedItemsAnimationTmpBuf
+        let value : EditModeOptions = ({enableGatherSelectedItemsAnimation: enableGatherSelectedItemsAnimationTmpResult} as EditModeOptions)
         return value
     }
 }

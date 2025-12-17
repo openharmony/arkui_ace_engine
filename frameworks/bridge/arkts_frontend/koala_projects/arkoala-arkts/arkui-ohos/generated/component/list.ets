@@ -18,7 +18,7 @@
 
 import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable } from "@koalaui/interop"
-import { ChildrenMainSize_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, ChildrenMainSize, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, RectResult_serializer, RectResult } from "./common"
+import { ChildrenMainSize_serializer, EditModeOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, ChildrenMainSize, EditModeOptions, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, RectResult_serializer, RectResult } from "./common"
 import { LengthConstrain_serializer, LengthConstrain, Dimension, Length, ResourceColor } from "./units"
 import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
@@ -240,6 +240,19 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ListAttribute_setStackFromEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEditModeOptionsAttribute(value: EditModeOptions | undefined): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            EditModeOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ListAttribute_setEditModeOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnScrollIndexAttribute(value: ((start: int32,end: int32,center: int32) => void) | undefined): void {
@@ -552,6 +565,9 @@ export interface ListAttribute extends ScrollableCommonMethod {
     stackFromEnd(value: boolean | undefined): this {
         throw new Error("Unimplemented method stackFromEnd")
     }
+    editModeOptions(value: EditModeOptions | undefined): this {
+        throw new Error("Unimplemented method editModeOptions")
+    }
     onScrollIndex(value: ((start: int32,end: int32,center: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onScrollIndex")
     }
@@ -611,6 +627,7 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     maintainVisibleContentPosition_value?: boolean | undefined
     supportEmptyBranchInLazyLoading_value?: boolean | undefined
     stackFromEnd_value?: boolean | undefined
+    editModeOptions_value?: EditModeOptions | undefined
     onScrollIndex_value?: ((start: int32,end: int32,center: int32) => void) | undefined
     onScrollVisibleContentChange_value?: OnScrollVisibleContentChangeCallback | undefined
     onItemMove_value?: ((from: int32,to: int32) => boolean) | undefined
@@ -669,6 +686,9 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
         return this
     }
     stackFromEnd(value: boolean | undefined): this {
+        return this
+    }
+    editModeOptions(value: EditModeOptions | undefined): this {
         return this
     }
     onScrollIndex(value: ((start: int32,end: int32,center: int32) => void) | undefined): this {
@@ -847,6 +867,14 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         if (this.checkPriority("stackFromEnd")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setStackFromEndAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public editModeOptions(value: EditModeOptions | undefined): this {
+        if (this.checkPriority("editModeOptions")) {
+            const value_casted = value as (EditModeOptions | undefined)
+            this.getPeer()?.setEditModeOptionsAttribute(value_casted)
             return this
         }
         return this

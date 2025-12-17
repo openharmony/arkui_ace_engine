@@ -108,4 +108,39 @@ HWTEST_F(SelectableItemUtilsTestNG, IsGatherSelectedItemsAnimationEnabled, TestS
     EXPECT_TRUE(SelectableUtils::IsGatherSelectedItemsAnimationEnabled(gridItemNode));
     EXPECT_TRUE(GridModelNG::GetEditModeOptions(AceType::RawPtr(frameNode_)).enableGatherSelectedItemsAnimation);
 }
+
+/**
+ * @tc.name: BindContextMenu
+ * @tc.desc: Test BindContextMenu function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectableItemUtilsTestNG, BindContextMenu, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(10);
+    CreateDone();
+
+    // GridItem without LongPress
+    auto gridItemNode = GetChildFrameNode(frameNode_, 0);
+    SelectableUtils::BindContextMenu(AceType::RawPtr(gridItemNode));
+
+    std::function<void()> buildFunc = []() {};
+    std::function<void()> previewBuildFunc = []() {};
+    NG::MenuParam menuParam;
+    menuParam.isShowHoverImage = true;
+    menuParam.hoverScaleInterruption = true;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    ViewAbstractModelNG::BindContextMenuWithLongPress(gridItemNode, buildFunc, menuParam, previewBuildFunc, true);
+    auto eventHub = gridItemNode->GetEventHub<SelectableItemEventHub>();
+    auto gestureHub = eventHub->GetGestureEventHub();
+    auto longPressEventActuator = gestureHub->GetLongPressEventActuator();
+    EXPECT_NE(longPressEventActuator, nullptr);
+    EXPECT_NE(longPressEventActuator->longPressEvent_, nullptr);
+
+    // GridItem with LongPress
+    SelectableUtils::BindContextMenu(AceType::RawPtr(gridItemNode));
+    auto actuator = AceType::DynamicCast<LongPressEventActuatorWithMultiSelect>(longPressEventActuator);
+    EXPECT_NE(actuator->multiSelectHandler_, nullptr);
+}
 } // namespace OHOS::Ace::NG

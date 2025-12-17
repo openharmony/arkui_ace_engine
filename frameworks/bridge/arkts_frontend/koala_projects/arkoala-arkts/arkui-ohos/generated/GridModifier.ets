@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethod, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback } from "./component/common"
+import { CommonMethod, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, EditModeOptions, OnWillScrollCallback, OnScrollCallback } from "./component/common"
 import { BarState, Color, CrownSensitivity, EdgeEffect, ScrollSource } from "./component/enums"
 import { Resource } from "global.resource"
 import { extractors, AttributeModifier } from "#handwritten"
@@ -97,6 +97,8 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
     _friction_0_0value?: double | Resource | undefined
     _alignItems_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignItems_0_0value?: GridItemAlignment | undefined
+    _editModeOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _editModeOptions_0_0value?: EditModeOptions | undefined
     _onScrollFrameBegin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onScrollFrameBegin_0_0value?: OnScrollFrameBeginCallback | undefined
     _onWillScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -615,6 +617,24 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 default: {
                     this._alignItems_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setAlignItemsAttribute((undefined as GridItemAlignment | undefined));
+                }
+            }
+        }
+        if (this._editModeOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._editModeOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEditModeOptionsAttribute((this._editModeOptions_0_0value as EditModeOptions | undefined));
+                    this._editModeOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._editModeOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._editModeOptions_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEditModeOptionsAttribute((undefined as EditModeOptions | undefined));
                 }
             }
         }
@@ -1225,6 +1245,19 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
             }
         }
+        if (modifier._editModeOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._editModeOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.editModeOptions(modifier._editModeOptions_0_0value);
+                    break;
+                }
+                default: {
+                    this.editModeOptions((undefined as EditModeOptions | undefined));
+                }
+            }
+        }
         if (modifier._onScrollFrameBegin_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onScrollFrameBegin_0_flag) {
@@ -1702,6 +1735,18 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         } else
         {
             this._alignItems_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    editModeOptions(value: EditModeOptions | undefined): this {
+        if (((this._editModeOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._editModeOptions_0_flag = AttributeUpdaterFlag.UPDATE
+            this._editModeOptions_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._editModeOptions_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
