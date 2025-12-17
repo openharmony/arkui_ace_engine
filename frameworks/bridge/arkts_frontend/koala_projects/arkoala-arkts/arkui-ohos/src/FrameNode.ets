@@ -1759,6 +1759,18 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    function getImageAttribute(node: FrameNode): ImageAttribute | undefined {
+        if (node.getType() !== 'Image') {
+            return undefined
+        }
+        let imageNode = node as ImageFrameNode
+        if (imageNode !== undefined) {
+            return imageNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
     function createBadgeNode(context: UIContext): BadgeFrameNode {
         return new BadgeFrameNode(context, 'Badge', (node: FrameNode, type: ModifierType): ArkBadgeNode => {
             let arknode = new ArkBadgeNode();
