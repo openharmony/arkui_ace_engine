@@ -14,7 +14,7 @@
  */
 
 class RefInfo {
-  private static obj2ref: WeakMap<object, object> = new WeakMap();
+  public static obj2ref: WeakMap<object, object> = new WeakMap();
   private static setMapProxy: SetMapProxyHandler = new SetMapProxyHandler(true);
   private static arrayProxy: ArrayProxyHandler = new ArrayProxyHandler(true);
   private static objectProxy: ObjectProxyHandler = new ObjectProxyHandler(true);

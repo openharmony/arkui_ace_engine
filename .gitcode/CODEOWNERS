@@ -1070,7 +1070,7 @@ frameworks/bridge/declarative_frontend/engine/js_object_template.inl @arkui_stat
 frameworks/bridge/declarative_frontend/engine/jsPrefetcher.js
 frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsShape.js
-frameworks/bridge/declarative_frontend/engine/jsStateManagement.js
+frameworks/bridge/declarative_frontend/engine/jsStateManagement.js @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/js_types.cpp @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/js_types.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsUIContext.js

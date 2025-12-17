@@ -159,25 +159,36 @@ class stateMgmtDFX {
     return {
       decorator: decorators, propertyName: varName, id: -1, value: stateMgmtDFX.getRawValue(prop),
       dependentElementIds:
-        { mode: 'V2', trackPropertiesDependencies: [], propertyDependencies: stateMgmtDFX.dumpDepenetElementV2(dependentElmIds) }
+        { mode: 'V2', trackPropertiesDependencies: [],
+          propertyDependencies: stateMgmtDFX.dumpDepenetElementV2(dependentElmIds) as Array<ElementType | string> }
       , syncPeers: []
     };
   }
 
-  private static dumpDepenetElementV2(dependentElmIds: Set<number> | undefined): Array<ElementType | string> {
-    const dumpElementIds: Array<ElementType | string> = [];
+  public static dumpDepenetElementV2(dependentElmIds: Set<number> | undefined,
+    isGetElement: boolean = false): Array<ElementType | string | ElementInfo> {
+    const dumpElementIds: Array<ElementType | string | ElementInfo> = [];
     dependentElmIds?.forEach((elmtId: number) => {
-      if (elmtId < ComputedV2.MIN_COMPUTED_ID) {
-        dumpElementIds.push(ObserveV2.getObserve().getElementInfoById(elmtId));
-      } else if (elmtId < MonitorV2.MIN_WATCH_ID) {
-        dumpElementIds.push(`@Computed ${ObserveV2.getObserve().getComputedInfoById(elmtId)}`);
-      } else if (elmtId < PersistenceV2Impl.MIN_PERSISTENCE_ID) {
-        dumpElementIds.push(`@Monitor ${ObserveV2.getObserve().getMonitorInfoById(elmtId)}`);
-      } else {
-        dumpElementIds.push(`PersistenceV2[${elmtId}]`);
-      }
+      dumpElementIds.push(isGetElement ?
+        { elementId: elmtId, elementName: this.getElementName(elmtId, true) } as ElementInfo :
+        this.getElementName(elmtId, false));
     });
     return dumpElementIds;
+  }
+
+  private static getElementName(elmtId: number, isGetElement: boolean): string {
+    if (elmtId < ComputedV2.MIN_COMPUTED_ID) {
+      return isGetElement ? ObserveV2.getObserve().getElementNameById(elmtId) :
+        ObserveV2.getObserve().getElementInfoById(elmtId) as string;
+    } else if (elmtId < MonitorV2.MIN_WATCH_ID) {
+      return `@Computed ${ObserveV2.getObserve().getComputedInfoById(elmtId)}`;
+    } else if (elmtId < MonitorV2.MIN_WATCH_FROM_API_ID) {
+      return `@Monitor ${ObserveV2.getObserve().getMonitorInfoById(elmtId)}`;
+    } else if (elmtId < PersistenceV2Impl.MIN_PERSISTENCE_ID) {
+      return `MonitorApi ${ObserveV2.getObserve().getMonitorInfoById(elmtId)}`;
+    } else {
+      return isGetElement ? 'PersistenceV2' : `PersistenceV2[${elmtId}]`;
+    }
   }
 
   private static getType(item: RawValue): string {
