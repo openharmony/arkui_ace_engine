@@ -39,7 +39,7 @@ std::optional<float> ProcessBindableRating(FrameNode* frameNode, const Opt_Union
             result = Converter::Convert<float>(src.value);
             WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
             auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](const std::string& value) {
-                auto nValue = Converter::ArkValue<Ark_Float64>(std::stof(value));
+                auto nValue = Converter::ArkValue<Ark_Float64>(StringUtils::StringToFloat(value));
                 PipelineContext::SetCallBackNode(weakNode);
                 arkCallback.Invoke(nValue);
             };
@@ -138,7 +138,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
     RatingChangeEvent onChange = {};
     if (optValue) {
         onChange = [arkCallback = CallbackHelper(*optValue)](const std::string& value) {
-            Ark_Float64 convValue = Converter::ArkValue<Ark_Float64>(std::stof(value));
+            Ark_Float64 convValue = Converter::ArkValue<Ark_Float64>(StringUtils::StringToFloat(value));
             arkCallback.Invoke(convValue);
         };
     }
