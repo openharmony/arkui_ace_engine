@@ -30826,6 +30826,10 @@ Ark_Boolean impl_FrameNodeExtender_isOnMainTree(Ark_NativePointer peer) {
         return GetAccessors()->getFrameNodeExtenderAccessor()->isOnMainTree(static_cast<Ark_FrameNode>(peer));
 }
 KOALA_INTEROP_DIRECT_1(FrameNodeExtender_isOnMainTree, Ark_Boolean, Ark_NativePointer)
+void impl_FrameNodeExtender_applyAttributesFinish(Ark_NativePointer peer) {
+        GetAccessors()->getFrameNodeExtenderAccessor()->applyAttributesFinish(static_cast<Ark_FrameNode>(peer));
+}
+KOALA_INTEROP_DIRECT_V1(FrameNodeExtender_applyAttributesFinish, Ark_NativePointer)
 KInteropReturnBuffer impl_FrameNodeExtender_convertPoint(Ark_NativePointer peer, Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_Vector2 vector2ValueTemp = Vector2_serializer::read(thisDeserializer);;

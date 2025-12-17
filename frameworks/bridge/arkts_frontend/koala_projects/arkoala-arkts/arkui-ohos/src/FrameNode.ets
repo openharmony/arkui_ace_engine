@@ -818,6 +818,9 @@ export class FrameNode implements MaterializedBase {
     public isOnMainTree(): boolean {
         return FrameNodeExtender.isOnMainTree(this);
     }
+      public invalidateAttributes(): void {
+        FrameNodeExtender.applyAttributesFinish(this);
+    }
 }
 class ImmutableFrameNode extends FrameNode {
     constructor(uiContext: UIContext, type: string, ptr?: KPointer) {

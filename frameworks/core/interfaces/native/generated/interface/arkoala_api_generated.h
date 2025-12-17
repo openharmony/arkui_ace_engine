@@ -27513,6 +27513,7 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
                                              const Ark_Vector2* positionByLocal);
     Array_Float64 (*convertPositionFromWindow)(Ark_FrameNode peer,
                                                const Ark_Vector2* positionByWindow);
+    void (*applyAttributesFinish)(Ark_FrameNode peer);
 } GENERATED_ArkUIFrameNodeExtenderAccessor;
 
 typedef struct GENERATED_ArkUIFrictionMotionAccessor {
