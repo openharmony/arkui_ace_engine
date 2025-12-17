@@ -654,10 +654,10 @@ export class ColorStop_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
@@ -678,10 +678,10 @@ export class ColorStop_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOffsetTmpValueForIdx0  = valueHolderForOffsetTmpValue as string
                 valueSerializer.writeString(valueHolderForOffsetTmpValueForIdx0)
-            } else if (valueHolderForOffsetTmpValue instanceof number) {
+            } else if (valueHolderForOffsetTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForOffsetTmpValueForIdx1  = valueHolderForOffsetTmpValue as number
-                valueSerializer.writeNumber(valueHolderForOffsetTmpValueForIdx1)
+                const valueHolderForOffsetTmpValueForIdx1  = valueHolderForOffsetTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForOffsetTmpValueForIdx1)
             } else if (valueHolderForOffsetTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForOffsetTmpValueForIdx2  = valueHolderForOffsetTmpValue as Resource
