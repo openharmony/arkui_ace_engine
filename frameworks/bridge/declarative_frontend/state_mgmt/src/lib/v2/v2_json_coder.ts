@@ -80,6 +80,118 @@ function __Type__<T>(type: TypeConstructor<T> | TransformOptions<T> | string, al
   };
 }
 
+function componentInitInternal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const watchProp = Symbol.for('INIT_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentInitFunction = descriptor.value;
+  if (componentInitFunction && typeof componentInitFunction === 'function') {
+    if (!target[watchProp]) {
+      const componentInitFunctionArray: Array<Function> = new Array<Function>();
+      componentInitFunctionArray.push(componentInitFunction as Function);
+      target[watchProp] = componentInitFunctionArray;
+    } else {
+      target[watchProp].push(componentInitFunction as Function);
+    }
+  }
+}
+
+function componentAppearInternal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const watchProp = Symbol.for('APPEAR_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentAppearFunction = descriptor.value;
+  if (componentAppearFunction && typeof componentAppearFunction === 'function') {
+    if (!target[watchProp]) {
+      const componentAppearFunctionArray: Array<Function> = new Array<Function>();
+      componentAppearFunctionArray.push(componentAppearFunction as Function);
+      target[watchProp] = componentAppearFunctionArray;
+    } else {
+      target[watchProp].push(componentAppearFunction as Function);
+    }
+  }
+}
+
+function componentBuiltInternal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const watchProp = Symbol.for('BUILT_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentBuiltFunction = descriptor.value;
+  if (componentBuiltFunction && typeof componentBuiltFunction === 'function') {
+    if (!target[watchProp]) {
+      const componentBuiltFunctionArray: Array<Function> = new Array<Function>();
+      componentBuiltFunctionArray.push(componentBuiltFunction as Function);
+      target[watchProp] = componentBuiltFunctionArray;
+    } else {
+      target[watchProp].push(componentBuiltFunction as Function);
+    }
+  }
+}
+
+function componentAttachInternal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const watchProp = Symbol.for('ATTACH_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentAttachFunction = descriptor.value;
+  if (componentAttachFunction && typeof componentAttachFunction === 'function') {
+    if (!target[watchProp]) {
+      const componentAttachFunctionArray: Array<Function> = new Array<Function>();
+      componentAttachFunctionArray.push(componentAttachFunction as Function);
+      target[watchProp] = componentAttachFunctionArray;
+    } else {
+      target[watchProp].push(componentAttachFunction as Function);
+    }
+  }
+}
+
+function componentDetachInternal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const watchProp = Symbol.for('DETACH_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentDetachFunction = descriptor.value;
+  if (componentDetachFunction && typeof componentDetachFunction === 'function') {
+    if (!target[watchProp]) {
+      const componentDetachFunctionArray: Array<Function> = new Array<Function>();
+      componentDetachFunctionArray.push(componentDetachFunction as Function);
+      target[watchProp] = componentDetachFunctionArray;
+    } else {
+      target[watchProp].push(componentDetachFunction as Function);
+    }
+  }
+}
+
+function componentReuseInternal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const watchProp = Symbol.for('REUSE_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentReuseFunction = descriptor.value;
+  if (componentReuseFunction && typeof componentReuseFunction === 'function') {
+    if (!target[watchProp]) {
+      const componentReuseFunctionArray: Array<Function> = new Array<Function>();
+      componentReuseFunctionArray.push(componentReuseFunction as Function);
+      target[watchProp] = componentReuseFunctionArray;
+    } else {
+      target[watchProp].push(componentReuseFunction as Function);
+    }
+  }
+}
+
+function componentRecycleInternal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const watchProp = Symbol.for('RECYCLE_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentRecycleFunction = descriptor.value;
+  if (componentRecycleFunction && typeof componentRecycleFunction === 'function') {
+    if (!target[watchProp]) {
+      const componentRecycleFunctionArray: Array<Function> = new Array<Function>();
+      componentRecycleFunctionArray.push(componentRecycleFunction as Function);
+      target[watchProp] = componentRecycleFunctionArray;
+    } else {
+      target[watchProp].push(componentRecycleFunction as Function);
+    }
+  }
+}
+
+function componentDisappearInternal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const watchProp = Symbol.for('DISAPPEAR_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentDisappearFunction = descriptor.value;
+  if (componentDisappearFunction && typeof componentDisappearFunction === 'function') {
+    if (!target[watchProp]) {
+      const componentDisappearFunctionArray: Array<Function> = new Array<Function>();
+      componentDisappearFunctionArray.push(componentDisappearFunction as Function);
+      target[watchProp] = componentDisappearFunctionArray;
+    } else {
+      target[watchProp].push(componentDisappearFunction as Function);
+    }
+  }
+}
+
 function ObservedReplacer(replacer: any) {
   const defaultReplacer = function (key: string, value: any) {
     return value;
