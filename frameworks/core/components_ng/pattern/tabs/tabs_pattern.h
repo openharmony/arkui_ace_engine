@@ -186,6 +186,7 @@ private:
     void RecordChangeEvent(int32_t index);
     void FireTabContentStateCallback(int32_t oldIndex, int32_t nextIndex) const;
     void FireTabChangeCallback(int32_t preIndex, int32_t nextIndex);
+    void UpdateTabBarOverlap(const RefPtr<TabsLayoutProperty>& tabsLayoutProperty);
     // Information on TabChange event
     struct TabChangeInfo {
         int32_t index = 0;
