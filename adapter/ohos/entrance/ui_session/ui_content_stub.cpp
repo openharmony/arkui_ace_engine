@@ -193,6 +193,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             HighlightSpecifiedContentInner(data, reply, option);
             break;
         }
+        case GET_MULTI_IMAGES_BY_ID: {
+            GetMultiImagesByIdInner(data, reply, option);
+            break;
+        }
         case REGISTER_CONTENT_CHANGE: {
             RegisterContentChangeCallbackInner(data, reply, option);
             break;
@@ -463,6 +467,25 @@ int32_t UiContentStub::GetCurrentImagesShowingInner(MessageParcel& data, Message
     int32_t processId = data.ReadInt32();
     UiSessionManager::GetInstance()->SaveProcessId("pixel", processId);
     reply.WriteInt32(GetCurrentImagesShowing(nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetMultiImagesByIdInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t processId = data.ReadInt32();
+    UiSessionManager::GetInstance()->SaveProcessId("getArkUIImages", processId);
+    UiSessionManager::GetInstance()->SaveProcessId("getArkWebImages", processId);
+    std::vector<int32_t> arkUIIds;
+    data.ReadInt32Vector(&arkUIIds);
+    std::map<int32_t, std::vector<int32_t>> arkWebs;
+    size_t mapSize = data.ReadUint64();
+    for (size_t i = 0; i < mapSize; ++i) {
+        int32_t webId = data.ReadInt32();
+        std::vector<int32_t> webImageIds;
+        data.ReadInt32Vector(&webImageIds);
+        arkWebs.emplace(webId, std::move(webImageIds));
+    }
+    reply.WriteInt32(GetImagesById(arkUIIds, nullptr, arkWebs, nullptr));
     return NO_ERROR;
 }
 

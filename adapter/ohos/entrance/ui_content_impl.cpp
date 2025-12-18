@@ -5860,6 +5860,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     };
     UiSessionManager::GetInstance()->SaveRegisterForWebFunction(webCallback);
     SetupGetPixelMapCallback(taskExecutor);
+    SetupGetImagesByIdCallback(taskExecutor);
     RegisterGetCurrentPageName(taskExecutor);
     InitSendCommandFunctionsCallbacks(taskExecutor);
     sendCommandCallbackInner(taskExecutor);
@@ -5946,6 +5947,26 @@ void UIContentImpl::SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& task
             TaskExecutor::TaskType::UI, "UiSessionGetHitTestInfos");
     };
     UiSessionManager::GetInstance()->SaveGetHitTestInfoCallback(getHitTestInfoCallback);
+}
+
+void UIContentImpl::SetupGetImagesByIdCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto getImagesById = [weakTaskExecutor = taskExecutor](const std::vector<int32_t>& arkUIIds,
+        const std::map<int32_t, std::vector<int32_t>>& arkWebs) {
+            auto taskExecutor = weakTaskExecutor.Upgrade();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [arkUIIds, arkWebs]() {
+                    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                    CHECK_NULL_VOID(pipeline);
+                    auto uiTranslateManager = pipeline->GetUiTranslateManagerImpl();
+                    CHECK_NULL_VOID(uiTranslateManager);
+                    auto windowId = pipeline->GetWindowId();
+                    uiTranslateManager->GetMultiImagesById(windowId, arkUIIds, arkWebs);
+                },
+                TaskExecutor::TaskType::UI, "UiSessionGetImagesById");
+        };
+    UiSessionManager::GetInstance()->SaveGetImagesByIdFunction(getImagesById);
 }
 
 void UIContentImpl::SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor)

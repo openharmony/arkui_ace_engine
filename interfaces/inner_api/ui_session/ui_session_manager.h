@@ -25,6 +25,7 @@
 #include "base/utils/macros.h"
 
 #include "param_config.h"
+#include "ui_content_proxy_error_code.h"
 #include "ui_session_json_util.h"
 #include "ui_translate_manager.h"
 
@@ -45,6 +46,8 @@ public:
     using GetHitTestInfoFunction = std::function<void(InteractionParamConfig config)>;
     using GetStateMgmtInfoFunction = std::function<void(
         const std::string& componentName, const std::string& propertyName, const std::string& jsonPath)>;
+    using GetImagesByIdFunction =
+        std::function<void(const std::vector<int32_t>&, const std::map<int32_t, std::vector<int32_t>>&)>;
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -168,6 +171,7 @@ public:
     virtual void SaveBaseInfo(const std::string& info) {};
     virtual void SendBaseInfo(int32_t processId) {};
     virtual void SaveGetPixelMapFunction(GetPixelMapFunction&& function) {};
+    virtual void SaveGetImagesByIdFunction(GetImagesByIdFunction&& function) {};
     virtual void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager,
         int32_t instanceId) {};
     virtual void SaveGetCurrentInstanceIdCallback(std::function<int32_t()>&& callback) {};
@@ -191,10 +195,17 @@ public:
     virtual void SendTranslateResult(int32_t nodeId, std::string result) {};
     virtual void ResetTranslate(int32_t nodeId = -1) {};
     virtual void GetPixelMap() {};
+    virtual void GetMultiImagesById(const std::vector<int32_t>& arkUIIds,
+        const std::map<int32_t, std::vector<int32_t>>& arkWebs) {};
     virtual void SendCommand(const std::string& command) {};
     virtual void SaveSendCommandFunction(SendCommandFunction&& function) {};
     virtual void SaveGetStateMgmtInfoFunction(GetStateMgmtInfoFunction&& callback) {};
     virtual void SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps) {};
+    virtual void SendArkUIImagesById(int32_t windowId,
+        const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>& componentImages,
+        MultiImageQueryErrorCode arkUIErrorCode) {};
+    virtual void SendArkWebImagesById(int32_t windowId, const std::map<int32_t, std::map<int32_t,
+        std::shared_ptr<Media::PixelMap>>>& webImages, MultiImageQueryErrorCode arkWebErrorCode) {};
     virtual void GetVisibleInspectorTree(ParamConfig config = ParamConfig()) {};
     virtual void RegisterPipeLineExeAppAIFunction(
         std::function<uint32_t(const std::string& funcName, const std::string& params)>&& callback) {};
@@ -235,6 +246,7 @@ protected:
     NotifyAllWebFunction notifyWebFunction_ = 0;
     GetPixelMapFunction getPixelMapFunction_ = 0;
     GetHitTestInfoFunction getHitTestInfoFunction_ = 0;
+    GetImagesByIdFunction getImagesByIdFunction_ = 0;
     NotifySendCommandFunction notifySendCommandFunction_ = 0;
     NotifySendCommandAsyncFunction notifySendCommandAsyncFunction_ = 0;
     GetStateMgmtInfoFunction getStateMgmtInfoFunction_ = 0;
