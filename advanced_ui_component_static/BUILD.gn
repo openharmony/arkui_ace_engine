@@ -43,6 +43,7 @@ group("advanced_ui_component_static") {
       "selecttitlebar:selectTitleBar",
       "progressbutton:progressButton",
       "progressbuttonV2:progressButtonV2",
+      "popup:popup",
       "tabtitlebar:tabTitleBar",
       "exceptionprompt:exceptionPrompt",
       "toolbar:toolBar",
