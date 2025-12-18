@@ -31,6 +31,7 @@ import { DoodleBoardArea } from "./DoodleBoardArea";
 import { TextInputArea } from "./TextInputArea";
 import { HomeTitle } from "./TitleArea";
 import { LandscapeSelectFuncArea } from "./UserInteractiveArea";
+import { ContinueOperateArea, HistoryArea } from './CanvasComplete';
 import { GeneratingArea } from './CanvasGenerate';
 import { calcAABB } from './ImageOperate';
 export class styleItem {
@@ -64,7 +65,7 @@ export class CanvasHome extends ViewV2 {
                     let componentCall = new HomeTitle(this, {
                         titleName: this.titleName,
                         currentGenerateState: this.currentGenerateState
-                    }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 42, col: 5 });
+                    }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 43, col: 5 });
                     ViewV2.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -99,7 +100,7 @@ export class CanvasHome extends ViewV2 {
                                             styles: this.styles,
                                             userPrompt: this.userPrompt,
                                             $currentGenerateState: value => { this.currentGenerateState = value; }
-                                        }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 51, col: 9 });
+                                        }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 52, col: 9 });
                                         ViewV2.create(componentCall);
                                         let paramsLambda = () => {
                                             return {
@@ -133,7 +134,7 @@ export class CanvasHome extends ViewV2 {
                     }
                 }, If);
                 If.pop();
-            }, { moduleName: "__harDefaultModuleName__", pagePath: "" });
+            }, { moduleName: "image_generator_dialog", pagePath: "" });
             NavDestination.hideBackButton(true);
             NavDestination.title({ builder: this.homeTitleBuilder.bind(this) });
         }, NavDestination);
@@ -206,6 +207,7 @@ class LandscapeLayout extends ViewV2 {
             ]];
         this.imgCounts = 0;
         this.initParam("userPrompt", (params && "userPrompt" in params) ? params.userPrompt : '');
+        this.resultList = [];
         this.finalizeConstruction();
     }
     resetStateVarsOnReuse(params) {
@@ -237,6 +239,7 @@ class LandscapeLayout extends ViewV2 {
             ]];
         this.imgCounts = 0;
         this.resetParam("userPrompt", (params && "userPrompt" in params) ? params.userPrompt : '');
+        this.resultList = [];
     }
     initImageMatrix() {
         let input = [];
@@ -277,7 +280,7 @@ class LandscapeLayout extends ViewV2 {
                     let componentCall = new DoodleBoardArea(this, {
                         imageInfoArr: this.imageInfoArr,
                         imageMatrixArr: this.imageMatrixArr
-                    }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 123, col: 11 });
+                    }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 125, col: 11 });
                     ViewV2.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -314,7 +317,7 @@ class LandscapeLayout extends ViewV2 {
                                     setImgCounts: (count) => {
                                         this.imgCounts = count;
                                     }
-                                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 129, col: 13 });
+                                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 131, col: 13 });
                                 ViewV2.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -346,6 +349,42 @@ class LandscapeLayout extends ViewV2 {
             }
         }, If);
         If.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (this.currentGenerateState === ImageGenerateState.GENERATED) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        __Common__.create();
+                        __Common__.margin({ right: 16 });
+                    }, __Common__);
+                    {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new HistoryArea(this, { resultList: this.resultList }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 142, col: 13 });
+                                ViewV2.create(componentCall);
+                                let paramsLambda = () => {
+                                    return {
+                                        resultList: this.resultList
+                                    };
+                                };
+                                componentCall.paramsGenerator_ = paramsLambda;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    resultList: this.resultList
+                                });
+                            }
+                        }, { name: "HistoryArea" });
+                    }
+                    __Common__.pop();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
         Row.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
@@ -364,7 +403,7 @@ class LandscapeLayout extends ViewV2 {
                                     },
                                     imgCounts: this.imgCounts,
                                     userPrompt: this.userPrompt
-                                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 143, col: 11 });
+                                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 149, col: 11 });
                                 ViewV2.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -407,7 +446,7 @@ class LandscapeLayout extends ViewV2 {
                                     changeGenerateState: (state) => {
                                         this.$currentGenerateState(state);
                                     }
-                                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 154, col: 11 });
+                                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 160, col: 11 });
                                 ViewV2.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -426,6 +465,50 @@ class LandscapeLayout extends ViewV2 {
                             }
                         }, { name: "GeneratingArea" });
                     }
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
+        If.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (this.currentGenerateState === ImageGenerateState.GENERATED) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        __Common__.create();
+                        __Common__.margin({ bottom: 14 });
+                    }, __Common__);
+                    {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new ContinueOperateArea(this, {
+                                    currentGenerateState: this.currentGenerateState,
+                                    changeGenerateState: (state) => {
+                                        this.$currentGenerateState(state);
+                                    }
+                                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasFramework.ets", line: 168, col: 11 });
+                                ViewV2.create(componentCall);
+                                let paramsLambda = () => {
+                                    return {
+                                        currentGenerateState: this.currentGenerateState,
+                                        changeGenerateState: (state) => {
+                                            this.$currentGenerateState(state);
+                                        }
+                                    };
+                                };
+                                componentCall.paramsGenerator_ = paramsLambda;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    currentGenerateState: this.currentGenerateState
+                                });
+                            }
+                        }, { name: "ContinueOperateArea" });
+                    }
+                    __Common__.pop();
                 });
             }
             else {
@@ -479,3 +562,6 @@ __decorate([
 __decorate([
     Param
 ], LandscapeLayout.prototype, "userPrompt", void 0);
+__decorate([
+    Local
+], LandscapeLayout.prototype, "resultList", void 0);

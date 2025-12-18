@@ -26,16 +26,16 @@ export declare class FileUtils {
      * @param sourceUri source uri
      * @param destination destination address
      */
-    static copyFileToDestination(r33: string, s33: string): void;
+    static copyFileToDestination(sourceUri: string, destination: string): void;
     /**
      * create pixelMap by uri
      *
      * @param uri file uri
      * @returns imageInfo
      */
-    static createPixelMap(h33: string): imageGeneration.ImageItem | undefined;
+    static createPixelMap(uri: string): imageGeneration.ImageItem | undefined;
     private static getDecodingOptions;
-    static matrixPixelMap(n32: image.PixelMap, o32: string): void;
+    static matrixPixelMap(pixelMap: image.PixelMap, orientation: string): void;
     /**
      * save file by buffer
      *
@@ -43,5 +43,5 @@ export declare class FileUtils {
      * @param buffer ArrayBuffer
      * @returns uri
      */
-    static saveFile(h32: Context, i32: ArrayBuffer): string;
+    static saveFile(context: Context, buffer: ArrayBuffer): string;
 }

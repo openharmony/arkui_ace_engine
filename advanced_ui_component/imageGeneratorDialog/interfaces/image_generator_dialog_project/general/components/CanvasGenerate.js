@@ -171,7 +171,7 @@ export class GenerateProgress extends ViewV2 {
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
-            globalThis.Context.animation({
+            Context.animation({
                 duration: this.progressValue == this.total ? 400 : 150,
                 curve: Curve.EaseOut,
                 playMode: PlayMode.Normal
@@ -180,7 +180,7 @@ export class GenerateProgress extends ViewV2 {
             Stack.width((100 - this.progressValue) * 1.5);
             Stack.position({ right: 0 });
             Stack.height(40);
-            globalThis.Context.animation(null);
+            Context.animation(null);
         }, Stack);
         Stack.pop();
         Stack.pop();
