@@ -271,6 +271,7 @@ function virtualRender<T>(
          * To optimize performance, insert reuseKey through compiler plugin to the content of itemBuilder.
          */
         if (attributes.reusable_) {
+            const tag = _type + repeatId + '@Repeat';
             const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
             const currentExtendableComponent = ExtendableComponent.current;
             NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
@@ -281,7 +282,7 @@ function virtualRender<T>(
                 itemBuilder(ri);
                 ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
                 ExtendableComponent.current = lastExtendableComponent;
-            }, _type + repeatId); // using type as reuseKey
+            }, tag); // using type as reuseKey
         } else {
             itemBuilder(ri);
         }
