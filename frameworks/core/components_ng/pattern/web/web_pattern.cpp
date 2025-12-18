@@ -5307,9 +5307,6 @@ void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreate
             result = action(menuItem);
         }
         CHECK_NULL_RETURN(webPattern, result);
-        if (!result && webPattern->IsQuickMenuShow()) {
-            webPattern->webSelectOverlay_->HideMenu(true);
-        }
         return result;
     };
     if (onPrepareMenuCallback) {
