@@ -1686,4 +1686,12 @@ void WebSelectOverlay::OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int
     selectArea_ = rect;
     UpdateSelectAreaInfo();
 }
+
+void WebSelectOverlay::OnOrientationChanged()
+{
+    if (webSelectInfo_.menuInfo.menuIsShow) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Hide menu when orientation is changed.");
+        ChangeVisibilityOfQuickMenu();
+    }
+}
 } // namespace OHOS::Ace::NG

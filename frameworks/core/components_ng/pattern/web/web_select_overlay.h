@@ -209,6 +209,7 @@ public:
     void OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int32_t width, int32_t height);
     void UpdateSelectAreaInfo();
     void UpdateSelectArea();
+    void OnOrientationChanged();
 private:
     void UpdateSelectMenuOptions();
     void UpdateIsSelectAll();

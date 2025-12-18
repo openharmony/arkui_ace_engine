@@ -9302,6 +9302,13 @@ void WebPattern::UninitRotationEventCallback()
     rotationEndCallbackId_ = 0;
 }
 
+void WebPattern::NotifyOverlayRotation()
+{
+    if (webSelectOverlay_) {
+        webSelectOverlay_->OnOrientationChanged();
+    }
+}
+
 void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
 {
     if (type != WindowSizeChangeReason::ROTATION) {
@@ -9311,6 +9318,7 @@ void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
         TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::AdjustRotationRenderFit not support");
         return;
     }
+    NotifyOverlayRotation();
 
     if (delegate_ && renderFit_ == RenderFit::TOP_LEFT &&
         renderMode_ == RenderMode::ASYNC_RENDER && layoutMode_ != WebLayoutMode::FIT_CONTENT) {
