@@ -209,7 +209,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetIsShowTest, TestSize.L
     auto builder = CreateCustomNodeBuilder(node);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
 
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto optOptions = Converter::ArkValue<Opt_SheetOptions>(Ark_Empty());
     checkBuilderEvent.reset();
     EXPECT_FALSE(checkBuilderEvent.has_value());
@@ -221,7 +221,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetIsShowTest, TestSize.L
     EXPECT_TRUE(checkBuilderEvent.has_value());
     EXPECT_EQ(checkBuilderEvent->resourceId, EXPECTED_CONTEXT_ID);
 
-    arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_FALSE);
+    arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_FALSE);
     checkBuilderEvent.reset();
     EXPECT_FALSE(checkBuilderEvent.has_value());
     modifier_->setBindSheet(node_, &arkShow, &customBuilder, &optOptions);
@@ -245,7 +245,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnAppearTest, TestSize
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     auto optOnAppearCallback = CreateOnAppearCallback<Opt_Callback_Void, Callback_Void>(frameNode);
     // parameters
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions { .onAppear = optOnAppearCallback,
         .onWillAppear = Converter::ArkValue<Opt_Callback_Void>(Ark_Empty()) };
     auto optOptions = Converter::ArkValue<Opt_SheetOptions>(arkOptions);
@@ -285,7 +285,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnDisAppearTest, TestS
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     auto optOnAppearCallback = CreateOnAppearCallback<Opt_Callback_Void, Callback_Void>(frameNode);
     // parameters
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions {
         .onDisappear = optOnAppearCallback,
     };
@@ -329,7 +329,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnWillAppearTest, Test
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     auto optOnAppearCallback = CreateOnAppearCallback<Opt_Callback_Void, Callback_Void>(frameNode);
     // parameters
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions {
         .onWillAppear = optOnAppearCallback,
     };
@@ -369,7 +369,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnWillDisAppearTest, T
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     auto optOnAppearCallback = CreateOnAppearCallback<Opt_Callback_Void, Callback_Void>(frameNode);
     // parameters
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions {
         .onWillDisappear = optOnAppearCallback,
     };
@@ -413,7 +413,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetShouldDismissTest, Tes
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     auto onDismissCallback = CreateDismissSheetVoidCallback(frameNode);
     // parameters
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions { .shouldDismiss = onDismissCallback };
     auto optOptions = Converter::ArkValue<Opt_SheetOptions>(arkOptions);
     checkBuilderEvent.reset();
@@ -455,7 +455,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetWillDismissTest, TestS
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     auto onDismissCallback = CreateDismissSheetReasonCallback(frameNode);
     // parameters
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions { .onWillDismiss = onDismissCallback };
     auto optOptions = Converter::ArkValue<Opt_SheetOptions>(arkOptions);
     checkBuilderEvent.reset();
@@ -503,7 +503,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetSpringBackTest, TestSi
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     auto onDismissCallback = CreateDismissSpringVoidCallback(frameNode);
     // parameters
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions { .onWillSpringBackWhenDismiss = onDismissCallback };
     auto optOptions = Converter::ArkValue<Opt_SheetOptions>(arkOptions);
     checkBuilderEvent.reset();
@@ -544,7 +544,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnTypeDidChangeTest, T
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     auto onChangeCallback = CreateOnChangeCallback<Opt_Callback_SheetType_Void, Ark_SheetType, SheetType>(frameNode);
     // parameters
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions { .onTypeDidChange = onChangeCallback };
     auto optOptions = Converter::ArkValue<Opt_SheetOptions>(arkOptions);
     checkBuilderEvent.reset();
@@ -587,9 +587,9 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnHeightDidChangeTest,
     EXPECT_NE(node, nullptr);
     auto builder = CreateCustomNodeBuilder(node);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
-    auto onChangeCallback = CreateOnChangeCallback<Opt_Callback_I32_Void, Ark_Int32, int32_t>(frameNode);
+    auto onChangeCallback = CreateOnChangeCallback<Opt_Callback_Number_Void, Ark_Number, int32_t>(frameNode);
     // parameters
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions { .onHeightDidChange = onChangeCallback };
     auto optOptions = Converter::ArkValue<Opt_SheetOptions>(arkOptions);
     checkBuilderEvent.reset();
@@ -634,7 +634,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnWidthDidChangeTest, 
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     auto onChangeCallback = CreateOnChangeCallback<Opt_Callback_I32_Void, Ark_Int32, int32_t>(frameNode);
     // parameters
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions { .onWidthDidChange = onChangeCallback };
     auto optOptions = Converter::ArkValue<Opt_SheetOptions>(arkOptions);
     checkBuilderEvent.reset();
@@ -679,7 +679,7 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetOnDetentsDidChangeTest
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     auto onChangeCallback = CreateOnChangeCallback<Opt_Callback_I32_Void, Ark_Int32, int32_t>(frameNode);
     // parameters
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_SheetOptions { .onDetentsDidChange = onChangeCallback };
     auto optOptions = Converter::ArkValue<Opt_SheetOptions>(arkOptions);
     checkBuilderEvent.reset();

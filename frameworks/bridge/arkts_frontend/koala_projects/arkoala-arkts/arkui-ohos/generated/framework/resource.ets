@@ -16,13 +16,12 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { Resource } from "global.resource"
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { TypeChecker } from "#components"
-import { CallbackTransformer } from "./../CallbackTransformer"
-export class Resource_serializer {
-    public static write(buffer: SerializerBase, value: Resource): void {
+import { Resource as global_resource_Resource } from 'global.resource'
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { CallbackTransformer } from './../CallbackTransformer'
+export class global_resource_Resource_serializer {
+    public static write(buffer: SerializerBase, value: global_resource_Resource): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForBundleName  = value.bundleName
         valueSerializer.writeString(valueHolderForBundleName)
@@ -36,7 +35,7 @@ export class Resource_serializer {
             const valueHolderForParamsTmpValue  = valueHolderForParams!
             valueSerializer.writeInt32((valueHolderForParamsTmpValue.length).toInt())
             for (let valueHolderForParamsTmpValueCounterI = 0; valueHolderForParamsTmpValueCounterI < valueHolderForParamsTmpValue.length; valueHolderForParamsTmpValueCounterI++) {
-                const valueHolderForParamsTmpValueTmpElement : string | int32 | int64 | double | Resource = valueHolderForParamsTmpValue[valueHolderForParamsTmpValueCounterI]
+                const valueHolderForParamsTmpValueTmpElement : string | int32 | int64 | double | global_resource_Resource = valueHolderForParamsTmpValue[valueHolderForParamsTmpValueCounterI]
                 if (valueHolderForParamsTmpValueTmpElement instanceof string) {
                     valueSerializer.writeInt8((0).toByte())
                     const valueHolderForParamsTmpValueTmpElementForIdx0  = valueHolderForParamsTmpValueTmpElement as string
@@ -53,10 +52,10 @@ export class Resource_serializer {
                     valueSerializer.writeInt8((3).toByte())
                     const valueHolderForParamsTmpValueTmpElementForIdx3  = valueHolderForParamsTmpValueTmpElement as double
                     valueSerializer.writeFloat64(valueHolderForParamsTmpValueTmpElementForIdx3)
-                } else if (valueHolderForParamsTmpValueTmpElement instanceof Resource) {
+                } else if (valueHolderForParamsTmpValueTmpElement instanceof global_resource_Resource) {
                     valueSerializer.writeInt8((4).toByte())
-                    const valueHolderForParamsTmpValueTmpElementForIdx4  = valueHolderForParamsTmpValueTmpElement as Resource
-                    Resource_serializer.write(valueSerializer, valueHolderForParamsTmpValueTmpElementForIdx4)
+                    const valueHolderForParamsTmpValueTmpElementForIdx4  = valueHolderForParamsTmpValueTmpElement as global_resource_Resource
+                    global_resource_Resource_serializer.write(valueSerializer, valueHolderForParamsTmpValueTmpElementForIdx4)
                 }
             }
         } else {
@@ -71,44 +70,44 @@ export class Resource_serializer {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
-    public static read(buffer: DeserializerBase): Resource {
+    public static read(buffer: DeserializerBase): global_resource_Resource {
         let valueDeserializer : DeserializerBase = buffer
         const bundleNameTmpResult : string = (valueDeserializer.readString() as string)
         const moduleNameTmpResult : string = (valueDeserializer.readString() as string)
         const idTmpResult : int64 = valueDeserializer.readInt64()
-        const paramsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let paramsTmpBuf : Array<string | int32 | int64 | double | Resource> | undefined = undefined
+        const paramsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let paramsTmpBuf : Array<string | int32 | int64 | double | global_resource_Resource> | undefined = undefined
         if ((paramsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const paramsTmpBuf_Length : int32 = valueDeserializer.readInt32()
-            let paramsTmpBuf_ : Array<string | int32 | int64 | double | Resource> = new Array<string | int32 | int64 | double | Resource>(paramsTmpBuf_Length)
-            for (let paramsTmpBuf_BufCounterI = 0; paramsTmpBuf_BufCounterI < paramsTmpBuf_Length; paramsTmpBuf_BufCounterI++) {
-                const paramsTmpBuf_TempBufUnionSelector : int32 = valueDeserializer.readInt8()
-                let paramsTmpBuf_TempBuf : string | int32 | int64 | double | Resource | undefined
-                if (paramsTmpBuf_TempBufUnionSelector == (0).toChar()) {
-                    paramsTmpBuf_TempBuf = (valueDeserializer.readString() as string)
-                } else if (paramsTmpBuf_TempBufUnionSelector == (1).toChar()) {
-                    paramsTmpBuf_TempBuf = valueDeserializer.readInt32()
-                } else if (paramsTmpBuf_TempBufUnionSelector == (2).toChar()) {
-                    paramsTmpBuf_TempBuf = valueDeserializer.readInt64()
-                } else if (paramsTmpBuf_TempBufUnionSelector == (3).toChar()) {
-                    paramsTmpBuf_TempBuf = valueDeserializer.readFloat64()
-                } else if (paramsTmpBuf_TempBufUnionSelector == (4).toChar()) {
-                    paramsTmpBuf_TempBuf = Resource_serializer.read(valueDeserializer)
+            const paramsTmpBufOptLength : int32 = valueDeserializer.readInt32()
+            let paramsTmpBufOpt : Array<string | int32 | int64 | double | global_resource_Resource> = new Array<string | int32 | int64 | double | global_resource_Resource>(paramsTmpBufOptLength)
+            for (let paramsTmpBufOptBufCounterI = 0; paramsTmpBufOptBufCounterI < paramsTmpBufOptLength; paramsTmpBufOptBufCounterI++) {
+                const paramsTmpBufOptTempBufUnionSelector : int32 = valueDeserializer.readInt8()
+                let paramsTmpBufOptTempBuf : string | int32 | int64 | double | global_resource_Resource | undefined
+                if (paramsTmpBufOptTempBufUnionSelector == (0).toByte()) {
+                    paramsTmpBufOptTempBuf = (valueDeserializer.readString() as string)
+                } else if (paramsTmpBufOptTempBufUnionSelector == (1).toByte()) {
+                    paramsTmpBufOptTempBuf = valueDeserializer.readInt32()
+                } else if (paramsTmpBufOptTempBufUnionSelector == (2).toByte()) {
+                    paramsTmpBufOptTempBuf = valueDeserializer.readInt64()
+                } else if (paramsTmpBufOptTempBufUnionSelector == (3).toByte()) {
+                    paramsTmpBufOptTempBuf = valueDeserializer.readFloat64()
+                } else if (paramsTmpBufOptTempBufUnionSelector == (4).toByte()) {
+                    paramsTmpBufOptTempBuf = global_resource_Resource_serializer.read(valueDeserializer)
                 } else {
-                    throw new Error("One of the branches for paramsTmpBuf_TempBuf has to be chosen through deserialisation.")
+                    throw new Error('One of the branches for paramsTmpBufOptTempBuf has to be chosen through deserialisation.')
                 }
-                paramsTmpBuf_[paramsTmpBuf_BufCounterI] = (paramsTmpBuf_TempBuf as string | int32 | int64 | double | Resource)
+                paramsTmpBufOpt[paramsTmpBufOptBufCounterI] = (paramsTmpBufOptTempBuf as string | int32 | int64 | double | global_resource_Resource)
             }
-            paramsTmpBuf = paramsTmpBuf_
+            paramsTmpBuf = paramsTmpBufOpt
         }
-        const paramsTmpResult : Array<string | int32 | int64 | double | Resource> | undefined = paramsTmpBuf
-        const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const paramsTmpResult : Array<string | int32 | int64 | double | global_resource_Resource> | undefined = paramsTmpBuf
+        const typeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let typeTmpBuf : int32 | undefined = undefined
         if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             typeTmpBuf = valueDeserializer.readInt32()
         }
         const typeTmpResult : int32 | undefined = typeTmpBuf
-        let value : Resource = ({bundleName: bundleNameTmpResult, moduleName: moduleNameTmpResult, id: idTmpResult, params: paramsTmpResult, type: typeTmpResult} as Resource)
+        let value : global_resource_Resource = ({bundleName: bundleNameTmpResult, moduleName: moduleNameTmpResult, id: idTmpResult, params: paramsTmpResult, type: typeTmpResult} as global_resource_Resource)
         return value
     }
 }

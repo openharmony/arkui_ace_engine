@@ -16,57 +16,406 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { extractors, AttributeModifier, hookTabContentAttributeModifier, AttributeUpdater } from "#handwritten"
-import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { ComponentContent_serializer } from "./../ComponentContent"
-import { Resource_serializer } from "./../framework/resource"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ComponentContent } from "arkui.ComponentContent"
-import { Resource } from "global.resource"
-import { CustomBuilder } from "./builder"
-import { VoidCallback, ResourceColor, Length, ResourceStr, Font, Padding, Dimension, LocalizedPadding, Font_serializer, Padding_serializer, LocalizedPadding_serializer } from "./units"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { Color, TextOverflow, TextHeightAdaptivePolicy, VerticalAlign } from "./enums"
-import { TabContentModifier } from "./../TabContentModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
-export class TabBarSymbolInternal {
-    public static fromPtr(ptr: KPointer): TabBarSymbol {
-        return new TabBarSymbol(ptr)
+import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { Padding_serializer, LocalizedPadding_serializer, ResourceStr as arkui_component_units_ResourceStr, Resource as arkui_component_units_Resource, Padding, Dimension, LocalizedPadding, VoidCallback, ResourceColor, Length, Font as arkui_component_units_Font, arkui_component_units_Font_serializer } from './units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { VerticalAlign, Color as arkui_component_enums_Color, TextOverflow, TextHeightAdaptivePolicy } from './enums'
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { ComponentContent_serializer } from './../framework/ComponentContent'
+import { extractors, AttributeModifier, hookTabContentAttributeModifier, AttributeUpdater } from '#handwritten'
+import { ComponentContent } from '@arkui.ComponentContent'
+import { SymbolGlyphModifier_serializer } from './../framework/SymbolGlyphModifier'
+import { SymbolGlyphModifier } from '@arkui.SymbolGlyphModifier'
+import { ArkThemeScopeManager } from '#arktheme'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { CustomBuilder } from './builder'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { TabContentModifier } from './../TabContentModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+export class BottomTabBarStyleInternal {
+    public static fromPtr(ptr: KPointer): BottomTabBarStyle {
+        return new BottomTabBarStyle(MaterializedBaseTag.NOP, ptr)
     }
 }
-export class TabBarSymbol implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+export class BottomTabBarStyle implements MaterializedBase {
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get normal(): SymbolGlyphModifier {
-        return this.getNormal()
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, BottomTabBarStyle.getFinalizer())
     }
-    set normal(normal: SymbolGlyphModifier) {
-        this.setNormal(normal)
+    constructor(icon: arkui_component_units_ResourceStr | TabBarSymbol, text: arkui_component_units_ResourceStr) {
+        this(MaterializedBaseTag.NOP, BottomTabBarStyle.construct(icon, text))
     }
-    get selected(): SymbolGlyphModifier | undefined {
-        return this.getSelected()
+    static construct(icon: arkui_component_units_ResourceStr | TabBarSymbol, text: arkui_component_units_ResourceStr): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (icon instanceof arkui_component_units_ResourceStr) {
+            thisSerializer.writeInt8((0).toByte())
+            const iconForIdx0  = icon as arkui_component_units_ResourceStr
+            if (iconForIdx0 instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const iconForIdx0ForIdx0  = iconForIdx0 as string
+                thisSerializer.writeString(iconForIdx0ForIdx0)
+            } else if (iconForIdx0 instanceof arkui_component_units_Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const iconForIdx0ForIdx1  = iconForIdx0 as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, iconForIdx0ForIdx1)
+            }
+        } else if (icon instanceof TabBarSymbol) {
+            thisSerializer.writeInt8((1).toByte())
+            const iconForIdx1  = icon as TabBarSymbol
+            TabBarSymbol_serializer.write(thisSerializer, iconForIdx1)
+        }
+        if (text instanceof string) {
+            thisSerializer.writeInt8((0).toByte())
+            const textForIdx0  = text as string
+            thisSerializer.writeString(textForIdx0)
+        } else if (text instanceof arkui_component_units_Resource) {
+            thisSerializer.writeInt8((1).toByte())
+            const textForIdx1  = text as arkui_component_units_Resource
+            global_resource_Resource_serializer.write(thisSerializer, textForIdx1)
+        }
+        const retval  = ArkUIGeneratedNativeModule._BottomTabBarStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
     }
-    set selected(selected: SymbolGlyphModifier | undefined) {
-        const selected_NonNull  = (selected as SymbolGlyphModifier | undefined)
-        this.setSelected(selected_NonNull)
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._BottomTabBarStyle_getFinalizer()
     }
-    constructor(peerPtr: KPointer) {
+    public static of(icon: arkui_component_units_ResourceStr | TabBarSymbol, text: arkui_component_units_ResourceStr): BottomTabBarStyle {
+        const icon_casted = icon as (arkui_component_units_ResourceStr | TabBarSymbol)
+        const text_casted = text as (arkui_component_units_ResourceStr)
+        return BottomTabBarStyle.of_serialize(icon_casted, text_casted)
+    }
+    private static of_serialize(icon: arkui_component_units_ResourceStr | TabBarSymbol, text: arkui_component_units_ResourceStr): BottomTabBarStyle {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (icon instanceof arkui_component_units_ResourceStr) {
+            thisSerializer.writeInt8((0).toByte())
+            const iconForIdx0  = icon as arkui_component_units_ResourceStr
+            if (iconForIdx0 instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const iconForIdx0ForIdx0  = iconForIdx0 as string
+                thisSerializer.writeString(iconForIdx0ForIdx0)
+            } else if (iconForIdx0 instanceof arkui_component_units_Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const iconForIdx0ForIdx1  = iconForIdx0 as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, iconForIdx0ForIdx1)
+            }
+        } else if (icon instanceof TabBarSymbol) {
+            thisSerializer.writeInt8((1).toByte())
+            const iconForIdx1  = icon as TabBarSymbol
+            TabBarSymbol_serializer.write(thisSerializer, iconForIdx1)
+        }
+        if (text instanceof string) {
+            thisSerializer.writeInt8((0).toByte())
+            const textForIdx0  = text as string
+            thisSerializer.writeString(textForIdx0)
+        } else if (text instanceof arkui_component_units_Resource) {
+            thisSerializer.writeInt8((1).toByte())
+            const textForIdx1  = text as arkui_component_units_Resource
+            global_resource_Resource_serializer.write(thisSerializer, textForIdx1)
+        }
+        const retval  = ArkUIGeneratedNativeModule._BottomTabBarStyle_of(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : BottomTabBarStyle = BottomTabBarStyleInternal.fromPtr(retval)
+        return obj
+    }
+    public labelStyle(style: TabBarLabelStyle): BottomTabBarStyle {
+        const style_casted = style as (TabBarLabelStyle)
+        return this.labelStyle_serialize(style_casted)
+    }
+    public padding(value: Padding | Dimension | LocalizedPadding): BottomTabBarStyle {
+        const value_casted = value as (Padding | Dimension | LocalizedPadding)
+        return this.padding_serialize(value_casted)
+    }
+    public layoutMode(value: LayoutMode): BottomTabBarStyle {
+        const value_casted = value as (LayoutMode)
+        return this.layoutMode_serialize(value_casted)
+    }
+    public verticalAlign(value: VerticalAlign): BottomTabBarStyle {
+        const value_casted = value as (VerticalAlign)
+        return this.verticalAlign_serialize(value_casted)
+    }
+    public symmetricExtensible(value: boolean): BottomTabBarStyle {
+        const value_casted = value as (boolean)
+        return this.symmetricExtensible_serialize(value_casted)
+    }
+    public id(value: string): BottomTabBarStyle {
+        const value_casted = value as (string)
+        return this.id_serialize(value_casted)
+    }
+    public iconStyle(style: TabBarIconStyle): BottomTabBarStyle {
+        const style_casted = style as (TabBarIconStyle)
+        return this.iconStyle_serialize(style_casted)
+    }
+    private labelStyle_serialize(style: TabBarLabelStyle): BottomTabBarStyle {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TabBarLabelStyle_serializer.write(thisSerializer, style)
+        const retval  = ArkUIGeneratedNativeModule._BottomTabBarStyle_labelStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : BottomTabBarStyle = BottomTabBarStyleInternal.fromPtr(retval)
+        return obj
+    }
+    private padding_serialize(value: Padding | Dimension | LocalizedPadding): BottomTabBarStyle {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value instanceof Padding) {
+            thisSerializer.writeInt8((0).toByte())
+            const valueForIdx0  = value as Padding
+            Padding_serializer.write(thisSerializer, valueForIdx0)
+        } else if (value instanceof Dimension) {
+            thisSerializer.writeInt8((1).toByte())
+            const valueForIdx1  = value as Dimension
+            if (valueForIdx1 instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueForIdx1ForIdx0  = valueForIdx1 as string
+                thisSerializer.writeString(valueForIdx1ForIdx0)
+            } else if (valueForIdx1 instanceof number) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueForIdx1ForIdx1  = valueForIdx1 as number
+                thisSerializer.writeNumber(valueForIdx1ForIdx1)
+            } else if (valueForIdx1 instanceof global_resource_Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueForIdx1ForIdx2  = valueForIdx1 as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueForIdx1ForIdx2)
+            }
+        } else if (value instanceof LocalizedPadding) {
+            thisSerializer.writeInt8((2).toByte())
+            const valueForIdx2  = value as LocalizedPadding
+            LocalizedPadding_serializer.write(thisSerializer, valueForIdx2)
+        }
+        const retval  = ArkUIGeneratedNativeModule._BottomTabBarStyle_padding(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : BottomTabBarStyle = BottomTabBarStyleInternal.fromPtr(retval)
+        return obj
+    }
+    private layoutMode_serialize(value: LayoutMode): BottomTabBarStyle {
+        const retval  = ArkUIGeneratedNativeModule._BottomTabBarStyle_layoutMode(this.peer!.ptr, value.valueOf())
+        const obj : BottomTabBarStyle = BottomTabBarStyleInternal.fromPtr(retval)
+        return obj
+    }
+    private verticalAlign_serialize(value: VerticalAlign): BottomTabBarStyle {
+        const retval  = ArkUIGeneratedNativeModule._BottomTabBarStyle_verticalAlign(this.peer!.ptr, value.valueOf())
+        const obj : BottomTabBarStyle = BottomTabBarStyleInternal.fromPtr(retval)
+        return obj
+    }
+    private symmetricExtensible_serialize(value: boolean): BottomTabBarStyle {
+        const retval  = ArkUIGeneratedNativeModule._BottomTabBarStyle_symmetricExtensible(this.peer!.ptr, value ? true : false)
+        const obj : BottomTabBarStyle = BottomTabBarStyleInternal.fromPtr(retval)
+        return obj
+    }
+    private id_serialize(value: string): BottomTabBarStyle {
+        const retval  = ArkUIGeneratedNativeModule._BottomTabBarStyle_id(this.peer!.ptr, value)
+        const obj : BottomTabBarStyle = BottomTabBarStyleInternal.fromPtr(retval)
+        return obj
+    }
+    private iconStyle_serialize(style: TabBarIconStyle): BottomTabBarStyle {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TabBarIconStyle_serializer.write(thisSerializer, style)
+        const retval  = ArkUIGeneratedNativeModule._BottomTabBarStyle_iconStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : BottomTabBarStyle = BottomTabBarStyleInternal.fromPtr(retval)
+        return obj
+    }
+}
+export class SubTabBarStyleInternal {
+    public static fromPtr(ptr: KPointer): SubTabBarStyle {
+        return new SubTabBarStyle(MaterializedBaseTag.NOP, ptr)
+    }
+}
+export class SubTabBarStyle implements MaterializedBase {
+    public peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, SubTabBarStyle.getFinalizer())
+    }
+    constructor(content: arkui_component_units_ResourceStr | ComponentContent<undefined>) {
+        this(MaterializedBaseTag.NOP, SubTabBarStyle.construct(content))
+    }
+    static construct(content: arkui_component_units_ResourceStr | ComponentContent<undefined>): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (content instanceof arkui_component_units_ResourceStr) {
+            thisSerializer.writeInt8((0).toByte())
+            const contentForIdx0  = content as arkui_component_units_ResourceStr
+            if (contentForIdx0 instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const contentForIdx0ForIdx0  = contentForIdx0 as string
+                thisSerializer.writeString(contentForIdx0ForIdx0)
+            } else if (contentForIdx0 instanceof arkui_component_units_Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const contentForIdx0ForIdx1  = contentForIdx0 as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, contentForIdx0ForIdx1)
+            }
+        } else if (content instanceof ComponentContent) {
+            thisSerializer.writeInt8((1).toByte())
+            const contentForIdx1  = content as ComponentContent
+            ComponentContent_serializer.write(thisSerializer, contentForIdx1)
+        }
+        const retval  = ArkUIGeneratedNativeModule._SubTabBarStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._SubTabBarStyle_getFinalizer()
+    }
+    public static of(content: arkui_component_units_ResourceStr | ComponentContent<undefined>): SubTabBarStyle {
+        const content_casted = content as (arkui_component_units_ResourceStr | ComponentContent<undefined>)
+        return SubTabBarStyle.of_serialize(content_casted)
+    }
+    private static of_serialize(content: arkui_component_units_ResourceStr | ComponentContent<undefined>): SubTabBarStyle {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (content instanceof arkui_component_units_ResourceStr) {
+            thisSerializer.writeInt8((0).toByte())
+            const contentForIdx0  = content as arkui_component_units_ResourceStr
+            if (contentForIdx0 instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const contentForIdx0ForIdx0  = contentForIdx0 as string
+                thisSerializer.writeString(contentForIdx0ForIdx0)
+            } else if (contentForIdx0 instanceof arkui_component_units_Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const contentForIdx0ForIdx1  = contentForIdx0 as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, contentForIdx0ForIdx1)
+            }
+        } else if (content instanceof ComponentContent) {
+            thisSerializer.writeInt8((1).toByte())
+            const contentForIdx1  = content as ComponentContent
+            ComponentContent_serializer.write(thisSerializer, contentForIdx1)
+        }
+        const retval  = ArkUIGeneratedNativeModule._SubTabBarStyle_of(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : SubTabBarStyle = SubTabBarStyleInternal.fromPtr(retval)
+        return obj
+    }
+    public indicator(style: SubTabBarIndicatorStyle): SubTabBarStyle {
+        const style_casted = style as (SubTabBarIndicatorStyle)
+        return this.indicator_serialize(style_casted)
+    }
+    public selectedMode(value: SelectedMode): SubTabBarStyle {
+        const value_casted = value as (SelectedMode)
+        return this.selectedMode_serialize(value_casted)
+    }
+    public board(value: BoardStyle): SubTabBarStyle {
+        const value_casted = value as (BoardStyle)
+        return this.board_serialize(value_casted)
+    }
+    public labelStyle(style: TabBarLabelStyle): SubTabBarStyle {
+        const style_casted = style as (TabBarLabelStyle)
+        return this.labelStyle_serialize(style_casted)
+    }
+    public padding(value: Padding | Dimension): SubTabBarStyle {
+        const value_casted = value as (Padding | Dimension)
+        return this.padding0_serialize(value_casted)
+    }
+    public padding(padding: LocalizedPadding): SubTabBarStyle {
+        const padding_casted = padding as (LocalizedPadding)
+        return this.padding1_serialize(padding_casted)
+    }
+    public id(value: string): SubTabBarStyle {
+        const value_casted = value as (string)
+        return this.id_serialize(value_casted)
+    }
+    private indicator_serialize(style: SubTabBarIndicatorStyle): SubTabBarStyle {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        SubTabBarIndicatorStyle_serializer.write(thisSerializer, style)
+        const retval  = ArkUIGeneratedNativeModule._SubTabBarStyle_indicator(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : SubTabBarStyle = SubTabBarStyleInternal.fromPtr(retval)
+        return obj
+    }
+    private selectedMode_serialize(value: SelectedMode): SubTabBarStyle {
+        const retval  = ArkUIGeneratedNativeModule._SubTabBarStyle_selectedMode(this.peer!.ptr, value.valueOf())
+        const obj : SubTabBarStyle = SubTabBarStyleInternal.fromPtr(retval)
+        return obj
+    }
+    private board_serialize(value: BoardStyle): SubTabBarStyle {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        BoardStyle_serializer.write(thisSerializer, value)
+        const retval  = ArkUIGeneratedNativeModule._SubTabBarStyle_board(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : SubTabBarStyle = SubTabBarStyleInternal.fromPtr(retval)
+        return obj
+    }
+    private labelStyle_serialize(style: TabBarLabelStyle): SubTabBarStyle {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        TabBarLabelStyle_serializer.write(thisSerializer, style)
+        const retval  = ArkUIGeneratedNativeModule._SubTabBarStyle_labelStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : SubTabBarStyle = SubTabBarStyleInternal.fromPtr(retval)
+        return obj
+    }
+    private padding0_serialize(value: Padding | Dimension): SubTabBarStyle {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value instanceof Padding) {
+            thisSerializer.writeInt8((0).toByte())
+            const valueForIdx0  = value as Padding
+            Padding_serializer.write(thisSerializer, valueForIdx0)
+        } else if (value instanceof Dimension) {
+            thisSerializer.writeInt8((1).toByte())
+            const valueForIdx1  = value as Dimension
+            if (valueForIdx1 instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueForIdx1ForIdx0  = valueForIdx1 as string
+                thisSerializer.writeString(valueForIdx1ForIdx0)
+            } else if (valueForIdx1 instanceof number) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueForIdx1ForIdx1  = valueForIdx1 as number
+                thisSerializer.writeNumber(valueForIdx1ForIdx1)
+            } else if (valueForIdx1 instanceof global_resource_Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueForIdx1ForIdx2  = valueForIdx1 as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueForIdx1ForIdx2)
+            }
+        }
+        const retval  = ArkUIGeneratedNativeModule._SubTabBarStyle_padding0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : SubTabBarStyle = SubTabBarStyleInternal.fromPtr(retval)
+        return obj
+    }
+    private padding1_serialize(padding: LocalizedPadding): SubTabBarStyle {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        LocalizedPadding_serializer.write(thisSerializer, padding)
+        const retval  = ArkUIGeneratedNativeModule._SubTabBarStyle_padding1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : SubTabBarStyle = SubTabBarStyleInternal.fromPtr(retval)
+        return obj
+    }
+    private id_serialize(value: string): SubTabBarStyle {
+        const retval  = ArkUIGeneratedNativeModule._SubTabBarStyle_id(this.peer!.ptr, value)
+        const obj : SubTabBarStyle = SubTabBarStyleInternal.fromPtr(retval)
+        return obj
+    }
+}
+export class TabBarSymbolInternal {
+    public static fromPtr(ptr: KPointer): TabBarSymbol {
+        return new TabBarSymbol(MaterializedBaseTag.NOP, ptr)
+    }
+}
+export class TabBarSymbol implements MaterializedBase {
+    public peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    public normal: SymbolGlyphModifier
+    public selected?: SymbolGlyphModifier | undefined
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TabBarSymbol.getFinalizer())
+        this.normal = this.getNormal()
+        this.selected = this.getSelected()
     }
     constructor() {
-        this(TabBarSymbol.construct())
+        this(MaterializedBaseTag.NOP, TabBarSymbol.construct())
+        this.normal = this.getNormal()
+        this.selected = this.getSelected()
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._TabBarSymbol_construct()
@@ -102,7 +451,7 @@ export class TabBarSymbol implements MaterializedBase {
     private getSelected_serialize(): SymbolGlyphModifier | undefined {
         const retval  = ArkUIGeneratedNativeModule._TabBarSymbol_getSelected(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
         let buffer : SymbolGlyphModifier | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
             buffer = (SymbolGlyphModifier_serializer.read(retvalDeserializer) as SymbolGlyphModifier)
@@ -125,7 +474,7 @@ export class TabBarSymbol implements MaterializedBase {
 }
 export class ArkTabContentPeer extends ArkCommonMethodPeer {
     attributeSet?: TabContentModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkTabContentPeer {
@@ -136,9 +485,10 @@ export class ArkTabContentPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setTabContentOptionsAttribute(): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._TabContentInterface_setTabContentOptions(this.peer.ptr)
     }
-    setTabBarAttribute(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): void {
+    setTabBarAttribute(value: ComponentContent<undefined> | SubTabBarStyle | BottomTabBarStyle | string | arkui_component_units_Resource | CustomBuilder | TabBarOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -159,10 +509,10 @@ export class ArkTabContentPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx3)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((4).toByte())
-                const valueTmpValueForIdx4  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx4)
+                const valueTmpValueForIdx4  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx4)
             } else if (valueTmpValue instanceof CustomBuilder) {
                 thisSerializer.writeInt8((5).toByte())
                 const valueTmpValueForIdx5  = valueTmpValue as CustomBuilder
@@ -225,10 +575,10 @@ export interface BoardStyle {
 export interface TabBarLabelStyle {
     overflow?: TextOverflow;
     maxLines?: int32;
-    minFontSize?: double | ResourceStr;
-    maxFontSize?: double | ResourceStr;
+    minFontSize?: double | arkui_component_units_ResourceStr;
+    maxFontSize?: double | arkui_component_units_ResourceStr;
     heightAdaptivePolicy?: TextHeightAdaptivePolicy;
-    font?: Font;
+    font?: arkui_component_units_Font;
     selectedColor?: ResourceColor;
     unselectedColor?: ResourceColor;
 }
@@ -237,73 +587,49 @@ export interface TabBarIconStyle {
     unselectedColor?: ResourceColor;
 }
 export interface TabBarOptions {
-    icon?: string | Resource;
-    text?: string | Resource;
+    icon?: string | arkui_component_units_Resource;
+    text?: string | arkui_component_units_Resource;
 }
 export interface TabContentAttribute extends CommonMethod {
     setTabContentOptions(): this {
-        throw new Error("Unimplemented method setTabContentOptions")
+        throw new Error('Unimplemented method setTabContentOptions')
     }
-    tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
-        throw new Error("Unimplemented method tabBar")
+    tabBar(value: ComponentContent<undefined> | SubTabBarStyle | BottomTabBarStyle | string | arkui_component_units_Resource | CustomBuilder | TabBarOptions | undefined): this {
+        throw new Error('Unimplemented method tabBar')
     }
     onWillShow(value: VoidCallback | undefined): this {
-        throw new Error("Unimplemented method onWillShow")
+        throw new Error('Unimplemented method onWillShow')
     }
     onWillHide(value: VoidCallback | undefined): this {
-        throw new Error("Unimplemented method onWillHide")
+        throw new Error('Unimplemented method onWillHide')
     }
     attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkTabContentStyle extends ArkCommonMethodStyle implements TabContentAttribute {
-    tabBar_value?: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined
-    onWillShow_value?: VoidCallback | undefined
-    onWillHide_value?: VoidCallback | undefined
-    attributeModifier_value?: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined
-    setTabContentOptions(): this {
-        return this
-    }
-    tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
-        return this
-    }
-    onWillShow(value: VoidCallback | undefined): this {
-        return this
-    }
-    onWillHide(value: VoidCallback | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkTabContentComponent extends ArkCommonMethodComponent implements TabContentAttribute {
     getPeer(): ArkTabContentPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkTabContentPeer)
     }
     public setTabContentOptions(): this {
-        if (this.checkPriority("setTabContentOptions")) {
+        if (this.checkPriority('setTabContentOptions')) {
             this.getPeer()?.setTabContentOptionsAttribute()
             this.applyOptionsFinish('TabContentAttribute');
             return this
         }
         return this
     }
-    public tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
-        if (this.checkPriority("tabBar")) {
-            const value_casted = value as (ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined)
+    public tabBar(value: ComponentContent<undefined> | SubTabBarStyle | BottomTabBarStyle | string | arkui_component_units_Resource | CustomBuilder | TabBarOptions | undefined): this {
+        if (this.checkPriority('tabBar')) {
+            const value_casted = value as (ComponentContent<undefined> | SubTabBarStyle | BottomTabBarStyle | string | arkui_component_units_Resource | CustomBuilder | TabBarOptions | undefined)
             this.getPeer()?.setTabBarAttribute(value_casted)
             return this
         }
         return this
     }
     public onWillShow(value: VoidCallback | undefined): this {
-        if (this.checkPriority("onWillShow")) {
+        if (this.checkPriority('onWillShow')) {
             const value_casted = value as (VoidCallback | undefined)
             this.getPeer()?.setOnWillShowAttribute(value_casted)
             return this
@@ -311,7 +637,7 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public onWillHide(value: VoidCallback | undefined): this {
-        if (this.checkPriority("onWillHide")) {
+        if (this.checkPriority('onWillHide')) {
             const value_casted = value as (VoidCallback | undefined)
             this.getPeer()?.setOnWillHideAttribute(value_casted)
             return this
@@ -332,93 +658,26 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         super.applyOptionsFinish(traceName)
     }
 }
-export class SubTabBarStyle {
-    _content?: ResourceStr | ResourceStr | ComponentContent | undefined
-    _indicator?: SubTabBarIndicatorStyle | undefined
-    _selectedMode?: SelectedMode | undefined
-    _board?: BoardStyle | undefined
-    _labelStyle?: TabBarLabelStyle | undefined
-    _padding?: Padding | Dimension | LocalizedPadding | undefined
-    _id?: string | undefined
-    constructor(content: ResourceStr | ResourceStr | ComponentContent) {
-        this._content = content
+export class BottomTabBarStyle_serializer {
+    public static write(buffer: SerializerBase, value: BottomTabBarStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
     }
-    static of(content: ResourceStr | ComponentContent): SubTabBarStyle {
-        return new SubTabBarStyle(content)
-    }
-    indicator(style: SubTabBarIndicatorStyle): this {
-        this._indicator = style
-        return this
-    }
-    selectedMode(value: SelectedMode): this {
-        this._selectedMode = value
-        return this
-    }
-    board(value: BoardStyle): this {
-        this._board = value
-        return this
-    }
-    labelStyle(style: TabBarLabelStyle): this {
-        this._labelStyle = style
-        return this
-    }
-    public padding(value: Padding | Dimension): this {
-        this._padding = value
-        return this
-    }
-    public padding(value: LocalizedPadding): this {
-        this._padding = value
-        return this
-    }
-    id(value: string): this {
-        this._id = value
-        return this
+    public static read(buffer: DeserializerBase): BottomTabBarStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return BottomTabBarStyleInternal.fromPtr(ptr)
     }
 }
-export class BottomTabBarStyle {
-    _icon?: ResourceStr | TabBarSymbol | undefined
-    _text?: ResourceStr | undefined
-    _labelStyle?: TabBarLabelStyle | undefined
-    _padding?: Padding | Dimension | LocalizedPadding | undefined
-    _layoutMode?: LayoutMode | undefined
-    _verticalAlign?: VerticalAlign | undefined
-    _symmetricExtensible?: boolean | undefined
-    _id?: string | undefined
-    _iconStyle?: TabBarIconStyle | undefined
-    constructor(icon: ResourceStr | TabBarSymbol, text: ResourceStr) {
-        this._icon = icon
-        this._text = text
+export class SubTabBarStyle_serializer {
+    public static write(buffer: SerializerBase, value: SubTabBarStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
     }
-    static of(icon: ResourceStr | TabBarSymbol, text: ResourceStr): BottomTabBarStyle {
-        return new BottomTabBarStyle(icon, text)
-    }
-    labelStyle(style: TabBarLabelStyle): this {
-        this._labelStyle = style
-        return this
-    }
-    padding(value: Padding | Dimension | LocalizedPadding): this {
-        this._padding = value
-        return this
-    }
-    layoutMode(value: LayoutMode): this {
-        this._layoutMode = value
-        return this
-    }
-    verticalAlign(value: VerticalAlign): this {
-        this._verticalAlign = value
-        return this
-    }
-    symmetricExtensible(value: boolean): this {
-        this._symmetricExtensible = value
-        return this
-    }
-    id(value: string): this {
-        this._id = value
-        return this
-    }
-    iconStyle(style: TabBarIconStyle): this {
-        this._iconStyle = style
-        return this
+    public static read(buffer: DeserializerBase): SubTabBarStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return SubTabBarStyleInternal.fromPtr(ptr)
     }
 }
 export class TabBarSymbol_serializer {
@@ -439,10 +698,10 @@ export class TabBarIconStyle_serializer {
         if (valueHolderForSelectedColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSelectedColorTmpValue  = valueHolderForSelectedColor!
-            if (valueHolderForSelectedColorTmpValue instanceof Color) {
+            if (valueHolderForSelectedColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForSelectedColorTmpValueForIdx0  = valueHolderForSelectedColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx0.getOrdinal())
+                const valueHolderForSelectedColorTmpValueForIdx0  = valueHolderForSelectedColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForSelectedColorTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueHolderForSelectedColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as int32
@@ -451,10 +710,10 @@ export class TabBarIconStyle_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx2  = valueHolderForSelectedColorTmpValue as string
                 valueSerializer.writeString(valueHolderForSelectedColorTmpValueForIdx2)
-            } else if (valueHolderForSelectedColorTmpValue instanceof Resource) {
+            } else if (valueHolderForSelectedColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForSelectedColorTmpValueForIdx3  = valueHolderForSelectedColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForSelectedColorTmpValueForIdx3)
+                const valueHolderForSelectedColorTmpValueForIdx3  = valueHolderForSelectedColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForSelectedColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -463,10 +722,10 @@ export class TabBarIconStyle_serializer {
         if (valueHolderForUnselectedColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForUnselectedColorTmpValue  = valueHolderForUnselectedColor!
-            if (valueHolderForUnselectedColorTmpValue instanceof Color) {
+            if (valueHolderForUnselectedColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal())
+                const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueHolderForUnselectedColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as int32
@@ -475,10 +734,10 @@ export class TabBarIconStyle_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx2  = valueHolderForUnselectedColorTmpValue as string
                 valueSerializer.writeString(valueHolderForUnselectedColorTmpValueForIdx2)
-            } else if (valueHolderForUnselectedColorTmpValue instanceof Resource) {
+            } else if (valueHolderForUnselectedColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForUnselectedColorTmpValueForIdx3  = valueHolderForUnselectedColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForUnselectedColorTmpValueForIdx3)
+                const valueHolderForUnselectedColorTmpValueForIdx3  = valueHolderForUnselectedColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForUnselectedColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -486,42 +745,42 @@ export class TabBarIconStyle_serializer {
     }
     public static read(buffer: DeserializerBase): TabBarIconStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const selectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const selectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let selectedColorTmpBuf : ResourceColor | undefined = undefined
         if ((selectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const selectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let selectedColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (selectedColorTmpBuf_UnionSelector == (0).toChar()) {
-                selectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (selectedColorTmpBuf_UnionSelector == (1).toChar()) {
-                selectedColorTmpBuf_ = (valueDeserializer.readInt32())
-            } else if (selectedColorTmpBuf_UnionSelector == (2).toChar()) {
-                selectedColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (selectedColorTmpBuf_UnionSelector == (3).toChar()) {
-                selectedColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const selectedColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let selectedColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (selectedColorTmpBufOptUnionSelector == (0).toByte()) {
+                selectedColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (selectedColorTmpBufOptUnionSelector == (1).toByte()) {
+                selectedColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (selectedColorTmpBufOptUnionSelector == (2).toByte()) {
+                selectedColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (selectedColorTmpBufOptUnionSelector == (3).toByte()) {
+                selectedColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for selectedColorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for selectedColorTmpBufOpt has to be chosen through deserialisation.')
             }
-            selectedColorTmpBuf = (selectedColorTmpBuf_ as Color | int32 | string | Resource)
+            selectedColorTmpBuf = (selectedColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const selectedColorTmpResult : ResourceColor | undefined = selectedColorTmpBuf
-        const unselectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const unselectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let unselectedColorTmpBuf : ResourceColor | undefined = undefined
         if ((unselectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const unselectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let unselectedColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (unselectedColorTmpBuf_UnionSelector == (0).toChar()) {
-                unselectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (unselectedColorTmpBuf_UnionSelector == (1).toChar()) {
-                unselectedColorTmpBuf_ = (valueDeserializer.readInt32())
-            } else if (unselectedColorTmpBuf_UnionSelector == (2).toChar()) {
-                unselectedColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (unselectedColorTmpBuf_UnionSelector == (3).toChar()) {
-                unselectedColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const unselectedColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let unselectedColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (unselectedColorTmpBufOptUnionSelector == (0).toByte()) {
+                unselectedColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (unselectedColorTmpBufOptUnionSelector == (1).toByte()) {
+                unselectedColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (unselectedColorTmpBufOptUnionSelector == (2).toByte()) {
+                unselectedColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (unselectedColorTmpBufOptUnionSelector == (3).toByte()) {
+                unselectedColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for unselectedColorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for unselectedColorTmpBufOpt has to be chosen through deserialisation.')
             }
-            unselectedColorTmpBuf = (unselectedColorTmpBuf_ as Color | int32 | string | Resource)
+            unselectedColorTmpBuf = (unselectedColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const unselectedColorTmpResult : ResourceColor | undefined = unselectedColorTmpBuf
         let value : TabBarIconStyle = ({selectedColor: selectedColorTmpResult, unselectedColor: unselectedColorTmpResult} as TabBarIconStyle)
@@ -539,10 +798,10 @@ export class TabBarOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIconTmpValueForIdx0  = valueHolderForIconTmpValue as string
                 valueSerializer.writeString(valueHolderForIconTmpValueForIdx0)
-            } else if (valueHolderForIconTmpValue instanceof Resource) {
+            } else if (valueHolderForIconTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
+                const valueHolderForIconTmpValueForIdx1  = valueHolderForIconTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForIconTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -555,10 +814,10 @@ export class TabBarOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTextTmpValueForIdx0  = valueHolderForTextTmpValue as string
                 valueSerializer.writeString(valueHolderForTextTmpValueForIdx0)
-            } else if (valueHolderForTextTmpValue instanceof Resource) {
+            } else if (valueHolderForTextTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForTextTmpValueForIdx1  = valueHolderForTextTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx1)
+                const valueHolderForTextTmpValueForIdx1  = valueHolderForTextTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -566,36 +825,36 @@ export class TabBarOptions_serializer {
     }
     public static read(buffer: DeserializerBase): TabBarOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let iconTmpBuf : string | Resource | undefined = undefined
+        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let iconTmpBuf : string | arkui_component_units_Resource | undefined = undefined
         if ((iconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const iconTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let iconTmpBuf_ : string | Resource | undefined
-            if (iconTmpBuf_UnionSelector == (0).toChar()) {
-                iconTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (iconTmpBuf_UnionSelector == (1).toChar()) {
-                iconTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const iconTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let iconTmpBufOpt : string | arkui_component_units_Resource | undefined
+            if (iconTmpBufOptUnionSelector == (0).toByte()) {
+                iconTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (iconTmpBufOptUnionSelector == (1).toByte()) {
+                iconTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for iconTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for iconTmpBufOpt has to be chosen through deserialisation.')
             }
-            iconTmpBuf = (iconTmpBuf_ as string | Resource)
+            iconTmpBuf = (iconTmpBufOpt as string | arkui_component_units_Resource)
         }
-        const iconTmpResult : string | Resource | undefined = iconTmpBuf
-        const textTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let textTmpBuf : string | Resource | undefined = undefined
+        const iconTmpResult : string | arkui_component_units_Resource | undefined = iconTmpBuf
+        const textTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let textTmpBuf : string | arkui_component_units_Resource | undefined = undefined
         if ((textTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const textTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let textTmpBuf_ : string | Resource | undefined
-            if (textTmpBuf_UnionSelector == (0).toChar()) {
-                textTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (textTmpBuf_UnionSelector == (1).toChar()) {
-                textTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const textTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let textTmpBufOpt : string | arkui_component_units_Resource | undefined
+            if (textTmpBufOptUnionSelector == (0).toByte()) {
+                textTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (textTmpBufOptUnionSelector == (1).toByte()) {
+                textTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for textTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for textTmpBufOpt has to be chosen through deserialisation.')
             }
-            textTmpBuf = (textTmpBuf_ as string | Resource)
+            textTmpBuf = (textTmpBufOpt as string | arkui_component_units_Resource)
         }
-        const textTmpResult : string | Resource | undefined = textTmpBuf
+        const textTmpResult : string | arkui_component_units_Resource | undefined = textTmpBuf
         let value : TabBarOptions = ({icon: iconTmpResult, text: textTmpResult} as TabBarOptions)
         return value
     }
@@ -615,10 +874,10 @@ export class BoardStyle_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForBorderRadiusTmpValueForIdx1)
-            } else if (valueHolderForBorderRadiusTmpValue instanceof Resource) {
+            } else if (valueHolderForBorderRadiusTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForBorderRadiusTmpValueForIdx2  = valueHolderForBorderRadiusTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx2)
+                const valueHolderForBorderRadiusTmpValueForIdx2  = valueHolderForBorderRadiusTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -626,21 +885,21 @@ export class BoardStyle_serializer {
     }
     public static read(buffer: DeserializerBase): BoardStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const borderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const borderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let borderRadiusTmpBuf : Length | undefined = undefined
         if ((borderRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const borderRadiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let borderRadiusTmpBuf_ : string | double | Resource | undefined
-            if (borderRadiusTmpBuf_UnionSelector == (0).toChar()) {
-                borderRadiusTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (borderRadiusTmpBuf_UnionSelector == (1).toChar()) {
-                borderRadiusTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (borderRadiusTmpBuf_UnionSelector == (2).toChar()) {
-                borderRadiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const borderRadiusTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let borderRadiusTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (borderRadiusTmpBufOptUnionSelector == (0).toByte()) {
+                borderRadiusTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (borderRadiusTmpBufOptUnionSelector == (1).toByte()) {
+                borderRadiusTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (borderRadiusTmpBufOptUnionSelector == (2).toByte()) {
+                borderRadiusTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for borderRadiusTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for borderRadiusTmpBufOpt has to be chosen through deserialisation.')
             }
-            borderRadiusTmpBuf = (borderRadiusTmpBuf_ as string | double | Resource)
+            borderRadiusTmpBuf = (borderRadiusTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const borderRadiusTmpResult : Length | undefined = borderRadiusTmpBuf
         let value : BoardStyle = ({borderRadius: borderRadiusTmpResult} as BoardStyle)
@@ -654,10 +913,10 @@ export class SubTabBarIndicatorStyle_serializer {
         if (valueHolderForColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
-            if (valueHolderForColorTmpValue instanceof Color) {
+            if (valueHolderForColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
+                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForColorTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
@@ -666,10 +925,10 @@ export class SubTabBarIndicatorStyle_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
-            } else if (valueHolderForColorTmpValue instanceof Resource) {
+            } else if (valueHolderForColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
+                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -686,10 +945,10 @@ export class SubTabBarIndicatorStyle_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForHeightTmpValueForIdx1)
-            } else if (valueHolderForHeightTmpValue instanceof Resource) {
+            } else if (valueHolderForHeightTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
+                const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -706,10 +965,10 @@ export class SubTabBarIndicatorStyle_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx1)
-            } else if (valueHolderForWidthTmpValue instanceof Resource) {
+            } else if (valueHolderForWidthTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
+                const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -726,10 +985,10 @@ export class SubTabBarIndicatorStyle_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx1  = valueHolderForBorderRadiusTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForBorderRadiusTmpValueForIdx1)
-            } else if (valueHolderForBorderRadiusTmpValue instanceof Resource) {
+            } else if (valueHolderForBorderRadiusTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForBorderRadiusTmpValueForIdx2  = valueHolderForBorderRadiusTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx2)
+                const valueHolderForBorderRadiusTmpValueForIdx2  = valueHolderForBorderRadiusTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -746,10 +1005,10 @@ export class SubTabBarIndicatorStyle_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMarginTopTmpValueForIdx1  = valueHolderForMarginTopTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForMarginTopTmpValueForIdx1)
-            } else if (valueHolderForMarginTopTmpValue instanceof Resource) {
+            } else if (valueHolderForMarginTopTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForMarginTopTmpValueForIdx2  = valueHolderForMarginTopTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForMarginTopTmpValueForIdx2)
+                const valueHolderForMarginTopTmpValueForIdx2  = valueHolderForMarginTopTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForMarginTopTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -757,91 +1016,91 @@ export class SubTabBarIndicatorStyle_serializer {
     }
     public static read(buffer: DeserializerBase): SubTabBarIndicatorStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readInt32())
-            } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
-                colorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const colorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let colorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (colorTmpBufOptUnionSelector == (0).toByte()) {
+                colorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (colorTmpBufOptUnionSelector == (1).toByte()) {
+                colorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (colorTmpBufOptUnionSelector == (2).toByte()) {
+                colorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (colorTmpBufOptUnionSelector == (3).toByte()) {
+                colorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for colorTmpBufOpt has to be chosen through deserialisation.')
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
+            colorTmpBuf = (colorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
-        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let heightTmpBuf : Length | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBuf_ : string | double | Resource | undefined
-            if (heightTmpBuf_UnionSelector == (0).toChar()) {
-                heightTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
-                heightTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (heightTmpBuf_UnionSelector == (2).toChar()) {
-                heightTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const heightTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (heightTmpBufOptUnionSelector == (0).toByte()) {
+                heightTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (heightTmpBufOptUnionSelector == (1).toByte()) {
+                heightTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (heightTmpBufOptUnionSelector == (2).toByte()) {
+                heightTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for heightTmpBufOpt has to be chosen through deserialisation.')
             }
-            heightTmpBuf = (heightTmpBuf_ as string | double | Resource)
+            heightTmpBuf = (heightTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const heightTmpResult : Length | undefined = heightTmpBuf
-        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let widthTmpBuf : Length | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : string | double | Resource | undefined
-            if (widthTmpBuf_UnionSelector == (0).toChar()) {
-                widthTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
-                widthTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (widthTmpBuf_UnionSelector == (2).toChar()) {
-                widthTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const widthTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (widthTmpBufOptUnionSelector == (0).toByte()) {
+                widthTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (widthTmpBufOptUnionSelector == (1).toByte()) {
+                widthTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (widthTmpBufOptUnionSelector == (2).toByte()) {
+                widthTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for widthTmpBufOpt has to be chosen through deserialisation.')
             }
-            widthTmpBuf = (widthTmpBuf_ as string | double | Resource)
+            widthTmpBuf = (widthTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const widthTmpResult : Length | undefined = widthTmpBuf
-        const borderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const borderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let borderRadiusTmpBuf : Length | undefined = undefined
         if ((borderRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const borderRadiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let borderRadiusTmpBuf_ : string | double | Resource | undefined
-            if (borderRadiusTmpBuf_UnionSelector == (0).toChar()) {
-                borderRadiusTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (borderRadiusTmpBuf_UnionSelector == (1).toChar()) {
-                borderRadiusTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (borderRadiusTmpBuf_UnionSelector == (2).toChar()) {
-                borderRadiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const borderRadiusTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let borderRadiusTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (borderRadiusTmpBufOptUnionSelector == (0).toByte()) {
+                borderRadiusTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (borderRadiusTmpBufOptUnionSelector == (1).toByte()) {
+                borderRadiusTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (borderRadiusTmpBufOptUnionSelector == (2).toByte()) {
+                borderRadiusTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for borderRadiusTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for borderRadiusTmpBufOpt has to be chosen through deserialisation.')
             }
-            borderRadiusTmpBuf = (borderRadiusTmpBuf_ as string | double | Resource)
+            borderRadiusTmpBuf = (borderRadiusTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const borderRadiusTmpResult : Length | undefined = borderRadiusTmpBuf
-        const marginTopTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const marginTopTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let marginTopTmpBuf : Length | undefined = undefined
         if ((marginTopTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const marginTopTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let marginTopTmpBuf_ : string | double | Resource | undefined
-            if (marginTopTmpBuf_UnionSelector == (0).toChar()) {
-                marginTopTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (marginTopTmpBuf_UnionSelector == (1).toChar()) {
-                marginTopTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (marginTopTmpBuf_UnionSelector == (2).toChar()) {
-                marginTopTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const marginTopTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let marginTopTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (marginTopTmpBufOptUnionSelector == (0).toByte()) {
+                marginTopTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (marginTopTmpBufOptUnionSelector == (1).toByte()) {
+                marginTopTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (marginTopTmpBufOptUnionSelector == (2).toByte()) {
+                marginTopTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for marginTopTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for marginTopTmpBufOpt has to be chosen through deserialisation.')
             }
-            marginTopTmpBuf = (marginTopTmpBuf_ as string | double | Resource)
+            marginTopTmpBuf = (marginTopTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const marginTopTmpResult : Length | undefined = marginTopTmpBuf
         let value : SubTabBarIndicatorStyle = ({color: colorTmpResult, height: heightTmpResult, width: widthTmpResult, borderRadius: borderRadiusTmpResult, marginTop: marginTopTmpResult} as SubTabBarIndicatorStyle)
@@ -875,17 +1134,17 @@ export class TabBarLabelStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMinFontSizeTmpValueForIdx0  = valueHolderForMinFontSizeTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForMinFontSizeTmpValueForIdx0)
-            } else if (valueHolderForMinFontSizeTmpValue instanceof ResourceStr) {
+            } else if (valueHolderForMinFontSizeTmpValue instanceof arkui_component_units_ResourceStr) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForMinFontSizeTmpValueForIdx1  = valueHolderForMinFontSizeTmpValue as ResourceStr
+                const valueHolderForMinFontSizeTmpValueForIdx1  = valueHolderForMinFontSizeTmpValue as arkui_component_units_ResourceStr
                 if (valueHolderForMinFontSizeTmpValueForIdx1 instanceof string) {
                     valueSerializer.writeInt8((0).toByte())
                     const valueHolderForMinFontSizeTmpValueForIdx1ForIdx0  = valueHolderForMinFontSizeTmpValueForIdx1 as string
                     valueSerializer.writeString(valueHolderForMinFontSizeTmpValueForIdx1ForIdx0)
-                } else if (valueHolderForMinFontSizeTmpValueForIdx1 instanceof Resource) {
+                } else if (valueHolderForMinFontSizeTmpValueForIdx1 instanceof arkui_component_units_Resource) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForMinFontSizeTmpValueForIdx1ForIdx1  = valueHolderForMinFontSizeTmpValueForIdx1 as Resource
-                    Resource_serializer.write(valueSerializer, valueHolderForMinFontSizeTmpValueForIdx1ForIdx1)
+                    const valueHolderForMinFontSizeTmpValueForIdx1ForIdx1  = valueHolderForMinFontSizeTmpValueForIdx1 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(valueSerializer, valueHolderForMinFontSizeTmpValueForIdx1ForIdx1)
                 }
             }
         } else {
@@ -899,17 +1158,17 @@ export class TabBarLabelStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMaxFontSizeTmpValueForIdx0  = valueHolderForMaxFontSizeTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForMaxFontSizeTmpValueForIdx0)
-            } else if (valueHolderForMaxFontSizeTmpValue instanceof ResourceStr) {
+            } else if (valueHolderForMaxFontSizeTmpValue instanceof arkui_component_units_ResourceStr) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForMaxFontSizeTmpValueForIdx1  = valueHolderForMaxFontSizeTmpValue as ResourceStr
+                const valueHolderForMaxFontSizeTmpValueForIdx1  = valueHolderForMaxFontSizeTmpValue as arkui_component_units_ResourceStr
                 if (valueHolderForMaxFontSizeTmpValueForIdx1 instanceof string) {
                     valueSerializer.writeInt8((0).toByte())
                     const valueHolderForMaxFontSizeTmpValueForIdx1ForIdx0  = valueHolderForMaxFontSizeTmpValueForIdx1 as string
                     valueSerializer.writeString(valueHolderForMaxFontSizeTmpValueForIdx1ForIdx0)
-                } else if (valueHolderForMaxFontSizeTmpValueForIdx1 instanceof Resource) {
+                } else if (valueHolderForMaxFontSizeTmpValueForIdx1 instanceof arkui_component_units_Resource) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForMaxFontSizeTmpValueForIdx1ForIdx1  = valueHolderForMaxFontSizeTmpValueForIdx1 as Resource
-                    Resource_serializer.write(valueSerializer, valueHolderForMaxFontSizeTmpValueForIdx1ForIdx1)
+                    const valueHolderForMaxFontSizeTmpValueForIdx1ForIdx1  = valueHolderForMaxFontSizeTmpValueForIdx1 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(valueSerializer, valueHolderForMaxFontSizeTmpValueForIdx1ForIdx1)
                 }
             }
         } else {
@@ -927,7 +1186,7 @@ export class TabBarLabelStyle_serializer {
         if (valueHolderForFont !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontTmpValue  = valueHolderForFont!
-            Font_serializer.write(valueSerializer, valueHolderForFontTmpValue)
+            arkui_component_units_Font_serializer.write(valueSerializer, valueHolderForFontTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -935,10 +1194,10 @@ export class TabBarLabelStyle_serializer {
         if (valueHolderForSelectedColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSelectedColorTmpValue  = valueHolderForSelectedColor!
-            if (valueHolderForSelectedColorTmpValue instanceof Color) {
+            if (valueHolderForSelectedColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForSelectedColorTmpValueForIdx0  = valueHolderForSelectedColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx0.getOrdinal())
+                const valueHolderForSelectedColorTmpValueForIdx0  = valueHolderForSelectedColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForSelectedColorTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueHolderForSelectedColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as int32
@@ -947,10 +1206,10 @@ export class TabBarLabelStyle_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx2  = valueHolderForSelectedColorTmpValue as string
                 valueSerializer.writeString(valueHolderForSelectedColorTmpValueForIdx2)
-            } else if (valueHolderForSelectedColorTmpValue instanceof Resource) {
+            } else if (valueHolderForSelectedColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForSelectedColorTmpValueForIdx3  = valueHolderForSelectedColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForSelectedColorTmpValueForIdx3)
+                const valueHolderForSelectedColorTmpValueForIdx3  = valueHolderForSelectedColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForSelectedColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -959,10 +1218,10 @@ export class TabBarLabelStyle_serializer {
         if (valueHolderForUnselectedColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForUnselectedColorTmpValue  = valueHolderForUnselectedColor!
-            if (valueHolderForUnselectedColorTmpValue instanceof Color) {
+            if (valueHolderForUnselectedColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal())
+                const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueHolderForUnselectedColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as int32
@@ -971,10 +1230,10 @@ export class TabBarLabelStyle_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx2  = valueHolderForUnselectedColorTmpValue as string
                 valueSerializer.writeString(valueHolderForUnselectedColorTmpValueForIdx2)
-            } else if (valueHolderForUnselectedColorTmpValue instanceof Resource) {
+            } else if (valueHolderForUnselectedColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForUnselectedColorTmpValueForIdx3  = valueHolderForUnselectedColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForUnselectedColorTmpValueForIdx3)
+                const valueHolderForUnselectedColorTmpValueForIdx3  = valueHolderForUnselectedColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForUnselectedColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -982,349 +1241,117 @@ export class TabBarLabelStyle_serializer {
     }
     public static read(buffer: DeserializerBase): TabBarLabelStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const overflowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const overflowTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let overflowTmpBuf : TextOverflow | undefined = undefined
         if ((overflowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             overflowTmpBuf = TextOverflow.fromValue(valueDeserializer.readInt32())
         }
         const overflowTmpResult : TextOverflow | undefined = overflowTmpBuf
-        const maxLinesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const maxLinesTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let maxLinesTmpBuf : int32 | undefined = undefined
         if ((maxLinesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             maxLinesTmpBuf = valueDeserializer.readInt32()
         }
         const maxLinesTmpResult : int32 | undefined = maxLinesTmpBuf
-        const minFontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let minFontSizeTmpBuf : double | ResourceStr | undefined = undefined
+        const minFontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let minFontSizeTmpBuf : double | arkui_component_units_ResourceStr | undefined = undefined
         if ((minFontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const minFontSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let minFontSizeTmpBuf_ : double | ResourceStr | undefined
-            if (minFontSizeTmpBuf_UnionSelector == (0).toChar()) {
-                minFontSizeTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (minFontSizeTmpBuf_UnionSelector == (1).toChar()) {
-                const minFontSizeTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let minFontSizeTmpBuf_BufU : string | Resource | undefined
-                if (minFontSizeTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    minFontSizeTmpBuf_BufU = (valueDeserializer.readString() as string)
-                } else if (minFontSizeTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    minFontSizeTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+            const minFontSizeTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let minFontSizeTmpBufOpt : double | arkui_component_units_ResourceStr | undefined
+            if (minFontSizeTmpBufOptUnionSelector == (0).toByte()) {
+                minFontSizeTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (minFontSizeTmpBufOptUnionSelector == (1).toByte()) {
+                const minFontSizeTmpBufOptBufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let minFontSizeTmpBufOptBufU : string | arkui_component_units_Resource | undefined
+                if (minFontSizeTmpBufOptBufUUnionSelector == (0).toByte()) {
+                    minFontSizeTmpBufOptBufU = (valueDeserializer.readString() as string)
+                } else if (minFontSizeTmpBufOptBufUUnionSelector == (1).toByte()) {
+                    minFontSizeTmpBufOptBufU = global_resource_Resource_serializer.read(valueDeserializer)
                 } else {
-                    throw new Error("One of the branches for minFontSizeTmpBuf_BufU has to be chosen through deserialisation.")
+                    throw new Error('One of the branches for minFontSizeTmpBufOptBufU has to be chosen through deserialisation.')
                 }
-                minFontSizeTmpBuf_ = (minFontSizeTmpBuf_BufU as string | Resource)
+                minFontSizeTmpBufOpt = (minFontSizeTmpBufOptBufU as string | arkui_component_units_Resource)
             } else {
-                throw new Error("One of the branches for minFontSizeTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for minFontSizeTmpBufOpt has to be chosen through deserialisation.')
             }
-            minFontSizeTmpBuf = (minFontSizeTmpBuf_ as double | ResourceStr)
+            minFontSizeTmpBuf = (minFontSizeTmpBufOpt as double | arkui_component_units_ResourceStr)
         }
-        const minFontSizeTmpResult : double | ResourceStr | undefined = minFontSizeTmpBuf
-        const maxFontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let maxFontSizeTmpBuf : double | ResourceStr | undefined = undefined
+        const minFontSizeTmpResult : double | arkui_component_units_ResourceStr | undefined = minFontSizeTmpBuf
+        const maxFontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let maxFontSizeTmpBuf : double | arkui_component_units_ResourceStr | undefined = undefined
         if ((maxFontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const maxFontSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let maxFontSizeTmpBuf_ : double | ResourceStr | undefined
-            if (maxFontSizeTmpBuf_UnionSelector == (0).toChar()) {
-                maxFontSizeTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (maxFontSizeTmpBuf_UnionSelector == (1).toChar()) {
-                const maxFontSizeTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let maxFontSizeTmpBuf_BufU : string | Resource | undefined
-                if (maxFontSizeTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    maxFontSizeTmpBuf_BufU = (valueDeserializer.readString() as string)
-                } else if (maxFontSizeTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    maxFontSizeTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+            const maxFontSizeTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let maxFontSizeTmpBufOpt : double | arkui_component_units_ResourceStr | undefined
+            if (maxFontSizeTmpBufOptUnionSelector == (0).toByte()) {
+                maxFontSizeTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (maxFontSizeTmpBufOptUnionSelector == (1).toByte()) {
+                const maxFontSizeTmpBufOptBufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let maxFontSizeTmpBufOptBufU : string | arkui_component_units_Resource | undefined
+                if (maxFontSizeTmpBufOptBufUUnionSelector == (0).toByte()) {
+                    maxFontSizeTmpBufOptBufU = (valueDeserializer.readString() as string)
+                } else if (maxFontSizeTmpBufOptBufUUnionSelector == (1).toByte()) {
+                    maxFontSizeTmpBufOptBufU = global_resource_Resource_serializer.read(valueDeserializer)
                 } else {
-                    throw new Error("One of the branches for maxFontSizeTmpBuf_BufU has to be chosen through deserialisation.")
+                    throw new Error('One of the branches for maxFontSizeTmpBufOptBufU has to be chosen through deserialisation.')
                 }
-                maxFontSizeTmpBuf_ = (maxFontSizeTmpBuf_BufU as string | Resource)
+                maxFontSizeTmpBufOpt = (maxFontSizeTmpBufOptBufU as string | arkui_component_units_Resource)
             } else {
-                throw new Error("One of the branches for maxFontSizeTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for maxFontSizeTmpBufOpt has to be chosen through deserialisation.')
             }
-            maxFontSizeTmpBuf = (maxFontSizeTmpBuf_ as double | ResourceStr)
+            maxFontSizeTmpBuf = (maxFontSizeTmpBufOpt as double | arkui_component_units_ResourceStr)
         }
-        const maxFontSizeTmpResult : double | ResourceStr | undefined = maxFontSizeTmpBuf
-        const heightAdaptivePolicyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const maxFontSizeTmpResult : double | arkui_component_units_ResourceStr | undefined = maxFontSizeTmpBuf
+        const heightAdaptivePolicyTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let heightAdaptivePolicyTmpBuf : TextHeightAdaptivePolicy | undefined = undefined
         if ((heightAdaptivePolicyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             heightAdaptivePolicyTmpBuf = TextHeightAdaptivePolicy.fromValue(valueDeserializer.readInt32())
         }
         const heightAdaptivePolicyTmpResult : TextHeightAdaptivePolicy | undefined = heightAdaptivePolicyTmpBuf
-        const fontTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontTmpBuf : Font | undefined = undefined
+        const fontTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let fontTmpBuf : arkui_component_units_Font | undefined = undefined
         if ((fontTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            fontTmpBuf = Font_serializer.read(valueDeserializer)
+            fontTmpBuf = arkui_component_units_Font_serializer.read(valueDeserializer)
         }
-        const fontTmpResult : Font | undefined = fontTmpBuf
-        const selectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const fontTmpResult : arkui_component_units_Font | undefined = fontTmpBuf
+        const selectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let selectedColorTmpBuf : ResourceColor | undefined = undefined
         if ((selectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const selectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let selectedColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (selectedColorTmpBuf_UnionSelector == (0).toChar()) {
-                selectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (selectedColorTmpBuf_UnionSelector == (1).toChar()) {
-                selectedColorTmpBuf_ = (valueDeserializer.readInt32())
-            } else if (selectedColorTmpBuf_UnionSelector == (2).toChar()) {
-                selectedColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (selectedColorTmpBuf_UnionSelector == (3).toChar()) {
-                selectedColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const selectedColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let selectedColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (selectedColorTmpBufOptUnionSelector == (0).toByte()) {
+                selectedColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (selectedColorTmpBufOptUnionSelector == (1).toByte()) {
+                selectedColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (selectedColorTmpBufOptUnionSelector == (2).toByte()) {
+                selectedColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (selectedColorTmpBufOptUnionSelector == (3).toByte()) {
+                selectedColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for selectedColorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for selectedColorTmpBufOpt has to be chosen through deserialisation.')
             }
-            selectedColorTmpBuf = (selectedColorTmpBuf_ as Color | int32 | string | Resource)
+            selectedColorTmpBuf = (selectedColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const selectedColorTmpResult : ResourceColor | undefined = selectedColorTmpBuf
-        const unselectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const unselectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let unselectedColorTmpBuf : ResourceColor | undefined = undefined
         if ((unselectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const unselectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let unselectedColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (unselectedColorTmpBuf_UnionSelector == (0).toChar()) {
-                unselectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (unselectedColorTmpBuf_UnionSelector == (1).toChar()) {
-                unselectedColorTmpBuf_ = (valueDeserializer.readInt32())
-            } else if (unselectedColorTmpBuf_UnionSelector == (2).toChar()) {
-                unselectedColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (unselectedColorTmpBuf_UnionSelector == (3).toChar()) {
-                unselectedColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const unselectedColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let unselectedColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (unselectedColorTmpBufOptUnionSelector == (0).toByte()) {
+                unselectedColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (unselectedColorTmpBufOptUnionSelector == (1).toByte()) {
+                unselectedColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (unselectedColorTmpBufOptUnionSelector == (2).toByte()) {
+                unselectedColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (unselectedColorTmpBufOptUnionSelector == (3).toByte()) {
+                unselectedColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for unselectedColorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for unselectedColorTmpBufOpt has to be chosen through deserialisation.')
             }
-            unselectedColorTmpBuf = (unselectedColorTmpBuf_ as Color | int32 | string | Resource)
+            unselectedColorTmpBuf = (unselectedColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const unselectedColorTmpResult : ResourceColor | undefined = unselectedColorTmpBuf
         let value : TabBarLabelStyle = ({overflow: overflowTmpResult, maxLines: maxLinesTmpResult, minFontSize: minFontSizeTmpResult, maxFontSize: maxFontSizeTmpResult, heightAdaptivePolicy: heightAdaptivePolicyTmpResult, font: fontTmpResult, selectedColor: selectedColorTmpResult, unselectedColor: unselectedColorTmpResult} as TabBarLabelStyle)
         return value
-    }
-}
-export class BottomTabBarStyle_serializer {
-    public static write(buffer: SerializerBase, value: BottomTabBarStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderFor_icon  = value._icon
-        if (valueHolderFor_icon !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_iconTmpValue  = valueHolderFor_icon!
-            if (valueHolderFor_iconTmpValue instanceof ResourceStr) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_iconTmpValueForIdx0  = valueHolderFor_iconTmpValue as ResourceStr
-                if (valueHolderFor_iconTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toByte())
-                    const valueHolderFor_iconTmpValueForIdx0ForIdx0  = valueHolderFor_iconTmpValueForIdx0 as string
-                    valueSerializer.writeString(valueHolderFor_iconTmpValueForIdx0ForIdx0)
-                } else if (valueHolderFor_iconTmpValueForIdx0 instanceof Resource) {
-                    valueSerializer.writeInt8((1).toByte())
-                    const valueHolderFor_iconTmpValueForIdx0ForIdx1  = valueHolderFor_iconTmpValueForIdx0 as Resource
-                    Resource_serializer.write(valueSerializer, valueHolderFor_iconTmpValueForIdx0ForIdx1)
-                }
-            } else if (valueHolderFor_iconTmpValue instanceof TabBarSymbol) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_iconTmpValueForIdx1  = valueHolderFor_iconTmpValue as TabBarSymbol
-                TabBarSymbol_serializer.write(valueSerializer, valueHolderFor_iconTmpValueForIdx1)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_text  = value._text
-        if (valueHolderFor_text !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_textTmpValue  = valueHolderFor_text!
-            if (valueHolderFor_textTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_textTmpValueForIdx0  = valueHolderFor_textTmpValue as string
-                valueSerializer.writeString(valueHolderFor_textTmpValueForIdx0)
-            } else if (valueHolderFor_textTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_textTmpValueForIdx1  = valueHolderFor_textTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_textTmpValueForIdx1)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_labelStyle  = value._labelStyle
-        if (valueHolderFor_labelStyle !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_labelStyleTmpValue  = valueHolderFor_labelStyle!
-            TabBarLabelStyle_serializer.write(valueSerializer, valueHolderFor_labelStyleTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_padding  = value._padding
-        if (valueHolderFor_padding !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_paddingTmpValue  = valueHolderFor_padding!
-            if (valueHolderFor_paddingTmpValue instanceof Padding) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_paddingTmpValueForIdx0  = valueHolderFor_paddingTmpValue as Padding
-                Padding_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx0)
-            } else if (valueHolderFor_paddingTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_paddingTmpValueForIdx1  = valueHolderFor_paddingTmpValue as Dimension
-                if (valueHolderFor_paddingTmpValueForIdx1 instanceof string) {
-                    valueSerializer.writeInt8((0).toByte())
-                    const valueHolderFor_paddingTmpValueForIdx1ForIdx0  = valueHolderFor_paddingTmpValueForIdx1 as string
-                    valueSerializer.writeString(valueHolderFor_paddingTmpValueForIdx1ForIdx0)
-                } else if (valueHolderFor_paddingTmpValueForIdx1 instanceof number) {
-                    valueSerializer.writeInt8((1).toByte())
-                    const valueHolderFor_paddingTmpValueForIdx1ForIdx1  = valueHolderFor_paddingTmpValueForIdx1 as number
-                    valueSerializer.writeNumber(valueHolderFor_paddingTmpValueForIdx1ForIdx1)
-                } else if (valueHolderFor_paddingTmpValueForIdx1 instanceof Resource) {
-                    valueSerializer.writeInt8((2).toByte())
-                    const valueHolderFor_paddingTmpValueForIdx1ForIdx2  = valueHolderFor_paddingTmpValueForIdx1 as Resource
-                    Resource_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx1ForIdx2)
-                }
-            } else if (valueHolderFor_paddingTmpValue instanceof LocalizedPadding) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_paddingTmpValueForIdx2  = valueHolderFor_paddingTmpValue as LocalizedPadding
-                LocalizedPadding_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx2)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_layoutMode  = value._layoutMode
-        if (valueHolderFor_layoutMode !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_layoutModeTmpValue  = (valueHolderFor_layoutMode as LayoutMode)
-            valueSerializer.writeInt32(valueHolderFor_layoutModeTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_verticalAlign  = value._verticalAlign
-        if (valueHolderFor_verticalAlign !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_verticalAlignTmpValue  = (valueHolderFor_verticalAlign as VerticalAlign)
-            valueSerializer.writeInt32(valueHolderFor_verticalAlignTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_symmetricExtensible  = value._symmetricExtensible
-        if (valueHolderFor_symmetricExtensible !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_symmetricExtensibleTmpValue  = valueHolderFor_symmetricExtensible!
-            valueSerializer.writeBoolean(valueHolderFor_symmetricExtensibleTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_id  = value._id
-        if (valueHolderFor_id !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_idTmpValue  = valueHolderFor_id!
-            valueSerializer.writeString(valueHolderFor_idTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_iconStyle  = value._iconStyle
-        if (valueHolderFor_iconStyle !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_iconStyleTmpValue  = valueHolderFor_iconStyle!
-            TabBarIconStyle_serializer.write(valueSerializer, valueHolderFor_iconStyleTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): BottomTabBarStyle {
-        throw new Error("Can not deserialize builder class")
-    }
-}
-export class SubTabBarStyle_serializer {
-    public static write(buffer: SerializerBase, value: SubTabBarStyle): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderFor_content  = value._content
-        if (valueHolderFor_content !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_contentTmpValue  = valueHolderFor_content!
-            if (valueHolderFor_contentTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_contentTmpValueForIdx0  = valueHolderFor_contentTmpValue as string
-                valueSerializer.writeString(valueHolderFor_contentTmpValueForIdx0)
-            } else if (valueHolderFor_contentTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_contentTmpValueForIdx1  = valueHolderFor_contentTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_contentTmpValueForIdx1)
-            } else if (valueHolderFor_contentTmpValue instanceof ComponentContent) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_contentTmpValueForIdx2  = valueHolderFor_contentTmpValue as ComponentContent
-                ComponentContent_serializer.write(valueSerializer, valueHolderFor_contentTmpValueForIdx2)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_indicator  = value._indicator
-        if (valueHolderFor_indicator !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_indicatorTmpValue  = valueHolderFor_indicator!
-            SubTabBarIndicatorStyle_serializer.write(valueSerializer, valueHolderFor_indicatorTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_selectedMode  = value._selectedMode
-        if (valueHolderFor_selectedMode !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_selectedModeTmpValue  = (valueHolderFor_selectedMode as SelectedMode)
-            valueSerializer.writeInt32(valueHolderFor_selectedModeTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_board  = value._board
-        if (valueHolderFor_board !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_boardTmpValue  = valueHolderFor_board!
-            BoardStyle_serializer.write(valueSerializer, valueHolderFor_boardTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_labelStyle  = value._labelStyle
-        if (valueHolderFor_labelStyle !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_labelStyleTmpValue  = valueHolderFor_labelStyle!
-            TabBarLabelStyle_serializer.write(valueSerializer, valueHolderFor_labelStyleTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_padding  = value._padding
-        if (valueHolderFor_padding !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_paddingTmpValue  = valueHolderFor_padding!
-            if (valueHolderFor_paddingTmpValue instanceof Padding | Dimension) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_paddingTmpValueForIdx0  = valueHolderFor_paddingTmpValue as Padding | Dimension
-                if (valueHolderFor_paddingTmpValueForIdx0 instanceof Padding) {
-                    valueSerializer.writeInt8((0).toByte())
-                    const valueHolderFor_paddingTmpValueForIdx0ForIdx0  = valueHolderFor_paddingTmpValueForIdx0 as Padding
-                    Padding_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx0ForIdx0)
-                } else if (valueHolderFor_paddingTmpValueForIdx0 instanceof Dimension) {
-                    valueSerializer.writeInt8((1).toByte())
-                    const valueHolderFor_paddingTmpValueForIdx0ForIdx1  = valueHolderFor_paddingTmpValueForIdx0 as Dimension
-                    if (valueHolderFor_paddingTmpValueForIdx0ForIdx1 instanceof string) {
-                        valueSerializer.writeInt8((0).toByte())
-                        const valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx0  = valueHolderFor_paddingTmpValueForIdx0ForIdx1 as string
-                        valueSerializer.writeString(valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx0)
-                    } else if (valueHolderFor_paddingTmpValueForIdx0ForIdx1 instanceof number) {
-                        valueSerializer.writeInt8((1).toByte())
-                        const valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx1  = valueHolderFor_paddingTmpValueForIdx0ForIdx1 as number
-                        valueSerializer.writeNumber(valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx1)
-                    } else if (valueHolderFor_paddingTmpValueForIdx0ForIdx1 instanceof Resource) {
-                        valueSerializer.writeInt8((2).toByte())
-                        const valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx2  = valueHolderFor_paddingTmpValueForIdx0ForIdx1 as Resource
-                        Resource_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx0ForIdx1ForIdx2)
-                    }
-                }
-            } else if (valueHolderFor_paddingTmpValue instanceof LocalizedPadding) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_paddingTmpValueForIdx1  = valueHolderFor_paddingTmpValue as LocalizedPadding
-                LocalizedPadding_serializer.write(valueSerializer, valueHolderFor_paddingTmpValueForIdx1)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_id  = value._id
-        if (valueHolderFor_id !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_idTmpValue  = valueHolderFor_id!
-            valueSerializer.writeString(valueHolderFor_idTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): SubTabBarStyle {
-        throw new Error("Can not deserialize builder class")
     }
 }

@@ -39,7 +39,8 @@ HWTEST_F(BlankModifierTest, DISABLED_BlankModifierTest001, TestSize.Level1)
 
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, "#00000000");
-    Opt_ResourceColor optColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
+    Opt_ResourceColor optColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
     modifier_->setColor(node_, &optColor);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "#FFFFFFFF");
@@ -89,47 +90,47 @@ HWTEST_F(BlankModifierTest, DISABLED_BlankModifierTest002, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, "0.00px");
 
-    auto intNegVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-123);
+    auto intNegVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(-123.);
     modifier_->setBlankOptions(node_, &intNegVal);
     auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal7, "0.00px");
 
-    auto floatNegVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-1.23f);
+    auto floatNegVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(-1.23f);
     modifier_->setBlankOptions(node_, &floatNegVal);
     auto checkVal8 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal8, "0.00px");
 
-    auto pxNegVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-4.5px");
+    auto pxNegVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-4.5px");
     modifier_->setBlankOptions(node_, &pxNegVal);
     auto checkVal9 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal9, "0.00px");
 
-    auto vpNegVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-56vp");
+    auto vpNegVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-56vp");
     modifier_->setBlankOptions(node_, &vpNegVal);
     auto checkVal10 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal10, "0.00px");
 
-    auto undefVal = Converter::ArkValue<Opt_Union_Number_String>();
+    auto undefVal = Converter::ArkValue<Opt_Union_F64_String>();
     modifier_->setBlankOptions(node_, &undefVal);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "0.00px");
 
-    auto intVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(123);
+    auto intVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(123.);
     modifier_->setBlankOptions(node_, &intVal);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "123.00vp");
 
-    auto floatVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(1.23f);
+    auto floatVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(1.23);
     modifier_->setBlankOptions(node_, &floatVal);
     auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal4, "1.23vp");
 
-    auto pxVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("45px");
+    auto pxVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("45px");
     modifier_->setBlankOptions(node_, &pxVal);
     auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, "45.00px");
 
-    auto vpVal = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("5.6vp");
+    auto vpVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("5.6vp");
     modifier_->setBlankOptions(node_, &vpVal);
     auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal6, "5.60vp");

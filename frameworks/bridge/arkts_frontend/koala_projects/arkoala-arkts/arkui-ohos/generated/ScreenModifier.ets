@@ -16,17 +16,23 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkScreenPeer, ScreenAttribute } from "./component/screen"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod } from "./component/common"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkScreenPeer, ScreenAttribute } from './component/screen'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod } from './component/common'
 export class ScreenModifier extends CommonMethodModifier implements ScreenAttribute,AttributeModifier<ScreenAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -36,15 +42,18 @@ export class ScreenModifier extends CommonMethodModifier implements ScreenAttrib
     applyFocusedAttribute(instance: ScreenAttribute): void { }
     applyDisabledAttribute(instance: ScreenAttribute): void { }
     applySelectedAttribute(instance: ScreenAttribute): void { }
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkScreenPeer;
+        const flagArray = this._flagArray;
     }
     mergeModifier(modifier: ScreenModifier): void {
         super.mergeModifier(modifier)
+        this._state = modifier._state;
+        const flagArray = modifier._flagArray;
     }
     public attributeModifier(value: AttributeModifier<ScreenAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

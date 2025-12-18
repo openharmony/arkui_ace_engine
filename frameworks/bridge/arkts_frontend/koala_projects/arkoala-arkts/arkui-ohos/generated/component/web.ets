@@ -16,46 +16,46 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors, AttributeModifier, hookWebAttributeModifier, AttributeUpdater } from "#handwritten"
-import { default as webview } from "@ohos.web.webview"
-import { Resource_serializer } from "./../framework/resource"
-import { Resource } from "global.resource"
-import { NestedScrollOptions_serializer, ArkCommonMethodPeer, CommonMethod, KeyEvent, NestedScrollOptions, TouchEvent, ArkCommonMethodComponent, ArkCommonMethodStyle, TouchEvent_serializer } from "./common"
-import { EditMenuOptions_serializer, EditMenuOptions, MenuType } from "./textCommon"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { CopyOptions, NestedScrollMode } from "./enums"
-import { CustomBuilder } from "./builder"
-import { PreviewMenuOptions, PreviewMenuOptions_serializer } from "./richEditor"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { Position, Position_serializer } from "./units"
-import { default as image } from "@ohos.multimedia.image"
-import { WebModifier } from "./../WebModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
-import { webview_WebviewController_serializer } from "./../framework/ohos.web.webview"
-import { ModifierStateManager } from '../CommonModifier';
+import { Finalizable, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from '@koalaui/interop'
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { extractors, AttributeModifier, hookJavaScriptProxy, hookWebAttributeModifier, AttributeUpdater } from '#handwritten'
+import { default as webview } from '@ohos.web.webview'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { ArkThemeScopeManager } from '#arktheme'
+import { NestedScrollOptions_serializer, ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, KeyEvent, NestedScrollOptions, TouchEvent, ArkCommonMethodComponent, TouchEvent_serializer } from './common'
+import { EditMenuOptions_serializer, EditMenuOptions, MenuType } from './textCommon'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { CopyOptions, NestedScrollMode } from './enums'
+import { CustomBuilder } from './builder'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { Position, Position_serializer } from './units'
+import { default as image } from '@ohos.multimedia.image'
+import { WebModifier } from './../WebModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
+import { webview_WebviewController_serializer } from './../framework/ohos.web.webview'
 export class ClientAuthenticationHandlerInternal {
     public static fromPtr(ptr: KPointer): ClientAuthenticationHandler {
-        return new ClientAuthenticationHandler(ptr)
+        return new ClientAuthenticationHandler(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class ClientAuthenticationHandler implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ClientAuthenticationHandler.getFinalizer())
     }
     constructor() {
-        this(ClientAuthenticationHandler.construct())
+        this(MaterializedBaseTag.NOP, ClientAuthenticationHandler.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._ClientAuthenticationHandler_construct()
@@ -83,34 +83,34 @@ export class ClientAuthenticationHandler implements MaterializedBase {
         this.ignore_serialize()
         return
     }
-    confirm0_serialize(priKeyFile: string, certChainFile: string): void {
+    private confirm0_serialize(priKeyFile: string, certChainFile: string): void {
         ArkUIGeneratedNativeModule._ClientAuthenticationHandler_confirm0(this.peer!.ptr, priKeyFile, certChainFile)
     }
-    confirm1_serialize(authUri: string): void {
+    private confirm1_serialize(authUri: string): void {
         ArkUIGeneratedNativeModule._ClientAuthenticationHandler_confirm1(this.peer!.ptr, authUri)
     }
-    cancel_serialize(): void {
+    private cancel_serialize(): void {
         ArkUIGeneratedNativeModule._ClientAuthenticationHandler_cancel(this.peer!.ptr)
     }
-    ignore_serialize(): void {
+    private ignore_serialize(): void {
         ArkUIGeneratedNativeModule._ClientAuthenticationHandler_ignore(this.peer!.ptr)
     }
 }
 export class ConsoleMessageInternal {
     public static fromPtr(ptr: KPointer): ConsoleMessage {
-        return new ConsoleMessage(ptr)
+        return new ConsoleMessage(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class ConsoleMessage implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ConsoleMessage.getFinalizer())
     }
     constructor() {
-        this(ConsoleMessage.construct())
+        this(MaterializedBaseTag.NOP, ConsoleMessage.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_construct()
@@ -131,38 +131,42 @@ export class ConsoleMessage implements MaterializedBase {
     public getMessageLevel(): MessageLevel {
         return this.getMessageLevel_serialize()
     }
-    getMessage_serialize(): string {
+    private getMessage_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getMessage(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
-    getSourceId_serialize(): string {
+    private getSourceId_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getSourceId(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
-    getLineNumber_serialize(): int32 {
+    private getLineNumber_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getLineNumber(this.peer!.ptr)
         return retval
     }
-    getMessageLevel_serialize(): MessageLevel {
+    private getMessageLevel_serialize(): MessageLevel {
         const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_getMessageLevel(this.peer!.ptr)
         return MessageLevel.fromValue(retval)
     }
 }
 export class ControllerHandlerInternal {
     public static fromPtr(ptr: KPointer): ControllerHandler {
-        return new ControllerHandler(ptr)
+        return new ControllerHandler(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class ControllerHandler implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ControllerHandler.getFinalizer())
     }
     constructor() {
-        this(ControllerHandler.construct())
+        this(MaterializedBaseTag.NOP, ControllerHandler.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._ControllerHandler_construct()
@@ -171,30 +175,30 @@ export class ControllerHandler implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ControllerHandler_getFinalizer()
     }
-    public setWebController(controller: webview.WebviewController): void {
-        const controller_casted = controller as (webview.WebviewController)
+    public setWebController(controller: WebviewController): void {
+        const controller_casted = controller as (WebviewController)
         this.setWebController_serialize(controller_casted)
         return
     }
-    setWebController_serialize(controller: webview.WebviewController): void {
+    private setWebController_serialize(controller: WebviewController): void {
         ArkUIGeneratedNativeModule._ControllerHandler_setWebController(this.peer!.ptr, extractors.toWebviewWebviewControllerPtr(controller))
     }
 }
 export class DataResubmissionHandlerInternal {
     public static fromPtr(ptr: KPointer): DataResubmissionHandler {
-        return new DataResubmissionHandler(ptr)
+        return new DataResubmissionHandler(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class DataResubmissionHandler implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, DataResubmissionHandler.getFinalizer())
     }
     constructor() {
-        this(DataResubmissionHandler.construct())
+        this(MaterializedBaseTag.NOP, DataResubmissionHandler.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._DataResubmissionHandler_construct()
@@ -211,28 +215,28 @@ export class DataResubmissionHandler implements MaterializedBase {
         this.cancel_serialize()
         return
     }
-    resend_serialize(): void {
+    private resend_serialize(): void {
         ArkUIGeneratedNativeModule._DataResubmissionHandler_resend(this.peer!.ptr)
     }
-    cancel_serialize(): void {
+    private cancel_serialize(): void {
         ArkUIGeneratedNativeModule._DataResubmissionHandler_cancel(this.peer!.ptr)
     }
 }
 export class EventResultInternal {
     public static fromPtr(ptr: KPointer): EventResult {
-        return new EventResult(ptr)
+        return new EventResult(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class EventResult implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, EventResult.getFinalizer())
     }
     constructor() {
-        this(EventResult.construct())
+        this(MaterializedBaseTag.NOP, EventResult.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._EventResult_construct()
@@ -252,28 +256,28 @@ export class EventResult implements MaterializedBase {
         this.setGestureEventResult1_serialize(result_casted, stopPropagation_casted)
         return
     }
-    setGestureEventResult0_serialize(result: boolean): void {
-        ArkUIGeneratedNativeModule._EventResult_setGestureEventResult0(this.peer!.ptr, result ? 1 : 0)
+    private setGestureEventResult0_serialize(result: boolean): void {
+        ArkUIGeneratedNativeModule._EventResult_setGestureEventResult0(this.peer!.ptr, result ? true : false)
     }
-    setGestureEventResult1_serialize(result: boolean, stopPropagation: boolean): void {
-        ArkUIGeneratedNativeModule._EventResult_setGestureEventResult1(this.peer!.ptr, result ? 1 : 0, stopPropagation ? 1 : 0)
+    private setGestureEventResult1_serialize(result: boolean, stopPropagation: boolean): void {
+        ArkUIGeneratedNativeModule._EventResult_setGestureEventResult1(this.peer!.ptr, result ? true : false, stopPropagation ? true : false)
     }
 }
 export class FileSelectorParamInternal {
     public static fromPtr(ptr: KPointer): FileSelectorParam {
-        return new FileSelectorParam(ptr)
+        return new FileSelectorParam(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class FileSelectorParam implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, FileSelectorParam.getFinalizer())
     }
     constructor() {
-        this(FileSelectorParam.construct())
+        this(MaterializedBaseTag.NOP, FileSelectorParam.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_construct()
@@ -297,15 +301,17 @@ export class FileSelectorParam implements MaterializedBase {
     public getMimeTypes(): Array<string> {
         return this.getMimeTypes_serialize()
     }
-    getTitle_serialize(): string {
+    private getTitle_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getTitle(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
-    getMode_serialize(): FileSelectorMode {
+    private getMode_serialize(): FileSelectorMode {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getMode(this.peer!.ptr)
         return FileSelectorMode.fromValue(retval)
     }
-    getAcceptType_serialize(): Array<string> {
+    private getAcceptType_serialize(): Array<string> {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getAcceptType(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength : int32 = retvalDeserializer.readInt32()
@@ -316,11 +322,11 @@ export class FileSelectorParam implements MaterializedBase {
         const returnResult : Array<string> = buffer
         return returnResult
     }
-    isCapture_serialize(): boolean {
+    private isCapture_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_isCapture(this.peer!.ptr)
         return retval
     }
-    getMimeTypes_serialize(): Array<string> {
+    private getMimeTypes_serialize(): Array<string> {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getMimeTypes(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength : int32 = retvalDeserializer.readInt32()
@@ -334,19 +340,19 @@ export class FileSelectorParam implements MaterializedBase {
 }
 export class FileSelectorResultInternal {
     public static fromPtr(ptr: KPointer): FileSelectorResult {
-        return new FileSelectorResult(ptr)
+        return new FileSelectorResult(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class FileSelectorResult implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, FileSelectorResult.getFinalizer())
     }
     constructor() {
-        this(FileSelectorResult.construct())
+        this(MaterializedBaseTag.NOP, FileSelectorResult.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorResult_construct()
@@ -360,7 +366,7 @@ export class FileSelectorResult implements MaterializedBase {
         this.handleFileList_serialize(fileList_casted)
         return
     }
-    handleFileList_serialize(fileList: Array<string>): void {
+    private handleFileList_serialize(fileList: Array<string>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((fileList.length).toInt())
         for (let fileListCounterI = 0; fileListCounterI < fileList.length; fileListCounterI++) {
@@ -373,19 +379,19 @@ export class FileSelectorResult implements MaterializedBase {
 }
 export class FullScreenExitHandlerInternal {
     public static fromPtr(ptr: KPointer): FullScreenExitHandler {
-        return new FullScreenExitHandler(ptr)
+        return new FullScreenExitHandler(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class FullScreenExitHandler implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, FullScreenExitHandler.getFinalizer())
     }
     constructor() {
-        this(FullScreenExitHandler.construct())
+        this(MaterializedBaseTag.NOP, FullScreenExitHandler.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._FullScreenExitHandler_construct()
@@ -398,25 +404,25 @@ export class FullScreenExitHandler implements MaterializedBase {
         this.exitFullScreen_serialize()
         return
     }
-    exitFullScreen_serialize(): void {
+    private exitFullScreen_serialize(): void {
         ArkUIGeneratedNativeModule._FullScreenExitHandler_exitFullScreen(this.peer!.ptr)
     }
 }
 export class HttpAuthHandlerInternal {
     public static fromPtr(ptr: KPointer): HttpAuthHandler {
-        return new HttpAuthHandler(ptr)
+        return new HttpAuthHandler(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class HttpAuthHandler implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, HttpAuthHandler.getFinalizer())
     }
     constructor() {
-        this(HttpAuthHandler.construct())
+        this(MaterializedBaseTag.NOP, HttpAuthHandler.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._HttpAuthHandler_construct()
@@ -437,33 +443,33 @@ export class HttpAuthHandler implements MaterializedBase {
     public isHttpAuthInfoSaved(): boolean {
         return this.isHttpAuthInfoSaved_serialize()
     }
-    confirm_serialize(userName: string, password: string): boolean {
+    private confirm_serialize(userName: string, password: string): boolean {
         const retval  = ArkUIGeneratedNativeModule._HttpAuthHandler_confirm(this.peer!.ptr, userName, password)
         return retval
     }
-    cancel_serialize(): void {
+    private cancel_serialize(): void {
         ArkUIGeneratedNativeModule._HttpAuthHandler_cancel(this.peer!.ptr)
     }
-    isHttpAuthInfoSaved_serialize(): boolean {
+    private isHttpAuthInfoSaved_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._HttpAuthHandler_isHttpAuthInfoSaved(this.peer!.ptr)
         return retval
     }
 }
 export class JsGeolocationInternal {
     public static fromPtr(ptr: KPointer): JsGeolocation {
-        return new JsGeolocation(ptr)
+        return new JsGeolocation(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class JsGeolocation implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, JsGeolocation.getFinalizer())
     }
     constructor() {
-        this(JsGeolocation.construct())
+        this(MaterializedBaseTag.NOP, JsGeolocation.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._JsGeolocation_construct()
@@ -479,25 +485,25 @@ export class JsGeolocation implements MaterializedBase {
         this.invoke_serialize(origin_casted, allow_casted, retain_casted)
         return
     }
-    invoke_serialize(origin: string, allow: boolean, retain: boolean): void {
-        ArkUIGeneratedNativeModule._JsGeolocation_invoke(this.peer!.ptr, origin, allow ? 1 : 0, retain ? 1 : 0)
+    private invoke_serialize(origin: string, allow: boolean, retain: boolean): void {
+        ArkUIGeneratedNativeModule._JsGeolocation_invoke(this.peer!.ptr, origin, allow ? true : false, retain ? true : false)
     }
 }
 export class JsResultInternal {
     public static fromPtr(ptr: KPointer): JsResult {
-        return new JsResult(ptr)
+        return new JsResult(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class JsResult implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, JsResult.getFinalizer())
     }
     constructor() {
-        this(JsResult.construct())
+        this(MaterializedBaseTag.NOP, JsResult.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._JsResult_construct()
@@ -519,31 +525,31 @@ export class JsResult implements MaterializedBase {
         this.handlePromptConfirm_serialize(result_casted)
         return
     }
-    handleCancel_serialize(): void {
+    private handleCancel_serialize(): void {
         ArkUIGeneratedNativeModule._JsResult_handleCancel(this.peer!.ptr)
     }
-    handleConfirm_serialize(): void {
+    private handleConfirm_serialize(): void {
         ArkUIGeneratedNativeModule._JsResult_handleConfirm(this.peer!.ptr)
     }
-    handlePromptConfirm_serialize(result: string): void {
+    private handlePromptConfirm_serialize(result: string): void {
         ArkUIGeneratedNativeModule._JsResult_handlePromptConfirm(this.peer!.ptr, result)
     }
 }
 export class PermissionRequestInternal {
     public static fromPtr(ptr: KPointer): PermissionRequest {
-        return new PermissionRequest(ptr)
+        return new PermissionRequest(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class PermissionRequest implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, PermissionRequest.getFinalizer())
     }
     constructor() {
-        this(PermissionRequest.construct())
+        this(MaterializedBaseTag.NOP, PermissionRequest.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._PermissionRequest_construct()
@@ -567,14 +573,16 @@ export class PermissionRequest implements MaterializedBase {
         this.grant_serialize(resources_casted)
         return
     }
-    deny_serialize(): void {
+    private deny_serialize(): void {
         ArkUIGeneratedNativeModule._PermissionRequest_deny(this.peer!.ptr)
     }
-    getOrigin_serialize(): string {
+    private getOrigin_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._PermissionRequest_getOrigin(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
-    getAccessibleResource_serialize(): Array<string> {
+    private getAccessibleResource_serialize(): Array<string> {
         const retval  = ArkUIGeneratedNativeModule._PermissionRequest_getAccessibleResource(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength : int32 = retvalDeserializer.readInt32()
@@ -585,7 +593,7 @@ export class PermissionRequest implements MaterializedBase {
         const returnResult : Array<string> = buffer
         return returnResult
     }
-    grant_serialize(resources: Array<string>): void {
+    private grant_serialize(resources: Array<string>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((resources.length).toInt())
         for (let resourcesCounterI = 0; resourcesCounterI < resources.length; resourcesCounterI++) {
@@ -598,19 +606,19 @@ export class PermissionRequest implements MaterializedBase {
 }
 export class ScreenCaptureHandlerInternal {
     public static fromPtr(ptr: KPointer): ScreenCaptureHandler {
-        return new ScreenCaptureHandler(ptr)
+        return new ScreenCaptureHandler(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class ScreenCaptureHandler implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ScreenCaptureHandler.getFinalizer())
     }
     constructor() {
-        this(ScreenCaptureHandler.construct())
+        this(MaterializedBaseTag.NOP, ScreenCaptureHandler.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._ScreenCaptureHandler_construct()
@@ -631,35 +639,37 @@ export class ScreenCaptureHandler implements MaterializedBase {
         this.deny_serialize()
         return
     }
-    getOrigin_serialize(): string {
+    private getOrigin_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._ScreenCaptureHandler_getOrigin(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
-    grant_serialize(config: ScreenCaptureConfig): void {
+    private grant_serialize(config: ScreenCaptureConfig): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         ScreenCaptureConfig_serializer.write(thisSerializer, config)
         ArkUIGeneratedNativeModule._ScreenCaptureHandler_grant(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    deny_serialize(): void {
+    private deny_serialize(): void {
         ArkUIGeneratedNativeModule._ScreenCaptureHandler_deny(this.peer!.ptr)
     }
 }
 export class SslErrorHandlerInternal {
     public static fromPtr(ptr: KPointer): SslErrorHandler {
-        return new SslErrorHandler(ptr)
+        return new SslErrorHandler(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class SslErrorHandler implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, SslErrorHandler.getFinalizer())
     }
     constructor() {
-        this(SslErrorHandler.construct())
+        this(MaterializedBaseTag.NOP, SslErrorHandler.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._SslErrorHandler_construct()
@@ -681,31 +691,31 @@ export class SslErrorHandler implements MaterializedBase {
         this.handleCancel1_serialize(abortLoading_casted)
         return
     }
-    handleConfirm_serialize(): void {
+    private handleConfirm_serialize(): void {
         ArkUIGeneratedNativeModule._SslErrorHandler_handleConfirm(this.peer!.ptr)
     }
-    handleCancel0_serialize(): void {
+    private handleCancel0_serialize(): void {
         ArkUIGeneratedNativeModule._SslErrorHandler_handleCancel0(this.peer!.ptr)
     }
-    handleCancel1_serialize(abortLoading: boolean): void {
-        ArkUIGeneratedNativeModule._SslErrorHandler_handleCancel1(this.peer!.ptr, abortLoading ? 1 : 0)
+    private handleCancel1_serialize(abortLoading: boolean): void {
+        ArkUIGeneratedNativeModule._SslErrorHandler_handleCancel1(this.peer!.ptr, abortLoading ? true : false)
     }
 }
 export class WebContextMenuParamInternal {
     public static fromPtr(ptr: KPointer): WebContextMenuParam {
-        return new WebContextMenuParam(ptr)
+        return new WebContextMenuParam(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class WebContextMenuParam implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, WebContextMenuParam.getFinalizer())
     }
     constructor() {
-        this(WebContextMenuParam.construct())
+        this(MaterializedBaseTag.NOP, WebContextMenuParam.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_construct()
@@ -756,78 +766,86 @@ export class WebContextMenuParam implements MaterializedBase {
     public getPreviewHeight(): int32 {
         return this.getPreviewHeight_serialize()
     }
-    x_serialize(): int32 {
+    private x_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_x(this.peer!.ptr)
         return retval
     }
-    y_serialize(): int32 {
+    private y_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_y(this.peer!.ptr)
         return retval
     }
-    getLinkUrl_serialize(): string {
+    private getLinkUrl_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getLinkUrl(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
-    getUnfilteredLinkUrl_serialize(): string {
+    private getUnfilteredLinkUrl_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getUnfilteredLinkUrl(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
-    getSourceUrl_serialize(): string {
+    private getSourceUrl_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getSourceUrl(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
-    existsImageContents_serialize(): boolean {
+    private existsImageContents_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_existsImageContents(this.peer!.ptr)
         return retval
     }
-    getMediaType_serialize(): ContextMenuMediaType {
+    private getMediaType_serialize(): ContextMenuMediaType {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getMediaType(this.peer!.ptr)
         return ContextMenuMediaType.fromValue(retval)
     }
-    getSelectionText_serialize(): string {
+    private getSelectionText_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getSelectionText(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
-    getSourceType_serialize(): ContextMenuSourceType {
+    private getSourceType_serialize(): ContextMenuSourceType {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getSourceType(this.peer!.ptr)
         return ContextMenuSourceType.fromValue(retval)
     }
-    getInputFieldType_serialize(): ContextMenuInputFieldType {
+    private getInputFieldType_serialize(): ContextMenuInputFieldType {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getInputFieldType(this.peer!.ptr)
         return ContextMenuInputFieldType.fromValue(retval)
     }
-    isEditable_serialize(): boolean {
+    private isEditable_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_isEditable(this.peer!.ptr)
         return retval
     }
-    getEditStateFlags_serialize(): int32 {
+    private getEditStateFlags_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getEditStateFlags(this.peer!.ptr)
         return retval
     }
-    getPreviewWidth_serialize(): int32 {
+    private getPreviewWidth_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getPreviewWidth(this.peer!.ptr)
         return retval
     }
-    getPreviewHeight_serialize(): int32 {
+    private getPreviewHeight_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getPreviewHeight(this.peer!.ptr)
         return retval
     }
 }
 export class WebContextMenuResultInternal {
     public static fromPtr(ptr: KPointer): WebContextMenuResult {
-        return new WebContextMenuResult(ptr)
+        return new WebContextMenuResult(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class WebContextMenuResult implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, WebContextMenuResult.getFinalizer())
     }
     constructor() {
-        this(WebContextMenuResult.construct())
+        this(MaterializedBaseTag.NOP, WebContextMenuResult.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuResult_construct()
@@ -860,40 +878,40 @@ export class WebContextMenuResult implements MaterializedBase {
         this.selectAll_serialize()
         return
     }
-    closeContextMenu_serialize(): void {
+    private closeContextMenu_serialize(): void {
         ArkUIGeneratedNativeModule._WebContextMenuResult_closeContextMenu(this.peer!.ptr)
     }
-    copyImage_serialize(): void {
+    private copyImage_serialize(): void {
         ArkUIGeneratedNativeModule._WebContextMenuResult_copyImage(this.peer!.ptr)
     }
-    copy_serialize(): void {
+    private copy_serialize(): void {
         ArkUIGeneratedNativeModule._WebContextMenuResult_copy(this.peer!.ptr)
     }
-    paste_serialize(): void {
+    private paste_serialize(): void {
         ArkUIGeneratedNativeModule._WebContextMenuResult_paste(this.peer!.ptr)
     }
-    cut_serialize(): void {
+    private cut_serialize(): void {
         ArkUIGeneratedNativeModule._WebContextMenuResult_cut(this.peer!.ptr)
     }
-    selectAll_serialize(): void {
+    private selectAll_serialize(): void {
         ArkUIGeneratedNativeModule._WebContextMenuResult_selectAll(this.peer!.ptr)
     }
 }
 export class WebKeyboardControllerInternal {
     public static fromPtr(ptr: KPointer): WebKeyboardController {
-        return new WebKeyboardController(ptr)
+        return new WebKeyboardController(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class WebKeyboardController implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, WebKeyboardController.getFinalizer())
     }
     constructor() {
-        this(WebKeyboardController.construct())
+        this(MaterializedBaseTag.NOP, WebKeyboardController.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._WebKeyboardController_construct()
@@ -926,37 +944,37 @@ export class WebKeyboardController implements MaterializedBase {
         this.close_serialize()
         return
     }
-    insertText_serialize(text: string): void {
+    private insertText_serialize(text: string): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_insertText(this.peer!.ptr, text)
     }
-    deleteForward_serialize(length: int32): void {
+    private deleteForward_serialize(length: int32): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_deleteForward(this.peer!.ptr, length)
     }
-    deleteBackward_serialize(length: int32): void {
+    private deleteBackward_serialize(length: int32): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_deleteBackward(this.peer!.ptr, length)
     }
-    sendFunctionKey_serialize(key: int32): void {
+    private sendFunctionKey_serialize(key: int32): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_sendFunctionKey(this.peer!.ptr, key)
     }
-    close_serialize(): void {
+    private close_serialize(): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_close(this.peer!.ptr)
     }
 }
 export class WebResourceErrorInternal {
     public static fromPtr(ptr: KPointer): WebResourceError {
-        return new WebResourceError(ptr)
+        return new WebResourceError(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class WebResourceError implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, WebResourceError.getFinalizer())
     }
     constructor() {
-        this(WebResourceError.construct())
+        this(MaterializedBaseTag.NOP, WebResourceError.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._WebResourceError_construct()
@@ -971,30 +989,32 @@ export class WebResourceError implements MaterializedBase {
     public getErrorCode(): int32 {
         return this.getErrorCode_serialize()
     }
-    getErrorInfo_serialize(): string {
+    private getErrorInfo_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._WebResourceError_getErrorInfo(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
-    getErrorCode_serialize(): int32 {
+    private getErrorCode_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebResourceError_getErrorCode(this.peer!.ptr)
         return retval
     }
 }
 export class WebResourceRequestInternal {
     public static fromPtr(ptr: KPointer): WebResourceRequest {
-        return new WebResourceRequest(ptr)
+        return new WebResourceRequest(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class WebResourceRequest implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, WebResourceRequest.getFinalizer())
     }
     constructor() {
-        this(WebResourceRequest.construct())
+        this(MaterializedBaseTag.NOP, WebResourceRequest.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._WebResourceRequest_construct()
@@ -1021,7 +1041,7 @@ export class WebResourceRequest implements MaterializedBase {
     public getRequestMethod(): string {
         return this.getRequestMethod_serialize()
     }
-    getRequestHeader_serialize(): Array<Header> {
+    private getRequestHeader_serialize(): Array<Header> {
         const retval  = ArkUIGeneratedNativeModule._WebResourceRequest_getRequestHeader(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength : int32 = retvalDeserializer.readInt32()
@@ -1032,42 +1052,46 @@ export class WebResourceRequest implements MaterializedBase {
         const returnResult : Array<Header> = buffer
         return returnResult
     }
-    getRequestUrl_serialize(): string {
+    private getRequestUrl_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._WebResourceRequest_getRequestUrl(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
-    isRequestGesture_serialize(): boolean {
+    private isRequestGesture_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._WebResourceRequest_isRequestGesture(this.peer!.ptr)
         return retval
     }
-    isMainFrame_serialize(): boolean {
+    private isMainFrame_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._WebResourceRequest_isMainFrame(this.peer!.ptr)
         return retval
     }
-    isRedirect_serialize(): boolean {
+    private isRedirect_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._WebResourceRequest_isRedirect(this.peer!.ptr)
         return retval
     }
-    getRequestMethod_serialize(): string {
+    private getRequestMethod_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._WebResourceRequest_getRequestMethod(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
 }
 export class WebResourceResponseInternal {
     public static fromPtr(ptr: KPointer): WebResourceResponse {
-        return new WebResourceResponse(ptr)
+        return new WebResourceResponse(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class WebResourceResponse implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, WebResourceResponse.getFinalizer())
     }
     constructor() {
-        this(WebResourceResponse.construct())
+        this(MaterializedBaseTag.NOP, WebResourceResponse.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_construct()
@@ -1079,7 +1103,7 @@ export class WebResourceResponse implements MaterializedBase {
     public getResponseData(): string {
         return this.getResponseData_serialize()
     }
-    public getResponseDataEx(): string | int32 | ArrayBuffer | Resource | undefined {
+    public getResponseDataEx(): string | int32 | ArrayBuffer | global_resource_Resource | undefined {
         return this.getResponseDataEx_serialize()
     }
     public getResponseEncoding(): string {
@@ -1097,8 +1121,8 @@ export class WebResourceResponse implements MaterializedBase {
     public getResponseCode(): int32 {
         return this.getResponseCode_serialize()
     }
-    public setResponseData(data: string | int32 | Resource | ArrayBuffer): void {
-        const data_casted = data as (string | int32 | Resource | ArrayBuffer)
+    public setResponseData(data: string | int32 | global_resource_Resource | ArrayBuffer): void {
+        const data_casted = data as (string | int32 | global_resource_Resource | ArrayBuffer)
         this.setResponseData_serialize(data_casted)
         return
     }
@@ -1135,47 +1159,55 @@ export class WebResourceResponse implements MaterializedBase {
     public getResponseIsReady(): boolean {
         return this.getResponseIsReady_serialize()
     }
-    getResponseData_serialize(): string {
+    private getResponseData_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseData(this.peer!.ptr)
-        return retval
-    }
-    getResponseDataEx_serialize(): string | int32 | ArrayBuffer | Resource | undefined {
-        const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseDataEx(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : string | int32 | ArrayBuffer | Resource | undefined = undefined
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_UnionSelector : int32 = retvalDeserializer.readInt8()
-            let buffer_ : string | int32 | ArrayBuffer | Resource | undefined
-            if (buffer_UnionSelector == (0).toChar()) {
-                buffer_ = (retvalDeserializer.readString() as string)
-            } else if (buffer_UnionSelector == (1).toChar()) {
-                buffer_ = retvalDeserializer.readInt32()
-            } else if (buffer_UnionSelector == (2).toChar()) {
-                buffer_ = (retvalDeserializer.readBuffer() as ArrayBuffer)
-            } else if (buffer_UnionSelector == (3).toChar()) {
-                buffer_ = Resource_serializer.read(retvalDeserializer)
-            } else {
-                throw new Error("One of the branches for buffer_ has to be chosen through deserialisation.")
-            }
-            buffer = (buffer_ as string | int32 | ArrayBuffer | Resource)
-        }
-        const returnResult : string | int32 | ArrayBuffer | Resource | undefined = buffer
+        const returnResult : string = (retvalDeserializer.readString() as string)
         return returnResult
     }
-    getResponseEncoding_serialize(): string {
+    private getResponseDataEx_serialize(): string | int32 | ArrayBuffer | global_resource_Resource | undefined {
+        const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseDataEx(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
+        let buffer : string | int32 | ArrayBuffer | global_resource_Resource | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const bufferOptUnionSelector : int32 = retvalDeserializer.readInt8()
+            let bufferOpt : string | int32 | ArrayBuffer | global_resource_Resource | undefined
+            if (bufferOptUnionSelector == (0).toByte()) {
+                bufferOpt = (retvalDeserializer.readString() as string)
+            } else if (bufferOptUnionSelector == (1).toByte()) {
+                bufferOpt = retvalDeserializer.readInt32()
+            } else if (bufferOptUnionSelector == (2).toByte()) {
+                bufferOpt = (retvalDeserializer.readBuffer() as ArrayBuffer)
+            } else if (bufferOptUnionSelector == (3).toByte()) {
+                bufferOpt = global_resource_Resource_serializer.read(retvalDeserializer)
+            } else {
+                throw new Error('One of the branches for bufferOpt has to be chosen through deserialisation.')
+            }
+            buffer = (bufferOpt as string | int32 | ArrayBuffer | global_resource_Resource)
+        }
+        const returnResult : string | int32 | ArrayBuffer | global_resource_Resource | undefined = buffer
+        return returnResult
+    }
+    private getResponseEncoding_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseEncoding(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
-    getResponseMimeType_serialize(): string {
+    private getResponseMimeType_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseMimeType(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
-    getReasonMessage_serialize(): string {
+    private getReasonMessage_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getReasonMessage(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
-    getResponseHeader_serialize(): Array<Header> {
+    private getResponseHeader_serialize(): Array<Header> {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseHeader(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength : int32 = retvalDeserializer.readInt32()
@@ -1186,11 +1218,11 @@ export class WebResourceResponse implements MaterializedBase {
         const returnResult : Array<Header> = buffer
         return returnResult
     }
-    getResponseCode_serialize(): int32 {
+    private getResponseCode_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseCode(this.peer!.ptr)
         return retval
     }
-    setResponseData_serialize(data: string | int32 | Resource | ArrayBuffer): void {
+    private setResponseData_serialize(data: string | int32 | global_resource_Resource | ArrayBuffer): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (data instanceof string) {
             thisSerializer.writeInt8((0).toByte())
@@ -1200,10 +1232,10 @@ export class WebResourceResponse implements MaterializedBase {
             thisSerializer.writeInt8((1).toByte())
             const dataForIdx1  = data as int32
             thisSerializer.writeInt32(dataForIdx1)
-        } else if (data instanceof Resource) {
+        } else if (data instanceof global_resource_Resource) {
             thisSerializer.writeInt8((2).toByte())
-            const dataForIdx2  = data as Resource
-            Resource_serializer.write(thisSerializer, dataForIdx2)
+            const dataForIdx2  = data as global_resource_Resource
+            global_resource_Resource_serializer.write(thisSerializer, dataForIdx2)
         } else if (data instanceof ArrayBuffer) {
             thisSerializer.writeInt8((3).toByte())
             const dataForIdx3  = data as ArrayBuffer
@@ -1212,16 +1244,16 @@ export class WebResourceResponse implements MaterializedBase {
         ArkUIGeneratedNativeModule._WebResourceResponse_setResponseData(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setResponseEncoding_serialize(encoding: string): void {
+    private setResponseEncoding_serialize(encoding: string): void {
         ArkUIGeneratedNativeModule._WebResourceResponse_setResponseEncoding(this.peer!.ptr, encoding)
     }
-    setResponseMimeType_serialize(mimeType: string): void {
+    private setResponseMimeType_serialize(mimeType: string): void {
         ArkUIGeneratedNativeModule._WebResourceResponse_setResponseMimeType(this.peer!.ptr, mimeType)
     }
-    setReasonMessage_serialize(reason: string): void {
+    private setReasonMessage_serialize(reason: string): void {
         ArkUIGeneratedNativeModule._WebResourceResponse_setReasonMessage(this.peer!.ptr, reason)
     }
-    setResponseHeader_serialize(header: Array<Header>): void {
+    private setResponseHeader_serialize(header: Array<Header>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((header.length).toInt())
         for (let headerCounterI = 0; headerCounterI < header.length; headerCounterI++) {
@@ -1231,20 +1263,20 @@ export class WebResourceResponse implements MaterializedBase {
         ArkUIGeneratedNativeModule._WebResourceResponse_setResponseHeader(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setResponseCode_serialize(code: int32): void {
+    private setResponseCode_serialize(code: int32): void {
         ArkUIGeneratedNativeModule._WebResourceResponse_setResponseCode(this.peer!.ptr, code)
     }
-    setResponseIsReady_serialize(IsReady: boolean): void {
-        ArkUIGeneratedNativeModule._WebResourceResponse_setResponseIsReady(this.peer!.ptr, IsReady ? 1 : 0)
+    private setResponseIsReady_serialize(IsReady: boolean): void {
+        ArkUIGeneratedNativeModule._WebResourceResponse_setResponseIsReady(this.peer!.ptr, IsReady ? true : false)
     }
-    getResponseIsReady_serialize(): boolean {
+    private getResponseIsReady_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_getResponseIsReady(this.peer!.ptr)
         return retval
     }
 }
 export class ArkWebPeer extends ArkCommonMethodPeer {
     attributeSet?: WebModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkWebPeer {
@@ -1255,6 +1287,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setWebOptionsAttribute(value: WebOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         WebOptions_serializer.write(thisSerializer, value)
         ArkUIGeneratedNativeModule._WebInterface_setWebOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -1354,18 +1387,6 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._WebAttribute_setGeolocationAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setJavaScriptProxyAttribute(value: JavaScriptProxy | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            JavaScriptProxy_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._WebAttribute_setJavaScriptProxy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setCacheModeAttribute(value: CacheMode | undefined): void {
@@ -1500,19 +1521,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setMetaViewport(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnPageEndAttribute(value: ((value0: OnPageEndEvent) => void) | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.holdAndWriteCallback(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._WebAttribute_setOnPageEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setOnPageBeginAttribute(value: ((value0: OnPageBeginEvent) => void) | undefined): void {
+    setOnPageBeginAttribute(value: arkui_component_common_Callback<OnPageBeginEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1524,7 +1533,19 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnPageBegin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnLoadStartedAttribute(value: ((value0: OnLoadStartedEvent) => void) | undefined): void {
+    setOnPageEndAttribute(value: arkui_component_common_Callback<OnPageEndEvent, void> | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnPageEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnLoadStartedAttribute(value: arkui_component_common_Callback<OnLoadStartedEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1536,7 +1557,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnLoadStarted(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnLoadFinishedAttribute(value: ((value0: OnLoadFinishedEvent) => void) | undefined): void {
+    setOnLoadFinishedAttribute(value: arkui_component_common_Callback<OnLoadFinishedEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1548,7 +1569,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnLoadFinished(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnProgressChangeAttribute(value: ((value0: OnProgressChangeEvent) => void) | undefined): void {
+    setOnProgressChangeAttribute(value: arkui_component_common_Callback<OnProgressChangeEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1560,7 +1581,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnProgressChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnTitleReceiveAttribute(value: ((value0: OnTitleReceiveEvent) => void) | undefined): void {
+    setOnTitleReceiveAttribute(value: arkui_component_common_Callback<OnTitleReceiveEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1584,7 +1605,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnGeolocationHide(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnGeolocationShowAttribute(value: ((value0: OnGeolocationShowEvent) => void) | undefined): void {
+    setOnGeolocationShowAttribute(value: arkui_component_common_Callback<OnGeolocationShowEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1608,7 +1629,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnRequestSelected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnAlertAttribute(value: ((value0: OnAlertEvent) => boolean) | undefined): void {
+    setOnAlertAttribute(value: arkui_component_common_Callback<OnAlertEvent, boolean> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1620,7 +1641,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnAlert(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnBeforeUnloadAttribute(value: ((value0: OnBeforeUnloadEvent) => boolean) | undefined): void {
+    setOnBeforeUnloadAttribute(value: arkui_component_common_Callback<OnBeforeUnloadEvent, boolean> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1632,7 +1653,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnBeforeUnload(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnConfirmAttribute(value: ((value0: OnConfirmEvent) => boolean) | undefined): void {
+    setOnConfirmAttribute(value: arkui_component_common_Callback<OnConfirmEvent, boolean> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1644,7 +1665,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnConfirm(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnPromptAttribute(value: ((value0: OnPromptEvent) => boolean) | undefined): void {
+    setOnPromptAttribute(value: arkui_component_common_Callback<OnPromptEvent, boolean> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1656,7 +1677,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnPrompt(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnConsoleAttribute(value: ((value0: OnConsoleEvent) => boolean) | undefined): void {
+    setOnConsoleAttribute(value: arkui_component_common_Callback<OnConsoleEvent, boolean> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1668,7 +1689,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnConsole(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnErrorReceiveAttribute(value: ((value0: OnErrorReceiveEvent) => void) | undefined): void {
+    setOnErrorReceiveAttribute(value: arkui_component_common_Callback<OnErrorReceiveEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1680,7 +1701,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnErrorReceive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnHttpErrorReceiveAttribute(value: ((value0: OnHttpErrorReceiveEvent) => void) | undefined): void {
+    setOnHttpErrorReceiveAttribute(value: arkui_component_common_Callback<OnHttpErrorReceiveEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1692,7 +1713,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnHttpErrorReceive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnDownloadStartAttribute(value: ((value0: OnDownloadStartEvent) => void) | undefined): void {
+    setOnDownloadStartAttribute(value: arkui_component_common_Callback<OnDownloadStartEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1704,7 +1725,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnDownloadStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnRefreshAccessedHistoryAttribute(value: ((value0: OnRefreshAccessedHistoryEvent) => void) | undefined): void {
+    setOnRefreshAccessedHistoryAttribute(value: arkui_component_common_Callback<OnRefreshAccessedHistoryEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1716,7 +1737,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnRefreshAccessedHistory(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnRenderExitedAttribute(value: ((value0: OnRenderExitedEvent) => void) | undefined): void {
+    setOnRenderExitedAttribute(value: arkui_component_common_Callback<OnRenderExitedEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1728,7 +1749,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnRenderExited(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnShowFileSelectorAttribute(value: ((value0: OnShowFileSelectorEvent) => boolean) | undefined): void {
+    setOnShowFileSelectorAttribute(value: arkui_component_common_Callback<OnShowFileSelectorEvent, boolean> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1740,7 +1761,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnShowFileSelector(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnResourceLoadAttribute(value: ((value0: OnResourceLoadEvent) => void) | undefined): void {
+    setOnResourceLoadAttribute(value: arkui_component_common_Callback<OnResourceLoadEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1776,7 +1797,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnFullScreenEnter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnScaleChangeAttribute(value: ((value0: OnScaleChangeEvent) => void) | undefined): void {
+    setOnScaleChangeAttribute(value: arkui_component_common_Callback<OnScaleChangeEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1788,7 +1809,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnScaleChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnHttpAuthRequestAttribute(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): void {
+    setOnHttpAuthRequestAttribute(value: arkui_component_common_Callback<OnHttpAuthRequestEvent, boolean> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1800,7 +1821,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnHttpAuthRequest(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnInterceptRequestAttribute(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): void {
+    setOnInterceptRequestAttribute(value: arkui_component_common_Callback<OnInterceptRequestEvent, WebResourceResponse | null> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1812,7 +1833,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnInterceptRequest(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnPermissionRequestAttribute(value: ((value0: OnPermissionRequestEvent) => void) | undefined): void {
+    setOnPermissionRequestAttribute(value: arkui_component_common_Callback<OnPermissionRequestEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1824,7 +1845,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnPermissionRequest(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnScreenCaptureRequestAttribute(value: ((value0: OnScreenCaptureRequestEvent) => void) | undefined): void {
+    setOnScreenCaptureRequestAttribute(value: arkui_component_common_Callback<OnScreenCaptureRequestEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1836,7 +1857,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnScreenCaptureRequest(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnContextMenuShowAttribute(value: ((value0: OnContextMenuShowEvent) => boolean) | undefined): void {
+    setOnContextMenuShowAttribute(value: arkui_component_common_Callback<OnContextMenuShowEvent, boolean> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1872,7 +1893,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setMediaPlayGestureAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnSearchResultReceiveAttribute(value: ((value0: OnSearchResultReceiveEvent) => void) | undefined): void {
+    setOnSearchResultReceiveAttribute(value: arkui_component_common_Callback<OnSearchResultReceiveEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1884,7 +1905,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnSearchResultReceive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnScrollAttribute(value: ((value0: OnScrollEvent) => void) | undefined): void {
+    setOnScrollAttribute(value: arkui_component_common_Callback<OnScrollEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1896,7 +1917,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnSslErrorEventReceiveAttribute(value: ((value0: OnSslErrorEventReceiveEvent) => void) | undefined): void {
+    setOnSslErrorEventReceiveAttribute(value: arkui_component_common_Callback<OnSslErrorEventReceiveEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1920,7 +1941,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnSslErrorEvent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnClientAuthenticationRequestAttribute(value: ((value0: OnClientAuthenticationEvent) => void) | undefined): void {
+    setOnClientAuthenticationRequestAttribute(value: arkui_component_common_Callback<OnClientAuthenticationEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1932,7 +1953,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnClientAuthenticationRequest(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnWindowNewAttribute(value: ((value0: OnWindowNewEvent) => void) | undefined): void {
+    setOnWindowNewAttribute(value: arkui_component_common_Callback<OnWindowNewEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2160,7 +2181,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setVerticalScrollBarAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnTouchIconUrlReceivedAttribute(value: ((value0: OnTouchIconUrlReceivedEvent) => void) | undefined): void {
+    setOnTouchIconUrlReceivedAttribute(value: arkui_component_common_Callback<OnTouchIconUrlReceivedEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2172,7 +2193,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnTouchIconUrlReceived(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnFaviconReceivedAttribute(value: ((value0: OnFaviconReceivedEvent) => void) | undefined): void {
+    setOnFaviconReceivedAttribute(value: arkui_component_common_Callback<OnFaviconReceivedEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2184,7 +2205,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnFaviconReceived(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnPageVisibleAttribute(value: ((value0: OnPageVisibleEvent) => void) | undefined): void {
+    setOnPageVisibleAttribute(value: arkui_component_common_Callback<OnPageVisibleEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2196,7 +2217,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnPageVisible(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnDataResubmittedAttribute(value: ((value0: OnDataResubmittedEvent) => void) | undefined): void {
+    setOnDataResubmittedAttribute(value: arkui_component_common_Callback<OnDataResubmittedEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2232,7 +2253,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setAllowWindowOpenMethod(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnAudioStateChangedAttribute(value: ((value0: OnAudioStateChangedEvent) => void) | undefined): void {
+    setOnAudioStateChangedAttribute(value: arkui_component_common_Callback<OnAudioStateChangedEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2244,7 +2265,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnAudioStateChanged(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnFirstContentfulPaintAttribute(value: ((value0: OnFirstContentfulPaintEvent) => void) | undefined): void {
+    setOnFirstContentfulPaintAttribute(value: arkui_component_common_Callback<OnFirstContentfulPaintEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2280,7 +2301,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnLargestContentfulPaint(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnLoadInterceptAttribute(value: ((value0: OnLoadInterceptEvent) => boolean) | undefined): void {
+    setOnLoadInterceptAttribute(value: arkui_component_common_Callback<OnLoadInterceptEvent, boolean> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2304,7 +2325,7 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnControllerAttached(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnOverScrollAttribute(value: ((value0: OnOverScrollEvent) => void) | undefined): void {
+    setOnOverScrollAttribute(value: arkui_component_common_Callback<OnOverScrollEvent, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2608,18 +2629,6 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setEnableHapticFeedback(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOptimizeParserBudgetAttribute(value: boolean | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.writeBoolean(valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._WebAttribute_setOptimizeParserBudget(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setEnableFollowSystemFontWeightAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -2642,6 +2651,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._WebAttribute_setEnableWebAVSession(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOptimizeParserBudgetAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOptimizeParserBudget(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setRunJavaScriptOnDocumentStartAttribute(value: Array<ScriptItem> | undefined): void {
@@ -2784,57 +2805,27 @@ export interface WebKeyboardOptions {
 }
 export interface WebKeyboardCallbackInfo {
     controller: WebKeyboardController;
-    attributes: Map<string, string>;
+    attributes: Record<string, string>;
 }
 export type WebKeyboardCallback = (keyboardCallbackInfo: WebKeyboardCallbackInfo) => WebKeyboardOptions;
 export enum MessageLevel {
     DEBUG = 0,
-    Debug = 0,
     ERROR = 1,
-    Error = 1,
     INFO = 2,
-    Info = 2,
     LOG = 3,
-    Log = 3,
-    WARN = 4,
-    Warn = 4
+    WARN = 4
 }
 export enum MixedMode {
     ALL = 0,
-    All = 0,
     COMPATIBLE = 1,
-    Compatible = 1,
-    NONE = 2,
-    None = 2
+    NONE = 2
 }
 export type OnSafeBrowsingCheckResultCallback = (threatType: ThreatType) => void;
-export enum HitTestType {
-    EDIT_TEXT = 0,
-    EditText = 0,
-    EMAIL = 1,
-    Email = 1,
-    HTTP_ANCHOR = 2,
-    HttpAnchor = 2,
-    HTTP_ANCHOR_IMG = 3,
-    HttpAnchorImg = 3,
-    IMG = 4,
-    Img = 4,
-    MAP = 5,
-    Map = 5,
-    PHONE = 6,
-    Phone = 6,
-    UNKNOWN = 7,
-    Unknown = 7
-}
 export enum CacheMode {
     DEFAULT = 0,
-    Default = 0,
     NONE = 1,
-    None = 1,
     ONLINE = 2,
-    Online = 2,
-    ONLY = 3,
-    Only = 3
+    ONLY = 3
 }
 export enum OverScrollMode {
     NEVER = 0,
@@ -2846,11 +2837,8 @@ export enum BlurOnKeyboardHideMode {
 }
 export enum WebDarkMode {
     OFF = 0,
-    Off = 0,
     ON = 1,
-    On = 1,
-    AUTO = 2,
-    Auto = 2
+    AUTO = 2
 }
 export enum WebCaptureMode {
     HOME_SCREEN = 0
@@ -2877,36 +2865,23 @@ export interface FullScreenEnterEvent {
 export type OnFullScreenEnterCallback = (event: FullScreenEnterEvent) => void;
 export enum RenderExitReason {
     PROCESS_ABNORMAL_TERMINATION = 0,
-    ProcessAbnormalTermination = 0,
     PROCESS_WAS_KILLED = 1,
-    ProcessWasKilled = 1,
     PROCESS_CRASHED = 2,
-    ProcessCrashed = 2,
     PROCESS_OOM = 3,
-    ProcessOom = 3,
-    PROCESS_EXIT_UNKNOWN = 4,
-    ProcessExitUnknown = 4
+    PROCESS_EXIT_UNKNOWN = 4
 }
 export type OnContextMenuHideCallback = () => void;
 export enum SslError {
     INVALID = 0,
-    Invalid = 0,
     HOST_MISMATCH = 1,
-    HostMismatch = 1,
     DATE_INVALID = 2,
-    DateInvalid = 2,
-    UNTRUSTED = 3,
-    Untrusted = 3
+    UNTRUSTED = 3
 }
 export enum FileSelectorMode {
     FILE_OPEN_MODE = 0,
-    FileOpenMode = 0,
     FILE_OPEN_MULTIPLE_MODE = 1,
-    FileOpenMultipleMode = 1,
     FILE_OPEN_FOLDER_MODE = 2,
-    FileOpenFolderMode = 2,
-    FILE_SAVE_MODE = 3,
-    FileSaveMode = 3
+    FILE_SAVE_MODE = 3
 }
 export enum WebLayoutMode {
     NONE = 0,
@@ -2917,39 +2892,27 @@ export enum RenderProcessNotRespondingReason {
     NAVIGATION_COMMIT_TIMEOUT = 1
 }
 export enum ProtectedResourceType {
-    MIDI_SYSEX = "'TYPE_MIDI_SYSEX'",
-    MidiSysex = "'TYPE_MIDI_SYSEX'",
-    VIDEO_CAPTURE = "'TYPE_VIDEO_CAPTURE'",
-    AUDIO_CAPTURE = "'TYPE_AUDIO_CAPTURE'",
-    SENSOR = "'TYPE_SENSOR'"
+    MIDI_SYSEX = 'TYPE_MIDI_SYSEX',
+    VIDEO_CAPTURE = 'TYPE_VIDEO_CAPTURE',
+    AUDIO_CAPTURE = 'TYPE_AUDIO_CAPTURE',
+    SENSOR = 'TYPE_SENSOR'
 }
 export enum ContextMenuSourceType {
     NONE = 0,
-    None = 0,
     MOUSE = 1,
-    Mouse = 1,
-    LONG_PRESS = 2,
-    LongPress = 2
+    LONG_PRESS = 2
 }
 export enum ContextMenuMediaType {
     NONE = 0,
-    None = 0,
-    IMAGE = 1,
-    Image = 1
+    IMAGE = 1
 }
 export enum ContextMenuInputFieldType {
     NONE = 0,
-    None = 0,
     PLAIN_TEXT = 1,
-    PlainText = 1,
     PASSWORD = 2,
-    Password = 2,
     NUMBER_DATA = 3,
-    NumberData = 3,
     TELEPHONE = 4,
-    Telephone = 4,
-    OTHER = 5,
-    Other = 5
+    OTHER = 5
 }
 export enum NativeEmbedStatus {
     CREATE = 0,
@@ -2986,8 +2949,8 @@ export interface Header {
     headerValue: string;
 }
 export interface WebOptions {
-    src: string | Resource;
-    controller: webview.WebviewController;
+    src: string | global_resource_Resource;
+    controller: WebviewController;
     renderMode?: RenderMode;
     incognitoMode?: boolean;
     sharedRenderProcessToken?: string;
@@ -3207,7 +3170,7 @@ export interface JavaScriptProxy {
     jsObject: Object;
     name: string;
     methodList: Array<string>;
-    controller: webview.WebviewController;
+    controller: WebviewController;
     asyncMethodList?: Array<string>;
     permission?: string;
 }
@@ -3227,865 +3190,378 @@ export enum AudioSessionType {
     AMBIENT = 3
 }
 export interface SelectionMenuOptionsExt {
-    onAppear?: (() => void);
-    onDisappear?: (() => void);
+    onAppear?: arkui_component_common_Callback<void, void>;
+    onDisappear?: arkui_component_common_Callback<void, void>;
     preview?: CustomBuilder;
     menuType?: MenuType;
-    previewMenuOptions?: PreviewMenuOptions;
+    previewMenuOptions?: object;
 }
 export interface WebAttribute extends CommonMethod {
     setWebOptions(value: WebOptions): this {
-        throw new Error("Unimplemented method setWebOptions")
+        throw new Error('Unimplemented method setWebOptions')
     }
     javaScriptAccess(value: boolean | undefined): this {
-        throw new Error("Unimplemented method javaScriptAccess")
+        throw new Error('Unimplemented method javaScriptAccess')
     }
     fileAccess(value: boolean | undefined): this {
-        throw new Error("Unimplemented method fileAccess")
+        throw new Error('Unimplemented method fileAccess')
     }
     onlineImageAccess(value: boolean | undefined): this {
-        throw new Error("Unimplemented method onlineImageAccess")
+        throw new Error('Unimplemented method onlineImageAccess')
     }
     domStorageAccess(value: boolean | undefined): this {
-        throw new Error("Unimplemented method domStorageAccess")
+        throw new Error('Unimplemented method domStorageAccess')
     }
     imageAccess(value: boolean | undefined): this {
-        throw new Error("Unimplemented method imageAccess")
+        throw new Error('Unimplemented method imageAccess')
     }
     mixedMode(value: MixedMode | undefined): this {
-        throw new Error("Unimplemented method mixedMode")
+        throw new Error('Unimplemented method mixedMode')
     }
     zoomAccess(value: boolean | undefined): this {
-        throw new Error("Unimplemented method zoomAccess")
+        throw new Error('Unimplemented method zoomAccess')
     }
     geolocationAccess(value: boolean | undefined): this {
-        throw new Error("Unimplemented method geolocationAccess")
+        throw new Error('Unimplemented method geolocationAccess')
     }
     javaScriptProxy(value: JavaScriptProxy | undefined): this {
-        throw new Error("Unimplemented method javaScriptProxy")
+        throw new Error('Unimplemented method javaScriptProxy')
     }
     cacheMode(value: CacheMode | undefined): this {
-        throw new Error("Unimplemented method cacheMode")
+        throw new Error('Unimplemented method cacheMode')
     }
     darkMode(value: WebDarkMode | undefined): this {
-        throw new Error("Unimplemented method darkMode")
+        throw new Error('Unimplemented method darkMode')
     }
     forceDarkAccess(value: boolean | undefined): this {
-        throw new Error("Unimplemented method forceDarkAccess")
+        throw new Error('Unimplemented method forceDarkAccess')
     }
     mediaOptions(value: WebMediaOptions | undefined): this {
-        throw new Error("Unimplemented method mediaOptions")
+        throw new Error('Unimplemented method mediaOptions')
     }
     overviewModeAccess(value: boolean | undefined): this {
-        throw new Error("Unimplemented method overviewModeAccess")
+        throw new Error('Unimplemented method overviewModeAccess')
     }
     overScrollMode(value: OverScrollMode | undefined): this {
-        throw new Error("Unimplemented method overScrollMode")
+        throw new Error('Unimplemented method overScrollMode')
     }
     blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this {
-        throw new Error("Unimplemented method blurOnKeyboardHideMode")
+        throw new Error('Unimplemented method blurOnKeyboardHideMode')
     }
     textZoomRatio(value: int32 | undefined): this {
-        throw new Error("Unimplemented method textZoomRatio")
+        throw new Error('Unimplemented method textZoomRatio')
     }
     databaseAccess(value: boolean | undefined): this {
-        throw new Error("Unimplemented method databaseAccess")
+        throw new Error('Unimplemented method databaseAccess')
     }
     initialScale(value: double | undefined): this {
-        throw new Error("Unimplemented method initialScale")
+        throw new Error('Unimplemented method initialScale')
     }
     metaViewport(value: boolean | undefined): this {
-        throw new Error("Unimplemented method metaViewport")
+        throw new Error('Unimplemented method metaViewport')
     }
-    onPageEnd(value: ((value0: OnPageEndEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onPageEnd")
+    onPageBegin(value: arkui_component_common_Callback<OnPageBeginEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onPageBegin')
     }
-    onPageBegin(value: ((value0: OnPageBeginEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onPageBegin")
+    onPageEnd(value: arkui_component_common_Callback<OnPageEndEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onPageEnd')
     }
-    onLoadStarted(value: ((value0: OnLoadStartedEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onLoadStarted")
+    onLoadStarted(value: arkui_component_common_Callback<OnLoadStartedEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onLoadStarted')
     }
-    onLoadFinished(value: ((value0: OnLoadFinishedEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onLoadFinished")
+    onLoadFinished(value: arkui_component_common_Callback<OnLoadFinishedEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onLoadFinished')
     }
-    onProgressChange(value: ((value0: OnProgressChangeEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onProgressChange")
+    onProgressChange(value: arkui_component_common_Callback<OnProgressChangeEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onProgressChange')
     }
-    onTitleReceive(value: ((value0: OnTitleReceiveEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onTitleReceive")
+    onTitleReceive(value: arkui_component_common_Callback<OnTitleReceiveEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onTitleReceive')
     }
     onGeolocationHide(value: (() => void) | undefined): this {
-        throw new Error("Unimplemented method onGeolocationHide")
+        throw new Error('Unimplemented method onGeolocationHide')
     }
-    onGeolocationShow(value: ((value0: OnGeolocationShowEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onGeolocationShow")
+    onGeolocationShow(value: arkui_component_common_Callback<OnGeolocationShowEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onGeolocationShow')
     }
     onRequestSelected(value: (() => void) | undefined): this {
-        throw new Error("Unimplemented method onRequestSelected")
+        throw new Error('Unimplemented method onRequestSelected')
     }
-    onAlert(value: ((value0: OnAlertEvent) => boolean) | undefined): this {
-        throw new Error("Unimplemented method onAlert")
+    onAlert(value: arkui_component_common_Callback<OnAlertEvent, boolean> | undefined): this {
+        throw new Error('Unimplemented method onAlert')
     }
-    onBeforeUnload(value: ((value0: OnBeforeUnloadEvent) => boolean) | undefined): this {
-        throw new Error("Unimplemented method onBeforeUnload")
+    onBeforeUnload(value: arkui_component_common_Callback<OnBeforeUnloadEvent, boolean> | undefined): this {
+        throw new Error('Unimplemented method onBeforeUnload')
     }
-    onConfirm(value: ((value0: OnConfirmEvent) => boolean) | undefined): this {
-        throw new Error("Unimplemented method onConfirm")
+    onConfirm(value: arkui_component_common_Callback<OnConfirmEvent, boolean> | undefined): this {
+        throw new Error('Unimplemented method onConfirm')
     }
-    onPrompt(value: ((value0: OnPromptEvent) => boolean) | undefined): this {
-        throw new Error("Unimplemented method onPrompt")
+    onPrompt(value: arkui_component_common_Callback<OnPromptEvent, boolean> | undefined): this {
+        throw new Error('Unimplemented method onPrompt')
     }
-    onConsole(value: ((value0: OnConsoleEvent) => boolean) | undefined): this {
-        throw new Error("Unimplemented method onConsole")
+    onConsole(value: arkui_component_common_Callback<OnConsoleEvent, boolean> | undefined): this {
+        throw new Error('Unimplemented method onConsole')
     }
-    onErrorReceive(value: ((value0: OnErrorReceiveEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onErrorReceive")
+    onErrorReceive(value: arkui_component_common_Callback<OnErrorReceiveEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onErrorReceive')
     }
-    onHttpErrorReceive(value: ((value0: OnHttpErrorReceiveEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onHttpErrorReceive")
+    onHttpErrorReceive(value: arkui_component_common_Callback<OnHttpErrorReceiveEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onHttpErrorReceive')
     }
-    onDownloadStart(value: ((value0: OnDownloadStartEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onDownloadStart")
+    onDownloadStart(value: arkui_component_common_Callback<OnDownloadStartEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onDownloadStart')
     }
-    onRefreshAccessedHistory(value: ((value0: OnRefreshAccessedHistoryEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onRefreshAccessedHistory")
+    onRefreshAccessedHistory(value: arkui_component_common_Callback<OnRefreshAccessedHistoryEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onRefreshAccessedHistory')
     }
-    onRenderExited(value: ((value0: OnRenderExitedEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onRenderExited")
+    onRenderExited(value: arkui_component_common_Callback<OnRenderExitedEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onRenderExited')
     }
-    onShowFileSelector(value: ((value0: OnShowFileSelectorEvent) => boolean) | undefined): this {
-        throw new Error("Unimplemented method onShowFileSelector")
+    onShowFileSelector(value: arkui_component_common_Callback<OnShowFileSelectorEvent, boolean> | undefined): this {
+        throw new Error('Unimplemented method onShowFileSelector')
     }
-    onResourceLoad(value: ((value0: OnResourceLoadEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onResourceLoad")
+    onResourceLoad(value: arkui_component_common_Callback<OnResourceLoadEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onResourceLoad')
     }
     onFullScreenExit(value: (() => void) | undefined): this {
-        throw new Error("Unimplemented method onFullScreenExit")
+        throw new Error('Unimplemented method onFullScreenExit')
     }
     onFullScreenEnter(value: OnFullScreenEnterCallback | undefined): this {
-        throw new Error("Unimplemented method onFullScreenEnter")
+        throw new Error('Unimplemented method onFullScreenEnter')
     }
-    onScaleChange(value: ((value0: OnScaleChangeEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onScaleChange")
+    onScaleChange(value: arkui_component_common_Callback<OnScaleChangeEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onScaleChange')
     }
-    onHttpAuthRequest(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): this {
-        throw new Error("Unimplemented method onHttpAuthRequest")
+    onHttpAuthRequest(value: arkui_component_common_Callback<OnHttpAuthRequestEvent, boolean> | undefined): this {
+        throw new Error('Unimplemented method onHttpAuthRequest')
     }
-    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
-        throw new Error("Unimplemented method onInterceptRequest")
+    onInterceptRequest(value: arkui_component_common_Callback<OnInterceptRequestEvent, WebResourceResponse | null> | undefined): this {
+        throw new Error('Unimplemented method onInterceptRequest')
     }
-    onPermissionRequest(value: ((value0: OnPermissionRequestEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onPermissionRequest")
+    onPermissionRequest(value: arkui_component_common_Callback<OnPermissionRequestEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onPermissionRequest')
     }
-    onScreenCaptureRequest(value: ((value0: OnScreenCaptureRequestEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onScreenCaptureRequest")
+    onScreenCaptureRequest(value: arkui_component_common_Callback<OnScreenCaptureRequestEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onScreenCaptureRequest')
     }
-    onContextMenuShow(value: ((value0: OnContextMenuShowEvent) => boolean) | undefined): this {
-        throw new Error("Unimplemented method onContextMenuShow")
+    onContextMenuShow(value: arkui_component_common_Callback<OnContextMenuShowEvent, boolean> | undefined): this {
+        throw new Error('Unimplemented method onContextMenuShow')
     }
     onContextMenuHide(value: OnContextMenuHideCallback | undefined): this {
-        throw new Error("Unimplemented method onContextMenuHide")
+        throw new Error('Unimplemented method onContextMenuHide')
     }
     mediaPlayGestureAccess(value: boolean | undefined): this {
-        throw new Error("Unimplemented method mediaPlayGestureAccess")
+        throw new Error('Unimplemented method mediaPlayGestureAccess')
     }
-    onSearchResultReceive(value: ((value0: OnSearchResultReceiveEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onSearchResultReceive")
+    onSearchResultReceive(value: arkui_component_common_Callback<OnSearchResultReceiveEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onSearchResultReceive')
     }
-    onScroll(value: ((value0: OnScrollEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onScroll")
+    onScroll(value: arkui_component_common_Callback<OnScrollEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onScroll')
     }
-    onSslErrorEventReceive(value: ((value0: OnSslErrorEventReceiveEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onSslErrorEventReceive")
+    onSslErrorEventReceive(value: arkui_component_common_Callback<OnSslErrorEventReceiveEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onSslErrorEventReceive')
     }
     onSslErrorEvent(value: OnSslErrorEventCallback | undefined): this {
-        throw new Error("Unimplemented method onSslErrorEvent")
+        throw new Error('Unimplemented method onSslErrorEvent')
     }
-    onClientAuthenticationRequest(value: ((value0: OnClientAuthenticationEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onClientAuthenticationRequest")
+    onClientAuthenticationRequest(value: arkui_component_common_Callback<OnClientAuthenticationEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onClientAuthenticationRequest')
     }
-    onWindowNew(value: ((value0: OnWindowNewEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onWindowNew")
+    onWindowNew(value: arkui_component_common_Callback<OnWindowNewEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onWindowNew')
     }
     onWindowExit(value: (() => void) | undefined): this {
-        throw new Error("Unimplemented method onWindowExit")
+        throw new Error('Unimplemented method onWindowExit')
     }
     multiWindowAccess(value: boolean | undefined): this {
-        throw new Error("Unimplemented method multiWindowAccess")
+        throw new Error('Unimplemented method multiWindowAccess')
     }
     onInterceptKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
-        throw new Error("Unimplemented method onInterceptKeyEvent")
+        throw new Error('Unimplemented method onInterceptKeyEvent')
     }
     webStandardFont(value: string | undefined): this {
-        throw new Error("Unimplemented method webStandardFont")
+        throw new Error('Unimplemented method webStandardFont')
     }
     webSerifFont(value: string | undefined): this {
-        throw new Error("Unimplemented method webSerifFont")
+        throw new Error('Unimplemented method webSerifFont')
     }
     webSansSerifFont(value: string | undefined): this {
-        throw new Error("Unimplemented method webSansSerifFont")
+        throw new Error('Unimplemented method webSansSerifFont')
     }
     webFixedFont(value: string | undefined): this {
-        throw new Error("Unimplemented method webFixedFont")
+        throw new Error('Unimplemented method webFixedFont')
     }
     webFantasyFont(value: string | undefined): this {
-        throw new Error("Unimplemented method webFantasyFont")
+        throw new Error('Unimplemented method webFantasyFont')
     }
     webCursiveFont(value: string | undefined): this {
-        throw new Error("Unimplemented method webCursiveFont")
+        throw new Error('Unimplemented method webCursiveFont')
     }
     defaultFixedFontSize(value: int32 | undefined): this {
-        throw new Error("Unimplemented method defaultFixedFontSize")
+        throw new Error('Unimplemented method defaultFixedFontSize')
     }
     defaultFontSize(value: int32 | undefined): this {
-        throw new Error("Unimplemented method defaultFontSize")
+        throw new Error('Unimplemented method defaultFontSize')
     }
     minFontSize(value: int32 | undefined): this {
-        throw new Error("Unimplemented method minFontSize")
+        throw new Error('Unimplemented method minFontSize')
     }
     minLogicalFontSize(value: int32 | undefined): this {
-        throw new Error("Unimplemented method minLogicalFontSize")
+        throw new Error('Unimplemented method minLogicalFontSize')
     }
     defaultTextEncodingFormat(value: string | undefined): this {
-        throw new Error("Unimplemented method defaultTextEncodingFormat")
+        throw new Error('Unimplemented method defaultTextEncodingFormat')
     }
     forceDisplayScrollBar(value: boolean | undefined): this {
-        throw new Error("Unimplemented method forceDisplayScrollBar")
+        throw new Error('Unimplemented method forceDisplayScrollBar')
     }
     blockNetwork(value: boolean | undefined): this {
-        throw new Error("Unimplemented method blockNetwork")
+        throw new Error('Unimplemented method blockNetwork')
     }
     horizontalScrollBarAccess(value: boolean | undefined): this {
-        throw new Error("Unimplemented method horizontalScrollBarAccess")
+        throw new Error('Unimplemented method horizontalScrollBarAccess')
     }
     verticalScrollBarAccess(value: boolean | undefined): this {
-        throw new Error("Unimplemented method verticalScrollBarAccess")
+        throw new Error('Unimplemented method verticalScrollBarAccess')
     }
-    onTouchIconUrlReceived(value: ((value0: OnTouchIconUrlReceivedEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onTouchIconUrlReceived")
+    onTouchIconUrlReceived(value: arkui_component_common_Callback<OnTouchIconUrlReceivedEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onTouchIconUrlReceived')
     }
-    onFaviconReceived(value: ((value0: OnFaviconReceivedEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onFaviconReceived")
+    onFaviconReceived(value: arkui_component_common_Callback<OnFaviconReceivedEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onFaviconReceived')
     }
-    onPageVisible(value: ((value0: OnPageVisibleEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onPageVisible")
+    onPageVisible(value: arkui_component_common_Callback<OnPageVisibleEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onPageVisible')
     }
-    onDataResubmitted(value: ((value0: OnDataResubmittedEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onDataResubmitted")
+    onDataResubmitted(value: arkui_component_common_Callback<OnDataResubmittedEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onDataResubmitted')
     }
     pinchSmooth(value: boolean | undefined): this {
-        throw new Error("Unimplemented method pinchSmooth")
+        throw new Error('Unimplemented method pinchSmooth')
     }
     allowWindowOpenMethod(value: boolean | undefined): this {
-        throw new Error("Unimplemented method allowWindowOpenMethod")
+        throw new Error('Unimplemented method allowWindowOpenMethod')
     }
-    onAudioStateChanged(value: ((value0: OnAudioStateChangedEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onAudioStateChanged")
+    onAudioStateChanged(value: arkui_component_common_Callback<OnAudioStateChangedEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onAudioStateChanged')
     }
-    onFirstContentfulPaint(value: ((value0: OnFirstContentfulPaintEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onFirstContentfulPaint")
+    onFirstContentfulPaint(value: arkui_component_common_Callback<OnFirstContentfulPaintEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onFirstContentfulPaint')
     }
     onFirstMeaningfulPaint(value: OnFirstMeaningfulPaintCallback | undefined): this {
-        throw new Error("Unimplemented method onFirstMeaningfulPaint")
+        throw new Error('Unimplemented method onFirstMeaningfulPaint')
     }
     onLargestContentfulPaint(value: OnLargestContentfulPaintCallback | undefined): this {
-        throw new Error("Unimplemented method onLargestContentfulPaint")
+        throw new Error('Unimplemented method onLargestContentfulPaint')
     }
-    onLoadIntercept(value: ((value0: OnLoadInterceptEvent) => boolean) | undefined): this {
-        throw new Error("Unimplemented method onLoadIntercept")
+    onLoadIntercept(value: arkui_component_common_Callback<OnLoadInterceptEvent, boolean> | undefined): this {
+        throw new Error('Unimplemented method onLoadIntercept')
     }
     onControllerAttached(value: (() => void) | undefined): this {
-        throw new Error("Unimplemented method onControllerAttached")
+        throw new Error('Unimplemented method onControllerAttached')
     }
-    onOverScroll(value: ((value0: OnOverScrollEvent) => void) | undefined): this {
-        throw new Error("Unimplemented method onOverScroll")
+    onOverScroll(value: arkui_component_common_Callback<OnOverScrollEvent, void> | undefined): this {
+        throw new Error('Unimplemented method onOverScroll')
     }
     onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this {
-        throw new Error("Unimplemented method onSafeBrowsingCheckResult")
+        throw new Error('Unimplemented method onSafeBrowsingCheckResult')
     }
     onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback | undefined): this {
-        throw new Error("Unimplemented method onNavigationEntryCommitted")
+        throw new Error('Unimplemented method onNavigationEntryCommitted')
     }
     onIntelligentTrackingPreventionResult(value: OnIntelligentTrackingPreventionCallback | undefined): this {
-        throw new Error("Unimplemented method onIntelligentTrackingPreventionResult")
+        throw new Error('Unimplemented method onIntelligentTrackingPreventionResult')
     }
     javaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
-        throw new Error("Unimplemented method javaScriptOnDocumentStart")
+        throw new Error('Unimplemented method javaScriptOnDocumentStart')
     }
     javaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
-        throw new Error("Unimplemented method javaScriptOnDocumentEnd")
+        throw new Error('Unimplemented method javaScriptOnDocumentEnd')
     }
     layoutMode(value: WebLayoutMode | undefined): this {
-        throw new Error("Unimplemented method layoutMode")
+        throw new Error('Unimplemented method layoutMode')
     }
     nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt | undefined): this {
-        throw new Error("Unimplemented method nestedScroll")
+        throw new Error('Unimplemented method nestedScroll')
     }
     enableNativeEmbedMode(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableNativeEmbedMode")
+        throw new Error('Unimplemented method enableNativeEmbedMode')
     }
     onNativeEmbedLifecycleChange(value: ((event: NativeEmbedDataInfo) => void) | undefined): this {
-        throw new Error("Unimplemented method onNativeEmbedLifecycleChange")
+        throw new Error('Unimplemented method onNativeEmbedLifecycleChange')
     }
     onNativeEmbedVisibilityChange(value: OnNativeEmbedVisibilityChangeCallback | undefined): this {
-        throw new Error("Unimplemented method onNativeEmbedVisibilityChange")
+        throw new Error('Unimplemented method onNativeEmbedVisibilityChange')
     }
     onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void) | undefined): this {
-        throw new Error("Unimplemented method onNativeEmbedGestureEvent")
+        throw new Error('Unimplemented method onNativeEmbedGestureEvent')
     }
     copyOptions(value: CopyOptions | undefined): this {
-        throw new Error("Unimplemented method copyOptions")
+        throw new Error('Unimplemented method copyOptions')
     }
     onOverrideUrlLoading(value: OnOverrideUrlLoadingCallback | undefined): this {
-        throw new Error("Unimplemented method onOverrideUrlLoading")
+        throw new Error('Unimplemented method onOverrideUrlLoading')
     }
     textAutosizing(value: boolean | undefined): this {
-        throw new Error("Unimplemented method textAutosizing")
+        throw new Error('Unimplemented method textAutosizing')
     }
     enableNativeMediaPlayer(value: NativeMediaPlayerConfig | undefined): this {
-        throw new Error("Unimplemented method enableNativeMediaPlayer")
+        throw new Error('Unimplemented method enableNativeMediaPlayer')
     }
     onRenderProcessNotResponding(value: OnRenderProcessNotRespondingCallback | undefined): this {
-        throw new Error("Unimplemented method onRenderProcessNotResponding")
+        throw new Error('Unimplemented method onRenderProcessNotResponding')
     }
     onRenderProcessResponding(value: OnRenderProcessRespondingCallback | undefined): this {
-        throw new Error("Unimplemented method onRenderProcessResponding")
+        throw new Error('Unimplemented method onRenderProcessResponding')
     }
     onViewportFitChanged(value: OnViewportFitChangedCallback | undefined): this {
-        throw new Error("Unimplemented method onViewportFitChanged")
+        throw new Error('Unimplemented method onViewportFitChanged')
     }
     onInterceptKeyboardAttach(value: WebKeyboardCallback | undefined): this {
-        throw new Error("Unimplemented method onInterceptKeyboardAttach")
+        throw new Error('Unimplemented method onInterceptKeyboardAttach')
     }
     onAdsBlocked(value: OnAdsBlockedCallback | undefined): this {
-        throw new Error("Unimplemented method onAdsBlocked")
+        throw new Error('Unimplemented method onAdsBlocked')
     }
     keyboardAvoidMode(value: WebKeyboardAvoidMode | undefined): this {
-        throw new Error("Unimplemented method keyboardAvoidMode")
+        throw new Error('Unimplemented method keyboardAvoidMode')
     }
     editMenuOptions(value: EditMenuOptions | undefined): this {
-        throw new Error("Unimplemented method editMenuOptions")
+        throw new Error('Unimplemented method editMenuOptions')
     }
     enableHapticFeedback(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableHapticFeedback")
-    }
-    optimizeParserBudget(value: boolean | undefined): this {
-        throw new Error("Unimplemented method optimizeParserBudget")
+        throw new Error('Unimplemented method enableHapticFeedback')
     }
     enableFollowSystemFontWeight(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableFollowSystemFontWeight")
+        throw new Error('Unimplemented method enableFollowSystemFontWeight')
     }
     enableWebAVSession(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableWebAVSession")
+        throw new Error('Unimplemented method enableWebAVSession')
+    }
+    optimizeParserBudget(value: boolean | undefined): this {
+        throw new Error('Unimplemented method optimizeParserBudget')
     }
     runJavaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
-        throw new Error("Unimplemented method runJavaScriptOnDocumentStart")
+        throw new Error('Unimplemented method runJavaScriptOnDocumentStart')
     }
     runJavaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
-        throw new Error("Unimplemented method runJavaScriptOnDocumentEnd")
+        throw new Error('Unimplemented method runJavaScriptOnDocumentEnd')
     }
     runJavaScriptOnHeadEnd(value: Array<ScriptItem> | undefined): this {
-        throw new Error("Unimplemented method runJavaScriptOnHeadEnd")
+        throw new Error('Unimplemented method runJavaScriptOnHeadEnd')
     }
     nativeEmbedOptions(value: EmbedOptions | undefined): this {
-        throw new Error("Unimplemented method nativeEmbedOptions")
+        throw new Error('Unimplemented method nativeEmbedOptions')
     }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
-        throw new Error("Unimplemented method registerNativeEmbedRule")
+        throw new Error('Unimplemented method registerNativeEmbedRule')
     }
     bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
-        throw new Error("Unimplemented method bindSelectionMenu")
+        throw new Error('Unimplemented method bindSelectionMenu')
     }
     attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
-    javaScriptAccess_value?: boolean | undefined
-    fileAccess_value?: boolean | undefined
-    onlineImageAccess_value?: boolean | undefined
-    domStorageAccess_value?: boolean | undefined
-    imageAccess_value?: boolean | undefined
-    mixedMode_value?: MixedMode | undefined
-    zoomAccess_value?: boolean | undefined
-    geolocationAccess_value?: boolean | undefined
-    javaScriptProxy_value?: JavaScriptProxy | undefined
-    cacheMode_value?: CacheMode | undefined
-    darkMode_value?: WebDarkMode | undefined
-    forceDarkAccess_value?: boolean | undefined
-    mediaOptions_value?: WebMediaOptions | undefined
-    overviewModeAccess_value?: boolean | undefined
-    overScrollMode_value?: OverScrollMode | undefined
-    blurOnKeyboardHideMode_value?: BlurOnKeyboardHideMode | undefined
-    textZoomRatio_value?: int32 | undefined
-    databaseAccess_value?: boolean | undefined
-    initialScale_value?: double | undefined
-    metaViewport_value?: boolean | undefined
-    onPageEnd_value?: ((value0: OnPageEndEvent) => void) | undefined
-    onPageBegin_value?: ((value0: OnPageBeginEvent) => void) | undefined
-    onLoadStarted_value?: ((value0: OnLoadStartedEvent) => void) | undefined
-    onLoadFinished_value?: ((value0: OnLoadFinishedEvent) => void) | undefined
-    onProgressChange_value?: ((value0: OnProgressChangeEvent) => void) | undefined
-    onTitleReceive_value?: ((value0: OnTitleReceiveEvent) => void) | undefined
-    onGeolocationHide_value?: (() => void) | undefined
-    onGeolocationShow_value?: ((value0: OnGeolocationShowEvent) => void) | undefined
-    onRequestSelected_value?: (() => void) | undefined
-    onAlert_value?: ((value0: OnAlertEvent) => boolean) | undefined
-    onBeforeUnload_value?: ((value0: OnBeforeUnloadEvent) => boolean) | undefined
-    onConfirm_value?: ((value0: OnConfirmEvent) => boolean) | undefined
-    onPrompt_value?: ((value0: OnPromptEvent) => boolean) | undefined
-    onConsole_value?: ((value0: OnConsoleEvent) => boolean) | undefined
-    onErrorReceive_value?: ((value0: OnErrorReceiveEvent) => void) | undefined
-    onHttpErrorReceive_value?: ((value0: OnHttpErrorReceiveEvent) => void) | undefined
-    onDownloadStart_value?: ((value0: OnDownloadStartEvent) => void) | undefined
-    onRefreshAccessedHistory_value?: ((value0: OnRefreshAccessedHistoryEvent) => void) | undefined
-    onRenderExited_value?: ((value0: OnRenderExitedEvent) => void) | undefined
-    onShowFileSelector_value?: ((value0: OnShowFileSelectorEvent) => boolean) | undefined
-    onResourceLoad_value?: ((value0: OnResourceLoadEvent) => void) | undefined
-    onFullScreenExit_value?: (() => void) | undefined
-    onFullScreenEnter_value?: OnFullScreenEnterCallback | undefined
-    onScaleChange_value?: ((value0: OnScaleChangeEvent) => void) | undefined
-    onHttpAuthRequest_value?: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined
-    onInterceptRequest_value?: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined
-    onPermissionRequest_value?: ((value0: OnPermissionRequestEvent) => void) | undefined
-    onScreenCaptureRequest_value?: ((value0: OnScreenCaptureRequestEvent) => void) | undefined
-    onContextMenuShow_value?: ((value0: OnContextMenuShowEvent) => boolean) | undefined
-    onContextMenuHide_value?: OnContextMenuHideCallback | undefined
-    mediaPlayGestureAccess_value?: boolean | undefined
-    onSearchResultReceive_value?: ((value0: OnSearchResultReceiveEvent) => void) | undefined
-    onScroll_value?: ((value0: OnScrollEvent) => void) | undefined
-    onSslErrorEventReceive_value?: ((value0: OnSslErrorEventReceiveEvent) => void) | undefined
-    onSslErrorEvent_value?: OnSslErrorEventCallback | undefined
-    onClientAuthenticationRequest_value?: ((value0: OnClientAuthenticationEvent) => void) | undefined
-    onWindowNew_value?: ((value0: OnWindowNewEvent) => void) | undefined
-    onWindowExit_value?: (() => void) | undefined
-    multiWindowAccess_value?: boolean | undefined
-    onInterceptKeyEvent_value?: ((event: KeyEvent) => boolean) | undefined
-    webStandardFont_value?: string | undefined
-    webSerifFont_value?: string | undefined
-    webSansSerifFont_value?: string | undefined
-    webFixedFont_value?: string | undefined
-    webFantasyFont_value?: string | undefined
-    webCursiveFont_value?: string | undefined
-    defaultFixedFontSize_value?: int32 | undefined
-    defaultFontSize_value?: int32 | undefined
-    minFontSize_value?: int32 | undefined
-    minLogicalFontSize_value?: int32 | undefined
-    defaultTextEncodingFormat_value?: string | undefined
-    forceDisplayScrollBar_value?: boolean | undefined
-    blockNetwork_value?: boolean | undefined
-    horizontalScrollBarAccess_value?: boolean | undefined
-    verticalScrollBarAccess_value?: boolean | undefined
-    onTouchIconUrlReceived_value?: ((value0: OnTouchIconUrlReceivedEvent) => void) | undefined
-    onFaviconReceived_value?: ((value0: OnFaviconReceivedEvent) => void) | undefined
-    onPageVisible_value?: ((value0: OnPageVisibleEvent) => void) | undefined
-    onDataResubmitted_value?: ((value0: OnDataResubmittedEvent) => void) | undefined
-    pinchSmooth_value?: boolean | undefined
-    allowWindowOpenMethod_value?: boolean | undefined
-    onAudioStateChanged_value?: ((value0: OnAudioStateChangedEvent) => void) | undefined
-    onFirstContentfulPaint_value?: ((value0: OnFirstContentfulPaintEvent) => void) | undefined
-    onFirstMeaningfulPaint_value?: OnFirstMeaningfulPaintCallback | undefined
-    onLargestContentfulPaint_value?: OnLargestContentfulPaintCallback | undefined
-    onLoadIntercept_value?: ((value0: OnLoadInterceptEvent) => boolean) | undefined
-    onControllerAttached_value?: (() => void) | undefined
-    onOverScroll_value?: ((value0: OnOverScrollEvent) => void) | undefined
-    onSafeBrowsingCheckResult_value?: OnSafeBrowsingCheckResultCallback | undefined
-    onNavigationEntryCommitted_value?: OnNavigationEntryCommittedCallback | undefined
-    onIntelligentTrackingPreventionResult_value?: OnIntelligentTrackingPreventionCallback | undefined
-    javaScriptOnDocumentStart_value?: Array<ScriptItem> | undefined
-    javaScriptOnDocumentEnd_value?: Array<ScriptItem> | undefined
-    layoutMode_value?: WebLayoutMode | undefined
-    nestedScroll_value?: NestedScrollOptions | NestedScrollOptionsExt | undefined
-    enableNativeEmbedMode_value?: boolean | undefined
-    onNativeEmbedLifecycleChange_value?: ((event: NativeEmbedDataInfo) => void) | undefined
-    onNativeEmbedVisibilityChange_value?: OnNativeEmbedVisibilityChangeCallback | undefined
-    onNativeEmbedGestureEvent_value?: ((event: NativeEmbedTouchInfo) => void) | undefined
-    copyOptions_value?: CopyOptions | undefined
-    onOverrideUrlLoading_value?: OnOverrideUrlLoadingCallback | undefined
-    textAutosizing_value?: boolean | undefined
-    enableNativeMediaPlayer_value?: NativeMediaPlayerConfig | undefined
-    onRenderProcessNotResponding_value?: OnRenderProcessNotRespondingCallback | undefined
-    onRenderProcessResponding_value?: OnRenderProcessRespondingCallback | undefined
-    onViewportFitChanged_value?: OnViewportFitChangedCallback | undefined
-    onInterceptKeyboardAttach_value?: WebKeyboardCallback | undefined
-    onAdsBlocked_value?: OnAdsBlockedCallback | undefined
-    keyboardAvoidMode_value?: WebKeyboardAvoidMode | undefined
-    editMenuOptions_value?: EditMenuOptions | undefined
-    enableHapticFeedback_value?: boolean | undefined
-    optimizeParserBudget_value?: boolean | undefined
-    enableFollowSystemFontWeight_value?: boolean | undefined
-    enableWebAVSession_value?: boolean | undefined
-    runJavaScriptOnDocumentStart_value?: Array<ScriptItem> | undefined
-    runJavaScriptOnDocumentEnd_value?: Array<ScriptItem> | undefined
-    runJavaScriptOnHeadEnd_value?: Array<ScriptItem> | undefined
-    nativeEmbedOptions_value?: EmbedOptions | undefined
-    attributeModifier_value?: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined
-    setWebOptions(value: WebOptions): this {
-        return this
-    }
-    javaScriptAccess(value: boolean | undefined): this {
-        return this
-    }
-    fileAccess(value: boolean | undefined): this {
-        return this
-    }
-    onlineImageAccess(value: boolean | undefined): this {
-        return this
-    }
-    domStorageAccess(value: boolean | undefined): this {
-        return this
-    }
-    imageAccess(value: boolean | undefined): this {
-        return this
-    }
-    mixedMode(value: MixedMode | undefined): this {
-        return this
-    }
-    zoomAccess(value: boolean | undefined): this {
-        return this
-    }
-    geolocationAccess(value: boolean | undefined): this {
-        return this
-    }
-    javaScriptProxy(value: JavaScriptProxy | undefined): this {
-        return this
-    }
-    cacheMode(value: CacheMode | undefined): this {
-        return this
-    }
-    darkMode(value: WebDarkMode | undefined): this {
-        return this
-    }
-    forceDarkAccess(value: boolean | undefined): this {
-        return this
-    }
-    mediaOptions(value: WebMediaOptions | undefined): this {
-        return this
-    }
-    overviewModeAccess(value: boolean | undefined): this {
-        return this
-    }
-    overScrollMode(value: OverScrollMode | undefined): this {
-        return this
-    }
-    blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this {
-        return this
-    }
-    textZoomRatio(value: int32 | undefined): this {
-        return this
-    }
-    databaseAccess(value: boolean | undefined): this {
-        return this
-    }
-    initialScale(value: double | undefined): this {
-        return this
-    }
-    metaViewport(value: boolean | undefined): this {
-        return this
-    }
-    onPageEnd(value: ((value0: OnPageEndEvent) => void) | undefined): this {
-        return this
-    }
-    onPageBegin(value: ((value0: OnPageBeginEvent) => void) | undefined): this {
-        return this
-    }
-    onLoadStarted(value: ((value0: OnLoadStartedEvent) => void) | undefined): this {
-        return this
-    }
-    onLoadFinished(value: ((value0: OnLoadFinishedEvent) => void) | undefined): this {
-        return this
-    }
-    onProgressChange(value: ((value0: OnProgressChangeEvent) => void) | undefined): this {
-        return this
-    }
-    onTitleReceive(value: ((value0: OnTitleReceiveEvent) => void) | undefined): this {
-        return this
-    }
-    onGeolocationHide(value: (() => void) | undefined): this {
-        return this
-    }
-    onGeolocationShow(value: ((value0: OnGeolocationShowEvent) => void) | undefined): this {
-        return this
-    }
-    onRequestSelected(value: (() => void) | undefined): this {
-        return this
-    }
-    onAlert(value: ((value0: OnAlertEvent) => boolean) | undefined): this {
-        return this
-    }
-    onBeforeUnload(value: ((value0: OnBeforeUnloadEvent) => boolean) | undefined): this {
-        return this
-    }
-    onConfirm(value: ((value0: OnConfirmEvent) => boolean) | undefined): this {
-        return this
-    }
-    onPrompt(value: ((value0: OnPromptEvent) => boolean) | undefined): this {
-        return this
-    }
-    onConsole(value: ((value0: OnConsoleEvent) => boolean) | undefined): this {
-        return this
-    }
-    onErrorReceive(value: ((value0: OnErrorReceiveEvent) => void) | undefined): this {
-        return this
-    }
-    onHttpErrorReceive(value: ((value0: OnHttpErrorReceiveEvent) => void) | undefined): this {
-        return this
-    }
-    onDownloadStart(value: ((value0: OnDownloadStartEvent) => void) | undefined): this {
-        return this
-    }
-    onRefreshAccessedHistory(value: ((value0: OnRefreshAccessedHistoryEvent) => void) | undefined): this {
-        return this
-    }
-    onRenderExited(value: ((value0: OnRenderExitedEvent) => void) | undefined): this {
-        return this
-    }
-    onShowFileSelector(value: ((value0: OnShowFileSelectorEvent) => boolean) | undefined): this {
-        return this
-    }
-    onResourceLoad(value: ((value0: OnResourceLoadEvent) => void) | undefined): this {
-        return this
-    }
-    onFullScreenExit(value: (() => void) | undefined): this {
-        return this
-    }
-    onFullScreenEnter(value: OnFullScreenEnterCallback | undefined): this {
-        return this
-    }
-    onScaleChange(value: ((value0: OnScaleChangeEvent) => void) | undefined): this {
-        return this
-    }
-    onHttpAuthRequest(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): this {
-        return this
-    }
-    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
-        return this
-    }
-    onPermissionRequest(value: ((value0: OnPermissionRequestEvent) => void) | undefined): this {
-        return this
-    }
-    onScreenCaptureRequest(value: ((value0: OnScreenCaptureRequestEvent) => void) | undefined): this {
-        return this
-    }
-    onContextMenuShow(value: ((value0: OnContextMenuShowEvent) => boolean) | undefined): this {
-        return this
-    }
-    onContextMenuHide(value: OnContextMenuHideCallback | undefined): this {
-        return this
-    }
-    mediaPlayGestureAccess(value: boolean | undefined): this {
-        return this
-    }
-    onSearchResultReceive(value: ((value0: OnSearchResultReceiveEvent) => void) | undefined): this {
-        return this
-    }
-    onScroll(value: ((value0: OnScrollEvent) => void) | undefined): this {
-        return this
-    }
-    onSslErrorEventReceive(value: ((value0: OnSslErrorEventReceiveEvent) => void) | undefined): this {
-        return this
-    }
-    onSslErrorEvent(value: OnSslErrorEventCallback | undefined): this {
-        return this
-    }
-    onClientAuthenticationRequest(value: ((value0: OnClientAuthenticationEvent) => void) | undefined): this {
-        return this
-    }
-    onWindowNew(value: ((value0: OnWindowNewEvent) => void) | undefined): this {
-        return this
-    }
-    onWindowExit(value: (() => void) | undefined): this {
-        return this
-    }
-    multiWindowAccess(value: boolean | undefined): this {
-        return this
-    }
-    onInterceptKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
-        return this
-    }
-    webStandardFont(value: string | undefined): this {
-        return this
-    }
-    webSerifFont(value: string | undefined): this {
-        return this
-    }
-    webSansSerifFont(value: string | undefined): this {
-        return this
-    }
-    webFixedFont(value: string | undefined): this {
-        return this
-    }
-    webFantasyFont(value: string | undefined): this {
-        return this
-    }
-    webCursiveFont(value: string | undefined): this {
-        return this
-    }
-    defaultFixedFontSize(value: int32 | undefined): this {
-        return this
-    }
-    defaultFontSize(value: int32 | undefined): this {
-        return this
-    }
-    minFontSize(value: int32 | undefined): this {
-        return this
-    }
-    minLogicalFontSize(value: int32 | undefined): this {
-        return this
-    }
-    defaultTextEncodingFormat(value: string | undefined): this {
-        return this
-    }
-    forceDisplayScrollBar(value: boolean | undefined): this {
-        return this
-    }
-    blockNetwork(value: boolean | undefined): this {
-        return this
-    }
-    horizontalScrollBarAccess(value: boolean | undefined): this {
-        return this
-    }
-    verticalScrollBarAccess(value: boolean | undefined): this {
-        return this
-    }
-    onTouchIconUrlReceived(value: ((value0: OnTouchIconUrlReceivedEvent) => void) | undefined): this {
-        return this
-    }
-    onFaviconReceived(value: ((value0: OnFaviconReceivedEvent) => void) | undefined): this {
-        return this
-    }
-    onPageVisible(value: ((value0: OnPageVisibleEvent) => void) | undefined): this {
-        return this
-    }
-    onDataResubmitted(value: ((value0: OnDataResubmittedEvent) => void) | undefined): this {
-        return this
-    }
-    pinchSmooth(value: boolean | undefined): this {
-        return this
-    }
-    allowWindowOpenMethod(value: boolean | undefined): this {
-        return this
-    }
-    onAudioStateChanged(value: ((value0: OnAudioStateChangedEvent) => void) | undefined): this {
-        return this
-    }
-    onFirstContentfulPaint(value: ((value0: OnFirstContentfulPaintEvent) => void) | undefined): this {
-        return this
-    }
-    onFirstMeaningfulPaint(value: OnFirstMeaningfulPaintCallback | undefined): this {
-        return this
-    }
-    onLargestContentfulPaint(value: OnLargestContentfulPaintCallback | undefined): this {
-        return this
-    }
-    onLoadIntercept(value: ((value0: OnLoadInterceptEvent) => boolean) | undefined): this {
-        return this
-    }
-    onControllerAttached(value: (() => void) | undefined): this {
-        return this
-    }
-    onOverScroll(value: ((value0: OnOverScrollEvent) => void) | undefined): this {
-        return this
-    }
-    onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this {
-        return this
-    }
-    onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback | undefined): this {
-        return this
-    }
-    onIntelligentTrackingPreventionResult(value: OnIntelligentTrackingPreventionCallback | undefined): this {
-        return this
-    }
-    javaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
-        return this
-    }
-    javaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
-        return this
-    }
-    layoutMode(value: WebLayoutMode | undefined): this {
-        return this
-    }
-    nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt | undefined): this {
-        return this
-    }
-    enableNativeEmbedMode(value: boolean | undefined): this {
-        return this
-    }
-    onNativeEmbedLifecycleChange(value: ((event: NativeEmbedDataInfo) => void) | undefined): this {
-        return this
-    }
-    onNativeEmbedVisibilityChange(value: OnNativeEmbedVisibilityChangeCallback | undefined): this {
-        return this
-    }
-    onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void) | undefined): this {
-        return this
-    }
-    copyOptions(value: CopyOptions | undefined): this {
-        return this
-    }
-    onOverrideUrlLoading(value: OnOverrideUrlLoadingCallback | undefined): this {
-        return this
-    }
-    textAutosizing(value: boolean | undefined): this {
-        return this
-    }
-    enableNativeMediaPlayer(value: NativeMediaPlayerConfig | undefined): this {
-        return this
-    }
-    onRenderProcessNotResponding(value: OnRenderProcessNotRespondingCallback | undefined): this {
-        return this
-    }
-    onRenderProcessResponding(value: OnRenderProcessRespondingCallback | undefined): this {
-        return this
-    }
-    onViewportFitChanged(value: OnViewportFitChangedCallback | undefined): this {
-        return this
-    }
-    onInterceptKeyboardAttach(value: WebKeyboardCallback | undefined): this {
-        return this
-    }
-    onAdsBlocked(value: OnAdsBlockedCallback | undefined): this {
-        return this
-    }
-    keyboardAvoidMode(value: WebKeyboardAvoidMode | undefined): this {
-        return this
-    }
-    editMenuOptions(value: EditMenuOptions | undefined): this {
-        return this
-    }
-    enableHapticFeedback(value: boolean | undefined): this {
-        return this
-    }
-    optimizeParserBudget(value: boolean | undefined): this {
-        return this
-    }
-    enableFollowSystemFontWeight(value: boolean | undefined): this {
-        return this
-    }
-    enableWebAVSession(value: boolean | undefined): this {
-        return this
-    }
-    runJavaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
-        return this
-    }
-    runJavaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
-        return this
-    }
-    runJavaScriptOnHeadEnd(value: Array<ScriptItem> | undefined): this {
-        return this
-    }
-    nativeEmbedOptions(value: EmbedOptions | undefined): this {
-        return this
-    }
-    registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
-        return this
-    }
-    bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 export interface SslErrorEvent {
@@ -4109,13 +3585,10 @@ export interface EmbedOptions {
 
 export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttribute {
     getPeer(): ArkWebPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkWebPeer)
     }
     public setWebOptions(value: WebOptions): this {
-        if (this.checkPriority("setWebOptions")) {
+        if (this.checkPriority('setWebOptions')) {
             const value_casted = value as (WebOptions)
             this.getPeer()?.setWebOptionsAttribute(value_casted)
             this.applyOptionsFinish('WebAttribute');
@@ -4124,7 +3597,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public javaScriptAccess(value: boolean | undefined): this {
-        if (this.checkPriority("javaScriptAccess")) {
+        if (this.checkPriority('javaScriptAccess')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setJavaScriptAccessAttribute(value_casted)
             return this
@@ -4132,7 +3605,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public fileAccess(value: boolean | undefined): this {
-        if (this.checkPriority("fileAccess")) {
+        if (this.checkPriority('fileAccess')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setFileAccessAttribute(value_casted)
             return this
@@ -4140,7 +3613,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public onlineImageAccess(value: boolean | undefined): this {
-        if (this.checkPriority("onlineImageAccess")) {
+        if (this.checkPriority('onlineImageAccess')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setOnlineImageAccessAttribute(value_casted)
             return this
@@ -4148,7 +3621,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public domStorageAccess(value: boolean | undefined): this {
-        if (this.checkPriority("domStorageAccess")) {
+        if (this.checkPriority('domStorageAccess')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setDomStorageAccessAttribute(value_casted)
             return this
@@ -4156,7 +3629,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public imageAccess(value: boolean | undefined): this {
-        if (this.checkPriority("imageAccess")) {
+        if (this.checkPriority('imageAccess')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setImageAccessAttribute(value_casted)
             return this
@@ -4164,7 +3637,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public mixedMode(value: MixedMode | undefined): this {
-        if (this.checkPriority("mixedMode")) {
+        if (this.checkPriority('mixedMode')) {
             const value_casted = value as (MixedMode | undefined)
             this.getPeer()?.setMixedModeAttribute(value_casted)
             return this
@@ -4172,7 +3645,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public zoomAccess(value: boolean | undefined): this {
-        if (this.checkPriority("zoomAccess")) {
+        if (this.checkPriority('zoomAccess')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setZoomAccessAttribute(value_casted)
             return this
@@ -4180,7 +3653,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public geolocationAccess(value: boolean | undefined): this {
-        if (this.checkPriority("geolocationAccess")) {
+        if (this.checkPriority('geolocationAccess')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setGeolocationAccessAttribute(value_casted)
             return this
@@ -4188,15 +3661,13 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public javaScriptProxy(value: JavaScriptProxy | undefined): this {
-        if (this.checkPriority("javaScriptProxy")) {
-            const value_casted = value as (JavaScriptProxy | undefined)
-            this.getPeer()?.setJavaScriptProxyAttribute(value_casted)
-            return this
+        if (this.checkPriority('javaScriptProxy')) {
+            hookJavaScriptProxy(this, value)
         }
         return this
     }
     public cacheMode(value: CacheMode | undefined): this {
-        if (this.checkPriority("cacheMode")) {
+        if (this.checkPriority('cacheMode')) {
             const value_casted = value as (CacheMode | undefined)
             this.getPeer()?.setCacheModeAttribute(value_casted)
             return this
@@ -4204,7 +3675,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public darkMode(value: WebDarkMode | undefined): this {
-        if (this.checkPriority("darkMode")) {
+        if (this.checkPriority('darkMode')) {
             const value_casted = value as (WebDarkMode | undefined)
             this.getPeer()?.setDarkModeAttribute(value_casted)
             return this
@@ -4212,7 +3683,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public forceDarkAccess(value: boolean | undefined): this {
-        if (this.checkPriority("forceDarkAccess")) {
+        if (this.checkPriority('forceDarkAccess')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setForceDarkAccessAttribute(value_casted)
             return this
@@ -4220,7 +3691,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public mediaOptions(value: WebMediaOptions | undefined): this {
-        if (this.checkPriority("mediaOptions")) {
+        if (this.checkPriority('mediaOptions')) {
             const value_casted = value as (WebMediaOptions | undefined)
             this.getPeer()?.setMediaOptionsAttribute(value_casted)
             return this
@@ -4228,7 +3699,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public overviewModeAccess(value: boolean | undefined): this {
-        if (this.checkPriority("overviewModeAccess")) {
+        if (this.checkPriority('overviewModeAccess')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setOverviewModeAccessAttribute(value_casted)
             return this
@@ -4236,7 +3707,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public overScrollMode(value: OverScrollMode | undefined): this {
-        if (this.checkPriority("overScrollMode")) {
+        if (this.checkPriority('overScrollMode')) {
             const value_casted = value as (OverScrollMode | undefined)
             this.getPeer()?.setOverScrollModeAttribute(value_casted)
             return this
@@ -4244,7 +3715,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this {
-        if (this.checkPriority("blurOnKeyboardHideMode")) {
+        if (this.checkPriority('blurOnKeyboardHideMode')) {
             const value_casted = value as (BlurOnKeyboardHideMode | undefined)
             this.getPeer()?.setBlurOnKeyboardHideModeAttribute(value_casted)
             return this
@@ -4252,7 +3723,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public textZoomRatio(value: int32 | undefined): this {
-        if (this.checkPriority("textZoomRatio")) {
+        if (this.checkPriority('textZoomRatio')) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setTextZoomRatioAttribute(value_casted)
             return this
@@ -4260,7 +3731,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public databaseAccess(value: boolean | undefined): this {
-        if (this.checkPriority("databaseAccess")) {
+        if (this.checkPriority('databaseAccess')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setDatabaseAccessAttribute(value_casted)
             return this
@@ -4268,7 +3739,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public initialScale(value: double | undefined): this {
-        if (this.checkPriority("initialScale")) {
+        if (this.checkPriority('initialScale')) {
             const value_casted = value as (double | undefined)
             this.getPeer()?.setInitialScaleAttribute(value_casted)
             return this
@@ -4276,183 +3747,183 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public metaViewport(value: boolean | undefined): this {
-        if (this.checkPriority("metaViewport")) {
+        if (this.checkPriority('metaViewport')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setMetaViewportAttribute(value_casted)
             return this
         }
         return this
     }
-    public onPageEnd(value: ((value0: OnPageEndEvent) => void) | undefined): this {
-        if (this.checkPriority("onPageEnd")) {
-            const value_casted = value as (((value0: OnPageEndEvent) => void) | undefined)
-            this.getPeer()?.setOnPageEndAttribute(value_casted)
-            return this
-        }
-        return this
-    }
-    public onPageBegin(value: ((value0: OnPageBeginEvent) => void) | undefined): this {
-        if (this.checkPriority("onPageBegin")) {
-            const value_casted = value as (((value0: OnPageBeginEvent) => void) | undefined)
+    public onPageBegin(value: arkui_component_common_Callback<OnPageBeginEvent, void> | undefined): this {
+        if (this.checkPriority('onPageBegin')) {
+            const value_casted = value as (arkui_component_common_Callback<OnPageBeginEvent, void> | undefined)
             this.getPeer()?.setOnPageBeginAttribute(value_casted)
             return this
         }
         return this
     }
-    public onLoadStarted(value: ((value0: OnLoadStartedEvent) => void) | undefined): this {
-        if (this.checkPriority("onLoadStarted")) {
-            const value_casted = value as (((value0: OnLoadStartedEvent) => void) | undefined)
+    public onPageEnd(value: arkui_component_common_Callback<OnPageEndEvent, void> | undefined): this {
+        if (this.checkPriority('onPageEnd')) {
+            const value_casted = value as (arkui_component_common_Callback<OnPageEndEvent, void> | undefined)
+            this.getPeer()?.setOnPageEndAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onLoadStarted(value: arkui_component_common_Callback<OnLoadStartedEvent, void> | undefined): this {
+        if (this.checkPriority('onLoadStarted')) {
+            const value_casted = value as (arkui_component_common_Callback<OnLoadStartedEvent, void> | undefined)
             this.getPeer()?.setOnLoadStartedAttribute(value_casted)
             return this
         }
         return this
     }
-    public onLoadFinished(value: ((value0: OnLoadFinishedEvent) => void) | undefined): this {
-        if (this.checkPriority("onLoadFinished")) {
-            const value_casted = value as (((value0: OnLoadFinishedEvent) => void) | undefined)
+    public onLoadFinished(value: arkui_component_common_Callback<OnLoadFinishedEvent, void> | undefined): this {
+        if (this.checkPriority('onLoadFinished')) {
+            const value_casted = value as (arkui_component_common_Callback<OnLoadFinishedEvent, void> | undefined)
             this.getPeer()?.setOnLoadFinishedAttribute(value_casted)
             return this
         }
         return this
     }
-    public onProgressChange(value: ((value0: OnProgressChangeEvent) => void) | undefined): this {
-        if (this.checkPriority("onProgressChange")) {
-            const value_casted = value as (((value0: OnProgressChangeEvent) => void) | undefined)
+    public onProgressChange(value: arkui_component_common_Callback<OnProgressChangeEvent, void> | undefined): this {
+        if (this.checkPriority('onProgressChange')) {
+            const value_casted = value as (arkui_component_common_Callback<OnProgressChangeEvent, void> | undefined)
             this.getPeer()?.setOnProgressChangeAttribute(value_casted)
             return this
         }
         return this
     }
-    public onTitleReceive(value: ((value0: OnTitleReceiveEvent) => void) | undefined): this {
-        if (this.checkPriority("onTitleReceive")) {
-            const value_casted = value as (((value0: OnTitleReceiveEvent) => void) | undefined)
+    public onTitleReceive(value: arkui_component_common_Callback<OnTitleReceiveEvent, void> | undefined): this {
+        if (this.checkPriority('onTitleReceive')) {
+            const value_casted = value as (arkui_component_common_Callback<OnTitleReceiveEvent, void> | undefined)
             this.getPeer()?.setOnTitleReceiveAttribute(value_casted)
             return this
         }
         return this
     }
     public onGeolocationHide(value: (() => void) | undefined): this {
-        if (this.checkPriority("onGeolocationHide")) {
+        if (this.checkPriority('onGeolocationHide')) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.setOnGeolocationHideAttribute(value_casted)
             return this
         }
         return this
     }
-    public onGeolocationShow(value: ((value0: OnGeolocationShowEvent) => void) | undefined): this {
-        if (this.checkPriority("onGeolocationShow")) {
-            const value_casted = value as (((value0: OnGeolocationShowEvent) => void) | undefined)
+    public onGeolocationShow(value: arkui_component_common_Callback<OnGeolocationShowEvent, void> | undefined): this {
+        if (this.checkPriority('onGeolocationShow')) {
+            const value_casted = value as (arkui_component_common_Callback<OnGeolocationShowEvent, void> | undefined)
             this.getPeer()?.setOnGeolocationShowAttribute(value_casted)
             return this
         }
         return this
     }
     public onRequestSelected(value: (() => void) | undefined): this {
-        if (this.checkPriority("onRequestSelected")) {
+        if (this.checkPriority('onRequestSelected')) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.setOnRequestSelectedAttribute(value_casted)
             return this
         }
         return this
     }
-    public onAlert(value: ((value0: OnAlertEvent) => boolean) | undefined): this {
-        if (this.checkPriority("onAlert")) {
-            const value_casted = value as (((value0: OnAlertEvent) => boolean) | undefined)
+    public onAlert(value: arkui_component_common_Callback<OnAlertEvent, boolean> | undefined): this {
+        if (this.checkPriority('onAlert')) {
+            const value_casted = value as (arkui_component_common_Callback<OnAlertEvent, boolean> | undefined)
             this.getPeer()?.setOnAlertAttribute(value_casted)
             return this
         }
         return this
     }
-    public onBeforeUnload(value: ((value0: OnBeforeUnloadEvent) => boolean) | undefined): this {
-        if (this.checkPriority("onBeforeUnload")) {
-            const value_casted = value as (((value0: OnBeforeUnloadEvent) => boolean) | undefined)
+    public onBeforeUnload(value: arkui_component_common_Callback<OnBeforeUnloadEvent, boolean> | undefined): this {
+        if (this.checkPriority('onBeforeUnload')) {
+            const value_casted = value as (arkui_component_common_Callback<OnBeforeUnloadEvent, boolean> | undefined)
             this.getPeer()?.setOnBeforeUnloadAttribute(value_casted)
             return this
         }
         return this
     }
-    public onConfirm(value: ((value0: OnConfirmEvent) => boolean) | undefined): this {
-        if (this.checkPriority("onConfirm")) {
-            const value_casted = value as (((value0: OnConfirmEvent) => boolean) | undefined)
+    public onConfirm(value: arkui_component_common_Callback<OnConfirmEvent, boolean> | undefined): this {
+        if (this.checkPriority('onConfirm')) {
+            const value_casted = value as (arkui_component_common_Callback<OnConfirmEvent, boolean> | undefined)
             this.getPeer()?.setOnConfirmAttribute(value_casted)
             return this
         }
         return this
     }
-    public onPrompt(value: ((value0: OnPromptEvent) => boolean) | undefined): this {
-        if (this.checkPriority("onPrompt")) {
-            const value_casted = value as (((value0: OnPromptEvent) => boolean) | undefined)
+    public onPrompt(value: arkui_component_common_Callback<OnPromptEvent, boolean> | undefined): this {
+        if (this.checkPriority('onPrompt')) {
+            const value_casted = value as (arkui_component_common_Callback<OnPromptEvent, boolean> | undefined)
             this.getPeer()?.setOnPromptAttribute(value_casted)
             return this
         }
         return this
     }
-    public onConsole(value: ((value0: OnConsoleEvent) => boolean) | undefined): this {
-        if (this.checkPriority("onConsole")) {
-            const value_casted = value as (((value0: OnConsoleEvent) => boolean) | undefined)
+    public onConsole(value: arkui_component_common_Callback<OnConsoleEvent, boolean> | undefined): this {
+        if (this.checkPriority('onConsole')) {
+            const value_casted = value as (arkui_component_common_Callback<OnConsoleEvent, boolean> | undefined)
             this.getPeer()?.setOnConsoleAttribute(value_casted)
             return this
         }
         return this
     }
-    public onErrorReceive(value: ((value0: OnErrorReceiveEvent) => void) | undefined): this {
-        if (this.checkPriority("onErrorReceive")) {
-            const value_casted = value as (((value0: OnErrorReceiveEvent) => void) | undefined)
+    public onErrorReceive(value: arkui_component_common_Callback<OnErrorReceiveEvent, void> | undefined): this {
+        if (this.checkPriority('onErrorReceive')) {
+            const value_casted = value as (arkui_component_common_Callback<OnErrorReceiveEvent, void> | undefined)
             this.getPeer()?.setOnErrorReceiveAttribute(value_casted)
             return this
         }
         return this
     }
-    public onHttpErrorReceive(value: ((value0: OnHttpErrorReceiveEvent) => void) | undefined): this {
-        if (this.checkPriority("onHttpErrorReceive")) {
-            const value_casted = value as (((value0: OnHttpErrorReceiveEvent) => void) | undefined)
+    public onHttpErrorReceive(value: arkui_component_common_Callback<OnHttpErrorReceiveEvent, void> | undefined): this {
+        if (this.checkPriority('onHttpErrorReceive')) {
+            const value_casted = value as (arkui_component_common_Callback<OnHttpErrorReceiveEvent, void> | undefined)
             this.getPeer()?.setOnHttpErrorReceiveAttribute(value_casted)
             return this
         }
         return this
     }
-    public onDownloadStart(value: ((value0: OnDownloadStartEvent) => void) | undefined): this {
-        if (this.checkPriority("onDownloadStart")) {
-            const value_casted = value as (((value0: OnDownloadStartEvent) => void) | undefined)
+    public onDownloadStart(value: arkui_component_common_Callback<OnDownloadStartEvent, void> | undefined): this {
+        if (this.checkPriority('onDownloadStart')) {
+            const value_casted = value as (arkui_component_common_Callback<OnDownloadStartEvent, void> | undefined)
             this.getPeer()?.setOnDownloadStartAttribute(value_casted)
             return this
         }
         return this
     }
-    public onRefreshAccessedHistory(value: ((value0: OnRefreshAccessedHistoryEvent) => void) | undefined): this {
-        if (this.checkPriority("onRefreshAccessedHistory")) {
-            const value_casted = value as (((value0: OnRefreshAccessedHistoryEvent) => void) | undefined)
+    public onRefreshAccessedHistory(value: arkui_component_common_Callback<OnRefreshAccessedHistoryEvent, void> | undefined): this {
+        if (this.checkPriority('onRefreshAccessedHistory')) {
+            const value_casted = value as (arkui_component_common_Callback<OnRefreshAccessedHistoryEvent, void> | undefined)
             this.getPeer()?.setOnRefreshAccessedHistoryAttribute(value_casted)
             return this
         }
         return this
     }
-    public onRenderExited(value: ((value0: OnRenderExitedEvent) => void) | undefined): this {
-        if (this.checkPriority("onRenderExited")) {
-            const value_casted = value as (((value0: OnRenderExitedEvent) => void) | undefined)
+    public onRenderExited(value: arkui_component_common_Callback<OnRenderExitedEvent, void> | undefined): this {
+        if (this.checkPriority('onRenderExited')) {
+            const value_casted = value as (arkui_component_common_Callback<OnRenderExitedEvent, void> | undefined)
             this.getPeer()?.setOnRenderExitedAttribute(value_casted)
             return this
         }
         return this
     }
-    public onShowFileSelector(value: ((value0: OnShowFileSelectorEvent) => boolean) | undefined): this {
-        if (this.checkPriority("onShowFileSelector")) {
-            const value_casted = value as (((value0: OnShowFileSelectorEvent) => boolean) | undefined)
+    public onShowFileSelector(value: arkui_component_common_Callback<OnShowFileSelectorEvent, boolean> | undefined): this {
+        if (this.checkPriority('onShowFileSelector')) {
+            const value_casted = value as (arkui_component_common_Callback<OnShowFileSelectorEvent, boolean> | undefined)
             this.getPeer()?.setOnShowFileSelectorAttribute(value_casted)
             return this
         }
         return this
     }
-    public onResourceLoad(value: ((value0: OnResourceLoadEvent) => void) | undefined): this {
-        if (this.checkPriority("onResourceLoad")) {
-            const value_casted = value as (((value0: OnResourceLoadEvent) => void) | undefined)
+    public onResourceLoad(value: arkui_component_common_Callback<OnResourceLoadEvent, void> | undefined): this {
+        if (this.checkPriority('onResourceLoad')) {
+            const value_casted = value as (arkui_component_common_Callback<OnResourceLoadEvent, void> | undefined)
             this.getPeer()?.setOnResourceLoadAttribute(value_casted)
             return this
         }
         return this
     }
     public onFullScreenExit(value: (() => void) | undefined): this {
-        if (this.checkPriority("onFullScreenExit")) {
+        if (this.checkPriority('onFullScreenExit')) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.setOnFullScreenExitAttribute(value_casted)
             return this
@@ -4460,63 +3931,63 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public onFullScreenEnter(value: OnFullScreenEnterCallback | undefined): this {
-        if (this.checkPriority("onFullScreenEnter")) {
+        if (this.checkPriority('onFullScreenEnter')) {
             const value_casted = value as (OnFullScreenEnterCallback | undefined)
             this.getPeer()?.setOnFullScreenEnterAttribute(value_casted)
             return this
         }
         return this
     }
-    public onScaleChange(value: ((value0: OnScaleChangeEvent) => void) | undefined): this {
-        if (this.checkPriority("onScaleChange")) {
-            const value_casted = value as (((value0: OnScaleChangeEvent) => void) | undefined)
+    public onScaleChange(value: arkui_component_common_Callback<OnScaleChangeEvent, void> | undefined): this {
+        if (this.checkPriority('onScaleChange')) {
+            const value_casted = value as (arkui_component_common_Callback<OnScaleChangeEvent, void> | undefined)
             this.getPeer()?.setOnScaleChangeAttribute(value_casted)
             return this
         }
         return this
     }
-    public onHttpAuthRequest(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): this {
-        if (this.checkPriority("onHttpAuthRequest")) {
-            const value_casted = value as (((value0: OnHttpAuthRequestEvent) => boolean) | undefined)
+    public onHttpAuthRequest(value: arkui_component_common_Callback<OnHttpAuthRequestEvent, boolean> | undefined): this {
+        if (this.checkPriority('onHttpAuthRequest')) {
+            const value_casted = value as (arkui_component_common_Callback<OnHttpAuthRequestEvent, boolean> | undefined)
             this.getPeer()?.setOnHttpAuthRequestAttribute(value_casted)
             return this
         }
         return this
     }
-    public onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
-        if (this.checkPriority("onInterceptRequest")) {
-            const value_casted = value as (((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined)
+    public onInterceptRequest(value: arkui_component_common_Callback<OnInterceptRequestEvent, WebResourceResponse | null> | undefined): this {
+        if (this.checkPriority('onInterceptRequest')) {
+            const value_casted = value as (arkui_component_common_Callback<OnInterceptRequestEvent, WebResourceResponse | null> | undefined)
             this.getPeer()?.setOnInterceptRequestAttribute(value_casted)
             return this
         }
         return this
     }
-    public onPermissionRequest(value: ((value0: OnPermissionRequestEvent) => void) | undefined): this {
-        if (this.checkPriority("onPermissionRequest")) {
-            const value_casted = value as (((value0: OnPermissionRequestEvent) => void) | undefined)
+    public onPermissionRequest(value: arkui_component_common_Callback<OnPermissionRequestEvent, void> | undefined): this {
+        if (this.checkPriority('onPermissionRequest')) {
+            const value_casted = value as (arkui_component_common_Callback<OnPermissionRequestEvent, void> | undefined)
             this.getPeer()?.setOnPermissionRequestAttribute(value_casted)
             return this
         }
         return this
     }
-    public onScreenCaptureRequest(value: ((value0: OnScreenCaptureRequestEvent) => void) | undefined): this {
-        if (this.checkPriority("onScreenCaptureRequest")) {
-            const value_casted = value as (((value0: OnScreenCaptureRequestEvent) => void) | undefined)
+    public onScreenCaptureRequest(value: arkui_component_common_Callback<OnScreenCaptureRequestEvent, void> | undefined): this {
+        if (this.checkPriority('onScreenCaptureRequest')) {
+            const value_casted = value as (arkui_component_common_Callback<OnScreenCaptureRequestEvent, void> | undefined)
             this.getPeer()?.setOnScreenCaptureRequestAttribute(value_casted)
             return this
         }
         return this
     }
-    public onContextMenuShow(value: ((value0: OnContextMenuShowEvent) => boolean) | undefined): this {
-        if (this.checkPriority("onContextMenuShow")) {
-            const value_casted = value as (((value0: OnContextMenuShowEvent) => boolean) | undefined)
+    public onContextMenuShow(value: arkui_component_common_Callback<OnContextMenuShowEvent, boolean> | undefined): this {
+        if (this.checkPriority('onContextMenuShow')) {
+            const value_casted = value as (arkui_component_common_Callback<OnContextMenuShowEvent, boolean> | undefined)
             this.getPeer()?.setOnContextMenuShowAttribute(value_casted)
             return this
         }
         return this
     }
     public onContextMenuHide(value: OnContextMenuHideCallback | undefined): this {
-        if (this.checkPriority("onContextMenuHide")) {
+        if (this.checkPriority('onContextMenuHide')) {
             const value_casted = value as (OnContextMenuHideCallback | undefined)
             this.getPeer()?.setOnContextMenuHideAttribute(value_casted)
             return this
@@ -4524,63 +3995,63 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public mediaPlayGestureAccess(value: boolean | undefined): this {
-        if (this.checkPriority("mediaPlayGestureAccess")) {
+        if (this.checkPriority('mediaPlayGestureAccess')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setMediaPlayGestureAccessAttribute(value_casted)
             return this
         }
         return this
     }
-    public onSearchResultReceive(value: ((value0: OnSearchResultReceiveEvent) => void) | undefined): this {
-        if (this.checkPriority("onSearchResultReceive")) {
-            const value_casted = value as (((value0: OnSearchResultReceiveEvent) => void) | undefined)
+    public onSearchResultReceive(value: arkui_component_common_Callback<OnSearchResultReceiveEvent, void> | undefined): this {
+        if (this.checkPriority('onSearchResultReceive')) {
+            const value_casted = value as (arkui_component_common_Callback<OnSearchResultReceiveEvent, void> | undefined)
             this.getPeer()?.setOnSearchResultReceiveAttribute(value_casted)
             return this
         }
         return this
     }
-    public onScroll(value: ((value0: OnScrollEvent) => void) | undefined): this {
-        if (this.checkPriority("onScroll")) {
-            const value_casted = value as (((value0: OnScrollEvent) => void) | undefined)
+    public onScroll(value: arkui_component_common_Callback<OnScrollEvent, void> | undefined): this {
+        if (this.checkPriority('onScroll')) {
+            const value_casted = value as (arkui_component_common_Callback<OnScrollEvent, void> | undefined)
             this.getPeer()?.setOnScrollAttribute(value_casted)
             return this
         }
         return this
     }
-    public onSslErrorEventReceive(value: ((value0: OnSslErrorEventReceiveEvent) => void) | undefined): this {
-        if (this.checkPriority("onSslErrorEventReceive")) {
-            const value_casted = value as (((value0: OnSslErrorEventReceiveEvent) => void) | undefined)
+    public onSslErrorEventReceive(value: arkui_component_common_Callback<OnSslErrorEventReceiveEvent, void> | undefined): this {
+        if (this.checkPriority('onSslErrorEventReceive')) {
+            const value_casted = value as (arkui_component_common_Callback<OnSslErrorEventReceiveEvent, void> | undefined)
             this.getPeer()?.setOnSslErrorEventReceiveAttribute(value_casted)
             return this
         }
         return this
     }
     public onSslErrorEvent(value: OnSslErrorEventCallback | undefined): this {
-        if (this.checkPriority("onSslErrorEvent")) {
+        if (this.checkPriority('onSslErrorEvent')) {
             const value_casted = value as (OnSslErrorEventCallback | undefined)
             this.getPeer()?.setOnSslErrorEventAttribute(value_casted)
             return this
         }
         return this
     }
-    public onClientAuthenticationRequest(value: ((value0: OnClientAuthenticationEvent) => void) | undefined): this {
-        if (this.checkPriority("onClientAuthenticationRequest")) {
-            const value_casted = value as (((value0: OnClientAuthenticationEvent) => void) | undefined)
+    public onClientAuthenticationRequest(value: arkui_component_common_Callback<OnClientAuthenticationEvent, void> | undefined): this {
+        if (this.checkPriority('onClientAuthenticationRequest')) {
+            const value_casted = value as (arkui_component_common_Callback<OnClientAuthenticationEvent, void> | undefined)
             this.getPeer()?.setOnClientAuthenticationRequestAttribute(value_casted)
             return this
         }
         return this
     }
-    public onWindowNew(value: ((value0: OnWindowNewEvent) => void) | undefined): this {
-        if (this.checkPriority("onWindowNew")) {
-            const value_casted = value as (((value0: OnWindowNewEvent) => void) | undefined)
+    public onWindowNew(value: arkui_component_common_Callback<OnWindowNewEvent, void> | undefined): this {
+        if (this.checkPriority('onWindowNew')) {
+            const value_casted = value as (arkui_component_common_Callback<OnWindowNewEvent, void> | undefined)
             this.getPeer()?.setOnWindowNewAttribute(value_casted)
             return this
         }
         return this
     }
     public onWindowExit(value: (() => void) | undefined): this {
-        if (this.checkPriority("onWindowExit")) {
+        if (this.checkPriority('onWindowExit')) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.setOnWindowExitAttribute(value_casted)
             return this
@@ -4588,7 +4059,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public multiWindowAccess(value: boolean | undefined): this {
-        if (this.checkPriority("multiWindowAccess")) {
+        if (this.checkPriority('multiWindowAccess')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setMultiWindowAccessAttribute(value_casted)
             return this
@@ -4596,7 +4067,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public onInterceptKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
-        if (this.checkPriority("onInterceptKeyEvent")) {
+        if (this.checkPriority('onInterceptKeyEvent')) {
             const value_casted = value as (((event: KeyEvent) => boolean) | undefined)
             this.getPeer()?.setOnInterceptKeyEventAttribute(value_casted)
             return this
@@ -4604,7 +4075,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public webStandardFont(value: string | undefined): this {
-        if (this.checkPriority("webStandardFont")) {
+        if (this.checkPriority('webStandardFont')) {
             const value_casted = value as (string | undefined)
             this.getPeer()?.setWebStandardFontAttribute(value_casted)
             return this
@@ -4612,7 +4083,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public webSerifFont(value: string | undefined): this {
-        if (this.checkPriority("webSerifFont")) {
+        if (this.checkPriority('webSerifFont')) {
             const value_casted = value as (string | undefined)
             this.getPeer()?.setWebSerifFontAttribute(value_casted)
             return this
@@ -4620,7 +4091,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public webSansSerifFont(value: string | undefined): this {
-        if (this.checkPriority("webSansSerifFont")) {
+        if (this.checkPriority('webSansSerifFont')) {
             const value_casted = value as (string | undefined)
             this.getPeer()?.setWebSansSerifFontAttribute(value_casted)
             return this
@@ -4628,7 +4099,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public webFixedFont(value: string | undefined): this {
-        if (this.checkPriority("webFixedFont")) {
+        if (this.checkPriority('webFixedFont')) {
             const value_casted = value as (string | undefined)
             this.getPeer()?.setWebFixedFontAttribute(value_casted)
             return this
@@ -4636,7 +4107,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public webFantasyFont(value: string | undefined): this {
-        if (this.checkPriority("webFantasyFont")) {
+        if (this.checkPriority('webFantasyFont')) {
             const value_casted = value as (string | undefined)
             this.getPeer()?.setWebFantasyFontAttribute(value_casted)
             return this
@@ -4644,7 +4115,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public webCursiveFont(value: string | undefined): this {
-        if (this.checkPriority("webCursiveFont")) {
+        if (this.checkPriority('webCursiveFont')) {
             const value_casted = value as (string | undefined)
             this.getPeer()?.setWebCursiveFontAttribute(value_casted)
             return this
@@ -4652,7 +4123,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public defaultFixedFontSize(value: int32 | undefined): this {
-        if (this.checkPriority("defaultFixedFontSize")) {
+        if (this.checkPriority('defaultFixedFontSize')) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setDefaultFixedFontSizeAttribute(value_casted)
             return this
@@ -4660,7 +4131,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public defaultFontSize(value: int32 | undefined): this {
-        if (this.checkPriority("defaultFontSize")) {
+        if (this.checkPriority('defaultFontSize')) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setDefaultFontSizeAttribute(value_casted)
             return this
@@ -4668,7 +4139,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public minFontSize(value: int32 | undefined): this {
-        if (this.checkPriority("minFontSize")) {
+        if (this.checkPriority('minFontSize')) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setMinFontSizeAttribute(value_casted)
             return this
@@ -4676,7 +4147,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public minLogicalFontSize(value: int32 | undefined): this {
-        if (this.checkPriority("minLogicalFontSize")) {
+        if (this.checkPriority('minLogicalFontSize')) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setMinLogicalFontSizeAttribute(value_casted)
             return this
@@ -4684,7 +4155,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public defaultTextEncodingFormat(value: string | undefined): this {
-        if (this.checkPriority("defaultTextEncodingFormat")) {
+        if (this.checkPriority('defaultTextEncodingFormat')) {
             const value_casted = value as (string | undefined)
             this.getPeer()?.setDefaultTextEncodingFormatAttribute(value_casted)
             return this
@@ -4692,7 +4163,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public forceDisplayScrollBar(value: boolean | undefined): this {
-        if (this.checkPriority("forceDisplayScrollBar")) {
+        if (this.checkPriority('forceDisplayScrollBar')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setForceDisplayScrollBarAttribute(value_casted)
             return this
@@ -4700,7 +4171,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public blockNetwork(value: boolean | undefined): this {
-        if (this.checkPriority("blockNetwork")) {
+        if (this.checkPriority('blockNetwork')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setBlockNetworkAttribute(value_casted)
             return this
@@ -4708,7 +4179,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public horizontalScrollBarAccess(value: boolean | undefined): this {
-        if (this.checkPriority("horizontalScrollBarAccess")) {
+        if (this.checkPriority('horizontalScrollBarAccess')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setHorizontalScrollBarAccessAttribute(value_casted)
             return this
@@ -4716,47 +4187,47 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public verticalScrollBarAccess(value: boolean | undefined): this {
-        if (this.checkPriority("verticalScrollBarAccess")) {
+        if (this.checkPriority('verticalScrollBarAccess')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setVerticalScrollBarAccessAttribute(value_casted)
             return this
         }
         return this
     }
-    public onTouchIconUrlReceived(value: ((value0: OnTouchIconUrlReceivedEvent) => void) | undefined): this {
-        if (this.checkPriority("onTouchIconUrlReceived")) {
-            const value_casted = value as (((value0: OnTouchIconUrlReceivedEvent) => void) | undefined)
+    public onTouchIconUrlReceived(value: arkui_component_common_Callback<OnTouchIconUrlReceivedEvent, void> | undefined): this {
+        if (this.checkPriority('onTouchIconUrlReceived')) {
+            const value_casted = value as (arkui_component_common_Callback<OnTouchIconUrlReceivedEvent, void> | undefined)
             this.getPeer()?.setOnTouchIconUrlReceivedAttribute(value_casted)
             return this
         }
         return this
     }
-    public onFaviconReceived(value: ((value0: OnFaviconReceivedEvent) => void) | undefined): this {
-        if (this.checkPriority("onFaviconReceived")) {
-            const value_casted = value as (((value0: OnFaviconReceivedEvent) => void) | undefined)
+    public onFaviconReceived(value: arkui_component_common_Callback<OnFaviconReceivedEvent, void> | undefined): this {
+        if (this.checkPriority('onFaviconReceived')) {
+            const value_casted = value as (arkui_component_common_Callback<OnFaviconReceivedEvent, void> | undefined)
             this.getPeer()?.setOnFaviconReceivedAttribute(value_casted)
             return this
         }
         return this
     }
-    public onPageVisible(value: ((value0: OnPageVisibleEvent) => void) | undefined): this {
-        if (this.checkPriority("onPageVisible")) {
-            const value_casted = value as (((value0: OnPageVisibleEvent) => void) | undefined)
+    public onPageVisible(value: arkui_component_common_Callback<OnPageVisibleEvent, void> | undefined): this {
+        if (this.checkPriority('onPageVisible')) {
+            const value_casted = value as (arkui_component_common_Callback<OnPageVisibleEvent, void> | undefined)
             this.getPeer()?.setOnPageVisibleAttribute(value_casted)
             return this
         }
         return this
     }
-    public onDataResubmitted(value: ((value0: OnDataResubmittedEvent) => void) | undefined): this {
-        if (this.checkPriority("onDataResubmitted")) {
-            const value_casted = value as (((value0: OnDataResubmittedEvent) => void) | undefined)
+    public onDataResubmitted(value: arkui_component_common_Callback<OnDataResubmittedEvent, void> | undefined): this {
+        if (this.checkPriority('onDataResubmitted')) {
+            const value_casted = value as (arkui_component_common_Callback<OnDataResubmittedEvent, void> | undefined)
             this.getPeer()?.setOnDataResubmittedAttribute(value_casted)
             return this
         }
         return this
     }
     public pinchSmooth(value: boolean | undefined): this {
-        if (this.checkPriority("pinchSmooth")) {
+        if (this.checkPriority('pinchSmooth')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setPinchSmoothAttribute(value_casted)
             return this
@@ -4764,31 +4235,31 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public allowWindowOpenMethod(value: boolean | undefined): this {
-        if (this.checkPriority("allowWindowOpenMethod")) {
+        if (this.checkPriority('allowWindowOpenMethod')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setAllowWindowOpenMethodAttribute(value_casted)
             return this
         }
         return this
     }
-    public onAudioStateChanged(value: ((value0: OnAudioStateChangedEvent) => void) | undefined): this {
-        if (this.checkPriority("onAudioStateChanged")) {
-            const value_casted = value as (((value0: OnAudioStateChangedEvent) => void) | undefined)
+    public onAudioStateChanged(value: arkui_component_common_Callback<OnAudioStateChangedEvent, void> | undefined): this {
+        if (this.checkPriority('onAudioStateChanged')) {
+            const value_casted = value as (arkui_component_common_Callback<OnAudioStateChangedEvent, void> | undefined)
             this.getPeer()?.setOnAudioStateChangedAttribute(value_casted)
             return this
         }
         return this
     }
-    public onFirstContentfulPaint(value: ((value0: OnFirstContentfulPaintEvent) => void) | undefined): this {
-        if (this.checkPriority("onFirstContentfulPaint")) {
-            const value_casted = value as (((value0: OnFirstContentfulPaintEvent) => void) | undefined)
+    public onFirstContentfulPaint(value: arkui_component_common_Callback<OnFirstContentfulPaintEvent, void> | undefined): this {
+        if (this.checkPriority('onFirstContentfulPaint')) {
+            const value_casted = value as (arkui_component_common_Callback<OnFirstContentfulPaintEvent, void> | undefined)
             this.getPeer()?.setOnFirstContentfulPaintAttribute(value_casted)
             return this
         }
         return this
     }
     public onFirstMeaningfulPaint(value: OnFirstMeaningfulPaintCallback | undefined): this {
-        if (this.checkPriority("onFirstMeaningfulPaint")) {
+        if (this.checkPriority('onFirstMeaningfulPaint')) {
             const value_casted = value as (OnFirstMeaningfulPaintCallback | undefined)
             this.getPeer()?.setOnFirstMeaningfulPaintAttribute(value_casted)
             return this
@@ -4796,39 +4267,39 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public onLargestContentfulPaint(value: OnLargestContentfulPaintCallback | undefined): this {
-        if (this.checkPriority("onLargestContentfulPaint")) {
+        if (this.checkPriority('onLargestContentfulPaint')) {
             const value_casted = value as (OnLargestContentfulPaintCallback | undefined)
             this.getPeer()?.setOnLargestContentfulPaintAttribute(value_casted)
             return this
         }
         return this
     }
-    public onLoadIntercept(value: ((value0: OnLoadInterceptEvent) => boolean) | undefined): this {
-        if (this.checkPriority("onLoadIntercept")) {
-            const value_casted = value as (((value0: OnLoadInterceptEvent) => boolean) | undefined)
+    public onLoadIntercept(value: arkui_component_common_Callback<OnLoadInterceptEvent, boolean> | undefined): this {
+        if (this.checkPriority('onLoadIntercept')) {
+            const value_casted = value as (arkui_component_common_Callback<OnLoadInterceptEvent, boolean> | undefined)
             this.getPeer()?.setOnLoadInterceptAttribute(value_casted)
             return this
         }
         return this
     }
     public onControllerAttached(value: (() => void) | undefined): this {
-        if (this.checkPriority("onControllerAttached")) {
+        if (this.checkPriority('onControllerAttached')) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.setOnControllerAttachedAttribute(value_casted)
             return this
         }
         return this
     }
-    public onOverScroll(value: ((value0: OnOverScrollEvent) => void) | undefined): this {
-        if (this.checkPriority("onOverScroll")) {
-            const value_casted = value as (((value0: OnOverScrollEvent) => void) | undefined)
+    public onOverScroll(value: arkui_component_common_Callback<OnOverScrollEvent, void> | undefined): this {
+        if (this.checkPriority('onOverScroll')) {
+            const value_casted = value as (arkui_component_common_Callback<OnOverScrollEvent, void> | undefined)
             this.getPeer()?.setOnOverScrollAttribute(value_casted)
             return this
         }
         return this
     }
     public onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this {
-        if (this.checkPriority("onSafeBrowsingCheckResult")) {
+        if (this.checkPriority('onSafeBrowsingCheckResult')) {
             const value_casted = value as (OnSafeBrowsingCheckResultCallback | undefined)
             this.getPeer()?.setOnSafeBrowsingCheckResultAttribute(value_casted)
             return this
@@ -4836,7 +4307,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback | undefined): this {
-        if (this.checkPriority("onNavigationEntryCommitted")) {
+        if (this.checkPriority('onNavigationEntryCommitted')) {
             const value_casted = value as (OnNavigationEntryCommittedCallback | undefined)
             this.getPeer()?.setOnNavigationEntryCommittedAttribute(value_casted)
             return this
@@ -4844,7 +4315,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public onIntelligentTrackingPreventionResult(value: OnIntelligentTrackingPreventionCallback | undefined): this {
-        if (this.checkPriority("onIntelligentTrackingPreventionResult")) {
+        if (this.checkPriority('onIntelligentTrackingPreventionResult')) {
             const value_casted = value as (OnIntelligentTrackingPreventionCallback | undefined)
             this.getPeer()?.setOnIntelligentTrackingPreventionResultAttribute(value_casted)
             return this
@@ -4852,7 +4323,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public javaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
-        if (this.checkPriority("javaScriptOnDocumentStart")) {
+        if (this.checkPriority('javaScriptOnDocumentStart')) {
             const value_casted = value as (Array<ScriptItem> | undefined)
             this.getPeer()?.setJavaScriptOnDocumentStartAttribute(value_casted)
             return this
@@ -4860,7 +4331,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public javaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
-        if (this.checkPriority("javaScriptOnDocumentEnd")) {
+        if (this.checkPriority('javaScriptOnDocumentEnd')) {
             const value_casted = value as (Array<ScriptItem> | undefined)
             this.getPeer()?.setJavaScriptOnDocumentEndAttribute(value_casted)
             return this
@@ -4868,7 +4339,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public layoutMode(value: WebLayoutMode | undefined): this {
-        if (this.checkPriority("layoutMode")) {
+        if (this.checkPriority('layoutMode')) {
             const value_casted = value as (WebLayoutMode | undefined)
             this.getPeer()?.setLayoutModeAttribute(value_casted)
             return this
@@ -4876,7 +4347,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt | undefined): this {
-        if (this.checkPriority("nestedScroll")) {
+        if (this.checkPriority('nestedScroll')) {
             const value_casted = value as (NestedScrollOptions | NestedScrollOptionsExt | undefined)
             this.getPeer()?.setNestedScrollAttribute(value_casted)
             return this
@@ -4884,7 +4355,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public enableNativeEmbedMode(value: boolean | undefined): this {
-        if (this.checkPriority("enableNativeEmbedMode")) {
+        if (this.checkPriority('enableNativeEmbedMode')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableNativeEmbedModeAttribute(value_casted)
             return this
@@ -4892,7 +4363,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public onNativeEmbedLifecycleChange(value: ((event: NativeEmbedDataInfo) => void) | undefined): this {
-        if (this.checkPriority("onNativeEmbedLifecycleChange")) {
+        if (this.checkPriority('onNativeEmbedLifecycleChange')) {
             const value_casted = value as (((event: NativeEmbedDataInfo) => void) | undefined)
             this.getPeer()?.setOnNativeEmbedLifecycleChangeAttribute(value_casted)
             return this
@@ -4900,7 +4371,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public onNativeEmbedVisibilityChange(value: OnNativeEmbedVisibilityChangeCallback | undefined): this {
-        if (this.checkPriority("onNativeEmbedVisibilityChange")) {
+        if (this.checkPriority('onNativeEmbedVisibilityChange')) {
             const value_casted = value as (OnNativeEmbedVisibilityChangeCallback | undefined)
             this.getPeer()?.setOnNativeEmbedVisibilityChangeAttribute(value_casted)
             return this
@@ -4908,7 +4379,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void) | undefined): this {
-        if (this.checkPriority("onNativeEmbedGestureEvent")) {
+        if (this.checkPriority('onNativeEmbedGestureEvent')) {
             const value_casted = value as (((event: NativeEmbedTouchInfo) => void) | undefined)
             this.getPeer()?.setOnNativeEmbedGestureEventAttribute(value_casted)
             return this
@@ -4916,7 +4387,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public copyOptions(value: CopyOptions | undefined): this {
-        if (this.checkPriority("copyOptions")) {
+        if (this.checkPriority('copyOptions')) {
             const value_casted = value as (CopyOptions | undefined)
             this.getPeer()?.setCopyOptionsAttribute(value_casted)
             return this
@@ -4924,7 +4395,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public onOverrideUrlLoading(value: OnOverrideUrlLoadingCallback | undefined): this {
-        if (this.checkPriority("onOverrideUrlLoading")) {
+        if (this.checkPriority('onOverrideUrlLoading')) {
             const value_casted = value as (OnOverrideUrlLoadingCallback | undefined)
             this.getPeer()?.setOnOverrideUrlLoadingAttribute(value_casted)
             return this
@@ -4932,7 +4403,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public textAutosizing(value: boolean | undefined): this {
-        if (this.checkPriority("textAutosizing")) {
+        if (this.checkPriority('textAutosizing')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setTextAutosizingAttribute(value_casted)
             return this
@@ -4940,7 +4411,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public enableNativeMediaPlayer(value: NativeMediaPlayerConfig | undefined): this {
-        if (this.checkPriority("enableNativeMediaPlayer")) {
+        if (this.checkPriority('enableNativeMediaPlayer')) {
             const value_casted = value as (NativeMediaPlayerConfig | undefined)
             this.getPeer()?.setEnableNativeMediaPlayerAttribute(value_casted)
             return this
@@ -4948,7 +4419,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public onRenderProcessNotResponding(value: OnRenderProcessNotRespondingCallback | undefined): this {
-        if (this.checkPriority("onRenderProcessNotResponding")) {
+        if (this.checkPriority('onRenderProcessNotResponding')) {
             const value_casted = value as (OnRenderProcessNotRespondingCallback | undefined)
             this.getPeer()?.setOnRenderProcessNotRespondingAttribute(value_casted)
             return this
@@ -4956,7 +4427,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public onRenderProcessResponding(value: OnRenderProcessRespondingCallback | undefined): this {
-        if (this.checkPriority("onRenderProcessResponding")) {
+        if (this.checkPriority('onRenderProcessResponding')) {
             const value_casted = value as (OnRenderProcessRespondingCallback | undefined)
             this.getPeer()?.setOnRenderProcessRespondingAttribute(value_casted)
             return this
@@ -4964,7 +4435,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public onViewportFitChanged(value: OnViewportFitChangedCallback | undefined): this {
-        if (this.checkPriority("onViewportFitChanged")) {
+        if (this.checkPriority('onViewportFitChanged')) {
             const value_casted = value as (OnViewportFitChangedCallback | undefined)
             this.getPeer()?.setOnViewportFitChangedAttribute(value_casted)
             return this
@@ -4972,7 +4443,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public onInterceptKeyboardAttach(value: WebKeyboardCallback | undefined): this {
-        if (this.checkPriority("onInterceptKeyboardAttach")) {
+        if (this.checkPriority('onInterceptKeyboardAttach')) {
             const value_casted = value as (WebKeyboardCallback | undefined)
             this.getPeer()?.setOnInterceptKeyboardAttachAttribute(value_casted)
             return this
@@ -4980,7 +4451,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public onAdsBlocked(value: OnAdsBlockedCallback | undefined): this {
-        if (this.checkPriority("onAdsBlocked")) {
+        if (this.checkPriority('onAdsBlocked')) {
             const value_casted = value as (OnAdsBlockedCallback | undefined)
             this.getPeer()?.setOnAdsBlockedAttribute(value_casted)
             return this
@@ -4988,7 +4459,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public keyboardAvoidMode(value: WebKeyboardAvoidMode | undefined): this {
-        if (this.checkPriority("keyboardAvoidMode")) {
+        if (this.checkPriority('keyboardAvoidMode')) {
             const value_casted = value as (WebKeyboardAvoidMode | undefined)
             this.getPeer()?.setKeyboardAvoidModeAttribute(value_casted)
             return this
@@ -4996,7 +4467,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public editMenuOptions(value: EditMenuOptions | undefined): this {
-        if (this.checkPriority("editMenuOptions")) {
+        if (this.checkPriority('editMenuOptions')) {
             const value_casted = value as (EditMenuOptions | undefined)
             this.getPeer()?.setEditMenuOptionsAttribute(value_casted)
             return this
@@ -5004,23 +4475,15 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public enableHapticFeedback(value: boolean | undefined): this {
-        if (this.checkPriority("enableHapticFeedback")) {
+        if (this.checkPriority('enableHapticFeedback')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableHapticFeedbackAttribute(value_casted)
             return this
         }
         return this
     }
-    public optimizeParserBudget(value: boolean | undefined): this {
-        if (this.checkPriority("optimizeParserBudget")) {
-            const value_casted = value as (boolean | undefined)
-            this.getPeer()?.setOptimizeParserBudgetAttribute(value_casted)
-            return this
-        }
-        return this
-    }
     public enableFollowSystemFontWeight(value: boolean | undefined): this {
-        if (this.checkPriority("enableFollowSystemFontWeight")) {
+        if (this.checkPriority('enableFollowSystemFontWeight')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableFollowSystemFontWeightAttribute(value_casted)
             return this
@@ -5028,15 +4491,23 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public enableWebAVSession(value: boolean | undefined): this {
-        if (this.checkPriority("enableWebAVSession")) {
+        if (this.checkPriority('enableWebAVSession')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableWebAVSessionAttribute(value_casted)
             return this
         }
         return this
     }
+    public optimizeParserBudget(value: boolean | undefined): this {
+        if (this.checkPriority('optimizeParserBudget')) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setOptimizeParserBudgetAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public runJavaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
-        if (this.checkPriority("runJavaScriptOnDocumentStart")) {
+        if (this.checkPriority('runJavaScriptOnDocumentStart')) {
             const value_casted = value as (Array<ScriptItem> | undefined)
             this.getPeer()?.setRunJavaScriptOnDocumentStartAttribute(value_casted)
             return this
@@ -5044,7 +4515,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public runJavaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
-        if (this.checkPriority("runJavaScriptOnDocumentEnd")) {
+        if (this.checkPriority('runJavaScriptOnDocumentEnd')) {
             const value_casted = value as (Array<ScriptItem> | undefined)
             this.getPeer()?.setRunJavaScriptOnDocumentEndAttribute(value_casted)
             return this
@@ -5052,7 +4523,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public runJavaScriptOnHeadEnd(value: Array<ScriptItem> | undefined): this {
-        if (this.checkPriority("runJavaScriptOnHeadEnd")) {
+        if (this.checkPriority('runJavaScriptOnHeadEnd')) {
             const value_casted = value as (Array<ScriptItem> | undefined)
             this.getPeer()?.setRunJavaScriptOnHeadEndAttribute(value_casted)
             return this
@@ -5060,7 +4531,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public nativeEmbedOptions(value: EmbedOptions | undefined): this {
-        if (this.checkPriority("nativeEmbedOptions")) {
+        if (this.checkPriority('nativeEmbedOptions')) {
             const value_casted = value as (EmbedOptions | undefined)
             this.getPeer()?.setNativeEmbedOptionsAttribute(value_casted)
             return this
@@ -5068,7 +4539,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
-        if (this.checkPriority("registerNativeEmbedRule")) {
+        if (this.checkPriority('registerNativeEmbedRule')) {
             const tag_casted = tag as (string | undefined)
             const type_casted = type as (string | undefined)
             this.getPeer()?.setRegisterNativeEmbedRuleAttribute(tag_casted, type_casted)
@@ -5077,7 +4548,7 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         return this
     }
     public bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
-        if (this.checkPriority("bindSelectionMenu")) {
+        if (this.checkPriority('bindSelectionMenu')) {
             const elementType_casted = elementType as (WebElementType | undefined)
             const content_casted = content as (CustomBuilder | undefined)
             const responseType_casted = responseType as (WebResponseType | undefined)
@@ -5104,18 +4575,16 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
 
 @memo
 export function WebImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: WebAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkWebComponent>((): ArkWebComponent => {
         return new ArkWebComponent()
     })
-    NodeAttach<ArkWebPeer>((): ArkWebPeer => ArkWebPeer.create(receiver), (peer: ArkWebPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkWebPeer>((): ArkWebPeer => ArkWebPeer.create(receiver), (_: ArkWebPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -5559,7 +5028,7 @@ export class EmbedOptions_serializer {
     }
     public static read(buffer: DeserializerBase): EmbedOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const supportDefaultIntrinsicSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const supportDefaultIntrinsicSizeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let supportDefaultIntrinsicSizeTmpBuf : boolean | undefined = undefined
         if ((supportDefaultIntrinsicSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             supportDefaultIntrinsicSizeTmpBuf = valueDeserializer.readBoolean()
@@ -5591,13 +5060,13 @@ export class FirstMeaningfulPaint_serializer {
     }
     public static read(buffer: DeserializerBase): FirstMeaningfulPaint {
         let valueDeserializer : DeserializerBase = buffer
-        const navigationStartTimeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const navigationStartTimeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let navigationStartTimeTmpBuf : int64 | undefined = undefined
         if ((navigationStartTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             navigationStartTimeTmpBuf = valueDeserializer.readInt64()
         }
         const navigationStartTimeTmpResult : int64 | undefined = navigationStartTimeTmpBuf
-        const firstMeaningfulPaintTimeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const firstMeaningfulPaintTimeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let firstMeaningfulPaintTimeTmpBuf : int64 | undefined = undefined
         if ((firstMeaningfulPaintTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             firstMeaningfulPaintTimeTmpBuf = valueDeserializer.readInt64()
@@ -5632,16 +5101,16 @@ export class FullScreenEnterEvent_serializer {
     public static read(buffer: DeserializerBase): FullScreenEnterEvent {
         let valueDeserializer : DeserializerBase = buffer
         const handlerTmpResult : FullScreenExitHandler = (FullScreenExitHandler_serializer.read(valueDeserializer) as FullScreenExitHandler)
-        const videoWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const videoWidthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let videoWidthTmpBuf : int32 | undefined = undefined
         if ((videoWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            videoWidthTmpBuf = (valueDeserializer.readInt32() as int32)
+            videoWidthTmpBuf = valueDeserializer.readInt32()
         }
         const videoWidthTmpResult : int32 | undefined = videoWidthTmpBuf
-        const videoHeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const videoHeightTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let videoHeightTmpBuf : int32 | undefined = undefined
         if ((videoHeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            videoHeightTmpBuf = (valueDeserializer.readInt32() as int32)
+            videoHeightTmpBuf = valueDeserializer.readInt32()
         }
         const videoHeightTmpResult : int32 | undefined = videoHeightTmpBuf
         let value : FullScreenEnterEvent = ({handler: handlerTmpResult, videoWidth: videoWidthTmpResult, videoHeight: videoHeightTmpResult} as FullScreenEnterEvent)
@@ -5726,19 +5195,19 @@ export class JavaScriptProxy_serializer {
             methodListTmpBuf[methodListTmpBufBufCounterI] = (valueDeserializer.readString() as string)
         }
         const methodListTmpResult : Array<string> = methodListTmpBuf
-        const controllerTmpResult : webview.WebviewController = (webview_WebviewController_serializer.read(valueDeserializer) as webview.WebviewController)
-        const asyncMethodListTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const controllerTmpResult : WebviewController = (webview_WebviewController_serializer.read(valueDeserializer) as webview.WebviewController)
+        const asyncMethodListTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let asyncMethodListTmpBuf : Array<string> | undefined = undefined
         if ((asyncMethodListTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const asyncMethodListTmpBuf_Length : int32 = valueDeserializer.readInt32()
-            let asyncMethodListTmpBuf_ : Array<string> = new Array<string>(asyncMethodListTmpBuf_Length)
-            for (let asyncMethodListTmpBuf_BufCounterI = 0; asyncMethodListTmpBuf_BufCounterI < asyncMethodListTmpBuf_Length; asyncMethodListTmpBuf_BufCounterI++) {
-                asyncMethodListTmpBuf_[asyncMethodListTmpBuf_BufCounterI] = (valueDeserializer.readString() as string)
+            const asyncMethodListTmpBufOptLength : int32 = valueDeserializer.readInt32()
+            let asyncMethodListTmpBufOpt : Array<string> = new Array<string>(asyncMethodListTmpBufOptLength)
+            for (let asyncMethodListTmpBufOptBufCounterI = 0; asyncMethodListTmpBufOptBufCounterI < asyncMethodListTmpBufOptLength; asyncMethodListTmpBufOptBufCounterI++) {
+                asyncMethodListTmpBufOpt[asyncMethodListTmpBufOptBufCounterI] = (valueDeserializer.readString() as string)
             }
-            asyncMethodListTmpBuf = asyncMethodListTmpBuf_
+            asyncMethodListTmpBuf = asyncMethodListTmpBufOpt
         }
         const asyncMethodListTmpResult : Array<string> | undefined = asyncMethodListTmpBuf
-        const permissionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const permissionTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let permissionTmpBuf : string | undefined = undefined
         if ((permissionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             permissionTmpBuf = (valueDeserializer.readString() as string)
@@ -5802,37 +5271,37 @@ export class LargestContentfulPaint_serializer {
     }
     public static read(buffer: DeserializerBase): LargestContentfulPaint {
         let valueDeserializer : DeserializerBase = buffer
-        const navigationStartTimeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const navigationStartTimeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let navigationStartTimeTmpBuf : int64 | undefined = undefined
         if ((navigationStartTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             navigationStartTimeTmpBuf = valueDeserializer.readInt64()
         }
         const navigationStartTimeTmpResult : int64 | undefined = navigationStartTimeTmpBuf
-        const largestImagePaintTimeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const largestImagePaintTimeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let largestImagePaintTimeTmpBuf : int64 | undefined = undefined
         if ((largestImagePaintTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             largestImagePaintTimeTmpBuf = valueDeserializer.readInt64()
         }
         const largestImagePaintTimeTmpResult : int64 | undefined = largestImagePaintTimeTmpBuf
-        const largestTextPaintTimeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const largestTextPaintTimeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let largestTextPaintTimeTmpBuf : int64 | undefined = undefined
         if ((largestTextPaintTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             largestTextPaintTimeTmpBuf = valueDeserializer.readInt64()
         }
         const largestTextPaintTimeTmpResult : int64 | undefined = largestTextPaintTimeTmpBuf
-        const imageBPPTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const imageBPPTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let imageBPPTmpBuf : double | undefined = undefined
         if ((imageBPPTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             imageBPPTmpBuf = valueDeserializer.readFloat64()
         }
         const imageBPPTmpResult : double | undefined = imageBPPTmpBuf
-        const largestImageLoadStartTimeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const largestImageLoadStartTimeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let largestImageLoadStartTimeTmpBuf : int64 | undefined = undefined
         if ((largestImageLoadStartTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             largestImageLoadStartTimeTmpBuf = valueDeserializer.readInt64()
         }
         const largestImageLoadStartTimeTmpResult : int64 | undefined = largestImageLoadStartTimeTmpBuf
-        const largestImageLoadEndTimeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const largestImageLoadEndTimeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let largestImageLoadEndTimeTmpBuf : int64 | undefined = undefined
         if ((largestImageLoadEndTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             largestImageLoadEndTimeTmpBuf = valueDeserializer.readInt64()
@@ -5864,6 +5333,58 @@ export class LoadCommittedDetails_serializer {
         const navigationTypeTmpResult : WebNavigationType = WebNavigationType.fromValue(valueDeserializer.readInt32())
         const urlTmpResult : string = (valueDeserializer.readString() as string)
         let value : LoadCommittedDetails = ({isMainFrame: isMainFrameTmpResult, isSameDocument: isSameDocumentTmpResult, didReplaceEntry: didReplaceEntryTmpResult, navigationType: navigationTypeTmpResult, url: urlTmpResult} as LoadCommittedDetails)
+        return value
+    }
+}
+export class NativeEmbedTouchInfo_serializer {
+    public static write(buffer: SerializerBase, value: NativeEmbedTouchInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForEmbedId  = value.embedId
+        if (valueHolderForEmbedId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEmbedIdTmpValue  = valueHolderForEmbedId!
+            valueSerializer.writeString(valueHolderForEmbedIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForTouchEvent  = value.touchEvent
+        if (valueHolderForTouchEvent !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTouchEventTmpValue  = valueHolderForTouchEvent!
+            TouchEvent_serializer.write(valueSerializer, valueHolderForTouchEventTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForResult  = value.result
+        if (valueHolderForResult !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForResultTmpValue  = valueHolderForResult!
+            EventResult_serializer.write(valueSerializer, valueHolderForResultTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): NativeEmbedTouchInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const embedIdTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let embedIdTmpBuf : string | undefined = undefined
+        if ((embedIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            embedIdTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const embedIdTmpResult : string | undefined = embedIdTmpBuf
+        const touchEventTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let touchEventTmpBuf : TouchEvent | undefined = undefined
+        if ((touchEventTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            touchEventTmpBuf = (TouchEvent_serializer.read(valueDeserializer) as TouchEvent)
+        }
+        const touchEventTmpResult : TouchEvent | undefined = touchEventTmpBuf
+        const resultTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let resultTmpBuf : EventResult | undefined = undefined
+        if ((resultTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            resultTmpBuf = (EventResult_serializer.read(valueDeserializer) as EventResult)
+        }
+        const resultTmpResult : EventResult | undefined = resultTmpBuf
+        let value : NativeEmbedTouchInfo = ({embedId: embedIdTmpResult, touchEvent: touchEventTmpResult, result: resultTmpResult} as NativeEmbedTouchInfo)
         return value
     }
 }
@@ -5921,25 +5442,25 @@ export class NestedScrollOptionsExt_serializer {
     }
     public static read(buffer: DeserializerBase): NestedScrollOptionsExt {
         let valueDeserializer : DeserializerBase = buffer
-        const scrollUpTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const scrollUpTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let scrollUpTmpBuf : NestedScrollMode | undefined = undefined
         if ((scrollUpTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             scrollUpTmpBuf = NestedScrollMode.fromValue(valueDeserializer.readInt32())
         }
         const scrollUpTmpResult : NestedScrollMode | undefined = scrollUpTmpBuf
-        const scrollDownTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const scrollDownTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let scrollDownTmpBuf : NestedScrollMode | undefined = undefined
         if ((scrollDownTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             scrollDownTmpBuf = NestedScrollMode.fromValue(valueDeserializer.readInt32())
         }
         const scrollDownTmpResult : NestedScrollMode | undefined = scrollDownTmpBuf
-        const scrollRightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const scrollRightTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let scrollRightTmpBuf : NestedScrollMode | undefined = undefined
         if ((scrollRightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             scrollRightTmpBuf = NestedScrollMode.fromValue(valueDeserializer.readInt32())
         }
         const scrollRightTmpResult : NestedScrollMode | undefined = scrollRightTmpBuf
-        const scrollLeftTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const scrollLeftTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let scrollLeftTmpBuf : NestedScrollMode | undefined = undefined
         if ((scrollLeftTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             scrollLeftTmpBuf = NestedScrollMode.fromValue(valueDeserializer.readInt32())
@@ -5991,7 +5512,7 @@ export class OnBeforeUnloadEvent_serializer {
         const urlTmpResult : string = (valueDeserializer.readString() as string)
         const messageTmpResult : string = (valueDeserializer.readString() as string)
         const resultTmpResult : JsResult = (JsResult_serializer.read(valueDeserializer) as JsResult)
-        const isReloadTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const isReloadTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let isReloadTmpBuf : boolean | undefined = undefined
         if ((isReloadTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             isReloadTmpBuf = valueDeserializer.readBoolean()
@@ -6376,15 +5897,15 @@ export class OnSslErrorEventReceiveEvent_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const handlerTmpResult : SslErrorHandler = (SslErrorHandler_serializer.read(valueDeserializer) as SslErrorHandler)
         const errorTmpResult : SslError = SslError.fromValue(valueDeserializer.readInt32())
-        const certChainDataTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const certChainDataTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let certChainDataTmpBuf : Array<ArrayBuffer> | undefined = undefined
         if ((certChainDataTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const certChainDataTmpBuf_Length : int32 = valueDeserializer.readInt32()
-            let certChainDataTmpBuf_ : Array<ArrayBuffer> = new Array<ArrayBuffer>(certChainDataTmpBuf_Length)
-            for (let certChainDataTmpBuf_BufCounterI = 0; certChainDataTmpBuf_BufCounterI < certChainDataTmpBuf_Length; certChainDataTmpBuf_BufCounterI++) {
-                certChainDataTmpBuf_[certChainDataTmpBuf_BufCounterI] = (valueDeserializer.readBuffer() as ArrayBuffer)
+            const certChainDataTmpBufOptLength : int32 = valueDeserializer.readInt32()
+            let certChainDataTmpBufOpt : Array<ArrayBuffer> = new Array<ArrayBuffer>(certChainDataTmpBufOptLength)
+            for (let certChainDataTmpBufOptBufCounterI = 0; certChainDataTmpBufOptBufCounterI < certChainDataTmpBufOptLength; certChainDataTmpBufOptBufCounterI++) {
+                certChainDataTmpBufOpt[certChainDataTmpBufOptBufCounterI] = (valueDeserializer.readBuffer() as ArrayBuffer)
             }
-            certChainDataTmpBuf = certChainDataTmpBuf_
+            certChainDataTmpBuf = certChainDataTmpBufOpt
         }
         const certChainDataTmpResult : Array<ArrayBuffer> | undefined = certChainDataTmpBuf
         let value : OnSslErrorEventReceiveEvent = ({handler: handlerTmpResult, error: errorTmpResult, certChainData: certChainDataTmpResult} as OnSslErrorEventReceiveEvent)
@@ -6408,7 +5929,7 @@ export class OnTitleReceiveEvent_serializer {
     public static read(buffer: DeserializerBase): OnTitleReceiveEvent {
         let valueDeserializer : DeserializerBase = buffer
         const titleTmpResult : string = (valueDeserializer.readString() as string)
-        const isRealTitleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const isRealTitleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let isRealTitleTmpBuf : boolean | undefined = undefined
         if ((isRealTitleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             isRealTitleTmpBuf = valueDeserializer.readBoolean()
@@ -6513,6 +6034,125 @@ export class ScriptItem_serializer {
         return value
     }
 }
+export class SelectionMenuOptionsExt_serializer {
+    public static write(buffer: SerializerBase, value: SelectionMenuOptionsExt): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForOnAppear  = value.onAppear
+        if (valueHolderForOnAppear !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnAppearTmpValue  = valueHolderForOnAppear!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnAppearTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOnDisappear  = value.onDisappear
+        if (valueHolderForOnDisappear !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnDisappearTmpValue  = valueHolderForOnDisappear!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnDisappearTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForPreview  = value.preview
+        if (valueHolderForPreview !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPreviewTmpValue  = valueHolderForPreview!
+            valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForPreviewTmpValue))
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForMenuType  = value.menuType
+        if (valueHolderForMenuType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMenuTypeTmpValue  = (valueHolderForMenuType as MenuType)
+            valueSerializer.writeInt32(valueHolderForMenuTypeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForPreviewMenuOptions  = value.previewMenuOptions
+        if (valueHolderForPreviewMenuOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPreviewMenuOptionsTmpValue  = valueHolderForPreviewMenuOptions!
+            valueSerializer.writeCustomObject('object', valueHolderForPreviewMenuOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): SelectionMenuOptionsExt {
+        let valueDeserializer : DeserializerBase = buffer
+        const onAppearTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let onAppearTmpBuf : arkui_component_common_Callback<void, void> | undefined = undefined
+        if ((onAppearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onAppearTmpBufOptBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onAppearTmpBufOptBufCall : KPointer = valueDeserializer.readPointer()
+            const onAppearTmpBufOptBufCallSync : KPointer = valueDeserializer.readPointer()
+            const onAppearTmpBufOptClosure  = ():void => {
+                const onAppearTmpBufOptBufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onAppearTmpBufOptBufArgsSerializer.writeInt32(onAppearTmpBufOptBufResource.resourceId);
+                onAppearTmpBufOptBufArgsSerializer.writePointer(onAppearTmpBufOptBufCall);
+                onAppearTmpBufOptBufArgsSerializer.writePointer(onAppearTmpBufOptBufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -912797893, onAppearTmpBufOptBufArgsSerializer.asBuffer(), onAppearTmpBufOptBufArgsSerializer.length());
+                onAppearTmpBufOptBufArgsSerializer.release();
+                return;
+            }
+            resourceFinalizerRegister(onAppearTmpBufOptClosure, onAppearTmpBufOptBufResource)
+            onAppearTmpBuf = onAppearTmpBufOptClosure
+        }
+        const onAppearTmpResult : arkui_component_common_Callback<void, void> | undefined = onAppearTmpBuf
+        const onDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let onDisappearTmpBuf : arkui_component_common_Callback<void, void> | undefined = undefined
+        if ((onDisappearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onDisappearTmpBufOptBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDisappearTmpBufOptBufCall : KPointer = valueDeserializer.readPointer()
+            const onDisappearTmpBufOptBufCallSync : KPointer = valueDeserializer.readPointer()
+            const onDisappearTmpBufOptClosure  = ():void => {
+                const onDisappearTmpBufOptBufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onDisappearTmpBufOptBufArgsSerializer.writeInt32(onDisappearTmpBufOptBufResource.resourceId);
+                onDisappearTmpBufOptBufArgsSerializer.writePointer(onDisappearTmpBufOptBufCall);
+                onDisappearTmpBufOptBufArgsSerializer.writePointer(onDisappearTmpBufOptBufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -912797893, onDisappearTmpBufOptBufArgsSerializer.asBuffer(), onDisappearTmpBufOptBufArgsSerializer.length());
+                onDisappearTmpBufOptBufArgsSerializer.release();
+                return;
+            }
+            resourceFinalizerRegister(onDisappearTmpBufOptClosure, onDisappearTmpBufOptBufResource)
+            onDisappearTmpBuf = onDisappearTmpBufOptClosure
+        }
+        const onDisappearTmpResult : arkui_component_common_Callback<void, void> | undefined = onDisappearTmpBuf
+        const previewTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let previewTmpBuf : CustomBuilder | undefined = undefined
+        if ((previewTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const previewTmpBufOptBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const previewTmpBufOptBufCall : KPointer = valueDeserializer.readPointer()
+            const previewTmpBufOptBufCallSync : KPointer = valueDeserializer.readPointer()
+            const previewTmpBufOptClosure  = ():void => {
+                const previewTmpBufOptBufArgsSerializer : SerializerBase = SerializerBase.hold();
+                previewTmpBufOptBufArgsSerializer.writeInt32(previewTmpBufOptBufResource.resourceId);
+                previewTmpBufOptBufArgsSerializer.writePointer(previewTmpBufOptBufCall);
+                previewTmpBufOptBufArgsSerializer.writePointer(previewTmpBufOptBufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1834072896, previewTmpBufOptBufArgsSerializer.asBuffer(), previewTmpBufOptBufArgsSerializer.length());
+                previewTmpBufOptBufArgsSerializer.release();
+                return;
+            }
+            resourceFinalizerRegister(previewTmpBufOptClosure, previewTmpBufOptBufResource)
+            previewTmpBuf = previewTmpBufOptClosure
+        }
+        const previewTmpResult : CustomBuilder | undefined = previewTmpBuf
+        const menuTypeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let menuTypeTmpBuf : MenuType | undefined = undefined
+        if ((menuTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            menuTypeTmpBuf = MenuType.fromValue(valueDeserializer.readInt32())
+        }
+        const menuTypeTmpResult : MenuType | undefined = menuTypeTmpBuf
+        const previewMenuOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let previewMenuOptionsTmpBuf : object | undefined = undefined
+        if ((previewMenuOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            previewMenuOptionsTmpBuf = (valueDeserializer.readCustomObject('object') as object)
+        }
+        const previewMenuOptionsTmpResult : object | undefined = previewMenuOptionsTmpBuf
+        let value : SelectionMenuOptionsExt = ({onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, preview: previewTmpResult, menuType: menuTypeTmpResult, previewMenuOptions: previewMenuOptionsTmpResult} as SelectionMenuOptionsExt)
+        return value
+    }
+}
 export class SslErrorEvent_serializer {
     public static write(buffer: SerializerBase, value: SslErrorEvent): void {
         let valueSerializer : SerializerBase = buffer
@@ -6562,14 +6202,14 @@ export class WebKeyboardCallbackInfo_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const controllerTmpResult : WebKeyboardController = (WebKeyboardController_serializer.read(valueDeserializer) as WebKeyboardController)
         const attributesTmpBufSizeVar : int32 = valueDeserializer.readInt32()
-        let attributesTmpBuf : Map<string, string> = new Map<string, string>()
+        let attributesTmpBuf : Record<string, string> = new Record<string, string>()
         // TODO: TS map resize
         for (let attributesTmpBufIVar = 0; attributesTmpBufIVar < attributesTmpBufSizeVar; attributesTmpBufIVar++) {
             const attributesTmpBufKeyVar : string = (valueDeserializer.readString() as string)
             const attributesTmpBufValueVar : string = (valueDeserializer.readString() as string)
             attributesTmpBuf.set(attributesTmpBufKeyVar, attributesTmpBufValueVar)
         }
-        const attributesTmpResult : Map<string, string> = attributesTmpBuf
+        const attributesTmpResult : Record<string, string> = attributesTmpBuf
         let value : WebKeyboardCallbackInfo = ({controller: controllerTmpResult, attributes: attributesTmpResult} as WebKeyboardCallbackInfo)
         return value
     }
@@ -6599,27 +6239,29 @@ export class WebKeyboardOptions_serializer {
     public static read(buffer: DeserializerBase): WebKeyboardOptions {
         let valueDeserializer : DeserializerBase = buffer
         const useSystemKeyboardTmpResult : boolean = valueDeserializer.readBoolean()
-        const enterKeyTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const enterKeyTypeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let enterKeyTypeTmpBuf : int32 | undefined = undefined
         if ((enterKeyTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             enterKeyTypeTmpBuf = valueDeserializer.readInt32()
         }
         const enterKeyTypeTmpResult : int32 | undefined = enterKeyTypeTmpBuf
-        const customKeyboardTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const customKeyboardTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let customKeyboardTmpBuf : CustomBuilder | undefined = undefined
         if ((customKeyboardTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const customKeyboardTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const customKeyboardTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const customKeyboardTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            customKeyboardTmpBuf = ():void => {
-                const customKeyboardTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                customKeyboardTmpBuf_BufArgsSerializer.writeInt32(customKeyboardTmpBuf_BufResource.resourceId);
-                customKeyboardTmpBuf_BufArgsSerializer.writePointer(customKeyboardTmpBuf_BufCall);
-                customKeyboardTmpBuf_BufArgsSerializer.writePointer(customKeyboardTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, 737226752, customKeyboardTmpBuf_BufArgsSerializer.asBuffer(), customKeyboardTmpBuf_BufArgsSerializer.length());
-                customKeyboardTmpBuf_BufArgsSerializer.release();
+            const customKeyboardTmpBufOptBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const customKeyboardTmpBufOptBufCall : KPointer = valueDeserializer.readPointer()
+            const customKeyboardTmpBufOptBufCallSync : KPointer = valueDeserializer.readPointer()
+            const customKeyboardTmpBufOptClosure  = ():void => {
+                const customKeyboardTmpBufOptBufArgsSerializer : SerializerBase = SerializerBase.hold();
+                customKeyboardTmpBufOptBufArgsSerializer.writeInt32(customKeyboardTmpBufOptBufResource.resourceId);
+                customKeyboardTmpBufOptBufArgsSerializer.writePointer(customKeyboardTmpBufOptBufCall);
+                customKeyboardTmpBufOptBufArgsSerializer.writePointer(customKeyboardTmpBufOptBufCallSync);
+                InteropNativeModule._CallCallbackSync(10, -1834072896, customKeyboardTmpBufOptBufArgsSerializer.asBuffer(), customKeyboardTmpBufOptBufArgsSerializer.length());
+                customKeyboardTmpBufOptBufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(customKeyboardTmpBufOptClosure, customKeyboardTmpBufOptBufResource)
+            customKeyboardTmpBuf = customKeyboardTmpBufOptClosure
         }
         const customKeyboardTmpResult : CustomBuilder | undefined = customKeyboardTmpBuf
         let value : WebKeyboardOptions = ({useSystemKeyboard: useSystemKeyboardTmpResult, enterKeyType: enterKeyTypeTmpResult, customKeyboard: customKeyboardTmpResult} as WebKeyboardOptions)
@@ -6656,19 +6298,19 @@ export class WebMediaOptions_serializer {
     }
     public static read(buffer: DeserializerBase): WebMediaOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const resumeIntervalTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const resumeIntervalTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let resumeIntervalTmpBuf : int32 | undefined = undefined
         if ((resumeIntervalTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             resumeIntervalTmpBuf = valueDeserializer.readInt32()
         }
         const resumeIntervalTmpResult : int32 | undefined = resumeIntervalTmpBuf
-        const audioExclusiveTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const audioExclusiveTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let audioExclusiveTmpBuf : boolean | undefined = undefined
         if ((audioExclusiveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             audioExclusiveTmpBuf = valueDeserializer.readBoolean()
         }
         const audioExclusiveTmpResult : boolean | undefined = audioExclusiveTmpBuf
-        const audioSessionTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const audioSessionTypeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let audioSessionTypeTmpBuf : AudioSessionType | undefined = undefined
         if ((audioSessionTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             audioSessionTypeTmpBuf = AudioSessionType.fromValue(valueDeserializer.readInt32())
@@ -6686,10 +6328,10 @@ export class WebOptions_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForSrcForIdx0  = valueHolderForSrc as string
             valueSerializer.writeString(valueHolderForSrcForIdx0)
-        } else if (valueHolderForSrc instanceof Resource) {
+        } else if (valueHolderForSrc instanceof global_resource_Resource) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForSrcForIdx1  = valueHolderForSrc as Resource
-            Resource_serializer.write(valueSerializer, valueHolderForSrcForIdx1)
+            const valueHolderForSrcForIdx1  = valueHolderForSrc as global_resource_Resource
+            global_resource_Resource_serializer.write(valueSerializer, valueHolderForSrcForIdx1)
         }
         const valueHolderForController  = value.controller
         webview_WebviewController_serializer.write(valueSerializer, valueHolderForController)
@@ -6721,148 +6363,35 @@ export class WebOptions_serializer {
     public static read(buffer: DeserializerBase): WebOptions {
         let valueDeserializer : DeserializerBase = buffer
         const srcTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let srcTmpBuf : string | Resource | undefined
-        if (srcTmpBufUnionSelector == (0).toChar()) {
+        let srcTmpBuf : string | global_resource_Resource | undefined
+        if (srcTmpBufUnionSelector == (0).toByte()) {
             srcTmpBuf = (valueDeserializer.readString() as string)
-        } else if (srcTmpBufUnionSelector == (1).toChar()) {
-            srcTmpBuf = Resource_serializer.read(valueDeserializer)
+        } else if (srcTmpBufUnionSelector == (1).toByte()) {
+            srcTmpBuf = global_resource_Resource_serializer.read(valueDeserializer)
         } else {
-            throw new Error("One of the branches for srcTmpBuf has to be chosen through deserialisation.")
+            throw new Error('One of the branches for srcTmpBuf has to be chosen through deserialisation.')
         }
-        const srcTmpResult : string | Resource = (srcTmpBuf as string | Resource)
-        const controllerTmpResult : webview.WebviewController = (webview_WebviewController_serializer.read(valueDeserializer) as webview.WebviewController)
-        const renderModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const srcTmpResult : string | global_resource_Resource = (srcTmpBuf as string | global_resource_Resource)
+        const controllerTmpResult : WebviewController = (webview_WebviewController_serializer.read(valueDeserializer) as webview.WebviewController)
+        const renderModeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let renderModeTmpBuf : RenderMode | undefined = undefined
         if ((renderModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             renderModeTmpBuf = RenderMode.fromValue(valueDeserializer.readInt32())
         }
         const renderModeTmpResult : RenderMode | undefined = renderModeTmpBuf
-        const incognitoModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const incognitoModeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let incognitoModeTmpBuf : boolean | undefined = undefined
         if ((incognitoModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             incognitoModeTmpBuf = valueDeserializer.readBoolean()
         }
         const incognitoModeTmpResult : boolean | undefined = incognitoModeTmpBuf
-        const sharedRenderProcessTokenTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const sharedRenderProcessTokenTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let sharedRenderProcessTokenTmpBuf : string | undefined = undefined
         if ((sharedRenderProcessTokenTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             sharedRenderProcessTokenTmpBuf = (valueDeserializer.readString() as string)
         }
         const sharedRenderProcessTokenTmpResult : string | undefined = sharedRenderProcessTokenTmpBuf
         let value : WebOptions = ({src: srcTmpResult, controller: controllerTmpResult, renderMode: renderModeTmpResult, incognitoMode: incognitoModeTmpResult, sharedRenderProcessToken: sharedRenderProcessTokenTmpResult} as WebOptions)
-        return value
-    }
-}
-export class SelectionMenuOptionsExt_serializer {
-    public static write(buffer: SerializerBase, value: SelectionMenuOptionsExt): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForOnAppear  = value.onAppear
-        if (valueHolderForOnAppear !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForOnAppearTmpValue  = valueHolderForOnAppear!
-            valueSerializer.holdAndWriteCallback(valueHolderForOnAppearTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForOnDisappear  = value.onDisappear
-        if (valueHolderForOnDisappear !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForOnDisappearTmpValue  = valueHolderForOnDisappear!
-            valueSerializer.holdAndWriteCallback(valueHolderForOnDisappearTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForPreview  = value.preview
-        if (valueHolderForPreview !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForPreviewTmpValue  = valueHolderForPreview!
-            valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForPreviewTmpValue))
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForMenuType  = value.menuType
-        if (valueHolderForMenuType !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForMenuTypeTmpValue  = (valueHolderForMenuType as MenuType)
-            valueSerializer.writeInt32(valueHolderForMenuTypeTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForPreviewMenuOptions  = value.previewMenuOptions
-        if (valueHolderForPreviewMenuOptions !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForPreviewMenuOptionsTmpValue  = valueHolderForPreviewMenuOptions!
-            PreviewMenuOptions_serializer.write(valueSerializer, valueHolderForPreviewMenuOptionsTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): SelectionMenuOptionsExt {
-        let valueDeserializer : DeserializerBase = buffer
-        const onAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onAppearTmpBuf : (() => void) | undefined = undefined
-        if ((onAppearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onAppearTmpBuf = ():void => {
-                const onAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onAppearTmpBuf_BufArgsSerializer.writeInt32(onAppearTmpBuf_BufResource.resourceId);
-                onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCall);
-                onAppearTmpBuf_BufArgsSerializer.writePointer(onAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, onAppearTmpBuf_BufArgsSerializer.asBuffer(), onAppearTmpBuf_BufArgsSerializer.length());
-                onAppearTmpBuf_BufArgsSerializer.release();
-                return;
-            }
-        }
-        const onAppearTmpResult : (() => void) | undefined = onAppearTmpBuf
-        const onDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDisappearTmpBuf : (() => void) | undefined = undefined
-        if ((onDisappearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDisappearTmpBuf = ():void => {
-                const onDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onDisappearTmpBuf_BufArgsSerializer.writeInt32(onDisappearTmpBuf_BufResource.resourceId);
-                onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCall);
-                onDisappearTmpBuf_BufArgsSerializer.writePointer(onDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, onDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDisappearTmpBuf_BufArgsSerializer.length());
-                onDisappearTmpBuf_BufArgsSerializer.release();
-                return;
-            }
-        }
-        const onDisappearTmpResult : (() => void) | undefined = onDisappearTmpBuf
-        const previewTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let previewTmpBuf : CustomBuilder | undefined = undefined
-        if ((previewTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const previewTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const previewTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const previewTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            previewTmpBuf = ():void => {
-                const previewTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                previewTmpBuf_BufArgsSerializer.writeInt32(previewTmpBuf_BufResource.resourceId);
-                previewTmpBuf_BufArgsSerializer.writePointer(previewTmpBuf_BufCall);
-                previewTmpBuf_BufArgsSerializer.writePointer(previewTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, 737226752, previewTmpBuf_BufArgsSerializer.asBuffer(), previewTmpBuf_BufArgsSerializer.length());
-                previewTmpBuf_BufArgsSerializer.release();
-                return;
-            }
-        }
-        const previewTmpResult : CustomBuilder | undefined = previewTmpBuf
-        const menuTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let menuTypeTmpBuf : MenuType | undefined = undefined
-        if ((menuTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            menuTypeTmpBuf = MenuType.fromValue(valueDeserializer.readInt32())
-        }
-        const menuTypeTmpResult : MenuType | undefined = menuTypeTmpBuf
-        const previewMenuOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let previewMenuOptionsTmpBuf : PreviewMenuOptions | undefined = undefined
-        if ((previewMenuOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            previewMenuOptionsTmpBuf = PreviewMenuOptions_serializer.read(valueDeserializer)
-        }
-        const previewMenuOptionsTmpResult : PreviewMenuOptions | undefined = previewMenuOptionsTmpBuf
-        let value : SelectionMenuOptionsExt = ({onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, preview: previewTmpResult, menuType: menuTypeTmpResult, previewMenuOptions: previewMenuOptionsTmpResult} as SelectionMenuOptionsExt)
         return value
     }
 }
@@ -6950,66 +6479,66 @@ export class NativeEmbedInfo_serializer {
     }
     public static read(buffer: DeserializerBase): NativeEmbedInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const idTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const idTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let idTmpBuf : string | undefined = undefined
         if ((idTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             idTmpBuf = (valueDeserializer.readString() as string)
         }
         const idTmpResult : string | undefined = idTmpBuf
-        const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const typeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let typeTmpBuf : string | undefined = undefined
         if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             typeTmpBuf = (valueDeserializer.readString() as string)
         }
         const typeTmpResult : string | undefined = typeTmpBuf
-        const srcTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const srcTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let srcTmpBuf : string | undefined = undefined
         if ((srcTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             srcTmpBuf = (valueDeserializer.readString() as string)
         }
         const srcTmpResult : string | undefined = srcTmpBuf
-        const positionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const positionTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let positionTmpBuf : Position | undefined = undefined
         if ((positionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             positionTmpBuf = Position_serializer.read(valueDeserializer)
         }
         const positionTmpResult : Position | undefined = positionTmpBuf
-        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let widthTmpBuf : int32 | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             widthTmpBuf = valueDeserializer.readInt32()
         }
         const widthTmpResult : int32 | undefined = widthTmpBuf
-        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let heightTmpBuf : int32 | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             heightTmpBuf = valueDeserializer.readInt32()
         }
         const heightTmpResult : int32 | undefined = heightTmpBuf
-        const urlTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const urlTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let urlTmpBuf : string | undefined = undefined
         if ((urlTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             urlTmpBuf = (valueDeserializer.readString() as string)
         }
         const urlTmpResult : string | undefined = urlTmpBuf
-        const tagTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const tagTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let tagTmpBuf : string | undefined = undefined
         if ((tagTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             tagTmpBuf = (valueDeserializer.readString() as string)
         }
         const tagTmpResult : string | undefined = tagTmpBuf
-        const paramsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const paramsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let paramsTmpBuf : Map<string, string> | undefined = undefined
         if ((paramsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const paramsTmpBuf_SizeVar : int32 = valueDeserializer.readInt32()
-            let paramsTmpBuf_ : Map<string, string> = new Map<string, string>()
+            const paramsTmpBufOptSizeVar : int32 = valueDeserializer.readInt32()
+            let paramsTmpBufOpt : Map<string, string> = new Map<string, string>()
             // TODO: TS map resize
-            for (let paramsTmpBuf_IVar = 0; paramsTmpBuf_IVar < paramsTmpBuf_SizeVar; paramsTmpBuf_IVar++) {
-                const paramsTmpBuf_KeyVar : string = (valueDeserializer.readString() as string)
-                const paramsTmpBuf_ValueVar : string = (valueDeserializer.readString() as string)
-                paramsTmpBuf_.set(paramsTmpBuf_KeyVar, paramsTmpBuf_ValueVar)
+            for (let paramsTmpBufOptIVar = 0; paramsTmpBufOptIVar < paramsTmpBufOptSizeVar; paramsTmpBufOptIVar++) {
+                const paramsTmpBufOptKeyVar : string = (valueDeserializer.readString() as string)
+                const paramsTmpBufOptValueVar : string = (valueDeserializer.readString() as string)
+                paramsTmpBufOpt.set(paramsTmpBufOptKeyVar, paramsTmpBufOptValueVar)
             }
-            paramsTmpBuf = paramsTmpBuf_
+            paramsTmpBuf = paramsTmpBufOpt
         }
         const paramsTmpResult : Map<string, string> | undefined = paramsTmpBuf
         let value : NativeEmbedInfo = ({id: idTmpResult, type: typeTmpResult, src: srcTmpResult, position: positionTmpResult, width: widthTmpResult, height: heightTmpResult, url: urlTmpResult, tag: tagTmpResult, params: paramsTmpResult} as NativeEmbedInfo)
@@ -7054,83 +6583,31 @@ export class NativeEmbedDataInfo_serializer {
     }
     public static read(buffer: DeserializerBase): NativeEmbedDataInfo {
         let valueDeserializer : DeserializerBase = buffer
-        const statusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const statusTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let statusTmpBuf : NativeEmbedStatus | undefined = undefined
         if ((statusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             statusTmpBuf = NativeEmbedStatus.fromValue(valueDeserializer.readInt32())
         }
         const statusTmpResult : NativeEmbedStatus | undefined = statusTmpBuf
-        const surfaceIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const surfaceIdTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let surfaceIdTmpBuf : string | undefined = undefined
         if ((surfaceIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             surfaceIdTmpBuf = (valueDeserializer.readString() as string)
         }
         const surfaceIdTmpResult : string | undefined = surfaceIdTmpBuf
-        const embedIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const embedIdTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let embedIdTmpBuf : string | undefined = undefined
         if ((embedIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             embedIdTmpBuf = (valueDeserializer.readString() as string)
         }
         const embedIdTmpResult : string | undefined = embedIdTmpBuf
-        const infoTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const infoTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let infoTmpBuf : NativeEmbedInfo | undefined = undefined
         if ((infoTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             infoTmpBuf = NativeEmbedInfo_serializer.read(valueDeserializer)
         }
         const infoTmpResult : NativeEmbedInfo | undefined = infoTmpBuf
         let value : NativeEmbedDataInfo = ({status: statusTmpResult, surfaceId: surfaceIdTmpResult, embedId: embedIdTmpResult, info: infoTmpResult} as NativeEmbedDataInfo)
-        return value
-    }
-}
-export class NativeEmbedTouchInfo_serializer {
-    public static write(buffer: SerializerBase, value: NativeEmbedTouchInfo): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForEmbedId  = value.embedId
-        if (valueHolderForEmbedId !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForEmbedIdTmpValue  = valueHolderForEmbedId!
-            valueSerializer.writeString(valueHolderForEmbedIdTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForTouchEvent  = value.touchEvent
-        if (valueHolderForTouchEvent !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForTouchEventTmpValue  = valueHolderForTouchEvent!
-            TouchEvent_serializer.write(valueSerializer, valueHolderForTouchEventTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForResult  = value.result
-        if (valueHolderForResult !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForResultTmpValue  = valueHolderForResult!
-            EventResult_serializer.write(valueSerializer, valueHolderForResultTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): NativeEmbedTouchInfo {
-        let valueDeserializer : DeserializerBase = buffer
-        const embedIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let embedIdTmpBuf : string | undefined = undefined
-        if ((embedIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            embedIdTmpBuf = (valueDeserializer.readString() as string)
-        }
-        const embedIdTmpResult : string | undefined = embedIdTmpBuf
-        const touchEventTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let touchEventTmpBuf : TouchEvent | undefined = undefined
-        if ((touchEventTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            touchEventTmpBuf = (TouchEvent_serializer.read(valueDeserializer) as TouchEvent)
-        }
-        const touchEventTmpResult : TouchEvent | undefined = touchEventTmpBuf
-        const resultTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let resultTmpBuf : EventResult | undefined = undefined
-        if ((resultTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            resultTmpBuf = (EventResult_serializer.read(valueDeserializer) as EventResult)
-        }
-        const resultTmpResult : EventResult | undefined = resultTmpBuf
-        let value : NativeEmbedTouchInfo = ({embedId: embedIdTmpResult, touchEvent: touchEventTmpResult, result: resultTmpResult} as NativeEmbedTouchInfo)
         return value
     }
 }

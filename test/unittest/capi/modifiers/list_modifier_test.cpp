@@ -486,12 +486,13 @@ HWTEST_F(ListModifierTest, setDividerTest, TestSize.Level1)
     auto dividerCheckValue = dividerObject->ToString();
     EXPECT_EQ(dividerCheckValue, "{}");
 
-    // set valid values, color as Ark_Color aka int
+    // set valid values, color as Ark_arkui_component_enums_Color aka int
     Ark_ListDividerOptions dividerOptions = {
         .strokeWidth = Converter::ArkValue<Ark_Length>("11px"),
         .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>("77px")),
-        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE),
     };
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
@@ -710,7 +711,7 @@ HWTEST_F(ListModifierTest, DISABLED_setOnItemDragStartTest, TestSize.Level1)
     // set callback to model
     auto onItemDragStartSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_ItemDragInfo event, const Ark_Int32 itemIndex,
-        const Callback_Opt_CustomBuilder_Void continuation
+        const Callback_Opt_CustomNodeBuilder_Void continuation
     ) {
         // check input values
         EXPECT_EQ(resourceId, expectedResourceId);

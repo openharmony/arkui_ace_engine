@@ -21,8 +21,8 @@
 #include "core/components_ng/pattern/navigation/navigation_route.h"
 
 namespace OHOS::Ace::NG::Converter {
-using NG::GeneratedModifier::NavigationContext::NavigationStack;
-void AssignArkValue(Ark_NavPathStack& dst, const RefPtr<NavigationStack>& src, ConvContext *ctx)
+void AssignArkValue(Ark_NavPathStack& dst,
+    const RefPtr<GeneratedModifier::NavigationContext::NavigationStack>& src, ConvContext *ctx)
 {
     const auto peer = PeerUtils::CreatePeer<NavPathStackPeer>();
     peer->SetNavigationStack(src);

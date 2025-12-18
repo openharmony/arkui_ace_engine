@@ -16,15 +16,20 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkComponentRootPeer, ComponentRoot } from "./component/idlize"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkComponentRootPeer, ComponentRoot } from './component/idlize'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
 export class ComponentRootModifier implements ComponentRoot,AttributeModifier<ComponentRoot> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -34,13 +39,16 @@ export class ComponentRootModifier implements ComponentRoot,AttributeModifier<Co
     applyFocusedAttribute(instance: ComponentRoot): void { }
     applyDisabledAttribute(instance: ComponentRoot): void { }
     applySelectedAttribute(instance: ComponentRoot): void { }
-    applyModifierPatch(node: PeerNode): void {
+    applyModifierPatch(node: object): void {
         this._state.addRef()
         const peer = node as ArkComponentRootPeer;
+        const flagArray = this._flagArray;
     }
     mergeModifier(modifier: ComponentRootModifier): void {
+        this._state = modifier._state;
+        const flagArray = modifier._flagArray;
     }
     public attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

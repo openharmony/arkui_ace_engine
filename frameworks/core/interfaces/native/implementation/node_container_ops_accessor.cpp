@@ -44,20 +44,21 @@ void NodeContainerSetNodeContainerOptionsImpl(Ark_NativePointer ptr,
     auto frameNode = reinterpret_cast<FrameNode *>(ptr);
     CHECK_NULL_VOID(frameNode);
 }
-void AddNodeContainerRootNodeImpl(Ark_NativePointer self, Ark_NativePointer childNode)
+void AddNodeContainerRootNodeImpl(Ark_NativePointer self,
+                                  Ark_NativePointer child)
 {
     auto nodeContainer = reinterpret_cast<FrameNode*>(self);
-    auto* childPeer = reinterpret_cast<Ark_FrameNode>(childNode);
+    auto* childPeer = reinterpret_cast<Ark_FrameNode>(child);
     auto pattern = nodeContainer->GetPattern<NodeContainerPattern>();
     CHECK_NULL_VOID(pattern);
     if (!childPeer) {
         pattern->AddBaseNode(nullptr);
         return;
     }
-    auto child = FrameNodePeer::GetFrameNodeByPeer(childPeer);
-    pattern->AddBaseNode(child);
+    pattern->AddBaseNode(FrameNodePeer::GetFrameNodeByPeer(childPeer));
 }
-void SetAboutToAppearImpl(Ark_NativePointer self, const Callback_Void* value)
+void SetAboutToAppearImpl(Ark_NativePointer self,
+                          const synthetic_Callback_Void* value)
 {
     auto nodeContainer = reinterpret_cast<FrameNode*>(self);
     CHECK_NULL_VOID(nodeContainer);
@@ -70,7 +71,8 @@ void SetAboutToAppearImpl(Ark_NativePointer self, const Callback_Void* value)
     };
     eventHub->SetControllerAboutToAppear(std::move(aboutToAppearFunc));
 }
-void SetAboutToDisappearImpl(Ark_NativePointer self, const Callback_Void* value)
+void SetAboutToDisappearImpl(Ark_NativePointer self,
+                             const synthetic_Callback_Void* value)
 {
     auto nodeContainer = reinterpret_cast<FrameNode*>(self);
     CHECK_NULL_VOID(nodeContainer);
@@ -83,7 +85,8 @@ void SetAboutToDisappearImpl(Ark_NativePointer self, const Callback_Void* value)
     };
     eventHub->SetControllerAboutToDisappear(std::move(aboutToDisappearFunc));
 }
-void SetAboutToResizeImpl(Ark_NativePointer self, const Callback_Size_Void* value)
+void SetAboutToResizeImpl(Ark_NativePointer self,
+                          const Callback_Size_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(self);
     CHECK_NULL_VOID(frameNode);
@@ -96,7 +99,8 @@ void SetAboutToResizeImpl(Ark_NativePointer self, const Callback_Size_Void* valu
     };
     pattern->SetOnResize(aboutToResizeFunc);
 }
-void SetOnAttachImpl(Ark_NativePointer self, const Callback_Void* value)
+void SetOnAttachImpl(Ark_NativePointer self,
+                     const synthetic_Callback_Void* value)
 {
     auto nodeContainer = reinterpret_cast<FrameNode*>(self);
     CHECK_NULL_VOID(nodeContainer);
@@ -109,7 +113,8 @@ void SetOnAttachImpl(Ark_NativePointer self, const Callback_Void* value)
     };
     eventHub->SetControllerOnAttach(std::move(onAttachFunc));
 }
-void SetOnDetachImpl(Ark_NativePointer self, const Callback_Void* value)
+void SetOnDetachImpl(Ark_NativePointer self,
+                     const synthetic_Callback_Void* value)
 {
     auto nodeContainer = reinterpret_cast<FrameNode*>(self);
     CHECK_NULL_VOID(nodeContainer);
@@ -121,21 +126,6 @@ void SetOnDetachImpl(Ark_NativePointer self, const Callback_Void* value)
         callback.InvokeSync();
     };
     eventHub->SetControllerOnDetach(std::move(onDetachFunc));
-}
-void SetOnTouchEventImpl(Ark_NativePointer self, const Opt_Callback_TouchEvent_Void* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(self);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        ViewAbstract::DisableOnTouch(frameNode);
-        return;
-    }
-    auto onEvent = [callback = CallbackHelper(value->value)](TouchEventInfo& info) {
-        const auto event = Converter::ArkTouchEventSync(info);
-        callback.InvokeSync(event.ArkValue());
-    };
-    ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
 }
 void SetOnDestoryEventImpl(Ark_NativePointer self,
                            const Callback_OnDestory_Void* value)
@@ -158,6 +148,22 @@ void SetOnDestoryEventImpl(Ark_NativePointer self,
     };
     nodeContainer->SetOnNodeDestroyCallback(onNodeDestroyCallback);
 }
+void SetOnTouchEventImpl(Ark_NativePointer self,
+                         const Opt_NodeContainerOpsOnTouchCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(self);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        ViewAbstract::DisableOnTouch(frameNode);
+        return;
+    }
+    auto onEvent = [callback = CallbackHelper(value->value)](TouchEventInfo& info) {
+        const auto event = Converter::ArkTouchEventSync(info);
+        callback.InvokeSync(event.ArkValue());
+    };
+    ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
+}
 } // NodeContainerOpsAccessor
 const GENERATED_ArkUINodeContainerOpsAccessor* GetNodeContainerOpsAccessor()
 {
@@ -170,8 +176,8 @@ const GENERATED_ArkUINodeContainerOpsAccessor* GetNodeContainerOpsAccessor()
         NodeContainerOpsAccessor::SetAboutToResizeImpl,
         NodeContainerOpsAccessor::SetOnAttachImpl,
         NodeContainerOpsAccessor::SetOnDetachImpl,
-        NodeContainerOpsAccessor::SetOnTouchEventImpl,
         NodeContainerOpsAccessor::SetOnDestoryEventImpl,
+        NodeContainerOpsAccessor::SetOnTouchEventImpl,
     };
     return &NodeContainerOpsAccessorImpl;
 }

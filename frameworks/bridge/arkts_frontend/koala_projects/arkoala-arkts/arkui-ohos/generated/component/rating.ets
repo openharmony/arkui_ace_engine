@@ -16,26 +16,27 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_F64_serializer } from "./common"
-import { ContentModifier, AttributeModifier, hookRatingContentModifier, hookRatingAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { ResourceStr } from "./units"
-import { Resource } from "global.resource"
-import { RatingModifier } from "./../RatingModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource_serializer } from "./../framework/resource"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, resourceFinalizerRegister, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, Bindable, CommonConfiguration, Callback as arkui_component_common_Callback, ArkCommonMethodComponent, Bindable_F64_serializer } from './common'
+import { ContentModifier, AttributeModifier, hookRatingContentModifier, hookRatingAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { ResourceStr as arkui_component_units_ResourceStr, Resource as arkui_component_units_Resource } from './units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { RatingModifier } from './../RatingModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+import { global_resource_Resource_serializer } from './../framework/resource'
 export class ArkRatingPeer extends ArkCommonMethodPeer {
     attributeSet?: RatingModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkRatingPeer {
@@ -46,6 +47,7 @@ export class ArkRatingPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setRatingOptionsAttribute(options?: RatingOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -111,80 +113,48 @@ export interface RatingOptions {
     indicator?: boolean;
 }
 export interface StarStyleOptions {
-    backgroundUri: ResourceStr | undefined;
-    foregroundUri: ResourceStr | undefined;
-    secondaryUri?: ResourceStr;
+    backgroundUri: arkui_component_units_ResourceStr | undefined;
+    foregroundUri: arkui_component_units_ResourceStr | undefined;
+    secondaryUri?: arkui_component_units_ResourceStr;
 }
 export interface RatingConfiguration extends CommonConfiguration<RatingConfiguration> {
     rating: double;
     indicator: boolean;
     stars: int32;
     stepSize: double;
-    triggerChange: ((value0: double) => void);
+    triggerChange: arkui_component_common_Callback<double, void>;
 }
 export type OnRatingChangeCallback = (rating: double) => void;
 export interface RatingAttribute extends CommonMethod {
     setRatingOptions(options?: RatingOptions): this {
-        throw new Error("Unimplemented method setRatingOptions")
+        throw new Error('Unimplemented method setRatingOptions')
     }
     stars(value: int32 | undefined): this {
-        throw new Error("Unimplemented method stars")
+        throw new Error('Unimplemented method stars')
     }
     stepSize(value: double | undefined): this {
-        throw new Error("Unimplemented method stepSize")
+        throw new Error('Unimplemented method stepSize')
     }
     starStyle(value: StarStyleOptions | undefined): this {
-        throw new Error("Unimplemented method starStyle")
+        throw new Error('Unimplemented method starStyle')
     }
     onChange(value: OnRatingChangeCallback | undefined): this {
-        throw new Error("Unimplemented method onChange")
+        throw new Error('Unimplemented method onChange')
     }
     contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this {
-        throw new Error("Unimplemented method contentModifier")
+        throw new Error('Unimplemented method contentModifier')
     }
     attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttribute {
-    stars_value?: int32 | undefined
-    stepSize_value?: double | undefined
-    starStyle_value?: StarStyleOptions | undefined
-    onChange_value?: OnRatingChangeCallback | undefined
-    contentModifier_value?: ContentModifier<RatingConfiguration> | undefined
-    attributeModifier_value?: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined
-    setRatingOptions(options?: RatingOptions): this {
-        return this
-    }
-    stars(value: int32 | undefined): this {
-        return this
-    }
-    stepSize(value: double | undefined): this {
-        return this
-    }
-    starStyle(value: StarStyleOptions | undefined): this {
-        return this
-    }
-    onChange(value: OnRatingChangeCallback | undefined): this {
-        return this
-    }
-    contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkRatingComponent extends ArkCommonMethodComponent implements RatingAttribute {
     getPeer(): ArkRatingPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkRatingPeer)
     }
     public setRatingOptions(options?: RatingOptions): this {
-        if (this.checkPriority("setRatingOptions")) {
+        if (this.checkPriority('setRatingOptions')) {
             const options_casted = options as (RatingOptions | undefined)
             this.getPeer()?.setRatingOptionsAttribute(options_casted)
             this.applyOptionsFinish('RatingAttribute');
@@ -193,7 +163,7 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements Rati
         return this
     }
     public stars(value: int32 | undefined): this {
-        if (this.checkPriority("stars")) {
+        if (this.checkPriority('stars')) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setStarsAttribute(value_casted)
             return this
@@ -201,7 +171,7 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements Rati
         return this
     }
     public stepSize(value: double | undefined): this {
-        if (this.checkPriority("stepSize")) {
+        if (this.checkPriority('stepSize')) {
             const value_casted = value as (double | undefined)
             this.getPeer()?.setStepSizeAttribute(value_casted)
             return this
@@ -209,7 +179,7 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements Rati
         return this
     }
     public starStyle(value: StarStyleOptions | undefined): this {
-        if (this.checkPriority("starStyle")) {
+        if (this.checkPriority('starStyle')) {
             const value_casted = value as (StarStyleOptions | undefined)
             this.getPeer()?.setStarStyleAttribute(value_casted)
             return this
@@ -217,7 +187,7 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements Rati
         return this
     }
     public onChange(value: OnRatingChangeCallback | undefined): this {
-        if (this.checkPriority("onChange")) {
+        if (this.checkPriority('onChange')) {
             const value_casted = value as (OnRatingChangeCallback | undefined)
             this.getPeer()?.setOnChangeAttribute(value_casted)
             return this
@@ -225,7 +195,7 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements Rati
         return this
     }
     public contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this {
-        if (this.checkPriority("contentModifier")) {
+        if (this.checkPriority('contentModifier')) {
             hookRatingContentModifier(this, value)
         }
         return this
@@ -247,18 +217,16 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements Rati
 
 @memo
 export function RatingImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: RatingAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkRatingComponent>((): ArkRatingComponent => {
         return new ArkRatingComponent()
     })
-    NodeAttach<ArkRatingPeer>((): ArkRatingPeer => ArkRatingPeer.create(receiver), (peer: ArkRatingPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkRatingPeer>((): ArkRatingPeer => ArkRatingPeer.create(receiver), (_: ArkRatingPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -292,16 +260,18 @@ export class RatingConfiguration_serializer {
         const triggerChangeTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const triggerChangeTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const triggerChangeTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const triggerChangeTmpResult : ((value0: double) => void) = (value0: double):void => {
+        const triggerChangeTmpBufClosure  = (data: double):void => {
             const triggerChangeTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             triggerChangeTmpBufBufArgsSerializer.writeInt32(triggerChangeTmpBufBufResource.resourceId);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCall);
             triggerChangeTmpBufBufArgsSerializer.writePointer(triggerChangeTmpBufBufCallSync);
-            triggerChangeTmpBufBufArgsSerializer.writeFloat64(value0);
-            InteropNativeModule._CallCallbackSync(10, -949162837, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
+            triggerChangeTmpBufBufArgsSerializer.writeFloat64(data);
+            InteropNativeModule._CallCallbackSync(10, 2113690827, triggerChangeTmpBufBufArgsSerializer.asBuffer(), triggerChangeTmpBufBufArgsSerializer.length());
             triggerChangeTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(triggerChangeTmpBufClosure, triggerChangeTmpBufBufResource)
+        const triggerChangeTmpResult : arkui_component_common_Callback<double, void> = triggerChangeTmpBufClosure
         let value : RatingConfiguration = ({enabled: enabledTmpResult, contentModifier: contentModifierTmpResult, rating: ratingTmpResult, indicator: indicatorTmpResult, stars: starsTmpResult, stepSize: stepSizeTmpResult, triggerChange: triggerChangeTmpResult} as RatingConfiguration)
         return value
     }
@@ -317,7 +287,7 @@ export class RatingOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForRatingTmpValueForIdx0  = valueHolderForRatingTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForRatingTmpValueForIdx0)
-            } else if (valueHolderForRatingTmpValue instanceof Bindable<double>) {
+            } else if (valueHolderForRatingTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRatingTmpValueForIdx1  = valueHolderForRatingTmpValue as Bindable<double>
                 Bindable_F64_serializer.write(valueSerializer, valueHolderForRatingTmpValueForIdx1)
@@ -336,22 +306,22 @@ export class RatingOptions_serializer {
     }
     public static read(buffer: DeserializerBase): RatingOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const ratingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const ratingTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let ratingTmpBuf : double | Bindable<double> | undefined = undefined
         if ((ratingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const ratingTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let ratingTmpBuf_ : double | Bindable<double> | undefined
-            if (ratingTmpBuf_UnionSelector == (0).toChar()) {
-                ratingTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (ratingTmpBuf_UnionSelector == (1).toChar()) {
-                ratingTmpBuf_ = Bindable_F64_serializer.read(valueDeserializer)
+            const ratingTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let ratingTmpBufOpt : double | Bindable<double> | undefined
+            if (ratingTmpBufOptUnionSelector == (0).toByte()) {
+                ratingTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (ratingTmpBufOptUnionSelector == (1).toByte()) {
+                ratingTmpBufOpt = Bindable_F64_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for ratingTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for ratingTmpBufOpt has to be chosen through deserialisation.')
             }
-            ratingTmpBuf = (ratingTmpBuf_ as double | Bindable<double>)
+            ratingTmpBuf = (ratingTmpBufOpt as double | Bindable<double>)
         }
         const ratingTmpResult : double | Bindable<double> | undefined = ratingTmpBuf
-        const indicatorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const indicatorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let indicatorTmpBuf : boolean | undefined = undefined
         if ((indicatorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             indicatorTmpBuf = valueDeserializer.readBoolean()
@@ -372,10 +342,10 @@ export class StarStyleOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBackgroundUriTmpValueForIdx0  = valueHolderForBackgroundUriTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundUriTmpValueForIdx0)
-            } else if (valueHolderForBackgroundUriTmpValue instanceof Resource) {
+            } else if (valueHolderForBackgroundUriTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForBackgroundUriTmpValueForIdx1  = valueHolderForBackgroundUriTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForBackgroundUriTmpValueForIdx1)
+                const valueHolderForBackgroundUriTmpValueForIdx1  = valueHolderForBackgroundUriTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForBackgroundUriTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -388,10 +358,10 @@ export class StarStyleOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForForegroundUriTmpValueForIdx0  = valueHolderForForegroundUriTmpValue as string
                 valueSerializer.writeString(valueHolderForForegroundUriTmpValueForIdx0)
-            } else if (valueHolderForForegroundUriTmpValue instanceof Resource) {
+            } else if (valueHolderForForegroundUriTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForForegroundUriTmpValueForIdx1  = valueHolderForForegroundUriTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForForegroundUriTmpValueForIdx1)
+                const valueHolderForForegroundUriTmpValueForIdx1  = valueHolderForForegroundUriTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForForegroundUriTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -404,10 +374,10 @@ export class StarStyleOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSecondaryUriTmpValueForIdx0  = valueHolderForSecondaryUriTmpValue as string
                 valueSerializer.writeString(valueHolderForSecondaryUriTmpValueForIdx0)
-            } else if (valueHolderForSecondaryUriTmpValue instanceof Resource) {
+            } else if (valueHolderForSecondaryUriTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForSecondaryUriTmpValueForIdx1  = valueHolderForSecondaryUriTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForSecondaryUriTmpValueForIdx1)
+                const valueHolderForSecondaryUriTmpValueForIdx1  = valueHolderForSecondaryUriTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForSecondaryUriTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -415,51 +385,51 @@ export class StarStyleOptions_serializer {
     }
     public static read(buffer: DeserializerBase): StarStyleOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const backgroundUriTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundUriTmpBuf : ResourceStr | undefined = undefined
+        const backgroundUriTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let backgroundUriTmpBuf : arkui_component_units_ResourceStr | undefined = undefined
         if ((backgroundUriTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const backgroundUriTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundUriTmpBuf_ : string | Resource | undefined
-            if (backgroundUriTmpBuf_UnionSelector == (0).toChar()) {
-                backgroundUriTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (backgroundUriTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundUriTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const backgroundUriTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let backgroundUriTmpBufOpt : string | arkui_component_units_Resource | undefined
+            if (backgroundUriTmpBufOptUnionSelector == (0).toByte()) {
+                backgroundUriTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (backgroundUriTmpBufOptUnionSelector == (1).toByte()) {
+                backgroundUriTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for backgroundUriTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for backgroundUriTmpBufOpt has to be chosen through deserialisation.')
             }
-            backgroundUriTmpBuf = (backgroundUriTmpBuf_ as string | Resource)
+            backgroundUriTmpBuf = (backgroundUriTmpBufOpt as string | arkui_component_units_Resource)
         }
-        const backgroundUriTmpResult : ResourceStr | undefined = backgroundUriTmpBuf
-        const foregroundUriTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let foregroundUriTmpBuf : ResourceStr | undefined = undefined
+        const backgroundUriTmpResult : arkui_component_units_ResourceStr | undefined = backgroundUriTmpBuf
+        const foregroundUriTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let foregroundUriTmpBuf : arkui_component_units_ResourceStr | undefined = undefined
         if ((foregroundUriTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const foregroundUriTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let foregroundUriTmpBuf_ : string | Resource | undefined
-            if (foregroundUriTmpBuf_UnionSelector == (0).toChar()) {
-                foregroundUriTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (foregroundUriTmpBuf_UnionSelector == (1).toChar()) {
-                foregroundUriTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const foregroundUriTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let foregroundUriTmpBufOpt : string | arkui_component_units_Resource | undefined
+            if (foregroundUriTmpBufOptUnionSelector == (0).toByte()) {
+                foregroundUriTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (foregroundUriTmpBufOptUnionSelector == (1).toByte()) {
+                foregroundUriTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for foregroundUriTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for foregroundUriTmpBufOpt has to be chosen through deserialisation.')
             }
-            foregroundUriTmpBuf = (foregroundUriTmpBuf_ as string | Resource)
+            foregroundUriTmpBuf = (foregroundUriTmpBufOpt as string | arkui_component_units_Resource)
         }
-        const foregroundUriTmpResult : ResourceStr | undefined = foregroundUriTmpBuf
-        const secondaryUriTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let secondaryUriTmpBuf : ResourceStr | undefined = undefined
+        const foregroundUriTmpResult : arkui_component_units_ResourceStr | undefined = foregroundUriTmpBuf
+        const secondaryUriTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let secondaryUriTmpBuf : arkui_component_units_ResourceStr | undefined = undefined
         if ((secondaryUriTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const secondaryUriTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let secondaryUriTmpBuf_ : string | Resource | undefined
-            if (secondaryUriTmpBuf_UnionSelector == (0).toChar()) {
-                secondaryUriTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (secondaryUriTmpBuf_UnionSelector == (1).toChar()) {
-                secondaryUriTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const secondaryUriTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let secondaryUriTmpBufOpt : string | arkui_component_units_Resource | undefined
+            if (secondaryUriTmpBufOptUnionSelector == (0).toByte()) {
+                secondaryUriTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (secondaryUriTmpBufOptUnionSelector == (1).toByte()) {
+                secondaryUriTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for secondaryUriTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for secondaryUriTmpBufOpt has to be chosen through deserialisation.')
             }
-            secondaryUriTmpBuf = (secondaryUriTmpBuf_ as string | Resource)
+            secondaryUriTmpBuf = (secondaryUriTmpBufOpt as string | arkui_component_units_Resource)
         }
-        const secondaryUriTmpResult : ResourceStr | undefined = secondaryUriTmpBuf
+        const secondaryUriTmpResult : arkui_component_units_ResourceStr | undefined = secondaryUriTmpBuf
         let value : StarStyleOptions = ({backgroundUri: backgroundUriTmpResult, foregroundUri: foregroundUriTmpResult, secondaryUri: secondaryUriTmpResult} as StarStyleOptions)
         return value
     }

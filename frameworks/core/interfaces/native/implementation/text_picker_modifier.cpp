@@ -36,54 +36,91 @@ void AssignArkValue(Ark_ResourceStr &dst, const std::string& src, ConvContext *c
 } // namespace Converter
 namespace {
 std::optional<Converter::PickerValueType> ProcessBindableValue(FrameNode* frameNode,
-    const Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable& value)
+    const Opt_Union_BindableResourceStr_BindableResourceStrArray& value)
 {
     std::optional<Converter::PickerValueType> result;
     Converter::VisitUnion(value,
-        [&result](const Ark_ResourceStr& src) {
-            result = Converter::OptConvert<Converter::PickerValueType>(src);
+        [&result, frameNode](const Ark_BindableResourceStr& src) {
+            Converter::VisitUnion(src,
+                [&result](const Ark_ResourceStr& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src);
+                },
+                [&result, frameNode](const Ark_Bindable_ResourceStr& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src.value);
+                    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+                    auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](
+                            const std::vector<std::string>& value) {
+                        CHECK_NULL_VOID(value.size());
+                        Converter::ConvContext ctx;
+                        auto result = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(value[0], &ctx);
+                        PipelineContext::SetCallBackNode(weakNode);
+                        arkCallback.Invoke(result);
+                    };
+                    TextPickerModelStatic::SetOnValueChangeEvent(frameNode, std::move(onEvent));
+                },
+                [&result, frameNode](const Ark_Bindable_String& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src.value);
+                    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+                    auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](
+                            const std::vector<std::string>& value) {
+                        CHECK_NULL_VOID(value.size());
+                        Converter::ConvContext ctx;
+                        auto result = Converter::ArkValue<Ark_String>(value[0], &ctx);
+                        PipelineContext::SetCallBackNode(weakNode);
+                        arkCallback.Invoke(result);
+                    };
+                    TextPickerModelStatic::SetOnValueChangeEvent(frameNode, std::move(onEvent));
+                },
+                [](const Ark_Bindable_Resource& src) {
+                },
+                [] {});
         },
-        [&result](const Array_ResourceStr& src) {
-            result = Converter::OptConvert<Converter::PickerValueType>(src);
-        },
-        [&result, frameNode](const Ark_Bindable_Arkui_Component_Units_ResourceStr& src) {
-            result = Converter::OptConvert<Converter::PickerValueType>(src.value);
-            WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-            auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](
-                    const std::vector<std::string>& value) {
-                CHECK_NULL_VOID(value.size());
-                Converter::ConvContext ctx;
-                auto result = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(value[0], &ctx);
-                PipelineContext::SetCallBackNode(weakNode);
-                arkCallback.Invoke(result);
-            };
-            TextPickerModelStatic::SetOnValueChangeEvent(frameNode, std::move(onEvent));
-        },
-        [&result, frameNode](const Ark_Bindable_Array_Arkui_Component_Units_ResourceStr& src) {
-            result = Converter::OptConvert<Converter::PickerValueType>(src.value);
-            WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-            auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](
-                    const std::vector<std::string>& value) {
-                Converter::ConvContext ctx;
-                auto result = Converter::ArkValue<Array_ResourceStr>(value, &ctx);
-                PipelineContext::SetCallBackNode(weakNode);
-                arkCallback.Invoke(result);
-            };
-            TextPickerModelStatic::SetOnValueChangeEvent(frameNode, std::move(onEvent));
+        [&result, frameNode](const Ark_BindableResourceStrArray& src) {
+            Converter::VisitUnion(src,
+                [&result](const Array_ResourceStr& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src);
+                },
+                [&result, frameNode](const Ark_Bindable_Array_ResourceStr& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src.value);
+                    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+                    auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](
+                            const std::vector<std::string>& value) {
+                        Converter::ConvContext ctx;
+                        auto result = Converter::ArkValue<Array_ResourceStr>(value, &ctx);
+                        PipelineContext::SetCallBackNode(weakNode);
+                        arkCallback.Invoke(result);
+                    };
+                    TextPickerModelStatic::SetOnValueChangeEvent(frameNode, std::move(onEvent));
+                },
+                [&result, frameNode](const Ark_Bindable_Array_String& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src.value);
+                    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+                    auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](
+                            const std::vector<std::string>& value) {
+                        Converter::ConvContext ctx;
+                        auto result = Converter::ArkValue<Array_String>(value, &ctx);
+                        PipelineContext::SetCallBackNode(weakNode);
+                        arkCallback.Invoke(result);
+                    };
+                    TextPickerModelStatic::SetOnValueChangeEvent(frameNode, std::move(onEvent));
+                },
+                [](const Ark_Bindable_Array_Resource& src) {
+                },
+                [] {});
         },
         [] {});
     return result;
 }
 
 std::optional<Converter::PickerSelectedType> ProcessBindableSelected(FrameNode* frameNode,
-    const Opt_Union_I32_Array_I32_Bindable_Bindable& value)
+    const Opt_Union_I32_Array_I32_Bindable_I32_Bindable_Array_I32& value)
 {
     std::optional<Converter::PickerSelectedType> result;
     Converter::VisitUnion(value,
         [&result](const Ark_Int32& src) {
             result = Converter::OptConvert<Converter::PickerSelectedType>(src);
         },
-        [&result](const Array_Int32& src) {
+        [&result](const Array_I32& src) {
             result = Converter::OptConvert<Converter::PickerSelectedType>(src);
         },
         [&result, frameNode](const Ark_Bindable_I32& src) {
@@ -102,7 +139,7 @@ std::optional<Converter::PickerSelectedType> ProcessBindableSelected(FrameNode* 
             WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
             auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](const std::vector<double>& index) {
                 Converter::ConvContext ctx;
-                auto result = Converter::ArkValue<Array_Int32>(index, &ctx);
+                auto result = Converter::ArkValue<Array_I32>(index, &ctx);
                 PipelineContext::SetCallBackNode(weakNode);
                 arkCallback.Invoke(result);
             };
@@ -547,9 +584,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
             selectedIndexes.push_back(static_cast<int32_t>(tmp));
         }
 
-        Converter::ArkArrayHolder<Array_Int32> numberHolder(selectedIndexes);
-        Array_Int32 intArrayValues = numberHolder.ArkValue();
-        auto index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_Int32>(intArrayValues);
+        auto index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_I32>(selectedIndexes, Converter::FC);
         arkCallback.Invoke(value, index);
     };
     TextPickerModelStatic::SetOnCascadeChange(frameNode, std::move(onChange));
@@ -572,8 +607,7 @@ void SetOnScrollStopImpl(Ark_NativePointer node,
         for (const auto tmp : selecteds) {
             selectedIndexes.push_back(static_cast<int32_t>(tmp));
         }
-        Array_Int32 intArrayValues = Converter::ArkValue<Array_Int32>(selectedIndexes, Converter::FC);
-        auto index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_Int32>(intArrayValues);
+        auto index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_I32>(selectedIndexes, Converter::FC);
         arkCallback.Invoke(value, index);
     };
     TextPickerModelStatic::SetOnScrollStop(frameNode, std::move(onScrollStop));
@@ -596,8 +630,7 @@ void SetOnEnterSelectedAreaImpl(Ark_NativePointer node,
         for (const auto tmp : selecteds) {
             selectedIndexes.push_back(static_cast<int32_t>(tmp));
         }
-        Array_Int32 intArrayValues = Converter::ArkValue<Array_Int32>(selectedIndexes, Converter::FC);
-        auto index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_Int32>(intArrayValues);
+        auto index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_I32>(selectedIndexes, Converter::FC);
         arkCallback.Invoke(value, index);
     };
     TextPickerModelStatic::SetOnEnterSelectedArea(frameNode, std::move(onEnterSelectedArea));

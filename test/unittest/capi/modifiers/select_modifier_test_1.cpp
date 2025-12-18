@@ -88,7 +88,7 @@ std::vector<std::tuple<ResIntegerID, std::string, OHOS::Ace::ResRawValue>> resou
 HWTEST_F(SelectModifierTest, setSelectedTestSelectedValidValues, TestSize.Level1)
 {
     auto checkValue = [this](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_I32_Resource_Bindable_Bindable& value) {
+                          const Opt_Union_I32_Resource_Bindable_I32_Bindable_Resource& value) {
         auto inputValueSelected = value;
         modifier_->setSelected(node_, &inputValueSelected);
         auto jsonValue = GetJsonValue(node_);
@@ -98,7 +98,7 @@ HWTEST_F(SelectModifierTest, setSelectedTestSelectedValidValues, TestSize.Level1
     };
 // we can check only empty selection, i.e. 0 and 1 indexes
     for (auto& [input, value, expected] : testNumberNonNegIntValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_I32_Resource_Bindable_Bindable, Ark_Int32>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_I32_Resource_Bindable_I32_Bindable_Resource, Ark_Int32>(value));
     }
     //todo add resource test
 }
@@ -110,11 +110,11 @@ HWTEST_F(SelectModifierTest, setSelectedTestSelectedValidValues, TestSize.Level1
  */
 HWTEST_F(SelectModifierTest, DISABLED_setSelectedTestSelectedInvalidValues, TestSize.Level1)
 {
-    auto initValueSelected = ArkUnion<Opt_Union_I32_Resource_Bindable_Bindable, Ark_Int32>(
+    auto initValueSelected = ArkUnion<Opt_Union_I32_Resource_Bindable_I32_Bindable_Resource, Ark_Int32>(
         std::get<1>(testNumberNonNegIntValidValues[0]));
 
     auto checkValue = [this, &initValueSelected](const std::string& input,
-        const Opt_Union_I32_Resource_Bindable_Bindable& value) {
+        const Opt_Union_I32_Resource_Bindable_I32_Bindable_Resource& value) {
         auto inputValueSelected = initValueSelected;
         modifier_->setSelected(node_, &inputValueSelected);
         inputValueSelected = value;
@@ -125,10 +125,10 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedTestSelectedInvalidValues, Test
             "Input value is: " << input << ", method: setSelected, attribute: selected";
     };
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_I32_Resource_Bindable_Bindable, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_I32_Resource_Bindable_I32_Bindable_Resource, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_I32_Resource_Bindable_Bindable>());
-    checkValue("-1", ArkUnion<Opt_Union_I32_Resource_Bindable_Bindable, Ark_Int32>(-1));
+    checkValue("undefined", ArkValue<Opt_Union_I32_Resource_Bindable_I32_Bindable_Resource>());
+    checkValue("-1", ArkUnion<Opt_Union_I32_Resource_Bindable_I32_Bindable_Resource, Ark_Int32>(-1));
 }
 
 /*
@@ -153,14 +153,14 @@ HWTEST_F(SelectModifierTest, setValueTestDefaultValues, TestSize.Level1)
 HWTEST_F(SelectModifierTest, setValueTestValueInvalidValues, TestSize.Level1)
 {
     // Initial setup
-    auto initValueValue = ArkUnion<Opt_Union_ResourceStr_Bindable_Bindable, Ark_ResourceStr>(
+    auto initValueValue = ArkUnion<Opt_Union_ResourceStr_Bindable_String_Bindable_Resource, Ark_ResourceStr>(
         ArkUnion<Ark_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0])));
 
     auto checkValue = [this, &initValueValue](const std::string& input, const Ark_ResourceStr& value) {
         auto inputValueValue = initValueValue;
 
         modifier_->setValue(node_, &inputValueValue);
-        inputValueValue = ArkUnion<Opt_Union_ResourceStr_Bindable_Bindable, Ark_ResourceStr>(value);
+        inputValueValue = ArkUnion<Opt_Union_ResourceStr_Bindable_String_Bindable_Resource, Ark_ResourceStr>(value);
         modifier_->setValue(node_, &inputValueValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
@@ -204,7 +204,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SelectModifierTest, setFontTestFontSizeValidValues, TestSize.Level1)
 {
-    Opt_Font initValueFont;
+    Opt_arkui_component_units_Font initValueFont;
 
     // Initial setup
     WriteTo(initValueFont).size =
@@ -218,7 +218,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontSizeValidValues, TestSize.Level1)
 
     auto checkValue = [this, &initValueFont](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
-        Opt_Font inputValueFont = initValueFont;
+        Opt_arkui_component_units_Font inputValueFont = initValueFont;
 
         WriteTo(inputValueFont).size = value;
         modifier_->setFont(node_, &inputValueFont);
@@ -240,7 +240,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontSizeValidValues, TestSize.Level1)
  */
 HWTEST_F(SelectModifierTest, DISABLED_setFontTestFontSizeInvalidValues, TestSize.Level1)
 {
-    Opt_Font initValueFont;
+    Opt_arkui_component_units_Font initValueFont;
 
     // Initial setup
     WriteTo(initValueFont).size =
@@ -253,7 +253,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontTestFontSizeInvalidValues, TestSize
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueFont](const std::string& input, const Opt_Length& value) {
-        Opt_Font inputValueFont = initValueFont;
+        Opt_arkui_component_units_Font inputValueFont = initValueFont;
 
         modifier_->setFont(node_, &inputValueFont);
         WriteTo(inputValueFont).size = value;
@@ -279,7 +279,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontTestFontSizeInvalidValues, TestSize
  */
 HWTEST_F(SelectModifierTest, setFontTestFontWeightValidValues, TestSize.Level1)
 {
-    Opt_Font initValueFont;
+    Opt_arkui_component_units_Font initValueFont;
 
     // Initial setup
     WriteTo(initValueFont).size =
@@ -293,7 +293,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontWeightValidValues, TestSize.Level1)
 
     auto checkValue = [this, &initValueFont](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_FontWeight_I32_String& value) {
-        Opt_Font inputValueFont = initValueFont;
+        Opt_arkui_component_units_Font inputValueFont = initValueFont;
 
         WriteTo(inputValueFont).weight = value;
         modifier_->setFont(node_, &inputValueFont);
@@ -322,7 +322,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontWeightValidValues, TestSize.Level1)
  */
 HWTEST_F(SelectModifierTest, DISABLED_setFontTestFontWeightInvalidValues, TestSize.Level1)
 {
-    Opt_Font initValueFont;
+    Opt_arkui_component_units_Font initValueFont;
 
     // Initial setup
     WriteTo(initValueFont).size =
@@ -336,7 +336,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontTestFontWeightInvalidValues, TestSi
 
     auto checkValue = [this, &initValueFont](
                           const std::string& input, const Opt_Union_FontWeight_I32_String& value) {
-        Opt_Font inputValueFont = initValueFont;
+        Opt_arkui_component_units_Font inputValueFont = initValueFont;
 
         modifier_->setFont(node_, &inputValueFont);
         WriteTo(inputValueFont).weight = value;
@@ -364,7 +364,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontTestFontWeightInvalidValues, TestSi
  */
 HWTEST_F(SelectModifierTest, setFontTestFontFamilyValidValues, TestSize.Level1)
 {
-    Opt_Font initValueFont;
+    Opt_arkui_component_units_Font initValueFont;
 
     // Initial setup
     WriteTo(initValueFont).size =
@@ -378,7 +378,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontFamilyValidValues, TestSize.Level1)
 
     auto checkValue = [this, &initValueFont](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_String_Resource& value) {
-        Opt_Font inputValueFont = initValueFont;
+        Opt_arkui_component_units_Font inputValueFont = initValueFont;
 
         WriteTo(inputValueFont).family = value;
         modifier_->setFont(node_, &inputValueFont);
@@ -404,7 +404,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontFamilyValidValues, TestSize.Level1)
  */
 HWTEST_F(SelectModifierTest, setFontTestFontFamilyInvalidValues, TestSize.Level1)
 {
-    Opt_Font initValueFont;
+    Opt_arkui_component_units_Font initValueFont;
 
     // Initial setup
     WriteTo(initValueFont).size =
@@ -417,7 +417,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontFamilyInvalidValues, TestSize.Level1
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueFont](const std::string& input, const Opt_Union_String_Resource& value) {
-        Opt_Font inputValueFont = initValueFont;
+        Opt_arkui_component_units_Font inputValueFont = initValueFont;
 
         modifier_->setFont(node_, &inputValueFont);
         WriteTo(inputValueFont).family = value;
@@ -441,7 +441,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontFamilyInvalidValues, TestSize.Level1
  */
 HWTEST_F(SelectModifierTest, setFontTestFontStyleValidValues, TestSize.Level1)
 {
-    Opt_Font initValueFont;
+    Opt_arkui_component_units_Font initValueFont;
 
     // Initial setup
     WriteTo(initValueFont).size =
@@ -455,7 +455,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontStyleValidValues, TestSize.Level1)
 
     auto checkValue = [this, &initValueFont](
                           const std::string& input, const std::string& expectedStr, const Opt_FontStyle& value) {
-        Opt_Font inputValueFont = initValueFont;
+        Opt_arkui_component_units_Font inputValueFont = initValueFont;
 
         WriteTo(inputValueFont).style = value;
         modifier_->setFont(node_, &inputValueFont);
@@ -477,7 +477,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontStyleValidValues, TestSize.Level1)
  */
 HWTEST_F(SelectModifierTest, setFontTestFontStyleInvalidValues, TestSize.Level1)
 {
-    Opt_Font initValueFont;
+    Opt_arkui_component_units_Font initValueFont;
 
     // Initial setup
     WriteTo(initValueFont).size =
@@ -490,7 +490,7 @@ HWTEST_F(SelectModifierTest, setFontTestFontStyleInvalidValues, TestSize.Level1)
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueFont](const std::string& input, const Opt_FontStyle& value) {
-        Opt_Font inputValueFont = initValueFont;
+        Opt_arkui_component_units_Font inputValueFont = initValueFont;
 
         modifier_->setFont(node_, &inputValueFont);
         WriteTo(inputValueFont).style = value;
@@ -529,7 +529,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontColorTestFontColorValidValues, Test
 {
     Opt_ResourceColor initValueFontColor;
     initValueFontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueFontColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -543,7 +544,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setFontColorTestFontColorValidValues, Test
             "Input value is: " << input << ", method: setFontColor, attribute: fontColor";
     };
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
@@ -567,7 +568,8 @@ HWTEST_F(SelectModifierTest, setFontColorTestFontColorInvalidValues, TestSize.Le
 
     // Initial setup
     initValueFontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueFontColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_ResourceColor inputValueFontColor = initValueFontColor;
@@ -585,7 +587,7 @@ HWTEST_F(SelectModifierTest, setFontColorTestFontColorInvalidValues, TestSize.Le
         checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
@@ -619,7 +621,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestSelectedOption
 
     // Initial setup
     initValueSelectedOptionBgColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedOptionBgColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -634,7 +637,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestSelectedOption
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
@@ -658,7 +661,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestSelectedOption
 
     // Initial setup
     initValueSelectedOptionBgColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedOptionBgColor](
                           const std::string& input, const Opt_ResourceColor& value) {
@@ -677,7 +681,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionBgColorTestSelectedOption
         checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
@@ -721,7 +725,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestDefaultValues, TestSize.Le
  */
 HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontSizeValidValues, TestSize.Level1)
 {
-    Opt_Font initValueSelectedOptionFont;
+    Opt_arkui_component_units_Font initValueSelectedOptionFont;
     WriteTo(initValueSelectedOptionFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
@@ -733,7 +737,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontSizeVali
 
     auto checkValue = [this, &initValueSelectedOptionFont](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
-        Opt_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
+        Opt_arkui_component_units_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
 
         WriteTo(inputValueSelectedOptionFont).size = value;
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
@@ -758,7 +762,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontSizeVali
  */
 HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestSelectedOptionFontSizeInvalidValues, TestSize.Level1)
 {
-    Opt_Font initValueSelectedOptionFont;
+    Opt_arkui_component_units_Font initValueSelectedOptionFont;
 
     // Initial setup
     WriteTo(initValueSelectedOptionFont).size =
@@ -771,7 +775,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestSelectedOptionFon
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedOptionFont](const std::string& input, const Opt_Length& value) {
-        Opt_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
+        Opt_arkui_component_units_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
 
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
         WriteTo(inputValueSelectedOptionFont).size = value;
@@ -799,7 +803,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestSelectedOptionFon
  */
 HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontWeightValidValues, TestSize.Level1)
 {
-    Opt_Font initValueSelectedOptionFont;
+    Opt_arkui_component_units_Font initValueSelectedOptionFont;
     WriteTo(initValueSelectedOptionFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
@@ -811,7 +815,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontWeightVa
 
     auto checkValue = [this, &initValueSelectedOptionFont](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_FontWeight_I32_String& value) {
-        Opt_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
+        Opt_arkui_component_units_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
 
         WriteTo(inputValueSelectedOptionFont).weight = value;
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
@@ -841,7 +845,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontWeightVa
  */
 HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestSelectedOptionFontWeightInvalidValues, TestSize.Level1)
 {
-    Opt_Font initValueSelectedOptionFont;
+    Opt_arkui_component_units_Font initValueSelectedOptionFont;
     WriteTo(initValueSelectedOptionFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
@@ -853,7 +857,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestSelectedOptionFon
 
     auto checkValue = [this, &initValueSelectedOptionFont](
                           const std::string& input, const Opt_Union_FontWeight_I32_String& value) {
-        Opt_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
+        Opt_arkui_component_units_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
 
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
         WriteTo(inputValueSelectedOptionFont).weight = value;
@@ -883,7 +887,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontTestSelectedOptionFon
  */
 HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontFamilyValidValues, TestSize.Level1)
 {
-    Opt_Font initValueSelectedOptionFont;
+    Opt_arkui_component_units_Font initValueSelectedOptionFont;
     WriteTo(initValueSelectedOptionFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
@@ -895,7 +899,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontFamilyVa
 
     auto checkValue = [this, &initValueSelectedOptionFont](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_String_Resource& value) {
-        Opt_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
+        Opt_arkui_component_units_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
 
         WriteTo(inputValueSelectedOptionFont).family = value;
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
@@ -923,7 +927,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontFamilyVa
  */
 HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontFamilyInvalidValues, TestSize.Level1)
 {
-    Opt_Font initValueSelectedOptionFont;
+    Opt_arkui_component_units_Font initValueSelectedOptionFont;
     WriteTo(initValueSelectedOptionFont).size =
         ArkUnion<Opt_Length, Ark_String>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValueSelectedOptionFont).weight = ArkUnion<Opt_Union_FontWeight_I32_String, Ark_FontWeight>(
@@ -935,7 +939,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontFamilyIn
 
     auto checkValue = [this, &initValueSelectedOptionFont](
                           const std::string& input, const Opt_Union_String_Resource& value) {
-        Opt_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
+        Opt_arkui_component_units_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
 
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
         WriteTo(inputValueSelectedOptionFont).family = value;
@@ -961,7 +965,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontFamilyIn
  */
 HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontStyleValidValues, TestSize.Level1)
 {
-    Opt_Font initValueSelectedOptionFont;
+    Opt_arkui_component_units_Font initValueSelectedOptionFont;
 
     // Initial setup
     WriteTo(initValueSelectedOptionFont).size =
@@ -975,7 +979,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontStyleVal
 
     auto checkValue = [this, &initValueSelectedOptionFont](
                           const std::string& input, const std::string& expectedStr, const Opt_FontStyle& value) {
-        Opt_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
+        Opt_arkui_component_units_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
 
         WriteTo(inputValueSelectedOptionFont).style = value;
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
@@ -1000,7 +1004,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontStyleVal
  */
 HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontStyleInvalidValues, TestSize.Level1)
 {
-    Opt_Font initValueSelectedOptionFont;
+    Opt_arkui_component_units_Font initValueSelectedOptionFont;
 
     // Initial setup
     WriteTo(initValueSelectedOptionFont).size =
@@ -1013,7 +1017,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSelectedOptionFontStyleInv
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedOptionFont](const std::string& input, const Opt_FontStyle& value) {
-        Opt_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
+        Opt_arkui_component_units_Font inputValueSelectedOptionFont = initValueSelectedOptionFont;
 
         modifier_->setSelectedOptionFont(node_, &inputValueSelectedOptionFont);
         WriteTo(inputValueSelectedOptionFont).style = value;
@@ -1058,7 +1062,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontColorTestSelectedOpti
 
     // Initial setup
     initValueSelectedOptionFontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedOptionFontColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -1074,7 +1079,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setSelectedOptionFontColorTestSelectedOpti
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
@@ -1098,7 +1103,8 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontColorTestSelectedOptionFontCol
 
     // Initial setup
     initValueSelectedOptionFontColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedOptionFontColor](
                           const std::string& input, const Opt_ResourceColor& value) {
@@ -1118,7 +1124,7 @@ HWTEST_F(SelectModifierTest, setSelectedOptionFontColorTestSelectedOptionFontCol
         checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
@@ -1151,7 +1157,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setOptionBgColorTestOptionBgColorValidValu
 
     // Initial setup
     initValueOptionBgColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueOptionBgColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -1166,7 +1173,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setOptionBgColorTestOptionBgColorValidValu
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
@@ -1190,7 +1197,8 @@ HWTEST_F(SelectModifierTest, DISABLED_setOptionBgColorTestOptionBgColorInvalidVa
 
     // Initial setup
     initValueOptionBgColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueOptionBgColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_ResourceColor inputValueOptionBgColor = initValueOptionBgColor;
@@ -1208,7 +1216,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setOptionBgColorTestOptionBgColorInvalidVa
         checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));

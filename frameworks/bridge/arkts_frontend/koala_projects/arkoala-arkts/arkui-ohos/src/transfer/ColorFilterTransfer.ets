@@ -16,6 +16,7 @@
 
 import { ArkUIAniModule } from 'arkui.ani'
 import { ColorFilter } from '../component/units'
+import { MaterializedBaseTag } from '@koalaui/interop'
 
 export class ColorFilterTransfer {
     static transferStatic(input: Any): Any {
@@ -37,7 +38,7 @@ export class ColorFilterTransfer {
         if (ctorPtr === 0) {
             return undefined;
         }
-        let colorFilter = new ColorFilter(false, ctorPtr);
+        let colorFilter = new ColorFilter(MaterializedBaseTag.NOP, ctorPtr);
         return colorFilter;
     }
     static transferDynamic(input: Object): Any {

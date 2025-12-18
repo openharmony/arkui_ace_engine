@@ -137,7 +137,7 @@ HWTEST_F(ListItemModifierTest, setSelectedTest, TestSize.Level1)
 {
     bool selected = GetAttrValue<bool>(node_, "selected");
     EXPECT_FALSE(selected);
-    auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(true);
     modifier_->setSelected(node_, &optValue);
     selected = GetAttrValue<bool>(node_, "selected");
     EXPECT_TRUE(selected);
@@ -195,9 +195,9 @@ HWTEST_F(ListItemModifierTest, setSwipeActionEdgeEffectTest, TestSize.Level1)
     EXPECT_EQ(edgeEffect, "");
 
     Ark_SwipeActionOptions  options = {
-        .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
-        .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
-        .onOffsetChange = Converter::ArkValue<Opt_Callback_F64_Void>(Ark_Empty()),
+        .start = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(Ark_Empty()),
+        .end = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(Ark_Empty()),
+        .onOffsetChange = Converter::ArkValue<Opt_synthetic_Callback_F64_Void>(Ark_Empty()),
         .edgeEffect = Converter::ArkValue<Opt_SwipeEdgeEffect>(V2::SwipeEdgeEffect::None)
     };
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(options);
@@ -208,8 +208,8 @@ HWTEST_F(ListItemModifierTest, setSwipeActionEdgeEffectTest, TestSize.Level1)
     EXPECT_EQ(edgeEffect, "SwipeEdgeEffect.None");
 
     options = {
-        .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
-        .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
+        .start = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(Ark_Empty()),
+        .end = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(Ark_Empty()),
         .edgeEffect = Converter::ArkValue<Opt_SwipeEdgeEffect>(V2::SwipeEdgeEffect::Spring)
     };
     optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(options);
@@ -220,8 +220,8 @@ HWTEST_F(ListItemModifierTest, setSwipeActionEdgeEffectTest, TestSize.Level1)
     EXPECT_EQ(edgeEffect, "SwipeEdgeEffect.Spring");
 
     options = {
-        .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
-        .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(Ark_Empty()),
+        .start = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(Ark_Empty()),
+        .end = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(Ark_Empty()),
         .edgeEffect = Converter::ArkValue<Opt_SwipeEdgeEffect>(static_cast<V2::SwipeEdgeEffect>(-10))
     };
     optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(options);
@@ -256,8 +256,8 @@ HWTEST_F(ListItemModifierTest, setSwipeActionOffsetChangeTest, TestSize.Level1)
         };
 
     Ark_SwipeActionOptions arkOptions = {
-        .onOffsetChange = Converter::ArkValue<Opt_Callback_F64_Void>(
-            Converter::ArkValue<Callback_F64_Void>(checkCallback, TEST_RESOURCE_ID_1))
+        .onOffsetChange = Converter::ArkValue<Opt_synthetic_Callback_F64_Void>(
+            Converter::ArkValue<synthetic_Callback_F64_Void>(checkCallback, TEST_RESOURCE_ID_1))
     };
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(arkOptions);
     modifier_->setSwipeAction(node_, &optOptions);
@@ -282,17 +282,17 @@ HWTEST_F(ListItemModifierTest, setSwipeActionCustomBuilderTest, TestSize.Level1)
 {
     uiNode_1 = BlankModelNG::CreateFrameNode(NODE_ID_1);
     auto customBuilderStart = getBuilderCb(true);
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionStart;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionStart;
     TypeHelper::WriteToUnion<CustomNodeBuilder>(arkUnionStart) = customBuilderStart;
 
     uiNode_2 = BlankModelNG::CreateFrameNode(NODE_ID_2);
     auto customBuilderEnd = getBuilderCb(false);
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionEnd;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionEnd;
     TypeHelper::WriteToUnion<CustomNodeBuilder>(arkUnionEnd) = customBuilderEnd;
 
     Ark_SwipeActionOptions arkOptions = {
-        .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionStart),
-        .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionEnd)
+        .start = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionStart),
+        .end = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionEnd)
     };
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(arkOptions);
     modifier_->setSwipeAction(node_, &optOptions);
@@ -320,7 +320,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemCustomBuilderTest, TestSi
     Ark_SwipeActionItem itemStart = {
         .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(customBuilderStart)
     };
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionStart;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionStart;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionStart) = itemStart;
 
     uiNode_2 = BlankModelNG::CreateFrameNode(NODE_ID_2);
@@ -328,12 +328,12 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemCustomBuilderTest, TestSi
     Ark_SwipeActionItem itemEnd = {
         .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(customBuilderEnd)
     };
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionEnd;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionEnd;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionEnd) = itemEnd;
 
     Ark_SwipeActionOptions arkOptions = {
-        .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionStart),
-        .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionEnd)
+        .start = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionStart),
+        .end = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionEnd)
     };
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(arkOptions);
     modifier_->setSwipeAction(node_, &optOptions);
@@ -369,7 +369,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnActionCallbackTest, Tes
         .onAction = Converter::ArkValue<Opt_Callback_Void>(
             Converter::ArkValue<Callback_Void>(checkCallbackStart, TEST_RESOURCE_ID_1))
     };
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionStart;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionStart;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionStart) = itemStart;
 
     static std::optional<CheckEvent> checkEventEnd = std::nullopt;
@@ -385,12 +385,12 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnActionCallbackTest, Tes
         .onAction = Converter::ArkValue<Opt_Callback_Void>(
             Converter::ArkValue<Callback_Void>(checkCallbackEnd, TEST_RESOURCE_ID_2))
     };
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionEnd;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionEnd;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionEnd) = itemEnd;
 
     Ark_SwipeActionOptions arkOptions = {
-        .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionStart),
-        .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionEnd)
+        .start = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionStart),
+        .end = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionEnd)
     };
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(arkOptions);
     modifier_->setSwipeAction(node_, &optOptions);
@@ -433,7 +433,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnEnterActionAreaCallback
         .onEnterActionArea = Converter::ArkValue<Opt_Callback_Void>(
             Converter::ArkValue<Callback_Void>(checkCallbackStart, TEST_RESOURCE_ID_1))
     };
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionStart;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionStart;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionStart) = itemStart;
 
     static std::optional<CheckEvent> checkEventEnd = std::nullopt;
@@ -449,12 +449,12 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnEnterActionAreaCallback
         .onEnterActionArea = Converter::ArkValue<Opt_Callback_Void>(
             Converter::ArkValue<Callback_Void>(checkCallbackEnd, TEST_RESOURCE_ID_2))
     };
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionEnd;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionEnd;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionEnd) = itemEnd;
 
     Ark_SwipeActionOptions arkOptions = {
-        .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionStart),
-        .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionEnd)
+        .start = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionStart),
+        .end = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionEnd)
     };
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(arkOptions);
     modifier_->setSwipeAction(node_, &optOptions);
@@ -497,7 +497,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnExitActionAreaCallbackT
         .onExitActionArea = Converter::ArkValue<Opt_Callback_Void>(
             Converter::ArkValue<Callback_Void>(checkCallbackStart, TEST_RESOURCE_ID_1))
     };
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionStart;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionStart;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionStart) = itemStart;
 
     static std::optional<CheckEvent> checkEventEnd = std::nullopt;
@@ -513,12 +513,12 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnExitActionAreaCallbackT
         .onExitActionArea = Converter::ArkValue<Opt_Callback_Void>(
             Converter::ArkValue<Callback_Void>(checkCallbackEnd, TEST_RESOURCE_ID_2))
     };
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionEnd;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionEnd;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionEnd) = itemEnd;
 
     Ark_SwipeActionOptions arkOptions = {
-        .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionStart),
-        .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionEnd)
+        .start = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionStart),
+        .end = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionEnd)
     };
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(arkOptions);
     modifier_->setSwipeAction(node_, &optOptions);
@@ -561,7 +561,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnStateChangeCallbackTest
         .onStateChange = Converter::ArkValue<Opt_Callback_SwipeActionState_Void>(
             Converter::ArkValue<Callback_SwipeActionState_Void>(checkCallbackStart, TEST_RESOURCE_ID_1))
     };
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionStart;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionStart;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionStart) = itemStart;
 
     static std::optional<CheckEvent> checkEventEnd = std::nullopt;
@@ -576,12 +576,12 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnStateChangeCallbackTest
         .onStateChange = Converter::ArkValue<Opt_Callback_SwipeActionState_Void>(
             Converter::ArkValue<Callback_SwipeActionState_Void>(checkCallbackEnd, TEST_RESOURCE_ID_2))
     };
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionEnd;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionEnd;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionEnd) = itemEnd;
 
     Ark_SwipeActionOptions arkOptions = {
-        .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionStart),
-        .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionEnd)
+        .start = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionStart),
+        .end = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionEnd)
     };
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(arkOptions);
     modifier_->setSwipeAction(node_, &optOptions);
@@ -623,19 +623,19 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceTest, T
         .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .actionAreaDistance = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
     };
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionStart;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionStart;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionStart) = itemStart;
 
     Ark_SwipeActionItem itemEnd = {
         .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .actionAreaDistance = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77.7f)),
     };
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionEnd;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionEnd;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionEnd) = itemEnd;
 
     Ark_SwipeActionOptions arkOptions = {
-        .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionStart),
-        .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionEnd)
+        .start = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionStart),
+        .end = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionEnd)
     };
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(arkOptions);
     modifier_->setSwipeAction(node_, &optOptions);
@@ -665,19 +665,19 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceNegativ
         .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .actionAreaDistance = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(-55.5f)),
     };
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionStart;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionStart;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionStart) = itemStart;
 
     Ark_SwipeActionItem itemEnd = {
         .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .actionAreaDistance = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(-77.7f)),
     };
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionEnd;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionEnd;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionEnd) = itemEnd;
 
     Ark_SwipeActionOptions arkOptions = {
-        .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionStart),
-        .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionEnd)
+        .start = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionStart),
+        .end = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionEnd)
     };
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(arkOptions);
     modifier_->setSwipeAction(node_, &optOptions);
@@ -707,19 +707,19 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceOptiona
         .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .actionAreaDistance = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
     };
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionStart;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionStart;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionStart) = itemStart;
 
     Ark_SwipeActionItem itemEnd = {
         .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .actionAreaDistance = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77.7f)),
     };
-    Ark_Union_CustomBuilder_SwipeActionItem arkUnionEnd;
+    Ark_Union_CustomNodeBuilder_SwipeActionItem arkUnionEnd;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionEnd) = itemEnd;
 
     Ark_SwipeActionOptions arkOptions = {
-        .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionStart),
-        .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionEnd)
+        .start = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionStart),
+        .end = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionEnd)
     };
     auto optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(arkOptions);
     modifier_->setSwipeAction(node_, &optOptions);
@@ -742,8 +742,8 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceOptiona
     };
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionEnd) = itemEnd;
 
-    arkOptions = { .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionStart),
-        .end = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionEnd)
+    arkOptions = { .start = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionStart),
+        .end = Converter::ArkValue<Opt_Union_CustomNodeBuilder_SwipeActionItem>(arkUnionEnd)
     };
     optOptions = Converter::ArkValue<Opt_SwipeActionOptions>(arkOptions);
     modifier_->setSwipeAction(node_, &optOptions);

@@ -608,9 +608,12 @@ HWTEST_F(CalendarModifierTest, setDirectionTestDirectionInvalidValues, TestSize.
 HWTEST_F(CalendarModifierTest, currentDayStyleTest, TestSize.Level1)
 {
     Ark_CurrentDayStyle initValue;
-    initValue.dayColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
-    initValue.lunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLACK);
-    initValue.markLunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE);
+    initValue.dayColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
+    initValue.lunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK);
+    initValue.markLunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE);
     initValue.dayFontSize = Converter::ArkValue<Opt_Number>(0);
     initValue.lunarDayFontSize = Converter::ArkValue<Opt_Number>(1);
     initValue.dayHeight = Converter::ArkValue<Opt_Number>(2);
@@ -755,10 +758,14 @@ HWTEST_F(CalendarModifierTest, currentDayStyleTest3, TestSize.Level1)
 HWTEST_F(CalendarModifierTest, nonCurrentDayStyleTest, TestSize.Level1)
 {
     Ark_NonCurrentDayStyle initValue;
-    initValue.nonCurrentMonthDayColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
-    initValue.nonCurrentMonthLunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLACK);
-    initValue.nonCurrentMonthWorkDayMarkColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE);
-    initValue.nonCurrentMonthOffDayMarkColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BROWN);
+    initValue.nonCurrentMonthDayColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
+    initValue.nonCurrentMonthLunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK);
+    initValue.nonCurrentMonthWorkDayMarkColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE);
+    initValue.nonCurrentMonthOffDayMarkColor =
+        Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN);
     auto optInitValue = Converter::ArkValue<Opt_NonCurrentDayStyle>(initValue);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_FALSE(frameNode->GetChildren().empty());
@@ -793,9 +800,12 @@ HWTEST_F(CalendarModifierTest, nonCurrentDayStyleTest, TestSize.Level1)
 HWTEST_F(CalendarModifierTest, todayStyleTest, TestSize.Level1)
 {
     Ark_TodayStyle initValue;
-    initValue.focusedDayColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
-    initValue.focusedLunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLACK);
-    initValue.focusedAreaBackgroundColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE);
+    initValue.focusedDayColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
+    initValue.focusedLunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK);
+    initValue.focusedAreaBackgroundColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE);
     initValue.focusedAreaRadius = Converter::ArkValue<Opt_Number>(0);
     auto optInitValue = Converter::ArkValue<Opt_TodayStyle>(initValue);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -832,9 +842,12 @@ HWTEST_F(CalendarModifierTest, todayStyleTest, TestSize.Level1)
 HWTEST_F(CalendarModifierTest, weekStyleTest, TestSize.Level1)
 {
     Ark_WeekStyle initValue;
-    initValue.weekColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
-    initValue.weekendDayColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLACK);
-    initValue.weekendLunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE);
+    initValue.weekColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
+    initValue.weekendDayColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK);
+    initValue.weekendLunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE);
     initValue.weekFontSize = Converter::ArkValue<Opt_Number>(0);
     initValue.weekHeight = Converter::ArkValue<Opt_Number>(1);
     initValue.weekWidth = Converter::ArkValue<Opt_Number>(2);
@@ -880,8 +893,10 @@ HWTEST_F(CalendarModifierTest, weekStyleTest, TestSize.Level1)
 HWTEST_F(CalendarModifierTest, workStateStyleTest, TestSize.Level1)
 {
     Ark_WorkStateStyle initValue;
-    initValue.workDayMarkColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
-    initValue.offDayMarkColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLACK);
+    initValue.workDayMarkColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE);
+    initValue.offDayMarkColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK);
     initValue.workDayMarkSize = Converter::ArkValue<Opt_Number>(0);
     initValue.offDayMarkSize = Converter::ArkValue<Opt_Number>(1);
     initValue.workStateWidth = Converter::ArkValue<Opt_Number>(2);

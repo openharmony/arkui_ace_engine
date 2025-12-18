@@ -16,30 +16,31 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { Resource_serializer } from "./../framework/resource"
-import { LinearGradient_serializer, LinearGradient } from "./dataPanel"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ResourceColor, Length, PX, VP, LPX, Font, Font_serializer } from "./units"
-import { Color } from "./enums"
-import { Resource } from "global.resource"
-import { ContentModifier, AttributeModifier, hookProgressContentModifier, extractors, hookProgressAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { LengthMetrics } from "arkui.Graphics"
-import { ProgressModifier } from "./../ProgressModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
-import { LengthMetrics_serializer } from "./../Graphics"
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { LinearGradient_serializer, LinearGradient } from './dataPanel'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, ArkCommonMethodComponent } from './common'
+import { ResourceColor, Resource as arkui_component_units_Resource, Length, PX, VP, LPX, Font as arkui_component_units_Font, arkui_component_units_Font_serializer } from './units'
+import { Color as arkui_component_enums_Color } from './enums'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { ContentModifier, AttributeModifier, hookProgressContentModifier, hookProgressAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { LengthMetrics as arkui_Graphics_LengthMetrics } from '@arkui.Graphics'
+import { ProgressModifier } from './../ProgressModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 export class ArkProgressPeer extends ArkCommonMethodPeer {
     attributeSet?: ProgressModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkProgressPeer {
@@ -50,17 +51,18 @@ export class ArkProgressPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setProgressOptionsAttribute(options: ProgressOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         ProgressOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._ProgressInterface_setProgressOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setValueAttribute(value: number | undefined): void {
+    setValueAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeNumber(valueTmpValue)
+            thisSerializer.writeFloat64(valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -75,10 +77,10 @@ export class ArkProgressPeer extends ArkCommonMethodPeer {
             if (valueTmpValue instanceof ResourceColor) {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ResourceColor
-                if (valueTmpValueForIdx0 instanceof Color) {
+                if (valueTmpValueForIdx0 instanceof arkui_component_enums_Color) {
                     thisSerializer.writeInt8((0).toByte())
-                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as Color
-                    thisSerializer.writeInt32(valueTmpValueForIdx0ForIdx0.getOrdinal())
+                    const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as arkui_component_enums_Color
+                    thisSerializer.writeInt32((valueTmpValueForIdx0ForIdx0.getOrdinal()) % (12))
                 } else if (valueTmpValueForIdx0 instanceof int32) {
                     thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as int32
@@ -87,10 +89,10 @@ export class ArkProgressPeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx2)
-                } else if (valueTmpValueForIdx0 instanceof Resource) {
+                } else if (valueTmpValueForIdx0 instanceof arkui_component_units_Resource) {
                     thisSerializer.writeInt8((3).toByte())
-                    const valueTmpValueForIdx0ForIdx3  = valueTmpValueForIdx0 as Resource
-                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
+                    const valueTmpValueForIdx0ForIdx3  = valueTmpValueForIdx0 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
                 }
             } else if (valueTmpValue instanceof LinearGradient) {
                 thisSerializer.writeInt8((1).toByte())
@@ -150,16 +152,16 @@ export interface ProgressOptions {
     type?: ProgressType;
 }
 export enum ProgressType {
-    LINEAR = 0,
     Linear = 0,
-    RING = 1,
     Ring = 1,
-    ECLIPSE = 2,
     Eclipse = 2,
-    SCALE_RING = 3,
     ScaleRing = 3,
-    CAPSULE = 4,
-    Capsule = 4
+    Capsule = 4,
+    LINEAR = 0,
+    RING = 1,
+    ECLIPSE = 2,
+    SCALE_RING = 3,
+    CAPSULE = 4
 }
 export enum ProgressStatus {
     LOADING = 0,
@@ -190,81 +192,52 @@ export interface RingStyleOptions extends ScanEffectOptions, CommonProgressStyle
 }
 export interface LinearStyleOptions extends ScanEffectOptions, CommonProgressStyleOptions {
     strokeWidth?: Length;
-    strokeRadius?: PX | VP | LPX | Resource;
+    strokeRadius?: PX | VP | LPX | global_resource_Resource;
 }
 export interface CapsuleStyleOptions extends ScanEffectOptions, CommonProgressStyleOptions {
     borderColor?: ResourceColor;
     borderWidth?: Length;
     content?: string;
-    font?: Font;
+    font?: arkui_component_units_Font;
     fontColor?: ResourceColor;
     showDefaultPercentage?: boolean;
-    borderRadius?: LengthMetrics;
+    borderRadius?: arkui_Graphics_LengthMetrics;
 }
 export enum ProgressStyle {
-    LINEAR = 0,
     Linear = 0,
-    RING = 1,
     Ring = 1,
-    ECLIPSE = 2,
     Eclipse = 2,
-    SCALE_RING = 3,
     ScaleRing = 3,
-    CAPSULE = 4,
-    Capsule = 4
+    Capsule = 4,
+    LINEAR = 0,
+    RING = 1,
+    ECLIPSE = 2,
+    SCALE_RING = 3,
+    CAPSULE = 4
 }
 export interface ProgressStyleMap {
 }
 export interface ProgressAttribute extends CommonMethod {
     setProgressOptions(options: ProgressOptions): this {
-        throw new Error("Unimplemented method setProgressOptions")
+        throw new Error('Unimplemented method setProgressOptions')
     }
-    value(value: number | undefined): this {
-        throw new Error("Unimplemented method value")
+    value(value: double | undefined): this {
+        throw new Error('Unimplemented method value')
     }
     color(value: ResourceColor | LinearGradient | undefined): this {
-        throw new Error("Unimplemented method color")
+        throw new Error('Unimplemented method color')
     }
     style(value: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined): this {
-        throw new Error("Unimplemented method style")
+        throw new Error('Unimplemented method style')
     }
     privacySensitive(value: boolean | undefined): this {
-        throw new Error("Unimplemented method privacySensitive")
+        throw new Error('Unimplemented method privacySensitive')
     }
     contentModifier(value: ContentModifier<ProgressConfiguration> | undefined): this {
-        throw new Error("Unimplemented method contentModifier")
+        throw new Error('Unimplemented method contentModifier')
     }
     attributeModifier(value: AttributeModifier<ProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkProgressStyle extends ArkCommonMethodStyle implements ProgressAttribute {
-    value_value?: number | undefined
-    color_value?: ResourceColor | LinearGradient | undefined
-    style_value?: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined
-    privacySensitive_value?: boolean | undefined
-    contentModifier_value?: ContentModifier<ProgressConfiguration> | undefined
-    attributeModifier_value?: AttributeModifier<ProgressAttribute> | AttributeModifier<CommonMethod> | undefined
-    setProgressOptions(options: ProgressOptions): this {
-        return this
-    }
-    value(value: number | undefined): this {
-        return this
-    }
-    color(value: ResourceColor | LinearGradient | undefined): this {
-        return this
-    }
-    style(value: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined): this {
-        return this
-    }
-    privacySensitive(value: boolean | undefined): this {
-        return this
-    }
-    contentModifier(value: ContentModifier<ProgressConfiguration> | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<ProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 export interface ProgressConfiguration extends CommonConfiguration<ProgressConfiguration> {
@@ -274,13 +247,10 @@ export interface ProgressConfiguration extends CommonConfiguration<ProgressConfi
 
 export class ArkProgressComponent extends ArkCommonMethodComponent implements ProgressAttribute {
     getPeer(): ArkProgressPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkProgressPeer)
     }
     public setProgressOptions(options: ProgressOptions): this {
-        if (this.checkPriority("setProgressOptions")) {
+        if (this.checkPriority('setProgressOptions')) {
             const options_casted = options as (ProgressOptions)
             this.getPeer()?.setProgressOptionsAttribute(options_casted)
             this.applyOptionsFinish('ProgressAttribute');
@@ -288,16 +258,16 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements Pr
         }
         return this
     }
-    public value(value: number | undefined): this {
-        if (this.checkPriority("value")) {
-            const value_casted = value as (number | undefined)
+    public value(value: double | undefined): this {
+        if (this.checkPriority('value')) {
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setValueAttribute(value_casted)
             return this
         }
         return this
     }
     public color(value: ResourceColor | LinearGradient | undefined): this {
-        if (this.checkPriority("color")) {
+        if (this.checkPriority('color')) {
             const value_casted = value as (ResourceColor | LinearGradient | undefined)
             this.getPeer()?.setColorAttribute(value_casted)
             return this
@@ -305,7 +275,7 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements Pr
         return this
     }
     public style(value: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined): this {
-        if (this.checkPriority("style")) {
+        if (this.checkPriority('style')) {
             const value_casted = value as (LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined)
             this.getPeer()?.setStyleAttribute(value_casted)
             return this
@@ -313,7 +283,7 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements Pr
         return this
     }
     public privacySensitive(value: boolean | undefined): this {
-        if (this.checkPriority("privacySensitive")) {
+        if (this.checkPriority('privacySensitive')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setPrivacySensitiveAttribute(value_casted)
             return this
@@ -321,7 +291,7 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements Pr
         return this
     }
     public contentModifier(value: ContentModifier<ProgressConfiguration> | undefined): this {
-        if (this.checkPriority("contentModifier")) {
+        if (this.checkPriority('contentModifier')) {
             hookProgressContentModifier(this, value)
         }
         return this
@@ -343,18 +313,16 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements Pr
 
 @memo
 export function ProgressImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: ProgressAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkProgressComponent>((): ArkProgressComponent => {
         return new ArkProgressComponent()
     })
-    NodeAttach<ArkProgressPeer>((): ArkProgressPeer => ArkProgressPeer.create(receiver), (peer: ArkProgressPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkProgressPeer>((): ArkProgressPeer => ArkProgressPeer.create(receiver), (_: ArkProgressPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -406,13 +374,13 @@ export class ProgressOptions_serializer {
     public static read(buffer: DeserializerBase): ProgressOptions {
         let valueDeserializer : DeserializerBase = buffer
         const valueTmpResult : double = valueDeserializer.readFloat64()
-        const totalTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const totalTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let totalTmpBuf : double | undefined = undefined
         if ((totalTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             totalTmpBuf = valueDeserializer.readFloat64()
         }
         const totalTmpResult : double | undefined = totalTmpBuf
-        const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const typeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let typeTmpBuf : ProgressType | undefined = undefined
         if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             typeTmpBuf = ProgressType.fromValue(valueDeserializer.readInt32())
@@ -453,10 +421,10 @@ export class LinearStyleOptions_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStrokeWidthTmpValueForIdx1  = valueHolderForStrokeWidthTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForStrokeWidthTmpValueForIdx1)
-            } else if (valueHolderForStrokeWidthTmpValue instanceof Resource) {
+            } else if (valueHolderForStrokeWidthTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForStrokeWidthTmpValueForIdx2  = valueHolderForStrokeWidthTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValueForIdx2)
+                const valueHolderForStrokeWidthTmpValueForIdx2  = valueHolderForStrokeWidthTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -473,10 +441,10 @@ export class LinearStyleOptions_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStrokeRadiusTmpValueForIdx1  = valueHolderForStrokeRadiusTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForStrokeRadiusTmpValueForIdx1)
-            } else if (valueHolderForStrokeRadiusTmpValue instanceof Resource) {
+            } else if (valueHolderForStrokeRadiusTmpValue instanceof global_resource_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForStrokeRadiusTmpValueForIdx2  = valueHolderForStrokeRadiusTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForStrokeRadiusTmpValueForIdx2)
+                const valueHolderForStrokeRadiusTmpValueForIdx2  = valueHolderForStrokeRadiusTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForStrokeRadiusTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -484,52 +452,52 @@ export class LinearStyleOptions_serializer {
     }
     public static read(buffer: DeserializerBase): LinearStyleOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const enableScanEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const enableScanEffectTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let enableScanEffectTmpBuf : boolean | undefined = undefined
         if ((enableScanEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             enableScanEffectTmpBuf = valueDeserializer.readBoolean()
         }
         const enableScanEffectTmpResult : boolean | undefined = enableScanEffectTmpBuf
-        const enableSmoothEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const enableSmoothEffectTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let enableSmoothEffectTmpBuf : boolean | undefined = undefined
         if ((enableSmoothEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             enableSmoothEffectTmpBuf = valueDeserializer.readBoolean()
         }
         const enableSmoothEffectTmpResult : boolean | undefined = enableSmoothEffectTmpBuf
-        const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let strokeWidthTmpBuf : Length | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const strokeWidthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let strokeWidthTmpBuf_ : string | double | Resource | undefined
-            if (strokeWidthTmpBuf_UnionSelector == (0).toChar()) {
-                strokeWidthTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (strokeWidthTmpBuf_UnionSelector == (1).toChar()) {
-                strokeWidthTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (strokeWidthTmpBuf_UnionSelector == (2).toChar()) {
-                strokeWidthTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const strokeWidthTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let strokeWidthTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (strokeWidthTmpBufOptUnionSelector == (0).toByte()) {
+                strokeWidthTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (strokeWidthTmpBufOptUnionSelector == (1).toByte()) {
+                strokeWidthTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (strokeWidthTmpBufOptUnionSelector == (2).toByte()) {
+                strokeWidthTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for strokeWidthTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for strokeWidthTmpBufOpt has to be chosen through deserialisation.')
             }
-            strokeWidthTmpBuf = (strokeWidthTmpBuf_ as string | double | Resource)
+            strokeWidthTmpBuf = (strokeWidthTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const strokeWidthTmpResult : Length | undefined = strokeWidthTmpBuf
-        const strokeRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let strokeRadiusTmpBuf : string | double | Resource | undefined = undefined
+        const strokeRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let strokeRadiusTmpBuf : string | double | global_resource_Resource | undefined = undefined
         if ((strokeRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const strokeRadiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let strokeRadiusTmpBuf_ : string | double | Resource | undefined
-            if (strokeRadiusTmpBuf_UnionSelector == (0).toChar()) {
-                strokeRadiusTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (strokeRadiusTmpBuf_UnionSelector == (1).toChar()) {
-                strokeRadiusTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (strokeRadiusTmpBuf_UnionSelector == (2).toChar()) {
-                strokeRadiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const strokeRadiusTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let strokeRadiusTmpBufOpt : string | double | global_resource_Resource | undefined
+            if (strokeRadiusTmpBufOptUnionSelector == (0).toByte()) {
+                strokeRadiusTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (strokeRadiusTmpBufOptUnionSelector == (1).toByte()) {
+                strokeRadiusTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (strokeRadiusTmpBufOptUnionSelector == (2).toByte()) {
+                strokeRadiusTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for strokeRadiusTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for strokeRadiusTmpBufOpt has to be chosen through deserialisation.')
             }
-            strokeRadiusTmpBuf = (strokeRadiusTmpBuf_ as string | double | Resource)
+            strokeRadiusTmpBuf = (strokeRadiusTmpBufOpt as string | double | global_resource_Resource)
         }
-        const strokeRadiusTmpResult : PX | VP | LPX | Resource | undefined = strokeRadiusTmpBuf
+        const strokeRadiusTmpResult : PX | VP | LPX | global_resource_Resource | undefined = strokeRadiusTmpBuf
         let value : LinearStyleOptions = ({enableScanEffect: enableScanEffectTmpResult, enableSmoothEffect: enableSmoothEffectTmpResult, strokeWidth: strokeWidthTmpResult, strokeRadius: strokeRadiusTmpResult} as LinearStyleOptions)
         return value
     }
@@ -557,10 +525,10 @@ export class ProgressStyleOptions_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStrokeWidthTmpValueForIdx1  = valueHolderForStrokeWidthTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForStrokeWidthTmpValueForIdx1)
-            } else if (valueHolderForStrokeWidthTmpValue instanceof Resource) {
+            } else if (valueHolderForStrokeWidthTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForStrokeWidthTmpValueForIdx2  = valueHolderForStrokeWidthTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValueForIdx2)
+                const valueHolderForStrokeWidthTmpValueForIdx2  = valueHolderForStrokeWidthTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -585,10 +553,10 @@ export class ProgressStyleOptions_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForScaleWidthTmpValueForIdx1  = valueHolderForScaleWidthTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForScaleWidthTmpValueForIdx1)
-            } else if (valueHolderForScaleWidthTmpValue instanceof Resource) {
+            } else if (valueHolderForScaleWidthTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForScaleWidthTmpValueForIdx2  = valueHolderForScaleWidthTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForScaleWidthTmpValueForIdx2)
+                const valueHolderForScaleWidthTmpValueForIdx2  = valueHolderForScaleWidthTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForScaleWidthTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -596,50 +564,50 @@ export class ProgressStyleOptions_serializer {
     }
     public static read(buffer: DeserializerBase): ProgressStyleOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const enableSmoothEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const enableSmoothEffectTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let enableSmoothEffectTmpBuf : boolean | undefined = undefined
         if ((enableSmoothEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             enableSmoothEffectTmpBuf = valueDeserializer.readBoolean()
         }
         const enableSmoothEffectTmpResult : boolean | undefined = enableSmoothEffectTmpBuf
-        const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let strokeWidthTmpBuf : Length | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const strokeWidthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let strokeWidthTmpBuf_ : string | double | Resource | undefined
-            if (strokeWidthTmpBuf_UnionSelector == (0).toChar()) {
-                strokeWidthTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (strokeWidthTmpBuf_UnionSelector == (1).toChar()) {
-                strokeWidthTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (strokeWidthTmpBuf_UnionSelector == (2).toChar()) {
-                strokeWidthTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const strokeWidthTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let strokeWidthTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (strokeWidthTmpBufOptUnionSelector == (0).toByte()) {
+                strokeWidthTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (strokeWidthTmpBufOptUnionSelector == (1).toByte()) {
+                strokeWidthTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (strokeWidthTmpBufOptUnionSelector == (2).toByte()) {
+                strokeWidthTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for strokeWidthTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for strokeWidthTmpBufOpt has to be chosen through deserialisation.')
             }
-            strokeWidthTmpBuf = (strokeWidthTmpBuf_ as string | double | Resource)
+            strokeWidthTmpBuf = (strokeWidthTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const strokeWidthTmpResult : Length | undefined = strokeWidthTmpBuf
-        const scaleCountTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const scaleCountTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let scaleCountTmpBuf : int32 | undefined = undefined
         if ((scaleCountTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             scaleCountTmpBuf = valueDeserializer.readInt32()
         }
         const scaleCountTmpResult : int32 | undefined = scaleCountTmpBuf
-        const scaleWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const scaleWidthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let scaleWidthTmpBuf : Length | undefined = undefined
         if ((scaleWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const scaleWidthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let scaleWidthTmpBuf_ : string | double | Resource | undefined
-            if (scaleWidthTmpBuf_UnionSelector == (0).toChar()) {
-                scaleWidthTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (scaleWidthTmpBuf_UnionSelector == (1).toChar()) {
-                scaleWidthTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (scaleWidthTmpBuf_UnionSelector == (2).toChar()) {
-                scaleWidthTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const scaleWidthTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let scaleWidthTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (scaleWidthTmpBufOptUnionSelector == (0).toByte()) {
+                scaleWidthTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (scaleWidthTmpBufOptUnionSelector == (1).toByte()) {
+                scaleWidthTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (scaleWidthTmpBufOptUnionSelector == (2).toByte()) {
+                scaleWidthTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for scaleWidthTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for scaleWidthTmpBufOpt has to be chosen through deserialisation.')
             }
-            scaleWidthTmpBuf = (scaleWidthTmpBuf_ as string | double | Resource)
+            scaleWidthTmpBuf = (scaleWidthTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const scaleWidthTmpResult : Length | undefined = scaleWidthTmpBuf
         let value : ProgressStyleOptions = ({enableSmoothEffect: enableSmoothEffectTmpResult, strokeWidth: strokeWidthTmpResult, scaleCount: scaleCountTmpResult, scaleWidth: scaleWidthTmpResult} as ProgressStyleOptions)
@@ -677,10 +645,10 @@ export class RingStyleOptions_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStrokeWidthTmpValueForIdx1  = valueHolderForStrokeWidthTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForStrokeWidthTmpValueForIdx1)
-            } else if (valueHolderForStrokeWidthTmpValue instanceof Resource) {
+            } else if (valueHolderForStrokeWidthTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForStrokeWidthTmpValueForIdx2  = valueHolderForStrokeWidthTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValueForIdx2)
+                const valueHolderForStrokeWidthTmpValueForIdx2  = valueHolderForStrokeWidthTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -704,42 +672,42 @@ export class RingStyleOptions_serializer {
     }
     public static read(buffer: DeserializerBase): RingStyleOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const enableScanEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const enableScanEffectTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let enableScanEffectTmpBuf : boolean | undefined = undefined
         if ((enableScanEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             enableScanEffectTmpBuf = valueDeserializer.readBoolean()
         }
         const enableScanEffectTmpResult : boolean | undefined = enableScanEffectTmpBuf
-        const enableSmoothEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const enableSmoothEffectTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let enableSmoothEffectTmpBuf : boolean | undefined = undefined
         if ((enableSmoothEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             enableSmoothEffectTmpBuf = valueDeserializer.readBoolean()
         }
         const enableSmoothEffectTmpResult : boolean | undefined = enableSmoothEffectTmpBuf
-        const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let strokeWidthTmpBuf : Length | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const strokeWidthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let strokeWidthTmpBuf_ : string | double | Resource | undefined
-            if (strokeWidthTmpBuf_UnionSelector == (0).toChar()) {
-                strokeWidthTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (strokeWidthTmpBuf_UnionSelector == (1).toChar()) {
-                strokeWidthTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (strokeWidthTmpBuf_UnionSelector == (2).toChar()) {
-                strokeWidthTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const strokeWidthTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let strokeWidthTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (strokeWidthTmpBufOptUnionSelector == (0).toByte()) {
+                strokeWidthTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (strokeWidthTmpBufOptUnionSelector == (1).toByte()) {
+                strokeWidthTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (strokeWidthTmpBufOptUnionSelector == (2).toByte()) {
+                strokeWidthTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for strokeWidthTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for strokeWidthTmpBufOpt has to be chosen through deserialisation.')
             }
-            strokeWidthTmpBuf = (strokeWidthTmpBuf_ as string | double | Resource)
+            strokeWidthTmpBuf = (strokeWidthTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const strokeWidthTmpResult : Length | undefined = strokeWidthTmpBuf
-        const shadowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const shadowTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let shadowTmpBuf : boolean | undefined = undefined
         if ((shadowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             shadowTmpBuf = valueDeserializer.readBoolean()
         }
         const shadowTmpResult : boolean | undefined = shadowTmpBuf
-        const statusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const statusTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let statusTmpBuf : ProgressStatus | undefined = undefined
         if ((statusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             statusTmpBuf = ProgressStatus.fromValue(valueDeserializer.readInt32())
@@ -772,10 +740,10 @@ export class CapsuleStyleOptions_serializer {
         if (valueHolderForBorderColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderColorTmpValue  = valueHolderForBorderColor!
-            if (valueHolderForBorderColorTmpValue instanceof Color) {
+            if (valueHolderForBorderColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForBorderColorTmpValueForIdx0  = valueHolderForBorderColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBorderColorTmpValueForIdx0.getOrdinal())
+                const valueHolderForBorderColorTmpValueForIdx0  = valueHolderForBorderColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForBorderColorTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueHolderForBorderColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderColorTmpValueForIdx1  = valueHolderForBorderColorTmpValue as int32
@@ -784,10 +752,10 @@ export class CapsuleStyleOptions_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBorderColorTmpValueForIdx2  = valueHolderForBorderColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBorderColorTmpValueForIdx2)
-            } else if (valueHolderForBorderColorTmpValue instanceof Resource) {
+            } else if (valueHolderForBorderColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForBorderColorTmpValueForIdx3  = valueHolderForBorderColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx3)
+                const valueHolderForBorderColorTmpValueForIdx3  = valueHolderForBorderColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForBorderColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -804,10 +772,10 @@ export class CapsuleStyleOptions_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderWidthTmpValueForIdx1  = valueHolderForBorderWidthTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForBorderWidthTmpValueForIdx1)
-            } else if (valueHolderForBorderWidthTmpValue instanceof Resource) {
+            } else if (valueHolderForBorderWidthTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForBorderWidthTmpValueForIdx2  = valueHolderForBorderWidthTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx2)
+                const valueHolderForBorderWidthTmpValueForIdx2  = valueHolderForBorderWidthTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForBorderWidthTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -824,7 +792,7 @@ export class CapsuleStyleOptions_serializer {
         if (valueHolderForFont !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontTmpValue  = valueHolderForFont!
-            Font_serializer.write(valueSerializer, valueHolderForFontTmpValue)
+            arkui_component_units_Font_serializer.write(valueSerializer, valueHolderForFontTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -832,10 +800,10 @@ export class CapsuleStyleOptions_serializer {
         if (valueHolderForFontColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontColorTmpValue  = valueHolderForFontColor!
-            if (valueHolderForFontColorTmpValue instanceof Color) {
+            if (valueHolderForFontColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
+                const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForFontColorTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueHolderForFontColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as int32
@@ -844,10 +812,10 @@ export class CapsuleStyleOptions_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
                 valueSerializer.writeString(valueHolderForFontColorTmpValueForIdx2)
-            } else if (valueHolderForFontColorTmpValue instanceof Resource) {
+            } else if (valueHolderForFontColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForFontColorTmpValueForIdx3  = valueHolderForFontColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForFontColorTmpValueForIdx3)
+                const valueHolderForFontColorTmpValueForIdx3  = valueHolderForFontColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForFontColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -864,104 +832,104 @@ export class CapsuleStyleOptions_serializer {
         if (valueHolderForBorderRadius !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderRadiusTmpValue  = valueHolderForBorderRadius!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValue)
+            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): CapsuleStyleOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const enableScanEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const enableScanEffectTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let enableScanEffectTmpBuf : boolean | undefined = undefined
         if ((enableScanEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             enableScanEffectTmpBuf = valueDeserializer.readBoolean()
         }
         const enableScanEffectTmpResult : boolean | undefined = enableScanEffectTmpBuf
-        const enableSmoothEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const enableSmoothEffectTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let enableSmoothEffectTmpBuf : boolean | undefined = undefined
         if ((enableSmoothEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             enableSmoothEffectTmpBuf = valueDeserializer.readBoolean()
         }
         const enableSmoothEffectTmpResult : boolean | undefined = enableSmoothEffectTmpBuf
-        const borderColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const borderColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let borderColorTmpBuf : ResourceColor | undefined = undefined
         if ((borderColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const borderColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let borderColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (borderColorTmpBuf_UnionSelector == (0).toChar()) {
-                borderColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (borderColorTmpBuf_UnionSelector == (1).toChar()) {
-                borderColorTmpBuf_ = (valueDeserializer.readInt32())
-            } else if (borderColorTmpBuf_UnionSelector == (2).toChar()) {
-                borderColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (borderColorTmpBuf_UnionSelector == (3).toChar()) {
-                borderColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const borderColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let borderColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (borderColorTmpBufOptUnionSelector == (0).toByte()) {
+                borderColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (borderColorTmpBufOptUnionSelector == (1).toByte()) {
+                borderColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (borderColorTmpBufOptUnionSelector == (2).toByte()) {
+                borderColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (borderColorTmpBufOptUnionSelector == (3).toByte()) {
+                borderColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for borderColorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for borderColorTmpBufOpt has to be chosen through deserialisation.')
             }
-            borderColorTmpBuf = (borderColorTmpBuf_ as Color | int32 | string | Resource)
+            borderColorTmpBuf = (borderColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const borderColorTmpResult : ResourceColor | undefined = borderColorTmpBuf
-        const borderWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const borderWidthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let borderWidthTmpBuf : Length | undefined = undefined
         if ((borderWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const borderWidthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let borderWidthTmpBuf_ : string | double | Resource | undefined
-            if (borderWidthTmpBuf_UnionSelector == (0).toChar()) {
-                borderWidthTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (borderWidthTmpBuf_UnionSelector == (1).toChar()) {
-                borderWidthTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (borderWidthTmpBuf_UnionSelector == (2).toChar()) {
-                borderWidthTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const borderWidthTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let borderWidthTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (borderWidthTmpBufOptUnionSelector == (0).toByte()) {
+                borderWidthTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (borderWidthTmpBufOptUnionSelector == (1).toByte()) {
+                borderWidthTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (borderWidthTmpBufOptUnionSelector == (2).toByte()) {
+                borderWidthTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for borderWidthTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for borderWidthTmpBufOpt has to be chosen through deserialisation.')
             }
-            borderWidthTmpBuf = (borderWidthTmpBuf_ as string | double | Resource)
+            borderWidthTmpBuf = (borderWidthTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const borderWidthTmpResult : Length | undefined = borderWidthTmpBuf
-        const contentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const contentTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let contentTmpBuf : string | undefined = undefined
         if ((contentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             contentTmpBuf = (valueDeserializer.readString() as string)
         }
         const contentTmpResult : string | undefined = contentTmpBuf
-        const fontTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let fontTmpBuf : Font | undefined = undefined
+        const fontTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let fontTmpBuf : arkui_component_units_Font | undefined = undefined
         if ((fontTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            fontTmpBuf = Font_serializer.read(valueDeserializer)
+            fontTmpBuf = arkui_component_units_Font_serializer.read(valueDeserializer)
         }
-        const fontTmpResult : Font | undefined = fontTmpBuf
-        const fontColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const fontTmpResult : arkui_component_units_Font | undefined = fontTmpBuf
+        const fontColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let fontColorTmpBuf : ResourceColor | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
-                fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readInt32())
-            } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
-                fontColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const fontColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let fontColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (fontColorTmpBufOptUnionSelector == (0).toByte()) {
+                fontColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (fontColorTmpBufOptUnionSelector == (1).toByte()) {
+                fontColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (fontColorTmpBufOptUnionSelector == (2).toByte()) {
+                fontColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (fontColorTmpBufOptUnionSelector == (3).toByte()) {
+                fontColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for fontColorTmpBufOpt has to be chosen through deserialisation.')
             }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
+            fontColorTmpBuf = (fontColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
-        const showDefaultPercentageTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const showDefaultPercentageTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let showDefaultPercentageTmpBuf : boolean | undefined = undefined
         if ((showDefaultPercentageTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             showDefaultPercentageTmpBuf = valueDeserializer.readBoolean()
         }
         const showDefaultPercentageTmpResult : boolean | undefined = showDefaultPercentageTmpBuf
-        const borderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let borderRadiusTmpBuf : LengthMetrics | undefined = undefined
+        const borderRadiusTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let borderRadiusTmpBuf : arkui_Graphics_LengthMetrics | undefined = undefined
         if ((borderRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            borderRadiusTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            borderRadiusTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
         }
-        const borderRadiusTmpResult : LengthMetrics | undefined = borderRadiusTmpBuf
+        const borderRadiusTmpResult : arkui_Graphics_LengthMetrics | undefined = borderRadiusTmpBuf
         let value : CapsuleStyleOptions = ({enableScanEffect: enableScanEffectTmpResult, enableSmoothEffect: enableSmoothEffectTmpResult, borderColor: borderColorTmpResult, borderWidth: borderWidthTmpResult, content: contentTmpResult, font: fontTmpResult, fontColor: fontColorTmpResult, showDefaultPercentage: showDefaultPercentageTmpResult, borderRadius: borderRadiusTmpResult} as CapsuleStyleOptions)
         return value
     }

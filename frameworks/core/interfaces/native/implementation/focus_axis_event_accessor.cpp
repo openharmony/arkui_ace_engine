@@ -51,23 +51,23 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Map_AxisModel_Float64 GetAxisMapImpl(Ark_FocusAxisEvent peer)
-{
-    CHECK_NULL_RETURN(peer && peer->GetEventInfo(), {});
-    auto eventInfo = peer->GetEventInfo();
-    return Converter::ArkValue<Map_AxisModel_Float64>(getAxisMapFromInfo(*eventInfo), Converter::FC);
-}
-void SetAxisMapImpl(Ark_FocusAxisEvent peer,
-                    const Map_AxisModel_Float64* axisMap)
-{
-    LOGW("ARKOALA KeyEventAccessor::SetAxisMapImpl doesn't have sense.");
-}
 void StopPropagationImpl(Ark_FocusAxisEvent peer)
 {
     CHECK_NULL_VOID(peer);
     FocusAxisEventInfo* info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     info->SetStopPropagation(true);
+}
+Map_AxisModel_F64 GetAxisMapImpl(Ark_FocusAxisEvent peer)
+{
+    CHECK_NULL_RETURN(peer && peer->GetEventInfo(), {});
+    auto eventInfo = peer->GetEventInfo();
+    return Converter::ArkValue<Map_AxisModel_F64>(getAxisMapFromInfo(*eventInfo), Converter::FC);
+}
+void SetAxisMapImpl(Ark_FocusAxisEvent peer,
+                    const Map_AxisModel_F64* axisMap)
+{
+    LOGW("ARKOALA KeyEventAccessor::SetAxisMapImpl doesn't have sense.");
 }
 } // FocusAxisEventAccessor
 const GENERATED_ArkUIFocusAxisEventAccessor* GetFocusAxisEventAccessor()
@@ -76,9 +76,9 @@ const GENERATED_ArkUIFocusAxisEventAccessor* GetFocusAxisEventAccessor()
         FocusAxisEventAccessor::DestroyPeerImpl,
         FocusAxisEventAccessor::ConstructImpl,
         FocusAxisEventAccessor::GetFinalizerImpl,
+        FocusAxisEventAccessor::StopPropagationImpl,
         FocusAxisEventAccessor::GetAxisMapImpl,
         FocusAxisEventAccessor::SetAxisMapImpl,
-        FocusAxisEventAccessor::StopPropagationImpl,
     };
     return &FocusAxisEventAccessorImpl;
 }

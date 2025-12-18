@@ -16,12 +16,11 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { extractors } from "#handwritten"
-import { default as drawing } from "@ohos.graphics.drawing"
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { TypeChecker } from "#components"
-import { CallbackTransformer } from "./../CallbackTransformer"
+import { extractors } from '#handwritten'
+import { default as drawing } from '@ohos.graphics.drawing'
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { CallbackTransformer } from './../CallbackTransformer'
 export class drawing_Canvas_serializer {
     public static write(buffer: SerializerBase, value: drawing.Canvas): void {
         let valueSerializer : SerializerBase = buffer
@@ -159,7 +158,7 @@ export class drawing_FontMetrics_serializer {
     }
     public static read(buffer: DeserializerBase): drawing.FontMetrics {
         let valueDeserializer : DeserializerBase = buffer
-        const flagsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const flagsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let flagsTmpBuf : int32 | undefined = undefined
         if ((flagsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             flagsTmpBuf = valueDeserializer.readInt32()
@@ -170,61 +169,61 @@ export class drawing_FontMetrics_serializer {
         const descentTmpResult : double = valueDeserializer.readFloat64()
         const bottomTmpResult : double = valueDeserializer.readFloat64()
         const leadingTmpResult : double = valueDeserializer.readFloat64()
-        const avgCharWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const avgCharWidthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let avgCharWidthTmpBuf : double | undefined = undefined
         if ((avgCharWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             avgCharWidthTmpBuf = valueDeserializer.readFloat64()
         }
         const avgCharWidthTmpResult : double | undefined = avgCharWidthTmpBuf
-        const maxCharWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const maxCharWidthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let maxCharWidthTmpBuf : double | undefined = undefined
         if ((maxCharWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             maxCharWidthTmpBuf = valueDeserializer.readFloat64()
         }
         const maxCharWidthTmpResult : double | undefined = maxCharWidthTmpBuf
-        const xMinTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const xMinTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let xMinTmpBuf : double | undefined = undefined
         if ((xMinTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             xMinTmpBuf = valueDeserializer.readFloat64()
         }
         const xMinTmpResult : double | undefined = xMinTmpBuf
-        const xMaxTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const xMaxTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let xMaxTmpBuf : double | undefined = undefined
         if ((xMaxTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             xMaxTmpBuf = valueDeserializer.readFloat64()
         }
         const xMaxTmpResult : double | undefined = xMaxTmpBuf
-        const xHeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const xHeightTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let xHeightTmpBuf : double | undefined = undefined
         if ((xHeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             xHeightTmpBuf = valueDeserializer.readFloat64()
         }
         const xHeightTmpResult : double | undefined = xHeightTmpBuf
-        const capHeightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const capHeightTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let capHeightTmpBuf : double | undefined = undefined
         if ((capHeightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             capHeightTmpBuf = valueDeserializer.readFloat64()
         }
         const capHeightTmpResult : double | undefined = capHeightTmpBuf
-        const underlineThicknessTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const underlineThicknessTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let underlineThicknessTmpBuf : double | undefined = undefined
         if ((underlineThicknessTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             underlineThicknessTmpBuf = valueDeserializer.readFloat64()
         }
         const underlineThicknessTmpResult : double | undefined = underlineThicknessTmpBuf
-        const underlinePositionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const underlinePositionTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let underlinePositionTmpBuf : double | undefined = undefined
         if ((underlinePositionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             underlinePositionTmpBuf = valueDeserializer.readFloat64()
         }
         const underlinePositionTmpResult : double | undefined = underlinePositionTmpBuf
-        const strikethroughThicknessTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const strikethroughThicknessTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let strikethroughThicknessTmpBuf : double | undefined = undefined
         if ((strikethroughThicknessTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             strikethroughThicknessTmpBuf = valueDeserializer.readFloat64()
         }
         const strikethroughThicknessTmpResult : double | undefined = strikethroughThicknessTmpBuf
-        const strikethroughPositionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const strikethroughPositionTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let strikethroughPositionTmpBuf : double | undefined = undefined
         if ((strikethroughPositionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             strikethroughPositionTmpBuf = valueDeserializer.readFloat64()

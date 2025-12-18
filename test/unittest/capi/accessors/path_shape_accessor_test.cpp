@@ -123,13 +123,13 @@ HWTEST_F(PathShapeAccessorTest, fillTest, TestSize.Level1)
 
     using FillTestStep = std::pair<Ark_ResourceColor, Color>;
     static const std::vector<FillTestStep> FILL_TEST_PLAN = {
-        // Ark_Color
-        {Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_RED),
-            Converter::OptConvert<Color>(Ark_Color::ARK_COLOR_RED).value_or(Color())},
-        {Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_GREEN),
-            Converter::OptConvert<Color>(Ark_Color::ARK_COLOR_GREEN).value_or(Color())},
-        {Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_BLUE),
-            Converter::OptConvert<Color>(Ark_Color::ARK_COLOR_BLUE).value_or(Color())},
+        // Ark_arkui_component_enums_Color
+        {Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED),
+            Converter::OptConvert<Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED).value_or(Color())},
+        {Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN),
+            Converter::OptConvert<Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN).value_or(Color())},
+        {Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+            Converter::OptConvert<Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE).value_or(Color())},
         // Ark_Number
         {Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(Converter::ArkValue<Ark_Float64>(0x11223344)),
             Color(0x11223344)},

@@ -16,24 +16,25 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
-import { int32, int64, float32 } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { VoidCallback } from "./units"
-import { AttributeModifier, hookCounterAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { CounterModifier } from "./../CounterModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from '@koalaui/interop'
+import { int32, int64, float32 } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { VoidCallback } from './units'
+import { AttributeModifier, hookCounterAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { CounterModifier } from './../CounterModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkCounterPeer extends ArkCommonMethodPeer {
     attributeSet?: CounterModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkCounterPeer {
@@ -44,6 +45,7 @@ export class ArkCounterPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setCounterOptionsAttribute(): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._CounterInterface_setCounterOptions(this.peer.ptr)
     }
     setOnIncAttribute(value: VoidCallback | undefined): void {
@@ -97,59 +99,31 @@ export class ArkCounterPeer extends ArkCommonMethodPeer {
 }
 export interface CounterAttribute extends CommonMethod {
     setCounterOptions(): this {
-        throw new Error("Unimplemented method setCounterOptions")
+        throw new Error('Unimplemented method setCounterOptions')
     }
     onInc(value: VoidCallback | undefined): this {
-        throw new Error("Unimplemented method onInc")
+        throw new Error('Unimplemented method onInc')
     }
     onDec(value: VoidCallback | undefined): this {
-        throw new Error("Unimplemented method onDec")
+        throw new Error('Unimplemented method onDec')
     }
     enableDec(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableDec")
+        throw new Error('Unimplemented method enableDec')
     }
     enableInc(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableInc")
+        throw new Error('Unimplemented method enableInc')
     }
     attributeModifier(value: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkCounterStyle extends ArkCommonMethodStyle implements CounterAttribute {
-    onInc_value?: VoidCallback | undefined
-    onDec_value?: VoidCallback | undefined
-    enableDec_value?: boolean | undefined
-    enableInc_value?: boolean | undefined
-    attributeModifier_value?: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined
-    setCounterOptions(): this {
-        return this
-    }
-    onInc(value: VoidCallback | undefined): this {
-        return this
-    }
-    onDec(value: VoidCallback | undefined): this {
-        return this
-    }
-    enableDec(value: boolean | undefined): this {
-        return this
-    }
-    enableInc(value: boolean | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkCounterComponent extends ArkCommonMethodComponent implements CounterAttribute {
     getPeer(): ArkCounterPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkCounterPeer)
     }
     public setCounterOptions(): this {
-        if (this.checkPriority("setCounterOptions")) {
+        if (this.checkPriority('setCounterOptions')) {
             this.getPeer()?.setCounterOptionsAttribute()
             this.applyOptionsFinish('CounterAttribute');
             return this
@@ -157,7 +131,7 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements Cou
         return this
     }
     public onInc(value: VoidCallback | undefined): this {
-        if (this.checkPriority("onInc")) {
+        if (this.checkPriority('onInc')) {
             const value_casted = value as (VoidCallback | undefined)
             this.getPeer()?.setOnIncAttribute(value_casted)
             return this
@@ -165,7 +139,7 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements Cou
         return this
     }
     public onDec(value: VoidCallback | undefined): this {
-        if (this.checkPriority("onDec")) {
+        if (this.checkPriority('onDec')) {
             const value_casted = value as (VoidCallback | undefined)
             this.getPeer()?.setOnDecAttribute(value_casted)
             return this
@@ -173,7 +147,7 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements Cou
         return this
     }
     public enableDec(value: boolean | undefined): this {
-        if (this.checkPriority("enableDec")) {
+        if (this.checkPriority('enableDec')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableDecAttribute(value_casted)
             return this
@@ -181,7 +155,7 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements Cou
         return this
     }
     public enableInc(value: boolean | undefined): this {
-        if (this.checkPriority("enableInc")) {
+        if (this.checkPriority('enableInc')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableIncAttribute(value_casted)
             return this
@@ -189,7 +163,7 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements Cou
         return this
     }
     public attributeModifier(value: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-          ModifierStateManager.INSTANCE.scope(() => {
+        ModifierStateManager.INSTANCE.scope(() => {
             hookCounterAttributeModifier(this, value);
         })
         return this
@@ -205,18 +179,16 @@ export class ArkCounterComponent extends ArkCommonMethodComponent implements Cou
 
 @memo
 export function CounterImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: CounterAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkCounterComponent>((): ArkCounterComponent => {
         return new ArkCounterComponent()
     })
-    NodeAttach<ArkCounterPeer>((): ArkCounterPeer => ArkCounterPeer.create(receiver), (peer: ArkCounterPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkCounterPeer>((): ArkCounterPeer => ArkCounterPeer.create(receiver), (_: ArkCounterPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }

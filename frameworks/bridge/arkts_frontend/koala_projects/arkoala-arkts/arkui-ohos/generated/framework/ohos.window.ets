@@ -16,23 +16,10 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { extractors } from "#handwritten"
-import { default as window } from "@ohos.window"
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { TypeChecker } from "#components"
-import { CallbackTransformer } from "./../CallbackTransformer"
-export class window_WindowStage_serializer {
-    public static write(buffer: SerializerBase, value: window.WindowStage): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(extractors.toWindowWindowStagePtr(value))
-    }
-    public static read(buffer: DeserializerBase): window.WindowStage {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return extractors.fromWindowWindowStagePtr(ptr)
-    }
-}
+import { default as window } from '@ohos.window'
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { CallbackTransformer } from './../CallbackTransformer'
 export class window_SystemBarStyle_serializer {
     public static write(buffer: SerializerBase, value: window.SystemBarStyle): void {
         let valueSerializer : SerializerBase = buffer
@@ -47,7 +34,7 @@ export class window_SystemBarStyle_serializer {
     }
     public static read(buffer: DeserializerBase): window.SystemBarStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const statusBarContentColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const statusBarContentColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let statusBarContentColorTmpBuf : string | undefined = undefined
         if ((statusBarContentColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             statusBarContentColorTmpBuf = (valueDeserializer.readString() as string)

@@ -106,7 +106,9 @@ generate_static_abc("movingphotoview_abc") {
     "@koalaui/runtime/states/Disposable",
     "@koalaui/runtime/tree/IncrementalNode",
     "@koalaui/common/koalaKey",
-    "@koalaui/runtime/internals"
+    "@koalaui/runtime/internals",
+    "@arkui.Graphics",
+    "@arkui.ComponentContent",
   ]
 
   paths_values = [
@@ -127,7 +129,9 @@ generate_static_abc("movingphotoview_abc") {
     "$ohos_ets_inner_path/@koalaui/runtime/states/Disposable.d.ets",
     "$ohos_ets_inner_path/@koalaui/runtime/tree/IncrementalNode.d.ets",
     "$ohos_ets_inner_path/@koalaui/common/koalaKey.d.ets",
-    "$ohos_ets_inner_path/@koalaui/runtime/internals.d.ets"
+    "$ohos_ets_inner_path/@koalaui/runtime/internals.d.ets",
+    "$ohos_ets_api_path/arkui/Graphics.d.ets",
+    "$ohos_ets_api_path/arkui/ComponentContent.d.ets"
   ]
   device_dst_file = "/system/framework/movingphotoview.abc"
   dst_file = target_out_dir + "/movingphotoview.abc"

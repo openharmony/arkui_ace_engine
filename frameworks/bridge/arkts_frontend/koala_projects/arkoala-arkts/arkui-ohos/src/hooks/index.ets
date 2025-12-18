@@ -1,6 +1,6 @@
 import { runtimeType, RuntimeType, KPointer } from "@koalaui/interop";
 import { default as image } from "@ohos.multimedia.image";
-import { ColorMetrics, DrawContext, LengthMetrics, LengthMetricsUnit, Size } from "arkui.Graphics";
+import { ColorMetrics, DrawContext, LengthMetrics, LengthMetricsUnit, Size } from "@arkui.Graphics";
 import { NodeController } from "arkui.NodeController";
 import { default as curves } from "@ohos.curves";
 import { default as matrix4 } from "@ohos.matrix4";
@@ -54,7 +54,7 @@ import { CanvasRenderer, ImageData, OffscreenCanvas, RenderingContextSettings, C
 import { pointer } from "@koalaui/interop";
 import { ArkUIAniModule } from "arkui.ani"
 import { InteropNativeModule } from "@koalaui/interop"
-import { NavPathStack, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationComponent } from "../component/navigation"
+import { NavPathStack, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationComponent, ArkNavigationPeer } from "../component/navigation"
 import { PathStackUtils } from "../base/ArkNavPathStack"
 import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
@@ -71,8 +71,13 @@ import { PeerNode } from '../PeerNode';
 import { int32 } from "@koalaui/common";
 import { DrawModifier } from "arkui/component/common";
 import { ArkTextPickerComponent, ArkTextPickerPeer, DividerOptions } from "#generated";
-import { ArkListComponent, ArkListItemGroupComponent, ChildrenMainSize } from "#generated";
+import { ArkListComponent, ArkListPeer, ArkListItemGroupComponent, ArkListItemGroupPeer, ChildrenMainSize } from "#generated";
 import { ListHandWritten } from "./ListHandWritten"
+import { CommonMethodModifier, SizeOptions, ArkCommonMethodPeer } from "#generated";
+import { ArkSelectComponent, ArkSelectPeer } from "#generated";
+import { PageFlipMode } from "#generated";
+import { ArkWithThemeComponent, WithThemeOptions } from "#generated";
+import { ArkWebComponent, ArkWebPeer, JavaScriptProxy } from "#generated";
 
 export function hookId(component: object, value?: string) {}
 
@@ -103,32 +108,44 @@ export function hookMergeKeyboardShortcuts(
 }
 
 export function hookGesture(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
+    hookGesture(commonMethod.getPeer(), gesture, mask)
+}
+
+export function hookGesture(peer: ArkCommonMethodPeer, gesture: GestureType | undefined, mask?: GestureMask): void {
     if (gesture instanceof Gesture) {
         let singleGesture = gesture as Gesture;
-        singleGesture.setGesture(0, commonMethod.getPeer(), mask);
+        singleGesture.setGesture(0, peer, mask);
     } else {
         let gestureGroup = gesture as GestureGroup;
-        gestureGroup.addGestureGroupToNode(0, commonMethod.getPeer(), mask)
+        gestureGroup.addGestureGroupToNode(0, peer, mask)
     }
 }
 
 export function hookPriorityGesture(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
+    hookPriorityGesture(commonMethod.getPeer(), gesture, mask)
+}
+
+export function hookPriorityGesture(peer: ArkCommonMethodPeer, gesture: GestureType | undefined, mask?: GestureMask): void {
     if (gesture instanceof Gesture) {
         let singleGesture = gesture as Gesture;
-        singleGesture.setGesture(1, commonMethod.getPeer(), mask);
+        singleGesture.setGesture(1, peer, mask);
     } else {
         let gestureGroup = gesture as GestureGroup;
-        gestureGroup.addGestureGroupToNode(1, commonMethod.getPeer(), mask)
+        gestureGroup.addGestureGroupToNode(1, peer, mask)
     }
 }
 
 export function hookParallelGesture(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
+    hookParallelGesture(commonMethod.getPeer(), gesture, mask)
+}
+
+export function hookParallelGesture(peer: ArkCommonMethodPeer, gesture: GestureType | undefined, mask?: GestureMask): void {
     if (gesture instanceof Gesture) {
         let singleGesture = gesture as Gesture;
-        singleGesture.setGesture(2, commonMethod.getPeer(), mask);
+        singleGesture.setGesture(2, peer, mask);
     } else {
         let gestureGroup = gesture as GestureGroup;
-        gestureGroup.addGestureGroupToNode(2, commonMethod.getPeer(), mask)
+        gestureGroup.addGestureGroupToNode(2, peer, mask)
     }
 }
 
@@ -154,7 +171,11 @@ export function hookGestureModifier(commonMethod: ArkCommonMethodComponent, valu
     value_casted.applyGesture(gestureEvent as UIGestureEvent);
 }
 
-export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPeer, value: Array<UniformDataType> | null | undefined) : void {
+export function hookGestureModifier(peer: ArkCommonMethodPeer, value: GestureModifier | undefined) {
+    throw new Error("Not implemented")
+}
+
+export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPeer, value: Array<UniformDataType> | Array<string> | null | undefined) : void {
   if (!node) {
       return
   }
@@ -200,6 +221,10 @@ export function hookStateStyleImpl(
   receiver: ArkCommonMethodComponent,
   value: StateStyles | undefined
 ) {
+    hookStateStyleImpl(receiver.getPeer(), value)
+}
+
+export function hookStateStyleImpl(peer: ArkCommonMethodPeer, value: StateStyles | undefined): void {
     const UI_STATE_NORMAL = 0;
     const UI_STATE_PRESSED = 1;
     const UI_STATE_FOCUSED = 1 << 1;
@@ -223,7 +248,7 @@ export function hookStateStyleImpl(
         curState |= UI_STATE_SELECTED;
     }
 
-    let currentState = receiver.getPeer().getOrCreateStateStyleMutable(curState);
+    let currentState = peer.getOrCreateStateStyleMutable(curState);
     if (currentState === undefined) {
       return;
     }
@@ -247,7 +272,7 @@ export function hookStateStyleImpl(
         value?.selected?.(cm)
     }
 
-    cm.applyModifierPatch(receiver.getPeer())
+    cm.applyModifierPatch(peer)
 }
 
 export class ElementIdToCustomProperties {
@@ -339,6 +364,10 @@ export function hookCommonMethodModifierCustomProperty(component: CommonMethodMo
 }
 
 export function hookDrawModifier(arkComponent: ArkCommonMethodComponent, value: DrawModifier | undefined): void {
+  hookDrawModifier(arkComponent.getPeer(), value)
+}
+
+export function hookDrawModifier(peer: ArkCommonMethodPeer, value: DrawModifier | undefined): void {
   if (value === undefined) {
     return;
   }
@@ -357,14 +386,15 @@ export function hookDrawModifier(arkComponent: ArkCommonMethodComponent, value: 
     }
   }
   if (flag) {
-    ArkUIAniModule._SetDrawModifier(arkComponent.getPeer().getPeerPtr(), flag, value!);
-    value.weakRefOfPeerNode = new WeakRef<PeerNode>(arkComponent.getPeer());
+    ArkUIAniModule._SetDrawModifier(peer.getPeerPtr(), flag, value!);
+    value.weakRefOfPeerNode = new WeakRef<PeerNode>(peer);
   }
 }
 
 export * from "./modifiers";
 export * from "./content_modifiers/ContentModifierHooks";
 export * from "./theme";
+export * from "./WaterFlowHandWritten";
 
 export function hookImageSetImageOptions(component: ArkImageComponent, src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): void {
     ImageOpsHandWritten.hookImageSetImageOptionsImpl(component, src, imageAIOptions);
@@ -405,7 +435,9 @@ export function hookGetParamByNameMethod(pathStack: NavPathStack, name: string):
 export function hookSetNavigationOptions(component: ArkNavigationComponent, pathInfos?: NavPathStack): void {
   NavigationOpsHandWritten.hookSetNavigationOptionsImpl(component, pathInfos);
 }
-
+export function hookSetNavDestination(peer: ArkNavigationPeer, value: PageMapBuilder | undefined) {
+    throw new Error("Not implemented")
+}
 export function hookSetNavDestination(component: ArkNavigationComponent, value: PageMapBuilder | undefined): void {
   NavigationOpsHandWritten.hookSetNavDestinationImpl(component, value);
 }
@@ -616,10 +648,38 @@ export function hookTextPickerDivider(receiver: ArkTextPickerComponent | ArkText
   peer.setDividerAttribute(value_casted)
 }
 
-export function hookListChildrenMainSizeImpl(node: ArkListComponent, value: ChildrenMainSize | undefined): void {
-  ListHandWritten.hookListChildrenMainSizeImpl(node, value)
+export function hookListChildrenMainSizeImpl(node: ArkListComponent | ArkListPeer, value: ChildrenMainSize | undefined): void {
+  if (node instanceof ArkListComponent) {
+    ListHandWritten.hookListChildrenMainSizeImpl(node, value)
+  } else {
+    throw new Error("Not implemented")
+  }
 }
 
-export function hookListItemGroupChildrenMainSizeImpl(node: ArkListItemGroupComponent, value: ChildrenMainSize | undefined): void {
-  ListHandWritten.hookListItemGroupChildrenMainSizeImpl(node, value)
+export function hookListItemGroupChildrenMainSizeImpl(node: ArkListItemGroupComponent | ArkListItemGroupPeer, value: ChildrenMainSize | undefined): void {
+  if (node instanceof ArkListItemGroupComponent) {
+    ListHandWritten.hookListItemGroupChildrenMainSizeImpl(node, value)
+  } else {
+    throw new Error("Not implemented")
+  }
+}
+
+export function hookCommonMethodModifierSize(modifier: CommonMethodModifier, value: SizeOptions | undefined) {
+    throw new Error("Not implemented")
+}
+
+export function hookSelectSetDividerMethod(component: ArkSelectComponent | ArkSelectPeer, value: DividerOptions | null | undefined) {
+    throw new Error("Not implemented")
+}
+
+export function hookTabsApplyAttributesFinish(component: ArkTabsComponent, value: PageFlipMode | undefined) {
+    throw new Error("Not implemented")
+}
+
+export function hookWithThemeOptions(component: ArkWithThemeComponent, options: WithThemeOptions) {
+    throw new Error("Not implemented")
+}
+
+export function hookJavaScriptProxy(component: ArkWebComponent | ArkWebPeer, value: JavaScriptProxy | undefined) {
+    throw new Error("Not implemented")
 }

@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-import { KInt, KLong, KBoolean, KFloat, KDouble, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer, KSerializerBuffer, loadNativeModuleLibrary, NativeBuffer } from "@koalaui/interop"
-import { int32, int64, float32 } from "@koalaui/common"
+import { KInt, KLong, KBoolean, KFloat, KDouble, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer, KSerializerBuffer, loadNativeModuleLibrary, NativeBuffer } from '@koalaui/interop'
+import { int32, int64, float32 } from '@koalaui/common'
 
 export class ArkUINativeModule {
     static {
         loadNativeModuleLibrary("ArkUINativeModule")
     }
     @ani.unsafe.Direct
-    native static _CreateNode(node_t: int32, arg0: int32, arg1: int32): KPointer
+    native static _CreateNode(node_t: KInt, arg0: KInt, arg1: KInt): KPointer
     @ani.unsafe.Direct
     native static _GetNodeFinalizer(): KPointer
     @ani.unsafe.Direct
@@ -31,56 +31,59 @@ export class ArkUINativeModule {
     @ani.unsafe.Direct
     native static _DumpTreeNode(ptr0: KPointer): void
     @ani.unsafe.Direct
-    native static _AddChild(ptr1: KPointer, ptr2: KPointer): int32
+    native static _AddChild(ptr1: KPointer, ptr2: KPointer): KInt
     @ani.unsafe.Direct
     native static _RemoveChild(ptr0: KPointer, ptr2: KPointer): void
     @ani.unsafe.Direct
-    native static _InsertChildAfter(ptr0: KPointer, ptr1: KPointer, ptr2: KPointer): int32
+    native static _InsertChildAfter(ptr0: KPointer, ptr1: KPointer, ptr2: KPointer): KInt
     @ani.unsafe.Direct
-    native static _InsertChildBefore(ptr0: KPointer, ptr1: KPointer, ptr2: KPointer): int32
+    native static _InsertChildBefore(ptr0: KPointer, ptr1: KPointer, ptr2: KPointer): KInt
     @ani.unsafe.Direct
-    native static _InsertChildAt(ptr0: KPointer, ptr1: KPointer, arg: int32): int32
+    native static _InsertChildAt(ptr0: KPointer, ptr1: KPointer, arg: KInt): KInt
     @ani.unsafe.Direct
     native static _ApplyModifierFinish(ptr0: KPointer): void
     @ani.unsafe.Direct
-    native static _MarkDirty(ptr0: KPointer, arg: int32): void
+    native static _MarkDirty(ptr0: KPointer, arg: KInt): void
     @ani.unsafe.Direct
     native static _IsBuilderNode(ptr0: KPointer): boolean
     @ani.unsafe.Direct
-    native static _ConvertLengthMetricsUnit(arg0: float, arg1: int32, arg2: int32): float
+    native static _ConvertLengthMetricsUnit(arg0: KFloat, arg1: KInt, arg2: KInt): KFloat
     @ani.unsafe.Direct
-    native static _SetCustomCallback(ptr0: KPointer, arg: int32): void
+    native static _SetCustomCallback(ptr0: KPointer, arg: KInt): void
+    @ani.unsafe.Direct
     native static _MeasureLayoutAndDraw(ptr0: KPointer): void
-    native static _MeasureNode(ptr0: KPointer, arr: KFloat32ArrayPtr): int32
     @ani.unsafe.Quick
-    native static _LayoutNode(ptr0: KPointer, arr: KFloat32ArrayPtr): int32
-    native static _DrawNode(ptr0: KPointer, arr: KFloat32ArrayPtr): int32
+    native static _MeasureNode(ptr0: KPointer, arr: KFloat32ArrayPtr): KInt
+    @ani.unsafe.Quick
+    native static _LayoutNode(ptr0: KPointer, arr: KFloat32ArrayPtr): KInt
+    @ani.unsafe.Quick
+    native static _DrawNode(ptr0: KPointer, arr: KFloat32ArrayPtr): KInt
     @ani.unsafe.Direct
-    native static _SetMeasureWidth(ptr0: KPointer, arg: int32): void
+    native static _SetMeasureWidth(ptr0: KPointer, arg: KInt): void
     @ani.unsafe.Direct
-    native static _GetMeasureWidth(ptr0: KPointer): int32
+    native static _GetMeasureWidth(ptr0: KPointer): KInt
     @ani.unsafe.Direct
-    native static _SetMeasureHeight(ptr0: KPointer, arg: int32): void
+    native static _SetMeasureHeight(ptr0: KPointer, arg: KInt): void
     @ani.unsafe.Direct
-    native static _GetMeasureHeight(ptr0: KPointer): int32
+    native static _GetMeasureHeight(ptr0: KPointer): KInt
     @ani.unsafe.Direct
-    native static _SetX(ptr0: KPointer, arg: int32): void
+    native static _SetX(ptr0: KPointer, arg: KInt): void
     @ani.unsafe.Direct
-    native static _GetX(ptr0: KPointer): int32
+    native static _GetX(ptr0: KPointer): KInt
     @ani.unsafe.Direct
-    native static _SetY(ptr0: KPointer, arg: int32): void
+    native static _SetY(ptr0: KPointer, arg: KInt): void
     @ani.unsafe.Direct
-    native static _GetY(ptr0: KPointer): int32
+    native static _GetY(ptr0: KPointer): KInt
     @ani.unsafe.Direct
-    native static _SetAlignment(ptr0: KPointer, arg: int32): void
+    native static _SetAlignment(ptr0: KPointer, arg: KInt): void
     @ani.unsafe.Direct
-    native static _GetAlignment(ptr0: KPointer): int32
+    native static _GetAlignment(ptr0: KPointer): KInt
     @ani.unsafe.Direct
-    native static _IndexerChecker(ptr0: KPointer): int32
+    native static _IndexerChecker(ptr0: KPointer): KInt
     @ani.unsafe.Direct
-    native static _SetRangeUpdater(ptr0: KPointer, arg: int32): void
+    native static _SetRangeUpdater(ptr0: KPointer, arg: KInt): void
     @ani.unsafe.Direct
-    native static _SetLazyItemIndexer(ptr0: KPointer, arg: int32): void
+    native static _SetLazyItemIndexer(ptr0: KPointer, arg: KInt): void
     @ani.unsafe.Direct
     native static _GetPipelineContext(ptr0: KPointer): KPointer
     @ani.unsafe.Quick
@@ -90,20 +93,21 @@ export class ArkUINativeModule {
     @ani.unsafe.Direct
     native static _UnblockVsyncWait(pipeline: KPointer): void
     @ani.unsafe.Direct
-    native static _SetChildTotalCount(ptr0: KPointer, arg: int32): void
+    native static _SetChildTotalCount(ptr0: KPointer, arg: KInt): void
     @ani.unsafe.Quick
-    native static _ShowCrash(message: string): void
+    native static _ShowCrash(message: KStringPtr): void
     @ani.unsafe.Quick
-    native static _StartPerf(str1: string): void
+    native static _StartPerf(str1: KStringPtr): void
     @ani.unsafe.Quick
-    native static _EndPerf(str1: string): void
+    native static _EndPerf(str1: KStringPtr): void
     @ani.unsafe.Direct
-    native static _DumpPerf(arg: int32): KPointer
+    native static _DumpPerf(arg: KInt): KPointer
     @ani.unsafe.Direct
-    native static _CheckCallbackEvent(buffer: KSerializerBuffer, bufferLength: int32): int32
+    native static _CheckCallbackEvent(buffer: KSerializerBuffer, bufferLength: KInt): KInt
     @ani.unsafe.Direct
-    native static _HoldCallbackResource(resourceId: int32): void
+    native static _HoldCallbackResource(resourceId: KInt): void
     @ani.unsafe.Direct
-    native static _ReleaseCallbackResource(resourceId: int32): void
-    native static _LoadUserView(userClass: string, params: string): Object
+    native static _ReleaseCallbackResource(resourceId: KInt): void
+    @ani.unsafe.Quick
+    native static _LoadUserView(userClass: KStringPtr, params: KStringPtr): Object
 }

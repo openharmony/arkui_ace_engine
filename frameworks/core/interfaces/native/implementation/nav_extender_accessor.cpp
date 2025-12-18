@@ -14,6 +14,7 @@
  */
 
 #include "arkoala_api_generated.h"
+#include "nav_path_info_peer_impl.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -46,7 +47,8 @@ void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
     };
     navigationStack->SetOnStateChangedCallback(std::move(updater));
 }
-void SyncStackImpl(Ark_NavPathStack peer)
+void SyncStackImpl(Ark_VMContext vmContext,
+                   Ark_NavPathStack peer)
 {
     CHECK_NULL_VOID(peer);
     auto stack = peer->GetNavPathStack();
@@ -58,6 +60,18 @@ void SyncStackImpl(Ark_NavPathStack peer)
     pattern->MarkNeedSyncWithJsStack();
     pattern->SyncWithJsStackIfNeeded();
     stack->ClearNodeList();
+}
+void SetNavDestinationIdImpl(Ark_NativePointer ptr,
+                             const Opt_String* id)
+{
+    auto peer = reinterpret_cast<Ark_NavPathInfo>(ptr);
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(id);
+    if (id->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        peer->data.navDestinationId_ = "";
+        return;
+    }
+    peer->data.navDestinationId_ = Converter::Convert<std::string>(id->value);
 }
 Ark_Boolean CheckNeedCreateImpl(Ark_NativePointer navigation,
                                 Ark_Int32 index)
@@ -129,7 +143,7 @@ Ark_String PopImpl(Ark_NavPathStack pathStack,
     return Converter::ArkValue<Ark_String>(info.navDestinationId_.value_or(""), Converter::FC);
 }
 void SetOnPopCallbackImpl(Ark_NavPathStack pathStack,
-                          const Callback_String_Void* popCallback)
+                          const synthetic_Callback_String_Void* popCallback)
 {
     auto stack = pathStack;
     CHECK_NULL_VOID(stack);
@@ -174,18 +188,30 @@ void PopToIndexImpl(Ark_NavPathStack pathStack,
     auto animatedVal = Converter::Convert<bool>(animated);
     navStack->NavigationContext::PathStack::PopToIndex(indexVal, animatedVal);
 }
-Ark_Int32 PopToNameImpl(Ark_NavPathStack pathStack,
+Ark_Number PopToNameImpl(Ark_NavPathStack pathStack,
                          const Ark_String* name,
                          Ark_Boolean animated)
 {
-    static Ark_Int32 invalidVal = Converter::ArkValue<Ark_Int32>(-1);
+    const auto invalidVal = Converter::ArkValue<Ark_Number>(-1);
     CHECK_NULL_RETURN(pathStack, invalidVal);
     auto navStack = pathStack->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
     auto nameVal = Converter::Convert<std::string>(*name);
     auto animatedVal = Converter::Convert<bool>(animated);
     auto index = navStack->NavigationContext::PathStack::PopToName(nameVal, animatedVal);
-    return Converter::ArkValue<Ark_Int32>(index);
+    return Converter::ArkValue<Ark_Number>(index);
+}
+Ark_NativePointer SetCreateNavDestinationCallbackImpl(Ark_NavPathStack peer,
+                                                      const NavExtender_CreateNavDestination* callback)
+{
+    LOGE("ARKOALA NavExtenderAccessor.SetCreateNavDestinationCallback not implemented yet");
+    return nullptr;
+}
+Array_String GetRouteMapInConfigImpl(Ark_NativePointer context)
+{
+    LOGE("ARKOALA NavExtenderAccessor.GetRouteMapInConfig not implemented yet");
+    std::vector<std::string> empty;
+    return Converter::ArkValue<Array_String>(empty, Converter::FC);
 }
 } // NavExtenderAccessor
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
@@ -194,6 +220,7 @@ const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
         NavExtenderAccessor::SetNavigationOptionsImpl,
         NavExtenderAccessor::SetUpdateStackCallbackImpl,
         NavExtenderAccessor::SyncStackImpl,
+        NavExtenderAccessor::SetNavDestinationIdImpl,
         NavExtenderAccessor::CheckNeedCreateImpl,
         NavExtenderAccessor::SetNavDestinationNodeImpl,
         NavExtenderAccessor::PushPathImpl,
@@ -204,6 +231,8 @@ const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
         NavExtenderAccessor::GetIdByNameImpl,
         NavExtenderAccessor::PopToIndexImpl,
         NavExtenderAccessor::PopToNameImpl,
+        NavExtenderAccessor::SetCreateNavDestinationCallbackImpl,
+        NavExtenderAccessor::GetRouteMapInConfigImpl,
     };
     return &NavExtenderAccessorImpl;
 }

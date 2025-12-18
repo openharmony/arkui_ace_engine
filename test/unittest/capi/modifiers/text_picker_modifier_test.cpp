@@ -230,7 +230,9 @@ const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN2 = {
 
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_BLACK_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -239,7 +241,9 @@ const std::vector<ColorTestStep> COLOR_BLACK_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_BLACK }
 };
 const std::vector<ColorTestStep> COLOR_TRANSPARENT_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -250,19 +254,19 @@ const std::vector<ColorTestStep> COLOR_TRANSPARENT_TEST_PLAN = {
 
 Converter::ConvContext ctx;
 auto array1 = std::array {1, 2, 3};
-auto arrayNumber1 = ArkValue<Array_Int32>(array1, &ctx);
+auto arrayNumber1 = ArkValue<Array_I32>(array1, &ctx);
 
 auto array2 = std::array {9, 1};
-auto arrayNumber2 = ArkValue<Array_Int32>(array2, &ctx);
+auto arrayNumber2 = ArkValue<Array_I32>(array2, &ctx);
 
 auto array3 = std::array {2, -2, 2, 1, 2};
-auto arrayNumber3 = ArkValue<Array_Int32>(array3, &ctx);
+auto arrayNumber3 = ArkValue<Array_I32>(array3, &ctx);
 
 auto array4 = std::array {6, 5, 4, 3, 2, 1};
-auto arrayNumber4 = ArkValue<Array_Int32>(array4, &ctx);
+auto arrayNumber4 = ArkValue<Array_I32>(array4, &ctx);
 
 auto array5 = std::array<int32_t, 0> {};
-auto arrayNumber5 = ArkValue<Array_Int32>(array5, &ctx);
+auto arrayNumber5 = ArkValue<Array_I32>(array5, &ctx);
 
 typedef std::tuple<Opt_Union_I32_Array_I32, std::string> SelectedIndexTestStep;
 const std::vector<SelectedIndexTestStep> SELECTED_INDEX_TEST_PLAN = {
@@ -270,11 +274,11 @@ const std::vector<SelectedIndexTestStep> SELECTED_INDEX_TEST_PLAN = {
     { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(-33), "0" },
     { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(2), "2" },
     { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(33), "0" },
-    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber1), "1" },
-    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber2), "0" },
-    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber3), "2" },
-    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber4), "0" },
-    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber5), "0" }
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(arrayNumber1), "1" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(arrayNumber2), "0" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(arrayNumber3), "2" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(arrayNumber4), "0" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(arrayNumber5), "0" }
 };
 
 const std::vector<SelectedIndexTestStep> SELECTEDS_INDEX_TEST_PLAN = {
@@ -282,15 +286,15 @@ const std::vector<SelectedIndexTestStep> SELECTEDS_INDEX_TEST_PLAN = {
     { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(-33), "[\"0\",\"0\",\"0\",\"0\",\"0\"]" },
     { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(2), "[\"2\",\"0\",\"0\",\"0\",\"0\"]" },
     { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(33), "[\"0\",\"0\",\"0\",\"0\",\"0\"]" },
-    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber1),
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(arrayNumber1),
         "[\"1\",\"2\",\"0\",\"0\",\"0\"]" },
-    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber2),
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(arrayNumber2),
         "[\"0\",\"1\",\"0\",\"0\",\"0\"]" },
-    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber3),
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(arrayNumber3),
         "[\"2\",\"0\",\"2\",\"1\",\"2\"]" },
-    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber4),
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(arrayNumber4),
         "[\"0\",\"0\",\"0\",\"0\",\"2\",\"1\"]" },
-    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber5),
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(arrayNumber5),
         "[\"0\",\"0\",\"0\",\"0\",\"0\"]" }
 };
 
@@ -299,13 +303,13 @@ const std::vector<SelectedIndexTestStep> SELECTEDS_INDEX_CASCADE_TEST_PLAN = {
     { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(-33), "[\"0\",\"0\"]" },
     { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(2), "[\"2\",\"0\"]" },
     { Converter::ArkUnion<Opt_Union_I32_Array_I32, Ark_Int32>(33), "[\"0\",\"0\"]" },
-    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber1), "[\"1\",\"2\",\"3\"]" },
-    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber2), "[\"0\",\"1\"]" },
-    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber3),
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(arrayNumber1), "[\"1\",\"2\",\"3\"]" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(arrayNumber2), "[\"0\",\"1\"]" },
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(arrayNumber3),
         "[\"2\",\"0\",\"2\",\"1\",\"2\"]" },
-    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber4),
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(arrayNumber4),
         "[\"0\",\"0\",\"4\",\"3\",\"2\",\"1\"]" },
-    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_Int32>(arrayNumber5), "[\"0\",\"0\"]" }
+    { Converter::ArkUnion<Opt_Union_I32_Array_I32, Array_I32>(arrayNumber5), "[\"0\",\"0\"]" }
 };
 
 typedef std::pair<Opt_Dimension, std::string> OptDimensionTestStep;
@@ -363,14 +367,6 @@ class TextPickerModifierTest : public ModifierTestBase<GENERATED_ArkUITextPicker
         AddResource(RES_INT_1_ID, RES_INT_VALUE);
     }
 };
-
-namespace Converter {
-template<>
-PickerValueType Convert(const Array_String& src)
-{
-    return Converter::Convert<std::vector<std::string>>(src);
-}
-} // namespace Converter
 
 /*
  * @tc.name: setTextPickerOptionsTestDefaultValues
@@ -449,20 +445,20 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsStringArray, TestSize.Lev
 
         if (std::get<HAS_VALUES_ID>(value)) {
             auto arkValue = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(std::get<VALUES_ID>(value));
-            arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable,
-                Ark_ResourceStr>(arkValue);
+            arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_BindableResourceStr_BindableResourceStrArray,
+                Ark_BindableResourceStr>(Converter::ArkUnion<Ark_BindableResourceStr, Ark_ResourceStr>(arkValue));
         } else {
             arkTextPickerOptions.value =
-                Converter::ArkUnion<Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable>(Ark_Empty());
+                Converter::ArkUnion<Opt_Union_BindableResourceStr_BindableResourceStrArray>(Ark_Empty());
         }
 
         if (std::get<HAS_SELECTEDS_ID>(value)) {
             auto arkSelected = std::get<SELECTEDS_ID>(value);
             arkTextPickerOptions.selected =
-                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable, Ark_Int32>(arkSelected);
+                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_I32_Bindable_Array_I32, Ark_Int32>(arkSelected);
         } else {
             arkTextPickerOptions.selected =
-                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable>(Ark_Empty());
+                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_I32_Bindable_Array_I32>(Ark_Empty());
         }
         Opt_TextPickerOptions inputValueOptions = Converter::ArkValue<Opt_TextPickerOptions>(arkTextPickerOptions);
 
@@ -572,19 +568,19 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsRangeArray, TestSize.Leve
 
         if (std::get<HAS_VALUES_ID>(value)) {
             auto arkValue = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(std::get<VALUES_ID>(value));
-            arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable,
-                Ark_ResourceStr>(arkValue);
+            arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_BindableResourceStr_BindableResourceStrArray,
+                Ark_BindableResourceStr>(Converter::ArkUnion<Ark_BindableResourceStr, Ark_ResourceStr>(arkValue));
         } else {
             arkTextPickerOptions.value =
-                Converter::ArkUnion<Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable>(Ark_Empty());
+                Converter::ArkUnion<Opt_Union_BindableResourceStr_BindableResourceStrArray>(Ark_Empty());
         }
 
         if (std::get<HAS_SELECTEDS_ID>(value)) {
-            arkTextPickerOptions.selected = Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable,
+            arkTextPickerOptions.selected = Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_I32_Bindable_Array_I32,
                 Ark_Int32>(std::get<SELECTEDS_ID>(value));
         } else {
             arkTextPickerOptions.selected =
-                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable>(Ark_Empty());
+                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_I32_Bindable_Array_I32>(Ark_Empty());
         }
         Opt_TextPickerOptions inputValueOptions = Converter::ArkValue<Opt_TextPickerOptions>(arkTextPickerOptions);
 
@@ -732,19 +728,20 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsStringMultiArray, TestSiz
             Array_Array_String>(value.range, &ctx);
 
         if (value.hasValues) {
-            arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable,
-                Array_ResourceStr>(value.values, &ctx);
+            arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_BindableResourceStr_BindableResourceStrArray,
+                Ark_BindableResourceStrArray>(
+                    Converter::ArkUnion<Ark_BindableResourceStrArray, Array_ResourceStr>(value.values, &ctx));
         } else {
             arkTextPickerOptions.value =
-                Converter::ArkUnion<Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable>(Ark_Empty());
+                Converter::ArkUnion<Opt_Union_BindableResourceStr_BindableResourceStrArray>(Ark_Empty());
         }
 
         if (value.hasSelecteds) {
-            arkTextPickerOptions.selected = Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable,
-                Array_Int32>(value.selecteds, &ctx);
+            arkTextPickerOptions.selected = Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_I32_Bindable_Array_I32,
+                Array_I32>(value.selecteds, &ctx);
         } else {
             arkTextPickerOptions.selected =
-                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable>(Ark_Empty());
+                Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_I32_Bindable_Array_I32>(Ark_Empty());
         }
         Opt_TextPickerOptions inputValueOptions = Converter::ArkValue<Opt_TextPickerOptions>(arkTextPickerOptions);
 
@@ -800,19 +797,20 @@ void CreateOptions(Array_TextCascadePickerRangeContent& arrayRoot,
         Array_TextCascadePickerRangeContent>(arrayRoot);
     if (std::get<HAS_VALUES_ID>(value)) {
         auto arkValue = Converter::ArkValue<Array_ResourceStr>(std::get<VALUES_ID>(value), Converter::FC);
-        arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable,
-            Array_ResourceStr>(arkValue);
+        arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_BindableResourceStr_BindableResourceStrArray,
+            Ark_BindableResourceStrArray>(Converter::ArkUnion<Ark_BindableResourceStrArray, Array_ResourceStr>(
+                arkValue));
     } else {
         arkTextPickerOptions.value =
-            Converter::ArkUnion<Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable>(Ark_Empty());
+            Converter::ArkUnion<Opt_Union_BindableResourceStr_BindableResourceStrArray>(Ark_Empty());
     }
     if (std::get<HAS_SELECTEDS_ID>(value)) {
         arkTextPickerOptions.selected =
-            Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable, Array_Int32>(
+            Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_I32_Bindable_Array_I32, Array_I32>(
                 std::get<SELECTEDS_ID>(value), ctx);
     } else {
         arkTextPickerOptions.selected =
-            Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_Bindable>(Ark_Empty());
+            Converter::ArkUnion<Opt_Union_I32_Array_I32_Bindable_I32_Bindable_Array_I32>(Ark_Empty());
     }
 }
 
@@ -1025,7 +1023,7 @@ HWTEST_F(TextPickerModifierTest, setCanLoop, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setDisappearTextStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -1066,7 +1064,7 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextStyle, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setDisappearTextWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -1125,7 +1123,7 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextWeight, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -1166,7 +1164,7 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextFamily, TestSize.Level
 HWTEST_F(TextPickerModifierTest, setDisappearTextSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -1232,7 +1230,7 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextColor, TestSize.Level1
 HWTEST_F(TextPickerModifierTest, setTextStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -1273,7 +1271,7 @@ HWTEST_F(TextPickerModifierTest, setTextStyle, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setTextWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -1332,7 +1330,7 @@ HWTEST_F(TextPickerModifierTest, setTextWeight, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, DISABLED_setTextFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -1373,7 +1371,7 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setTextFamily, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setTextSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -1439,7 +1437,7 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setTextColor, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setSelectedTextStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -1480,7 +1478,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextStyle, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, setSelectedTextWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -1539,7 +1537,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextWeight, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -1580,7 +1578,7 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextFamily, TestSize.Level1
 HWTEST_F(TextPickerModifierTest, setSelectedTextSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -2163,7 +2161,7 @@ HWTEST_F(TextPickerModifierTest, disableTextStyleAnimation, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, defaultTextWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -2210,7 +2208,7 @@ HWTEST_F(TextPickerModifierTest, defaultTextWeight, TestSize.Level1)
 HWTEST_F(TextPickerModifierTest, defaultTextSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,

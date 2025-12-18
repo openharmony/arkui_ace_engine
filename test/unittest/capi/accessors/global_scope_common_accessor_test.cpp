@@ -29,57 +29,6 @@ class GlobalScopeCommonAccessorTest : public StaticAccessorTest<GENERATED_ArkUIG
 };
 
 /**
- * @tc.name: vp2pxTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GlobalScopeCommonAccessorTest, vp2pxTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->vp2px, nullptr);
-
-    double density = PipelineBase::GetCurrentDensity();
-
-    auto vpValue1 = 5;
-    auto vpValue2 = 10.5f;
-
-    int32_t pxValue1 = vpValue1 * density;
-    int32_t pxValue2 = vpValue2 * density;
-
-    Ark_Number arkVpValue1 = Converter::ArkValue<Ark_Number>(vpValue1);
-    Ark_Number arkVpValue2 = Converter::ArkValue<Ark_Number>(vpValue2);
-
-    EXPECT_EQ(pxValue1, Converter::Convert<int32_t>(accessor_->vp2px(&arkVpValue1)));
-    EXPECT_EQ(pxValue2, Converter::Convert<int32_t>(accessor_->vp2px(&arkVpValue2)));
-    EXPECT_EQ(0, Converter::Convert<int32_t>(accessor_->vp2px(nullptr)));
-}
-
-/**
- * @tc.name: px2vpTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GlobalScopeCommonAccessorTest, px2vpTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->px2vp, nullptr);
-
-    double density = PipelineBase::GetCurrentDensity();
-    ASSERT_TRUE(density > 0);
-
-    auto pxValue1 = 5;
-    auto pxValue2 = 10.5f;
-
-    int32_t vpValue1 = pxValue1 / density;
-    int32_t vpValue2 = pxValue2 / density;
-
-    Ark_Number arkPxValue1 = Converter::ArkValue<Ark_Number>(pxValue1);
-    Ark_Number arkPxValue2 = Converter::ArkValue<Ark_Number>(pxValue2);
-
-    EXPECT_EQ(vpValue1, Converter::Convert<int32_t>(accessor_->px2vp(&arkPxValue1)));
-    EXPECT_EQ(vpValue2, Converter::Convert<int32_t>(accessor_->px2vp(&arkPxValue2)));
-    EXPECT_EQ(0, Converter::Convert<int32_t>(accessor_->px2vp(nullptr)));
-}
-
-/**
  * @tc.name: animateToTest
  * @tc.desc:
  * @tc.type: FUNC
@@ -89,7 +38,7 @@ HWTEST_F(GlobalScopeCommonAccessorTest, animateToTest, TestSize.Level1)
     ASSERT_NE(accessor_->animateTo, nullptr);
 
     Ark_AnimateParam param;
-    param.curve = Converter::ArkValue<Opt_Union_Curve_String_ICurve>(Ark_Empty());
+    param.curve = Converter::ArkValue<Opt_Union_curves_Curve_String_curves_ICurve>(Ark_Empty());
     param.delay = Converter::ArkValue<Opt_Int32>(Ark_Empty());
     param.duration = Converter::ArkValue<Opt_Int32>(Ark_Empty());
     param.expectedFrameRateRange = Converter::ArkValue<Opt_ExpectedFrameRateRange>(Ark_Empty());
@@ -118,7 +67,7 @@ HWTEST_F(GlobalScopeCommonAccessorTest, animateToImmediatelyTest, TestSize.Level
     ASSERT_NE(accessor_->animateToImmediately, nullptr);
 
     Ark_AnimateParam param;
-    param.curve = Converter::ArkValue<Opt_Union_Curve_String_ICurve>(Ark_Empty());
+    param.curve = Converter::ArkValue<Opt_Union_curves_Curve_String_curves_ICurve>(Ark_Empty());
     param.delay = Converter::ArkValue<Opt_Int32>(Ark_Empty());
     param.duration = Converter::ArkValue<Opt_Int32>(Ark_Empty());
     param.expectedFrameRateRange = Converter::ArkValue<Opt_ExpectedFrameRateRange>(Ark_Empty());

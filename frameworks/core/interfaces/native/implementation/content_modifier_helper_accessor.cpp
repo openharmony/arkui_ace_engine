@@ -56,7 +56,7 @@ void ContentModifierButtonImpl(Ark_NativePointer node,
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
         arkConfig.label = Converter::ArkValue<Ark_String>(config.label_, Converter::FC);
         arkConfig.pressed = Converter::ArkValue<Ark_Boolean>(config.pressed_);
-        std::function<void(Ark_Float64, Ark_Float64)> handler = [frameNode](Ark_Float64 arkX, Ark_Float64 arkY) {
+        auto handler = [frameNode](Ark_Float64 arkX, Ark_Float64 arkY) {
             auto x = Converter::Convert<int32_t>(arkX);
             auto y = Converter::Convert<int32_t>(arkY);
             ButtonModelNG::TriggerClick(frameNode, x, y);
@@ -96,7 +96,7 @@ void ContentModifierCheckBoxImpl(Ark_NativePointer node,
         auto handler = [frameNode](Ark_Boolean retValue) {
             CheckBoxModelStatic::TriggerChange(frameNode, Converter::Convert<bool>(retValue));
         };
-        auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>(handler);
+        auto triggerCallback = CallbackKeeper::Claim<arkui_component_common_Callback_Boolean_Void>(handler);
         arkConfig.triggerChange = triggerCallback.ArkValue();
         auto boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
@@ -126,7 +126,7 @@ void ContentModifierDataPanelImpl(Ark_NativePointer node,
         Ark_DataPanelConfiguration arkConfig;
         arkConfig.contentModifier = contentModifier;
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.values = Converter::ArkValue<Array_Float64>(config.values_, Converter::FC);
+        arkConfig.values = Converter::ArkValue<Array_F64>(config.values_, Converter::FC);
         arkConfig.maxValue = Converter::ArkValue<Ark_Float64>(config.maxValue_);
         auto panelNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([panelNode](const RefPtr<UINode>& uiNode) mutable {
@@ -156,9 +156,9 @@ void ContentModifierGaugeImpl(Ark_NativePointer node,
         Ark_GaugeConfiguration arkConfig;
         arkConfig.contentModifier = contentModifier;
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.max = Converter::ArkValue<Ark_Float64 >(config.max_);
-        arkConfig.min = Converter::ArkValue<Ark_Float64 >(config.min_);
-        arkConfig.value = Converter::ArkValue<Ark_Float64 >(config.value_);
+        arkConfig.max = Converter::ArkValue<Ark_Float64>(config.max_);
+        arkConfig.min = Converter::ArkValue<Ark_Float64>(config.min_);
+        arkConfig.value = Converter::ArkValue<Ark_Float64>(config.value_);
         auto gaugeNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([gaugeNode](const RefPtr<UINode>& uiNode) mutable {
             gaugeNode->AddChild(uiNode);
@@ -250,7 +250,8 @@ void ContentModifierRadioImpl(Ark_NativePointer node,
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
         arkConfig.value = Converter::ArkValue<Ark_String>(config.value_, Converter::FC);
         arkConfig.checked = Converter::ArkValue<Ark_Boolean>(config.checked_);
-        auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>([frameNode](bool change) {
+        auto triggerCallback = CallbackKeeper::Claim<arkui_component_common_Callback_Boolean_Void>(
+            [frameNode](bool change) {
             RadioModelNG::SetChangeValue(frameNode, change);
         });
         arkConfig.triggerChange = triggerCallback.ArkValue();
@@ -422,10 +423,10 @@ void ContentModifierTextTimerImpl(Ark_NativePointer node,
         Ark_TextTimerConfiguration arkConfig;
         arkConfig.contentModifier = contentModifier;
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.count = Converter::ArkValue<Ark_Int64>(config.count_);
+        arkConfig.count = Converter::ArkValue<Ark_Int64>(static_cast<int64_t>(config.count_));
         arkConfig.isCountDown = Converter::ArkValue<Ark_Boolean>(config.isCountDown_);
         arkConfig.started = Converter::ArkValue<Ark_Boolean>(config.started_);
-        arkConfig.elapsedTime = Converter::ArkValue<Ark_Int64>(static_cast<int32_t>(config.elapsedTime_));
+        arkConfig.elapsedTime = Converter::ArkValue<Ark_Int64>(static_cast<int64_t>(config.elapsedTime_));
         auto boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
             boxNode->AddChild(uiNode);
@@ -457,11 +458,10 @@ void ContentModifierToggleImpl(Ark_NativePointer node,
         arkConfig.contentModifier = contentModifier;
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
         arkConfig.isOn = Converter::ArkValue<Ark_Boolean>(config.isOn_);
-        arkConfig.toggleEnabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
         auto handler = [frameNode](Ark_Boolean retValue) {
             ToggleModelStatic::TriggerChange(frameNode, Converter::Convert<bool>(retValue));
         };
-        auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>(handler);
+        auto triggerCallback = CallbackKeeper::Claim<arkui_component_common_Callback_Boolean_Void>(handler);
         arkConfig.triggerChange = triggerCallback.ArkValue();
         auto boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {

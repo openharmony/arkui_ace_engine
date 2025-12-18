@@ -36,7 +36,7 @@ Ark_CustomDialogControllerExtender ConstructImpl(const Ark_CustomDialogControlle
     peer->SetDialogAlignment(value->alignment);
     peer->SetOffset(value->offset);
     peer->SetCustomStyle(value->customStyle);
-    peer->SetGridCount(value->gridCount);
+    peer->SetGridCount(Converter::OptConvert<int32_t>(value->gridCount));
     peer->SetMaskColor(value->maskColor);
     peer->SetMaskRect(value->maskRect);
     peer->SetOpenAnimation(value->openAnimation);
@@ -64,7 +64,7 @@ Ark_CustomDialogControllerExtender ConstructImpl(const Ark_CustomDialogControlle
     peer->SetOnWillDisappearExtender(value->onWillDisappear, peer);
     peer->SetKeyboardAvoidDistance(value->keyboardAvoidDistance);
     peer->SetLevelMode(value->showInSubWindow, value->levelMode);
-    peer->SetLevelUniqueId(value->levelUniqueId);
+    peer->SetLevelUniqueId(Converter::OptConvert<int32_t>(value->levelUniqueId));
     peer->SetImersiveMode(value->immersiveMode);
     peer->SetLevelOrderExtender(value->levelOrderExtender);
     peer->SetFocusable(value->focusable);
@@ -115,4 +115,5 @@ const GENERATED_ArkUICustomDialogControllerExtenderAccessor* GetCustomDialogCont
     };
     return &CustomDialogControllerExtenderAccessorImpl;
 }
+
 }

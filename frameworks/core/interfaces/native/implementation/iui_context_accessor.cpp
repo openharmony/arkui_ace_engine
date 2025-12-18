@@ -21,37 +21,39 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
-std::optional<std::string> ConvertString(const Ark_Union_Int32_String& src)
+std::optional<std::string> ConvertString(const Ark_Union_Number_String& src)
 {
     std::optional<std::string> value;
     auto selector = src.selector;
     if (selector == 1) {
-        value = OHOS::Ace::NG::Converter::OptConvert<std::string>(src.value1);
+        value = Converter::OptConvert<std::string>(src.value1);
     }
     return value;
 }
-std::optional<int32_t> ConvertInt(const Ark_Union_Int32_String& src)
+std::optional<int32_t> ConvertInt(const Ark_Union_Number_String& src)
 {
     std::optional<int32_t> value;
     auto selector = src.selector;
     if (selector == 0) {
-        value = static_cast<int32_t>(src.value0);
+        value = Converter::OptConvert<int32_t>(src.value0);
     }
     return value;
 }
 } // namespace
 namespace IUIContextAccessor {
-void FreezeUINode0Impl(const Ark_String* id, Ark_Boolean isFrozen)
+void FreezeUINode0Impl(const Ark_String* id,
+                       Ark_Boolean isFrozen)
 {
     CHECK_NULL_VOID(id);
     ViewAbstract::FreezeUINodeById(Converter::Convert<std::string>(*id), Converter::Convert<bool>(isFrozen));
 }
-void FreezeUINode1Impl(Ark_Int64 id, Ark_Boolean isFrozen)
+void FreezeUINode1Impl(Ark_Int64 id,
+                       Ark_Boolean isFrozen)
 {
-    CHECK_NULL_VOID(id);
-    ViewAbstract::FreezeUINodeByUniqueId(static_cast<int32_t>(id), Converter::Convert<bool>(isFrozen));
+    ViewAbstract::FreezeUINodeByUniqueId(Converter::Convert<int64_t>(id), Converter::Convert<bool>(isFrozen));
 }
-Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Int32_String* node, Ark_KeyEvent event)
+Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Number_String* node,
+                                 Ark_KeyEvent event)
 {
     auto result = false;
     RefPtr<NG::FrameNode> frameNode = nullptr;
@@ -77,7 +79,7 @@ Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Int32_String* node, Ark_KeyEven
     result = focusHub->HandleEvent(keyEvent);
     return Converter::ArkValue<Ark_Boolean>(result);
 }
-} // namespace IUIContextAccessor
+} // IUIContextAccessor
 const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
 {
     static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {
@@ -88,4 +90,4 @@ const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
     return &IUIContextAccessorImpl;
 }
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

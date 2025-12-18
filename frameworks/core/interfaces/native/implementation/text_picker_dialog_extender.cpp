@@ -33,32 +33,55 @@ namespace OHOS::Ace::NG {
 namespace TextPickerDialogExtender {
 
 std::optional<Converter::PickerValueType> ProcessBindableTextValue(
-    const Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable& value)
+    const Opt_Union_BindableResourceStr_BindableResourceStrArray& value)
 {
     std::optional<Converter::PickerValueType> result;
-    Converter::VisitUnion(
-        value,
-        [&result](const Ark_ResourceStr& src) { result = Converter::OptConvert<Converter::PickerValueType>(src); },
-        [&result](const Array_ResourceStr& src) { result = Converter::OptConvert<Converter::PickerValueType>(src); },
-        [&result](const Ark_Bindable_Arkui_Component_Units_ResourceStr& src) {
-            result = Converter::OptConvert<Converter::PickerValueType>(src.value);
-            // Implement callback functionality
+    Converter::VisitUnion(value,
+        [&result](const Ark_BindableResourceStr& src) {
+            Converter::VisitUnion(src,
+                [&result](const Ark_ResourceStr& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src);
+                },
+                [&result](const Ark_Bindable_ResourceStr& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src.value);
+                    // Implement callback functionality
+                },
+                [&result](const Ark_Bindable_String& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src.value);
+                    // Implement callback functionality
+                },
+                [](const Ark_Bindable_Resource& src) {
+                },
+                [] {});
         },
-        [&result](const Ark_Bindable_Array_Arkui_Component_Units_ResourceStr& src) {
-            result = Converter::OptConvert<Converter::PickerValueType>(src.value);
-            // Implement callback functionality
+        [&result](const Ark_BindableResourceStrArray& src) {
+            Converter::VisitUnion(src,
+                [&result](const Array_ResourceStr& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src);
+                },
+                [&result](const Ark_Bindable_Array_ResourceStr& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src.value);
+                    // Implement callback functionality
+                },
+                [&result](const Ark_Bindable_Array_String& src) {
+                    result = Converter::OptConvert<Converter::PickerValueType>(src.value);
+                    // Implement callback functionality
+                },
+                [](const Ark_Bindable_Array_Resource& src) {
+                },
+                [] {});
         },
         [] {});
     return result;
 }
 
 std::optional<Converter::PickerSelectedType> ProcessBindableTextSelected(
-    const Opt_Union_I32_Array_I32_Bindable_Bindable& value)
+    const Opt_Union_I32_Array_I32_Bindable_I32_Bindable_Array_I32& value)
 {
     std::optional<Converter::PickerSelectedType> result;
     Converter::VisitUnion(
         value, [&result](const Ark_Int32& src) { result = Converter::OptConvert<Converter::PickerSelectedType>(src); },
-        [&result](const Array_Int32& src) { result = Converter::OptConvert<Converter::PickerSelectedType>(src); },
+        [&result](const Array_I32& src) { result = Converter::OptConvert<Converter::PickerSelectedType>(src); },
         [&result](const Ark_Bindable_I32& src) {
             result = Converter::OptConvert<Converter::PickerSelectedType>(src.value);
             // Implement callback functionality
@@ -208,7 +231,8 @@ void BuildTextPickerSettingData(
     }
 }
 
-DialogTextEvent BuildTextEvent(Callback_TextPickerResult_Void callback)
+template<typename T>
+DialogTextEvent BuildTextEvent(T callback)
 {
     return [arkCallback = CallbackHelper(callback)](const std::string& info) -> void {
         Ark_TextPickerResult textPickerRes;
@@ -224,13 +248,10 @@ DialogTextEvent BuildTextEvent(Callback_TextPickerResult_Void callback)
         } else {
             indexes.push_back(jsonIndex->GetUInt());
         }
-        Converter::ArkArrayHolder<Array_Int32> indexesHolder(indexes);
         if (isIndexesArray) {
-            Array_Int32 arkValues = indexesHolder.ArkValue();
-            textPickerRes.index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_Int32>(arkValues);
+            textPickerRes.index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Array_I32>(indexes, Converter::FC);
         } else if (static_cast<int32_t>(indexes.size()) > 0) {
-            textPickerRes.index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Ark_Int32>(
-                Converter::ArkValue<Ark_Int32>(indexes.at(0)));
+            textPickerRes.index = Converter::ArkUnion<Ark_Union_I32_Array_I32, Ark_Int32>(indexes.at(0));
         }
 
         std::vector<std::string> values;
@@ -243,13 +264,11 @@ DialogTextEvent BuildTextEvent(Callback_TextPickerResult_Void callback)
         } else {
             values.push_back(data->GetString("value"));
         }
-        Converter::ArkArrayHolder<Array_String> holder(values);
         if (isValuesArray) {
-            Array_String arkValues = holder.ArkValue();
-            textPickerRes.value = Converter::ArkUnion<Ark_Union_String_Array_String, Array_String>(arkValues);
+            textPickerRes.value = Converter::ArkUnion<Ark_Union_String_Array_String, Array_String>(
+                values, Converter::FC);
         } else if (static_cast<int32_t>(values.size()) > 0) {
-            textPickerRes.value = Converter::ArkUnion<Ark_Union_String_Array_String, Ark_String>(
-                Converter::ArkValue<Ark_String>(values.at(0)));
+            textPickerRes.value = Converter::ArkUnion<Ark_Union_String_Array_String, Ark_String>(values.at(0));
         }
 
         arkCallback.Invoke(textPickerRes);
@@ -325,23 +344,22 @@ TextPickerInteractiveEvent BuildSelectInteractiveEvents(const Ark_TextPickerDial
         events.cancelEvent = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
     }
     // onAccept
-    auto acceptCallbackOpt = Converter::OptConvert<Callback_TextPickerResult_Void>(arkOptions.onAccept);
+    auto acceptCallbackOpt = Converter::GetOpt(arkOptions.onAccept);
     if (acceptCallbackOpt) {
         events.acceptEvent = BuildTextEvent(*acceptCallbackOpt);
     }
     // onChange
-    auto changeCallbackOpt = Converter::OptConvert<Callback_TextPickerResult_Void>(arkOptions.onChange);
+    auto changeCallbackOpt = Converter::GetOpt(arkOptions.onChange);
     if (changeCallbackOpt) {
         events.changeEvent = BuildTextEvent(*changeCallbackOpt);
     }
     // onScrollStop
-    auto scrollStopCallbackOpt = Converter::OptConvert<Callback_TextPickerResult_Void>(arkOptions.onScrollStop);
+    auto scrollStopCallbackOpt = Converter::GetOpt(arkOptions.onScrollStop);
     if (scrollStopCallbackOpt) {
         events.scrollStopEvent = BuildTextEvent(*scrollStopCallbackOpt);
     }
     // onEnterSelectedAreaEvent
-    auto enterSelectedAreaCallbackOpt =
-        Converter::OptConvert<Callback_TextPickerResult_Void>(arkOptions.onEnterSelectedArea);
+    auto enterSelectedAreaCallbackOpt = Converter::GetOpt(arkOptions.onEnterSelectedArea);
     if (enterSelectedAreaCallbackOpt) {
         events.enterSelectedAreaEvent = BuildTextEvent(*enterSelectedAreaCallbackOpt);
     }

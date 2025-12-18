@@ -65,19 +65,45 @@ namespace {
         { INVALID_REASON_VALUE, std::nullopt },
     };
     std::vector<std::pair<Opt_ResourceColor, std::string>> colorTestPlan = {
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLACK), "#FF000000" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BROWN), "#FFA52A2A" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GRAY), "#FF808080" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GREEN), "#FF008000" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GREY), "#FF808080" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_ORANGE), "#FFFFA500" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_PINK), "#FFFFC0CB" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_YELLOW), "#FFFFFF00" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_TRANSPARENT), "#00000000" },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(static_cast<Ark_Color>(-1)), "#00000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE),
+            "#FFFFFFFF" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK),
+            "#FF000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+            "#FF0000FF" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN),
+            "#FFA52A2A" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY),
+            "#FF808080" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN),
+            "#FF008000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY),
+            "#FF808080" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE),
+            "#FFFFA500" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK),
+            "#FFFFC0CB" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED),
+            "#FFFF0000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW),
+            "#FFFFFF00" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT),
+            "#00000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            static_cast<Ark_arkui_component_enums_Color>(-1)),
+            "#00000000" },
         { Converter::ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr), "#00000000" },
     };
     std::vector<std::pair<Opt_Union_F64_String, double>> arkUnionNumberTestPlan = {
@@ -200,6 +226,7 @@ HWTEST_F(CommonMethodModifierTest8, setGeometryTransitionTestDefaultValues, Test
  */
 HWTEST_F(CommonMethodModifierTest8, DISABLED_setGeometryTransitionTestValidValues, TestSize.Level1)
 {
+#ifdef WRONG_GEN_SIG
     ASSERT_NE(modifier_->setGeometryTransition0, nullptr);
     using OneTestStep = std::tuple<Opt_String, std::string>;
     static const std::vector<OneTestStep> testPlan = {
@@ -211,6 +238,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setGeometryTransitionTestValidValue
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_GEOMETRY_TRANSITION_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
+#endif // WRONG_GEN_SIG
 }
 
 ///////// RestoreId
@@ -286,7 +314,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover0IsShowTest, TestSize.Lev
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto optModal = Converter::ArkValue<Opt_ModalTransition>(ARK_MODAL_TRANSITION_ALPHA);
 
     EXPECT_FALSE(checkBuilderEvent.has_value());
@@ -294,7 +322,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover0IsShowTest, TestSize.Lev
     EXPECT_TRUE(checkBuilderEvent.has_value());
     EXPECT_EQ(checkBuilderEvent->resourceId, EXPECTED_CONTEXT_ID);
 
-    arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_FALSE);
+    arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_FALSE);
     checkBuilderEvent.reset();
     EXPECT_FALSE(checkBuilderEvent.has_value());
     modifier_->setBindContentCover0(node_, &arkShow, &customBuilder, &optModal);
@@ -312,7 +340,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover0ModalTransition
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
 
     for (auto& [actual, expected] : modalTransitionTestPlan) {
         modifier_->setBindContentCover0(node_, &arkShow, &customBuilder, &actual);
@@ -339,7 +367,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1IsShowTest, Tes
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto optOptions = Converter::ArkValue<Opt_ContentCoverOptions>(Ark_Empty());
 
     EXPECT_FALSE(checkBuilderEvent.has_value());
@@ -347,7 +375,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1IsShowTest, Tes
     EXPECT_TRUE(checkBuilderEvent.has_value());
     EXPECT_EQ(checkBuilderEvent->resourceId, EXPECTED_CONTEXT_ID);
 
-    arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_FALSE);
+    arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_FALSE);
     checkBuilderEvent.reset();
     EXPECT_FALSE(checkBuilderEvent.has_value());
     modifier_->setBindContentCover1(node_, &arkShow, &customBuilder, &optOptions);
@@ -376,7 +404,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnAppearTest, T
     auto arkOnAppearCallback = Converter::ArkValue<Callback_Void>(onAppearCallback, frameNode->GetId());
     auto optOnAppearCallback = Converter::ArkValue<Opt_Callback_Void>(arkOnAppearCallback);
 
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
         .onAppear = optOnAppearCallback,
     };
@@ -419,7 +447,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnDisAppearTest
     auto arkOnDisAppearCallback = Converter::ArkValue<Callback_Void>(onDisAppearCallback, frameNode->GetId());
     auto optOnDisAppearCallback = Converter::ArkValue<Opt_Callback_Void>(arkOnDisAppearCallback);
 
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
         .onDisappear = optOnDisAppearCallback,
     };
@@ -467,7 +495,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnWillAppearTes
     auto arkOnWillAppearCallback = Converter::ArkValue<Callback_Void>(onWillAppearCallback, frameNode->GetId());
     auto optOnWillAppearCallback = Converter::ArkValue<Opt_Callback_Void>(arkOnWillAppearCallback);
 
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
         .onWillAppear = optOnWillAppearCallback,
     };
@@ -507,7 +535,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnWillDisAppear
     };
     auto arkOnWillDisAppearCallback = Converter::ArkValue<Callback_Void>(onWillDisAppearCallback, frameNode->GetId());
     auto optOnWillDisAppearCallback = Converter::ArkValue<Opt_Callback_Void>(arkOnWillDisAppearCallback);
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
         .onWillDisappear = optOnWillDisAppearCallback,
     };
@@ -547,7 +575,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1DismissCallback
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
     auto arkOptions = Ark_ContentCoverOptions {
         .onWillDismiss = onDismissCallback
     };
@@ -586,7 +614,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1BackgroundColor
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
 
     for (auto& [actual, expected] : colorTestPlan) {
         auto arkOptions = Ark_ContentCoverOptions {
@@ -617,7 +645,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1ModalTransition
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
 
     for (auto& [actual, expected] : modalTransitionTestPlan) {
         auto arkOptions = Ark_ContentCoverOptions {
@@ -646,7 +674,7 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1TransitionEffec
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
     EXPECT_NE(node, nullptr);
     auto customBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(CreateCustomNodeBuilder(node));
-    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(ACTUAL_TRUE);
+    auto arkShow = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(ACTUAL_TRUE);
 
     for (auto& [actualC, expectedC] : arkUnionNumberTestPlan) {
         for (auto& [actualS, expectedS] : arkNumberTestPlan) {

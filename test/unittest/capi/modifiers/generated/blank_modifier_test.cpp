@@ -69,15 +69,15 @@ HWTEST_F(BlankModifierTest, setBlankOptionsTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(BlankModifierTest, setBlankOptionsTestMinValidValues, TestSize.Level1)
 {
-    Opt_Union_Number_String initValueMin;
+    Opt_Union_F64_String initValueMin;
 
     // Initial setup
-    initValueMin = ArkUnion<Opt_Union_Number_String, Ark_Number>(
+    initValueMin = ArkUnion<Opt_Union_F64_String, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueMin](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_Number_String& value) {
-        Opt_Union_Number_String inputValueMin = initValueMin;
+                          const Opt_Union_F64_String& value) {
+        Opt_Union_F64_String inputValueMin = initValueMin;
 
         // Re-create node for 'options' attribute
         auto node = CreateNode();
@@ -90,10 +90,10 @@ HWTEST_F(BlankModifierTest, setBlankOptionsTestMinValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_Number_String, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_F64_String, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_Number_String, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_F64_String, Ark_String>(value));
     }
 }
 
@@ -104,14 +104,14 @@ HWTEST_F(BlankModifierTest, setBlankOptionsTestMinValidValues, TestSize.Level1)
  */
 HWTEST_F(BlankModifierTest, DISABLED_setBlankOptionsTestMinInvalidValues, TestSize.Level1)
 {
-    Opt_Union_Number_String initValueMin;
+    Opt_Union_F64_String initValueMin;
 
     // Initial setup
-    initValueMin = ArkUnion<Opt_Union_Number_String, Ark_Number>(
+    initValueMin = ArkUnion<Opt_Union_F64_String, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
-    auto checkValue = [this, &initValueMin](const std::string& input, const Opt_Union_Number_String& value) {
-        Opt_Union_Number_String inputValueMin = initValueMin;
+    auto checkValue = [this, &initValueMin](const std::string& input, const Opt_Union_F64_String& value) {
+        Opt_Union_F64_String inputValueMin = initValueMin;
 
         // Re-create node for 'options' attribute
         auto node = CreateNode();
@@ -125,15 +125,15 @@ HWTEST_F(BlankModifierTest, DISABLED_setBlankOptionsTestMinInvalidValues, TestSi
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_String, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Union_F64_String, Ark_Float64>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_String, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_F64_String, Ark_String>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_Number_String, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_F64_String, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_Number_String>());
+    checkValue("undefined", ArkValue<Opt_Union_F64_String>());
 }
 
 /*
@@ -160,7 +160,8 @@ HWTEST_F(BlankModifierTest, DISABLED_setColorTestColorValidValues, TestSize.Leve
     Opt_ResourceColor initValueColor;
 
     // Initial setup
-    initValueColor = ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    initValueColor = ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -174,7 +175,7 @@ HWTEST_F(BlankModifierTest, DISABLED_setColorTestColorValidValues, TestSize.Leve
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
@@ -197,7 +198,8 @@ HWTEST_F(BlankModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.Le
     Opt_ResourceColor initValueColor;
 
     // Initial setup
-    initValueColor = ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    initValueColor = ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_ResourceColor inputValueColor = initValueColor;
@@ -215,7 +217,7 @@ HWTEST_F(BlankModifierTest, DISABLED_setColorTestColorInvalidValues, TestSize.Le
         checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));

@@ -43,13 +43,13 @@ const std::vector<float> VALID_MATRIX_1 = {
 Converter::ConvContext s_ctx;
 } // namespace
 
-const std::vector<std::tuple<std::string, Array_Float64, std::vector<float>>> floatMatrixTest = {
-    { "EMPTY_VECTOR", ArkValue<Array_Float64>(EMPTY_VECTOR, &s_ctx), DEFAULT_COLORFILTER_MATRIX },
-    { "VALID_HOLDER_0", ArkValue<Array_Float64>(VALID_MATRIX_0, &s_ctx), VALID_MATRIX_0 },
-    { "INVALID_HOLDER_0", ArkValue<Array_Float64>(INVALID_MATRIX_LESS, &s_ctx), DEFAULT_COLORFILTER_MATRIX },
-    { "VALID_HOLDER_1", ArkValue<Array_Float64>(VALID_MATRIX_1, &s_ctx), VALID_MATRIX_1 },
-    { "INVALID_HOLDER_1", ArkValue<Array_Float64>(INVALID_MATRIX_MORE, &s_ctx), DEFAULT_COLORFILTER_MATRIX },
-    { "VALID_HOLDER_2", ArkValue<Array_Float64>(VALID_MATRIX, &s_ctx), VALID_MATRIX }
+const std::vector<std::tuple<std::string, Array_F64, std::vector<float>>> floatMatrixTest = {
+    { "EMPTY_VECTOR", ArkValue<Array_F64>(EMPTY_VECTOR, &s_ctx), DEFAULT_COLORFILTER_MATRIX },
+    { "VALID_HOLDER_0", ArkValue<Array_F64>(VALID_MATRIX_0, &s_ctx), VALID_MATRIX_0 },
+    { "INVALID_HOLDER_0", ArkValue<Array_F64>(INVALID_MATRIX_LESS, &s_ctx), DEFAULT_COLORFILTER_MATRIX },
+    { "VALID_HOLDER_1", ArkValue<Array_F64>(VALID_MATRIX_1, &s_ctx), VALID_MATRIX_1 },
+    { "INVALID_HOLDER_1", ArkValue<Array_F64>(INVALID_MATRIX_MORE, &s_ctx), DEFAULT_COLORFILTER_MATRIX },
+    { "VALID_HOLDER_2", ArkValue<Array_F64>(VALID_MATRIX, &s_ctx), VALID_MATRIX }
 };
 } // namespace ColorFilter
 } // namespace OHOS::Ace::NG

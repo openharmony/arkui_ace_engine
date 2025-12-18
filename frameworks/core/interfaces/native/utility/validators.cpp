@@ -232,5 +232,24 @@ void ValidateDegree(std::optional<float>& opt)
     }
     opt = deg;
 }
+
+void ValidatePaddingProperty(std::optional<PaddingProperty>& opt)
+{
+    if (!opt.has_value()) {
+        return;
+    }
+    Validator::ValidateNonNegative(opt->left);
+    Validator::ValidateNonPercent(opt->left);
+    Validator::ValidateNonNegative(opt->top);
+    Validator::ValidateNonPercent(opt->top);
+    Validator::ValidateNonNegative(opt->right);
+    Validator::ValidateNonPercent(opt->right);
+    Validator::ValidateNonNegative(opt->bottom);
+    Validator::ValidateNonPercent(opt->bottom);
+    Validator::ValidateNonNegative(opt->start);
+    Validator::ValidateNonPercent(opt->start);
+    Validator::ValidateNonNegative(opt->end);
+    Validator::ValidateNonPercent(opt->end);
+}
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG

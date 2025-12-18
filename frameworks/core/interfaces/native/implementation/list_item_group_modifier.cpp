@@ -107,21 +107,6 @@ void SetDividerImpl(Ark_NativePointer node,
     }
     ListItemGroupModelStatic::SetDivider(frameNode, dividerAns);
 }
-void SetChildrenMainSizeImpl(Ark_NativePointer node,
-                             const Opt_ChildrenMainSize* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        ListItemGroupModelStatic::ResetListChildrenMainSize(frameNode);
-        return;
-    }
-    auto peer = *optValue;
-    CHECK_NULL_VOID(peer);
-    RefPtr<ListChildrenMainSize> handler = ListItemGroupModelStatic::GetOrCreateListChildrenMainSize(frameNode);
-    peer->SetHandler(handler);
-}
 } // ListItemGroupAttributeModifier
 const GENERATED_ArkUIListItemGroupModifier* GetListItemGroupModifier()
 {
@@ -129,7 +114,6 @@ const GENERATED_ArkUIListItemGroupModifier* GetListItemGroupModifier()
         ListItemGroupModifier::ConstructImpl,
         ListItemGroupInterfaceModifier::SetListItemGroupOptionsImpl,
         ListItemGroupAttributeModifier::SetDividerImpl,
-        ListItemGroupAttributeModifier::SetChildrenMainSizeImpl,
     };
     return &ArkUIListItemGroupModifierImpl;
 }

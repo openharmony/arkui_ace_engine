@@ -16,17 +16,23 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkGridColPeer, GridColColumnOption, GridColAttribute } from "./component/gridCol"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod } from "./component/common"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkGridColPeer, GridColColumnOption, GridColAttribute } from './component/gridCol'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod } from './component/common'
 export class GridColModifier extends CommonMethodModifier implements GridColAttribute,AttributeModifier<GridColAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -36,66 +42,64 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
     applyFocusedAttribute(instance: GridColAttribute): void { }
     applyDisabledAttribute(instance: GridColAttribute): void { }
     applySelectedAttribute(instance: GridColAttribute): void { }
-    _span_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _span_0_0value?: int32 | GridColColumnOption | undefined
-    _gridColOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _gridColOffset_0_0value?: int32 | GridColColumnOption | undefined
-    _order_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _order_0_0value?: int32 | GridColColumnOption | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _span_0_0value?: int32 | GridColColumnOption | undefined
+    public _gridColOffset_0_0value?: int32 | GridColColumnOption | undefined
+    public _order_0_0value?: int32 | GridColColumnOption | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkGridColPeer;
-        if (this._span_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._span_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkGridColPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setSpanAttribute((this._span_0_0value as int32 | GridColColumnOption | undefined));
-                    this._span_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._span_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._span_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setSpanAttribute((undefined as int32 | GridColColumnOption | undefined));
                 }
             }
         }
-        if (this._gridColOffset_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._gridColOffset_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
                     peer.setGridColOffsetAttribute((this._gridColOffset_0_0value as int32 | GridColColumnOption | undefined));
-                    this._gridColOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._gridColOffset_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._gridColOffset_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
                     peer.setGridColOffsetAttribute((undefined as int32 | GridColColumnOption | undefined));
                 }
             }
         }
-        if (this._order_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._order_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
                     peer.setOrderAttribute((this._order_0_0value as int32 | GridColColumnOption | undefined));
-                    this._order_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._order_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._order_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[2] = 0;
                     peer.setOrderAttribute((undefined as int32 | GridColColumnOption | undefined));
                 }
             }
@@ -104,11 +108,14 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
     mergeModifier(modifier: GridColModifier): void {
         super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._span_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._span_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: GridColModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.span(modifier._span_0_0value);
                     break;
                 }
@@ -117,11 +124,10 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
                 }
             }
         }
-        if (modifier._gridColOffset_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._gridColOffset_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.gridColOffset(modifier._gridColOffset_0_0value);
                     break;
                 }
@@ -130,11 +136,10 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
                 }
             }
         }
-        if (modifier._order_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._order_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.order(modifier._order_0_0value);
                     break;
                 }
@@ -145,42 +150,36 @@ export class GridColModifier extends CommonMethodModifier implements GridColAttr
         }
     }
     span(value: int32 | GridColColumnOption | undefined): this {
-        if (((this._span_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._span_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._span_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._span_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     gridColOffset(value: int32 | GridColColumnOption | undefined): this {
-        if (((this._gridColOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._gridColOffset_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._gridColOffset_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._gridColOffset_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     order(value: int32 | GridColColumnOption | undefined): this {
-        if (((this._order_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._order_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._order_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._order_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<GridColAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

@@ -16,23 +16,24 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, hookScreenAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { ScreenModifier } from "./../ScreenModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { int32, int64, float32 } from '@koalaui/common'
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from '@koalaui/interop'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { AttributeModifier, hookScreenAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { ScreenModifier } from './../ScreenModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkScreenPeer extends ArkCommonMethodPeer {
     attributeSet?: ScreenModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkScreenPeer {
@@ -42,38 +43,27 @@ export class ArkScreenPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setScreenOptionsAttribute(screenId: number): void {
+    setScreenOptionsAttribute(screenId: int64): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._ScreenInterface_setScreenOptions(this.peer.ptr, screenId)
     }
 }
 export interface ScreenAttribute extends CommonMethod {
-    setScreenOptions(screenId: number): this {
-        throw new Error("Unimplemented method setScreenOptions")
+    setScreenOptions(screenId: int64): this {
+        throw new Error('Unimplemented method setScreenOptions')
     }
     attributeModifier(value: AttributeModifier<ScreenAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkScreenStyle extends ArkCommonMethodStyle implements ScreenAttribute {
-    attributeModifier_value?: AttributeModifier<ScreenAttribute> | AttributeModifier<CommonMethod> | undefined
-    setScreenOptions(screenId: number): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<ScreenAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkScreenComponent extends ArkCommonMethodComponent implements ScreenAttribute {
     getPeer(): ArkScreenPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkScreenPeer)
     }
-    public setScreenOptions(screenId: number): this {
-        if (this.checkPriority("setScreenOptions")) {
-            const screenId_casted = screenId as (number)
+    public setScreenOptions(screenId: int64): this {
+        if (this.checkPriority('setScreenOptions')) {
+            const screenId_casted = screenId as (int64)
             this.getPeer()?.setScreenOptionsAttribute(screenId_casted)
             this.applyOptionsFinish('ScreenAttribute');
             return this
@@ -97,18 +87,16 @@ export class ArkScreenComponent extends ArkCommonMethodComponent implements Scre
 
 @memo
 export function ScreenImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: ScreenAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkScreenComponent>((): ArkScreenComponent => {
         return new ArkScreenComponent()
     })
-    NodeAttach<ArkScreenPeer>((): ArkScreenPeer => ArkScreenPeer.create(receiver), (peer: ArkScreenPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkScreenPeer>((): ArkScreenPeer => ArkScreenPeer.create(receiver), (_: ArkScreenPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }

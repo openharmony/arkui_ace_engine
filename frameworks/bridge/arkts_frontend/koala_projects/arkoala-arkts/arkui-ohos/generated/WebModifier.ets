@@ -16,20 +16,26 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkWebPeer, MixedMode, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageEndEvent, OnPageBeginEvent, OnLoadStartedEvent, OnLoadFinishedEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnWindowNewEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt } from "./component/web"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod, KeyEvent, NestedScrollOptions } from "./component/common"
-import { CopyOptions } from "./component/enums"
-import { EditMenuOptions } from "./component/textCommon"
-import { CustomBuilder } from "./component/builder"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier, hookJavaScriptProxy } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkWebPeer, MixedMode, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageBeginEvent, OnPageEndEvent, OnLoadStartedEvent, OnLoadFinishedEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnWindowNewEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt } from './component/web'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod, Callback as arkui_component_common_Callback, KeyEvent, NestedScrollOptions } from './component/common'
+import { CopyOptions } from './component/enums'
+import { EditMenuOptions } from './component/textCommon'
+import { CustomBuilder } from './component/builder'
 export class WebModifier extends CommonMethodModifier implements WebAttribute,AttributeModifier<WebAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -39,2423 +45,2210 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     applyFocusedAttribute(instance: WebAttribute): void { }
     applyDisabledAttribute(instance: WebAttribute): void { }
     applySelectedAttribute(instance: WebAttribute): void { }
-    _javaScriptAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _javaScriptAccess_0_0value?: boolean | undefined
-    _fileAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fileAccess_0_0value?: boolean | undefined
-    _onlineImageAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onlineImageAccess_0_0value?: boolean | undefined
-    _domStorageAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _domStorageAccess_0_0value?: boolean | undefined
-    _imageAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _imageAccess_0_0value?: boolean | undefined
-    _mixedMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _mixedMode_0_0value?: MixedMode | undefined
-    _zoomAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _zoomAccess_0_0value?: boolean | undefined
-    _geolocationAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _geolocationAccess_0_0value?: boolean | undefined
-    _javaScriptProxy_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _javaScriptProxy_0_0value?: JavaScriptProxy | undefined
-    _cacheMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _cacheMode_0_0value?: CacheMode | undefined
-    _darkMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _darkMode_0_0value?: WebDarkMode | undefined
-    _forceDarkAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _forceDarkAccess_0_0value?: boolean | undefined
-    _mediaOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _mediaOptions_0_0value?: WebMediaOptions | undefined
-    _overviewModeAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _overviewModeAccess_0_0value?: boolean | undefined
-    _overScrollMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _overScrollMode_0_0value?: OverScrollMode | undefined
-    _blurOnKeyboardHideMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _blurOnKeyboardHideMode_0_0value?: BlurOnKeyboardHideMode | undefined
-    _textZoomRatio_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _textZoomRatio_0_0value?: int32 | undefined
-    _databaseAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _databaseAccess_0_0value?: boolean | undefined
-    _initialScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _initialScale_0_0value?: double | undefined
-    _metaViewport_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _metaViewport_0_0value?: boolean | undefined
-    _onPageEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onPageEnd_0_0value?: ((value0: OnPageEndEvent) => void) | undefined
-    _onPageBegin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onPageBegin_0_0value?: ((value0: OnPageBeginEvent) => void) | undefined
-    _onLoadStarted_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onLoadStarted_0_0value?: ((value0: OnLoadStartedEvent) => void) | undefined
-    _onLoadFinished_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onLoadFinished_0_0value?: ((value0: OnLoadFinishedEvent) => void) | undefined
-    _onProgressChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onProgressChange_0_0value?: ((value0: OnProgressChangeEvent) => void) | undefined
-    _onTitleReceive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onTitleReceive_0_0value?: ((value0: OnTitleReceiveEvent) => void) | undefined
-    _onGeolocationHide_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onGeolocationHide_0_0value?: (() => void) | undefined
-    _onGeolocationShow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onGeolocationShow_0_0value?: ((value0: OnGeolocationShowEvent) => void) | undefined
-    _onRequestSelected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onRequestSelected_0_0value?: (() => void) | undefined
-    _onAlert_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onAlert_0_0value?: ((value0: OnAlertEvent) => boolean) | undefined
-    _onBeforeUnload_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onBeforeUnload_0_0value?: ((value0: OnBeforeUnloadEvent) => boolean) | undefined
-    _onConfirm_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onConfirm_0_0value?: ((value0: OnConfirmEvent) => boolean) | undefined
-    _onPrompt_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onPrompt_0_0value?: ((value0: OnPromptEvent) => boolean) | undefined
-    _onConsole_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onConsole_0_0value?: ((value0: OnConsoleEvent) => boolean) | undefined
-    _onErrorReceive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onErrorReceive_0_0value?: ((value0: OnErrorReceiveEvent) => void) | undefined
-    _onHttpErrorReceive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onHttpErrorReceive_0_0value?: ((value0: OnHttpErrorReceiveEvent) => void) | undefined
-    _onDownloadStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onDownloadStart_0_0value?: ((value0: OnDownloadStartEvent) => void) | undefined
-    _onRefreshAccessedHistory_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onRefreshAccessedHistory_0_0value?: ((value0: OnRefreshAccessedHistoryEvent) => void) | undefined
-    _onRenderExited_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onRenderExited_0_0value?: ((value0: OnRenderExitedEvent) => void) | undefined
-    _onShowFileSelector_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onShowFileSelector_0_0value?: ((value0: OnShowFileSelectorEvent) => boolean) | undefined
-    _onResourceLoad_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onResourceLoad_0_0value?: ((value0: OnResourceLoadEvent) => void) | undefined
-    _onFullScreenExit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onFullScreenExit_0_0value?: (() => void) | undefined
-    _onFullScreenEnter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onFullScreenEnter_0_0value?: OnFullScreenEnterCallback | undefined
-    _onScaleChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onScaleChange_0_0value?: ((value0: OnScaleChangeEvent) => void) | undefined
-    _onHttpAuthRequest_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onHttpAuthRequest_0_0value?: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined
-    _onInterceptRequest_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onInterceptRequest_0_0value?: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined
-    _onPermissionRequest_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onPermissionRequest_0_0value?: ((value0: OnPermissionRequestEvent) => void) | undefined
-    _onScreenCaptureRequest_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onScreenCaptureRequest_0_0value?: ((value0: OnScreenCaptureRequestEvent) => void) | undefined
-    _onContextMenuShow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onContextMenuShow_0_0value?: ((value0: OnContextMenuShowEvent) => boolean) | undefined
-    _onContextMenuHide_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onContextMenuHide_0_0value?: OnContextMenuHideCallback | undefined
-    _mediaPlayGestureAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _mediaPlayGestureAccess_0_0value?: boolean | undefined
-    _onSearchResultReceive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onSearchResultReceive_0_0value?: ((value0: OnSearchResultReceiveEvent) => void) | undefined
-    _onScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onScroll_0_0value?: ((value0: OnScrollEvent) => void) | undefined
-    _onSslErrorEventReceive_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onSslErrorEventReceive_0_0value?: ((value0: OnSslErrorEventReceiveEvent) => void) | undefined
-    _onSslErrorEvent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onSslErrorEvent_0_0value?: OnSslErrorEventCallback | undefined
-    _onClientAuthenticationRequest_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onClientAuthenticationRequest_0_0value?: ((value0: OnClientAuthenticationEvent) => void) | undefined
-    _onWindowNew_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onWindowNew_0_0value?: ((value0: OnWindowNewEvent) => void) | undefined
-    _onWindowExit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onWindowExit_0_0value?: (() => void) | undefined
-    _multiWindowAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _multiWindowAccess_0_0value?: boolean | undefined
-    _onInterceptKeyEvent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onInterceptKeyEvent_0_0value?: ((event: KeyEvent) => boolean) | undefined
-    _webStandardFont_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _webStandardFont_0_0value?: string | undefined
-    _webSerifFont_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _webSerifFont_0_0value?: string | undefined
-    _webSansSerifFont_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _webSansSerifFont_0_0value?: string | undefined
-    _webFixedFont_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _webFixedFont_0_0value?: string | undefined
-    _webFantasyFont_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _webFantasyFont_0_0value?: string | undefined
-    _webCursiveFont_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _webCursiveFont_0_0value?: string | undefined
-    _defaultFixedFontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _defaultFixedFontSize_0_0value?: int32 | undefined
-    _defaultFontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _defaultFontSize_0_0value?: int32 | undefined
-    _minFontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minFontSize_0_0value?: int32 | undefined
-    _minLogicalFontSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _minLogicalFontSize_0_0value?: int32 | undefined
-    _defaultTextEncodingFormat_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _defaultTextEncodingFormat_0_0value?: string | undefined
-    _forceDisplayScrollBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _forceDisplayScrollBar_0_0value?: boolean | undefined
-    _blockNetwork_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _blockNetwork_0_0value?: boolean | undefined
-    _horizontalScrollBarAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _horizontalScrollBarAccess_0_0value?: boolean | undefined
-    _verticalScrollBarAccess_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _verticalScrollBarAccess_0_0value?: boolean | undefined
-    _onTouchIconUrlReceived_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onTouchIconUrlReceived_0_0value?: ((value0: OnTouchIconUrlReceivedEvent) => void) | undefined
-    _onFaviconReceived_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onFaviconReceived_0_0value?: ((value0: OnFaviconReceivedEvent) => void) | undefined
-    _onPageVisible_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onPageVisible_0_0value?: ((value0: OnPageVisibleEvent) => void) | undefined
-    _onDataResubmitted_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onDataResubmitted_0_0value?: ((value0: OnDataResubmittedEvent) => void) | undefined
-    _pinchSmooth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _pinchSmooth_0_0value?: boolean | undefined
-    _allowWindowOpenMethod_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _allowWindowOpenMethod_0_0value?: boolean | undefined
-    _onAudioStateChanged_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onAudioStateChanged_0_0value?: ((value0: OnAudioStateChangedEvent) => void) | undefined
-    _onFirstContentfulPaint_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onFirstContentfulPaint_0_0value?: ((value0: OnFirstContentfulPaintEvent) => void) | undefined
-    _onFirstMeaningfulPaint_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onFirstMeaningfulPaint_0_0value?: OnFirstMeaningfulPaintCallback | undefined
-    _onLargestContentfulPaint_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onLargestContentfulPaint_0_0value?: OnLargestContentfulPaintCallback | undefined
-    _onLoadIntercept_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onLoadIntercept_0_0value?: ((value0: OnLoadInterceptEvent) => boolean) | undefined
-    _onControllerAttached_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onControllerAttached_0_0value?: (() => void) | undefined
-    _onOverScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onOverScroll_0_0value?: ((value0: OnOverScrollEvent) => void) | undefined
-    _onSafeBrowsingCheckResult_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onSafeBrowsingCheckResult_0_0value?: OnSafeBrowsingCheckResultCallback | undefined
-    _onNavigationEntryCommitted_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onNavigationEntryCommitted_0_0value?: OnNavigationEntryCommittedCallback | undefined
-    _onIntelligentTrackingPreventionResult_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onIntelligentTrackingPreventionResult_0_0value?: OnIntelligentTrackingPreventionCallback | undefined
-    _javaScriptOnDocumentStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _javaScriptOnDocumentStart_0_0value?: Array<ScriptItem> | undefined
-    _javaScriptOnDocumentEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _javaScriptOnDocumentEnd_0_0value?: Array<ScriptItem> | undefined
-    _layoutMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _layoutMode_0_0value?: WebLayoutMode | undefined
-    _nestedScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _nestedScroll_0_0value?: NestedScrollOptions | NestedScrollOptionsExt | undefined
-    _enableNativeEmbedMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableNativeEmbedMode_0_0value?: boolean | undefined
-    _onNativeEmbedLifecycleChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onNativeEmbedLifecycleChange_0_0value?: ((event: NativeEmbedDataInfo) => void) | undefined
-    _onNativeEmbedVisibilityChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onNativeEmbedVisibilityChange_0_0value?: OnNativeEmbedVisibilityChangeCallback | undefined
-    _onNativeEmbedGestureEvent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onNativeEmbedGestureEvent_0_0value?: ((event: NativeEmbedTouchInfo) => void) | undefined
-    _copyOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _copyOptions_0_0value?: CopyOptions | undefined
-    _onOverrideUrlLoading_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onOverrideUrlLoading_0_0value?: OnOverrideUrlLoadingCallback | undefined
-    _textAutosizing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _textAutosizing_0_0value?: boolean | undefined
-    _enableNativeMediaPlayer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableNativeMediaPlayer_0_0value?: NativeMediaPlayerConfig | undefined
-    _onRenderProcessNotResponding_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onRenderProcessNotResponding_0_0value?: OnRenderProcessNotRespondingCallback | undefined
-    _onRenderProcessResponding_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onRenderProcessResponding_0_0value?: OnRenderProcessRespondingCallback | undefined
-    _onViewportFitChanged_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onViewportFitChanged_0_0value?: OnViewportFitChangedCallback | undefined
-    _onInterceptKeyboardAttach_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onInterceptKeyboardAttach_0_0value?: WebKeyboardCallback | undefined
-    _onAdsBlocked_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onAdsBlocked_0_0value?: OnAdsBlockedCallback | undefined
-    _keyboardAvoidMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _keyboardAvoidMode_0_0value?: WebKeyboardAvoidMode | undefined
-    _editMenuOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _editMenuOptions_0_0value?: EditMenuOptions | undefined
-    _enableHapticFeedback_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableHapticFeedback_0_0value?: boolean | undefined
-    _optimizeParserBudget_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _optimizeParserBudget_0_0value?: boolean | undefined
-    _enableFollowSystemFontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableFollowSystemFontWeight_0_0value?: boolean | undefined
-    _enableWebAVSession_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableWebAVSession_0_0value?: boolean | undefined
-    _runJavaScriptOnDocumentStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _runJavaScriptOnDocumentStart_0_0value?: Array<ScriptItem> | undefined
-    _runJavaScriptOnDocumentEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _runJavaScriptOnDocumentEnd_0_0value?: Array<ScriptItem> | undefined
-    _runJavaScriptOnHeadEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _runJavaScriptOnHeadEnd_0_0value?: Array<ScriptItem> | undefined
-    _nativeEmbedOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _nativeEmbedOptions_0_0value?: EmbedOptions | undefined
-    _registerNativeEmbedRule_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _registerNativeEmbedRule_0_0value?: string | undefined
-    _registerNativeEmbedRule_0_1value?: string | undefined
-    _bindSelectionMenu_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _bindSelectionMenu_0_0value?: WebElementType | undefined
-    _bindSelectionMenu_0_1value?: CustomBuilder | undefined
-    _bindSelectionMenu_0_2value?: WebResponseType | undefined
-    _bindSelectionMenu_0_3value?: SelectionMenuOptionsExt | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _javaScriptAccess_0_0value?: boolean | undefined
+    public _fileAccess_0_0value?: boolean | undefined
+    public _onlineImageAccess_0_0value?: boolean | undefined
+    public _domStorageAccess_0_0value?: boolean | undefined
+    public _imageAccess_0_0value?: boolean | undefined
+    public _mixedMode_0_0value?: MixedMode | undefined
+    public _zoomAccess_0_0value?: boolean | undefined
+    public _geolocationAccess_0_0value?: boolean | undefined
+    public _javaScriptProxy_0_0value?: JavaScriptProxy | undefined
+    public _cacheMode_0_0value?: CacheMode | undefined
+    public _darkMode_0_0value?: WebDarkMode | undefined
+    public _forceDarkAccess_0_0value?: boolean | undefined
+    public _mediaOptions_0_0value?: WebMediaOptions | undefined
+    public _overviewModeAccess_0_0value?: boolean | undefined
+    public _overScrollMode_0_0value?: OverScrollMode | undefined
+    public _blurOnKeyboardHideMode_0_0value?: BlurOnKeyboardHideMode | undefined
+    public _textZoomRatio_0_0value?: int32 | undefined
+    public _databaseAccess_0_0value?: boolean | undefined
+    public _initialScale_0_0value?: double | undefined
+    public _metaViewport_0_0value?: boolean | undefined
+    public _onPageBegin_0_0value?: arkui_component_common_Callback<OnPageBeginEvent, void> | undefined
+    public _onPageEnd_0_0value?: arkui_component_common_Callback<OnPageEndEvent, void> | undefined
+    public _onLoadStarted_0_0value?: arkui_component_common_Callback<OnLoadStartedEvent, void> | undefined
+    public _onLoadFinished_0_0value?: arkui_component_common_Callback<OnLoadFinishedEvent, void> | undefined
+    public _onProgressChange_0_0value?: arkui_component_common_Callback<OnProgressChangeEvent, void> | undefined
+    public _onTitleReceive_0_0value?: arkui_component_common_Callback<OnTitleReceiveEvent, void> | undefined
+    public _onGeolocationHide_0_0value?: (() => void) | undefined
+    public _onGeolocationShow_0_0value?: arkui_component_common_Callback<OnGeolocationShowEvent, void> | undefined
+    public _onRequestSelected_0_0value?: (() => void) | undefined
+    public _onAlert_0_0value?: arkui_component_common_Callback<OnAlertEvent, boolean> | undefined
+    public _onBeforeUnload_0_0value?: arkui_component_common_Callback<OnBeforeUnloadEvent, boolean> | undefined
+    public _onConfirm_0_0value?: arkui_component_common_Callback<OnConfirmEvent, boolean> | undefined
+    public _onPrompt_0_0value?: arkui_component_common_Callback<OnPromptEvent, boolean> | undefined
+    public _onConsole_0_0value?: arkui_component_common_Callback<OnConsoleEvent, boolean> | undefined
+    public _onErrorReceive_0_0value?: arkui_component_common_Callback<OnErrorReceiveEvent, void> | undefined
+    public _onHttpErrorReceive_0_0value?: arkui_component_common_Callback<OnHttpErrorReceiveEvent, void> | undefined
+    public _onDownloadStart_0_0value?: arkui_component_common_Callback<OnDownloadStartEvent, void> | undefined
+    public _onRefreshAccessedHistory_0_0value?: arkui_component_common_Callback<OnRefreshAccessedHistoryEvent, void> | undefined
+    public _onRenderExited_0_0value?: arkui_component_common_Callback<OnRenderExitedEvent, void> | undefined
+    public _onShowFileSelector_0_0value?: arkui_component_common_Callback<OnShowFileSelectorEvent, boolean> | undefined
+    public _onResourceLoad_0_0value?: arkui_component_common_Callback<OnResourceLoadEvent, void> | undefined
+    public _onFullScreenExit_0_0value?: (() => void) | undefined
+    public _onFullScreenEnter_0_0value?: OnFullScreenEnterCallback | undefined
+    public _onScaleChange_0_0value?: arkui_component_common_Callback<OnScaleChangeEvent, void> | undefined
+    public _onHttpAuthRequest_0_0value?: arkui_component_common_Callback<OnHttpAuthRequestEvent, boolean> | undefined
+    public _onInterceptRequest_0_0value?: arkui_component_common_Callback<OnInterceptRequestEvent, WebResourceResponse | null> | undefined
+    public _onPermissionRequest_0_0value?: arkui_component_common_Callback<OnPermissionRequestEvent, void> | undefined
+    public _onScreenCaptureRequest_0_0value?: arkui_component_common_Callback<OnScreenCaptureRequestEvent, void> | undefined
+    public _onContextMenuShow_0_0value?: arkui_component_common_Callback<OnContextMenuShowEvent, boolean> | undefined
+    public _onContextMenuHide_0_0value?: OnContextMenuHideCallback | undefined
+    public _mediaPlayGestureAccess_0_0value?: boolean | undefined
+    public _onSearchResultReceive_0_0value?: arkui_component_common_Callback<OnSearchResultReceiveEvent, void> | undefined
+    public _onScroll_0_0value?: arkui_component_common_Callback<OnScrollEvent, void> | undefined
+    public _onSslErrorEventReceive_0_0value?: arkui_component_common_Callback<OnSslErrorEventReceiveEvent, void> | undefined
+    public _onSslErrorEvent_0_0value?: OnSslErrorEventCallback | undefined
+    public _onClientAuthenticationRequest_0_0value?: arkui_component_common_Callback<OnClientAuthenticationEvent, void> | undefined
+    public _onWindowNew_0_0value?: arkui_component_common_Callback<OnWindowNewEvent, void> | undefined
+    public _onWindowExit_0_0value?: (() => void) | undefined
+    public _multiWindowAccess_0_0value?: boolean | undefined
+    public _onInterceptKeyEvent_0_0value?: ((event: KeyEvent) => boolean) | undefined
+    public _webStandardFont_0_0value?: string | undefined
+    public _webSerifFont_0_0value?: string | undefined
+    public _webSansSerifFont_0_0value?: string | undefined
+    public _webFixedFont_0_0value?: string | undefined
+    public _webFantasyFont_0_0value?: string | undefined
+    public _webCursiveFont_0_0value?: string | undefined
+    public _defaultFixedFontSize_0_0value?: int32 | undefined
+    public _defaultFontSize_0_0value?: int32 | undefined
+    public _minFontSize_0_0value?: int32 | undefined
+    public _minLogicalFontSize_0_0value?: int32 | undefined
+    public _defaultTextEncodingFormat_0_0value?: string | undefined
+    public _forceDisplayScrollBar_0_0value?: boolean | undefined
+    public _blockNetwork_0_0value?: boolean | undefined
+    public _horizontalScrollBarAccess_0_0value?: boolean | undefined
+    public _verticalScrollBarAccess_0_0value?: boolean | undefined
+    public _onTouchIconUrlReceived_0_0value?: arkui_component_common_Callback<OnTouchIconUrlReceivedEvent, void> | undefined
+    public _onFaviconReceived_0_0value?: arkui_component_common_Callback<OnFaviconReceivedEvent, void> | undefined
+    public _onPageVisible_0_0value?: arkui_component_common_Callback<OnPageVisibleEvent, void> | undefined
+    public _onDataResubmitted_0_0value?: arkui_component_common_Callback<OnDataResubmittedEvent, void> | undefined
+    public _pinchSmooth_0_0value?: boolean | undefined
+    public _allowWindowOpenMethod_0_0value?: boolean | undefined
+    public _onAudioStateChanged_0_0value?: arkui_component_common_Callback<OnAudioStateChangedEvent, void> | undefined
+    public _onFirstContentfulPaint_0_0value?: arkui_component_common_Callback<OnFirstContentfulPaintEvent, void> | undefined
+    public _onFirstMeaningfulPaint_0_0value?: OnFirstMeaningfulPaintCallback | undefined
+    public _onLargestContentfulPaint_0_0value?: OnLargestContentfulPaintCallback | undefined
+    public _onLoadIntercept_0_0value?: arkui_component_common_Callback<OnLoadInterceptEvent, boolean> | undefined
+    public _onControllerAttached_0_0value?: (() => void) | undefined
+    public _onOverScroll_0_0value?: arkui_component_common_Callback<OnOverScrollEvent, void> | undefined
+    public _onSafeBrowsingCheckResult_0_0value?: OnSafeBrowsingCheckResultCallback | undefined
+    public _onNavigationEntryCommitted_0_0value?: OnNavigationEntryCommittedCallback | undefined
+    public _onIntelligentTrackingPreventionResult_0_0value?: OnIntelligentTrackingPreventionCallback | undefined
+    public _javaScriptOnDocumentStart_0_0value?: Array<ScriptItem> | undefined
+    public _javaScriptOnDocumentEnd_0_0value?: Array<ScriptItem> | undefined
+    public _layoutMode_0_0value?: WebLayoutMode | undefined
+    public _nestedScroll_0_0value?: NestedScrollOptions | NestedScrollOptionsExt | undefined
+    public _enableNativeEmbedMode_0_0value?: boolean | undefined
+    public _onNativeEmbedLifecycleChange_0_0value?: ((event: NativeEmbedDataInfo) => void) | undefined
+    public _onNativeEmbedVisibilityChange_0_0value?: OnNativeEmbedVisibilityChangeCallback | undefined
+    public _onNativeEmbedGestureEvent_0_0value?: ((event: NativeEmbedTouchInfo) => void) | undefined
+    public _copyOptions_0_0value?: CopyOptions | undefined
+    public _onOverrideUrlLoading_0_0value?: OnOverrideUrlLoadingCallback | undefined
+    public _textAutosizing_0_0value?: boolean | undefined
+    public _enableNativeMediaPlayer_0_0value?: NativeMediaPlayerConfig | undefined
+    public _onRenderProcessNotResponding_0_0value?: OnRenderProcessNotRespondingCallback | undefined
+    public _onRenderProcessResponding_0_0value?: OnRenderProcessRespondingCallback | undefined
+    public _onViewportFitChanged_0_0value?: OnViewportFitChangedCallback | undefined
+    public _onInterceptKeyboardAttach_0_0value?: WebKeyboardCallback | undefined
+    public _onAdsBlocked_0_0value?: OnAdsBlockedCallback | undefined
+    public _keyboardAvoidMode_0_0value?: WebKeyboardAvoidMode | undefined
+    public _editMenuOptions_0_0value?: EditMenuOptions | undefined
+    public _enableHapticFeedback_0_0value?: boolean | undefined
+    public _enableFollowSystemFontWeight_0_0value?: boolean | undefined
+    public _enableWebAVSession_0_0value?: boolean | undefined
+    public _optimizeParserBudget_0_0value?: boolean | undefined
+    public _runJavaScriptOnDocumentStart_0_0value?: Array<ScriptItem> | undefined
+    public _runJavaScriptOnDocumentEnd_0_0value?: Array<ScriptItem> | undefined
+    public _runJavaScriptOnHeadEnd_0_0value?: Array<ScriptItem> | undefined
+    public _nativeEmbedOptions_0_0value?: EmbedOptions | undefined
+    public _registerNativeEmbedRule_0_0value?: string | undefined
+    public _registerNativeEmbedRule_0_1value?: string | undefined
+    public _bindSelectionMenu_0_0value?: WebElementType | undefined
+    public _bindSelectionMenu_0_1value?: CustomBuilder | undefined
+    public _bindSelectionMenu_0_2value?: WebResponseType | undefined
+    public _bindSelectionMenu_0_3value?: SelectionMenuOptionsExt | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkWebPeer;
-        if (this._javaScriptAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._javaScriptAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+        this.applyModifierPatch1(peer, flagArray);
+        this.applyModifierPatch2(peer, flagArray);
+        this.applyModifierPatch3(peer, flagArray);
+        this.applyModifierPatch4(peer, flagArray);
+        this.applyModifierPatch5(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkWebPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setJavaScriptAccessAttribute((this._javaScriptAccess_0_0value as boolean | undefined));
-                    this._javaScriptAccess_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._javaScriptAccess_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._javaScriptAccess_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setJavaScriptAccessAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._fileAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._fileAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
                     peer.setFileAccessAttribute((this._fileAccess_0_0value as boolean | undefined));
-                    this._fileAccess_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._fileAccess_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._fileAccess_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
                     peer.setFileAccessAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._onlineImageAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onlineImageAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
                     peer.setOnlineImageAccessAttribute((this._onlineImageAccess_0_0value as boolean | undefined));
-                    this._onlineImageAccess_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onlineImageAccess_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._onlineImageAccess_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[2] = 0;
                     peer.setOnlineImageAccessAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._domStorageAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._domStorageAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
                     peer.setDomStorageAccessAttribute((this._domStorageAccess_0_0value as boolean | undefined));
-                    this._domStorageAccess_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[3] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._domStorageAccess_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[3] = 2;
                     break;
                 }
                 default: {
-                    this._domStorageAccess_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[3] = 0;
                     peer.setDomStorageAccessAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._imageAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._imageAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1: {
                     peer.setImageAccessAttribute((this._imageAccess_0_0value as boolean | undefined));
-                    this._imageAccess_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._imageAccess_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._imageAccess_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[4] = 0;
                     peer.setImageAccessAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._mixedMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._mixedMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1: {
                     peer.setMixedModeAttribute((this._mixedMode_0_0value as MixedMode | undefined));
-                    this._mixedMode_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[5] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._mixedMode_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[5] = 2;
                     break;
                 }
                 default: {
-                    this._mixedMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[5] = 0;
                     peer.setMixedModeAttribute((undefined as MixedMode | undefined));
                 }
             }
         }
-        if (this._zoomAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._zoomAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1: {
                     peer.setZoomAccessAttribute((this._zoomAccess_0_0value as boolean | undefined));
-                    this._zoomAccess_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[6] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._zoomAccess_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[6] = 2;
                     break;
                 }
                 default: {
-                    this._zoomAccess_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[6] = 0;
                     peer.setZoomAccessAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._geolocationAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._geolocationAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1: {
                     peer.setGeolocationAccessAttribute((this._geolocationAccess_0_0value as boolean | undefined));
-                    this._geolocationAccess_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[7] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._geolocationAccess_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[7] = 2;
                     break;
                 }
                 default: {
-                    this._geolocationAccess_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[7] = 0;
                     peer.setGeolocationAccessAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._javaScriptProxy_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._javaScriptProxy_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setJavaScriptProxyAttribute((this._javaScriptProxy_0_0value as JavaScriptProxy | undefined));
-                    this._javaScriptProxy_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1: {
+                    hookJavaScriptProxy(peer, (this._javaScriptProxy_0_0value as JavaScriptProxy | undefined));
+                    flagArray[8] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._javaScriptProxy_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[8] = 2;
                     break;
                 }
                 default: {
-                    this._javaScriptProxy_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setJavaScriptProxyAttribute((undefined as JavaScriptProxy | undefined));
+                    flagArray[8] = 0;
+                    hookJavaScriptProxy(peer, (undefined as JavaScriptProxy | undefined));
                 }
             }
         }
-        if (this._cacheMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._cacheMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1: {
                     peer.setCacheModeAttribute((this._cacheMode_0_0value as CacheMode | undefined));
-                    this._cacheMode_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[9] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._cacheMode_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[9] = 2;
                     break;
                 }
                 default: {
-                    this._cacheMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[9] = 0;
                     peer.setCacheModeAttribute((undefined as CacheMode | undefined));
                 }
             }
         }
-        if (this._darkMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._darkMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
+                case 1: {
                     peer.setDarkModeAttribute((this._darkMode_0_0value as WebDarkMode | undefined));
-                    this._darkMode_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[10] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._darkMode_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[10] = 2;
                     break;
                 }
                 default: {
-                    this._darkMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[10] = 0;
                     peer.setDarkModeAttribute((undefined as WebDarkMode | undefined));
                 }
             }
         }
-        if (this._forceDarkAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._forceDarkAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[11] != 0) {
+            switch (flagArray[11]) {
+                case 1: {
                     peer.setForceDarkAccessAttribute((this._forceDarkAccess_0_0value as boolean | undefined));
-                    this._forceDarkAccess_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[11] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._forceDarkAccess_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[11] = 2;
                     break;
                 }
                 default: {
-                    this._forceDarkAccess_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[11] = 0;
                     peer.setForceDarkAccessAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._mediaOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._mediaOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[12] != 0) {
+            switch (flagArray[12]) {
+                case 1: {
                     peer.setMediaOptionsAttribute((this._mediaOptions_0_0value as WebMediaOptions | undefined));
-                    this._mediaOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[12] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._mediaOptions_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[12] = 2;
                     break;
                 }
                 default: {
-                    this._mediaOptions_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[12] = 0;
                     peer.setMediaOptionsAttribute((undefined as WebMediaOptions | undefined));
                 }
             }
         }
-        if (this._overviewModeAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._overviewModeAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[13] != 0) {
+            switch (flagArray[13]) {
+                case 1: {
                     peer.setOverviewModeAccessAttribute((this._overviewModeAccess_0_0value as boolean | undefined));
-                    this._overviewModeAccess_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[13] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._overviewModeAccess_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[13] = 2;
                     break;
                 }
                 default: {
-                    this._overviewModeAccess_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[13] = 0;
                     peer.setOverviewModeAccessAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._overScrollMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._overScrollMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[14] != 0) {
+            switch (flagArray[14]) {
+                case 1: {
                     peer.setOverScrollModeAttribute((this._overScrollMode_0_0value as OverScrollMode | undefined));
-                    this._overScrollMode_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[14] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._overScrollMode_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[14] = 2;
                     break;
                 }
                 default: {
-                    this._overScrollMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[14] = 0;
                     peer.setOverScrollModeAttribute((undefined as OverScrollMode | undefined));
                 }
             }
         }
-        if (this._blurOnKeyboardHideMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._blurOnKeyboardHideMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[15] != 0) {
+            switch (flagArray[15]) {
+                case 1: {
                     peer.setBlurOnKeyboardHideModeAttribute((this._blurOnKeyboardHideMode_0_0value as BlurOnKeyboardHideMode | undefined));
-                    this._blurOnKeyboardHideMode_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[15] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._blurOnKeyboardHideMode_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[15] = 2;
                     break;
                 }
                 default: {
-                    this._blurOnKeyboardHideMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[15] = 0;
                     peer.setBlurOnKeyboardHideModeAttribute((undefined as BlurOnKeyboardHideMode | undefined));
                 }
             }
         }
-        if (this._textZoomRatio_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._textZoomRatio_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[16] != 0) {
+            switch (flagArray[16]) {
+                case 1: {
                     peer.setTextZoomRatioAttribute((this._textZoomRatio_0_0value as int32 | undefined));
-                    this._textZoomRatio_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[16] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._textZoomRatio_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[16] = 2;
                     break;
                 }
                 default: {
-                    this._textZoomRatio_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[16] = 0;
                     peer.setTextZoomRatioAttribute((undefined as int32 | undefined));
                 }
             }
         }
-        if (this._databaseAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._databaseAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[17] != 0) {
+            switch (flagArray[17]) {
+                case 1: {
                     peer.setDatabaseAccessAttribute((this._databaseAccess_0_0value as boolean | undefined));
-                    this._databaseAccess_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[17] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._databaseAccess_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[17] = 2;
                     break;
                 }
                 default: {
-                    this._databaseAccess_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[17] = 0;
                     peer.setDatabaseAccessAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._initialScale_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._initialScale_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[18] != 0) {
+            switch (flagArray[18]) {
+                case 1: {
                     peer.setInitialScaleAttribute((this._initialScale_0_0value as double | undefined));
-                    this._initialScale_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[18] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._initialScale_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[18] = 2;
                     break;
                 }
                 default: {
-                    this._initialScale_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[18] = 0;
                     peer.setInitialScaleAttribute((undefined as double | undefined));
                 }
             }
         }
-        if (this._metaViewport_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._metaViewport_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[19] != 0) {
+            switch (flagArray[19]) {
+                case 1: {
                     peer.setMetaViewportAttribute((this._metaViewport_0_0value as boolean | undefined));
-                    this._metaViewport_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[19] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._metaViewport_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[19] = 2;
                     break;
                 }
                 default: {
-                    this._metaViewport_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[19] = 0;
                     peer.setMetaViewportAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._onPageEnd_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onPageEnd_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnPageEndAttribute((this._onPageEnd_0_0value as ((value0: OnPageEndEvent) => void) | undefined));
-                    this._onPageEnd_0_flag = AttributeUpdaterFlag.RESET;
+    }
+    applyModifierPatch1(peer: ArkWebPeer, flagArray: Uint8Array): void {
+        if (flagArray[20] != 0) {
+            switch (flagArray[20]) {
+                case 1: {
+                    peer.setOnPageBeginAttribute((this._onPageBegin_0_0value as arkui_component_common_Callback<OnPageBeginEvent, void> | undefined));
+                    flagArray[20] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onPageEnd_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onPageEnd_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnPageEndAttribute((undefined as ((value0: OnPageEndEvent) => void) | undefined));
-                }
-            }
-        }
-        if (this._onPageBegin_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onPageBegin_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnPageBeginAttribute((this._onPageBegin_0_0value as ((value0: OnPageBeginEvent) => void) | undefined));
-                    this._onPageBegin_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onPageBegin_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[20] = 2;
                     break;
                 }
                 default: {
-                    this._onPageBegin_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnPageBeginAttribute((undefined as ((value0: OnPageBeginEvent) => void) | undefined));
+                    flagArray[20] = 0;
+                    peer.setOnPageBeginAttribute((undefined as arkui_component_common_Callback<OnPageBeginEvent, void> | undefined));
                 }
             }
         }
-        if (this._onLoadStarted_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onLoadStarted_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnLoadStartedAttribute((this._onLoadStarted_0_0value as ((value0: OnLoadStartedEvent) => void) | undefined));
-                    this._onLoadStarted_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[21] != 0) {
+            switch (flagArray[21]) {
+                case 1: {
+                    peer.setOnPageEndAttribute((this._onPageEnd_0_0value as arkui_component_common_Callback<OnPageEndEvent, void> | undefined));
+                    flagArray[21] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onLoadStarted_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[21] = 2;
                     break;
                 }
                 default: {
-                    this._onLoadStarted_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnLoadStartedAttribute((undefined as ((value0: OnLoadStartedEvent) => void) | undefined));
+                    flagArray[21] = 0;
+                    peer.setOnPageEndAttribute((undefined as arkui_component_common_Callback<OnPageEndEvent, void> | undefined));
                 }
             }
         }
-        if (this._onLoadFinished_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onLoadFinished_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnLoadFinishedAttribute((this._onLoadFinished_0_0value as ((value0: OnLoadFinishedEvent) => void) | undefined));
-                    this._onLoadFinished_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[22] != 0) {
+            switch (flagArray[22]) {
+                case 1: {
+                    peer.setOnLoadStartedAttribute((this._onLoadStarted_0_0value as arkui_component_common_Callback<OnLoadStartedEvent, void> | undefined));
+                    flagArray[22] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onLoadFinished_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[22] = 2;
                     break;
                 }
                 default: {
-                    this._onLoadFinished_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnLoadFinishedAttribute((undefined as ((value0: OnLoadFinishedEvent) => void) | undefined));
+                    flagArray[22] = 0;
+                    peer.setOnLoadStartedAttribute((undefined as arkui_component_common_Callback<OnLoadStartedEvent, void> | undefined));
                 }
             }
         }
-        if (this._onProgressChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onProgressChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnProgressChangeAttribute((this._onProgressChange_0_0value as ((value0: OnProgressChangeEvent) => void) | undefined));
-                    this._onProgressChange_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[23] != 0) {
+            switch (flagArray[23]) {
+                case 1: {
+                    peer.setOnLoadFinishedAttribute((this._onLoadFinished_0_0value as arkui_component_common_Callback<OnLoadFinishedEvent, void> | undefined));
+                    flagArray[23] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onProgressChange_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[23] = 2;
                     break;
                 }
                 default: {
-                    this._onProgressChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnProgressChangeAttribute((undefined as ((value0: OnProgressChangeEvent) => void) | undefined));
+                    flagArray[23] = 0;
+                    peer.setOnLoadFinishedAttribute((undefined as arkui_component_common_Callback<OnLoadFinishedEvent, void> | undefined));
                 }
             }
         }
-        if (this._onTitleReceive_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onTitleReceive_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnTitleReceiveAttribute((this._onTitleReceive_0_0value as ((value0: OnTitleReceiveEvent) => void) | undefined));
-                    this._onTitleReceive_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[24] != 0) {
+            switch (flagArray[24]) {
+                case 1: {
+                    peer.setOnProgressChangeAttribute((this._onProgressChange_0_0value as arkui_component_common_Callback<OnProgressChangeEvent, void> | undefined));
+                    flagArray[24] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onTitleReceive_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[24] = 2;
                     break;
                 }
                 default: {
-                    this._onTitleReceive_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnTitleReceiveAttribute((undefined as ((value0: OnTitleReceiveEvent) => void) | undefined));
+                    flagArray[24] = 0;
+                    peer.setOnProgressChangeAttribute((undefined as arkui_component_common_Callback<OnProgressChangeEvent, void> | undefined));
                 }
             }
         }
-        if (this._onGeolocationHide_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onGeolocationHide_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[25] != 0) {
+            switch (flagArray[25]) {
+                case 1: {
+                    peer.setOnTitleReceiveAttribute((this._onTitleReceive_0_0value as arkui_component_common_Callback<OnTitleReceiveEvent, void> | undefined));
+                    flagArray[25] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[25] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[25] = 0;
+                    peer.setOnTitleReceiveAttribute((undefined as arkui_component_common_Callback<OnTitleReceiveEvent, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[26] != 0) {
+            switch (flagArray[26]) {
+                case 1: {
                     peer.setOnGeolocationHideAttribute((this._onGeolocationHide_0_0value as (() => void) | undefined));
-                    this._onGeolocationHide_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[26] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onGeolocationHide_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[26] = 2;
                     break;
                 }
                 default: {
-                    this._onGeolocationHide_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[26] = 0;
                     peer.setOnGeolocationHideAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
-        if (this._onGeolocationShow_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onGeolocationShow_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnGeolocationShowAttribute((this._onGeolocationShow_0_0value as ((value0: OnGeolocationShowEvent) => void) | undefined));
-                    this._onGeolocationShow_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[27] != 0) {
+            switch (flagArray[27]) {
+                case 1: {
+                    peer.setOnGeolocationShowAttribute((this._onGeolocationShow_0_0value as arkui_component_common_Callback<OnGeolocationShowEvent, void> | undefined));
+                    flagArray[27] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onGeolocationShow_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[27] = 2;
                     break;
                 }
                 default: {
-                    this._onGeolocationShow_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnGeolocationShowAttribute((undefined as ((value0: OnGeolocationShowEvent) => void) | undefined));
+                    flagArray[27] = 0;
+                    peer.setOnGeolocationShowAttribute((undefined as arkui_component_common_Callback<OnGeolocationShowEvent, void> | undefined));
                 }
             }
         }
-        if (this._onRequestSelected_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onRequestSelected_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[28] != 0) {
+            switch (flagArray[28]) {
+                case 1: {
                     peer.setOnRequestSelectedAttribute((this._onRequestSelected_0_0value as (() => void) | undefined));
-                    this._onRequestSelected_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[28] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onRequestSelected_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[28] = 2;
                     break;
                 }
                 default: {
-                    this._onRequestSelected_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[28] = 0;
                     peer.setOnRequestSelectedAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
-        if (this._onAlert_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onAlert_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnAlertAttribute((this._onAlert_0_0value as ((value0: OnAlertEvent) => boolean) | undefined));
-                    this._onAlert_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[29] != 0) {
+            switch (flagArray[29]) {
+                case 1: {
+                    peer.setOnAlertAttribute((this._onAlert_0_0value as arkui_component_common_Callback<OnAlertEvent, boolean> | undefined));
+                    flagArray[29] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onAlert_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onAlert_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnAlertAttribute((undefined as ((value0: OnAlertEvent) => boolean) | undefined));
-                }
-            }
-        }
-        if (this._onBeforeUnload_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onBeforeUnload_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnBeforeUnloadAttribute((this._onBeforeUnload_0_0value as ((value0: OnBeforeUnloadEvent) => boolean) | undefined));
-                    this._onBeforeUnload_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onBeforeUnload_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[29] = 2;
                     break;
                 }
                 default: {
-                    this._onBeforeUnload_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnBeforeUnloadAttribute((undefined as ((value0: OnBeforeUnloadEvent) => boolean) | undefined));
+                    flagArray[29] = 0;
+                    peer.setOnAlertAttribute((undefined as arkui_component_common_Callback<OnAlertEvent, boolean> | undefined));
                 }
             }
         }
-        if (this._onConfirm_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onConfirm_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnConfirmAttribute((this._onConfirm_0_0value as ((value0: OnConfirmEvent) => boolean) | undefined));
-                    this._onConfirm_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[30] != 0) {
+            switch (flagArray[30]) {
+                case 1: {
+                    peer.setOnBeforeUnloadAttribute((this._onBeforeUnload_0_0value as arkui_component_common_Callback<OnBeforeUnloadEvent, boolean> | undefined));
+                    flagArray[30] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onConfirm_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[30] = 2;
                     break;
                 }
                 default: {
-                    this._onConfirm_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnConfirmAttribute((undefined as ((value0: OnConfirmEvent) => boolean) | undefined));
+                    flagArray[30] = 0;
+                    peer.setOnBeforeUnloadAttribute((undefined as arkui_component_common_Callback<OnBeforeUnloadEvent, boolean> | undefined));
                 }
             }
         }
-        if (this._onPrompt_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onPrompt_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnPromptAttribute((this._onPrompt_0_0value as ((value0: OnPromptEvent) => boolean) | undefined));
-                    this._onPrompt_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[31] != 0) {
+            switch (flagArray[31]) {
+                case 1: {
+                    peer.setOnConfirmAttribute((this._onConfirm_0_0value as arkui_component_common_Callback<OnConfirmEvent, boolean> | undefined));
+                    flagArray[31] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onPrompt_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[31] = 2;
                     break;
                 }
                 default: {
-                    this._onPrompt_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnPromptAttribute((undefined as ((value0: OnPromptEvent) => boolean) | undefined));
+                    flagArray[31] = 0;
+                    peer.setOnConfirmAttribute((undefined as arkui_component_common_Callback<OnConfirmEvent, boolean> | undefined));
                 }
             }
         }
-        if (this._onConsole_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onConsole_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnConsoleAttribute((this._onConsole_0_0value as ((value0: OnConsoleEvent) => boolean) | undefined));
-                    this._onConsole_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[32] != 0) {
+            switch (flagArray[32]) {
+                case 1: {
+                    peer.setOnPromptAttribute((this._onPrompt_0_0value as arkui_component_common_Callback<OnPromptEvent, boolean> | undefined));
+                    flagArray[32] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onConsole_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[32] = 2;
                     break;
                 }
                 default: {
-                    this._onConsole_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnConsoleAttribute((undefined as ((value0: OnConsoleEvent) => boolean) | undefined));
+                    flagArray[32] = 0;
+                    peer.setOnPromptAttribute((undefined as arkui_component_common_Callback<OnPromptEvent, boolean> | undefined));
                 }
             }
         }
-        if (this._onErrorReceive_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onErrorReceive_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnErrorReceiveAttribute((this._onErrorReceive_0_0value as ((value0: OnErrorReceiveEvent) => void) | undefined));
-                    this._onErrorReceive_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[33] != 0) {
+            switch (flagArray[33]) {
+                case 1: {
+                    peer.setOnConsoleAttribute((this._onConsole_0_0value as arkui_component_common_Callback<OnConsoleEvent, boolean> | undefined));
+                    flagArray[33] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onErrorReceive_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[33] = 2;
                     break;
                 }
                 default: {
-                    this._onErrorReceive_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnErrorReceiveAttribute((undefined as ((value0: OnErrorReceiveEvent) => void) | undefined));
+                    flagArray[33] = 0;
+                    peer.setOnConsoleAttribute((undefined as arkui_component_common_Callback<OnConsoleEvent, boolean> | undefined));
                 }
             }
         }
-        if (this._onHttpErrorReceive_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onHttpErrorReceive_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnHttpErrorReceiveAttribute((this._onHttpErrorReceive_0_0value as ((value0: OnHttpErrorReceiveEvent) => void) | undefined));
-                    this._onHttpErrorReceive_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[34] != 0) {
+            switch (flagArray[34]) {
+                case 1: {
+                    peer.setOnErrorReceiveAttribute((this._onErrorReceive_0_0value as arkui_component_common_Callback<OnErrorReceiveEvent, void> | undefined));
+                    flagArray[34] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onHttpErrorReceive_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[34] = 2;
                     break;
                 }
                 default: {
-                    this._onHttpErrorReceive_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnHttpErrorReceiveAttribute((undefined as ((value0: OnHttpErrorReceiveEvent) => void) | undefined));
+                    flagArray[34] = 0;
+                    peer.setOnErrorReceiveAttribute((undefined as arkui_component_common_Callback<OnErrorReceiveEvent, void> | undefined));
                 }
             }
         }
-        if (this._onDownloadStart_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onDownloadStart_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnDownloadStartAttribute((this._onDownloadStart_0_0value as ((value0: OnDownloadStartEvent) => void) | undefined));
-                    this._onDownloadStart_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[35] != 0) {
+            switch (flagArray[35]) {
+                case 1: {
+                    peer.setOnHttpErrorReceiveAttribute((this._onHttpErrorReceive_0_0value as arkui_component_common_Callback<OnHttpErrorReceiveEvent, void> | undefined));
+                    flagArray[35] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onDownloadStart_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[35] = 2;
                     break;
                 }
                 default: {
-                    this._onDownloadStart_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnDownloadStartAttribute((undefined as ((value0: OnDownloadStartEvent) => void) | undefined));
+                    flagArray[35] = 0;
+                    peer.setOnHttpErrorReceiveAttribute((undefined as arkui_component_common_Callback<OnHttpErrorReceiveEvent, void> | undefined));
                 }
             }
         }
-        if (this._onRefreshAccessedHistory_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onRefreshAccessedHistory_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnRefreshAccessedHistoryAttribute((this._onRefreshAccessedHistory_0_0value as ((value0: OnRefreshAccessedHistoryEvent) => void) | undefined));
-                    this._onRefreshAccessedHistory_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[36] != 0) {
+            switch (flagArray[36]) {
+                case 1: {
+                    peer.setOnDownloadStartAttribute((this._onDownloadStart_0_0value as arkui_component_common_Callback<OnDownloadStartEvent, void> | undefined));
+                    flagArray[36] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onRefreshAccessedHistory_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[36] = 2;
                     break;
                 }
                 default: {
-                    this._onRefreshAccessedHistory_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnRefreshAccessedHistoryAttribute((undefined as ((value0: OnRefreshAccessedHistoryEvent) => void) | undefined));
+                    flagArray[36] = 0;
+                    peer.setOnDownloadStartAttribute((undefined as arkui_component_common_Callback<OnDownloadStartEvent, void> | undefined));
                 }
             }
         }
-        if (this._onRenderExited_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onRenderExited_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnRenderExitedAttribute((this._onRenderExited_0_0value as ((value0: OnRenderExitedEvent) => void) | undefined));
-                    this._onRenderExited_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[37] != 0) {
+            switch (flagArray[37]) {
+                case 1: {
+                    peer.setOnRefreshAccessedHistoryAttribute((this._onRefreshAccessedHistory_0_0value as arkui_component_common_Callback<OnRefreshAccessedHistoryEvent, void> | undefined));
+                    flagArray[37] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onRenderExited_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[37] = 2;
                     break;
                 }
                 default: {
-                    this._onRenderExited_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnRenderExitedAttribute((undefined as ((value0: OnRenderExitedEvent) => void) | undefined));
+                    flagArray[37] = 0;
+                    peer.setOnRefreshAccessedHistoryAttribute((undefined as arkui_component_common_Callback<OnRefreshAccessedHistoryEvent, void> | undefined));
                 }
             }
         }
-        if (this._onShowFileSelector_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onShowFileSelector_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnShowFileSelectorAttribute((this._onShowFileSelector_0_0value as ((value0: OnShowFileSelectorEvent) => boolean) | undefined));
-                    this._onShowFileSelector_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[38] != 0) {
+            switch (flagArray[38]) {
+                case 1: {
+                    peer.setOnRenderExitedAttribute((this._onRenderExited_0_0value as arkui_component_common_Callback<OnRenderExitedEvent, void> | undefined));
+                    flagArray[38] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onShowFileSelector_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[38] = 2;
                     break;
                 }
                 default: {
-                    this._onShowFileSelector_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnShowFileSelectorAttribute((undefined as ((value0: OnShowFileSelectorEvent) => boolean) | undefined));
+                    flagArray[38] = 0;
+                    peer.setOnRenderExitedAttribute((undefined as arkui_component_common_Callback<OnRenderExitedEvent, void> | undefined));
                 }
             }
         }
-        if (this._onResourceLoad_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onResourceLoad_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnResourceLoadAttribute((this._onResourceLoad_0_0value as ((value0: OnResourceLoadEvent) => void) | undefined));
-                    this._onResourceLoad_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[39] != 0) {
+            switch (flagArray[39]) {
+                case 1: {
+                    peer.setOnShowFileSelectorAttribute((this._onShowFileSelector_0_0value as arkui_component_common_Callback<OnShowFileSelectorEvent, boolean> | undefined));
+                    flagArray[39] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onResourceLoad_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[39] = 2;
                     break;
                 }
                 default: {
-                    this._onResourceLoad_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnResourceLoadAttribute((undefined as ((value0: OnResourceLoadEvent) => void) | undefined));
+                    flagArray[39] = 0;
+                    peer.setOnShowFileSelectorAttribute((undefined as arkui_component_common_Callback<OnShowFileSelectorEvent, boolean> | undefined));
                 }
             }
         }
-        if (this._onFullScreenExit_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onFullScreenExit_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+    }
+    applyModifierPatch2(peer: ArkWebPeer, flagArray: Uint8Array): void {
+        if (flagArray[40] != 0) {
+            switch (flagArray[40]) {
+                case 1: {
+                    peer.setOnResourceLoadAttribute((this._onResourceLoad_0_0value as arkui_component_common_Callback<OnResourceLoadEvent, void> | undefined));
+                    flagArray[40] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[40] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[40] = 0;
+                    peer.setOnResourceLoadAttribute((undefined as arkui_component_common_Callback<OnResourceLoadEvent, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[41] != 0) {
+            switch (flagArray[41]) {
+                case 1: {
                     peer.setOnFullScreenExitAttribute((this._onFullScreenExit_0_0value as (() => void) | undefined));
-                    this._onFullScreenExit_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[41] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onFullScreenExit_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[41] = 2;
                     break;
                 }
                 default: {
-                    this._onFullScreenExit_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[41] = 0;
                     peer.setOnFullScreenExitAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
-        if (this._onFullScreenEnter_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onFullScreenEnter_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[42] != 0) {
+            switch (flagArray[42]) {
+                case 1: {
                     peer.setOnFullScreenEnterAttribute((this._onFullScreenEnter_0_0value as OnFullScreenEnterCallback | undefined));
-                    this._onFullScreenEnter_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[42] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onFullScreenEnter_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[42] = 2;
                     break;
                 }
                 default: {
-                    this._onFullScreenEnter_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[42] = 0;
                     peer.setOnFullScreenEnterAttribute((undefined as OnFullScreenEnterCallback | undefined));
                 }
             }
         }
-        if (this._onScaleChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onScaleChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnScaleChangeAttribute((this._onScaleChange_0_0value as ((value0: OnScaleChangeEvent) => void) | undefined));
-                    this._onScaleChange_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[43] != 0) {
+            switch (flagArray[43]) {
+                case 1: {
+                    peer.setOnScaleChangeAttribute((this._onScaleChange_0_0value as arkui_component_common_Callback<OnScaleChangeEvent, void> | undefined));
+                    flagArray[43] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onScaleChange_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onScaleChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnScaleChangeAttribute((undefined as ((value0: OnScaleChangeEvent) => void) | undefined));
-                }
-            }
-        }
-        if (this._onHttpAuthRequest_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onHttpAuthRequest_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnHttpAuthRequestAttribute((this._onHttpAuthRequest_0_0value as ((value0: OnHttpAuthRequestEvent) => boolean) | undefined));
-                    this._onHttpAuthRequest_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onHttpAuthRequest_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[43] = 2;
                     break;
                 }
                 default: {
-                    this._onHttpAuthRequest_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnHttpAuthRequestAttribute((undefined as ((value0: OnHttpAuthRequestEvent) => boolean) | undefined));
+                    flagArray[43] = 0;
+                    peer.setOnScaleChangeAttribute((undefined as arkui_component_common_Callback<OnScaleChangeEvent, void> | undefined));
                 }
             }
         }
-        if (this._onInterceptRequest_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onInterceptRequest_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnInterceptRequestAttribute((this._onInterceptRequest_0_0value as ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined));
-                    this._onInterceptRequest_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[44] != 0) {
+            switch (flagArray[44]) {
+                case 1: {
+                    peer.setOnHttpAuthRequestAttribute((this._onHttpAuthRequest_0_0value as arkui_component_common_Callback<OnHttpAuthRequestEvent, boolean> | undefined));
+                    flagArray[44] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onInterceptRequest_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[44] = 2;
                     break;
                 }
                 default: {
-                    this._onInterceptRequest_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnInterceptRequestAttribute((undefined as ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined));
+                    flagArray[44] = 0;
+                    peer.setOnHttpAuthRequestAttribute((undefined as arkui_component_common_Callback<OnHttpAuthRequestEvent, boolean> | undefined));
                 }
             }
         }
-        if (this._onPermissionRequest_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onPermissionRequest_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnPermissionRequestAttribute((this._onPermissionRequest_0_0value as ((value0: OnPermissionRequestEvent) => void) | undefined));
-                    this._onPermissionRequest_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[45] != 0) {
+            switch (flagArray[45]) {
+                case 1: {
+                    peer.setOnInterceptRequestAttribute((this._onInterceptRequest_0_0value as arkui_component_common_Callback<OnInterceptRequestEvent, WebResourceResponse | null> | undefined));
+                    flagArray[45] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onPermissionRequest_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[45] = 2;
                     break;
                 }
                 default: {
-                    this._onPermissionRequest_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnPermissionRequestAttribute((undefined as ((value0: OnPermissionRequestEvent) => void) | undefined));
+                    flagArray[45] = 0;
+                    peer.setOnInterceptRequestAttribute((undefined as arkui_component_common_Callback<OnInterceptRequestEvent, WebResourceResponse | null> | undefined));
                 }
             }
         }
-        if (this._onScreenCaptureRequest_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onScreenCaptureRequest_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnScreenCaptureRequestAttribute((this._onScreenCaptureRequest_0_0value as ((value0: OnScreenCaptureRequestEvent) => void) | undefined));
-                    this._onScreenCaptureRequest_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[46] != 0) {
+            switch (flagArray[46]) {
+                case 1: {
+                    peer.setOnPermissionRequestAttribute((this._onPermissionRequest_0_0value as arkui_component_common_Callback<OnPermissionRequestEvent, void> | undefined));
+                    flagArray[46] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onScreenCaptureRequest_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[46] = 2;
                     break;
                 }
                 default: {
-                    this._onScreenCaptureRequest_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnScreenCaptureRequestAttribute((undefined as ((value0: OnScreenCaptureRequestEvent) => void) | undefined));
+                    flagArray[46] = 0;
+                    peer.setOnPermissionRequestAttribute((undefined as arkui_component_common_Callback<OnPermissionRequestEvent, void> | undefined));
                 }
             }
         }
-        if (this._onContextMenuShow_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onContextMenuShow_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnContextMenuShowAttribute((this._onContextMenuShow_0_0value as ((value0: OnContextMenuShowEvent) => boolean) | undefined));
-                    this._onContextMenuShow_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[47] != 0) {
+            switch (flagArray[47]) {
+                case 1: {
+                    peer.setOnScreenCaptureRequestAttribute((this._onScreenCaptureRequest_0_0value as arkui_component_common_Callback<OnScreenCaptureRequestEvent, void> | undefined));
+                    flagArray[47] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onContextMenuShow_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[47] = 2;
                     break;
                 }
                 default: {
-                    this._onContextMenuShow_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnContextMenuShowAttribute((undefined as ((value0: OnContextMenuShowEvent) => boolean) | undefined));
+                    flagArray[47] = 0;
+                    peer.setOnScreenCaptureRequestAttribute((undefined as arkui_component_common_Callback<OnScreenCaptureRequestEvent, void> | undefined));
                 }
             }
         }
-        if (this._onContextMenuHide_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onContextMenuHide_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[48] != 0) {
+            switch (flagArray[48]) {
+                case 1: {
+                    peer.setOnContextMenuShowAttribute((this._onContextMenuShow_0_0value as arkui_component_common_Callback<OnContextMenuShowEvent, boolean> | undefined));
+                    flagArray[48] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[48] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[48] = 0;
+                    peer.setOnContextMenuShowAttribute((undefined as arkui_component_common_Callback<OnContextMenuShowEvent, boolean> | undefined));
+                }
+            }
+        }
+        if (flagArray[49] != 0) {
+            switch (flagArray[49]) {
+                case 1: {
                     peer.setOnContextMenuHideAttribute((this._onContextMenuHide_0_0value as OnContextMenuHideCallback | undefined));
-                    this._onContextMenuHide_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[49] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onContextMenuHide_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[49] = 2;
                     break;
                 }
                 default: {
-                    this._onContextMenuHide_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[49] = 0;
                     peer.setOnContextMenuHideAttribute((undefined as OnContextMenuHideCallback | undefined));
                 }
             }
         }
-        if (this._mediaPlayGestureAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._mediaPlayGestureAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[50] != 0) {
+            switch (flagArray[50]) {
+                case 1: {
                     peer.setMediaPlayGestureAccessAttribute((this._mediaPlayGestureAccess_0_0value as boolean | undefined));
-                    this._mediaPlayGestureAccess_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[50] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._mediaPlayGestureAccess_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[50] = 2;
                     break;
                 }
                 default: {
-                    this._mediaPlayGestureAccess_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[50] = 0;
                     peer.setMediaPlayGestureAccessAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._onSearchResultReceive_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onSearchResultReceive_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnSearchResultReceiveAttribute((this._onSearchResultReceive_0_0value as ((value0: OnSearchResultReceiveEvent) => void) | undefined));
-                    this._onSearchResultReceive_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[51] != 0) {
+            switch (flagArray[51]) {
+                case 1: {
+                    peer.setOnSearchResultReceiveAttribute((this._onSearchResultReceive_0_0value as arkui_component_common_Callback<OnSearchResultReceiveEvent, void> | undefined));
+                    flagArray[51] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onSearchResultReceive_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onSearchResultReceive_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnSearchResultReceiveAttribute((undefined as ((value0: OnSearchResultReceiveEvent) => void) | undefined));
-                }
-            }
-        }
-        if (this._onScroll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onScroll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnScrollAttribute((this._onScroll_0_0value as ((value0: OnScrollEvent) => void) | undefined));
-                    this._onScroll_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onScroll_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[51] = 2;
                     break;
                 }
                 default: {
-                    this._onScroll_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnScrollAttribute((undefined as ((value0: OnScrollEvent) => void) | undefined));
+                    flagArray[51] = 0;
+                    peer.setOnSearchResultReceiveAttribute((undefined as arkui_component_common_Callback<OnSearchResultReceiveEvent, void> | undefined));
                 }
             }
         }
-        if (this._onSslErrorEventReceive_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onSslErrorEventReceive_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnSslErrorEventReceiveAttribute((this._onSslErrorEventReceive_0_0value as ((value0: OnSslErrorEventReceiveEvent) => void) | undefined));
-                    this._onSslErrorEventReceive_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[52] != 0) {
+            switch (flagArray[52]) {
+                case 1: {
+                    peer.setOnScrollAttribute((this._onScroll_0_0value as arkui_component_common_Callback<OnScrollEvent, void> | undefined));
+                    flagArray[52] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onSslErrorEventReceive_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[52] = 2;
                     break;
                 }
                 default: {
-                    this._onSslErrorEventReceive_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnSslErrorEventReceiveAttribute((undefined as ((value0: OnSslErrorEventReceiveEvent) => void) | undefined));
+                    flagArray[52] = 0;
+                    peer.setOnScrollAttribute((undefined as arkui_component_common_Callback<OnScrollEvent, void> | undefined));
                 }
             }
         }
-        if (this._onSslErrorEvent_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onSslErrorEvent_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[53] != 0) {
+            switch (flagArray[53]) {
+                case 1: {
+                    peer.setOnSslErrorEventReceiveAttribute((this._onSslErrorEventReceive_0_0value as arkui_component_common_Callback<OnSslErrorEventReceiveEvent, void> | undefined));
+                    flagArray[53] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[53] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[53] = 0;
+                    peer.setOnSslErrorEventReceiveAttribute((undefined as arkui_component_common_Callback<OnSslErrorEventReceiveEvent, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[54] != 0) {
+            switch (flagArray[54]) {
+                case 1: {
                     peer.setOnSslErrorEventAttribute((this._onSslErrorEvent_0_0value as OnSslErrorEventCallback | undefined));
-                    this._onSslErrorEvent_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[54] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onSslErrorEvent_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[54] = 2;
                     break;
                 }
                 default: {
-                    this._onSslErrorEvent_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[54] = 0;
                     peer.setOnSslErrorEventAttribute((undefined as OnSslErrorEventCallback | undefined));
                 }
             }
         }
-        if (this._onClientAuthenticationRequest_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onClientAuthenticationRequest_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnClientAuthenticationRequestAttribute((this._onClientAuthenticationRequest_0_0value as ((value0: OnClientAuthenticationEvent) => void) | undefined));
-                    this._onClientAuthenticationRequest_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[55] != 0) {
+            switch (flagArray[55]) {
+                case 1: {
+                    peer.setOnClientAuthenticationRequestAttribute((this._onClientAuthenticationRequest_0_0value as arkui_component_common_Callback<OnClientAuthenticationEvent, void> | undefined));
+                    flagArray[55] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onClientAuthenticationRequest_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onClientAuthenticationRequest_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnClientAuthenticationRequestAttribute((undefined as ((value0: OnClientAuthenticationEvent) => void) | undefined));
-                }
-            }
-        }
-        if (this._onWindowNew_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onWindowNew_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnWindowNewAttribute((this._onWindowNew_0_0value as ((value0: OnWindowNewEvent) => void) | undefined));
-                    this._onWindowNew_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onWindowNew_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[55] = 2;
                     break;
                 }
                 default: {
-                    this._onWindowNew_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnWindowNewAttribute((undefined as ((value0: OnWindowNewEvent) => void) | undefined));
+                    flagArray[55] = 0;
+                    peer.setOnClientAuthenticationRequestAttribute((undefined as arkui_component_common_Callback<OnClientAuthenticationEvent, void> | undefined));
                 }
             }
         }
-        if (this._onWindowExit_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onWindowExit_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[56] != 0) {
+            switch (flagArray[56]) {
+                case 1: {
+                    peer.setOnWindowNewAttribute((this._onWindowNew_0_0value as arkui_component_common_Callback<OnWindowNewEvent, void> | undefined));
+                    flagArray[56] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[56] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[56] = 0;
+                    peer.setOnWindowNewAttribute((undefined as arkui_component_common_Callback<OnWindowNewEvent, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[57] != 0) {
+            switch (flagArray[57]) {
+                case 1: {
                     peer.setOnWindowExitAttribute((this._onWindowExit_0_0value as (() => void) | undefined));
-                    this._onWindowExit_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[57] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onWindowExit_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[57] = 2;
                     break;
                 }
                 default: {
-                    this._onWindowExit_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[57] = 0;
                     peer.setOnWindowExitAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
-        if (this._multiWindowAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._multiWindowAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[58] != 0) {
+            switch (flagArray[58]) {
+                case 1: {
                     peer.setMultiWindowAccessAttribute((this._multiWindowAccess_0_0value as boolean | undefined));
-                    this._multiWindowAccess_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[58] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._multiWindowAccess_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[58] = 2;
                     break;
                 }
                 default: {
-                    this._multiWindowAccess_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[58] = 0;
                     peer.setMultiWindowAccessAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._onInterceptKeyEvent_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onInterceptKeyEvent_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[59] != 0) {
+            switch (flagArray[59]) {
+                case 1: {
                     peer.setOnInterceptKeyEventAttribute((this._onInterceptKeyEvent_0_0value as ((event: KeyEvent) => boolean) | undefined));
-                    this._onInterceptKeyEvent_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[59] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onInterceptKeyEvent_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[59] = 2;
                     break;
                 }
                 default: {
-                    this._onInterceptKeyEvent_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[59] = 0;
                     peer.setOnInterceptKeyEventAttribute((undefined as ((event: KeyEvent) => boolean) | undefined));
                 }
             }
         }
-        if (this._webStandardFont_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._webStandardFont_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+    }
+    applyModifierPatch3(peer: ArkWebPeer, flagArray: Uint8Array): void {
+        if (flagArray[60] != 0) {
+            switch (flagArray[60]) {
+                case 1: {
                     peer.setWebStandardFontAttribute((this._webStandardFont_0_0value as string | undefined));
-                    this._webStandardFont_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[60] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._webStandardFont_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[60] = 2;
                     break;
                 }
                 default: {
-                    this._webStandardFont_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[60] = 0;
                     peer.setWebStandardFontAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (this._webSerifFont_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._webSerifFont_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[61] != 0) {
+            switch (flagArray[61]) {
+                case 1: {
                     peer.setWebSerifFontAttribute((this._webSerifFont_0_0value as string | undefined));
-                    this._webSerifFont_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[61] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._webSerifFont_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[61] = 2;
                     break;
                 }
                 default: {
-                    this._webSerifFont_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[61] = 0;
                     peer.setWebSerifFontAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (this._webSansSerifFont_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._webSansSerifFont_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[62] != 0) {
+            switch (flagArray[62]) {
+                case 1: {
                     peer.setWebSansSerifFontAttribute((this._webSansSerifFont_0_0value as string | undefined));
-                    this._webSansSerifFont_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[62] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._webSansSerifFont_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[62] = 2;
                     break;
                 }
                 default: {
-                    this._webSansSerifFont_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[62] = 0;
                     peer.setWebSansSerifFontAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (this._webFixedFont_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._webFixedFont_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[63] != 0) {
+            switch (flagArray[63]) {
+                case 1: {
                     peer.setWebFixedFontAttribute((this._webFixedFont_0_0value as string | undefined));
-                    this._webFixedFont_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[63] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._webFixedFont_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[63] = 2;
                     break;
                 }
                 default: {
-                    this._webFixedFont_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[63] = 0;
                     peer.setWebFixedFontAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (this._webFantasyFont_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._webFantasyFont_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[64] != 0) {
+            switch (flagArray[64]) {
+                case 1: {
                     peer.setWebFantasyFontAttribute((this._webFantasyFont_0_0value as string | undefined));
-                    this._webFantasyFont_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[64] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._webFantasyFont_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[64] = 2;
                     break;
                 }
                 default: {
-                    this._webFantasyFont_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[64] = 0;
                     peer.setWebFantasyFontAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (this._webCursiveFont_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._webCursiveFont_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[65] != 0) {
+            switch (flagArray[65]) {
+                case 1: {
                     peer.setWebCursiveFontAttribute((this._webCursiveFont_0_0value as string | undefined));
-                    this._webCursiveFont_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[65] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._webCursiveFont_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[65] = 2;
                     break;
                 }
                 default: {
-                    this._webCursiveFont_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[65] = 0;
                     peer.setWebCursiveFontAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (this._defaultFixedFontSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._defaultFixedFontSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[66] != 0) {
+            switch (flagArray[66]) {
+                case 1: {
                     peer.setDefaultFixedFontSizeAttribute((this._defaultFixedFontSize_0_0value as int32 | undefined));
-                    this._defaultFixedFontSize_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[66] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._defaultFixedFontSize_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[66] = 2;
                     break;
                 }
                 default: {
-                    this._defaultFixedFontSize_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[66] = 0;
                     peer.setDefaultFixedFontSizeAttribute((undefined as int32 | undefined));
                 }
             }
         }
-        if (this._defaultFontSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._defaultFontSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[67] != 0) {
+            switch (flagArray[67]) {
+                case 1: {
                     peer.setDefaultFontSizeAttribute((this._defaultFontSize_0_0value as int32 | undefined));
-                    this._defaultFontSize_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[67] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._defaultFontSize_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[67] = 2;
                     break;
                 }
                 default: {
-                    this._defaultFontSize_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[67] = 0;
                     peer.setDefaultFontSizeAttribute((undefined as int32 | undefined));
                 }
             }
         }
-        if (this._minFontSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._minFontSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[68] != 0) {
+            switch (flagArray[68]) {
+                case 1: {
                     peer.setMinFontSizeAttribute((this._minFontSize_0_0value as int32 | undefined));
-                    this._minFontSize_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[68] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._minFontSize_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[68] = 2;
                     break;
                 }
                 default: {
-                    this._minFontSize_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[68] = 0;
                     peer.setMinFontSizeAttribute((undefined as int32 | undefined));
                 }
             }
         }
-        if (this._minLogicalFontSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._minLogicalFontSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[69] != 0) {
+            switch (flagArray[69]) {
+                case 1: {
                     peer.setMinLogicalFontSizeAttribute((this._minLogicalFontSize_0_0value as int32 | undefined));
-                    this._minLogicalFontSize_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[69] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._minLogicalFontSize_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[69] = 2;
                     break;
                 }
                 default: {
-                    this._minLogicalFontSize_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[69] = 0;
                     peer.setMinLogicalFontSizeAttribute((undefined as int32 | undefined));
                 }
             }
         }
-        if (this._defaultTextEncodingFormat_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._defaultTextEncodingFormat_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[70] != 0) {
+            switch (flagArray[70]) {
+                case 1: {
                     peer.setDefaultTextEncodingFormatAttribute((this._defaultTextEncodingFormat_0_0value as string | undefined));
-                    this._defaultTextEncodingFormat_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[70] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._defaultTextEncodingFormat_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[70] = 2;
                     break;
                 }
                 default: {
-                    this._defaultTextEncodingFormat_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[70] = 0;
                     peer.setDefaultTextEncodingFormatAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (this._forceDisplayScrollBar_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._forceDisplayScrollBar_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[71] != 0) {
+            switch (flagArray[71]) {
+                case 1: {
                     peer.setForceDisplayScrollBarAttribute((this._forceDisplayScrollBar_0_0value as boolean | undefined));
-                    this._forceDisplayScrollBar_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[71] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._forceDisplayScrollBar_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[71] = 2;
                     break;
                 }
                 default: {
-                    this._forceDisplayScrollBar_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[71] = 0;
                     peer.setForceDisplayScrollBarAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._blockNetwork_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._blockNetwork_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[72] != 0) {
+            switch (flagArray[72]) {
+                case 1: {
                     peer.setBlockNetworkAttribute((this._blockNetwork_0_0value as boolean | undefined));
-                    this._blockNetwork_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[72] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._blockNetwork_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[72] = 2;
                     break;
                 }
                 default: {
-                    this._blockNetwork_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[72] = 0;
                     peer.setBlockNetworkAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._horizontalScrollBarAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._horizontalScrollBarAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[73] != 0) {
+            switch (flagArray[73]) {
+                case 1: {
                     peer.setHorizontalScrollBarAccessAttribute((this._horizontalScrollBarAccess_0_0value as boolean | undefined));
-                    this._horizontalScrollBarAccess_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[73] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._horizontalScrollBarAccess_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[73] = 2;
                     break;
                 }
                 default: {
-                    this._horizontalScrollBarAccess_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[73] = 0;
                     peer.setHorizontalScrollBarAccessAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._verticalScrollBarAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._verticalScrollBarAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[74] != 0) {
+            switch (flagArray[74]) {
+                case 1: {
                     peer.setVerticalScrollBarAccessAttribute((this._verticalScrollBarAccess_0_0value as boolean | undefined));
-                    this._verticalScrollBarAccess_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[74] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._verticalScrollBarAccess_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[74] = 2;
                     break;
                 }
                 default: {
-                    this._verticalScrollBarAccess_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[74] = 0;
                     peer.setVerticalScrollBarAccessAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._onTouchIconUrlReceived_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onTouchIconUrlReceived_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnTouchIconUrlReceivedAttribute((this._onTouchIconUrlReceived_0_0value as ((value0: OnTouchIconUrlReceivedEvent) => void) | undefined));
-                    this._onTouchIconUrlReceived_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[75] != 0) {
+            switch (flagArray[75]) {
+                case 1: {
+                    peer.setOnTouchIconUrlReceivedAttribute((this._onTouchIconUrlReceived_0_0value as arkui_component_common_Callback<OnTouchIconUrlReceivedEvent, void> | undefined));
+                    flagArray[75] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onTouchIconUrlReceived_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onTouchIconUrlReceived_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnTouchIconUrlReceivedAttribute((undefined as ((value0: OnTouchIconUrlReceivedEvent) => void) | undefined));
-                }
-            }
-        }
-        if (this._onFaviconReceived_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onFaviconReceived_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnFaviconReceivedAttribute((this._onFaviconReceived_0_0value as ((value0: OnFaviconReceivedEvent) => void) | undefined));
-                    this._onFaviconReceived_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onFaviconReceived_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[75] = 2;
                     break;
                 }
                 default: {
-                    this._onFaviconReceived_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnFaviconReceivedAttribute((undefined as ((value0: OnFaviconReceivedEvent) => void) | undefined));
+                    flagArray[75] = 0;
+                    peer.setOnTouchIconUrlReceivedAttribute((undefined as arkui_component_common_Callback<OnTouchIconUrlReceivedEvent, void> | undefined));
                 }
             }
         }
-        if (this._onPageVisible_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onPageVisible_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnPageVisibleAttribute((this._onPageVisible_0_0value as ((value0: OnPageVisibleEvent) => void) | undefined));
-                    this._onPageVisible_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[76] != 0) {
+            switch (flagArray[76]) {
+                case 1: {
+                    peer.setOnFaviconReceivedAttribute((this._onFaviconReceived_0_0value as arkui_component_common_Callback<OnFaviconReceivedEvent, void> | undefined));
+                    flagArray[76] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onPageVisible_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[76] = 2;
                     break;
                 }
                 default: {
-                    this._onPageVisible_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnPageVisibleAttribute((undefined as ((value0: OnPageVisibleEvent) => void) | undefined));
+                    flagArray[76] = 0;
+                    peer.setOnFaviconReceivedAttribute((undefined as arkui_component_common_Callback<OnFaviconReceivedEvent, void> | undefined));
                 }
             }
         }
-        if (this._onDataResubmitted_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onDataResubmitted_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnDataResubmittedAttribute((this._onDataResubmitted_0_0value as ((value0: OnDataResubmittedEvent) => void) | undefined));
-                    this._onDataResubmitted_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[77] != 0) {
+            switch (flagArray[77]) {
+                case 1: {
+                    peer.setOnPageVisibleAttribute((this._onPageVisible_0_0value as arkui_component_common_Callback<OnPageVisibleEvent, void> | undefined));
+                    flagArray[77] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onDataResubmitted_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[77] = 2;
                     break;
                 }
                 default: {
-                    this._onDataResubmitted_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnDataResubmittedAttribute((undefined as ((value0: OnDataResubmittedEvent) => void) | undefined));
+                    flagArray[77] = 0;
+                    peer.setOnPageVisibleAttribute((undefined as arkui_component_common_Callback<OnPageVisibleEvent, void> | undefined));
                 }
             }
         }
-        if (this._pinchSmooth_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._pinchSmooth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[78] != 0) {
+            switch (flagArray[78]) {
+                case 1: {
+                    peer.setOnDataResubmittedAttribute((this._onDataResubmitted_0_0value as arkui_component_common_Callback<OnDataResubmittedEvent, void> | undefined));
+                    flagArray[78] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[78] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[78] = 0;
+                    peer.setOnDataResubmittedAttribute((undefined as arkui_component_common_Callback<OnDataResubmittedEvent, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[79] != 0) {
+            switch (flagArray[79]) {
+                case 1: {
                     peer.setPinchSmoothAttribute((this._pinchSmooth_0_0value as boolean | undefined));
-                    this._pinchSmooth_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[79] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._pinchSmooth_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[79] = 2;
                     break;
                 }
                 default: {
-                    this._pinchSmooth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[79] = 0;
                     peer.setPinchSmoothAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._allowWindowOpenMethod_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._allowWindowOpenMethod_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+    }
+    applyModifierPatch4(peer: ArkWebPeer, flagArray: Uint8Array): void {
+        if (flagArray[80] != 0) {
+            switch (flagArray[80]) {
+                case 1: {
                     peer.setAllowWindowOpenMethodAttribute((this._allowWindowOpenMethod_0_0value as boolean | undefined));
-                    this._allowWindowOpenMethod_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[80] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._allowWindowOpenMethod_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[80] = 2;
                     break;
                 }
                 default: {
-                    this._allowWindowOpenMethod_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[80] = 0;
                     peer.setAllowWindowOpenMethodAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._onAudioStateChanged_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onAudioStateChanged_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnAudioStateChangedAttribute((this._onAudioStateChanged_0_0value as ((value0: OnAudioStateChangedEvent) => void) | undefined));
-                    this._onAudioStateChanged_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[81] != 0) {
+            switch (flagArray[81]) {
+                case 1: {
+                    peer.setOnAudioStateChangedAttribute((this._onAudioStateChanged_0_0value as arkui_component_common_Callback<OnAudioStateChangedEvent, void> | undefined));
+                    flagArray[81] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onAudioStateChanged_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onAudioStateChanged_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnAudioStateChangedAttribute((undefined as ((value0: OnAudioStateChangedEvent) => void) | undefined));
-                }
-            }
-        }
-        if (this._onFirstContentfulPaint_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onFirstContentfulPaint_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnFirstContentfulPaintAttribute((this._onFirstContentfulPaint_0_0value as ((value0: OnFirstContentfulPaintEvent) => void) | undefined));
-                    this._onFirstContentfulPaint_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onFirstContentfulPaint_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[81] = 2;
                     break;
                 }
                 default: {
-                    this._onFirstContentfulPaint_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnFirstContentfulPaintAttribute((undefined as ((value0: OnFirstContentfulPaintEvent) => void) | undefined));
+                    flagArray[81] = 0;
+                    peer.setOnAudioStateChangedAttribute((undefined as arkui_component_common_Callback<OnAudioStateChangedEvent, void> | undefined));
                 }
             }
         }
-        if (this._onFirstMeaningfulPaint_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onFirstMeaningfulPaint_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[82] != 0) {
+            switch (flagArray[82]) {
+                case 1: {
+                    peer.setOnFirstContentfulPaintAttribute((this._onFirstContentfulPaint_0_0value as arkui_component_common_Callback<OnFirstContentfulPaintEvent, void> | undefined));
+                    flagArray[82] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[82] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[82] = 0;
+                    peer.setOnFirstContentfulPaintAttribute((undefined as arkui_component_common_Callback<OnFirstContentfulPaintEvent, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[83] != 0) {
+            switch (flagArray[83]) {
+                case 1: {
                     peer.setOnFirstMeaningfulPaintAttribute((this._onFirstMeaningfulPaint_0_0value as OnFirstMeaningfulPaintCallback | undefined));
-                    this._onFirstMeaningfulPaint_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[83] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onFirstMeaningfulPaint_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[83] = 2;
                     break;
                 }
                 default: {
-                    this._onFirstMeaningfulPaint_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[83] = 0;
                     peer.setOnFirstMeaningfulPaintAttribute((undefined as OnFirstMeaningfulPaintCallback | undefined));
                 }
             }
         }
-        if (this._onLargestContentfulPaint_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onLargestContentfulPaint_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[84] != 0) {
+            switch (flagArray[84]) {
+                case 1: {
                     peer.setOnLargestContentfulPaintAttribute((this._onLargestContentfulPaint_0_0value as OnLargestContentfulPaintCallback | undefined));
-                    this._onLargestContentfulPaint_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[84] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onLargestContentfulPaint_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[84] = 2;
                     break;
                 }
                 default: {
-                    this._onLargestContentfulPaint_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[84] = 0;
                     peer.setOnLargestContentfulPaintAttribute((undefined as OnLargestContentfulPaintCallback | undefined));
                 }
             }
         }
-        if (this._onLoadIntercept_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onLoadIntercept_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnLoadInterceptAttribute((this._onLoadIntercept_0_0value as ((value0: OnLoadInterceptEvent) => boolean) | undefined));
-                    this._onLoadIntercept_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[85] != 0) {
+            switch (flagArray[85]) {
+                case 1: {
+                    peer.setOnLoadInterceptAttribute((this._onLoadIntercept_0_0value as arkui_component_common_Callback<OnLoadInterceptEvent, boolean> | undefined));
+                    flagArray[85] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onLoadIntercept_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[85] = 2;
                     break;
                 }
                 default: {
-                    this._onLoadIntercept_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnLoadInterceptAttribute((undefined as ((value0: OnLoadInterceptEvent) => boolean) | undefined));
+                    flagArray[85] = 0;
+                    peer.setOnLoadInterceptAttribute((undefined as arkui_component_common_Callback<OnLoadInterceptEvent, boolean> | undefined));
                 }
             }
         }
-        if (this._onControllerAttached_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onControllerAttached_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[86] != 0) {
+            switch (flagArray[86]) {
+                case 1: {
                     peer.setOnControllerAttachedAttribute((this._onControllerAttached_0_0value as (() => void) | undefined));
-                    this._onControllerAttached_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[86] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onControllerAttached_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[86] = 2;
                     break;
                 }
                 default: {
-                    this._onControllerAttached_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[86] = 0;
                     peer.setOnControllerAttachedAttribute((undefined as (() => void) | undefined));
                 }
             }
         }
-        if (this._onOverScroll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onOverScroll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnOverScrollAttribute((this._onOverScroll_0_0value as ((value0: OnOverScrollEvent) => void) | undefined));
-                    this._onOverScroll_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[87] != 0) {
+            switch (flagArray[87]) {
+                case 1: {
+                    peer.setOnOverScrollAttribute((this._onOverScroll_0_0value as arkui_component_common_Callback<OnOverScrollEvent, void> | undefined));
+                    flagArray[87] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onOverScroll_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[87] = 2;
                     break;
                 }
                 default: {
-                    this._onOverScroll_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnOverScrollAttribute((undefined as ((value0: OnOverScrollEvent) => void) | undefined));
+                    flagArray[87] = 0;
+                    peer.setOnOverScrollAttribute((undefined as arkui_component_common_Callback<OnOverScrollEvent, void> | undefined));
                 }
             }
         }
-        if (this._onSafeBrowsingCheckResult_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onSafeBrowsingCheckResult_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[88] != 0) {
+            switch (flagArray[88]) {
+                case 1: {
                     peer.setOnSafeBrowsingCheckResultAttribute((this._onSafeBrowsingCheckResult_0_0value as OnSafeBrowsingCheckResultCallback | undefined));
-                    this._onSafeBrowsingCheckResult_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[88] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onSafeBrowsingCheckResult_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[88] = 2;
                     break;
                 }
                 default: {
-                    this._onSafeBrowsingCheckResult_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[88] = 0;
                     peer.setOnSafeBrowsingCheckResultAttribute((undefined as OnSafeBrowsingCheckResultCallback | undefined));
                 }
             }
         }
-        if (this._onNavigationEntryCommitted_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onNavigationEntryCommitted_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[89] != 0) {
+            switch (flagArray[89]) {
+                case 1: {
                     peer.setOnNavigationEntryCommittedAttribute((this._onNavigationEntryCommitted_0_0value as OnNavigationEntryCommittedCallback | undefined));
-                    this._onNavigationEntryCommitted_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[89] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onNavigationEntryCommitted_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[89] = 2;
                     break;
                 }
                 default: {
-                    this._onNavigationEntryCommitted_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[89] = 0;
                     peer.setOnNavigationEntryCommittedAttribute((undefined as OnNavigationEntryCommittedCallback | undefined));
                 }
             }
         }
-        if (this._onIntelligentTrackingPreventionResult_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onIntelligentTrackingPreventionResult_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[90] != 0) {
+            switch (flagArray[90]) {
+                case 1: {
                     peer.setOnIntelligentTrackingPreventionResultAttribute((this._onIntelligentTrackingPreventionResult_0_0value as OnIntelligentTrackingPreventionCallback | undefined));
-                    this._onIntelligentTrackingPreventionResult_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[90] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onIntelligentTrackingPreventionResult_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[90] = 2;
                     break;
                 }
                 default: {
-                    this._onIntelligentTrackingPreventionResult_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[90] = 0;
                     peer.setOnIntelligentTrackingPreventionResultAttribute((undefined as OnIntelligentTrackingPreventionCallback | undefined));
                 }
             }
         }
-        if (this._javaScriptOnDocumentStart_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._javaScriptOnDocumentStart_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[91] != 0) {
+            switch (flagArray[91]) {
+                case 1: {
                     peer.setJavaScriptOnDocumentStartAttribute((this._javaScriptOnDocumentStart_0_0value as Array<ScriptItem> | undefined));
-                    this._javaScriptOnDocumentStart_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[91] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._javaScriptOnDocumentStart_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[91] = 2;
                     break;
                 }
                 default: {
-                    this._javaScriptOnDocumentStart_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[91] = 0;
                     peer.setJavaScriptOnDocumentStartAttribute((undefined as Array<ScriptItem> | undefined));
                 }
             }
         }
-        if (this._javaScriptOnDocumentEnd_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._javaScriptOnDocumentEnd_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[92] != 0) {
+            switch (flagArray[92]) {
+                case 1: {
                     peer.setJavaScriptOnDocumentEndAttribute((this._javaScriptOnDocumentEnd_0_0value as Array<ScriptItem> | undefined));
-                    this._javaScriptOnDocumentEnd_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[92] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._javaScriptOnDocumentEnd_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[92] = 2;
                     break;
                 }
                 default: {
-                    this._javaScriptOnDocumentEnd_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[92] = 0;
                     peer.setJavaScriptOnDocumentEndAttribute((undefined as Array<ScriptItem> | undefined));
                 }
             }
         }
-        if (this._layoutMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._layoutMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[93] != 0) {
+            switch (flagArray[93]) {
+                case 1: {
                     peer.setLayoutModeAttribute((this._layoutMode_0_0value as WebLayoutMode | undefined));
-                    this._layoutMode_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[93] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._layoutMode_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[93] = 2;
                     break;
                 }
                 default: {
-                    this._layoutMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[93] = 0;
                     peer.setLayoutModeAttribute((undefined as WebLayoutMode | undefined));
                 }
             }
         }
-        if (this._nestedScroll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._nestedScroll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[94] != 0) {
+            switch (flagArray[94]) {
+                case 1: {
                     peer.setNestedScrollAttribute((this._nestedScroll_0_0value as NestedScrollOptions | NestedScrollOptionsExt | undefined));
-                    this._nestedScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[94] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._nestedScroll_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[94] = 2;
                     break;
                 }
                 default: {
-                    this._nestedScroll_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[94] = 0;
                     peer.setNestedScrollAttribute((undefined as NestedScrollOptions | NestedScrollOptionsExt | undefined));
                 }
             }
         }
-        if (this._enableNativeEmbedMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableNativeEmbedMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[95] != 0) {
+            switch (flagArray[95]) {
+                case 1: {
                     peer.setEnableNativeEmbedModeAttribute((this._enableNativeEmbedMode_0_0value as boolean | undefined));
-                    this._enableNativeEmbedMode_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[95] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableNativeEmbedMode_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[95] = 2;
                     break;
                 }
                 default: {
-                    this._enableNativeEmbedMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[95] = 0;
                     peer.setEnableNativeEmbedModeAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._onNativeEmbedLifecycleChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onNativeEmbedLifecycleChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[96] != 0) {
+            switch (flagArray[96]) {
+                case 1: {
                     peer.setOnNativeEmbedLifecycleChangeAttribute((this._onNativeEmbedLifecycleChange_0_0value as ((event: NativeEmbedDataInfo) => void) | undefined));
-                    this._onNativeEmbedLifecycleChange_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[96] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onNativeEmbedLifecycleChange_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[96] = 2;
                     break;
                 }
                 default: {
-                    this._onNativeEmbedLifecycleChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[96] = 0;
                     peer.setOnNativeEmbedLifecycleChangeAttribute((undefined as ((event: NativeEmbedDataInfo) => void) | undefined));
                 }
             }
         }
-        if (this._onNativeEmbedVisibilityChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onNativeEmbedVisibilityChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[97] != 0) {
+            switch (flagArray[97]) {
+                case 1: {
                     peer.setOnNativeEmbedVisibilityChangeAttribute((this._onNativeEmbedVisibilityChange_0_0value as OnNativeEmbedVisibilityChangeCallback | undefined));
-                    this._onNativeEmbedVisibilityChange_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[97] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onNativeEmbedVisibilityChange_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[97] = 2;
                     break;
                 }
                 default: {
-                    this._onNativeEmbedVisibilityChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[97] = 0;
                     peer.setOnNativeEmbedVisibilityChangeAttribute((undefined as OnNativeEmbedVisibilityChangeCallback | undefined));
                 }
             }
         }
-        if (this._onNativeEmbedGestureEvent_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onNativeEmbedGestureEvent_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[98] != 0) {
+            switch (flagArray[98]) {
+                case 1: {
                     peer.setOnNativeEmbedGestureEventAttribute((this._onNativeEmbedGestureEvent_0_0value as ((event: NativeEmbedTouchInfo) => void) | undefined));
-                    this._onNativeEmbedGestureEvent_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[98] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onNativeEmbedGestureEvent_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[98] = 2;
                     break;
                 }
                 default: {
-                    this._onNativeEmbedGestureEvent_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[98] = 0;
                     peer.setOnNativeEmbedGestureEventAttribute((undefined as ((event: NativeEmbedTouchInfo) => void) | undefined));
                 }
             }
         }
-        if (this._copyOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._copyOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[99] != 0) {
+            switch (flagArray[99]) {
+                case 1: {
                     peer.setCopyOptionsAttribute((this._copyOptions_0_0value as CopyOptions | undefined));
-                    this._copyOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[99] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._copyOptions_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[99] = 2;
                     break;
                 }
                 default: {
-                    this._copyOptions_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[99] = 0;
                     peer.setCopyOptionsAttribute((undefined as CopyOptions | undefined));
                 }
             }
         }
-        if (this._onOverrideUrlLoading_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onOverrideUrlLoading_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+    }
+    applyModifierPatch5(peer: ArkWebPeer, flagArray: Uint8Array): void {
+        if (flagArray[100] != 0) {
+            switch (flagArray[100]) {
+                case 1: {
                     peer.setOnOverrideUrlLoadingAttribute((this._onOverrideUrlLoading_0_0value as OnOverrideUrlLoadingCallback | undefined));
-                    this._onOverrideUrlLoading_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[100] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onOverrideUrlLoading_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[100] = 2;
                     break;
                 }
                 default: {
-                    this._onOverrideUrlLoading_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[100] = 0;
                     peer.setOnOverrideUrlLoadingAttribute((undefined as OnOverrideUrlLoadingCallback | undefined));
                 }
             }
         }
-        if (this._textAutosizing_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._textAutosizing_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[101] != 0) {
+            switch (flagArray[101]) {
+                case 1: {
                     peer.setTextAutosizingAttribute((this._textAutosizing_0_0value as boolean | undefined));
-                    this._textAutosizing_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[101] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._textAutosizing_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[101] = 2;
                     break;
                 }
                 default: {
-                    this._textAutosizing_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[101] = 0;
                     peer.setTextAutosizingAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._enableNativeMediaPlayer_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableNativeMediaPlayer_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[102] != 0) {
+            switch (flagArray[102]) {
+                case 1: {
                     peer.setEnableNativeMediaPlayerAttribute((this._enableNativeMediaPlayer_0_0value as NativeMediaPlayerConfig | undefined));
-                    this._enableNativeMediaPlayer_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[102] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableNativeMediaPlayer_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[102] = 2;
                     break;
                 }
                 default: {
-                    this._enableNativeMediaPlayer_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[102] = 0;
                     peer.setEnableNativeMediaPlayerAttribute((undefined as NativeMediaPlayerConfig | undefined));
                 }
             }
         }
-        if (this._onRenderProcessNotResponding_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onRenderProcessNotResponding_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[103] != 0) {
+            switch (flagArray[103]) {
+                case 1: {
                     peer.setOnRenderProcessNotRespondingAttribute((this._onRenderProcessNotResponding_0_0value as OnRenderProcessNotRespondingCallback | undefined));
-                    this._onRenderProcessNotResponding_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[103] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onRenderProcessNotResponding_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[103] = 2;
                     break;
                 }
                 default: {
-                    this._onRenderProcessNotResponding_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[103] = 0;
                     peer.setOnRenderProcessNotRespondingAttribute((undefined as OnRenderProcessNotRespondingCallback | undefined));
                 }
             }
         }
-        if (this._onRenderProcessResponding_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onRenderProcessResponding_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[104] != 0) {
+            switch (flagArray[104]) {
+                case 1: {
                     peer.setOnRenderProcessRespondingAttribute((this._onRenderProcessResponding_0_0value as OnRenderProcessRespondingCallback | undefined));
-                    this._onRenderProcessResponding_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[104] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onRenderProcessResponding_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[104] = 2;
                     break;
                 }
                 default: {
-                    this._onRenderProcessResponding_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[104] = 0;
                     peer.setOnRenderProcessRespondingAttribute((undefined as OnRenderProcessRespondingCallback | undefined));
                 }
             }
         }
-        if (this._onViewportFitChanged_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onViewportFitChanged_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[105] != 0) {
+            switch (flagArray[105]) {
+                case 1: {
                     peer.setOnViewportFitChangedAttribute((this._onViewportFitChanged_0_0value as OnViewportFitChangedCallback | undefined));
-                    this._onViewportFitChanged_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[105] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onViewportFitChanged_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[105] = 2;
                     break;
                 }
                 default: {
-                    this._onViewportFitChanged_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[105] = 0;
                     peer.setOnViewportFitChangedAttribute((undefined as OnViewportFitChangedCallback | undefined));
                 }
             }
         }
-        if (this._onInterceptKeyboardAttach_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onInterceptKeyboardAttach_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[106] != 0) {
+            switch (flagArray[106]) {
+                case 1: {
                     peer.setOnInterceptKeyboardAttachAttribute((this._onInterceptKeyboardAttach_0_0value as WebKeyboardCallback | undefined));
-                    this._onInterceptKeyboardAttach_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[106] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onInterceptKeyboardAttach_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[106] = 2;
                     break;
                 }
                 default: {
-                    this._onInterceptKeyboardAttach_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[106] = 0;
                     peer.setOnInterceptKeyboardAttachAttribute((undefined as WebKeyboardCallback | undefined));
                 }
             }
         }
-        if (this._onAdsBlocked_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onAdsBlocked_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[107] != 0) {
+            switch (flagArray[107]) {
+                case 1: {
                     peer.setOnAdsBlockedAttribute((this._onAdsBlocked_0_0value as OnAdsBlockedCallback | undefined));
-                    this._onAdsBlocked_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[107] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onAdsBlocked_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[107] = 2;
                     break;
                 }
                 default: {
-                    this._onAdsBlocked_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[107] = 0;
                     peer.setOnAdsBlockedAttribute((undefined as OnAdsBlockedCallback | undefined));
                 }
             }
         }
-        if (this._keyboardAvoidMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._keyboardAvoidMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[108] != 0) {
+            switch (flagArray[108]) {
+                case 1: {
                     peer.setKeyboardAvoidModeAttribute((this._keyboardAvoidMode_0_0value as WebKeyboardAvoidMode | undefined));
-                    this._keyboardAvoidMode_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[108] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._keyboardAvoidMode_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[108] = 2;
                     break;
                 }
                 default: {
-                    this._keyboardAvoidMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[108] = 0;
                     peer.setKeyboardAvoidModeAttribute((undefined as WebKeyboardAvoidMode | undefined));
                 }
             }
         }
-        if (this._editMenuOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._editMenuOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[109] != 0) {
+            switch (flagArray[109]) {
+                case 1: {
                     peer.setEditMenuOptionsAttribute((this._editMenuOptions_0_0value as EditMenuOptions | undefined));
-                    this._editMenuOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[109] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._editMenuOptions_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[109] = 2;
                     break;
                 }
                 default: {
-                    this._editMenuOptions_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[109] = 0;
                     peer.setEditMenuOptionsAttribute((undefined as EditMenuOptions | undefined));
                 }
             }
         }
-        if (this._enableHapticFeedback_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableHapticFeedback_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[110] != 0) {
+            switch (flagArray[110]) {
+                case 1: {
                     peer.setEnableHapticFeedbackAttribute((this._enableHapticFeedback_0_0value as boolean | undefined));
-                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[110] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[110] = 2;
                     break;
                 }
                 default: {
-                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[110] = 0;
                     peer.setEnableHapticFeedbackAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._optimizeParserBudget_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._optimizeParserBudget_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOptimizeParserBudgetAttribute((this._optimizeParserBudget_0_0value as boolean | undefined));
-                    this._optimizeParserBudget_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._optimizeParserBudget_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._optimizeParserBudget_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOptimizeParserBudgetAttribute((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (this._enableFollowSystemFontWeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableFollowSystemFontWeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[111] != 0) {
+            switch (flagArray[111]) {
+                case 1: {
                     peer.setEnableFollowSystemFontWeightAttribute((this._enableFollowSystemFontWeight_0_0value as boolean | undefined));
-                    this._enableFollowSystemFontWeight_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[111] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableFollowSystemFontWeight_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[111] = 2;
                     break;
                 }
                 default: {
-                    this._enableFollowSystemFontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[111] = 0;
                     peer.setEnableFollowSystemFontWeightAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._enableWebAVSession_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableWebAVSession_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[112] != 0) {
+            switch (flagArray[112]) {
+                case 1: {
                     peer.setEnableWebAVSessionAttribute((this._enableWebAVSession_0_0value as boolean | undefined));
-                    this._enableWebAVSession_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[112] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableWebAVSession_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[112] = 2;
                     break;
                 }
                 default: {
-                    this._enableWebAVSession_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[112] = 0;
                     peer.setEnableWebAVSessionAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._runJavaScriptOnDocumentStart_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._runJavaScriptOnDocumentStart_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setRunJavaScriptOnDocumentStartAttribute((this._runJavaScriptOnDocumentStart_0_0value as Array<ScriptItem> | undefined));
-                    this._runJavaScriptOnDocumentStart_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[113] != 0) {
+            switch (flagArray[113]) {
+                case 1: {
+                    peer.setOptimizeParserBudgetAttribute((this._optimizeParserBudget_0_0value as boolean | undefined));
+                    flagArray[113] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._runJavaScriptOnDocumentStart_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[113] = 2;
                     break;
                 }
                 default: {
-                    this._runJavaScriptOnDocumentStart_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[113] = 0;
+                    peer.setOptimizeParserBudgetAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[114] != 0) {
+            switch (flagArray[114]) {
+                case 1: {
+                    peer.setRunJavaScriptOnDocumentStartAttribute((this._runJavaScriptOnDocumentStart_0_0value as Array<ScriptItem> | undefined));
+                    flagArray[114] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[114] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[114] = 0;
                     peer.setRunJavaScriptOnDocumentStartAttribute((undefined as Array<ScriptItem> | undefined));
                 }
             }
         }
-        if (this._runJavaScriptOnDocumentEnd_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._runJavaScriptOnDocumentEnd_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[115] != 0) {
+            switch (flagArray[115]) {
+                case 1: {
                     peer.setRunJavaScriptOnDocumentEndAttribute((this._runJavaScriptOnDocumentEnd_0_0value as Array<ScriptItem> | undefined));
-                    this._runJavaScriptOnDocumentEnd_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[115] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._runJavaScriptOnDocumentEnd_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[115] = 2;
                     break;
                 }
                 default: {
-                    this._runJavaScriptOnDocumentEnd_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[115] = 0;
                     peer.setRunJavaScriptOnDocumentEndAttribute((undefined as Array<ScriptItem> | undefined));
                 }
             }
         }
-        if (this._runJavaScriptOnHeadEnd_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._runJavaScriptOnHeadEnd_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[116] != 0) {
+            switch (flagArray[116]) {
+                case 1: {
                     peer.setRunJavaScriptOnHeadEndAttribute((this._runJavaScriptOnHeadEnd_0_0value as Array<ScriptItem> | undefined));
-                    this._runJavaScriptOnHeadEnd_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[116] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._runJavaScriptOnHeadEnd_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[116] = 2;
                     break;
                 }
                 default: {
-                    this._runJavaScriptOnHeadEnd_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[116] = 0;
                     peer.setRunJavaScriptOnHeadEndAttribute((undefined as Array<ScriptItem> | undefined));
                 }
             }
         }
-        if (this._nativeEmbedOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._nativeEmbedOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[117] != 0) {
+            switch (flagArray[117]) {
+                case 1: {
                     peer.setNativeEmbedOptionsAttribute((this._nativeEmbedOptions_0_0value as EmbedOptions | undefined));
-                    this._nativeEmbedOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[117] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._nativeEmbedOptions_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[117] = 2;
                     break;
                 }
                 default: {
-                    this._nativeEmbedOptions_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[117] = 0;
                     peer.setNativeEmbedOptionsAttribute((undefined as EmbedOptions | undefined));
                 }
             }
         }
-        if (this._registerNativeEmbedRule_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._registerNativeEmbedRule_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[118] != 0) {
+            switch (flagArray[118]) {
+                case 1: {
                     peer.setRegisterNativeEmbedRuleAttribute((this._registerNativeEmbedRule_0_0value as string | undefined), (this._registerNativeEmbedRule_0_1value as string | undefined));
-                    this._registerNativeEmbedRule_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[118] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._registerNativeEmbedRule_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[118] = 2;
                     break;
                 }
                 default: {
-                    this._registerNativeEmbedRule_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[118] = 0;
                     peer.setRegisterNativeEmbedRuleAttribute((undefined as string | undefined), (undefined as string | undefined));
                 }
             }
         }
-        if (this._bindSelectionMenu_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._bindSelectionMenu_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[119] != 0) {
+            switch (flagArray[119]) {
+                case 1: {
                     peer.setBindSelectionMenuAttribute((this._bindSelectionMenu_0_0value as WebElementType | undefined), (this._bindSelectionMenu_0_1value as CustomBuilder | undefined), (this._bindSelectionMenu_0_2value as WebResponseType | undefined), (this._bindSelectionMenu_0_3value as SelectionMenuOptionsExt | undefined | undefined));
-                    this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[119] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[119] = 2;
                     break;
                 }
                 default: {
-                    this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[119] = 0;
                     peer.setBindSelectionMenuAttribute((undefined as WebElementType | undefined), (undefined as CustomBuilder | undefined), (undefined as WebResponseType | undefined), (undefined as SelectionMenuOptionsExt | undefined | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: WebModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._javaScriptAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._javaScriptAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+        this.mergeModifier1(modifier, flagArray);
+        this.mergeModifier2(modifier, flagArray);
+        this.mergeModifier3(modifier, flagArray);
+        this.mergeModifier4(modifier, flagArray);
+        this.mergeModifier5(modifier, flagArray);
+    }
+    mergeModifier0(modifier: WebModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.javaScriptAccess(modifier._javaScriptAccess_0_0value);
                     break;
                 }
@@ -2464,11 +2257,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._fileAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._fileAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.fileAccess(modifier._fileAccess_0_0value);
                     break;
                 }
@@ -2477,11 +2269,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onlineImageAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onlineImageAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.onlineImageAccess(modifier._onlineImageAccess_0_0value);
                     break;
                 }
@@ -2490,11 +2281,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._domStorageAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._domStorageAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
                     this.domStorageAccess(modifier._domStorageAccess_0_0value);
                     break;
                 }
@@ -2503,11 +2293,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._imageAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._imageAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
                     this.imageAccess(modifier._imageAccess_0_0value);
                     break;
                 }
@@ -2516,11 +2305,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._mixedMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._mixedMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1:
+                case 3: {
                     this.mixedMode(modifier._mixedMode_0_0value);
                     break;
                 }
@@ -2529,11 +2317,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._zoomAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._zoomAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1:
+                case 3: {
                     this.zoomAccess(modifier._zoomAccess_0_0value);
                     break;
                 }
@@ -2542,11 +2329,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._geolocationAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._geolocationAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1:
+                case 3: {
                     this.geolocationAccess(modifier._geolocationAccess_0_0value);
                     break;
                 }
@@ -2555,11 +2341,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._javaScriptProxy_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._javaScriptProxy_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1:
+                case 3: {
                     this.javaScriptProxy(modifier._javaScriptProxy_0_0value);
                     break;
                 }
@@ -2568,11 +2353,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._cacheMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._cacheMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1:
+                case 3: {
                     this.cacheMode(modifier._cacheMode_0_0value);
                     break;
                 }
@@ -2581,11 +2365,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._darkMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._darkMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
+                case 1:
+                case 3: {
                     this.darkMode(modifier._darkMode_0_0value);
                     break;
                 }
@@ -2594,11 +2377,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._forceDarkAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._forceDarkAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[11] != 0) {
+            switch (flagArray[11]) {
+                case 1:
+                case 3: {
                     this.forceDarkAccess(modifier._forceDarkAccess_0_0value);
                     break;
                 }
@@ -2607,11 +2389,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._mediaOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._mediaOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[12] != 0) {
+            switch (flagArray[12]) {
+                case 1:
+                case 3: {
                     this.mediaOptions(modifier._mediaOptions_0_0value);
                     break;
                 }
@@ -2620,11 +2401,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._overviewModeAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._overviewModeAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[13] != 0) {
+            switch (flagArray[13]) {
+                case 1:
+                case 3: {
                     this.overviewModeAccess(modifier._overviewModeAccess_0_0value);
                     break;
                 }
@@ -2633,11 +2413,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._overScrollMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._overScrollMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[14] != 0) {
+            switch (flagArray[14]) {
+                case 1:
+                case 3: {
                     this.overScrollMode(modifier._overScrollMode_0_0value);
                     break;
                 }
@@ -2646,11 +2425,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._blurOnKeyboardHideMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._blurOnKeyboardHideMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[15] != 0) {
+            switch (flagArray[15]) {
+                case 1:
+                case 3: {
                     this.blurOnKeyboardHideMode(modifier._blurOnKeyboardHideMode_0_0value);
                     break;
                 }
@@ -2659,11 +2437,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._textZoomRatio_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._textZoomRatio_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[16] != 0) {
+            switch (flagArray[16]) {
+                case 1:
+                case 3: {
                     this.textZoomRatio(modifier._textZoomRatio_0_0value);
                     break;
                 }
@@ -2672,11 +2449,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._databaseAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._databaseAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[17] != 0) {
+            switch (flagArray[17]) {
+                case 1:
+                case 3: {
                     this.databaseAccess(modifier._databaseAccess_0_0value);
                     break;
                 }
@@ -2685,11 +2461,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._initialScale_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._initialScale_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[18] != 0) {
+            switch (flagArray[18]) {
+                case 1:
+                case 3: {
                     this.initialScale(modifier._initialScale_0_0value);
                     break;
                 }
@@ -2698,11 +2473,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._metaViewport_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._metaViewport_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[19] != 0) {
+            switch (flagArray[19]) {
+                case 1:
+                case 3: {
                     this.metaViewport(modifier._metaViewport_0_0value);
                     break;
                 }
@@ -2711,89 +2485,84 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onPageEnd_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onPageEnd_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.onPageEnd(modifier._onPageEnd_0_0value);
-                    break;
-                }
-                default: {
-                    this.onPageEnd((undefined as ((value0: OnPageEndEvent) => void) | undefined));
-                }
-            }
-        }
-        if (modifier._onPageBegin_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onPageBegin_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+    }
+    mergeModifier1(modifier: WebModifier, flagArray: Uint8Array): void {
+        if (flagArray[20] != 0) {
+            switch (flagArray[20]) {
+                case 1:
+                case 3: {
                     this.onPageBegin(modifier._onPageBegin_0_0value);
                     break;
                 }
                 default: {
-                    this.onPageBegin((undefined as ((value0: OnPageBeginEvent) => void) | undefined));
+                    this.onPageBegin((undefined as arkui_component_common_Callback<OnPageBeginEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onLoadStarted_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onLoadStarted_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[21] != 0) {
+            switch (flagArray[21]) {
+                case 1:
+                case 3: {
+                    this.onPageEnd(modifier._onPageEnd_0_0value);
+                    break;
+                }
+                default: {
+                    this.onPageEnd((undefined as arkui_component_common_Callback<OnPageEndEvent, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[22] != 0) {
+            switch (flagArray[22]) {
+                case 1:
+                case 3: {
                     this.onLoadStarted(modifier._onLoadStarted_0_0value);
                     break;
                 }
                 default: {
-                    this.onLoadStarted((undefined as ((value0: OnLoadStartedEvent) => void) | undefined));
+                    this.onLoadStarted((undefined as arkui_component_common_Callback<OnLoadStartedEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onLoadFinished_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onLoadFinished_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[23] != 0) {
+            switch (flagArray[23]) {
+                case 1:
+                case 3: {
                     this.onLoadFinished(modifier._onLoadFinished_0_0value);
                     break;
                 }
                 default: {
-                    this.onLoadFinished((undefined as ((value0: OnLoadFinishedEvent) => void) | undefined));
+                    this.onLoadFinished((undefined as arkui_component_common_Callback<OnLoadFinishedEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onProgressChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onProgressChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[24] != 0) {
+            switch (flagArray[24]) {
+                case 1:
+                case 3: {
                     this.onProgressChange(modifier._onProgressChange_0_0value);
                     break;
                 }
                 default: {
-                    this.onProgressChange((undefined as ((value0: OnProgressChangeEvent) => void) | undefined));
+                    this.onProgressChange((undefined as arkui_component_common_Callback<OnProgressChangeEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onTitleReceive_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onTitleReceive_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[25] != 0) {
+            switch (flagArray[25]) {
+                case 1:
+                case 3: {
                     this.onTitleReceive(modifier._onTitleReceive_0_0value);
                     break;
                 }
                 default: {
-                    this.onTitleReceive((undefined as ((value0: OnTitleReceiveEvent) => void) | undefined));
+                    this.onTitleReceive((undefined as arkui_component_common_Callback<OnTitleReceiveEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onGeolocationHide_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onGeolocationHide_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[26] != 0) {
+            switch (flagArray[26]) {
+                case 1:
+                case 3: {
                     this.onGeolocationHide(modifier._onGeolocationHide_0_0value);
                     break;
                 }
@@ -2802,24 +2571,22 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onGeolocationShow_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onGeolocationShow_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[27] != 0) {
+            switch (flagArray[27]) {
+                case 1:
+                case 3: {
                     this.onGeolocationShow(modifier._onGeolocationShow_0_0value);
                     break;
                 }
                 default: {
-                    this.onGeolocationShow((undefined as ((value0: OnGeolocationShowEvent) => void) | undefined));
+                    this.onGeolocationShow((undefined as arkui_component_common_Callback<OnGeolocationShowEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onRequestSelected_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onRequestSelected_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[28] != 0) {
+            switch (flagArray[28]) {
+                case 1:
+                case 3: {
                     this.onRequestSelected(modifier._onRequestSelected_0_0value);
                     break;
                 }
@@ -2828,167 +2595,156 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onAlert_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onAlert_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[29] != 0) {
+            switch (flagArray[29]) {
+                case 1:
+                case 3: {
                     this.onAlert(modifier._onAlert_0_0value);
                     break;
                 }
                 default: {
-                    this.onAlert((undefined as ((value0: OnAlertEvent) => boolean) | undefined));
+                    this.onAlert((undefined as arkui_component_common_Callback<OnAlertEvent, boolean> | undefined));
                 }
             }
         }
-        if (modifier._onBeforeUnload_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onBeforeUnload_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[30] != 0) {
+            switch (flagArray[30]) {
+                case 1:
+                case 3: {
                     this.onBeforeUnload(modifier._onBeforeUnload_0_0value);
                     break;
                 }
                 default: {
-                    this.onBeforeUnload((undefined as ((value0: OnBeforeUnloadEvent) => boolean) | undefined));
+                    this.onBeforeUnload((undefined as arkui_component_common_Callback<OnBeforeUnloadEvent, boolean> | undefined));
                 }
             }
         }
-        if (modifier._onConfirm_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onConfirm_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[31] != 0) {
+            switch (flagArray[31]) {
+                case 1:
+                case 3: {
                     this.onConfirm(modifier._onConfirm_0_0value);
                     break;
                 }
                 default: {
-                    this.onConfirm((undefined as ((value0: OnConfirmEvent) => boolean) | undefined));
+                    this.onConfirm((undefined as arkui_component_common_Callback<OnConfirmEvent, boolean> | undefined));
                 }
             }
         }
-        if (modifier._onPrompt_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onPrompt_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[32] != 0) {
+            switch (flagArray[32]) {
+                case 1:
+                case 3: {
                     this.onPrompt(modifier._onPrompt_0_0value);
                     break;
                 }
                 default: {
-                    this.onPrompt((undefined as ((value0: OnPromptEvent) => boolean) | undefined));
+                    this.onPrompt((undefined as arkui_component_common_Callback<OnPromptEvent, boolean> | undefined));
                 }
             }
         }
-        if (modifier._onConsole_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onConsole_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[33] != 0) {
+            switch (flagArray[33]) {
+                case 1:
+                case 3: {
                     this.onConsole(modifier._onConsole_0_0value);
                     break;
                 }
                 default: {
-                    this.onConsole((undefined as ((value0: OnConsoleEvent) => boolean) | undefined));
+                    this.onConsole((undefined as arkui_component_common_Callback<OnConsoleEvent, boolean> | undefined));
                 }
             }
         }
-        if (modifier._onErrorReceive_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onErrorReceive_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[34] != 0) {
+            switch (flagArray[34]) {
+                case 1:
+                case 3: {
                     this.onErrorReceive(modifier._onErrorReceive_0_0value);
                     break;
                 }
                 default: {
-                    this.onErrorReceive((undefined as ((value0: OnErrorReceiveEvent) => void) | undefined));
+                    this.onErrorReceive((undefined as arkui_component_common_Callback<OnErrorReceiveEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onHttpErrorReceive_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onHttpErrorReceive_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[35] != 0) {
+            switch (flagArray[35]) {
+                case 1:
+                case 3: {
                     this.onHttpErrorReceive(modifier._onHttpErrorReceive_0_0value);
                     break;
                 }
                 default: {
-                    this.onHttpErrorReceive((undefined as ((value0: OnHttpErrorReceiveEvent) => void) | undefined));
+                    this.onHttpErrorReceive((undefined as arkui_component_common_Callback<OnHttpErrorReceiveEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onDownloadStart_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onDownloadStart_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[36] != 0) {
+            switch (flagArray[36]) {
+                case 1:
+                case 3: {
                     this.onDownloadStart(modifier._onDownloadStart_0_0value);
                     break;
                 }
                 default: {
-                    this.onDownloadStart((undefined as ((value0: OnDownloadStartEvent) => void) | undefined));
+                    this.onDownloadStart((undefined as arkui_component_common_Callback<OnDownloadStartEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onRefreshAccessedHistory_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onRefreshAccessedHistory_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[37] != 0) {
+            switch (flagArray[37]) {
+                case 1:
+                case 3: {
                     this.onRefreshAccessedHistory(modifier._onRefreshAccessedHistory_0_0value);
                     break;
                 }
                 default: {
-                    this.onRefreshAccessedHistory((undefined as ((value0: OnRefreshAccessedHistoryEvent) => void) | undefined));
+                    this.onRefreshAccessedHistory((undefined as arkui_component_common_Callback<OnRefreshAccessedHistoryEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onRenderExited_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onRenderExited_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[38] != 0) {
+            switch (flagArray[38]) {
+                case 1:
+                case 3: {
                     this.onRenderExited(modifier._onRenderExited_0_0value);
                     break;
                 }
                 default: {
-                    this.onRenderExited((undefined as ((value0: OnRenderExitedEvent) => void) | undefined));
+                    this.onRenderExited((undefined as arkui_component_common_Callback<OnRenderExitedEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onShowFileSelector_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onShowFileSelector_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[39] != 0) {
+            switch (flagArray[39]) {
+                case 1:
+                case 3: {
                     this.onShowFileSelector(modifier._onShowFileSelector_0_0value);
                     break;
                 }
                 default: {
-                    this.onShowFileSelector((undefined as ((value0: OnShowFileSelectorEvent) => boolean) | undefined));
+                    this.onShowFileSelector((undefined as arkui_component_common_Callback<OnShowFileSelectorEvent, boolean> | undefined));
                 }
             }
         }
-        if (modifier._onResourceLoad_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onResourceLoad_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+    }
+    mergeModifier2(modifier: WebModifier, flagArray: Uint8Array): void {
+        if (flagArray[40] != 0) {
+            switch (flagArray[40]) {
+                case 1:
+                case 3: {
                     this.onResourceLoad(modifier._onResourceLoad_0_0value);
                     break;
                 }
                 default: {
-                    this.onResourceLoad((undefined as ((value0: OnResourceLoadEvent) => void) | undefined));
+                    this.onResourceLoad((undefined as arkui_component_common_Callback<OnResourceLoadEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onFullScreenExit_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onFullScreenExit_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[41] != 0) {
+            switch (flagArray[41]) {
+                case 1:
+                case 3: {
                     this.onFullScreenExit(modifier._onFullScreenExit_0_0value);
                     break;
                 }
@@ -2997,11 +2753,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onFullScreenEnter_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onFullScreenEnter_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[42] != 0) {
+            switch (flagArray[42]) {
+                case 1:
+                case 3: {
                     this.onFullScreenEnter(modifier._onFullScreenEnter_0_0value);
                     break;
                 }
@@ -3010,89 +2765,82 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onScaleChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onScaleChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[43] != 0) {
+            switch (flagArray[43]) {
+                case 1:
+                case 3: {
                     this.onScaleChange(modifier._onScaleChange_0_0value);
                     break;
                 }
                 default: {
-                    this.onScaleChange((undefined as ((value0: OnScaleChangeEvent) => void) | undefined));
+                    this.onScaleChange((undefined as arkui_component_common_Callback<OnScaleChangeEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onHttpAuthRequest_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onHttpAuthRequest_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[44] != 0) {
+            switch (flagArray[44]) {
+                case 1:
+                case 3: {
                     this.onHttpAuthRequest(modifier._onHttpAuthRequest_0_0value);
                     break;
                 }
                 default: {
-                    this.onHttpAuthRequest((undefined as ((value0: OnHttpAuthRequestEvent) => boolean) | undefined));
+                    this.onHttpAuthRequest((undefined as arkui_component_common_Callback<OnHttpAuthRequestEvent, boolean> | undefined));
                 }
             }
         }
-        if (modifier._onInterceptRequest_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onInterceptRequest_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[45] != 0) {
+            switch (flagArray[45]) {
+                case 1:
+                case 3: {
                     this.onInterceptRequest(modifier._onInterceptRequest_0_0value);
                     break;
                 }
                 default: {
-                    this.onInterceptRequest((undefined as ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined));
+                    this.onInterceptRequest((undefined as arkui_component_common_Callback<OnInterceptRequestEvent, WebResourceResponse | null> | undefined));
                 }
             }
         }
-        if (modifier._onPermissionRequest_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onPermissionRequest_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[46] != 0) {
+            switch (flagArray[46]) {
+                case 1:
+                case 3: {
                     this.onPermissionRequest(modifier._onPermissionRequest_0_0value);
                     break;
                 }
                 default: {
-                    this.onPermissionRequest((undefined as ((value0: OnPermissionRequestEvent) => void) | undefined));
+                    this.onPermissionRequest((undefined as arkui_component_common_Callback<OnPermissionRequestEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onScreenCaptureRequest_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onScreenCaptureRequest_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[47] != 0) {
+            switch (flagArray[47]) {
+                case 1:
+                case 3: {
                     this.onScreenCaptureRequest(modifier._onScreenCaptureRequest_0_0value);
                     break;
                 }
                 default: {
-                    this.onScreenCaptureRequest((undefined as ((value0: OnScreenCaptureRequestEvent) => void) | undefined));
+                    this.onScreenCaptureRequest((undefined as arkui_component_common_Callback<OnScreenCaptureRequestEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onContextMenuShow_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onContextMenuShow_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[48] != 0) {
+            switch (flagArray[48]) {
+                case 1:
+                case 3: {
                     this.onContextMenuShow(modifier._onContextMenuShow_0_0value);
                     break;
                 }
                 default: {
-                    this.onContextMenuShow((undefined as ((value0: OnContextMenuShowEvent) => boolean) | undefined));
+                    this.onContextMenuShow((undefined as arkui_component_common_Callback<OnContextMenuShowEvent, boolean> | undefined));
                 }
             }
         }
-        if (modifier._onContextMenuHide_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onContextMenuHide_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[49] != 0) {
+            switch (flagArray[49]) {
+                case 1:
+                case 3: {
                     this.onContextMenuHide(modifier._onContextMenuHide_0_0value);
                     break;
                 }
@@ -3101,11 +2849,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._mediaPlayGestureAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._mediaPlayGestureAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[50] != 0) {
+            switch (flagArray[50]) {
+                case 1:
+                case 3: {
                     this.mediaPlayGestureAccess(modifier._mediaPlayGestureAccess_0_0value);
                     break;
                 }
@@ -3114,50 +2861,46 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onSearchResultReceive_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onSearchResultReceive_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[51] != 0) {
+            switch (flagArray[51]) {
+                case 1:
+                case 3: {
                     this.onSearchResultReceive(modifier._onSearchResultReceive_0_0value);
                     break;
                 }
                 default: {
-                    this.onSearchResultReceive((undefined as ((value0: OnSearchResultReceiveEvent) => void) | undefined));
+                    this.onSearchResultReceive((undefined as arkui_component_common_Callback<OnSearchResultReceiveEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onScroll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onScroll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[52] != 0) {
+            switch (flagArray[52]) {
+                case 1:
+                case 3: {
                     this.onScroll(modifier._onScroll_0_0value);
                     break;
                 }
                 default: {
-                    this.onScroll((undefined as ((value0: OnScrollEvent) => void) | undefined));
+                    this.onScroll((undefined as arkui_component_common_Callback<OnScrollEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onSslErrorEventReceive_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onSslErrorEventReceive_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[53] != 0) {
+            switch (flagArray[53]) {
+                case 1:
+                case 3: {
                     this.onSslErrorEventReceive(modifier._onSslErrorEventReceive_0_0value);
                     break;
                 }
                 default: {
-                    this.onSslErrorEventReceive((undefined as ((value0: OnSslErrorEventReceiveEvent) => void) | undefined));
+                    this.onSslErrorEventReceive((undefined as arkui_component_common_Callback<OnSslErrorEventReceiveEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onSslErrorEvent_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onSslErrorEvent_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[54] != 0) {
+            switch (flagArray[54]) {
+                case 1:
+                case 3: {
                     this.onSslErrorEvent(modifier._onSslErrorEvent_0_0value);
                     break;
                 }
@@ -3166,37 +2909,34 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onClientAuthenticationRequest_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onClientAuthenticationRequest_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[55] != 0) {
+            switch (flagArray[55]) {
+                case 1:
+                case 3: {
                     this.onClientAuthenticationRequest(modifier._onClientAuthenticationRequest_0_0value);
                     break;
                 }
                 default: {
-                    this.onClientAuthenticationRequest((undefined as ((value0: OnClientAuthenticationEvent) => void) | undefined));
+                    this.onClientAuthenticationRequest((undefined as arkui_component_common_Callback<OnClientAuthenticationEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onWindowNew_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onWindowNew_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[56] != 0) {
+            switch (flagArray[56]) {
+                case 1:
+                case 3: {
                     this.onWindowNew(modifier._onWindowNew_0_0value);
                     break;
                 }
                 default: {
-                    this.onWindowNew((undefined as ((value0: OnWindowNewEvent) => void) | undefined));
+                    this.onWindowNew((undefined as arkui_component_common_Callback<OnWindowNewEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onWindowExit_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onWindowExit_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[57] != 0) {
+            switch (flagArray[57]) {
+                case 1:
+                case 3: {
                     this.onWindowExit(modifier._onWindowExit_0_0value);
                     break;
                 }
@@ -3205,11 +2945,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._multiWindowAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._multiWindowAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[58] != 0) {
+            switch (flagArray[58]) {
+                case 1:
+                case 3: {
                     this.multiWindowAccess(modifier._multiWindowAccess_0_0value);
                     break;
                 }
@@ -3218,11 +2957,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onInterceptKeyEvent_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onInterceptKeyEvent_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[59] != 0) {
+            switch (flagArray[59]) {
+                case 1:
+                case 3: {
                     this.onInterceptKeyEvent(modifier._onInterceptKeyEvent_0_0value);
                     break;
                 }
@@ -3231,11 +2969,12 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._webStandardFont_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._webStandardFont_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+    }
+    mergeModifier3(modifier: WebModifier, flagArray: Uint8Array): void {
+        if (flagArray[60] != 0) {
+            switch (flagArray[60]) {
+                case 1:
+                case 3: {
                     this.webStandardFont(modifier._webStandardFont_0_0value);
                     break;
                 }
@@ -3244,11 +2983,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._webSerifFont_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._webSerifFont_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[61] != 0) {
+            switch (flagArray[61]) {
+                case 1:
+                case 3: {
                     this.webSerifFont(modifier._webSerifFont_0_0value);
                     break;
                 }
@@ -3257,11 +2995,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._webSansSerifFont_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._webSansSerifFont_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[62] != 0) {
+            switch (flagArray[62]) {
+                case 1:
+                case 3: {
                     this.webSansSerifFont(modifier._webSansSerifFont_0_0value);
                     break;
                 }
@@ -3270,11 +3007,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._webFixedFont_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._webFixedFont_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[63] != 0) {
+            switch (flagArray[63]) {
+                case 1:
+                case 3: {
                     this.webFixedFont(modifier._webFixedFont_0_0value);
                     break;
                 }
@@ -3283,11 +3019,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._webFantasyFont_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._webFantasyFont_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[64] != 0) {
+            switch (flagArray[64]) {
+                case 1:
+                case 3: {
                     this.webFantasyFont(modifier._webFantasyFont_0_0value);
                     break;
                 }
@@ -3296,11 +3031,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._webCursiveFont_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._webCursiveFont_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[65] != 0) {
+            switch (flagArray[65]) {
+                case 1:
+                case 3: {
                     this.webCursiveFont(modifier._webCursiveFont_0_0value);
                     break;
                 }
@@ -3309,11 +3043,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._defaultFixedFontSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._defaultFixedFontSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[66] != 0) {
+            switch (flagArray[66]) {
+                case 1:
+                case 3: {
                     this.defaultFixedFontSize(modifier._defaultFixedFontSize_0_0value);
                     break;
                 }
@@ -3322,11 +3055,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._defaultFontSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._defaultFontSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[67] != 0) {
+            switch (flagArray[67]) {
+                case 1:
+                case 3: {
                     this.defaultFontSize(modifier._defaultFontSize_0_0value);
                     break;
                 }
@@ -3335,11 +3067,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._minFontSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._minFontSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[68] != 0) {
+            switch (flagArray[68]) {
+                case 1:
+                case 3: {
                     this.minFontSize(modifier._minFontSize_0_0value);
                     break;
                 }
@@ -3348,11 +3079,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._minLogicalFontSize_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._minLogicalFontSize_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[69] != 0) {
+            switch (flagArray[69]) {
+                case 1:
+                case 3: {
                     this.minLogicalFontSize(modifier._minLogicalFontSize_0_0value);
                     break;
                 }
@@ -3361,11 +3091,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._defaultTextEncodingFormat_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._defaultTextEncodingFormat_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[70] != 0) {
+            switch (flagArray[70]) {
+                case 1:
+                case 3: {
                     this.defaultTextEncodingFormat(modifier._defaultTextEncodingFormat_0_0value);
                     break;
                 }
@@ -3374,11 +3103,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._forceDisplayScrollBar_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._forceDisplayScrollBar_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[71] != 0) {
+            switch (flagArray[71]) {
+                case 1:
+                case 3: {
                     this.forceDisplayScrollBar(modifier._forceDisplayScrollBar_0_0value);
                     break;
                 }
@@ -3387,11 +3115,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._blockNetwork_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._blockNetwork_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[72] != 0) {
+            switch (flagArray[72]) {
+                case 1:
+                case 3: {
                     this.blockNetwork(modifier._blockNetwork_0_0value);
                     break;
                 }
@@ -3400,11 +3127,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._horizontalScrollBarAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._horizontalScrollBarAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[73] != 0) {
+            switch (flagArray[73]) {
+                case 1:
+                case 3: {
                     this.horizontalScrollBarAccess(modifier._horizontalScrollBarAccess_0_0value);
                     break;
                 }
@@ -3413,11 +3139,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._verticalScrollBarAccess_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._verticalScrollBarAccess_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[74] != 0) {
+            switch (flagArray[74]) {
+                case 1:
+                case 3: {
                     this.verticalScrollBarAccess(modifier._verticalScrollBarAccess_0_0value);
                     break;
                 }
@@ -3426,63 +3151,58 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onTouchIconUrlReceived_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onTouchIconUrlReceived_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[75] != 0) {
+            switch (flagArray[75]) {
+                case 1:
+                case 3: {
                     this.onTouchIconUrlReceived(modifier._onTouchIconUrlReceived_0_0value);
                     break;
                 }
                 default: {
-                    this.onTouchIconUrlReceived((undefined as ((value0: OnTouchIconUrlReceivedEvent) => void) | undefined));
+                    this.onTouchIconUrlReceived((undefined as arkui_component_common_Callback<OnTouchIconUrlReceivedEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onFaviconReceived_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onFaviconReceived_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[76] != 0) {
+            switch (flagArray[76]) {
+                case 1:
+                case 3: {
                     this.onFaviconReceived(modifier._onFaviconReceived_0_0value);
                     break;
                 }
                 default: {
-                    this.onFaviconReceived((undefined as ((value0: OnFaviconReceivedEvent) => void) | undefined));
+                    this.onFaviconReceived((undefined as arkui_component_common_Callback<OnFaviconReceivedEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onPageVisible_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onPageVisible_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[77] != 0) {
+            switch (flagArray[77]) {
+                case 1:
+                case 3: {
                     this.onPageVisible(modifier._onPageVisible_0_0value);
                     break;
                 }
                 default: {
-                    this.onPageVisible((undefined as ((value0: OnPageVisibleEvent) => void) | undefined));
+                    this.onPageVisible((undefined as arkui_component_common_Callback<OnPageVisibleEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onDataResubmitted_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onDataResubmitted_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[78] != 0) {
+            switch (flagArray[78]) {
+                case 1:
+                case 3: {
                     this.onDataResubmitted(modifier._onDataResubmitted_0_0value);
                     break;
                 }
                 default: {
-                    this.onDataResubmitted((undefined as ((value0: OnDataResubmittedEvent) => void) | undefined));
+                    this.onDataResubmitted((undefined as arkui_component_common_Callback<OnDataResubmittedEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._pinchSmooth_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._pinchSmooth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[79] != 0) {
+            switch (flagArray[79]) {
+                case 1:
+                case 3: {
                     this.pinchSmooth(modifier._pinchSmooth_0_0value);
                     break;
                 }
@@ -3491,11 +3211,12 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._allowWindowOpenMethod_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._allowWindowOpenMethod_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+    }
+    mergeModifier4(modifier: WebModifier, flagArray: Uint8Array): void {
+        if (flagArray[80] != 0) {
+            switch (flagArray[80]) {
+                case 1:
+                case 3: {
                     this.allowWindowOpenMethod(modifier._allowWindowOpenMethod_0_0value);
                     break;
                 }
@@ -3504,37 +3225,34 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onAudioStateChanged_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onAudioStateChanged_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[81] != 0) {
+            switch (flagArray[81]) {
+                case 1:
+                case 3: {
                     this.onAudioStateChanged(modifier._onAudioStateChanged_0_0value);
                     break;
                 }
                 default: {
-                    this.onAudioStateChanged((undefined as ((value0: OnAudioStateChangedEvent) => void) | undefined));
+                    this.onAudioStateChanged((undefined as arkui_component_common_Callback<OnAudioStateChangedEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onFirstContentfulPaint_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onFirstContentfulPaint_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[82] != 0) {
+            switch (flagArray[82]) {
+                case 1:
+                case 3: {
                     this.onFirstContentfulPaint(modifier._onFirstContentfulPaint_0_0value);
                     break;
                 }
                 default: {
-                    this.onFirstContentfulPaint((undefined as ((value0: OnFirstContentfulPaintEvent) => void) | undefined));
+                    this.onFirstContentfulPaint((undefined as arkui_component_common_Callback<OnFirstContentfulPaintEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onFirstMeaningfulPaint_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onFirstMeaningfulPaint_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[83] != 0) {
+            switch (flagArray[83]) {
+                case 1:
+                case 3: {
                     this.onFirstMeaningfulPaint(modifier._onFirstMeaningfulPaint_0_0value);
                     break;
                 }
@@ -3543,11 +3261,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onLargestContentfulPaint_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onLargestContentfulPaint_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[84] != 0) {
+            switch (flagArray[84]) {
+                case 1:
+                case 3: {
                     this.onLargestContentfulPaint(modifier._onLargestContentfulPaint_0_0value);
                     break;
                 }
@@ -3556,24 +3273,22 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onLoadIntercept_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onLoadIntercept_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[85] != 0) {
+            switch (flagArray[85]) {
+                case 1:
+                case 3: {
                     this.onLoadIntercept(modifier._onLoadIntercept_0_0value);
                     break;
                 }
                 default: {
-                    this.onLoadIntercept((undefined as ((value0: OnLoadInterceptEvent) => boolean) | undefined));
+                    this.onLoadIntercept((undefined as arkui_component_common_Callback<OnLoadInterceptEvent, boolean> | undefined));
                 }
             }
         }
-        if (modifier._onControllerAttached_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onControllerAttached_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[86] != 0) {
+            switch (flagArray[86]) {
+                case 1:
+                case 3: {
                     this.onControllerAttached(modifier._onControllerAttached_0_0value);
                     break;
                 }
@@ -3582,24 +3297,22 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onOverScroll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onOverScroll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[87] != 0) {
+            switch (flagArray[87]) {
+                case 1:
+                case 3: {
                     this.onOverScroll(modifier._onOverScroll_0_0value);
                     break;
                 }
                 default: {
-                    this.onOverScroll((undefined as ((value0: OnOverScrollEvent) => void) | undefined));
+                    this.onOverScroll((undefined as arkui_component_common_Callback<OnOverScrollEvent, void> | undefined));
                 }
             }
         }
-        if (modifier._onSafeBrowsingCheckResult_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onSafeBrowsingCheckResult_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[88] != 0) {
+            switch (flagArray[88]) {
+                case 1:
+                case 3: {
                     this.onSafeBrowsingCheckResult(modifier._onSafeBrowsingCheckResult_0_0value);
                     break;
                 }
@@ -3608,11 +3321,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onNavigationEntryCommitted_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onNavigationEntryCommitted_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[89] != 0) {
+            switch (flagArray[89]) {
+                case 1:
+                case 3: {
                     this.onNavigationEntryCommitted(modifier._onNavigationEntryCommitted_0_0value);
                     break;
                 }
@@ -3621,11 +3333,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onIntelligentTrackingPreventionResult_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onIntelligentTrackingPreventionResult_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[90] != 0) {
+            switch (flagArray[90]) {
+                case 1:
+                case 3: {
                     this.onIntelligentTrackingPreventionResult(modifier._onIntelligentTrackingPreventionResult_0_0value);
                     break;
                 }
@@ -3634,11 +3345,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._javaScriptOnDocumentStart_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._javaScriptOnDocumentStart_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[91] != 0) {
+            switch (flagArray[91]) {
+                case 1:
+                case 3: {
                     this.javaScriptOnDocumentStart(modifier._javaScriptOnDocumentStart_0_0value);
                     break;
                 }
@@ -3647,11 +3357,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._javaScriptOnDocumentEnd_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._javaScriptOnDocumentEnd_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[92] != 0) {
+            switch (flagArray[92]) {
+                case 1:
+                case 3: {
                     this.javaScriptOnDocumentEnd(modifier._javaScriptOnDocumentEnd_0_0value);
                     break;
                 }
@@ -3660,11 +3369,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._layoutMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._layoutMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[93] != 0) {
+            switch (flagArray[93]) {
+                case 1:
+                case 3: {
                     this.layoutMode(modifier._layoutMode_0_0value);
                     break;
                 }
@@ -3673,11 +3381,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._nestedScroll_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._nestedScroll_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[94] != 0) {
+            switch (flagArray[94]) {
+                case 1:
+                case 3: {
                     this.nestedScroll(modifier._nestedScroll_0_0value);
                     break;
                 }
@@ -3686,11 +3393,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._enableNativeEmbedMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableNativeEmbedMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[95] != 0) {
+            switch (flagArray[95]) {
+                case 1:
+                case 3: {
                     this.enableNativeEmbedMode(modifier._enableNativeEmbedMode_0_0value);
                     break;
                 }
@@ -3699,11 +3405,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onNativeEmbedLifecycleChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onNativeEmbedLifecycleChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[96] != 0) {
+            switch (flagArray[96]) {
+                case 1:
+                case 3: {
                     this.onNativeEmbedLifecycleChange(modifier._onNativeEmbedLifecycleChange_0_0value);
                     break;
                 }
@@ -3712,11 +3417,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onNativeEmbedVisibilityChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onNativeEmbedVisibilityChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[97] != 0) {
+            switch (flagArray[97]) {
+                case 1:
+                case 3: {
                     this.onNativeEmbedVisibilityChange(modifier._onNativeEmbedVisibilityChange_0_0value);
                     break;
                 }
@@ -3725,11 +3429,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onNativeEmbedGestureEvent_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onNativeEmbedGestureEvent_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[98] != 0) {
+            switch (flagArray[98]) {
+                case 1:
+                case 3: {
                     this.onNativeEmbedGestureEvent(modifier._onNativeEmbedGestureEvent_0_0value);
                     break;
                 }
@@ -3738,11 +3441,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._copyOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._copyOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[99] != 0) {
+            switch (flagArray[99]) {
+                case 1:
+                case 3: {
                     this.copyOptions(modifier._copyOptions_0_0value);
                     break;
                 }
@@ -3751,11 +3453,12 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onOverrideUrlLoading_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onOverrideUrlLoading_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+    }
+    mergeModifier5(modifier: WebModifier, flagArray: Uint8Array): void {
+        if (flagArray[100] != 0) {
+            switch (flagArray[100]) {
+                case 1:
+                case 3: {
                     this.onOverrideUrlLoading(modifier._onOverrideUrlLoading_0_0value);
                     break;
                 }
@@ -3764,11 +3467,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._textAutosizing_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._textAutosizing_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[101] != 0) {
+            switch (flagArray[101]) {
+                case 1:
+                case 3: {
                     this.textAutosizing(modifier._textAutosizing_0_0value);
                     break;
                 }
@@ -3777,11 +3479,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._enableNativeMediaPlayer_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableNativeMediaPlayer_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[102] != 0) {
+            switch (flagArray[102]) {
+                case 1:
+                case 3: {
                     this.enableNativeMediaPlayer(modifier._enableNativeMediaPlayer_0_0value);
                     break;
                 }
@@ -3790,11 +3491,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onRenderProcessNotResponding_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onRenderProcessNotResponding_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[103] != 0) {
+            switch (flagArray[103]) {
+                case 1:
+                case 3: {
                     this.onRenderProcessNotResponding(modifier._onRenderProcessNotResponding_0_0value);
                     break;
                 }
@@ -3803,11 +3503,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onRenderProcessResponding_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onRenderProcessResponding_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[104] != 0) {
+            switch (flagArray[104]) {
+                case 1:
+                case 3: {
                     this.onRenderProcessResponding(modifier._onRenderProcessResponding_0_0value);
                     break;
                 }
@@ -3816,11 +3515,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onViewportFitChanged_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onViewportFitChanged_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[105] != 0) {
+            switch (flagArray[105]) {
+                case 1:
+                case 3: {
                     this.onViewportFitChanged(modifier._onViewportFitChanged_0_0value);
                     break;
                 }
@@ -3829,11 +3527,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onInterceptKeyboardAttach_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onInterceptKeyboardAttach_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[106] != 0) {
+            switch (flagArray[106]) {
+                case 1:
+                case 3: {
                     this.onInterceptKeyboardAttach(modifier._onInterceptKeyboardAttach_0_0value);
                     break;
                 }
@@ -3842,11 +3539,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._onAdsBlocked_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onAdsBlocked_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[107] != 0) {
+            switch (flagArray[107]) {
+                case 1:
+                case 3: {
                     this.onAdsBlocked(modifier._onAdsBlocked_0_0value);
                     break;
                 }
@@ -3855,11 +3551,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._keyboardAvoidMode_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._keyboardAvoidMode_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[108] != 0) {
+            switch (flagArray[108]) {
+                case 1:
+                case 3: {
                     this.keyboardAvoidMode(modifier._keyboardAvoidMode_0_0value);
                     break;
                 }
@@ -3868,11 +3563,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._editMenuOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._editMenuOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[109] != 0) {
+            switch (flagArray[109]) {
+                case 1:
+                case 3: {
                     this.editMenuOptions(modifier._editMenuOptions_0_0value);
                     break;
                 }
@@ -3881,11 +3575,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._enableHapticFeedback_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableHapticFeedback_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[110] != 0) {
+            switch (flagArray[110]) {
+                case 1:
+                case 3: {
                     this.enableHapticFeedback(modifier._enableHapticFeedback_0_0value);
                     break;
                 }
@@ -3894,24 +3587,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._optimizeParserBudget_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._optimizeParserBudget_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.optimizeParserBudget(modifier._optimizeParserBudget_0_0value);
-                    break;
-                }
-                default: {
-                    this.optimizeParserBudget((undefined as boolean | undefined));
-                }
-            }
-        }
-        if (modifier._enableFollowSystemFontWeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableFollowSystemFontWeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[111] != 0) {
+            switch (flagArray[111]) {
+                case 1:
+                case 3: {
                     this.enableFollowSystemFontWeight(modifier._enableFollowSystemFontWeight_0_0value);
                     break;
                 }
@@ -3920,11 +3599,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._enableWebAVSession_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableWebAVSession_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[112] != 0) {
+            switch (flagArray[112]) {
+                case 1:
+                case 3: {
                     this.enableWebAVSession(modifier._enableWebAVSession_0_0value);
                     break;
                 }
@@ -3933,11 +3611,22 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._runJavaScriptOnDocumentStart_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._runJavaScriptOnDocumentStart_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[113] != 0) {
+            switch (flagArray[113]) {
+                case 1:
+                case 3: {
+                    this.optimizeParserBudget(modifier._optimizeParserBudget_0_0value);
+                    break;
+                }
+                default: {
+                    this.optimizeParserBudget((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[114] != 0) {
+            switch (flagArray[114]) {
+                case 1:
+                case 3: {
                     this.runJavaScriptOnDocumentStart(modifier._runJavaScriptOnDocumentStart_0_0value);
                     break;
                 }
@@ -3946,11 +3635,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._runJavaScriptOnDocumentEnd_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._runJavaScriptOnDocumentEnd_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[115] != 0) {
+            switch (flagArray[115]) {
+                case 1:
+                case 3: {
                     this.runJavaScriptOnDocumentEnd(modifier._runJavaScriptOnDocumentEnd_0_0value);
                     break;
                 }
@@ -3959,11 +3647,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._runJavaScriptOnHeadEnd_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._runJavaScriptOnHeadEnd_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[116] != 0) {
+            switch (flagArray[116]) {
+                case 1:
+                case 3: {
                     this.runJavaScriptOnHeadEnd(modifier._runJavaScriptOnHeadEnd_0_0value);
                     break;
                 }
@@ -3972,11 +3659,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._nativeEmbedOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._nativeEmbedOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[117] != 0) {
+            switch (flagArray[117]) {
+                case 1:
+                case 3: {
                     this.nativeEmbedOptions(modifier._nativeEmbedOptions_0_0value);
                     break;
                 }
@@ -3985,11 +3671,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._registerNativeEmbedRule_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._registerNativeEmbedRule_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[118] != 0) {
+            switch (flagArray[118]) {
+                case 1:
+                case 3: {
                     this.registerNativeEmbedRule(modifier._registerNativeEmbedRule_0_0value, modifier._registerNativeEmbedRule_0_1value);
                     break;
                 }
@@ -3998,11 +3683,10 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
-        if (modifier._bindSelectionMenu_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._bindSelectionMenu_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[119] != 0) {
+            switch (flagArray[119]) {
+                case 1:
+                case 3: {
                     this.bindSelectionMenu(modifier._bindSelectionMenu_0_0value, modifier._bindSelectionMenu_0_1value, modifier._bindSelectionMenu_0_2value, modifier._bindSelectionMenu_0_3value);
                     break;
                 }
@@ -4013,1449 +3697,1210 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         }
     }
     javaScriptAccess(value: boolean | undefined): this {
-        if (((this._javaScriptAccess_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._javaScriptAccess_0_0value) !== (value)))
-        {
-            this._javaScriptAccess_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || ((this._javaScriptAccess_0_0value) !== (value))) {
+            this._flagArray[0] = 1
             this._javaScriptAccess_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._javaScriptAccess_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     fileAccess(value: boolean | undefined): this {
-        if (((this._fileAccess_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._fileAccess_0_0value) !== (value)))
-        {
-            this._fileAccess_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[1]) == (0)) || ((this._fileAccess_0_0value) !== (value))) {
+            this._flagArray[1] = 1
             this._fileAccess_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._fileAccess_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     onlineImageAccess(value: boolean | undefined): this {
-        if (((this._onlineImageAccess_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._onlineImageAccess_0_0value) !== (value)))
-        {
-            this._onlineImageAccess_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[2]) == (0)) || ((this._onlineImageAccess_0_0value) !== (value))) {
+            this._flagArray[2] = 1
             this._onlineImageAccess_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onlineImageAccess_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     domStorageAccess(value: boolean | undefined): this {
-        if (((this._domStorageAccess_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._domStorageAccess_0_0value) !== (value)))
-        {
-            this._domStorageAccess_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[3]) == (0)) || ((this._domStorageAccess_0_0value) !== (value))) {
+            this._flagArray[3] = 1
             this._domStorageAccess_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._domStorageAccess_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }
     imageAccess(value: boolean | undefined): this {
-        if (((this._imageAccess_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._imageAccess_0_0value) !== (value)))
-        {
-            this._imageAccess_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[4]) == (0)) || ((this._imageAccess_0_0value) !== (value))) {
+            this._flagArray[4] = 1
             this._imageAccess_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._imageAccess_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[4] = 3
         }
         return this
     }
     mixedMode(value: MixedMode | undefined): this {
-        if (((this._mixedMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._mixedMode_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[5]) == (0)) || (true)) {
+            this._flagArray[5] = 1
             this._mixedMode_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._mixedMode_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[5] = 3
         }
         return this
     }
     zoomAccess(value: boolean | undefined): this {
-        if (((this._zoomAccess_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._zoomAccess_0_0value) !== (value)))
-        {
-            this._zoomAccess_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[6]) == (0)) || ((this._zoomAccess_0_0value) !== (value))) {
+            this._flagArray[6] = 1
             this._zoomAccess_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._zoomAccess_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[6] = 3
         }
         return this
     }
     geolocationAccess(value: boolean | undefined): this {
-        if (((this._geolocationAccess_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._geolocationAccess_0_0value) !== (value)))
-        {
-            this._geolocationAccess_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[7]) == (0)) || ((this._geolocationAccess_0_0value) !== (value))) {
+            this._flagArray[7] = 1
             this._geolocationAccess_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._geolocationAccess_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[7] = 3
         }
         return this
     }
     javaScriptProxy(value: JavaScriptProxy | undefined): this {
-        if (((this._javaScriptProxy_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._javaScriptProxy_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[8]) == (0)) || (true)) {
+            this._flagArray[8] = 1
             this._javaScriptProxy_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._javaScriptProxy_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[8] = 3
         }
         return this
     }
     cacheMode(value: CacheMode | undefined): this {
-        if (((this._cacheMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._cacheMode_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[9]) == (0)) || (true)) {
+            this._flagArray[9] = 1
             this._cacheMode_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._cacheMode_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[9] = 3
         }
         return this
     }
     darkMode(value: WebDarkMode | undefined): this {
-        if (((this._darkMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._darkMode_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[10]) == (0)) || (true)) {
+            this._flagArray[10] = 1
             this._darkMode_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._darkMode_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[10] = 3
         }
         return this
     }
     forceDarkAccess(value: boolean | undefined): this {
-        if (((this._forceDarkAccess_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._forceDarkAccess_0_0value) !== (value)))
-        {
-            this._forceDarkAccess_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[11]) == (0)) || ((this._forceDarkAccess_0_0value) !== (value))) {
+            this._flagArray[11] = 1
             this._forceDarkAccess_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._forceDarkAccess_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[11] = 3
         }
         return this
     }
     mediaOptions(value: WebMediaOptions | undefined): this {
-        if (((this._mediaOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._mediaOptions_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[12]) == (0)) || (true)) {
+            this._flagArray[12] = 1
             this._mediaOptions_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._mediaOptions_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[12] = 3
         }
         return this
     }
     overviewModeAccess(value: boolean | undefined): this {
-        if (((this._overviewModeAccess_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._overviewModeAccess_0_0value) !== (value)))
-        {
-            this._overviewModeAccess_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[13]) == (0)) || ((this._overviewModeAccess_0_0value) !== (value))) {
+            this._flagArray[13] = 1
             this._overviewModeAccess_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._overviewModeAccess_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[13] = 3
         }
         return this
     }
     overScrollMode(value: OverScrollMode | undefined): this {
-        if (((this._overScrollMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._overScrollMode_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[14]) == (0)) || (true)) {
+            this._flagArray[14] = 1
             this._overScrollMode_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._overScrollMode_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[14] = 3
         }
         return this
     }
     blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this {
-        if (((this._blurOnKeyboardHideMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._blurOnKeyboardHideMode_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[15]) == (0)) || (true)) {
+            this._flagArray[15] = 1
             this._blurOnKeyboardHideMode_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._blurOnKeyboardHideMode_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[15] = 3
         }
         return this
     }
     textZoomRatio(value: int32 | undefined): this {
-        if (((this._textZoomRatio_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._textZoomRatio_0_0value) !== (value)))
-        {
-            this._textZoomRatio_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[16]) == (0)) || ((this._textZoomRatio_0_0value) !== (value))) {
+            this._flagArray[16] = 1
             this._textZoomRatio_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._textZoomRatio_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[16] = 3
         }
         return this
     }
     databaseAccess(value: boolean | undefined): this {
-        if (((this._databaseAccess_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._databaseAccess_0_0value) !== (value)))
-        {
-            this._databaseAccess_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[17]) == (0)) || ((this._databaseAccess_0_0value) !== (value))) {
+            this._flagArray[17] = 1
             this._databaseAccess_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._databaseAccess_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[17] = 3
         }
         return this
     }
     initialScale(value: double | undefined): this {
-        if (((this._initialScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._initialScale_0_0value) !== (value)))
-        {
-            this._initialScale_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[18]) == (0)) || ((this._initialScale_0_0value) !== (value))) {
+            this._flagArray[18] = 1
             this._initialScale_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._initialScale_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[18] = 3
         }
         return this
     }
     metaViewport(value: boolean | undefined): this {
-        if (((this._metaViewport_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._metaViewport_0_0value) !== (value)))
-        {
-            this._metaViewport_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[19]) == (0)) || ((this._metaViewport_0_0value) !== (value))) {
+            this._flagArray[19] = 1
             this._metaViewport_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._metaViewport_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[19] = 3
         }
         return this
     }
-    onPageEnd(value: ((value0: OnPageEndEvent) => void) | undefined): this {
-        if (((this._onPageEnd_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onPageEnd_0_flag = AttributeUpdaterFlag.UPDATE
-            this._onPageEnd_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._onPageEnd_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    onPageBegin(value: ((value0: OnPageBeginEvent) => void) | undefined): this {
-        if (((this._onPageBegin_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onPageBegin_0_flag = AttributeUpdaterFlag.UPDATE
+    onPageBegin(value: arkui_component_common_Callback<OnPageBeginEvent, void> | undefined): this {
+        if (((this._flagArray[20]) == (0)) || (true)) {
+            this._flagArray[20] = 1
             this._onPageBegin_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onPageBegin_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[20] = 3
         }
         return this
     }
-    onLoadStarted(value: ((value0: OnLoadStartedEvent) => void) | undefined): this {
-        if (((this._onLoadStarted_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onLoadStarted_0_flag = AttributeUpdaterFlag.UPDATE
+    onPageEnd(value: arkui_component_common_Callback<OnPageEndEvent, void> | undefined): this {
+        if (((this._flagArray[21]) == (0)) || (true)) {
+            this._flagArray[21] = 1
+            this._onPageEnd_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[21] = 3
+        }
+        return this
+    }
+    onLoadStarted(value: arkui_component_common_Callback<OnLoadStartedEvent, void> | undefined): this {
+        if (((this._flagArray[22]) == (0)) || (true)) {
+            this._flagArray[22] = 1
             this._onLoadStarted_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onLoadStarted_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[22] = 3
         }
         return this
     }
-    onLoadFinished(value: ((value0: OnLoadFinishedEvent) => void) | undefined): this {
-        if (((this._onLoadFinished_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onLoadFinished_0_flag = AttributeUpdaterFlag.UPDATE
+    onLoadFinished(value: arkui_component_common_Callback<OnLoadFinishedEvent, void> | undefined): this {
+        if (((this._flagArray[23]) == (0)) || (true)) {
+            this._flagArray[23] = 1
             this._onLoadFinished_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onLoadFinished_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[23] = 3
         }
         return this
     }
-    onProgressChange(value: ((value0: OnProgressChangeEvent) => void) | undefined): this {
-        if (((this._onProgressChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onProgressChange_0_flag = AttributeUpdaterFlag.UPDATE
+    onProgressChange(value: arkui_component_common_Callback<OnProgressChangeEvent, void> | undefined): this {
+        if (((this._flagArray[24]) == (0)) || (true)) {
+            this._flagArray[24] = 1
             this._onProgressChange_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onProgressChange_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[24] = 3
         }
         return this
     }
-    onTitleReceive(value: ((value0: OnTitleReceiveEvent) => void) | undefined): this {
-        if (((this._onTitleReceive_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onTitleReceive_0_flag = AttributeUpdaterFlag.UPDATE
+    onTitleReceive(value: arkui_component_common_Callback<OnTitleReceiveEvent, void> | undefined): this {
+        if (((this._flagArray[25]) == (0)) || (true)) {
+            this._flagArray[25] = 1
             this._onTitleReceive_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onTitleReceive_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[25] = 3
         }
         return this
     }
     onGeolocationHide(value: (() => void) | undefined): this {
-        if (((this._onGeolocationHide_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onGeolocationHide_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[26]) == (0)) || (true)) {
+            this._flagArray[26] = 1
             this._onGeolocationHide_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onGeolocationHide_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[26] = 3
         }
         return this
     }
-    onGeolocationShow(value: ((value0: OnGeolocationShowEvent) => void) | undefined): this {
-        if (((this._onGeolocationShow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onGeolocationShow_0_flag = AttributeUpdaterFlag.UPDATE
+    onGeolocationShow(value: arkui_component_common_Callback<OnGeolocationShowEvent, void> | undefined): this {
+        if (((this._flagArray[27]) == (0)) || (true)) {
+            this._flagArray[27] = 1
             this._onGeolocationShow_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onGeolocationShow_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[27] = 3
         }
         return this
     }
     onRequestSelected(value: (() => void) | undefined): this {
-        if (((this._onRequestSelected_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onRequestSelected_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[28]) == (0)) || (true)) {
+            this._flagArray[28] = 1
             this._onRequestSelected_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onRequestSelected_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[28] = 3
         }
         return this
     }
-    onAlert(value: ((value0: OnAlertEvent) => boolean) | undefined): this {
-        if (((this._onAlert_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onAlert_0_flag = AttributeUpdaterFlag.UPDATE
+    onAlert(value: arkui_component_common_Callback<OnAlertEvent, boolean> | undefined): this {
+        if (((this._flagArray[29]) == (0)) || (true)) {
+            this._flagArray[29] = 1
             this._onAlert_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onAlert_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[29] = 3
         }
         return this
     }
-    onBeforeUnload(value: ((value0: OnBeforeUnloadEvent) => boolean) | undefined): this {
-        if (((this._onBeforeUnload_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onBeforeUnload_0_flag = AttributeUpdaterFlag.UPDATE
+    onBeforeUnload(value: arkui_component_common_Callback<OnBeforeUnloadEvent, boolean> | undefined): this {
+        if (((this._flagArray[30]) == (0)) || (true)) {
+            this._flagArray[30] = 1
             this._onBeforeUnload_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onBeforeUnload_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[30] = 3
         }
         return this
     }
-    onConfirm(value: ((value0: OnConfirmEvent) => boolean) | undefined): this {
-        if (((this._onConfirm_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onConfirm_0_flag = AttributeUpdaterFlag.UPDATE
+    onConfirm(value: arkui_component_common_Callback<OnConfirmEvent, boolean> | undefined): this {
+        if (((this._flagArray[31]) == (0)) || (true)) {
+            this._flagArray[31] = 1
             this._onConfirm_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onConfirm_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[31] = 3
         }
         return this
     }
-    onPrompt(value: ((value0: OnPromptEvent) => boolean) | undefined): this {
-        if (((this._onPrompt_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onPrompt_0_flag = AttributeUpdaterFlag.UPDATE
+    onPrompt(value: arkui_component_common_Callback<OnPromptEvent, boolean> | undefined): this {
+        if (((this._flagArray[32]) == (0)) || (true)) {
+            this._flagArray[32] = 1
             this._onPrompt_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onPrompt_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[32] = 3
         }
         return this
     }
-    onConsole(value: ((value0: OnConsoleEvent) => boolean) | undefined): this {
-        if (((this._onConsole_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onConsole_0_flag = AttributeUpdaterFlag.UPDATE
+    onConsole(value: arkui_component_common_Callback<OnConsoleEvent, boolean> | undefined): this {
+        if (((this._flagArray[33]) == (0)) || (true)) {
+            this._flagArray[33] = 1
             this._onConsole_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onConsole_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[33] = 3
         }
         return this
     }
-    onErrorReceive(value: ((value0: OnErrorReceiveEvent) => void) | undefined): this {
-        if (((this._onErrorReceive_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onErrorReceive_0_flag = AttributeUpdaterFlag.UPDATE
+    onErrorReceive(value: arkui_component_common_Callback<OnErrorReceiveEvent, void> | undefined): this {
+        if (((this._flagArray[34]) == (0)) || (true)) {
+            this._flagArray[34] = 1
             this._onErrorReceive_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onErrorReceive_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[34] = 3
         }
         return this
     }
-    onHttpErrorReceive(value: ((value0: OnHttpErrorReceiveEvent) => void) | undefined): this {
-        if (((this._onHttpErrorReceive_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onHttpErrorReceive_0_flag = AttributeUpdaterFlag.UPDATE
+    onHttpErrorReceive(value: arkui_component_common_Callback<OnHttpErrorReceiveEvent, void> | undefined): this {
+        if (((this._flagArray[35]) == (0)) || (true)) {
+            this._flagArray[35] = 1
             this._onHttpErrorReceive_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onHttpErrorReceive_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[35] = 3
         }
         return this
     }
-    onDownloadStart(value: ((value0: OnDownloadStartEvent) => void) | undefined): this {
-        if (((this._onDownloadStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onDownloadStart_0_flag = AttributeUpdaterFlag.UPDATE
+    onDownloadStart(value: arkui_component_common_Callback<OnDownloadStartEvent, void> | undefined): this {
+        if (((this._flagArray[36]) == (0)) || (true)) {
+            this._flagArray[36] = 1
             this._onDownloadStart_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onDownloadStart_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[36] = 3
         }
         return this
     }
-    onRefreshAccessedHistory(value: ((value0: OnRefreshAccessedHistoryEvent) => void) | undefined): this {
-        if (((this._onRefreshAccessedHistory_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onRefreshAccessedHistory_0_flag = AttributeUpdaterFlag.UPDATE
+    onRefreshAccessedHistory(value: arkui_component_common_Callback<OnRefreshAccessedHistoryEvent, void> | undefined): this {
+        if (((this._flagArray[37]) == (0)) || (true)) {
+            this._flagArray[37] = 1
             this._onRefreshAccessedHistory_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onRefreshAccessedHistory_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[37] = 3
         }
         return this
     }
-    onRenderExited(value: ((value0: OnRenderExitedEvent) => void) | undefined): this {
-        if (((this._onRenderExited_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onRenderExited_0_flag = AttributeUpdaterFlag.UPDATE
+    onRenderExited(value: arkui_component_common_Callback<OnRenderExitedEvent, void> | undefined): this {
+        if (((this._flagArray[38]) == (0)) || (true)) {
+            this._flagArray[38] = 1
             this._onRenderExited_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onRenderExited_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[38] = 3
         }
         return this
     }
-    onShowFileSelector(value: ((value0: OnShowFileSelectorEvent) => boolean) | undefined): this {
-        if (((this._onShowFileSelector_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onShowFileSelector_0_flag = AttributeUpdaterFlag.UPDATE
+    onShowFileSelector(value: arkui_component_common_Callback<OnShowFileSelectorEvent, boolean> | undefined): this {
+        if (((this._flagArray[39]) == (0)) || (true)) {
+            this._flagArray[39] = 1
             this._onShowFileSelector_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onShowFileSelector_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[39] = 3
         }
         return this
     }
-    onResourceLoad(value: ((value0: OnResourceLoadEvent) => void) | undefined): this {
-        if (((this._onResourceLoad_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onResourceLoad_0_flag = AttributeUpdaterFlag.UPDATE
+    onResourceLoad(value: arkui_component_common_Callback<OnResourceLoadEvent, void> | undefined): this {
+        if (((this._flagArray[40]) == (0)) || (true)) {
+            this._flagArray[40] = 1
             this._onResourceLoad_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onResourceLoad_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[40] = 3
         }
         return this
     }
     onFullScreenExit(value: (() => void) | undefined): this {
-        if (((this._onFullScreenExit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onFullScreenExit_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[41]) == (0)) || (true)) {
+            this._flagArray[41] = 1
             this._onFullScreenExit_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onFullScreenExit_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[41] = 3
         }
         return this
     }
     onFullScreenEnter(value: OnFullScreenEnterCallback | undefined): this {
-        if (((this._onFullScreenEnter_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onFullScreenEnter_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[42]) == (0)) || (true)) {
+            this._flagArray[42] = 1
             this._onFullScreenEnter_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onFullScreenEnter_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[42] = 3
         }
         return this
     }
-    onScaleChange(value: ((value0: OnScaleChangeEvent) => void) | undefined): this {
-        if (((this._onScaleChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onScaleChange_0_flag = AttributeUpdaterFlag.UPDATE
+    onScaleChange(value: arkui_component_common_Callback<OnScaleChangeEvent, void> | undefined): this {
+        if (((this._flagArray[43]) == (0)) || (true)) {
+            this._flagArray[43] = 1
             this._onScaleChange_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onScaleChange_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[43] = 3
         }
         return this
     }
-    onHttpAuthRequest(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): this {
-        if (((this._onHttpAuthRequest_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onHttpAuthRequest_0_flag = AttributeUpdaterFlag.UPDATE
+    onHttpAuthRequest(value: arkui_component_common_Callback<OnHttpAuthRequestEvent, boolean> | undefined): this {
+        if (((this._flagArray[44]) == (0)) || (true)) {
+            this._flagArray[44] = 1
             this._onHttpAuthRequest_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onHttpAuthRequest_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[44] = 3
         }
         return this
     }
-    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse | null) | undefined): this {
-        if (((this._onInterceptRequest_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onInterceptRequest_0_flag = AttributeUpdaterFlag.UPDATE
+    onInterceptRequest(value: arkui_component_common_Callback<OnInterceptRequestEvent, WebResourceResponse | null> | undefined): this {
+        if (((this._flagArray[45]) == (0)) || (true)) {
+            this._flagArray[45] = 1
             this._onInterceptRequest_0_0value = value
-        } else
-        {
-            this._onInterceptRequest_0_flag = AttributeUpdaterFlag.SKIP
+            this._state.fireChange()
+        } else {
+            this._flagArray[45] = 3
         }
         return this
     }
-    onPermissionRequest(value: ((value0: OnPermissionRequestEvent) => void) | undefined): this {
-        if (((this._onPermissionRequest_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onPermissionRequest_0_flag = AttributeUpdaterFlag.UPDATE
+    onPermissionRequest(value: arkui_component_common_Callback<OnPermissionRequestEvent, void> | undefined): this {
+        if (((this._flagArray[46]) == (0)) || (true)) {
+            this._flagArray[46] = 1
             this._onPermissionRequest_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onPermissionRequest_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[46] = 3
         }
         return this
     }
-    onScreenCaptureRequest(value: ((value0: OnScreenCaptureRequestEvent) => void) | undefined): this {
-        if (((this._onScreenCaptureRequest_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onScreenCaptureRequest_0_flag = AttributeUpdaterFlag.UPDATE
+    onScreenCaptureRequest(value: arkui_component_common_Callback<OnScreenCaptureRequestEvent, void> | undefined): this {
+        if (((this._flagArray[47]) == (0)) || (true)) {
+            this._flagArray[47] = 1
             this._onScreenCaptureRequest_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onScreenCaptureRequest_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[47] = 3
         }
         return this
     }
-    onContextMenuShow(value: ((value0: OnContextMenuShowEvent) => boolean) | undefined): this {
-        if (((this._onContextMenuShow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onContextMenuShow_0_flag = AttributeUpdaterFlag.UPDATE
+    onContextMenuShow(value: arkui_component_common_Callback<OnContextMenuShowEvent, boolean> | undefined): this {
+        if (((this._flagArray[48]) == (0)) || (true)) {
+            this._flagArray[48] = 1
             this._onContextMenuShow_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onContextMenuShow_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[48] = 3
         }
         return this
     }
     onContextMenuHide(value: OnContextMenuHideCallback | undefined): this {
-        if (((this._onContextMenuHide_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onContextMenuHide_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[49]) == (0)) || (true)) {
+            this._flagArray[49] = 1
             this._onContextMenuHide_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onContextMenuHide_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[49] = 3
         }
         return this
     }
     mediaPlayGestureAccess(value: boolean | undefined): this {
-        if (((this._mediaPlayGestureAccess_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._mediaPlayGestureAccess_0_0value) !== (value)))
-        {
-            this._mediaPlayGestureAccess_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[50]) == (0)) || ((this._mediaPlayGestureAccess_0_0value) !== (value))) {
+            this._flagArray[50] = 1
             this._mediaPlayGestureAccess_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._mediaPlayGestureAccess_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[50] = 3
         }
         return this
     }
-    onSearchResultReceive(value: ((value0: OnSearchResultReceiveEvent) => void) | undefined): this {
-        if (((this._onSearchResultReceive_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onSearchResultReceive_0_flag = AttributeUpdaterFlag.UPDATE
+    onSearchResultReceive(value: arkui_component_common_Callback<OnSearchResultReceiveEvent, void> | undefined): this {
+        if (((this._flagArray[51]) == (0)) || (true)) {
+            this._flagArray[51] = 1
             this._onSearchResultReceive_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onSearchResultReceive_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[51] = 3
         }
         return this
     }
-    onScroll(value: ((value0: OnScrollEvent) => void) | undefined): this {
-        if (((this._onScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onScroll_0_flag = AttributeUpdaterFlag.UPDATE
+    onScroll(value: arkui_component_common_Callback<OnScrollEvent, void> | undefined): this {
+        if (((this._flagArray[52]) == (0)) || (true)) {
+            this._flagArray[52] = 1
             this._onScroll_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onScroll_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[52] = 3
         }
         return this
     }
-    onSslErrorEventReceive(value: ((value0: OnSslErrorEventReceiveEvent) => void) | undefined): this {
-        if (((this._onSslErrorEventReceive_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onSslErrorEventReceive_0_flag = AttributeUpdaterFlag.UPDATE
+    onSslErrorEventReceive(value: arkui_component_common_Callback<OnSslErrorEventReceiveEvent, void> | undefined): this {
+        if (((this._flagArray[53]) == (0)) || (true)) {
+            this._flagArray[53] = 1
             this._onSslErrorEventReceive_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onSslErrorEventReceive_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[53] = 3
         }
         return this
     }
     onSslErrorEvent(value: OnSslErrorEventCallback | undefined): this {
-        if (((this._onSslErrorEvent_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onSslErrorEvent_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[54]) == (0)) || (true)) {
+            this._flagArray[54] = 1
             this._onSslErrorEvent_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onSslErrorEvent_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[54] = 3
         }
         return this
     }
-    onClientAuthenticationRequest(value: ((value0: OnClientAuthenticationEvent) => void) | undefined): this {
-        if (((this._onClientAuthenticationRequest_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onClientAuthenticationRequest_0_flag = AttributeUpdaterFlag.UPDATE
+    onClientAuthenticationRequest(value: arkui_component_common_Callback<OnClientAuthenticationEvent, void> | undefined): this {
+        if (((this._flagArray[55]) == (0)) || (true)) {
+            this._flagArray[55] = 1
             this._onClientAuthenticationRequest_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onClientAuthenticationRequest_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[55] = 3
         }
         return this
     }
-    onWindowNew(value: ((value0: OnWindowNewEvent) => void) | undefined): this {
-        if (((this._onWindowNew_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onWindowNew_0_flag = AttributeUpdaterFlag.UPDATE
+    onWindowNew(value: arkui_component_common_Callback<OnWindowNewEvent, void> | undefined): this {
+        if (((this._flagArray[56]) == (0)) || (true)) {
+            this._flagArray[56] = 1
             this._onWindowNew_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onWindowNew_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[56] = 3
         }
         return this
     }
     onWindowExit(value: (() => void) | undefined): this {
-        if (((this._onWindowExit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onWindowExit_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[57]) == (0)) || (true)) {
+            this._flagArray[57] = 1
             this._onWindowExit_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onWindowExit_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[57] = 3
         }
         return this
     }
     multiWindowAccess(value: boolean | undefined): this {
-        if (((this._multiWindowAccess_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._multiWindowAccess_0_0value) !== (value)))
-        {
-            this._multiWindowAccess_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[58]) == (0)) || ((this._multiWindowAccess_0_0value) !== (value))) {
+            this._flagArray[58] = 1
             this._multiWindowAccess_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._multiWindowAccess_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[58] = 3
         }
         return this
     }
     onInterceptKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
-        if (((this._onInterceptKeyEvent_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onInterceptKeyEvent_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[59]) == (0)) || (true)) {
+            this._flagArray[59] = 1
             this._onInterceptKeyEvent_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onInterceptKeyEvent_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[59] = 3
         }
         return this
     }
     webStandardFont(value: string | undefined): this {
-        if (((this._webStandardFont_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._webStandardFont_0_0value) !== (value)))
-        {
-            this._webStandardFont_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[60]) == (0)) || ((this._webStandardFont_0_0value) !== (value))) {
+            this._flagArray[60] = 1
             this._webStandardFont_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._webStandardFont_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[60] = 3
         }
         return this
     }
     webSerifFont(value: string | undefined): this {
-        if (((this._webSerifFont_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._webSerifFont_0_0value) !== (value)))
-        {
-            this._webSerifFont_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[61]) == (0)) || ((this._webSerifFont_0_0value) !== (value))) {
+            this._flagArray[61] = 1
             this._webSerifFont_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._webSerifFont_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[61] = 3
         }
         return this
     }
     webSansSerifFont(value: string | undefined): this {
-        if (((this._webSansSerifFont_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._webSansSerifFont_0_0value) !== (value)))
-        {
-            this._webSansSerifFont_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[62]) == (0)) || ((this._webSansSerifFont_0_0value) !== (value))) {
+            this._flagArray[62] = 1
             this._webSansSerifFont_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._webSansSerifFont_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[62] = 3
         }
         return this
     }
     webFixedFont(value: string | undefined): this {
-        if (((this._webFixedFont_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._webFixedFont_0_0value) !== (value)))
-        {
-            this._webFixedFont_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[63]) == (0)) || ((this._webFixedFont_0_0value) !== (value))) {
+            this._flagArray[63] = 1
             this._webFixedFont_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._webFixedFont_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[63] = 3
         }
         return this
     }
     webFantasyFont(value: string | undefined): this {
-        if (((this._webFantasyFont_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._webFantasyFont_0_0value) !== (value)))
-        {
-            this._webFantasyFont_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[64]) == (0)) || ((this._webFantasyFont_0_0value) !== (value))) {
+            this._flagArray[64] = 1
             this._webFantasyFont_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._webFantasyFont_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[64] = 3
         }
         return this
     }
     webCursiveFont(value: string | undefined): this {
-        if (((this._webCursiveFont_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._webCursiveFont_0_0value) !== (value)))
-        {
-            this._webCursiveFont_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[65]) == (0)) || ((this._webCursiveFont_0_0value) !== (value))) {
+            this._flagArray[65] = 1
             this._webCursiveFont_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._webCursiveFont_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[65] = 3
         }
         return this
     }
     defaultFixedFontSize(value: int32 | undefined): this {
-        if (((this._defaultFixedFontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._defaultFixedFontSize_0_0value) !== (value)))
-        {
-            this._defaultFixedFontSize_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[66]) == (0)) || ((this._defaultFixedFontSize_0_0value) !== (value))) {
+            this._flagArray[66] = 1
             this._defaultFixedFontSize_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._defaultFixedFontSize_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[66] = 3
         }
         return this
     }
     defaultFontSize(value: int32 | undefined): this {
-        if (((this._defaultFontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._defaultFontSize_0_0value) !== (value)))
-        {
-            this._defaultFontSize_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[67]) == (0)) || ((this._defaultFontSize_0_0value) !== (value))) {
+            this._flagArray[67] = 1
             this._defaultFontSize_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._defaultFontSize_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[67] = 3
         }
         return this
     }
     minFontSize(value: int32 | undefined): this {
-        if (((this._minFontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._minFontSize_0_0value) !== (value)))
-        {
-            this._minFontSize_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[68]) == (0)) || ((this._minFontSize_0_0value) !== (value))) {
+            this._flagArray[68] = 1
             this._minFontSize_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._minFontSize_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[68] = 3
         }
         return this
     }
     minLogicalFontSize(value: int32 | undefined): this {
-        if (((this._minLogicalFontSize_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._minLogicalFontSize_0_0value) !== (value)))
-        {
-            this._minLogicalFontSize_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[69]) == (0)) || ((this._minLogicalFontSize_0_0value) !== (value))) {
+            this._flagArray[69] = 1
             this._minLogicalFontSize_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._minLogicalFontSize_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[69] = 3
         }
         return this
     }
     defaultTextEncodingFormat(value: string | undefined): this {
-        if (((this._defaultTextEncodingFormat_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._defaultTextEncodingFormat_0_0value) !== (value)))
-        {
-            this._defaultTextEncodingFormat_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[70]) == (0)) || ((this._defaultTextEncodingFormat_0_0value) !== (value))) {
+            this._flagArray[70] = 1
             this._defaultTextEncodingFormat_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._defaultTextEncodingFormat_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[70] = 3
         }
         return this
     }
     forceDisplayScrollBar(value: boolean | undefined): this {
-        if (((this._forceDisplayScrollBar_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._forceDisplayScrollBar_0_0value) !== (value)))
-        {
-            this._forceDisplayScrollBar_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[71]) == (0)) || ((this._forceDisplayScrollBar_0_0value) !== (value))) {
+            this._flagArray[71] = 1
             this._forceDisplayScrollBar_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._forceDisplayScrollBar_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[71] = 3
         }
         return this
     }
     blockNetwork(value: boolean | undefined): this {
-        if (((this._blockNetwork_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._blockNetwork_0_0value) !== (value)))
-        {
-            this._blockNetwork_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[72]) == (0)) || ((this._blockNetwork_0_0value) !== (value))) {
+            this._flagArray[72] = 1
             this._blockNetwork_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._blockNetwork_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[72] = 3
         }
         return this
     }
     horizontalScrollBarAccess(value: boolean | undefined): this {
-        if (((this._horizontalScrollBarAccess_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._horizontalScrollBarAccess_0_0value) !== (value)))
-        {
-            this._horizontalScrollBarAccess_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[73]) == (0)) || ((this._horizontalScrollBarAccess_0_0value) !== (value))) {
+            this._flagArray[73] = 1
             this._horizontalScrollBarAccess_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._horizontalScrollBarAccess_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[73] = 3
         }
         return this
     }
     verticalScrollBarAccess(value: boolean | undefined): this {
-        if (((this._verticalScrollBarAccess_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._verticalScrollBarAccess_0_0value) !== (value)))
-        {
-            this._verticalScrollBarAccess_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[74]) == (0)) || ((this._verticalScrollBarAccess_0_0value) !== (value))) {
+            this._flagArray[74] = 1
             this._verticalScrollBarAccess_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._verticalScrollBarAccess_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[74] = 3
         }
         return this
     }
-    onTouchIconUrlReceived(value: ((value0: OnTouchIconUrlReceivedEvent) => void) | undefined): this {
-        if (((this._onTouchIconUrlReceived_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onTouchIconUrlReceived_0_flag = AttributeUpdaterFlag.UPDATE
+    onTouchIconUrlReceived(value: arkui_component_common_Callback<OnTouchIconUrlReceivedEvent, void> | undefined): this {
+        if (((this._flagArray[75]) == (0)) || (true)) {
+            this._flagArray[75] = 1
             this._onTouchIconUrlReceived_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onTouchIconUrlReceived_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[75] = 3
         }
         return this
     }
-    onFaviconReceived(value: ((value0: OnFaviconReceivedEvent) => void) | undefined): this {
-        if (((this._onFaviconReceived_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onFaviconReceived_0_flag = AttributeUpdaterFlag.UPDATE
+    onFaviconReceived(value: arkui_component_common_Callback<OnFaviconReceivedEvent, void> | undefined): this {
+        if (((this._flagArray[76]) == (0)) || (true)) {
+            this._flagArray[76] = 1
             this._onFaviconReceived_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onFaviconReceived_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[76] = 3
         }
         return this
     }
-    onPageVisible(value: ((value0: OnPageVisibleEvent) => void) | undefined): this {
-        if (((this._onPageVisible_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onPageVisible_0_flag = AttributeUpdaterFlag.UPDATE
+    onPageVisible(value: arkui_component_common_Callback<OnPageVisibleEvent, void> | undefined): this {
+        if (((this._flagArray[77]) == (0)) || (true)) {
+            this._flagArray[77] = 1
             this._onPageVisible_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onPageVisible_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[77] = 3
         }
         return this
     }
-    onDataResubmitted(value: ((value0: OnDataResubmittedEvent) => void) | undefined): this {
-        if (((this._onDataResubmitted_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onDataResubmitted_0_flag = AttributeUpdaterFlag.UPDATE
+    onDataResubmitted(value: arkui_component_common_Callback<OnDataResubmittedEvent, void> | undefined): this {
+        if (((this._flagArray[78]) == (0)) || (true)) {
+            this._flagArray[78] = 1
             this._onDataResubmitted_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onDataResubmitted_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[78] = 3
         }
         return this
     }
     pinchSmooth(value: boolean | undefined): this {
-        if (((this._pinchSmooth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._pinchSmooth_0_0value) !== (value)))
-        {
-            this._pinchSmooth_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[79]) == (0)) || ((this._pinchSmooth_0_0value) !== (value))) {
+            this._flagArray[79] = 1
             this._pinchSmooth_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._pinchSmooth_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[79] = 3
         }
         return this
     }
     allowWindowOpenMethod(value: boolean | undefined): this {
-        if (((this._allowWindowOpenMethod_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._allowWindowOpenMethod_0_0value) !== (value)))
-        {
-            this._allowWindowOpenMethod_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[80]) == (0)) || ((this._allowWindowOpenMethod_0_0value) !== (value))) {
+            this._flagArray[80] = 1
             this._allowWindowOpenMethod_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._allowWindowOpenMethod_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[80] = 3
         }
         return this
     }
-    onAudioStateChanged(value: ((value0: OnAudioStateChangedEvent) => void) | undefined): this {
-        if (((this._onAudioStateChanged_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onAudioStateChanged_0_flag = AttributeUpdaterFlag.UPDATE
+    onAudioStateChanged(value: arkui_component_common_Callback<OnAudioStateChangedEvent, void> | undefined): this {
+        if (((this._flagArray[81]) == (0)) || (true)) {
+            this._flagArray[81] = 1
             this._onAudioStateChanged_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onAudioStateChanged_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[81] = 3
         }
         return this
     }
-    onFirstContentfulPaint(value: ((value0: OnFirstContentfulPaintEvent) => void) | undefined): this {
-        if (((this._onFirstContentfulPaint_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onFirstContentfulPaint_0_flag = AttributeUpdaterFlag.UPDATE
+    onFirstContentfulPaint(value: arkui_component_common_Callback<OnFirstContentfulPaintEvent, void> | undefined): this {
+        if (((this._flagArray[82]) == (0)) || (true)) {
+            this._flagArray[82] = 1
             this._onFirstContentfulPaint_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onFirstContentfulPaint_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[82] = 3
         }
         return this
     }
     onFirstMeaningfulPaint(value: OnFirstMeaningfulPaintCallback | undefined): this {
-        if (((this._onFirstMeaningfulPaint_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onFirstMeaningfulPaint_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[83]) == (0)) || (true)) {
+            this._flagArray[83] = 1
             this._onFirstMeaningfulPaint_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onFirstMeaningfulPaint_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[83] = 3
         }
         return this
     }
     onLargestContentfulPaint(value: OnLargestContentfulPaintCallback | undefined): this {
-        if (((this._onLargestContentfulPaint_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onLargestContentfulPaint_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[84]) == (0)) || (true)) {
+            this._flagArray[84] = 1
             this._onLargestContentfulPaint_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onLargestContentfulPaint_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[84] = 3
         }
         return this
     }
-    onLoadIntercept(value: ((value0: OnLoadInterceptEvent) => boolean) | undefined): this {
-        if (((this._onLoadIntercept_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onLoadIntercept_0_flag = AttributeUpdaterFlag.UPDATE
+    onLoadIntercept(value: arkui_component_common_Callback<OnLoadInterceptEvent, boolean> | undefined): this {
+        if (((this._flagArray[85]) == (0)) || (true)) {
+            this._flagArray[85] = 1
             this._onLoadIntercept_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onLoadIntercept_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[85] = 3
         }
         return this
     }
     onControllerAttached(value: (() => void) | undefined): this {
-        if (((this._onControllerAttached_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onControllerAttached_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[86]) == (0)) || (true)) {
+            this._flagArray[86] = 1
             this._onControllerAttached_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onControllerAttached_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[86] = 3
         }
         return this
     }
-    onOverScroll(value: ((value0: OnOverScrollEvent) => void) | undefined): this {
-        if (((this._onOverScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onOverScroll_0_flag = AttributeUpdaterFlag.UPDATE
+    onOverScroll(value: arkui_component_common_Callback<OnOverScrollEvent, void> | undefined): this {
+        if (((this._flagArray[87]) == (0)) || (true)) {
+            this._flagArray[87] = 1
             this._onOverScroll_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onOverScroll_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[87] = 3
         }
         return this
     }
     onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this {
-        if (((this._onSafeBrowsingCheckResult_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onSafeBrowsingCheckResult_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[88]) == (0)) || (true)) {
+            this._flagArray[88] = 1
             this._onSafeBrowsingCheckResult_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onSafeBrowsingCheckResult_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[88] = 3
         }
         return this
     }
     onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback | undefined): this {
-        if (((this._onNavigationEntryCommitted_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onNavigationEntryCommitted_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[89]) == (0)) || (true)) {
+            this._flagArray[89] = 1
             this._onNavigationEntryCommitted_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onNavigationEntryCommitted_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[89] = 3
         }
         return this
     }
     onIntelligentTrackingPreventionResult(value: OnIntelligentTrackingPreventionCallback | undefined): this {
-        if (((this._onIntelligentTrackingPreventionResult_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onIntelligentTrackingPreventionResult_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[90]) == (0)) || (true)) {
+            this._flagArray[90] = 1
             this._onIntelligentTrackingPreventionResult_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onIntelligentTrackingPreventionResult_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[90] = 3
         }
         return this
     }
     javaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
-        if (((this._javaScriptOnDocumentStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._javaScriptOnDocumentStart_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[91]) == (0)) || (true)) {
+            this._flagArray[91] = 1
             this._javaScriptOnDocumentStart_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._javaScriptOnDocumentStart_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[91] = 3
         }
         return this
     }
     javaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
-        if (((this._javaScriptOnDocumentEnd_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._javaScriptOnDocumentEnd_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[92]) == (0)) || (true)) {
+            this._flagArray[92] = 1
             this._javaScriptOnDocumentEnd_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._javaScriptOnDocumentEnd_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[92] = 3
         }
         return this
     }
     layoutMode(value: WebLayoutMode | undefined): this {
-        if (((this._layoutMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._layoutMode_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[93]) == (0)) || (true)) {
+            this._flagArray[93] = 1
             this._layoutMode_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._layoutMode_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[93] = 3
         }
         return this
     }
     nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt | undefined): this {
-        if (((this._nestedScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[94]) == (0)) || (true)) {
+            this._flagArray[94] = 1
             this._nestedScroll_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[94] = 3
         }
         return this
     }
     enableNativeEmbedMode(value: boolean | undefined): this {
-        if (((this._enableNativeEmbedMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableNativeEmbedMode_0_0value) !== (value)))
-        {
-            this._enableNativeEmbedMode_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[95]) == (0)) || ((this._enableNativeEmbedMode_0_0value) !== (value))) {
+            this._flagArray[95] = 1
             this._enableNativeEmbedMode_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._enableNativeEmbedMode_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[95] = 3
         }
         return this
     }
     onNativeEmbedLifecycleChange(value: ((event: NativeEmbedDataInfo) => void) | undefined): this {
-        if (((this._onNativeEmbedLifecycleChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onNativeEmbedLifecycleChange_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[96]) == (0)) || (true)) {
+            this._flagArray[96] = 1
             this._onNativeEmbedLifecycleChange_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onNativeEmbedLifecycleChange_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[96] = 3
         }
         return this
     }
     onNativeEmbedVisibilityChange(value: OnNativeEmbedVisibilityChangeCallback | undefined): this {
-        if (((this._onNativeEmbedVisibilityChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onNativeEmbedVisibilityChange_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[97]) == (0)) || (true)) {
+            this._flagArray[97] = 1
             this._onNativeEmbedVisibilityChange_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onNativeEmbedVisibilityChange_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[97] = 3
         }
         return this
     }
     onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void) | undefined): this {
-        if (((this._onNativeEmbedGestureEvent_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onNativeEmbedGestureEvent_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[98]) == (0)) || (true)) {
+            this._flagArray[98] = 1
             this._onNativeEmbedGestureEvent_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onNativeEmbedGestureEvent_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[98] = 3
         }
         return this
     }
     copyOptions(value: CopyOptions | undefined): this {
-        if (((this._copyOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._copyOptions_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[99]) == (0)) || (true)) {
+            this._flagArray[99] = 1
             this._copyOptions_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._copyOptions_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[99] = 3
         }
         return this
     }
     onOverrideUrlLoading(value: OnOverrideUrlLoadingCallback | undefined): this {
-        if (((this._onOverrideUrlLoading_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onOverrideUrlLoading_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[100]) == (0)) || (true)) {
+            this._flagArray[100] = 1
             this._onOverrideUrlLoading_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onOverrideUrlLoading_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[100] = 3
         }
         return this
     }
     textAutosizing(value: boolean | undefined): this {
-        if (((this._textAutosizing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._textAutosizing_0_0value) !== (value)))
-        {
-            this._textAutosizing_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[101]) == (0)) || ((this._textAutosizing_0_0value) !== (value))) {
+            this._flagArray[101] = 1
             this._textAutosizing_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._textAutosizing_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[101] = 3
         }
         return this
     }
     enableNativeMediaPlayer(value: NativeMediaPlayerConfig | undefined): this {
-        if (((this._enableNativeMediaPlayer_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._enableNativeMediaPlayer_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[102]) == (0)) || (true)) {
+            this._flagArray[102] = 1
             this._enableNativeMediaPlayer_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._enableNativeMediaPlayer_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[102] = 3
         }
         return this
     }
     onRenderProcessNotResponding(value: OnRenderProcessNotRespondingCallback | undefined): this {
-        if (((this._onRenderProcessNotResponding_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onRenderProcessNotResponding_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[103]) == (0)) || (true)) {
+            this._flagArray[103] = 1
             this._onRenderProcessNotResponding_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onRenderProcessNotResponding_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[103] = 3
         }
         return this
     }
     onRenderProcessResponding(value: OnRenderProcessRespondingCallback | undefined): this {
-        if (((this._onRenderProcessResponding_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onRenderProcessResponding_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[104]) == (0)) || (true)) {
+            this._flagArray[104] = 1
             this._onRenderProcessResponding_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onRenderProcessResponding_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[104] = 3
         }
         return this
     }
     onViewportFitChanged(value: OnViewportFitChangedCallback | undefined): this {
-        if (((this._onViewportFitChanged_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onViewportFitChanged_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[105]) == (0)) || (true)) {
+            this._flagArray[105] = 1
             this._onViewportFitChanged_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onViewportFitChanged_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[105] = 3
         }
         return this
     }
     onInterceptKeyboardAttach(value: WebKeyboardCallback | undefined): this {
-        if (((this._onInterceptKeyboardAttach_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onInterceptKeyboardAttach_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[106]) == (0)) || (true)) {
+            this._flagArray[106] = 1
             this._onInterceptKeyboardAttach_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onInterceptKeyboardAttach_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[106] = 3
         }
         return this
     }
     onAdsBlocked(value: OnAdsBlockedCallback | undefined): this {
-        if (((this._onAdsBlocked_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onAdsBlocked_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[107]) == (0)) || (true)) {
+            this._flagArray[107] = 1
             this._onAdsBlocked_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onAdsBlocked_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[107] = 3
         }
         return this
     }
     keyboardAvoidMode(value: WebKeyboardAvoidMode | undefined): this {
-        if (((this._keyboardAvoidMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._keyboardAvoidMode_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[108]) == (0)) || (true)) {
+            this._flagArray[108] = 1
             this._keyboardAvoidMode_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._keyboardAvoidMode_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[108] = 3
         }
         return this
     }
     editMenuOptions(value: EditMenuOptions | undefined): this {
-        if (((this._editMenuOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._editMenuOptions_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[109]) == (0)) || (true)) {
+            this._flagArray[109] = 1
             this._editMenuOptions_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._editMenuOptions_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[109] = 3
         }
         return this
     }
     enableHapticFeedback(value: boolean | undefined): this {
-        if (((this._enableHapticFeedback_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableHapticFeedback_0_0value) !== (value)))
-        {
-            this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[110]) == (0)) || ((this._enableHapticFeedback_0_0value) !== (value))) {
+            this._flagArray[110] = 1
             this._enableHapticFeedback_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
-        }
-        return this
-    }
-    optimizeParserBudget(value: boolean | undefined): this {
-        if (((this._optimizeParserBudget_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._optimizeParserBudget_0_0value) !== (value)))
-        {
-            this._optimizeParserBudget_0_flag = AttributeUpdaterFlag.UPDATE
-            this._optimizeParserBudget_0_0value = value
-            this._state.fireChange()
-        } else
-        {
-            this._optimizeParserBudget_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[110] = 3
         }
         return this
     }
     enableFollowSystemFontWeight(value: boolean | undefined): this {
-        if (((this._enableFollowSystemFontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableFollowSystemFontWeight_0_0value) !== (value)))
-        {
-            this._enableFollowSystemFontWeight_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[111]) == (0)) || ((this._enableFollowSystemFontWeight_0_0value) !== (value))) {
+            this._flagArray[111] = 1
             this._enableFollowSystemFontWeight_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._enableFollowSystemFontWeight_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[111] = 3
         }
         return this
     }
     enableWebAVSession(value: boolean | undefined): this {
-        if (((this._enableWebAVSession_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableWebAVSession_0_0value) !== (value)))
-        {
-            this._enableWebAVSession_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[112]) == (0)) || ((this._enableWebAVSession_0_0value) !== (value))) {
+            this._flagArray[112] = 1
             this._enableWebAVSession_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._enableWebAVSession_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[112] = 3
+        }
+        return this
+    }
+    optimizeParserBudget(value: boolean | undefined): this {
+        if (((this._flagArray[113]) == (0)) || ((this._optimizeParserBudget_0_0value) !== (value))) {
+            this._flagArray[113] = 1
+            this._optimizeParserBudget_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[113] = 3
         }
         return this
     }
     runJavaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
-        if (((this._runJavaScriptOnDocumentStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._runJavaScriptOnDocumentStart_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[114]) == (0)) || (true)) {
+            this._flagArray[114] = 1
             this._runJavaScriptOnDocumentStart_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._runJavaScriptOnDocumentStart_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[114] = 3
         }
         return this
     }
     runJavaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
-        if (((this._runJavaScriptOnDocumentEnd_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._runJavaScriptOnDocumentEnd_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[115]) == (0)) || (true)) {
+            this._flagArray[115] = 1
             this._runJavaScriptOnDocumentEnd_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._runJavaScriptOnDocumentEnd_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[115] = 3
         }
         return this
     }
     runJavaScriptOnHeadEnd(value: Array<ScriptItem> | undefined): this {
-        if (((this._runJavaScriptOnHeadEnd_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._runJavaScriptOnHeadEnd_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[116]) == (0)) || (true)) {
+            this._flagArray[116] = 1
             this._runJavaScriptOnHeadEnd_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._runJavaScriptOnHeadEnd_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[116] = 3
         }
         return this
     }
     nativeEmbedOptions(value: EmbedOptions | undefined): this {
-        if (((this._nativeEmbedOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._nativeEmbedOptions_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[117]) == (0)) || (true)) {
+            this._flagArray[117] = 1
             this._nativeEmbedOptions_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._nativeEmbedOptions_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[117] = 3
         }
         return this
     }
     registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
-        if (((this._registerNativeEmbedRule_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._registerNativeEmbedRule_0_0value) !== (tag)) || ((this._registerNativeEmbedRule_0_1value) !== (type)))
-        {
-            this._registerNativeEmbedRule_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[118]) == (0)) || ((this._registerNativeEmbedRule_0_0value) !== (tag)) || ((this._registerNativeEmbedRule_0_1value) !== (type))) {
+            this._flagArray[118] = 1
             this._registerNativeEmbedRule_0_0value = tag
             this._registerNativeEmbedRule_0_1value = type
             this._state.fireChange()
-        } else
-        {
-            this._registerNativeEmbedRule_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[118] = 3
         }
         return this
     }
     bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
-        if (((this._bindSelectionMenu_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true) || (true) || (true))
-        {
-            this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[119]) == (0)) || (true) || (true) || (true) || (true)) {
+            this._flagArray[119] = 1
             this._bindSelectionMenu_0_0value = elementType
             this._bindSelectionMenu_0_1value = content
             this._bindSelectionMenu_0_2value = responseType
             this._bindSelectionMenu_0_3value = options
             this._state.fireChange()
-        } else
-        {
-            this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[119] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

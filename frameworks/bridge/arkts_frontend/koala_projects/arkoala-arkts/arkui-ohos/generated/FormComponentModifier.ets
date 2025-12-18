@@ -16,19 +16,25 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkFormComponentPeer, FormSize, FormDimension, FormCallbackInfo, ErrorInformation, FormComponentAttribute } from "./component/formComponent"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod } from "./component/common"
-import { Visibility } from "./component/enums"
-import { VoidCallback } from "./component/units"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkFormComponentPeer, FormSize, FormDimension, FormCallbackInfo, ErrorInformation, FormComponentAttribute } from './component/formComponent'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod, Callback as arkui_component_common_Callback } from './component/common'
+import { Visibility } from './component/enums'
+import { VoidCallback } from './component/units'
 export class FormComponentModifier extends CommonMethodModifier implements FormComponentAttribute,AttributeModifier<FormComponentAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -38,252 +44,233 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
     applyFocusedAttribute(instance: FormComponentAttribute): void { }
     applyDisabledAttribute(instance: FormComponentAttribute): void { }
     applySelectedAttribute(instance: FormComponentAttribute): void { }
-    _size_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _size_0_0value?: FormSize | undefined
-    _moduleName_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _moduleName_0_0value?: string | undefined
-    _dimension_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _dimension_0_0value?: FormDimension | undefined
-    _allowUpdate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _allowUpdate_0_0value?: boolean | undefined
-    _visibility_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _visibility_0_0value?: Visibility | undefined
-    _onAcquired_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onAcquired_0_0value?: ((value0: FormCallbackInfo) => void) | undefined
-    _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onError_0_0value?: ((value0: ErrorInformation) => void) | undefined
-    _onRouter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onRouter_0_0value?: ((value0: Object) => void) | undefined
-    _onUninstall_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onUninstall_0_0value?: ((value0: FormCallbackInfo) => void) | undefined
-    _onLoad_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onLoad_0_0value?: VoidCallback | undefined
-    _onUpdate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onUpdate_0_0value?: ((value0: FormCallbackInfo) => void) | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _size_0_0value?: FormSize
+    public _moduleName_0_0value?: string | undefined
+    public _dimension_0_0value?: FormDimension | undefined
+    public _allowUpdate_0_0value?: boolean | undefined
+    public _visibility_0_0value?: Visibility | undefined
+    public _onAcquired_0_0value?: arkui_component_common_Callback<FormCallbackInfo, void> | undefined
+    public _onError_0_0value?: arkui_component_common_Callback<ErrorInformation, void> | undefined
+    public _onRouter_0_0value?: arkui_component_common_Callback<Object, void> | undefined
+    public _onUninstall_0_0value?: arkui_component_common_Callback<FormCallbackInfo, void> | undefined
+    public _onLoad_0_0value?: VoidCallback | undefined
+    public _onUpdate_0_0value?: arkui_component_common_Callback<FormCallbackInfo, void> | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkFormComponentPeer;
-        if (this._size_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._size_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSizeAttribute((this._size_0_0value as FormSize | undefined));
-                    this._size_0_flag = AttributeUpdaterFlag.RESET;
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkFormComponentPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
+                    peer.setSizeAttribute((this._size_0_0value as FormSize));
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._size_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._size_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setSizeAttribute((undefined as FormSize | undefined));
+                    flagArray[0] = 0;
                 }
             }
         }
-        if (this._moduleName_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._moduleName_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
                     peer.setModuleNameAttribute((this._moduleName_0_0value as string | undefined));
-                    this._moduleName_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._moduleName_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._moduleName_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
                     peer.setModuleNameAttribute((undefined as string | undefined));
                 }
             }
         }
-        if (this._dimension_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._dimension_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
                     peer.setDimensionAttribute((this._dimension_0_0value as FormDimension | undefined));
-                    this._dimension_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._dimension_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._dimension_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[2] = 0;
                     peer.setDimensionAttribute((undefined as FormDimension | undefined));
                 }
             }
         }
-        if (this._allowUpdate_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._allowUpdate_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
                     peer.setAllowUpdateAttribute((this._allowUpdate_0_0value as boolean | undefined));
-                    this._allowUpdate_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[3] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._allowUpdate_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[3] = 2;
                     break;
                 }
                 default: {
-                    this._allowUpdate_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[3] = 0;
                     peer.setAllowUpdateAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._visibility_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._visibility_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1: {
                     peer.setVisibilityAttribute((this._visibility_0_0value as Visibility | undefined));
-                    this._visibility_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._visibility_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._visibility_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[4] = 0;
                     peer.setVisibilityAttribute((undefined as Visibility | undefined));
                 }
             }
         }
-        if (this._onAcquired_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onAcquired_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnAcquiredAttribute((this._onAcquired_0_0value as ((value0: FormCallbackInfo) => void) | undefined));
-                    this._onAcquired_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1: {
+                    peer.setOnAcquiredAttribute((this._onAcquired_0_0value as arkui_component_common_Callback<FormCallbackInfo, void> | undefined));
+                    flagArray[5] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onAcquired_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._onAcquired_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnAcquiredAttribute((undefined as ((value0: FormCallbackInfo) => void) | undefined));
-                }
-            }
-        }
-        if (this._onError_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onError_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnErrorAttribute((this._onError_0_0value as ((value0: ErrorInformation) => void) | undefined));
-                    this._onError_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onError_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[5] = 2;
                     break;
                 }
                 default: {
-                    this._onError_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnErrorAttribute((undefined as ((value0: ErrorInformation) => void) | undefined));
+                    flagArray[5] = 0;
+                    peer.setOnAcquiredAttribute((undefined as arkui_component_common_Callback<FormCallbackInfo, void> | undefined));
                 }
             }
         }
-        if (this._onRouter_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onRouter_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnRouterAttribute((this._onRouter_0_0value as ((value0: Object) => void) | undefined));
-                    this._onRouter_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1: {
+                    peer.setOnErrorAttribute((this._onError_0_0value as arkui_component_common_Callback<ErrorInformation, void> | undefined));
+                    flagArray[6] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onRouter_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[6] = 2;
                     break;
                 }
                 default: {
-                    this._onRouter_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnRouterAttribute((undefined as ((value0: Object) => void) | undefined));
+                    flagArray[6] = 0;
+                    peer.setOnErrorAttribute((undefined as arkui_component_common_Callback<ErrorInformation, void> | undefined));
                 }
             }
         }
-        if (this._onUninstall_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onUninstall_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnUninstallAttribute((this._onUninstall_0_0value as ((value0: FormCallbackInfo) => void) | undefined));
-                    this._onUninstall_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1: {
+                    peer.setOnRouterAttribute((this._onRouter_0_0value as arkui_component_common_Callback<Object, void> | undefined));
+                    flagArray[7] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onUninstall_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[7] = 2;
                     break;
                 }
                 default: {
-                    this._onUninstall_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnUninstallAttribute((undefined as ((value0: FormCallbackInfo) => void) | undefined));
+                    flagArray[7] = 0;
+                    peer.setOnRouterAttribute((undefined as arkui_component_common_Callback<Object, void> | undefined));
                 }
             }
         }
-        if (this._onLoad_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onLoad_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1: {
+                    peer.setOnUninstallAttribute((this._onUninstall_0_0value as arkui_component_common_Callback<FormCallbackInfo, void> | undefined));
+                    flagArray[8] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[8] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[8] = 0;
+                    peer.setOnUninstallAttribute((undefined as arkui_component_common_Callback<FormCallbackInfo, void> | undefined));
+                }
+            }
+        }
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1: {
                     peer.setOnLoadAttribute((this._onLoad_0_0value as VoidCallback | undefined));
-                    this._onLoad_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[9] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onLoad_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[9] = 2;
                     break;
                 }
                 default: {
-                    this._onLoad_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[9] = 0;
                     peer.setOnLoadAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
-        if (this._onUpdate_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onUpdate_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnUpdateAttribute((this._onUpdate_0_0value as ((value0: FormCallbackInfo) => void) | undefined));
-                    this._onUpdate_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
+                case 1: {
+                    peer.setOnUpdateAttribute((this._onUpdate_0_0value as arkui_component_common_Callback<FormCallbackInfo, void> | undefined));
+                    flagArray[10] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onUpdate_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[10] = 2;
                     break;
                 }
                 default: {
-                    this._onUpdate_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnUpdateAttribute((undefined as ((value0: FormCallbackInfo) => void) | undefined));
+                    flagArray[10] = 0;
+                    peer.setOnUpdateAttribute((undefined as arkui_component_common_Callback<FormCallbackInfo, void> | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: FormComponentModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._size_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._size_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
-                    this.size(modifier._size_0_0value);
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: FormComponentModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     break;
                 }
                 default: {
-                    this.size((undefined as FormSize | undefined));
                 }
             }
         }
-        if (modifier._moduleName_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._moduleName_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.moduleName(modifier._moduleName_0_0value);
                     break;
                 }
@@ -292,11 +279,10 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
                 }
             }
         }
-        if (modifier._dimension_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._dimension_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.dimension(modifier._dimension_0_0value);
                     break;
                 }
@@ -305,11 +291,10 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
                 }
             }
         }
-        if (modifier._allowUpdate_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._allowUpdate_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
                     this.allowUpdate(modifier._allowUpdate_0_0value);
                     break;
                 }
@@ -318,11 +303,10 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
                 }
             }
         }
-        if (modifier._visibility_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._visibility_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
                     this.visibility(modifier._visibility_0_0value);
                     break;
                 }
@@ -331,63 +315,58 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
                 }
             }
         }
-        if (modifier._onAcquired_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onAcquired_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1:
+                case 3: {
                     this.onAcquired(modifier._onAcquired_0_0value);
                     break;
                 }
                 default: {
-                    this.onAcquired((undefined as ((value0: FormCallbackInfo) => void) | undefined));
+                    this.onAcquired((undefined as arkui_component_common_Callback<FormCallbackInfo, void> | undefined));
                 }
             }
         }
-        if (modifier._onError_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onError_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1:
+                case 3: {
                     this.onError(modifier._onError_0_0value);
                     break;
                 }
                 default: {
-                    this.onError((undefined as ((value0: ErrorInformation) => void) | undefined));
+                    this.onError((undefined as arkui_component_common_Callback<ErrorInformation, void> | undefined));
                 }
             }
         }
-        if (modifier._onRouter_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onRouter_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1:
+                case 3: {
                     this.onRouter(modifier._onRouter_0_0value);
                     break;
                 }
                 default: {
-                    this.onRouter((undefined as ((value0: Object) => void) | undefined));
+                    this.onRouter((undefined as arkui_component_common_Callback<Object, void> | undefined));
                 }
             }
         }
-        if (modifier._onUninstall_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onUninstall_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1:
+                case 3: {
                     this.onUninstall(modifier._onUninstall_0_0value);
                     break;
                 }
                 default: {
-                    this.onUninstall((undefined as ((value0: FormCallbackInfo) => void) | undefined));
+                    this.onUninstall((undefined as arkui_component_common_Callback<FormCallbackInfo, void> | undefined));
                 }
             }
         }
-        if (modifier._onLoad_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onLoad_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1:
+                case 3: {
                     this.onLoad(modifier._onLoad_0_0value);
                     break;
                 }
@@ -396,153 +375,130 @@ export class FormComponentModifier extends CommonMethodModifier implements FormC
                 }
             }
         }
-        if (modifier._onUpdate_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onUpdate_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
+                case 1:
+                case 3: {
                     this.onUpdate(modifier._onUpdate_0_0value);
                     break;
                 }
                 default: {
-                    this.onUpdate((undefined as ((value0: FormCallbackInfo) => void) | undefined));
+                    this.onUpdate((undefined as arkui_component_common_Callback<FormCallbackInfo, void> | undefined));
                 }
             }
         }
     }
-    size(value: FormSize | undefined): this {
-        if (((this._size_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._size_0_flag = AttributeUpdaterFlag.UPDATE
+    size(value: FormSize): this {
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._size_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._size_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     moduleName(value: string | undefined): this {
-        if (((this._moduleName_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._moduleName_0_0value) !== (value)))
-        {
-            this._moduleName_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[1]) == (0)) || ((this._moduleName_0_0value) !== (value))) {
+            this._flagArray[1] = 1
             this._moduleName_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._moduleName_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     dimension(value: FormDimension | undefined): this {
-        if (((this._dimension_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._dimension_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._dimension_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._dimension_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     allowUpdate(value: boolean | undefined): this {
-        if (((this._allowUpdate_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._allowUpdate_0_0value) !== (value)))
-        {
-            this._allowUpdate_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[3]) == (0)) || ((this._allowUpdate_0_0value) !== (value))) {
+            this._flagArray[3] = 1
             this._allowUpdate_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._allowUpdate_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }
     visibility(value: Visibility | undefined): this {
-        if (((this._visibility_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._visibility_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[4]) == (0)) || (true)) {
+            this._flagArray[4] = 1
             this._visibility_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._visibility_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[4] = 3
         }
         return this
     }
-    onAcquired(value: ((value0: FormCallbackInfo) => void) | undefined): this {
-        if (((this._onAcquired_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onAcquired_0_flag = AttributeUpdaterFlag.UPDATE
+    onAcquired(value: arkui_component_common_Callback<FormCallbackInfo, void> | undefined): this {
+        if (((this._flagArray[5]) == (0)) || (true)) {
+            this._flagArray[5] = 1
             this._onAcquired_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onAcquired_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[5] = 3
         }
         return this
     }
-    onError(value: ((value0: ErrorInformation) => void) | undefined): this {
-        if (((this._onError_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onError_0_flag = AttributeUpdaterFlag.UPDATE
+    onError(value: arkui_component_common_Callback<ErrorInformation, void> | undefined): this {
+        if (((this._flagArray[6]) == (0)) || (true)) {
+            this._flagArray[6] = 1
             this._onError_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onError_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[6] = 3
         }
         return this
     }
-    onRouter(value: ((value0: Object) => void) | undefined): this {
-        if (((this._onRouter_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onRouter_0_flag = AttributeUpdaterFlag.UPDATE
+    onRouter(value: arkui_component_common_Callback<Object, void> | undefined): this {
+        if (((this._flagArray[7]) == (0)) || (true)) {
+            this._flagArray[7] = 1
             this._onRouter_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onRouter_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[7] = 3
         }
         return this
     }
-    onUninstall(value: ((value0: FormCallbackInfo) => void) | undefined): this {
-        if (((this._onUninstall_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onUninstall_0_flag = AttributeUpdaterFlag.UPDATE
+    onUninstall(value: arkui_component_common_Callback<FormCallbackInfo, void> | undefined): this {
+        if (((this._flagArray[8]) == (0)) || (true)) {
+            this._flagArray[8] = 1
             this._onUninstall_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onUninstall_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[8] = 3
         }
         return this
     }
     onLoad(value: VoidCallback | undefined): this {
-        if (((this._onLoad_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onLoad_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[9]) == (0)) || (true)) {
+            this._flagArray[9] = 1
             this._onLoad_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onLoad_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[9] = 3
         }
         return this
     }
-    onUpdate(value: ((value0: FormCallbackInfo) => void) | undefined): this {
-        if (((this._onUpdate_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onUpdate_0_flag = AttributeUpdaterFlag.UPDATE
+    onUpdate(value: arkui_component_common_Callback<FormCallbackInfo, void> | undefined): this {
+        if (((this._flagArray[10]) == (0)) || (true)) {
+            this._flagArray[10] = 1
             this._onUpdate_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onUpdate_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[10] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

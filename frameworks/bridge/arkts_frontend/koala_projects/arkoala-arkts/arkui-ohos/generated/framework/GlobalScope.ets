@@ -16,20 +16,18 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, NativeBuffer, Finalizable, runtimeType, RuntimeType, MaterializedBase, KPointer, toPeerPtr } from "@koalaui/interop"
-import { Resource_serializer } from "./resource"
-import { AnimateParam_serializer, AnimateParam, FinishCallbackType, ExpectedFrameRateRange } from "./../component/common"
-import { ComponentInfo_serializer, ComponentInfo, Offset_componentutils, TranslateResult, ScaleResult, RotateResult, Matrix4Result } from "./../component/idlize"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { Resource } from "global.resource"
-import { default as curves } from "@ohos.curves"
-import { extractors } from "#handwritten"
-import { PlayMode } from "./../component/enums"
-import { Size } from "arkui.Graphics"
-import { default as pointer } from "@ohos.multimodalInput.pointer"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
+import { SerializerBase, DeserializerBase, NativeBuffer, Finalizable, RuntimeType, MaterializedBase, KPointer, toPeerPtr } from '@koalaui/interop'
+import { global_resource_Resource_serializer } from './resource'
+import { AnimateParam_serializer, AnimateParam, CommonMethod, PointerStyle as arkui_component_common_PointerStyle } from './../component/common'
+import { ComponentInfo_serializer, ComponentInfo } from './../component/idlize'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { CallbackKind } from './peers/CallbackKind'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { RecordData, Callback as ohos_base_Callback } from '@ohos.base'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { CustomStyles } from '#handwritten'
+import { default as pointer } from '@ohos.multimodalInput.pointer'
 export class GlobalScope {
     public static postCardAction(component: Object, action: Object): void {
         const component_casted = component as (Object)
@@ -44,16 +42,16 @@ export class GlobalScope {
         ArkUIGeneratedNativeModule._GlobalScope_postCardAction(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    public static $r(value: string, params: Array<Object | null | undefined>): Resource {
+    public static $r(value: string, params: Array<RecordData>): global_resource_Resource {
         const value_casted = value as (string)
-        const params_casted = params as (Array<Object | null | undefined>)
+        const params_casted = params as (Array<RecordData>)
         return GlobalScope.$r_serialize(value_casted, params_casted)
     }
-    static $r_serialize(value: string, params: Array<Object | null | undefined>): Resource {
+    static $r_serialize(value: string, params: Array<RecordData>): global_resource_Resource {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((params.length).toInt())
         for (let paramsCounterI = 0; paramsCounterI < params.length; paramsCounterI++) {
-            const paramsTmpElement : Object | null | undefined = params[paramsCounterI]
+            const paramsTmpElement : RecordData = params[paramsCounterI]
             if (paramsTmpElement !== undefined && paramsTmpElement !== null) {
                 thisSerializer.writeInt8(RuntimeType.OBJECT)
                 const paramsTmpElementTmpValue  = paramsTmpElement!
@@ -65,17 +63,17 @@ export class GlobalScope {
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_$r(value, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Resource = Resource_serializer.read(retvalDeserializer)
+        const returnResult : global_resource_Resource = global_resource_Resource_serializer.read(retvalDeserializer)
         return returnResult
     }
-    public static $rawfile(value: string): Resource {
+    public static $rawfile(value: string): global_resource_Resource {
         const value_casted = value as (string)
         return GlobalScope.$rawfile_serialize(value_casted)
     }
-    static $rawfile_serialize(value: string): Resource {
+    static $rawfile_serialize(value: string): global_resource_Resource {
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_$rawfile(value)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : Resource = Resource_serializer.read(retvalDeserializer)
+        const returnResult : global_resource_Resource = global_resource_Resource_serializer.read(retvalDeserializer)
         return returnResult
     }
     public static animateTo(value: AnimateParam, event: (() => void)): void {
@@ -104,22 +102,6 @@ export class GlobalScope {
         ArkUIGeneratedNativeModule._GlobalScope_animateToImmediately(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    public static vp2px(value: number): number {
-        const value_casted = value as (number)
-        return GlobalScope.vp2px_serialize(value_casted)
-    }
-    static vp2px_serialize(value: number): number {
-        const retval  = ArkUIGeneratedNativeModule._GlobalScope_vp2px(value)
-        return retval
-    }
-    public static px2vp(value: number): number {
-        const value_casted = value as (number)
-        return GlobalScope.px2vp_serialize(value_casted)
-    }
-    static px2vp_serialize(value: number): number {
-        const retval  = ArkUIGeneratedNativeModule._GlobalScope_px2vp(value)
-        return retval
-    }
     public static setAppBgColor(value: string): void {
         const value_casted = value as (string)
         GlobalScope.setAppBgColor_serialize(value_casted)
@@ -138,12 +120,12 @@ export class GlobalScope {
         const returnResult : ComponentInfo = ComponentInfo_serializer.read(retvalDeserializer)
         return returnResult
     }
-    public static Profiler_registerVsyncCallback(callback_: ((value0: string) => void)): void {
-        const callback__casted = callback_ as (((value0: string) => void))
+    public static Profiler_registerVsyncCallback(callback_: ohos_base_Callback<string>): void {
+        const callback__casted = callback_ as (ohos_base_Callback<string>)
         GlobalScope.Profiler_registerVsyncCallback_serialize(callback__casted)
         return
     }
-    static Profiler_registerVsyncCallback_serialize(callback_: ((value0: string) => void)): void {
+    static Profiler_registerVsyncCallback_serialize(callback_: ohos_base_Callback<string>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(callback_)
         ArkUIGeneratedNativeModule._GlobalScope_Profiler_registerVsyncCallback(thisSerializer.asBuffer(), thisSerializer.length())
@@ -156,12 +138,12 @@ export class GlobalScope {
     static Profiler_unregisterVsyncCallback_serialize(): void {
         ArkUIGeneratedNativeModule._GlobalScope_Profiler_unregisterVsyncCallback()
     }
-    public static cursorControl_setCursor(value: pointer.PointerStyle): void {
-        const value_casted = value as (pointer.PointerStyle)
+    public static cursorControl_setCursor(value: arkui_component_common_PointerStyle): void {
+        const value_casted = value as (arkui_component_common_PointerStyle)
         GlobalScope.cursorControl_setCursor_serialize(value_casted)
         return
     }
-    static cursorControl_setCursor_serialize(value: pointer.PointerStyle): void {
+    static cursorControl_setCursor_serialize(value: arkui_component_common_PointerStyle): void {
         ArkUIGeneratedNativeModule._GlobalScope_cursorControl_setCursor(value.valueOf())
     }
     public static cursorControl_restoreDefault(): void {

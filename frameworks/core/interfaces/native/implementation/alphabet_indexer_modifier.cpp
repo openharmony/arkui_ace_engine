@@ -57,7 +57,7 @@ void AssignCast(std::optional<AlignStyle>& dst, const Ark_IndexerAlign& src)
 
 } // namespace Converter
 namespace {
-int32_t ProcessBindableSelected(FrameNode* frameNode, const Ark_Union_I32_Bindable& value)
+int32_t ProcessBindableSelected(FrameNode* frameNode, const Ark_Union_I32_Bindable_I32& value)
 {
     int32_t result = 0;
     Converter::VisitUnion(value,
@@ -170,7 +170,7 @@ void SetUsingPopupImpl(Ark_NativePointer node,
     IndexerModelStatic::SetUsingPopup(frameNode, convValue);
 }
 void SetSelectedFontImpl(Ark_NativePointer node,
-                         const Opt_Font* value)
+                         const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -183,7 +183,7 @@ void SetSelectedFontImpl(Ark_NativePointer node,
     }
 }
 void SetPopupFontImpl(Ark_NativePointer node,
-                      const Opt_Font* value)
+                      const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -196,7 +196,7 @@ void SetPopupFontImpl(Ark_NativePointer node,
     }
 }
 void SetPopupItemFontImpl(Ark_NativePointer node,
-                          const Opt_Font* value)
+                          const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -221,7 +221,7 @@ void SetItemSizeImpl(Ark_NativePointer node,
     IndexerModelStatic::SetItemSize(frameNode, size);
 }
 void SetFontImpl(Ark_NativePointer node,
-                 const Opt_Font* value)
+                 const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -260,7 +260,7 @@ void SetOnRequestPopupDataImpl(Ark_NativePointer node,
     auto onEvent = [callback = CallbackHelper(*optValue)](const int32_t selected) -> std::vector<std::string> {
         auto arkValue = Converter::ArkValue<Ark_Int32>(selected);
         return callback.InvokeWithConvertResult<std::vector<std::string>, Array_String,
-            Callback_Array_String_Void>(arkValue);
+            synthetic_Callback_Array_String_Void>(arkValue);
     };
     IndexerModelStatic::SetOnRequestPopupData(frameNode, std::move(onEvent));
 }
@@ -279,7 +279,7 @@ void SetOnPopupSelectImpl(Ark_NativePointer node,
     IndexerModelStatic::SetOnPopupSelected(frameNode, std::move(onEvent));
 }
 void SetSelectedImpl(Ark_NativePointer node,
-                     const Opt_Union_I32_Bindable* value)
+                     const Opt_Union_I32_Bindable_I32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

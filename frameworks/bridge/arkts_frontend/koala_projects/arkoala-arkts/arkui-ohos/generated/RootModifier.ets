@@ -16,15 +16,20 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkRootPeer, Root } from "./component/idlize"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkRootPeer, Root } from './component/idlize'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
 export class RootModifier implements Root,AttributeModifier<Root> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -34,13 +39,16 @@ export class RootModifier implements Root,AttributeModifier<Root> {
     applyFocusedAttribute(instance: Root): void { }
     applyDisabledAttribute(instance: Root): void { }
     applySelectedAttribute(instance: Root): void { }
-    applyModifierPatch(node: PeerNode): void {
+    applyModifierPatch(node: object): void {
         this._state.addRef()
         const peer = node as ArkRootPeer;
+        const flagArray = this._flagArray;
     }
     mergeModifier(modifier: RootModifier): void {
+        this._state = modifier._state;
+        const flagArray = modifier._flagArray;
     }
     public attributeModifier(value: AttributeModifier<Root> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

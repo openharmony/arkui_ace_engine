@@ -16,27 +16,28 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
-import { Resource_serializer } from "./../framework/resource"
-import { int32, int64, float32 } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ResourceColor, ResourceStr } from "./units"
-import { Color } from "./enums"
-import { Resource } from "global.resource"
-import { AttributeModifier, hookQRCodeAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { QRCodeModifier } from "./../QRCodeModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from '@koalaui/interop'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { int32, int64, float32 } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { ResourceColor, Resource as arkui_component_units_Resource, ResourceStr as arkui_component_units_ResourceStr } from './units'
+import { Color as arkui_component_enums_Color } from './enums'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { AttributeModifier, hookQRCodeAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { QRCodeModifier } from './../QRCodeModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkQRCodePeer extends ArkCommonMethodPeer {
     attributeSet?: QRCodeModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkQRCodePeer {
@@ -46,16 +47,17 @@ export class ArkQRCodePeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setQRCodeOptionsAttribute(value: ResourceStr): void {
+    setQRCodeOptionsAttribute(value: arkui_component_units_ResourceStr): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value instanceof string) {
             thisSerializer.writeInt8((0).toByte())
             const valueForIdx0  = value as string
             thisSerializer.writeString(valueForIdx0)
-        } else if (value instanceof Resource) {
+        } else if (value instanceof arkui_component_units_Resource) {
             thisSerializer.writeInt8((1).toByte())
-            const valueForIdx1  = value as Resource
-            Resource_serializer.write(thisSerializer, valueForIdx1)
+            const valueForIdx1  = value as arkui_component_units_Resource
+            global_resource_Resource_serializer.write(thisSerializer, valueForIdx1)
         }
         ArkUIGeneratedNativeModule._QRCodeInterface_setQRCodeOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -65,10 +67,10 @@ export class ArkQRCodePeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0  = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
@@ -77,10 +79,10 @@ export class ArkQRCodePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -93,10 +95,10 @@ export class ArkQRCodePeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0  = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
@@ -105,10 +107,10 @@ export class ArkQRCodePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -116,7 +118,7 @@ export class ArkQRCodePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._QRCodeAttribute_setBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setContentOpacityAttribute(value: double | Resource | undefined): void {
+    setContentOpacityAttribute(value: double | global_resource_Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -125,10 +127,10 @@ export class ArkQRCodePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -138,52 +140,28 @@ export class ArkQRCodePeer extends ArkCommonMethodPeer {
     }
 }
 export interface QRCodeAttribute extends CommonMethod {
-    setQRCodeOptions(value: ResourceStr): this {
-        throw new Error("Unimplemented method setQRCodeOptions")
+    setQRCodeOptions(value: arkui_component_units_ResourceStr): this {
+        throw new Error('Unimplemented method setQRCodeOptions')
     }
     color(value: ResourceColor | undefined): this {
-        throw new Error("Unimplemented method color")
+        throw new Error('Unimplemented method color')
     }
     backgroundColor(value: ResourceColor | undefined): this
-    contentOpacity(value: double | Resource | undefined): this {
-        throw new Error("Unimplemented method contentOpacity")
+    contentOpacity(value: double | global_resource_Resource | undefined): this {
+        throw new Error('Unimplemented method contentOpacity')
     }
     attributeModifier(value: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkQRCodeStyle extends ArkCommonMethodStyle implements QRCodeAttribute {
-    color_value?: ResourceColor | undefined
-    backgroundColor_value?: ResourceColor | undefined
-    contentOpacity_value?: double | Resource | undefined
-    attributeModifier_value?: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined
-    setQRCodeOptions(value: ResourceStr): this {
-        return this
-    }
-    color(value: ResourceColor | undefined): this {
-        return this
-    }
-    backgroundColor(value: ResourceColor | undefined): this {
-        return this
-    }
-    contentOpacity(value: double | Resource | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkQRCodeComponent extends ArkCommonMethodComponent implements QRCodeAttribute {
     getPeer(): ArkQRCodePeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkQRCodePeer)
     }
-    public setQRCodeOptions(value: ResourceStr): this {
-        if (this.checkPriority("setQRCodeOptions")) {
-            const value_casted = value as (ResourceStr)
+    public setQRCodeOptions(value: arkui_component_units_ResourceStr): this {
+        if (this.checkPriority('setQRCodeOptions')) {
+            const value_casted = value as (arkui_component_units_ResourceStr)
             this.getPeer()?.setQRCodeOptionsAttribute(value_casted)
             this.applyOptionsFinish('QRCodeAttribute');
             return this
@@ -191,7 +169,7 @@ export class ArkQRCodeComponent extends ArkCommonMethodComponent implements QRCo
         return this
     }
     public color(value: ResourceColor | undefined): this {
-        if (this.checkPriority("color")) {
+        if (this.checkPriority('color')) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.setColorAttribute(value_casted)
             return this
@@ -199,16 +177,16 @@ export class ArkQRCodeComponent extends ArkCommonMethodComponent implements QRCo
         return this
     }
     public backgroundColor(value: ResourceColor | undefined): this {
-        if (this.checkPriority("backgroundColor")) {
+        if (this.checkPriority('backgroundColor')) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.setBackgroundColorAttribute(value_casted)
             return this
         }
         return this
     }
-    public contentOpacity(value: double | Resource | undefined): this {
-        if (this.checkPriority("contentOpacity")) {
-            const value_casted = value as (double | Resource | undefined)
+    public contentOpacity(value: double | global_resource_Resource | undefined): this {
+        if (this.checkPriority('contentOpacity')) {
+            const value_casted = value as (double | global_resource_Resource | undefined)
             this.getPeer()?.setContentOpacityAttribute(value_casted)
             return this
         }
@@ -231,18 +209,16 @@ export class ArkQRCodeComponent extends ArkCommonMethodComponent implements QRCo
 
 @memo
 export function QRCodeImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: QRCodeAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkQRCodeComponent>((): ArkQRCodeComponent => {
         return new ArkQRCodeComponent()
     })
-    NodeAttach<ArkQRCodePeer>((): ArkQRCodePeer => ArkQRCodePeer.create(receiver), (peer: ArkQRCodePeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkQRCodePeer>((): ArkQRCodePeer => ArkQRCodePeer.create(receiver), (_: ArkQRCodePeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -34,7 +34,7 @@ inline void AssignCast(std::optional<GridItemSize>& dst, const Ark_GridLayoutOpt
 }
 
 template<>
-inline void AssignCast(std::optional<std::set<int32_t>>& dst, const Array_Int32& src)
+inline void AssignCast(std::optional<std::set<int32_t>>& dst, const Array_I32& src)
 {
     auto length = static_cast<int32_t>(src.length);
     std::set<int32_t> indexesSet;
@@ -219,7 +219,7 @@ void SetScrollBarWidthImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetScrollBarWidth(frameNode, convValue);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
-                           const Opt_Union_Color_I32_String* value)
+                           const Opt_Union_arkui_component_enums_Color_I32_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -374,11 +374,12 @@ void SetOnItemDragStartImpl(Ark_NativePointer node,
         return;
     }
     auto onItemDragStart = [callback = CallbackHelper(*optValue), frameNode, node](
-                               const ItemDragInfo& dragInfo, int32_t itemIndex) {
+        const ItemDragInfo& dragInfo, int32_t itemIndex
+    ) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Int32>(itemIndex);
         auto builderOpt = callback.InvokeWithOptConvertResult<CustomNodeBuilder, Opt_CustomNodeBuilder,
-            Callback_Opt_CustomBuilder_Void>(arkDragInfo, arkItemIndex);
+            Callback_Opt_CustomNodeBuilder_Void>(arkDragInfo, arkItemIndex);
         if (builderOpt.has_value()) {
             auto uiNode = CallbackHelper(builderOpt.value()).BuildSync(node);
             ViewStackProcessor::GetInstance()->Push(uiNode);

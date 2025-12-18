@@ -46,8 +46,9 @@ constexpr int32_t PARTICLE_DEFAULT_EMITTER_RATE = 5;
 
 void ParseSize(std::pair<Dimension, Dimension>& size, const Ark_Tuple_Dimension_Dimension& value)
 {
-    auto width = Converter::Convert<Dimension>(value.value0);
-    auto height = Converter::Convert<Dimension>(value.value1);
+    auto dimPair = Converter::Convert<std::pair<Dimension, Dimension>>(value);
+    auto width = dimPair.first;
+    auto height = dimPair.second;
     if (GreatOrEqual(width.Value(), 0.0)) {
         size.first = width;
     }
@@ -119,7 +120,7 @@ void ParseFloatInitRange(const Ark_Tuple_Number_Number& arkRange, ParticleFloatP
     floatOption.SetRange(range);
 }
 
-RefPtr<Curve> ParseCurve(const Opt_Union_Curve_ICurve arkCurve)
+RefPtr<Curve> ParseCurve(const Opt_Union_curves_Curve_curves_ICurve arkCurve)
 {
     std::optional<RefPtr<Curve>> curveOpt = Converter::OptConvert<RefPtr<Curve>>(arkCurve);
     if (curveOpt && *curveOpt) {
@@ -418,14 +419,13 @@ bool ParseParticleObject(const Ark_EmitterParticleOptions& src, Particle& result
     }
     result.SetCount(count);
     int64_t lifeTime = 1000;
-    std::optional<long> lifeTimeIntValue =
-        Converter::OptConvert<long>(src.lifetime); // notice: long is not supported now
+    auto lifeTimeIntValue = Converter::OptConvert<int32_t>(src.lifetime);
     if (lifeTimeIntValue && *lifeTimeIntValue >= -1) {
         lifeTime = *lifeTimeIntValue;
     }
     result.SetLifeTime(lifeTime);
     int64_t lifeTimeRange = 0;
-    std::optional<long> lifeTimeRangeIntValue = Converter::OptConvert<long>(src.lifetimeRange);
+    auto lifeTimeRangeIntValue = Converter::OptConvert<int32_t>(src.lifetimeRange);
     if (lifeTimeRangeIntValue && *lifeTimeRangeIntValue >= 0) {
         lifeTimeRange = *lifeTimeRangeIntValue;
     }
@@ -606,7 +606,6 @@ void ParseParticleArray(const Ark_ParticlesInner& src, std::list<ParticleOption>
     }
 }
 } // namespace
-
 namespace ParticleHelperAccessor {
 void SetDisturbanceFieldsImpl(Ark_NativePointer node,
                               const Opt_Array_DisturbanceFieldOptionsInner* disturbanceFields)
@@ -661,7 +660,6 @@ void SetParticleOptionsImpl(Ark_NativePointer node,
     renderContext->UpdateParticleOptionArray(options);
 }
 } // ParticleHelperAccessor
-
 const GENERATED_ArkUIParticleHelperAccessor* GetParticleHelperAccessor()
 {
     static const GENERATED_ArkUIParticleHelperAccessor ParticleHelperAccessorImpl {

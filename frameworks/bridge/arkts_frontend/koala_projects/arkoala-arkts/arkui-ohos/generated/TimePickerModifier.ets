@@ -16,19 +16,25 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkTimePickerPeer, OnTimePickerChangeCallback, TimePickerResult, TimePickerAttribute } from "./component/timePicker"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod, PickerTextStyle } from "./component/common"
-import { default as intl } from "@ohos.intl"
-import { CrownSensitivity } from "./component/enums"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkTimePickerPeer, OnTimePickerChangeCallback, TimePickerResult, TimePickerAttribute } from './component/timePicker'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod, PickerTextStyle, DateTimeOptions, Callback as arkui_component_common_Callback } from './component/common'
+import { default as intl } from '@ohos.intl'
+import { CrownSensitivity } from './component/enums'
 export class TimePickerModifier extends CommonMethodModifier implements TimePickerAttribute,AttributeModifier<TimePickerAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -38,239 +44,224 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
     applyFocusedAttribute(instance: TimePickerAttribute): void { }
     applyDisabledAttribute(instance: TimePickerAttribute): void { }
     applySelectedAttribute(instance: TimePickerAttribute): void { }
-    _useMilitaryTime_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _useMilitaryTime_0_0value?: boolean | undefined
-    _loop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _loop_0_0value?: boolean | undefined
-    _disappearTextStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _disappearTextStyle_0_0value?: PickerTextStyle | undefined
-    _textStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _textStyle_0_0value?: PickerTextStyle | undefined
-    _selectedTextStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selectedTextStyle_0_0value?: PickerTextStyle | undefined
-    _dateTimeOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _dateTimeOptions_0_0value?: intl.DateTimeOptions | undefined
-    _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onChange_0_0value?: OnTimePickerChangeCallback | undefined
-    _onEnterSelectedArea_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onEnterSelectedArea_0_0value?: ((value0: TimePickerResult) => void) | undefined
-    _enableHapticFeedback_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableHapticFeedback_0_0value?: boolean | undefined
-    _digitalCrownSensitivity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
-    _enableCascade_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _enableCascade_0_0value?: boolean | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _useMilitaryTime_0_0value?: boolean | undefined
+    public _loop_0_0value?: boolean | undefined
+    public _disappearTextStyle_0_0value?: PickerTextStyle | undefined
+    public _textStyle_0_0value?: PickerTextStyle | undefined
+    public _selectedTextStyle_0_0value?: PickerTextStyle | undefined
+    public _dateTimeOptions_0_0value?: DateTimeOptions | undefined
+    public _onChange_0_0value?: OnTimePickerChangeCallback | undefined
+    public _onEnterSelectedArea_0_0value?: arkui_component_common_Callback<TimePickerResult, void> | undefined
+    public _enableHapticFeedback_0_0value?: boolean | undefined
+    public _digitalCrownSensitivity_0_0value?: CrownSensitivity | undefined
+    public _enableCascade_0_0value?: boolean | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkTimePickerPeer;
-        if (this._useMilitaryTime_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._useMilitaryTime_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkTimePickerPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setUseMilitaryTimeAttribute((this._useMilitaryTime_0_0value as boolean | undefined));
-                    this._useMilitaryTime_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._useMilitaryTime_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._useMilitaryTime_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setUseMilitaryTimeAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._loop_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._loop_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
                     peer.setLoopAttribute((this._loop_0_0value as boolean | undefined));
-                    this._loop_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._loop_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._loop_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
                     peer.setLoopAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._disappearTextStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._disappearTextStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
                     peer.setDisappearTextStyleAttribute((this._disappearTextStyle_0_0value as PickerTextStyle | undefined));
-                    this._disappearTextStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._disappearTextStyle_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._disappearTextStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[2] = 0;
                     peer.setDisappearTextStyleAttribute((undefined as PickerTextStyle | undefined));
                 }
             }
         }
-        if (this._textStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._textStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
                     peer.setTextStyleAttribute((this._textStyle_0_0value as PickerTextStyle | undefined));
-                    this._textStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[3] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._textStyle_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[3] = 2;
                     break;
                 }
                 default: {
-                    this._textStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[3] = 0;
                     peer.setTextStyleAttribute((undefined as PickerTextStyle | undefined));
                 }
             }
         }
-        if (this._selectedTextStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._selectedTextStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1: {
                     peer.setSelectedTextStyleAttribute((this._selectedTextStyle_0_0value as PickerTextStyle | undefined));
-                    this._selectedTextStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._selectedTextStyle_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._selectedTextStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[4] = 0;
                     peer.setSelectedTextStyleAttribute((undefined as PickerTextStyle | undefined));
                 }
             }
         }
-        if (this._dateTimeOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._dateTimeOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDateTimeOptionsAttribute((this._dateTimeOptions_0_0value as intl.DateTimeOptions | undefined));
-                    this._dateTimeOptions_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1: {
+                    peer.setDateTimeOptionsAttribute((this._dateTimeOptions_0_0value as DateTimeOptions | undefined));
+                    flagArray[5] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._dateTimeOptions_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[5] = 2;
                     break;
                 }
                 default: {
-                    this._dateTimeOptions_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setDateTimeOptionsAttribute((undefined as intl.DateTimeOptions | undefined));
+                    flagArray[5] = 0;
+                    peer.setDateTimeOptionsAttribute((undefined as DateTimeOptions | undefined));
                 }
             }
         }
-        if (this._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1: {
                     peer.setOnChangeAttribute((this._onChange_0_0value as OnTimePickerChangeCallback | undefined));
-                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[6] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[6] = 2;
                     break;
                 }
                 default: {
-                    this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[6] = 0;
                     peer.setOnChangeAttribute((undefined as OnTimePickerChangeCallback | undefined));
                 }
             }
         }
-        if (this._onEnterSelectedArea_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onEnterSelectedArea_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnEnterSelectedAreaAttribute((this._onEnterSelectedArea_0_0value as ((value0: TimePickerResult) => void) | undefined));
-                    this._onEnterSelectedArea_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1: {
+                    peer.setOnEnterSelectedAreaAttribute((this._onEnterSelectedArea_0_0value as arkui_component_common_Callback<TimePickerResult, void> | undefined));
+                    flagArray[7] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onEnterSelectedArea_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[7] = 2;
                     break;
                 }
                 default: {
-                    this._onEnterSelectedArea_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnEnterSelectedAreaAttribute((undefined as ((value0: TimePickerResult) => void) | undefined));
+                    flagArray[7] = 0;
+                    peer.setOnEnterSelectedAreaAttribute((undefined as arkui_component_common_Callback<TimePickerResult, void> | undefined));
                 }
             }
         }
-        if (this._enableHapticFeedback_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableHapticFeedback_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1: {
                     peer.setEnableHapticFeedbackAttribute((this._enableHapticFeedback_0_0value as boolean | undefined));
-                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[8] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[8] = 2;
                     break;
                 }
                 default: {
-                    this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[8] = 0;
                     peer.setEnableHapticFeedbackAttribute((undefined as boolean | undefined));
                 }
             }
         }
-        if (this._digitalCrownSensitivity_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._digitalCrownSensitivity_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1: {
                     peer.setDigitalCrownSensitivityAttribute((this._digitalCrownSensitivity_0_0value as CrownSensitivity | undefined));
-                    this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[9] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[9] = 2;
                     break;
                 }
                 default: {
-                    this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[9] = 0;
                     peer.setDigitalCrownSensitivityAttribute((undefined as CrownSensitivity | undefined));
                 }
             }
         }
-        if (this._enableCascade_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._enableCascade_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
+                case 1: {
                     peer.setEnableCascadeAttribute((this._enableCascade_0_0value as boolean | undefined));
-                    this._enableCascade_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[10] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._enableCascade_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[10] = 2;
                     break;
                 }
                 default: {
-                    this._enableCascade_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[10] = 0;
                     peer.setEnableCascadeAttribute((undefined as boolean | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: TimePickerModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._useMilitaryTime_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._useMilitaryTime_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: TimePickerModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.useMilitaryTime(modifier._useMilitaryTime_0_0value);
                     break;
                 }
@@ -279,11 +270,10 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
                 }
             }
         }
-        if (modifier._loop_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._loop_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.loop(modifier._loop_0_0value);
                     break;
                 }
@@ -292,11 +282,10 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
                 }
             }
         }
-        if (modifier._disappearTextStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._disappearTextStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.disappearTextStyle(modifier._disappearTextStyle_0_0value);
                     break;
                 }
@@ -305,11 +294,10 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
                 }
             }
         }
-        if (modifier._textStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._textStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
                     this.textStyle(modifier._textStyle_0_0value);
                     break;
                 }
@@ -318,11 +306,10 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
                 }
             }
         }
-        if (modifier._selectedTextStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._selectedTextStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
                     this.selectedTextStyle(modifier._selectedTextStyle_0_0value);
                     break;
                 }
@@ -331,24 +318,22 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
                 }
             }
         }
-        if (modifier._dateTimeOptions_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._dateTimeOptions_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1:
+                case 3: {
                     this.dateTimeOptions(modifier._dateTimeOptions_0_0value);
                     break;
                 }
                 default: {
-                    this.dateTimeOptions((undefined as intl.DateTimeOptions | undefined));
+                    this.dateTimeOptions((undefined as DateTimeOptions | undefined));
                 }
             }
         }
-        if (modifier._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1:
+                case 3: {
                     this.onChange(modifier._onChange_0_0value);
                     break;
                 }
@@ -357,24 +342,22 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
                 }
             }
         }
-        if (modifier._onEnterSelectedArea_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onEnterSelectedArea_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1:
+                case 3: {
                     this.onEnterSelectedArea(modifier._onEnterSelectedArea_0_0value);
                     break;
                 }
                 default: {
-                    this.onEnterSelectedArea((undefined as ((value0: TimePickerResult) => void) | undefined));
+                    this.onEnterSelectedArea((undefined as arkui_component_common_Callback<TimePickerResult, void> | undefined));
                 }
             }
         }
-        if (modifier._enableHapticFeedback_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableHapticFeedback_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[8] != 0) {
+            switch (flagArray[8]) {
+                case 1:
+                case 3: {
                     this.enableHapticFeedback(modifier._enableHapticFeedback_0_0value);
                     break;
                 }
@@ -383,11 +366,10 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
                 }
             }
         }
-        if (modifier._digitalCrownSensitivity_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._digitalCrownSensitivity_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[9] != 0) {
+            switch (flagArray[9]) {
+                case 1:
+                case 3: {
                     this.digitalCrownSensitivity(modifier._digitalCrownSensitivity_0_0value);
                     break;
                 }
@@ -396,11 +378,10 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
                 }
             }
         }
-        if (modifier._enableCascade_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._enableCascade_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[10] != 0) {
+            switch (flagArray[10]) {
+                case 1:
+                case 3: {
                     this.enableCascade(modifier._enableCascade_0_0value);
                     break;
                 }
@@ -411,138 +392,116 @@ export class TimePickerModifier extends CommonMethodModifier implements TimePick
         }
     }
     useMilitaryTime(value: boolean | undefined): this {
-        if (((this._useMilitaryTime_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._useMilitaryTime_0_0value) !== (value)))
-        {
-            this._useMilitaryTime_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || ((this._useMilitaryTime_0_0value) !== (value))) {
+            this._flagArray[0] = 1
             this._useMilitaryTime_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._useMilitaryTime_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     loop(value: boolean | undefined): this {
-        if (((this._loop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._loop_0_0value) !== (value)))
-        {
-            this._loop_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[1]) == (0)) || ((this._loop_0_0value) !== (value))) {
+            this._flagArray[1] = 1
             this._loop_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._loop_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     disappearTextStyle(value: PickerTextStyle | undefined): this {
-        if (((this._disappearTextStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._disappearTextStyle_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._disappearTextStyle_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._disappearTextStyle_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     textStyle(value: PickerTextStyle | undefined): this {
-        if (((this._textStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._textStyle_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[3]) == (0)) || (true)) {
+            this._flagArray[3] = 1
             this._textStyle_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._textStyle_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }
     selectedTextStyle(value: PickerTextStyle | undefined): this {
-        if (((this._selectedTextStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._selectedTextStyle_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[4]) == (0)) || (true)) {
+            this._flagArray[4] = 1
             this._selectedTextStyle_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._selectedTextStyle_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[4] = 3
         }
         return this
     }
-    dateTimeOptions(value: intl.DateTimeOptions | undefined): this {
-        if (((this._dateTimeOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._dateTimeOptions_0_flag = AttributeUpdaterFlag.UPDATE
+    dateTimeOptions(value: DateTimeOptions | undefined): this {
+        if (((this._flagArray[5]) == (0)) || (true)) {
+            this._flagArray[5] = 1
             this._dateTimeOptions_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._dateTimeOptions_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[5] = 3
         }
         return this
     }
     onChange(value: OnTimePickerChangeCallback | undefined): this {
-        if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[6]) == (0)) || (true)) {
+            this._flagArray[6] = 1
             this._onChange_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onChange_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[6] = 3
         }
         return this
     }
-    onEnterSelectedArea(value: ((value0: TimePickerResult) => void) | undefined): this {
-        if (((this._onEnterSelectedArea_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onEnterSelectedArea_0_flag = AttributeUpdaterFlag.UPDATE
+    onEnterSelectedArea(value: arkui_component_common_Callback<TimePickerResult, void> | undefined): this {
+        if (((this._flagArray[7]) == (0)) || (true)) {
+            this._flagArray[7] = 1
             this._onEnterSelectedArea_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onEnterSelectedArea_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[7] = 3
         }
         return this
     }
     enableHapticFeedback(value: boolean | undefined): this {
-        if (((this._enableHapticFeedback_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableHapticFeedback_0_0value) !== (value)))
-        {
-            this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[8]) == (0)) || ((this._enableHapticFeedback_0_0value) !== (value))) {
+            this._flagArray[8] = 1
             this._enableHapticFeedback_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[8] = 3
         }
         return this
     }
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
-        if (((this._digitalCrownSensitivity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[9]) == (0)) || (true)) {
+            this._flagArray[9] = 1
             this._digitalCrownSensitivity_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[9] = 3
         }
         return this
     }
     enableCascade(value: boolean | undefined): this {
-        if (((this._enableCascade_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableCascade_0_0value) !== (value)))
-        {
-            this._enableCascade_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[10]) == (0)) || ((this._enableCascade_0_0value) !== (value))) {
+            this._flagArray[10] = 1
             this._enableCascade_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._enableCascade_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[10] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<TimePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

@@ -16,80 +16,84 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkBaseSpanPeer, TextBackgroundStyle, BaseSpan } from "./component/span"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod } from "./component/common"
-import { LengthMetrics } from "arkui.Graphics"
-export class BaseSpanModifier extends CommonMethodModifier implements BaseSpan,AttributeModifier<BaseSpan> {
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkBaseSpanPeer, TextBackgroundStyle, BaseSpan } from './component/span'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod } from './component/common'
+import { LengthMetrics as arkui_Graphics_LengthMetrics } from '@arkui.Graphics'
+export class BaseSpanModifier extends CommonMethodModifier implements BaseSpan {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
-    applyNormalAttribute(instance: BaseSpan): void { }
-    applyPressedAttribute(instance: BaseSpan): void { }
-    applyFocusedAttribute(instance: BaseSpan): void { }
-    applyDisabledAttribute(instance: BaseSpan): void { }
-    applySelectedAttribute(instance: BaseSpan): void { }
-    _textBackgroundStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
-    _baselineOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _baselineOffset_0_0value?: LengthMetrics | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
+    public _baselineOffset_0_0value?: arkui_Graphics_LengthMetrics | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkBaseSpanPeer;
-        if (this._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._textBackgroundStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkBaseSpanPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setTextBackgroundStyleAttribute((this._textBackgroundStyle_0_0value as TextBackgroundStyle | undefined));
-                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setTextBackgroundStyleAttribute((undefined as TextBackgroundStyle | undefined));
                 }
             }
         }
-        if (this._baselineOffset_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._baselineOffset_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBaselineOffsetAttribute((this._baselineOffset_0_0value as LengthMetrics | undefined));
-                    this._baselineOffset_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
+                    peer.setBaselineOffsetAttribute((this._baselineOffset_0_0value as arkui_Graphics_LengthMetrics | undefined));
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._baselineOffset_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._baselineOffset_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBaselineOffsetAttribute((undefined as LengthMetrics | undefined));
+                    flagArray[1] = 0;
+                    peer.setBaselineOffsetAttribute((undefined as arkui_Graphics_LengthMetrics | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: BaseSpanModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._textBackgroundStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: BaseSpanModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.textBackgroundStyle(modifier._textBackgroundStyle_0_0value);
                     break;
                 }
@@ -98,45 +102,40 @@ export class BaseSpanModifier extends CommonMethodModifier implements BaseSpan,A
                 }
             }
         }
-        if (modifier._baselineOffset_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._baselineOffset_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.baselineOffset(modifier._baselineOffset_0_0value);
                     break;
                 }
                 default: {
-                    this.baselineOffset((undefined as LengthMetrics | undefined));
+                    this.baselineOffset((undefined as arkui_Graphics_LengthMetrics | undefined));
                 }
             }
         }
     }
     textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
-        if (((this._textBackgroundStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._textBackgroundStyle_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
-    baselineOffset(value: LengthMetrics | undefined): this {
-        if (((this._baselineOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._baselineOffset_0_flag = AttributeUpdaterFlag.UPDATE
+    baselineOffset(value: arkui_Graphics_LengthMetrics | undefined): this {
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._baselineOffset_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._baselineOffset_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

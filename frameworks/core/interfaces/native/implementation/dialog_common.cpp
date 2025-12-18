@@ -35,6 +35,18 @@ void AddOnWillDismiss(DialogProperties& properties, Opt_Callback_DismissDialogAc
         callback.InvokeSync(peer);
     };
 }
+void AddOnWillDismiss(DialogProperties& properties, Opt_synthetic_Callback_DismissDialogAction_Void onWillDismiss)
+{
+    auto onWillDismissOpt = Converter::OptConvert<synthetic_Callback_DismissDialogAction_Void>(onWillDismiss);
+    CHECK_NULL_VOID(onWillDismissOpt);
+    properties.onWillDismiss = [callback = CallbackHelper(onWillDismissOpt.value())](
+        const int32_t& info, const int32_t& instanceId
+    ) {
+        auto peer = PeerUtils::CreatePeer<DismissDialogActionPeer>();
+        peer->reason = static_cast<BindSheetDismissReason>(info);
+        callback.InvokeSync(peer);
+    };
+}
 } // namespace GeneratedModifier
 namespace Converter {
 template<>

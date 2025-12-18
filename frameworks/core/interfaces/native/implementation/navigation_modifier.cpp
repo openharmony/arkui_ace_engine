@@ -35,14 +35,15 @@ constexpr uint32_t SAFE_AREA_EDGE_BOTTOM = 1;
 constexpr uint32_t INVALID_VALUE = 0;
 constexpr uint32_t DEFAULT_NAV_BAR_WIDTH = 240;
 
-std::optional<Dimension> ProcessBindableNavBarWidth(FrameNode* frameNode, const Opt_Union_Length_Bindable* value)
+std::optional<Dimension> ProcessBindableNavBarWidth(
+    FrameNode* frameNode, const Opt_Union_Length_Bindable_Length* value)
 {
     std::optional<Dimension> result;
     Converter::VisitUnionPtr(value,
         [&result](const Ark_Length& src) {
             result = Converter::OptConvert<Dimension>(src);
         },
-        [&result, frameNode](const Ark_Bindable_Arkui_Component_Units_Length& src) {
+        [&result, frameNode](const Ark_Bindable_Length& src) {
             result = Converter::OptConvert<Dimension>(src.value);
             // Need to provide callback
         },
@@ -52,15 +53,15 @@ std::optional<Dimension> ProcessBindableNavBarWidth(FrameNode* frameNode, const 
 } // namespace
 
 namespace NavigationModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
+Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                Ark_Int32 flags)
 {
     auto frameNode = NavigationModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
-} // namespace NavigationModifier
-
+} // NavigationModifier
 namespace NavigationInterfaceModifier {
 void SetNavigationOptionsImpl(Ark_NativePointer node,
                               const Opt_NavPathStack* pathInfos)
@@ -76,11 +77,10 @@ void SetNavigationOptionsImpl(Ark_NativePointer node,
     navigationPattern->SetNavigationStack(navigationStack);
     navigationStack->SetOnStateChangedCallback(nullptr);
 }
-} // namespace NavigationInterfaceModifier
-
+} // NavigationInterfaceModifier
 namespace NavigationAttributeModifier {
 void SetNavBarWidthImpl(Ark_NativePointer node,
-                        const Opt_Union_Length_Bindable* value)
+                        const Opt_Union_Length_Bindable_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -214,7 +214,7 @@ void SetHideToolBar0Impl(Ark_NativePointer node,
 void SetEnableToolBarAdaptationImpl(Ark_NativePointer node,
                                     const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     NavigationModelStatic::SetEnableToolBarAdaptation(frameNode, Converter::OptConvertPtr<bool>(value).value_or(true));
 }
@@ -250,7 +250,7 @@ void SetOnTitleModeChangeImpl(Ark_NativePointer node,
     eventHub->SetOnTitleModeChange(eventChange);
 }
 void SetOnNavBarStateChangeImpl(Ark_NativePointer node,
-                                const Opt_Callback_Boolean_Void* value)
+                                const Opt_synthetic_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -284,10 +284,6 @@ void SetOnNavigationModeChangeImpl(Ark_NativePointer node,
     auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnNavigationModeChange(modeCallback);
-}
-void SetNavDestinationImpl(Ark_NativePointer node,
-                           const Opt_PageMapBuilder* value)
-{
 }
 void SetCustomNavContentTransitionImpl(Ark_NativePointer node,
                                        const Opt_Type_NavigationAttribute_customNavContentTransition* value)
@@ -350,8 +346,8 @@ void SetEnableModeChangeAnimationImpl(Ark_NativePointer node,
         Converter::OptConvertPtr<bool>(value).value_or(true));
 }
 void SetBackButtonIconImpl(Ark_NativePointer node,
-                            const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* icon,
-                            const Opt_ResourceStr* accessibilityText)
+                           const Opt_Union_String_image_PixelMap_Resource_SymbolGlyphModifier* icon,
+                           const Opt_ResourceStr* accessibilityText)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -414,7 +410,7 @@ void SetBackButtonIconImpl(Ark_NativePointer node,
         frameNode, iconSymbol, src, imageOption, pixMap, nameList, true, backButtonAccessibilityText);
 }
 void SetTitleImpl(Ark_NativePointer node,
-                  const Opt_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_NavigationCustomTitle* value,
+                  const Opt_Union_ResourceStr_CustomNodeBuilder_NavigationCommonTitle_NavigationCustomTitle* value,
                   const Opt_NavigationTitleOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -513,8 +509,8 @@ void SetHideTitleBar1Impl(Ark_NativePointer node,
     NavigationModelStatic::SetHideTitleBar(frameNode, isHide, isAnimated);
 }
 void SetMenusImpl(Ark_NativePointer node,
-                   const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
-                   const Opt_NavigationMenuOptions* options)
+                  const Opt_Union_Array_NavigationMenuItem_CustomNodeBuilder* items,
+                  const Opt_NavigationMenuOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -544,7 +540,7 @@ void SetMenusImpl(Ark_NativePointer node,
     NavigationModelStatic::SetMenuOptions(frameNode, std::move(menuOptions));
 }
 void SetToolbarConfigurationImpl(Ark_NativePointer node,
-                                 const Opt_Union_Array_ToolbarItem_CustomBuilder* value,
+                                 const Opt_Union_Array_ToolbarItem_CustomNodeBuilder* value,
                                  const Opt_NavigationToolbarOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -648,8 +644,7 @@ void SetIgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
     }
     NavigationModelStatic::SetIgnoreLayoutSafeArea(frameNode, opts);
 }
-} // namespace NavigationAttributeModifier
-
+} // NavigationAttributeModifier
 const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
 {
     static const GENERATED_ArkUINavigationModifier ArkUINavigationModifierImpl {
@@ -685,4 +680,4 @@ const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
     return &ArkUINavigationModifierImpl;
 }
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

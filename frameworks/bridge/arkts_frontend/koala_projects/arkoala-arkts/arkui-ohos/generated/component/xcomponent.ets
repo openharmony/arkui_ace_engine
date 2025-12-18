@@ -16,41 +16,57 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { ImageAnalyzerConfig_serializer, ImageAnalyzerConfig, ImageAIOptions, ImageAIOptions_serializer } from "./imageCommon"
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { VoidCallback } from "./units"
-import { AttributeModifier, hookXComponentAttributeModifier, AttributeUpdater, hookSetXComponentOptions } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { XComponentType } from "./enums"
-import { XComponentModifier } from "./../XComponentModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { SerializerBase, DeserializerBase, resourceFinalizerRegister, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { ImageAnalyzerConfig_serializer, ImageAnalyzerConfig, ImageAIOptions, ImageAIOptions_serializer } from './imageCommon'
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { ArkThemeScopeManager } from '#arktheme'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, ArkCommonMethodComponent } from './common'
+import { VoidCallback } from './units'
+import { AttributeModifier, hookSetXComponentOptions, hookXComponentAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { XComponentType } from './enums'
+import { XComponentModifier } from './../XComponentModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class XComponentControllerInternal {
     public static fromPtr(ptr: KPointer): XComponentController {
-        return new XComponentController(ptr)
+        return new XComponentController(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class XComponentController implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    onSurfaceCreated(surfaceId: string): void {}
-    onSurfaceChanged(surfaceId: string,rect: SurfaceRect): void {}
-    onSurfaceDestroyed(surfaceId: string): void {}
-    constructor(peerPtr: KPointer) {
+    get onSurfaceCreated(): ((breakpoints: string) => void) {
+        return this.getOnSurfaceCreated()
+    }
+    set onSurfaceCreated(onSurfaceCreated: ((breakpoints: string) => void)) {
+        this.setOnSurfaceCreated(onSurfaceCreated)
+    }
+    get onSurfaceChanged(): ((surfaceId: string,rect: SurfaceRect) => void) {
+        return this.getOnSurfaceChanged()
+    }
+    set onSurfaceChanged(onSurfaceChanged: ((surfaceId: string,rect: SurfaceRect) => void)) {
+        this.setOnSurfaceChanged(onSurfaceChanged)
+    }
+    get onSurfaceDestroyed(): ((breakpoints: string) => void) {
+        return this.getOnSurfaceDestroyed()
+    }
+    set onSurfaceDestroyed(onSurfaceDestroyed: ((breakpoints: string) => void)) {
+        this.setOnSurfaceDestroyed(onSurfaceDestroyed)
+    }
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, XComponentController.getFinalizer())
     }
     constructor() {
-        this(XComponentController.construct())
+        this(MaterializedBaseTag.NOP, XComponentController.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._XComponentController_construct()
@@ -86,11 +102,11 @@ export class XComponentController implements MaterializedBase {
         this.stopImageAnalyzer_serialize()
         return
     }
-    private getOnSurfaceCreated(): ((surfaceId: string) => void) {
+    private getOnSurfaceCreated(): ((breakpoints: string) => void) {
         return this.getOnSurfaceCreated_serialize()
     }
-    private setOnSurfaceCreated(onSurfaceCreated: ((surfaceId: string) => void)): void {
-        const onSurfaceCreated_casted = onSurfaceCreated as (((surfaceId: string) => void))
+    private setOnSurfaceCreated(onSurfaceCreated: ((breakpoints: string) => void)): void {
+        const onSurfaceCreated_casted = onSurfaceCreated as (((breakpoints: string) => void))
         this.setOnSurfaceCreated_serialize(onSurfaceCreated_casted)
         return
     }
@@ -102,43 +118,45 @@ export class XComponentController implements MaterializedBase {
         this.setOnSurfaceChanged_serialize(onSurfaceChanged_casted)
         return
     }
-    private getOnSurfaceDestroyed(): ((surfaceId: string) => void) {
+    private getOnSurfaceDestroyed(): ((breakpoints: string) => void) {
         return this.getOnSurfaceDestroyed_serialize()
     }
-    private setOnSurfaceDestroyed(onSurfaceDestroyed: ((surfaceId: string) => void)): void {
-        const onSurfaceDestroyed_casted = onSurfaceDestroyed as (((surfaceId: string) => void))
+    private setOnSurfaceDestroyed(onSurfaceDestroyed: ((breakpoints: string) => void)): void {
+        const onSurfaceDestroyed_casted = onSurfaceDestroyed as (((breakpoints: string) => void))
         this.setOnSurfaceDestroyed_serialize(onSurfaceDestroyed_casted)
         return
     }
-    getXComponentSurfaceId_serialize(): string {
+    private getXComponentSurfaceId_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._XComponentController_getXComponentSurfaceId(this.peer!.ptr)
-        return retval
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : string = (retvalDeserializer.readString() as string)
+        return returnResult
     }
-    setXComponentSurfaceRect_serialize(rect: SurfaceRect): void {
+    private setXComponentSurfaceRect_serialize(rect: SurfaceRect): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         SurfaceRect_serializer.write(thisSerializer, rect)
         ArkUIGeneratedNativeModule._XComponentController_setXComponentSurfaceRect(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    getXComponentSurfaceRect_serialize(): SurfaceRect {
+    private getXComponentSurfaceRect_serialize(): SurfaceRect {
         const retval  = ArkUIGeneratedNativeModule._XComponentController_getXComponentSurfaceRect(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult : SurfaceRect = SurfaceRect_serializer.read(retvalDeserializer)
         return returnResult
     }
-    setXComponentSurfaceRotation_serialize(rotationOptions: SurfaceRotationOptions): void {
+    private setXComponentSurfaceRotation_serialize(rotationOptions: SurfaceRotationOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         SurfaceRotationOptions_serializer.write(thisSerializer, rotationOptions)
         ArkUIGeneratedNativeModule._XComponentController_setXComponentSurfaceRotation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    getXComponentSurfaceRotation_serialize(): SurfaceRotationOptions {
+    private getXComponentSurfaceRotation_serialize(): SurfaceRotationOptions {
         const retval  = ArkUIGeneratedNativeModule._XComponentController_getXComponentSurfaceRotation(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult : SurfaceRotationOptions = SurfaceRotationOptions_serializer.read(retvalDeserializer)
         return returnResult
     }
-    startImageAnalyzer_serialize(config: ImageAnalyzerConfig): Promise<void> {
+    private startImageAnalyzer_serialize(config: ImageAnalyzerConfig): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         ImageAnalyzerConfig_serializer.write(thisSerializer, config)
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
@@ -146,14 +164,30 @@ export class XComponentController implements MaterializedBase {
         thisSerializer.release()
         return retval
     }
-    stopImageAnalyzer_serialize(): void {
+    private stopImageAnalyzer_serialize(): void {
         ArkUIGeneratedNativeModule._XComponentController_stopImageAnalyzer(this.peer!.ptr)
     }
-    private getOnSurfaceCreated_serialize(): ((surfaceId: string) => void) {
+    private getOnSurfaceCreated_serialize(): ((breakpoints: string) => void) {
         const retval  = ArkUIGeneratedNativeModule._XComponentController_getOnSurfaceCreated(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferBufResource : CallbackResource = retvalDeserializer.readCallbackResource()
+        const bufferBufCall : KPointer = retvalDeserializer.readPointer()
+        const bufferBufCallSync : KPointer = retvalDeserializer.readPointer()
+        const bufferClosure  = (breakpoints: string):void => {
+            const bufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            bufferBufArgsSerializer.writeInt32(bufferBufResource.resourceId);
+            bufferBufArgsSerializer.writePointer(bufferBufCall);
+            bufferBufArgsSerializer.writePointer(bufferBufCallSync);
+            bufferBufArgsSerializer.writeString(breakpoints);
+            InteropNativeModule._CallCallbackSync(10, 569646982, bufferBufArgsSerializer.asBuffer(), bufferBufArgsSerializer.length());
+            bufferBufArgsSerializer.release();
+            return;
+        }
+        resourceFinalizerRegister(bufferClosure, bufferBufResource)
+        const returnResult : ((breakpoints: string) => void) = bufferClosure
+        return returnResult
     }
-    private setOnSurfaceCreated_serialize(onSurfaceCreated: ((surfaceId: string) => void)): void {
+    private setOnSurfaceCreated_serialize(onSurfaceCreated: ((breakpoints: string) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(onSurfaceCreated)
         ArkUIGeneratedNativeModule._XComponentController_setOnSurfaceCreated(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -161,7 +195,24 @@ export class XComponentController implements MaterializedBase {
     }
     private getOnSurfaceChanged_serialize(): ((surfaceId: string,rect: SurfaceRect) => void) {
         const retval  = ArkUIGeneratedNativeModule._XComponentController_getOnSurfaceChanged(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferBufResource : CallbackResource = retvalDeserializer.readCallbackResource()
+        const bufferBufCall : KPointer = retvalDeserializer.readPointer()
+        const bufferBufCallSync : KPointer = retvalDeserializer.readPointer()
+        const bufferClosure  = (surfaceId: string, rect: SurfaceRect):void => {
+            const bufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            bufferBufArgsSerializer.writeInt32(bufferBufResource.resourceId);
+            bufferBufArgsSerializer.writePointer(bufferBufCall);
+            bufferBufArgsSerializer.writePointer(bufferBufCallSync);
+            bufferBufArgsSerializer.writeString(surfaceId);
+            SurfaceRect_serializer.write(bufferBufArgsSerializer, rect);
+            InteropNativeModule._CallCallbackSync(10, -1982338800, bufferBufArgsSerializer.asBuffer(), bufferBufArgsSerializer.length());
+            bufferBufArgsSerializer.release();
+            return;
+        }
+        resourceFinalizerRegister(bufferClosure, bufferBufResource)
+        const returnResult : ((surfaceId: string,rect: SurfaceRect) => void) = bufferClosure
+        return returnResult
     }
     private setOnSurfaceChanged_serialize(onSurfaceChanged: ((surfaceId: string,rect: SurfaceRect) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -169,11 +220,27 @@ export class XComponentController implements MaterializedBase {
         ArkUIGeneratedNativeModule._XComponentController_setOnSurfaceChanged(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getOnSurfaceDestroyed_serialize(): ((surfaceId: string) => void) {
+    private getOnSurfaceDestroyed_serialize(): ((breakpoints: string) => void) {
         const retval  = ArkUIGeneratedNativeModule._XComponentController_getOnSurfaceDestroyed(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferBufResource : CallbackResource = retvalDeserializer.readCallbackResource()
+        const bufferBufCall : KPointer = retvalDeserializer.readPointer()
+        const bufferBufCallSync : KPointer = retvalDeserializer.readPointer()
+        const bufferClosure  = (breakpoints: string):void => {
+            const bufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            bufferBufArgsSerializer.writeInt32(bufferBufResource.resourceId);
+            bufferBufArgsSerializer.writePointer(bufferBufCall);
+            bufferBufArgsSerializer.writePointer(bufferBufCallSync);
+            bufferBufArgsSerializer.writeString(breakpoints);
+            InteropNativeModule._CallCallbackSync(10, 569646982, bufferBufArgsSerializer.asBuffer(), bufferBufArgsSerializer.length());
+            bufferBufArgsSerializer.release();
+            return;
+        }
+        resourceFinalizerRegister(bufferClosure, bufferBufResource)
+        const returnResult : ((breakpoints: string) => void) = bufferClosure
+        return returnResult
     }
-    private setOnSurfaceDestroyed_serialize(onSurfaceDestroyed: ((surfaceId: string) => void)): void {
+    private setOnSurfaceDestroyed_serialize(onSurfaceDestroyed: ((breakpoints: string) => void)): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(onSurfaceDestroyed)
         ArkUIGeneratedNativeModule._XComponentController_setOnSurfaceDestroyed(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -182,7 +249,7 @@ export class XComponentController implements MaterializedBase {
 }
 export class ArkXComponentPeer extends ArkCommonMethodPeer {
     attributeSet?: XComponentModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkXComponentPeer {
@@ -193,6 +260,7 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setXComponentOptionsAttribute(params: XComponentParameters | XComponentOptions | NativeXComponentParameters): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (params instanceof XComponentParameters) {
             thisSerializer.writeInt8((0).toByte())
@@ -305,87 +373,52 @@ export interface NativeXComponentParameters {
 }
 export interface XComponentAttribute extends CommonMethod {
     setXComponentOptions(params: XComponentParameters | XComponentOptions | NativeXComponentParameters): this {
-        throw new Error("Unimplemented method setXComponentOptions")
+        throw new Error('Unimplemented method setXComponentOptions')
     }
     onLoad(value: VoidCallback | undefined): this {
-        throw new Error("Unimplemented method onLoad")
+        throw new Error('Unimplemented method onLoad')
     }
     onDestroy(value: VoidCallback | undefined): this {
-        throw new Error("Unimplemented method onDestroy")
+        throw new Error('Unimplemented method onDestroy')
     }
     enableAnalyzer(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableAnalyzer")
+        throw new Error('Unimplemented method enableAnalyzer')
     }
     enableSecure(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableSecure")
+        throw new Error('Unimplemented method enableSecure')
     }
     enableTransparentLayer(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableTransparentLayer")
+        throw new Error('Unimplemented method enableTransparentLayer')
     }
     hdrBrightness(value: double | undefined): this {
-        throw new Error("Unimplemented method hdrBrightness")
+        throw new Error('Unimplemented method hdrBrightness')
     }
     attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkXComponentStyle extends ArkCommonMethodStyle implements XComponentAttribute {
-    onLoad_value?: VoidCallback | undefined
-    onDestroy_value?: VoidCallback | undefined
-    enableAnalyzer_value?: boolean | undefined
-    enableSecure_value?: boolean | undefined
-    enableTransparentLayer_value?: boolean | undefined
-    hdrBrightness_value?: double | undefined
-    attributeModifier_value?: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined
-    setXComponentOptions(params: XComponentParameters | XComponentOptions | NativeXComponentParameters): this {
-        return this
-    }
-    onLoad(value: VoidCallback | undefined): this {
-        return this
-    }
-    onDestroy(value: VoidCallback | undefined): this {
-        return this
-    }
-    enableAnalyzer(value: boolean | undefined): this {
-        return this
-    }
-    enableSecure(value: boolean | undefined): this {
-        return this
-    }
-    enableTransparentLayer(value: boolean | undefined): this {
-        return this
-    }
-    hdrBrightness(value: double | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 export interface XComponentParameters {
     id: string;
     type: XComponentType;
-    nativeXComponentHandler: ((value0: NativeXComponentPointer) => void);
+    nativeXComponentHandler: arkui_component_common_Callback<int64, void>;
     controller?: XComponentController;
 }
 
 export class ArkXComponentComponent extends ArkCommonMethodComponent implements XComponentAttribute {
     getPeer(): ArkXComponentPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkXComponentPeer)
     }
     public setXComponentOptions(params: XComponentParameters | XComponentOptions | NativeXComponentParameters): this {
-        if (this.checkPriority("setXComponentOptions")) {
-            hookSetXComponentOptions(this, params);
+        if (this.checkPriority('setXComponentOptions')) {
+            const params_casted = params as (XComponentParameters | XComponentOptions | NativeXComponentParameters)
+            this.getPeer()?.setXComponentOptionsAttribute(params_casted)
             this.applyOptionsFinish('XComponentAttribute');
             return this
         }
         return this
     }
     public onLoad(value: VoidCallback | undefined): this {
-        if (this.checkPriority("onLoad")) {
+        if (this.checkPriority('onLoad')) {
             const value_casted = value as (VoidCallback | undefined)
             this.getPeer()?.setOnLoadAttribute(value_casted)
             return this
@@ -393,7 +426,7 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public onDestroy(value: VoidCallback | undefined): this {
-        if (this.checkPriority("onDestroy")) {
+        if (this.checkPriority('onDestroy')) {
             const value_casted = value as (VoidCallback | undefined)
             this.getPeer()?.setOnDestroyAttribute(value_casted)
             return this
@@ -401,7 +434,7 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public enableAnalyzer(value: boolean | undefined): this {
-        if (this.checkPriority("enableAnalyzer")) {
+        if (this.checkPriority('enableAnalyzer')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableAnalyzerAttribute(value_casted)
             return this
@@ -409,7 +442,7 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public enableSecure(value: boolean | undefined): this {
-        if (this.checkPriority("enableSecure")) {
+        if (this.checkPriority('enableSecure')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableSecureAttribute(value_casted)
             return this
@@ -417,7 +450,7 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public enableTransparentLayer(value: boolean | undefined): this {
-        if (this.checkPriority("enableTransparentLayer")) {
+        if (this.checkPriority('enableTransparentLayer')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableTransparentLayerAttribute(value_casted)
             return this
@@ -425,7 +458,7 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public hdrBrightness(value: double | undefined): this {
-        if (this.checkPriority("hdrBrightness")) {
+        if (this.checkPriority('hdrBrightness')) {
             const value_casted = value as (double | undefined)
             this.getPeer()?.setHdrBrightnessAttribute(value_casted)
             return this
@@ -449,22 +482,31 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
 
 @memo
 export function XComponentImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: XComponentAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkXComponentComponent>((): ArkXComponentComponent => {
         return new ArkXComponentComponent()
     })
-    NodeAttach<ArkXComponentPeer>((): ArkXComponentPeer => ArkXComponentPeer.create(receiver), (peer: ArkXComponentPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkXComponentPeer>((): ArkXComponentPeer => ArkXComponentPeer.create(receiver), (_: ArkXComponentPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
 
+export class XComponentController_serializer {
+    public static write(buffer: SerializerBase, value: XComponentController): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): XComponentController {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return XComponentControllerInternal.fromPtr(ptr)
+    }
+}
 export class SurfaceRect_serializer {
     public static write(buffer: SerializerBase, value: SurfaceRect): void {
         let valueSerializer : SerializerBase = buffer
@@ -491,13 +533,13 @@ export class SurfaceRect_serializer {
     }
     public static read(buffer: DeserializerBase): SurfaceRect {
         let valueDeserializer : DeserializerBase = buffer
-        const offsetXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const offsetXTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let offsetXTmpBuf : double | undefined = undefined
         if ((offsetXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             offsetXTmpBuf = valueDeserializer.readFloat64()
         }
         const offsetXTmpResult : double | undefined = offsetXTmpBuf
-        const offsetYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const offsetYTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let offsetYTmpBuf : double | undefined = undefined
         if ((offsetYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             offsetYTmpBuf = valueDeserializer.readFloat64()
@@ -523,7 +565,7 @@ export class SurfaceRotationOptions_serializer {
     }
     public static read(buffer: DeserializerBase): SurfaceRotationOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const lockTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const lockTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let lockTmpBuf : boolean | undefined = undefined
         if ((lockTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             lockTmpBuf = valueDeserializer.readBoolean()
@@ -533,15 +575,51 @@ export class SurfaceRotationOptions_serializer {
         return value
     }
 }
-export class XComponentController_serializer {
-    public static write(buffer: SerializerBase, value: XComponentController): void {
+export class XComponentParameters_serializer {
+    public static write(buffer: SerializerBase, value: XComponentParameters): void {
         let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
+        const valueHolderForId  = value.id
+        valueSerializer.writeString(valueHolderForId)
+        const valueHolderForType  = value.type
+        valueSerializer.writeInt32(valueHolderForType.valueOf())
+        const valueHolderForNativeXComponentHandler  = value.nativeXComponentHandler
+        valueSerializer.holdAndWriteCallback(valueHolderForNativeXComponentHandler)
+        const valueHolderForController  = value.controller
+        if (valueHolderForController !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForControllerTmpValue  = valueHolderForController!
+            XComponentController_serializer.write(valueSerializer, valueHolderForControllerTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
-    public static read(buffer: DeserializerBase): XComponentController {
+    public static read(buffer: DeserializerBase): XComponentParameters {
         let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return XComponentControllerInternal.fromPtr(ptr)
+        const idTmpResult : string = (valueDeserializer.readString() as string)
+        const typeTmpResult : XComponentType = XComponentType.fromValue(valueDeserializer.readInt32())
+        const nativeXComponentHandlerTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+        const nativeXComponentHandlerTmpBufBufCall : KPointer = valueDeserializer.readPointer()
+        const nativeXComponentHandlerTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
+        const nativeXComponentHandlerTmpBufClosure  = (data: int64):void => {
+            const nativeXComponentHandlerTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
+            nativeXComponentHandlerTmpBufBufArgsSerializer.writeInt32(nativeXComponentHandlerTmpBufBufResource.resourceId);
+            nativeXComponentHandlerTmpBufBufArgsSerializer.writePointer(nativeXComponentHandlerTmpBufBufCall);
+            nativeXComponentHandlerTmpBufBufArgsSerializer.writePointer(nativeXComponentHandlerTmpBufBufCallSync);
+            nativeXComponentHandlerTmpBufBufArgsSerializer.writeInt64(data);
+            InteropNativeModule._CallCallbackSync(10, -1073090076, nativeXComponentHandlerTmpBufBufArgsSerializer.asBuffer(), nativeXComponentHandlerTmpBufBufArgsSerializer.length());
+            nativeXComponentHandlerTmpBufBufArgsSerializer.release();
+            return;
+        }
+        resourceFinalizerRegister(nativeXComponentHandlerTmpBufClosure, nativeXComponentHandlerTmpBufBufResource)
+        const nativeXComponentHandlerTmpResult : arkui_component_common_Callback<int64, void> = nativeXComponentHandlerTmpBufClosure
+        const controllerTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let controllerTmpBuf : XComponentController | undefined = undefined
+        if ((controllerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            controllerTmpBuf = (XComponentController_serializer.read(valueDeserializer) as XComponentController)
+        }
+        const controllerTmpResult : XComponentController | undefined = controllerTmpBuf
+        let value : XComponentParameters = ({id: idTmpResult, type: typeTmpResult, nativeXComponentHandler: nativeXComponentHandlerTmpResult, controller: controllerTmpResult} as XComponentParameters)
+        return value
     }
 }
 export class NativeXComponentParameters_serializer {
@@ -561,7 +639,7 @@ export class NativeXComponentParameters_serializer {
     public static read(buffer: DeserializerBase): NativeXComponentParameters {
         let valueDeserializer : DeserializerBase = buffer
         const typeTmpResult : XComponentType = XComponentType.fromValue(valueDeserializer.readInt32())
-        const imageAIOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const imageAIOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let imageAIOptionsTmpBuf : ImageAIOptions | undefined = undefined
         if ((imageAIOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             imageAIOptionsTmpBuf = ImageAIOptions_serializer.read(valueDeserializer)
@@ -599,64 +677,19 @@ export class XComponentOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const typeTmpResult : XComponentType = XComponentType.fromValue(valueDeserializer.readInt32())
         const controllerTmpResult : XComponentController = (XComponentController_serializer.read(valueDeserializer) as XComponentController)
-        const imageAIOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const imageAIOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let imageAIOptionsTmpBuf : ImageAIOptions | undefined = undefined
         if ((imageAIOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             imageAIOptionsTmpBuf = ImageAIOptions_serializer.read(valueDeserializer)
         }
         const imageAIOptionsTmpResult : ImageAIOptions | undefined = imageAIOptionsTmpBuf
-        const screenIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const screenIdTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let screenIdTmpBuf : int64 | undefined = undefined
         if ((screenIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             screenIdTmpBuf = valueDeserializer.readInt64()
         }
         const screenIdTmpResult : int64 | undefined = screenIdTmpBuf
         let value : XComponentOptions = ({type: typeTmpResult, controller: controllerTmpResult, imageAIOptions: imageAIOptionsTmpResult, screenId: screenIdTmpResult} as XComponentOptions)
-        return value
-    }
-}
-export class XComponentParameters_serializer {
-    public static write(buffer: SerializerBase, value: XComponentParameters): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForId  = value.id
-        valueSerializer.writeString(valueHolderForId)
-        const valueHolderForType  = value.type
-        valueSerializer.writeInt32(valueHolderForType.valueOf())
-        const valueHolderForNativeXComponentHandler  = value.nativeXComponentHandler
-        valueSerializer.holdAndWriteCallback(valueHolderForNativeXComponentHandler)
-        const valueHolderForController  = value.controller
-        if (valueHolderForController !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForControllerTmpValue  = valueHolderForController!
-            XComponentController_serializer.write(valueSerializer, valueHolderForControllerTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): XComponentParameters {
-        let valueDeserializer : DeserializerBase = buffer
-        const idTmpResult : string = (valueDeserializer.readString() as string)
-        const typeTmpResult : XComponentType = XComponentType.fromValue(valueDeserializer.readInt32())
-        const nativeXComponentHandlerTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
-        const nativeXComponentHandlerTmpBufBufCall : KPointer = valueDeserializer.readPointer()
-        const nativeXComponentHandlerTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const nativeXComponentHandlerTmpResult : ((value0: NativeXComponentPointer) => void) = (value0: NativeXComponentPointer):void => {
-            const nativeXComponentHandlerTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
-            nativeXComponentHandlerTmpBufBufArgsSerializer.writeInt32(nativeXComponentHandlerTmpBufBufResource.resourceId);
-            nativeXComponentHandlerTmpBufBufArgsSerializer.writePointer(nativeXComponentHandlerTmpBufBufCall);
-            nativeXComponentHandlerTmpBufBufArgsSerializer.writePointer(nativeXComponentHandlerTmpBufBufCallSync);
-            nativeXComponentHandlerTmpBufBufArgsSerializer.writeInt64(value0);
-            InteropNativeModule._CallCallbackSync(10, -141504638, nativeXComponentHandlerTmpBufBufArgsSerializer.asBuffer(), nativeXComponentHandlerTmpBufBufArgsSerializer.length());
-            nativeXComponentHandlerTmpBufBufArgsSerializer.release();
-            return;
-        }
-        const controllerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let controllerTmpBuf : XComponentController | undefined = undefined
-        if ((controllerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            controllerTmpBuf = (XComponentController_serializer.read(valueDeserializer) as XComponentController)
-        }
-        const controllerTmpResult : XComponentController | undefined = controllerTmpBuf
-        let value : XComponentParameters = ({id: idTmpResult, type: typeTmpResult, nativeXComponentHandler: nativeXComponentHandlerTmpResult, controller: controllerTmpResult} as XComponentParameters)
         return value
     }
 }

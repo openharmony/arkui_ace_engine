@@ -16,54 +16,31 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { PickerTextStyle_serializer, ArkCommonMethodPeer, CommonMethod, PickerTextStyle, Bindable, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Date_serializer, PickerDialogButtonStyle_serializer, Rectangle_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, ShadowOptions_serializer } from "./common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { CrownSensitivity, Color } from "./enums"
-import { AttributeModifier, hookDatePickerAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { ResourceColor, Offset, VoidCallback, Offset_serializer } from "./units"
-import { Resource } from "global.resource"
-import { DialogAlignment } from "./alertDialog"
-import { default as intl } from "@ohos.intl"
-import { DatePickerModifier } from "./../DatePickerModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource_serializer } from "./../framework/resource"
-import { intl_DateTimeOptions_serializer } from "./../framework/ohos.intl"
-import { ModifierStateManager } from '../CommonModifier';
-export class DatePickerDialogInternal {
-    public static fromPtr(ptr: KPointer): DatePickerDialog {
-        return new DatePickerDialog(ptr)
-    }
-}
-export class DatePickerDialog implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, DatePickerDialog.getFinalizer())
-    }
-    constructor() {
-        this(DatePickerDialog.construct())
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._DatePickerDialog_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._DatePickerDialog_getFinalizer()
-    }
-}
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from '@koalaui/interop'
+import { PickerTextStyle_serializer, ArkCommonMethodPeer, CommonMethod, PickerTextStyle, Callback as arkui_component_common_Callback, Bindable, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, DateTimeOptions, HoverModeAreaType, ArkCommonMethodComponent, Bindable_Date_serializer, PickerDialogButtonStyle_serializer, Rectangle_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, ShadowOptions_serializer } from './common'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CrownSensitivity, Color as arkui_component_enums_Color } from './enums'
+import { AttributeModifier, hookDatePickerAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { ResourceColor, Resource as arkui_component_units_Resource, Offset, VoidCallback, Offset_serializer } from './units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { DialogAlignment } from './alertDialog'
+import { default as intl } from '@ohos.intl'
+import { DatePickerModifier } from './../DatePickerModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { intl_DateTimeOptions_serializer } from './../framework/ohos.intl'
 export class ArkDatePickerPeer extends ArkCommonMethodPeer {
     attributeSet?: DatePickerModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkDatePickerPeer {
@@ -74,6 +51,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setDatePickerOptionsAttribute(options?: DatePickerOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -133,7 +111,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._DatePickerAttribute_setSelectedTextStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnDateChangeAttribute(value: ((value0: Date) => void) | undefined): void {
+    setOnDateChangeAttribute(value: arkui_component_common_Callback<Date, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -188,68 +166,31 @@ export interface DatePickerOptions {
 }
 export interface DatePickerAttribute extends CommonMethod {
     setDatePickerOptions(options?: DatePickerOptions): this {
-        throw new Error("Unimplemented method setDatePickerOptions")
+        throw new Error('Unimplemented method setDatePickerOptions')
     }
     lunar(value: boolean | undefined): this {
-        throw new Error("Unimplemented method lunar")
+        throw new Error('Unimplemented method lunar')
     }
     disappearTextStyle(value: PickerTextStyle | undefined): this {
-        throw new Error("Unimplemented method disappearTextStyle")
+        throw new Error('Unimplemented method disappearTextStyle')
     }
     textStyle(value: PickerTextStyle | undefined): this {
-        throw new Error("Unimplemented method textStyle")
+        throw new Error('Unimplemented method textStyle')
     }
     selectedTextStyle(value: PickerTextStyle | undefined): this {
-        throw new Error("Unimplemented method selectedTextStyle")
+        throw new Error('Unimplemented method selectedTextStyle')
     }
-    onDateChange(value: ((value0: Date) => void) | undefined): this {
-        throw new Error("Unimplemented method onDateChange")
+    onDateChange(value: arkui_component_common_Callback<Date, void> | undefined): this {
+        throw new Error('Unimplemented method onDateChange')
     }
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
-        throw new Error("Unimplemented method digitalCrownSensitivity")
+        throw new Error('Unimplemented method digitalCrownSensitivity')
     }
     enableHapticFeedback(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableHapticFeedback")
+        throw new Error('Unimplemented method enableHapticFeedback')
     }
     attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePickerAttribute {
-    lunar_value?: boolean | undefined
-    disappearTextStyle_value?: PickerTextStyle | undefined
-    textStyle_value?: PickerTextStyle | undefined
-    selectedTextStyle_value?: PickerTextStyle | undefined
-    onDateChange_value?: ((value0: Date) => void) | undefined
-    digitalCrownSensitivity_value?: CrownSensitivity | undefined
-    enableHapticFeedback_value?: boolean | undefined
-    attributeModifier_value?: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined
-    setDatePickerOptions(options?: DatePickerOptions): this {
-        return this
-    }
-    lunar(value: boolean | undefined): this {
-        return this
-    }
-    disappearTextStyle(value: PickerTextStyle | undefined): this {
-        return this
-    }
-    textStyle(value: PickerTextStyle | undefined): this {
-        return this
-    }
-    selectedTextStyle(value: PickerTextStyle | undefined): this {
-        return this
-    }
-    onDateChange(value: ((value0: Date) => void) | undefined): this {
-        return this
-    }
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
-        return this
-    }
-    enableHapticFeedback(value: boolean | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 export interface LunarSwitchStyle {
@@ -272,8 +213,8 @@ export interface DatePickerDialogOptions extends DatePickerOptions {
     alignment?: DialogAlignment;
     offset?: Offset;
     onCancel?: VoidCallback;
-    onDateAccept?: ((value0: Date) => void);
-    onDateChange?: ((value0: Date) => void);
+    onDateAccept?: arkui_component_common_Callback<Date, void>;
+    onDateChange?: arkui_component_common_Callback<Date, void>;
     backgroundColor?: ResourceColor;
     backgroundBlurStyle?: BlurStyle;
     backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
@@ -283,7 +224,7 @@ export interface DatePickerDialogOptions extends DatePickerOptions {
     onWillAppear?: VoidCallback;
     onWillDisappear?: VoidCallback;
     shadow?: ShadowOptions | ShadowStyle;
-    dateTimeOptions?: intl.DateTimeOptions;
+    dateTimeOptions?: DateTimeOptions;
     enableHoverMode?: boolean;
     hoverModeArea?: HoverModeAreaType;
     enableHapticFeedback?: boolean;
@@ -291,13 +232,10 @@ export interface DatePickerDialogOptions extends DatePickerOptions {
 
 export class ArkDatePickerComponent extends ArkCommonMethodComponent implements DatePickerAttribute {
     getPeer(): ArkDatePickerPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkDatePickerPeer)
     }
     public setDatePickerOptions(options?: DatePickerOptions): this {
-        if (this.checkPriority("setDatePickerOptions")) {
+        if (this.checkPriority('setDatePickerOptions')) {
             const options_casted = options as (DatePickerOptions | undefined)
             this.getPeer()?.setDatePickerOptionsAttribute(options_casted)
             this.applyOptionsFinish('DatePickerAttribute');
@@ -306,7 +244,7 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public lunar(value: boolean | undefined): this {
-        if (this.checkPriority("lunar")) {
+        if (this.checkPriority('lunar')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setLunarAttribute(value_casted)
             return this
@@ -314,7 +252,7 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public disappearTextStyle(value: PickerTextStyle | undefined): this {
-        if (this.checkPriority("disappearTextStyle")) {
+        if (this.checkPriority('disappearTextStyle')) {
             const value_casted = value as (PickerTextStyle | undefined)
             this.getPeer()?.setDisappearTextStyleAttribute(value_casted)
             return this
@@ -322,7 +260,7 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public textStyle(value: PickerTextStyle | undefined): this {
-        if (this.checkPriority("textStyle")) {
+        if (this.checkPriority('textStyle')) {
             const value_casted = value as (PickerTextStyle | undefined)
             this.getPeer()?.setTextStyleAttribute(value_casted)
             return this
@@ -330,23 +268,23 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public selectedTextStyle(value: PickerTextStyle | undefined): this {
-        if (this.checkPriority("selectedTextStyle")) {
+        if (this.checkPriority('selectedTextStyle')) {
             const value_casted = value as (PickerTextStyle | undefined)
             this.getPeer()?.setSelectedTextStyleAttribute(value_casted)
             return this
         }
         return this
     }
-    public onDateChange(value: ((value0: Date) => void) | undefined): this {
-        if (this.checkPriority("onDateChange")) {
-            const value_casted = value as (((value0: Date) => void) | undefined)
+    public onDateChange(value: arkui_component_common_Callback<Date, void> | undefined): this {
+        if (this.checkPriority('onDateChange')) {
+            const value_casted = value as (arkui_component_common_Callback<Date, void> | undefined)
             this.getPeer()?.setOnDateChangeAttribute(value_casted)
             return this
         }
         return this
     }
     public digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
-        if (this.checkPriority("digitalCrownSensitivity")) {
+        if (this.checkPriority('digitalCrownSensitivity')) {
             const value_casted = value as (CrownSensitivity | undefined)
             this.getPeer()?.setDigitalCrownSensitivityAttribute(value_casted)
             return this
@@ -354,7 +292,7 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public enableHapticFeedback(value: boolean | undefined): this {
-        if (this.checkPriority("enableHapticFeedback")) {
+        if (this.checkPriority('enableHapticFeedback')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableHapticFeedbackAttribute(value_casted)
             return this
@@ -362,7 +300,7 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         return this
     }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-         ModifierStateManager.INSTANCE.scope(() => {
+        ModifierStateManager.INSTANCE.scope(() => {
             hookDatePickerAttributeModifier(this, value);
         })
         return this
@@ -378,33 +316,20 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
 
 @memo
 export function DatePickerImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: DatePickerAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkDatePickerComponent>((): ArkDatePickerComponent => {
         return new ArkDatePickerComponent()
     })
-    NodeAttach<ArkDatePickerPeer>((): ArkDatePickerPeer => ArkDatePickerPeer.create(receiver), (peer: ArkDatePickerPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkDatePickerPeer>((): ArkDatePickerPeer => ArkDatePickerPeer.create(receiver), (_: ArkDatePickerPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
 
-export class DatePickerDialog_serializer {
-    public static write(buffer: SerializerBase, value: DatePickerDialog): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): DatePickerDialog {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return DatePickerDialogInternal.fromPtr(ptr)
-    }
-}
 export class DatePickerOptions_serializer {
     public static write(buffer: SerializerBase, value: DatePickerOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -412,7 +337,7 @@ export class DatePickerOptions_serializer {
         if (valueHolderForStart !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStartTmpValue  = valueHolderForStart!
-            valueSerializer.writeInt64(valueHolderForStartTmpValue.getTime().toLong())
+            valueSerializer.writeInt64(valueHolderForStartTmpValue.getTime()!.toLong())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -420,7 +345,7 @@ export class DatePickerOptions_serializer {
         if (valueHolderForEnd !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEndTmpValue  = valueHolderForEnd!
-            valueSerializer.writeInt64(valueHolderForEndTmpValue.getTime().toLong())
+            valueSerializer.writeInt64(valueHolderForEndTmpValue.getTime()!.toLong())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -431,8 +356,8 @@ export class DatePickerOptions_serializer {
             if (valueHolderForSelectedTmpValue instanceof Date) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSelectedTmpValueForIdx0  = valueHolderForSelectedTmpValue as Date
-                valueSerializer.writeInt64(valueHolderForSelectedTmpValueForIdx0.getTime().toLong())
-            } else if (valueHolderForSelectedTmpValue instanceof Bindable<Date>) {
+                valueSerializer.writeInt64(valueHolderForSelectedTmpValueForIdx0.getTime()!.toLong())
+            } else if (valueHolderForSelectedTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSelectedTmpValueForIdx1  = valueHolderForSelectedTmpValue as Bindable<Date>
                 Bindable_Date_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx1)
@@ -451,34 +376,34 @@ export class DatePickerOptions_serializer {
     }
     public static read(buffer: DeserializerBase): DatePickerOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const startTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let startTmpBuf : Date | undefined = undefined
         if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             startTmpBuf = new Date(valueDeserializer.readInt64())
         }
         const startTmpResult : Date | undefined = startTmpBuf
-        const endTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const endTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let endTmpBuf : Date | undefined = undefined
         if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             endTmpBuf = new Date(valueDeserializer.readInt64())
         }
         const endTmpResult : Date | undefined = endTmpBuf
-        const selectedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const selectedTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let selectedTmpBuf : Date | Bindable<Date> | undefined = undefined
         if ((selectedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const selectedTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let selectedTmpBuf_ : Date | Bindable<Date> | undefined
-            if (selectedTmpBuf_UnionSelector == (0).toChar()) {
-                selectedTmpBuf_ = new Date(valueDeserializer.readInt64())
-            } else if (selectedTmpBuf_UnionSelector == (1).toChar()) {
-                selectedTmpBuf_ = Bindable_Date_serializer.read(valueDeserializer)
+            const selectedTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let selectedTmpBufOpt : Date | Bindable<Date> | undefined
+            if (selectedTmpBufOptUnionSelector == (0).toByte()) {
+                selectedTmpBufOpt = new Date(valueDeserializer.readInt64())
+            } else if (selectedTmpBufOptUnionSelector == (1).toByte()) {
+                selectedTmpBufOpt = Bindable_Date_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for selectedTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for selectedTmpBufOpt has to be chosen through deserialisation.')
             }
-            selectedTmpBuf = (selectedTmpBuf_ as Date | Bindable<Date>)
+            selectedTmpBuf = (selectedTmpBufOpt as Date | Bindable<Date>)
         }
         const selectedTmpResult : Date | Bindable<Date> | undefined = selectedTmpBuf
-        const modeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const modeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let modeTmpBuf : DatePickerMode | undefined = undefined
         if ((modeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             modeTmpBuf = DatePickerMode.fromValue(valueDeserializer.readInt32())
@@ -495,22 +420,22 @@ export class LunarSwitchStyle_serializer {
         if (valueHolderForSelectedColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForSelectedColorTmpValue  = valueHolderForSelectedColor!
-            if (valueHolderForSelectedColorTmpValue instanceof Color) {
+            if (valueHolderForSelectedColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForSelectedColorTmpValueForIdx0  = valueHolderForSelectedColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForSelectedColorTmpValue instanceof number) {
+                const valueHolderForSelectedColorTmpValueForIdx0  = valueHolderForSelectedColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForSelectedColorTmpValueForIdx0.getOrdinal()) % (12))
+            } else if (valueHolderForSelectedColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForSelectedColorTmpValueForIdx1)
+                const valueHolderForSelectedColorTmpValueForIdx1  = valueHolderForSelectedColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForSelectedColorTmpValueForIdx1)
             } else if (valueHolderForSelectedColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForSelectedColorTmpValueForIdx2  = valueHolderForSelectedColorTmpValue as string
                 valueSerializer.writeString(valueHolderForSelectedColorTmpValueForIdx2)
-            } else if (valueHolderForSelectedColorTmpValue instanceof Resource) {
+            } else if (valueHolderForSelectedColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForSelectedColorTmpValueForIdx3  = valueHolderForSelectedColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForSelectedColorTmpValueForIdx3)
+                const valueHolderForSelectedColorTmpValueForIdx3  = valueHolderForSelectedColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForSelectedColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -519,22 +444,22 @@ export class LunarSwitchStyle_serializer {
         if (valueHolderForUnselectedColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForUnselectedColorTmpValue  = valueHolderForUnselectedColor!
-            if (valueHolderForUnselectedColorTmpValue instanceof Color) {
+            if (valueHolderForUnselectedColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForUnselectedColorTmpValue instanceof number) {
+                const valueHolderForUnselectedColorTmpValueForIdx0  = valueHolderForUnselectedColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForUnselectedColorTmpValueForIdx0.getOrdinal()) % (12))
+            } else if (valueHolderForUnselectedColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForUnselectedColorTmpValueForIdx1)
+                const valueHolderForUnselectedColorTmpValueForIdx1  = valueHolderForUnselectedColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForUnselectedColorTmpValueForIdx1)
             } else if (valueHolderForUnselectedColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForUnselectedColorTmpValueForIdx2  = valueHolderForUnselectedColorTmpValue as string
                 valueSerializer.writeString(valueHolderForUnselectedColorTmpValueForIdx2)
-            } else if (valueHolderForUnselectedColorTmpValue instanceof Resource) {
+            } else if (valueHolderForUnselectedColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForUnselectedColorTmpValueForIdx3  = valueHolderForUnselectedColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForUnselectedColorTmpValueForIdx3)
+                const valueHolderForUnselectedColorTmpValueForIdx3  = valueHolderForUnselectedColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForUnselectedColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -543,22 +468,22 @@ export class LunarSwitchStyle_serializer {
         if (valueHolderForStrokeColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStrokeColorTmpValue  = valueHolderForStrokeColor!
-            if (valueHolderForStrokeColorTmpValue instanceof Color) {
+            if (valueHolderForStrokeColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForStrokeColorTmpValueForIdx0  = valueHolderForStrokeColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForStrokeColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForStrokeColorTmpValue instanceof number) {
+                const valueHolderForStrokeColorTmpValueForIdx0  = valueHolderForStrokeColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForStrokeColorTmpValueForIdx0.getOrdinal()) % (12))
+            } else if (valueHolderForStrokeColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForStrokeColorTmpValueForIdx1  = valueHolderForStrokeColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForStrokeColorTmpValueForIdx1)
+                const valueHolderForStrokeColorTmpValueForIdx1  = valueHolderForStrokeColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForStrokeColorTmpValueForIdx1)
             } else if (valueHolderForStrokeColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForStrokeColorTmpValueForIdx2  = valueHolderForStrokeColorTmpValue as string
                 valueSerializer.writeString(valueHolderForStrokeColorTmpValueForIdx2)
-            } else if (valueHolderForStrokeColorTmpValue instanceof Resource) {
+            } else if (valueHolderForStrokeColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForStrokeColorTmpValueForIdx3  = valueHolderForStrokeColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForStrokeColorTmpValueForIdx3)
+                const valueHolderForStrokeColorTmpValueForIdx3  = valueHolderForStrokeColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForStrokeColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -566,61 +491,61 @@ export class LunarSwitchStyle_serializer {
     }
     public static read(buffer: DeserializerBase): LunarSwitchStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const selectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const selectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let selectedColorTmpBuf : ResourceColor | undefined = undefined
         if ((selectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const selectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let selectedColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (selectedColorTmpBuf_UnionSelector == (0).toChar()) {
-                selectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (selectedColorTmpBuf_UnionSelector == (1).toChar()) {
-                selectedColorTmpBuf_ = valueDeserializer.readInt32()
-            } else if (selectedColorTmpBuf_UnionSelector == (2).toChar()) {
-                selectedColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (selectedColorTmpBuf_UnionSelector == (3).toChar()) {
-                selectedColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const selectedColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let selectedColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (selectedColorTmpBufOptUnionSelector == (0).toByte()) {
+                selectedColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (selectedColorTmpBufOptUnionSelector == (1).toByte()) {
+                selectedColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (selectedColorTmpBufOptUnionSelector == (2).toByte()) {
+                selectedColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (selectedColorTmpBufOptUnionSelector == (3).toByte()) {
+                selectedColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for selectedColorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for selectedColorTmpBufOpt has to be chosen through deserialisation.')
             }
-            selectedColorTmpBuf = (selectedColorTmpBuf_ as Color | int32 | string | Resource)
+            selectedColorTmpBuf = (selectedColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const selectedColorTmpResult : ResourceColor | undefined = selectedColorTmpBuf
-        const unselectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const unselectedColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let unselectedColorTmpBuf : ResourceColor | undefined = undefined
         if ((unselectedColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const unselectedColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let unselectedColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (unselectedColorTmpBuf_UnionSelector == (0).toChar()) {
-                unselectedColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (unselectedColorTmpBuf_UnionSelector == (1).toChar()) {
-                unselectedColorTmpBuf_ = valueDeserializer.readInt32()
-            } else if (unselectedColorTmpBuf_UnionSelector == (2).toChar()) {
-                unselectedColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (unselectedColorTmpBuf_UnionSelector == (3).toChar()) {
-                unselectedColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const unselectedColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let unselectedColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (unselectedColorTmpBufOptUnionSelector == (0).toByte()) {
+                unselectedColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (unselectedColorTmpBufOptUnionSelector == (1).toByte()) {
+                unselectedColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (unselectedColorTmpBufOptUnionSelector == (2).toByte()) {
+                unselectedColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (unselectedColorTmpBufOptUnionSelector == (3).toByte()) {
+                unselectedColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for unselectedColorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for unselectedColorTmpBufOpt has to be chosen through deserialisation.')
             }
-            unselectedColorTmpBuf = (unselectedColorTmpBuf_ as Color | int32 | string | Resource)
+            unselectedColorTmpBuf = (unselectedColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const unselectedColorTmpResult : ResourceColor | undefined = unselectedColorTmpBuf
-        const strokeColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const strokeColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let strokeColorTmpBuf : ResourceColor | undefined = undefined
         if ((strokeColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const strokeColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let strokeColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (strokeColorTmpBuf_UnionSelector == (0).toChar()) {
-                strokeColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (strokeColorTmpBuf_UnionSelector == (1).toChar()) {
-                strokeColorTmpBuf_ = valueDeserializer.readInt32()
-            } else if (strokeColorTmpBuf_UnionSelector == (2).toChar()) {
-                strokeColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (strokeColorTmpBuf_UnionSelector == (3).toChar()) {
-                strokeColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const strokeColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let strokeColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (strokeColorTmpBufOptUnionSelector == (0).toByte()) {
+                strokeColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (strokeColorTmpBufOptUnionSelector == (1).toByte()) {
+                strokeColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (strokeColorTmpBufOptUnionSelector == (2).toByte()) {
+                strokeColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (strokeColorTmpBufOptUnionSelector == (3).toByte()) {
+                strokeColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for strokeColorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for strokeColorTmpBufOpt has to be chosen through deserialisation.')
             }
-            strokeColorTmpBuf = (strokeColorTmpBuf_ as Color | int32 | string | Resource)
+            strokeColorTmpBuf = (strokeColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const strokeColorTmpResult : ResourceColor | undefined = strokeColorTmpBuf
         let value : LunarSwitchStyle = ({selectedColor: selectedColorTmpResult, unselectedColor: unselectedColorTmpResult, strokeColor: strokeColorTmpResult} as LunarSwitchStyle)
@@ -634,7 +559,7 @@ export class DatePickerDialogOptions_serializer {
         if (valueHolderForStart !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStartTmpValue  = valueHolderForStart!
-            valueSerializer.writeInt64(valueHolderForStartTmpValue.getTime().toLong())
+            valueSerializer.writeInt64(valueHolderForStartTmpValue.getTime()!.toLong())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -642,7 +567,7 @@ export class DatePickerDialogOptions_serializer {
         if (valueHolderForEnd !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForEndTmpValue  = valueHolderForEnd!
-            valueSerializer.writeInt64(valueHolderForEndTmpValue.getTime().toLong())
+            valueSerializer.writeInt64(valueHolderForEndTmpValue.getTime()!.toLong())
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -653,8 +578,8 @@ export class DatePickerDialogOptions_serializer {
             if (valueHolderForSelectedTmpValue instanceof Date) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSelectedTmpValueForIdx0  = valueHolderForSelectedTmpValue as Date
-                valueSerializer.writeInt64(valueHolderForSelectedTmpValueForIdx0.getTime().toLong())
-            } else if (valueHolderForSelectedTmpValue instanceof Bindable<Date>) {
+                valueSerializer.writeInt64(valueHolderForSelectedTmpValueForIdx0.getTime()!.toLong())
+            } else if (valueHolderForSelectedTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSelectedTmpValueForIdx1  = valueHolderForSelectedTmpValue as Bindable<Date>
                 Bindable_Date_serializer.write(valueSerializer, valueHolderForSelectedTmpValueForIdx1)
@@ -802,22 +727,22 @@ export class DatePickerDialogOptions_serializer {
         if (valueHolderForBackgroundColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
-            if (valueHolderForBackgroundColorTmpValue instanceof Color) {
+            if (valueHolderForBackgroundColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForBackgroundColorTmpValue instanceof number) {
+                const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal()) % (12))
+            } else if (valueHolderForBackgroundColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForBackgroundColorTmpValueForIdx1)
+                const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx1)
             } else if (valueHolderForBackgroundColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
-            } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
+            } else if (valueHolderForBackgroundColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
+                const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -929,309 +854,323 @@ export class DatePickerDialogOptions_serializer {
     }
     public static read(buffer: DeserializerBase): DatePickerDialogOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const startTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let startTmpBuf : Date | undefined = undefined
         if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             startTmpBuf = new Date(valueDeserializer.readInt64())
         }
         const startTmpResult : Date | undefined = startTmpBuf
-        const endTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const endTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let endTmpBuf : Date | undefined = undefined
         if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             endTmpBuf = new Date(valueDeserializer.readInt64())
         }
         const endTmpResult : Date | undefined = endTmpBuf
-        const selectedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const selectedTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let selectedTmpBuf : Date | Bindable<Date> | undefined = undefined
         if ((selectedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const selectedTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let selectedTmpBuf_ : Date | Bindable<Date> | undefined
-            if (selectedTmpBuf_UnionSelector == (0).toChar()) {
-                selectedTmpBuf_ = new Date(valueDeserializer.readInt64())
-            } else if (selectedTmpBuf_UnionSelector == (1).toChar()) {
-                selectedTmpBuf_ = Bindable_Date_serializer.read(valueDeserializer)
+            const selectedTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let selectedTmpBufOpt : Date | Bindable<Date> | undefined
+            if (selectedTmpBufOptUnionSelector == (0).toByte()) {
+                selectedTmpBufOpt = new Date(valueDeserializer.readInt64())
+            } else if (selectedTmpBufOptUnionSelector == (1).toByte()) {
+                selectedTmpBufOpt = Bindable_Date_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for selectedTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for selectedTmpBufOpt has to be chosen through deserialisation.')
             }
-            selectedTmpBuf = (selectedTmpBuf_ as Date | Bindable<Date>)
+            selectedTmpBuf = (selectedTmpBufOpt as Date | Bindable<Date>)
         }
         const selectedTmpResult : Date | Bindable<Date> | undefined = selectedTmpBuf
-        const modeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const modeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let modeTmpBuf : DatePickerMode | undefined = undefined
         if ((modeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             modeTmpBuf = DatePickerMode.fromValue(valueDeserializer.readInt32())
         }
         const modeTmpResult : DatePickerMode | undefined = modeTmpBuf
-        const lunarTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const lunarTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let lunarTmpBuf : boolean | undefined = undefined
         if ((lunarTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             lunarTmpBuf = valueDeserializer.readBoolean()
         }
         const lunarTmpResult : boolean | undefined = lunarTmpBuf
-        const lunarSwitchTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const lunarSwitchTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let lunarSwitchTmpBuf : boolean | undefined = undefined
         if ((lunarSwitchTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             lunarSwitchTmpBuf = valueDeserializer.readBoolean()
         }
         const lunarSwitchTmpResult : boolean | undefined = lunarSwitchTmpBuf
-        const lunarSwitchStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const lunarSwitchStyleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let lunarSwitchStyleTmpBuf : LunarSwitchStyle | undefined = undefined
         if ((lunarSwitchStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             lunarSwitchStyleTmpBuf = LunarSwitchStyle_serializer.read(valueDeserializer)
         }
         const lunarSwitchStyleTmpResult : LunarSwitchStyle | undefined = lunarSwitchStyleTmpBuf
-        const showTimeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const showTimeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let showTimeTmpBuf : boolean | undefined = undefined
         if ((showTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             showTimeTmpBuf = valueDeserializer.readBoolean()
         }
         const showTimeTmpResult : boolean | undefined = showTimeTmpBuf
-        const useMilitaryTimeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const useMilitaryTimeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let useMilitaryTimeTmpBuf : boolean | undefined = undefined
         if ((useMilitaryTimeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             useMilitaryTimeTmpBuf = valueDeserializer.readBoolean()
         }
         const useMilitaryTimeTmpResult : boolean | undefined = useMilitaryTimeTmpBuf
-        const disappearTextStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const disappearTextStyleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let disappearTextStyleTmpBuf : PickerTextStyle | undefined = undefined
         if ((disappearTextStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             disappearTextStyleTmpBuf = PickerTextStyle_serializer.read(valueDeserializer)
         }
         const disappearTextStyleTmpResult : PickerTextStyle | undefined = disappearTextStyleTmpBuf
-        const textStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const textStyleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let textStyleTmpBuf : PickerTextStyle | undefined = undefined
         if ((textStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             textStyleTmpBuf = PickerTextStyle_serializer.read(valueDeserializer)
         }
         const textStyleTmpResult : PickerTextStyle | undefined = textStyleTmpBuf
-        const acceptButtonStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const acceptButtonStyleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let acceptButtonStyleTmpBuf : PickerDialogButtonStyle | undefined = undefined
         if ((acceptButtonStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             acceptButtonStyleTmpBuf = PickerDialogButtonStyle_serializer.read(valueDeserializer)
         }
         const acceptButtonStyleTmpResult : PickerDialogButtonStyle | undefined = acceptButtonStyleTmpBuf
-        const cancelButtonStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const cancelButtonStyleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let cancelButtonStyleTmpBuf : PickerDialogButtonStyle | undefined = undefined
         if ((cancelButtonStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             cancelButtonStyleTmpBuf = PickerDialogButtonStyle_serializer.read(valueDeserializer)
         }
         const cancelButtonStyleTmpResult : PickerDialogButtonStyle | undefined = cancelButtonStyleTmpBuf
-        const selectedTextStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const selectedTextStyleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let selectedTextStyleTmpBuf : PickerTextStyle | undefined = undefined
         if ((selectedTextStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             selectedTextStyleTmpBuf = PickerTextStyle_serializer.read(valueDeserializer)
         }
         const selectedTextStyleTmpResult : PickerTextStyle | undefined = selectedTextStyleTmpBuf
-        const maskRectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const maskRectTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let maskRectTmpBuf : Rectangle | undefined = undefined
         if ((maskRectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             maskRectTmpBuf = Rectangle_serializer.read(valueDeserializer)
         }
         const maskRectTmpResult : Rectangle | undefined = maskRectTmpBuf
-        const alignmentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const alignmentTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let alignmentTmpBuf : DialogAlignment | undefined = undefined
         if ((alignmentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             alignmentTmpBuf = DialogAlignment.fromValue(valueDeserializer.readInt32())
         }
         const alignmentTmpResult : DialogAlignment | undefined = alignmentTmpBuf
-        const offsetTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const offsetTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let offsetTmpBuf : Offset | undefined = undefined
         if ((offsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             offsetTmpBuf = Offset_serializer.read(valueDeserializer)
         }
         const offsetTmpResult : Offset | undefined = offsetTmpBuf
-        const onCancelTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const onCancelTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let onCancelTmpBuf : VoidCallback | undefined = undefined
         if ((onCancelTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onCancelTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onCancelTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onCancelTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onCancelTmpBuf = ():void => {
-                const onCancelTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onCancelTmpBuf_BufArgsSerializer.writeInt32(onCancelTmpBuf_BufResource.resourceId);
-                onCancelTmpBuf_BufArgsSerializer.writePointer(onCancelTmpBuf_BufCall);
-                onCancelTmpBuf_BufArgsSerializer.writePointer(onCancelTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -2038961969, onCancelTmpBuf_BufArgsSerializer.asBuffer(), onCancelTmpBuf_BufArgsSerializer.length());
-                onCancelTmpBuf_BufArgsSerializer.release();
+            const onCancelTmpBufOptBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onCancelTmpBufOptBufCall : KPointer = valueDeserializer.readPointer()
+            const onCancelTmpBufOptBufCallSync : KPointer = valueDeserializer.readPointer()
+            const onCancelTmpBufOptClosure  = ():void => {
+                const onCancelTmpBufOptBufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onCancelTmpBufOptBufArgsSerializer.writeInt32(onCancelTmpBufOptBufResource.resourceId);
+                onCancelTmpBufOptBufArgsSerializer.writePointer(onCancelTmpBufOptBufCall);
+                onCancelTmpBufOptBufArgsSerializer.writePointer(onCancelTmpBufOptBufCallSync);
+                InteropNativeModule._CallCallbackSync(10, 553494831, onCancelTmpBufOptBufArgsSerializer.asBuffer(), onCancelTmpBufOptBufArgsSerializer.length());
+                onCancelTmpBufOptBufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onCancelTmpBufOptClosure, onCancelTmpBufOptBufResource)
+            onCancelTmpBuf = onCancelTmpBufOptClosure
         }
         const onCancelTmpResult : VoidCallback | undefined = onCancelTmpBuf
-        const onDateAcceptTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDateAcceptTmpBuf : ((value0: Date) => void) | undefined = undefined
+        const onDateAcceptTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let onDateAcceptTmpBuf : arkui_component_common_Callback<Date, void> | undefined = undefined
         if ((onDateAcceptTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onDateAcceptTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onDateAcceptTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onDateAcceptTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDateAcceptTmpBuf = (value0: Date):void => {
-                const onDateAcceptTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onDateAcceptTmpBuf_BufArgsSerializer.writeInt32(onDateAcceptTmpBuf_BufResource.resourceId);
-                onDateAcceptTmpBuf_BufArgsSerializer.writePointer(onDateAcceptTmpBuf_BufCall);
-                onDateAcceptTmpBuf_BufArgsSerializer.writePointer(onDateAcceptTmpBuf_BufCallSync);
-                onDateAcceptTmpBuf_BufArgsSerializer.writeInt64(value0.getTime().toLong());
-                InteropNativeModule._CallCallbackSync(10, 1405382363, onDateAcceptTmpBuf_BufArgsSerializer.asBuffer(), onDateAcceptTmpBuf_BufArgsSerializer.length());
-                onDateAcceptTmpBuf_BufArgsSerializer.release();
+            const onDateAcceptTmpBufOptBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDateAcceptTmpBufOptBufCall : KPointer = valueDeserializer.readPointer()
+            const onDateAcceptTmpBufOptBufCallSync : KPointer = valueDeserializer.readPointer()
+            const onDateAcceptTmpBufOptClosure  = (data: Date):void => {
+                const onDateAcceptTmpBufOptBufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onDateAcceptTmpBufOptBufArgsSerializer.writeInt32(onDateAcceptTmpBufOptBufResource.resourceId);
+                onDateAcceptTmpBufOptBufArgsSerializer.writePointer(onDateAcceptTmpBufOptBufCall);
+                onDateAcceptTmpBufOptBufArgsSerializer.writePointer(onDateAcceptTmpBufOptBufCallSync);
+                onDateAcceptTmpBufOptBufArgsSerializer.writeInt64(data.getTime()!.toLong());
+                InteropNativeModule._CallCallbackSync(10, -1865664613, onDateAcceptTmpBufOptBufArgsSerializer.asBuffer(), onDateAcceptTmpBufOptBufArgsSerializer.length());
+                onDateAcceptTmpBufOptBufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDateAcceptTmpBufOptClosure, onDateAcceptTmpBufOptBufResource)
+            onDateAcceptTmpBuf = onDateAcceptTmpBufOptClosure
         }
-        const onDateAcceptTmpResult : ((value0: Date) => void) | undefined = onDateAcceptTmpBuf
-        const onDateChangeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDateChangeTmpBuf : ((value0: Date) => void) | undefined = undefined
+        const onDateAcceptTmpResult : arkui_component_common_Callback<Date, void> | undefined = onDateAcceptTmpBuf
+        const onDateChangeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let onDateChangeTmpBuf : arkui_component_common_Callback<Date, void> | undefined = undefined
         if ((onDateChangeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onDateChangeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onDateChangeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onDateChangeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDateChangeTmpBuf = (value0: Date):void => {
-                const onDateChangeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onDateChangeTmpBuf_BufArgsSerializer.writeInt32(onDateChangeTmpBuf_BufResource.resourceId);
-                onDateChangeTmpBuf_BufArgsSerializer.writePointer(onDateChangeTmpBuf_BufCall);
-                onDateChangeTmpBuf_BufArgsSerializer.writePointer(onDateChangeTmpBuf_BufCallSync);
-                onDateChangeTmpBuf_BufArgsSerializer.writeInt64(value0.getTime().toLong());
-                InteropNativeModule._CallCallbackSync(10, 1405382363, onDateChangeTmpBuf_BufArgsSerializer.asBuffer(), onDateChangeTmpBuf_BufArgsSerializer.length());
-                onDateChangeTmpBuf_BufArgsSerializer.release();
+            const onDateChangeTmpBufOptBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDateChangeTmpBufOptBufCall : KPointer = valueDeserializer.readPointer()
+            const onDateChangeTmpBufOptBufCallSync : KPointer = valueDeserializer.readPointer()
+            const onDateChangeTmpBufOptClosure  = (data: Date):void => {
+                const onDateChangeTmpBufOptBufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onDateChangeTmpBufOptBufArgsSerializer.writeInt32(onDateChangeTmpBufOptBufResource.resourceId);
+                onDateChangeTmpBufOptBufArgsSerializer.writePointer(onDateChangeTmpBufOptBufCall);
+                onDateChangeTmpBufOptBufArgsSerializer.writePointer(onDateChangeTmpBufOptBufCallSync);
+                onDateChangeTmpBufOptBufArgsSerializer.writeInt64(data.getTime()!.toLong());
+                InteropNativeModule._CallCallbackSync(10, -1865664613, onDateChangeTmpBufOptBufArgsSerializer.asBuffer(), onDateChangeTmpBufOptBufArgsSerializer.length());
+                onDateChangeTmpBufOptBufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDateChangeTmpBufOptClosure, onDateChangeTmpBufOptBufResource)
+            onDateChangeTmpBuf = onDateChangeTmpBufOptClosure
         }
-        const onDateChangeTmpResult : ((value0: Date) => void) | undefined = onDateChangeTmpBuf
-        const backgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const onDateChangeTmpResult : arkui_component_common_Callback<Date, void> | undefined = onDateChangeTmpBuf
+        const backgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let backgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
-                backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundColorTmpBuf_ = valueDeserializer.readInt32()
-            } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
-                backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
-                backgroundColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const backgroundColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let backgroundColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (backgroundColorTmpBufOptUnionSelector == (0).toByte()) {
+                backgroundColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (backgroundColorTmpBufOptUnionSelector == (1).toByte()) {
+                backgroundColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (backgroundColorTmpBufOptUnionSelector == (2).toByte()) {
+                backgroundColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (backgroundColorTmpBufOptUnionSelector == (3).toByte()) {
+                backgroundColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for backgroundColorTmpBufOpt has to be chosen through deserialisation.')
             }
-            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | int32 | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
-        const backgroundBlurStyleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const backgroundBlurStyleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let backgroundBlurStyleTmpBuf : BlurStyle | undefined = undefined
         if ((backgroundBlurStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             backgroundBlurStyleTmpBuf = BlurStyle.fromValue(valueDeserializer.readInt32())
         }
         const backgroundBlurStyleTmpResult : BlurStyle | undefined = backgroundBlurStyleTmpBuf
-        const backgroundBlurStyleOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const backgroundBlurStyleOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let backgroundBlurStyleOptionsTmpBuf : BackgroundBlurStyleOptions | undefined = undefined
         if ((backgroundBlurStyleOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             backgroundBlurStyleOptionsTmpBuf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
         }
         const backgroundBlurStyleOptionsTmpResult : BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptionsTmpBuf
-        const backgroundEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const backgroundEffectTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let backgroundEffectTmpBuf : BackgroundEffectOptions | undefined = undefined
         if ((backgroundEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             backgroundEffectTmpBuf = BackgroundEffectOptions_serializer.read(valueDeserializer)
         }
         const backgroundEffectTmpResult : BackgroundEffectOptions | undefined = backgroundEffectTmpBuf
-        const onDidAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const onDidAppearTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let onDidAppearTmpBuf : VoidCallback | undefined = undefined
         if ((onDidAppearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onDidAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onDidAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onDidAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidAppearTmpBuf = ():void => {
-                const onDidAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onDidAppearTmpBuf_BufArgsSerializer.writeInt32(onDidAppearTmpBuf_BufResource.resourceId);
-                onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCall);
-                onDidAppearTmpBuf_BufArgsSerializer.writePointer(onDidAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -2038961969, onDidAppearTmpBuf_BufArgsSerializer.asBuffer(), onDidAppearTmpBuf_BufArgsSerializer.length());
-                onDidAppearTmpBuf_BufArgsSerializer.release();
+            const onDidAppearTmpBufOptBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDidAppearTmpBufOptBufCall : KPointer = valueDeserializer.readPointer()
+            const onDidAppearTmpBufOptBufCallSync : KPointer = valueDeserializer.readPointer()
+            const onDidAppearTmpBufOptClosure  = ():void => {
+                const onDidAppearTmpBufOptBufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onDidAppearTmpBufOptBufArgsSerializer.writeInt32(onDidAppearTmpBufOptBufResource.resourceId);
+                onDidAppearTmpBufOptBufArgsSerializer.writePointer(onDidAppearTmpBufOptBufCall);
+                onDidAppearTmpBufOptBufArgsSerializer.writePointer(onDidAppearTmpBufOptBufCallSync);
+                InteropNativeModule._CallCallbackSync(10, 553494831, onDidAppearTmpBufOptBufArgsSerializer.asBuffer(), onDidAppearTmpBufOptBufArgsSerializer.length());
+                onDidAppearTmpBufOptBufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidAppearTmpBufOptClosure, onDidAppearTmpBufOptBufResource)
+            onDidAppearTmpBuf = onDidAppearTmpBufOptClosure
         }
         const onDidAppearTmpResult : VoidCallback | undefined = onDidAppearTmpBuf
-        const onDidDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const onDidDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let onDidDisappearTmpBuf : VoidCallback | undefined = undefined
         if ((onDidDisappearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onDidDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onDidDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onDidDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onDidDisappearTmpBuf = ():void => {
-                const onDidDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onDidDisappearTmpBuf_BufArgsSerializer.writeInt32(onDidDisappearTmpBuf_BufResource.resourceId);
-                onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCall);
-                onDidDisappearTmpBuf_BufArgsSerializer.writePointer(onDidDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -2038961969, onDidDisappearTmpBuf_BufArgsSerializer.asBuffer(), onDidDisappearTmpBuf_BufArgsSerializer.length());
-                onDidDisappearTmpBuf_BufArgsSerializer.release();
+            const onDidDisappearTmpBufOptBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDidDisappearTmpBufOptBufCall : KPointer = valueDeserializer.readPointer()
+            const onDidDisappearTmpBufOptBufCallSync : KPointer = valueDeserializer.readPointer()
+            const onDidDisappearTmpBufOptClosure  = ():void => {
+                const onDidDisappearTmpBufOptBufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onDidDisappearTmpBufOptBufArgsSerializer.writeInt32(onDidDisappearTmpBufOptBufResource.resourceId);
+                onDidDisappearTmpBufOptBufArgsSerializer.writePointer(onDidDisappearTmpBufOptBufCall);
+                onDidDisappearTmpBufOptBufArgsSerializer.writePointer(onDidDisappearTmpBufOptBufCallSync);
+                InteropNativeModule._CallCallbackSync(10, 553494831, onDidDisappearTmpBufOptBufArgsSerializer.asBuffer(), onDidDisappearTmpBufOptBufArgsSerializer.length());
+                onDidDisappearTmpBufOptBufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onDidDisappearTmpBufOptClosure, onDidDisappearTmpBufOptBufResource)
+            onDidDisappearTmpBuf = onDidDisappearTmpBufOptClosure
         }
         const onDidDisappearTmpResult : VoidCallback | undefined = onDidDisappearTmpBuf
-        const onWillAppearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const onWillAppearTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let onWillAppearTmpBuf : VoidCallback | undefined = undefined
         if ((onWillAppearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onWillAppearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onWillAppearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onWillAppearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillAppearTmpBuf = ():void => {
-                const onWillAppearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onWillAppearTmpBuf_BufArgsSerializer.writeInt32(onWillAppearTmpBuf_BufResource.resourceId);
-                onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCall);
-                onWillAppearTmpBuf_BufArgsSerializer.writePointer(onWillAppearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -2038961969, onWillAppearTmpBuf_BufArgsSerializer.asBuffer(), onWillAppearTmpBuf_BufArgsSerializer.length());
-                onWillAppearTmpBuf_BufArgsSerializer.release();
+            const onWillAppearTmpBufOptBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onWillAppearTmpBufOptBufCall : KPointer = valueDeserializer.readPointer()
+            const onWillAppearTmpBufOptBufCallSync : KPointer = valueDeserializer.readPointer()
+            const onWillAppearTmpBufOptClosure  = ():void => {
+                const onWillAppearTmpBufOptBufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onWillAppearTmpBufOptBufArgsSerializer.writeInt32(onWillAppearTmpBufOptBufResource.resourceId);
+                onWillAppearTmpBufOptBufArgsSerializer.writePointer(onWillAppearTmpBufOptBufCall);
+                onWillAppearTmpBufOptBufArgsSerializer.writePointer(onWillAppearTmpBufOptBufCallSync);
+                InteropNativeModule._CallCallbackSync(10, 553494831, onWillAppearTmpBufOptBufArgsSerializer.asBuffer(), onWillAppearTmpBufOptBufArgsSerializer.length());
+                onWillAppearTmpBufOptBufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillAppearTmpBufOptClosure, onWillAppearTmpBufOptBufResource)
+            onWillAppearTmpBuf = onWillAppearTmpBufOptClosure
         }
         const onWillAppearTmpResult : VoidCallback | undefined = onWillAppearTmpBuf
-        const onWillDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const onWillDisappearTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let onWillDisappearTmpBuf : VoidCallback | undefined = undefined
         if ((onWillDisappearTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const onWillDisappearTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onWillDisappearTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
-            const onWillDisappearTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
-            onWillDisappearTmpBuf = ():void => {
-                const onWillDisappearTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
-                onWillDisappearTmpBuf_BufArgsSerializer.writeInt32(onWillDisappearTmpBuf_BufResource.resourceId);
-                onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCall);
-                onWillDisappearTmpBuf_BufArgsSerializer.writePointer(onWillDisappearTmpBuf_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -2038961969, onWillDisappearTmpBuf_BufArgsSerializer.asBuffer(), onWillDisappearTmpBuf_BufArgsSerializer.length());
-                onWillDisappearTmpBuf_BufArgsSerializer.release();
+            const onWillDisappearTmpBufOptBufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onWillDisappearTmpBufOptBufCall : KPointer = valueDeserializer.readPointer()
+            const onWillDisappearTmpBufOptBufCallSync : KPointer = valueDeserializer.readPointer()
+            const onWillDisappearTmpBufOptClosure  = ():void => {
+                const onWillDisappearTmpBufOptBufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onWillDisappearTmpBufOptBufArgsSerializer.writeInt32(onWillDisappearTmpBufOptBufResource.resourceId);
+                onWillDisappearTmpBufOptBufArgsSerializer.writePointer(onWillDisappearTmpBufOptBufCall);
+                onWillDisappearTmpBufOptBufArgsSerializer.writePointer(onWillDisappearTmpBufOptBufCallSync);
+                InteropNativeModule._CallCallbackSync(10, 553494831, onWillDisappearTmpBufOptBufArgsSerializer.asBuffer(), onWillDisappearTmpBufOptBufArgsSerializer.length());
+                onWillDisappearTmpBufOptBufArgsSerializer.release();
                 return;
             }
+            resourceFinalizerRegister(onWillDisappearTmpBufOptClosure, onWillDisappearTmpBufOptBufResource)
+            onWillDisappearTmpBuf = onWillDisappearTmpBufOptClosure
         }
         const onWillDisappearTmpResult : VoidCallback | undefined = onWillDisappearTmpBuf
-        const shadowTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const shadowTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let shadowTmpBuf : ShadowOptions | ShadowStyle | undefined = undefined
         if ((shadowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const shadowTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let shadowTmpBuf_ : ShadowOptions | ShadowStyle | undefined
-            if (shadowTmpBuf_UnionSelector == (0).toChar()) {
-                shadowTmpBuf_ = ShadowOptions_serializer.read(valueDeserializer)
-            } else if (shadowTmpBuf_UnionSelector == (1).toChar()) {
-                shadowTmpBuf_ = ShadowStyle.fromValue(valueDeserializer.readInt32())
+            const shadowTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let shadowTmpBufOpt : ShadowOptions | ShadowStyle | undefined
+            if (shadowTmpBufOptUnionSelector == (0).toByte()) {
+                shadowTmpBufOpt = ShadowOptions_serializer.read(valueDeserializer)
+            } else if (shadowTmpBufOptUnionSelector == (1).toByte()) {
+                shadowTmpBufOpt = ShadowStyle.fromValue(valueDeserializer.readInt32())
             } else {
-                throw new Error("One of the branches for shadowTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for shadowTmpBufOpt has to be chosen through deserialisation.')
             }
-            shadowTmpBuf = (shadowTmpBuf_ as ShadowOptions | ShadowStyle)
+            shadowTmpBuf = (shadowTmpBufOpt as ShadowOptions | ShadowStyle)
         }
         const shadowTmpResult : ShadowOptions | ShadowStyle | undefined = shadowTmpBuf
-        const dateTimeOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let dateTimeOptionsTmpBuf : intl.DateTimeOptions | undefined = undefined
+        const dateTimeOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let dateTimeOptionsTmpBuf : DateTimeOptions | undefined = undefined
         if ((dateTimeOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             dateTimeOptionsTmpBuf = intl_DateTimeOptions_serializer.read(valueDeserializer)
         }
-        const dateTimeOptionsTmpResult : intl.DateTimeOptions | undefined = dateTimeOptionsTmpBuf
-        const enableHoverModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const dateTimeOptionsTmpResult : DateTimeOptions | undefined = dateTimeOptionsTmpBuf
+        const enableHoverModeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let enableHoverModeTmpBuf : boolean | undefined = undefined
         if ((enableHoverModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             enableHoverModeTmpBuf = valueDeserializer.readBoolean()
         }
         const enableHoverModeTmpResult : boolean | undefined = enableHoverModeTmpBuf
-        const hoverModeAreaTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const hoverModeAreaTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let hoverModeAreaTmpBuf : HoverModeAreaType | undefined = undefined
         if ((hoverModeAreaTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             hoverModeAreaTmpBuf = HoverModeAreaType.fromValue(valueDeserializer.readInt32())
         }
         const hoverModeAreaTmpResult : HoverModeAreaType | undefined = hoverModeAreaTmpBuf
-        const enableHapticFeedbackTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const enableHapticFeedbackTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let enableHapticFeedbackTmpBuf : boolean | undefined = undefined
         if ((enableHapticFeedbackTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             enableHapticFeedbackTmpBuf = valueDeserializer.readBoolean()

@@ -436,7 +436,7 @@ bool OnHttpAuthRequest(const CallbackHelper<Callback_OnHttpAuthRequestEvent_Bool
 }
 
 RefPtr<WebResponse> OnInterceptRequest(
-    const CallbackHelper<Type_WebAttribute_onInterceptRequest>& arkCallback,
+    const CallbackHelper<Callback_OnInterceptRequestEvent_Opt_WebResourceResponse>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     const auto refNode = weakNode.Upgrade();
@@ -453,9 +453,8 @@ RefPtr<WebResponse> OnInterceptRequest(
     parameter.request = peer;
     const auto arkResult = arkCallback.InvokeWithOptConvertResult<Ark_WebResourceResponse, Opt_WebResourceResponse,
         Callback_Opt_WebResourceResponse_Void>(parameter);
-    CHECK_NULL_RETURN(arkResult.has_value(), nullptr);
-    Ark_WebResourceResponse value = arkResult.value();
-    return value->handler;
+    Ark_WebResourceResponse value = arkResult.value_or(nullptr);
+    return value ? value->handler : nullptr;
 }
 
 void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_Void>& arkCallback,
@@ -689,7 +688,7 @@ void OnWindowExit(const CallbackHelper<Callback_Void>& arkCallback,
     arkCallback.InvokeSync();
 }
 
-bool OnInterceptKey(const CallbackHelper<Callback_KeyEvent_Boolean>& arkCallback,
+bool OnInterceptKey(const CallbackHelper<synthetic_Callback_KeyEvent_Boolean>& arkCallback,
     WeakPtr<FrameNode> weakNode, KeyEventInfo& keyEventInfo)
 {
     const auto refNode = weakNode.Upgrade();

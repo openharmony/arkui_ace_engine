@@ -80,12 +80,13 @@ HWTEST_F(CommonMethodModifierTest5, setLinearGradientBlurTestValidValues, TestSi
     using OneTestStep = std::tuple<Opt_Float64, Opt_LinearGradientBlurOptions, std::string>;
     std::vector<FractionStop> val1 = {{1.1f, 2.2f}, {3.3f, 4.4f}, {5.5f, 6.6f}};
     Converter::ArkArrayHolder<Array_FractionStop> frac(val1);
+    Array_FractionStop fractions = frac.ArkValue();
     static const std::vector<OneTestStep> testPlan = {
         {
             Converter::ArkValue<Opt_Float64>(12),
             Converter::ArkValue<Opt_LinearGradientBlurOptions>(Ark_LinearGradientBlurOptions {
-                .direction = Ark_GradientDirection::ARK_GRADIENT_DIRECTION_BOTTOM,
-                .fractionStops = frac.ArkValue()
+                .direction = Converter::ArkValue<Opt_GradientDirection>(ARK_GRADIENT_DIRECTION_BOTTOM),
+                .fractionStops = Converter::ArkValue<Opt_Array_FractionStop>(fractions)
             }),
             "{\"value\":\"12.00vp\",\"options\":{\"direction\":\"BOTTOM\","
             "\"fractionStops\":[\"1.100000,2.200000\",\"3.300000,4.400000\",\"5.500000,6.600000\"]}}"

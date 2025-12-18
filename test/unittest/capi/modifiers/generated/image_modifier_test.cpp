@@ -118,15 +118,15 @@ HWTEST_F(ImageModifierTest, setImageOptions0TestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, setImageOptions0TestSrcValidValues, TestSize.Level1)
 {
-    Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent initValueSrc;
+    Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent initValueSrc;
 
     // Initial setup
-    initValueSrc = ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ImageContent>(
+    initValueSrc = ArkUnion<Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ImageContent>(
         std::get<1>(Fixtures::testFixtureImageContentValidValues[0]));
 
     auto checkValue = [this, &initValueSrc](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent& value) {
-        Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent inputValueSrc = initValueSrc;
+                          const Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent& value) {
+        Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent inputValueSrc = initValueSrc;
 
         // Re-create node for 'options' attribute
         auto node = CreateNode();
@@ -141,16 +141,16 @@ HWTEST_F(ImageModifierTest, setImageOptions0TestSrcValidValues, TestSize.Level1)
 
     for (auto& [input, value, expected] : Fixtures::testFixtureImageContentValidValues) {
         checkValue(input, expected,
-            ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ImageContent>(value));
+            ArkUnion<Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ImageContent>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
         checkValue(input, expected,
-            ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ResourceStr>(
+            ArkUnion<Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ResourceStr>(
                 ArkUnion<Ark_ResourceStr, Ark_String>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
         checkValue(input, expected,
-            ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ResourceStr>(
+            ArkUnion<Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ResourceStr>(
                 ArkUnion<Ark_ResourceStr, Ark_Resource>(value)));
     }
 }
@@ -162,15 +162,15 @@ HWTEST_F(ImageModifierTest, setImageOptions0TestSrcValidValues, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, setImageOptions0TestSrcInvalidValues, TestSize.Level1)
 {
-    Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent initValueSrc;
+    Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent initValueSrc;
 
     // Initial setup
-    initValueSrc = ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ImageContent>(
+    initValueSrc = ArkUnion<Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ImageContent>(
         std::get<1>(Fixtures::testFixtureImageContentValidValues[0]));
 
     auto checkValue = [this, &initValueSrc](const std::string& input,
-                          const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent& value) {
-        Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent inputValueSrc = initValueSrc;
+                          const Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent& value) {
+        Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent inputValueSrc = initValueSrc;
 
         // Re-create node for 'options' attribute
         auto node = CreateNode();
@@ -184,11 +184,11 @@ HWTEST_F(ImageModifierTest, setImageOptions0TestSrcInvalidValues, TestSize.Level
     };
 
     // Check invalid union
-    checkValue(
-        "invalid union", ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_Empty>(nullptr));
+    checkValue("invalid union",
+        ArkUnion<Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_Empty>(nullptr));
     // Check invalid union
-    checkValue(
-        "invalid union", ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_Empty>(nullptr));
+    checkValue("invalid union",
+        ArkUnion<Ark_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_Empty>(nullptr));
 }
 
 /*
@@ -242,15 +242,15 @@ HWTEST_F(ImageModifierTest, setAltTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, setAltTestAltValidValues, TestSize.Level1)
 {
-    Opt_Union_String_Resource_PixelMap initValueAlt;
+    Opt_Union_String_Resource_image_PixelMap initValueAlt;
 
     // Initial setup
-    initValueAlt = ArkUnion<Opt_Union_String_Resource_PixelMap, Ark_String>(
+    initValueAlt = ArkUnion<Opt_Union_String_Resource_image_PixelMap, Ark_String>(
         std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueAlt](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_String_Resource_PixelMap& value) {
-        Opt_Union_String_Resource_PixelMap inputValueAlt = initValueAlt;
+                          const Opt_Union_String_Resource_image_PixelMap& value) {
+        Opt_Union_String_Resource_image_PixelMap inputValueAlt = initValueAlt;
 
         inputValueAlt = value;
         modifier_->setAlt(node_, &inputValueAlt);
@@ -260,10 +260,10 @@ HWTEST_F(ImageModifierTest, setAltTestAltValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource_PixelMap, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource_image_PixelMap, Ark_String>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource_PixelMap, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource_image_PixelMap, Ark_Resource>(value));
     }
 }
 
@@ -274,14 +274,15 @@ HWTEST_F(ImageModifierTest, setAltTestAltValidValues, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, setAltTestAltInvalidValues, TestSize.Level1)
 {
-    Opt_Union_String_Resource_PixelMap initValueAlt;
+    Opt_Union_String_Resource_image_PixelMap initValueAlt;
 
     // Initial setup
-    initValueAlt = ArkUnion<Opt_Union_String_Resource_PixelMap, Ark_String>(
+    initValueAlt = ArkUnion<Opt_Union_String_Resource_image_PixelMap, Ark_String>(
         std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
-    auto checkValue = [this, &initValueAlt](const std::string& input, const Opt_Union_String_Resource_PixelMap& value) {
-        Opt_Union_String_Resource_PixelMap inputValueAlt = initValueAlt;
+    auto checkValue = [this, &initValueAlt](
+        const std::string& input, const Opt_Union_String_Resource_image_PixelMap& value) {
+        Opt_Union_String_Resource_image_PixelMap inputValueAlt = initValueAlt;
 
         modifier_->setAlt(node_, &inputValueAlt);
         inputValueAlt = value;
@@ -293,9 +294,9 @@ HWTEST_F(ImageModifierTest, setAltTestAltInvalidValues, TestSize.Level1)
     };
 
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_String_Resource_PixelMap, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_String_Resource_image_PixelMap, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_String_Resource_PixelMap>());
+    checkValue("undefined", ArkValue<Opt_Union_String_Resource_image_PixelMap>());
 }
 
 /*
@@ -466,7 +467,8 @@ HWTEST_F(ImageModifierTest, setFillColorTestFillColorValidValues, TestSize.Level
 
     // Initial setup
     initValueFillColor = ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_ResourceColor>(
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+        ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
 
     auto checkValue = [this, &initValueFillColor](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_ResourceColor_ColorContent_ColorMetrics& value) {
@@ -483,7 +485,7 @@ HWTEST_F(ImageModifierTest, setFillColorTestFillColorValidValues, TestSize.Level
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(input, expected,
             ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+                ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected,
@@ -513,7 +515,8 @@ HWTEST_F(ImageModifierTest, setFillColorTestFillColorInvalidValues, TestSize.Lev
 
     // Initial setup
     initValueFillColor = ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_ResourceColor>(
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+        ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
 
     auto checkValue = [this, &initValueFillColor](
                           const std::string& input, const Opt_Union_ResourceColor_ColorContent_ColorMetrics& value) {
@@ -534,7 +537,7 @@ HWTEST_F(ImageModifierTest, setFillColorTestFillColorInvalidValues, TestSize.Lev
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
         checkValue(input, ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_ResourceColor>(
-                              ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+                              ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(value)));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_Empty>(nullptr));
@@ -1278,7 +1281,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePosit
     WriteTo(WriteTo(initValuePointLight).lightSource).intensity =
         std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
     WriteTo(WriteTo(initValuePointLight).lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValuePointLight).illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(Fixtures::testFixtureEnumIlluminatedTypeValidValues[0]));
     WriteTo(initValuePointLight).bloom =
@@ -1330,7 +1334,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePosit
     WriteTo(WriteTo(initValuePointLight).lightSource).intensity =
         std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
     WriteTo(WriteTo(initValuePointLight).lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValuePointLight).illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(Fixtures::testFixtureEnumIlluminatedTypeValidValues[0]));
     WriteTo(initValuePointLight).bloom =
@@ -1384,7 +1389,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePosit
     WriteTo(WriteTo(initValuePointLight).lightSource).intensity =
         std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
     WriteTo(WriteTo(initValuePointLight).lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValuePointLight).illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(Fixtures::testFixtureEnumIlluminatedTypeValidValues[0]));
     WriteTo(initValuePointLight).bloom =
@@ -1436,7 +1442,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePosit
     WriteTo(WriteTo(initValuePointLight).lightSource).intensity =
         std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
     WriteTo(WriteTo(initValuePointLight).lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValuePointLight).illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(Fixtures::testFixtureEnumIlluminatedTypeValidValues[0]));
     WriteTo(initValuePointLight).bloom =
@@ -1490,7 +1497,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePosit
     WriteTo(WriteTo(initValuePointLight).lightSource).intensity =
         std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
     WriteTo(WriteTo(initValuePointLight).lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValuePointLight).illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(Fixtures::testFixtureEnumIlluminatedTypeValidValues[0]));
     WriteTo(initValuePointLight).bloom =
@@ -1542,7 +1550,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourcePosit
     WriteTo(WriteTo(initValuePointLight).lightSource).intensity =
         std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
     WriteTo(WriteTo(initValuePointLight).lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValuePointLight).illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(Fixtures::testFixtureEnumIlluminatedTypeValidValues[0]));
     WriteTo(initValuePointLight).bloom =
@@ -1596,7 +1605,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourceInten
     WriteTo(WriteTo(initValuePointLight).lightSource).intensity =
         std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
     WriteTo(WriteTo(initValuePointLight).lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValuePointLight).illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(Fixtures::testFixtureEnumIlluminatedTypeValidValues[0]));
     WriteTo(initValuePointLight).bloom =
@@ -1642,7 +1652,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourceColor
     WriteTo(WriteTo(initValuePointLight).lightSource).intensity =
         std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
     WriteTo(WriteTo(initValuePointLight).lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValuePointLight).illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(Fixtures::testFixtureEnumIlluminatedTypeValidValues[0]));
     WriteTo(initValuePointLight).bloom =
@@ -1665,7 +1676,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourceColor
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
@@ -1697,7 +1708,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourceColor
     WriteTo(WriteTo(initValuePointLight).lightSource).intensity =
         std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
     WriteTo(WriteTo(initValuePointLight).lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValuePointLight).illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(Fixtures::testFixtureEnumIlluminatedTypeValidValues[0]));
     WriteTo(initValuePointLight).bloom =
@@ -1723,7 +1735,7 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightLightSourceColor
         checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
@@ -1750,7 +1762,8 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightIlluminatedValidValues, T
     WriteTo(WriteTo(initValuePointLight).lightSource).intensity =
         std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
     WriteTo(WriteTo(initValuePointLight).lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValuePointLight).illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(Fixtures::testFixtureEnumIlluminatedTypeValidValues[0]));
     WriteTo(initValuePointLight).bloom =
@@ -1793,7 +1806,8 @@ HWTEST_F(ImageModifierTest, setPointLightTestPointLightIlluminatedInvalidValues,
     WriteTo(WriteTo(initValuePointLight).lightSource).intensity =
         std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
     WriteTo(WriteTo(initValuePointLight).lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValuePointLight).illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(Fixtures::testFixtureEnumIlluminatedTypeValidValues[0]));
     WriteTo(initValuePointLight).bloom =
@@ -1836,7 +1850,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightBloomValidValues
     WriteTo(WriteTo(initValuePointLight).lightSource).intensity =
         std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
     WriteTo(WriteTo(initValuePointLight).lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValuePointLight).illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(Fixtures::testFixtureEnumIlluminatedTypeValidValues[0]));
     WriteTo(initValuePointLight).bloom =
@@ -1879,7 +1894,8 @@ HWTEST_F(ImageModifierTest, DISABLED_setPointLightTestPointLightBloomInvalidValu
     WriteTo(WriteTo(initValuePointLight).lightSource).intensity =
         std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
     WriteTo(WriteTo(initValuePointLight).lightSource).color =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteTo(initValuePointLight).illuminated =
         ArkValue<Opt_IlluminatedType>(std::get<1>(Fixtures::testFixtureEnumIlluminatedTypeValidValues[0]));
     WriteTo(initValuePointLight).bloom =

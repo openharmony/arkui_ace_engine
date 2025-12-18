@@ -90,7 +90,8 @@ HWTEST_F(CircleShapeAccessorTest, offsetTest, TestSize.Level1)
 HWTEST_F(CircleShapeAccessorTest, fillTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->fill, nullptr);
-    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_RED);
+    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED);
     auto peer = accessor_->fill(peer_, &color);
     auto aceColor = peer->shape->GetColor();
     EXPECT_EQ(aceColor, Color::FromRGB(255, 0, 0));

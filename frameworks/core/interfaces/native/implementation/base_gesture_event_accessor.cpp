@@ -51,6 +51,22 @@ void SetFingerListImpl(Ark_BaseGestureEvent peer,
     eventInfo->SetFingerList(list);
 }
 
+Opt_Array_FingerInfo GetFingerInfosImpl(Ark_BaseGestureEvent peer)
+{
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Array_FingerInfo>(Ark_Empty()));
+    auto value = GetFingerListImpl(peer);
+    return Converter::ArkValue<Opt_Array_FingerInfo>(value);
+}
+void SetFingerInfosImpl(Ark_BaseGestureEvent peer,
+                        const Opt_Array_FingerInfo* fingerInfos)
+{
+    CHECK_NULL_VOID(peer);
+    auto convValue = Converter::GetOptPtr(fingerInfos);
+    if (convValue) {
+        SetFingerListImpl(peer, &convValue.value());
+    }
+}
+
 } // BaseGestureEventAccessor
 const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor()
 {
@@ -60,6 +76,8 @@ const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor()
         BaseGestureEventAccessor::GetFinalizerImpl,
         BaseGestureEventAccessor::GetFingerListImpl,
         BaseGestureEventAccessor::SetFingerListImpl,
+        BaseGestureEventAccessor::GetFingerInfosImpl,
+        BaseGestureEventAccessor::SetFingerInfosImpl,
     };
     return &BaseGestureEventAccessorImpl;
 }

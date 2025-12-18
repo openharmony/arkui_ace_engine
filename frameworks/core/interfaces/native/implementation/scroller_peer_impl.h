@@ -36,7 +36,7 @@ public:
     void TriggerFling(ani_env* env, const Ark_Float64 velocity);
     void TriggerScrollPage0(ani_env* env, const Ark_ScrollPageOptions* value);
     void TriggerScrollPage1(bool next);
-    Opt_OffsetResult TriggerCurrentOffset(ani_env* env);
+    std::optional<Offset> TriggerCurrentOffset(ani_env* env);
     void TriggerScrollToIndex(ani_env* env, const Ark_Int32 value, const Opt_Boolean* smooth,
         const Opt_ScrollAlign* align, const Opt_ScrollToIndexOptions* options);
     void TriggerScrollBy(ani_env* env, const Dimension& xOffset, const Dimension& yOffset);

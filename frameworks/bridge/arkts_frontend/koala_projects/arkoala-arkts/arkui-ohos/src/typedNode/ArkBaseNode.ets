@@ -24,14 +24,14 @@ import { LinearGradientBlurOptions, BackgroundOptions } from '../component/commo
 import { LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions } from '../component/common';
 import { MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus } from '../component/common';
 import { ProgressMask, Rectangle, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle } from '../component/common';
-import { SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult } from '../component/common';
-import { TouchTestInfo, TransitionEffect, TransitionFinishCallback, TranslateOptions } from '../component/common';
+import { SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent } from '../component/common';
+import { TransitionEffect, TransitionFinishCallback, TranslateOptions } from '../component/common';
 import { VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOptions, ArkCommonMethodPeer } from '../component/common';
 import { SystemAdaptiveOptions, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, LinearGradientOptions } from '../component/common';
 import { OnDragEventCallback, LayoutPolicy, PreviewConfiguration, DropOptions, SweepGradientOptions, AccessibilitySamePageMode } from '../component/common';
 import { AccessibilityFocusCallback, ReuseOptions, TipsMessageType, TipsOptions, VisibleAreaEventOptions, RadialGradientOptions} from '../component/common';
 import { Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from '../component/enums'
-import { ResourceColor, ConstraintSizeOptions, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, EdgeStyles, Edges } from '../component/units'
+import { ResourceColor, ConstraintSizeOptions, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr as arkui_component_units_ResourceStr, AccessibilityOptions, EdgeStyles, Edges } from '../component/units'
 import { Resource } from "global.resource"
 import { LengthMetrics } from "../Graphics"
 import {  PixelMap, UniformDataType } from "#external"
@@ -45,7 +45,7 @@ import { BlendMode } from "../component/common"
 import { InteropNativeModule } from '@koalaui/interop';
 import { ArkUIAniModule } from 'arkui.ani';
 import { hookCustomPropertyImpl } from '#handwritten';
-import { CustomProperty } from '#generated';
+import { CustomProperty, TouchTestInfo, TouchResult } from '#generated';
 
 export class ArkBaseNode extends ComponentBase implements CommonAttribute {
 
@@ -589,7 +589,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         return this
     }
-    public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
+    public backgroundImage(src: arkui_component_units_ResourceStr | PixelMap | undefined, repeat: ImageRepeat): this {
         this.getPeer().setBackgroundImage2Attribute(src, repeat);
         return this
     }

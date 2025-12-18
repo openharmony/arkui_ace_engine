@@ -39,20 +39,22 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // RichTextModifier
 namespace RichTextInterfaceModifier {
 void SetRichTextOptionsImpl(Ark_NativePointer node,
-                            const Ark_Union_String_Resource* value)
+                            const Ark_Union_String_Resource* content)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
+    CHECK_NULL_VOID(content);
 #ifdef WEB_SUPPORTED
-    auto convValue = Converter::OptConvert<std::string>(*value);
-    RichTextModelStatic::SetRichTextOptions(frameNode, convValue.value_or(""));
+    auto convValue = Converter::OptConvertPtr<std::string>(content);
+    if (convValue.has_value()) {
+        RichTextModelStatic::SetRichTextOptions(frameNode, convValue.value());
+    }
 #endif
 }
 } // RichTextInterfaceModifier
 namespace RichTextAttributeModifier {
 void SetOnStartImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+                    const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -69,7 +71,7 @@ void SetOnStartImpl(Ark_NativePointer node,
 #endif
 }
 void SetOnCompleteImpl(Ark_NativePointer node,
-                       const Opt_Callback_Void* value)
+                       const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -96,7 +96,7 @@ void FinishAnimationImpl(Ark_SwiperController peer,
 void PreloadItemsImpl(Ark_VMContext vmContext,
                       Ark_AsyncWorkerPtr asyncWorker,
                       Ark_SwiperController peer,
-                      const Opt_Array_Int32* indices,
+                      const Opt_Array_I32* indices,
                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
     CHECK_NULL_VOID(asyncWorker);

@@ -148,7 +148,9 @@ const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN2 = {
 
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -250,7 +252,7 @@ HWTEST_F(TimePickerModifierTest, setLoop, TestSize.Level1)
 HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -291,7 +293,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextStyle, TestSize.Level1
 HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -350,7 +352,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextWeight, TestSize.Level
 HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -391,7 +393,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextFamily, TestSize.Level
 HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -457,7 +459,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setDisappearTextColor, TestSize.Level1
 HWTEST_F(TimePickerModifierTest, DISABLED_setTextStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -498,7 +500,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextStyle, TestSize.Level1)
 HWTEST_F(TimePickerModifierTest, DISABLED_setTextWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -557,7 +559,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextWeight, TestSize.Level1)
 HWTEST_F(TimePickerModifierTest, DISABLED_setTextFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -598,7 +600,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextFamily, TestSize.Level1)
 HWTEST_F(TimePickerModifierTest, DISABLED_setTextSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -664,7 +666,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setTextColor, TestSize.Level1)
 HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -705,7 +707,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextStyle, TestSize.Level1)
 HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -764,7 +766,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextWeight, TestSize.Level1
 HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -805,7 +807,7 @@ HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextFamily, TestSize.Level1
 HWTEST_F(TimePickerModifierTest, DISABLED_setSelectedTextSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,

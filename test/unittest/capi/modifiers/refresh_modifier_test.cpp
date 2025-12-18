@@ -248,7 +248,7 @@ HWTEST_F(RefreshModifierTest, setOnOffsetChangeTest, TestSize.Level1)
         },
         .call = onOffsetChange
     };
-    auto optFunc = Converter::ArkValue<Opt_Callback_F64_Void>(func);
+    auto optFunc = Converter::ArkValue<Opt_arkui_component_common_Callback_F64_Void>(func);
     modifier_->setOnOffsetChange(node_, &optFunc);
 
     for (const auto& testValue : OFFSET_CHANGE_EVENT_TEST_PLAN) {

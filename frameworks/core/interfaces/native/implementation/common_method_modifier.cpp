@@ -112,6 +112,13 @@ enum class PixelroundRule {
 }
 
 namespace OHOS::Ace::NG {
+namespace Converter {
+template<>
+Color Convert(const Ark_Int64& src)
+{
+    return Convert<Color>(static_cast<int32_t>(Convert<int64_t>(src)));
+}
+} // namespace Converter
 namespace {
 Ark_GestureRecognizer CreateArkGestureRecognizer(const RefPtr<NGGestureRecognizer>& recognizer)
 {
@@ -172,7 +179,7 @@ Array_GestureRecognizer CreateArkGestureRecognizerArray(const Container& recogni
     }
     return result;
 }
-std::optional<bool> ProcessBindableIsShow(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
+std::optional<bool> ProcessBindableIsShow(FrameNode* frameNode, const Opt_Union_Boolean_Bindable_Boolean *value)
 {
     std::optional<bool> result;
     Converter::VisitUnionPtr(value,
@@ -264,8 +271,8 @@ struct EdgesParamOptions {
 };
 
 struct BiasOpt {
-    std::optional<float> first;
-    std::optional<float> second;
+    std::optional<float> horizontal;
+    std::optional<float> vertical;
 };
 
 struct RotateOpt {
@@ -955,9 +962,9 @@ uint16_t Convert(const Ark_PixelRoundPolicy& src)
 }
 
 template<>
-float Convert(const Ark_ForegroundEffectOptions& src)
+void AssignCast(std::optional<float>& dst, const Ark_ForegroundEffectOptions& src)
 {
-    return Convert<float>(src.radius);
+    dst = OptConvert<float>(src.radius);
 }
 
 template<>
@@ -1005,16 +1012,9 @@ BorderStyleProperty Convert(const Ark_EdgeOutlineStyles& src)
     return dst;
 }
 template<>
-InvertVariant Convert(const Ark_Number& value)
-{
-    float fDst = Converter::Convert<float>(value);
-    return std::variant<float, InvertOption>(fDst);
-}
-template<>
 InvertVariant Convert(const Ark_Float64& value)
 {
-    float fDst = Converter::Convert<float>(value);
-    return std::variant<float, InvertOption>(fDst);
+    return Converter::Convert<float>(value);
 }
 template<>
 InvertVariant Convert(const Ark_InvertOptions& value)
@@ -1024,7 +1024,7 @@ InvertVariant Convert(const Ark_InvertOptions& value)
         .high_ = Converter::Convert<float>(value.high),
         .threshold_ = Converter::Convert<float>(value.threshold),
         .thresholdRange_ = Converter::Convert<float>(value.thresholdRange)};
-    return std::variant<float, InvertOption>(invertOption);
+    return invertOption;
 }
 template<>
 float Convert(const Ark_InvertOptions& value)
@@ -1250,9 +1250,21 @@ template<>
 BiasOpt Convert(const Ark_Bias& src)
 {
     BiasOpt bias;
-    bias.first = OptConvert<float>(src.horizontal);
-    bias.second = OptConvert<float>(src.vertical);
+    bias.horizontal = OptConvert<float>(src.horizontal);
+    bias.vertical = OptConvert<float>(src.vertical);
     return bias;
+}
+
+template<>
+void AssignCast(std::optional<BiasOpt>& dst, const Ark_LocalizedAlignRuleOptions& src)
+{
+    dst = OptConvert<BiasOpt>(src.bias);
+}
+
+template<>
+void AssignCast(std::optional<BiasOpt>& dst, const Ark_AlignRuleOption& src)
+{
+    dst = OptConvert<BiasOpt>(src.bias);
 }
 
 template<>
@@ -1267,16 +1279,6 @@ void AssignCast(std::optional<uint32_t>& dst, const Ark_FocusPriority& src)
 }
 
 template<>
-OHOS::Ace::Color Convert(const Ark_ColorMetrics& src)
-{
-    uint8_t red = static_cast<uint8_t>(src.red_);
-    uint8_t green = static_cast<uint8_t>(src.green_);
-    uint8_t blue = static_cast<uint8_t>(src.blue_);
-    uint8_t alpha = static_cast<uint8_t>(src.alpha_);
-    return Color::FromARGB(alpha, red, green, blue);
-}
-
-template<>
 FocusBoxStyle Convert(const Ark_FocusBoxStyle& src)
 {
     FocusBoxStyle style;
@@ -1287,29 +1289,24 @@ FocusBoxStyle Convert(const Ark_FocusBoxStyle& src)
 }
 
 template<>
+MotionBlurAnchor Convert(const Ark_MotionBlurAnchor& src)
+{
+    MotionBlurAnchor result;
+    result.x = OptConvert<float>(src.x).value_or(result.x);
+    result.y = OptConvert<float>(src.y).value_or(result.y);
+    return result;
+}
+
+template<>
 MotionBlurOption Convert(const Ark_MotionBlurOptions& src)
 {
     MotionBlurOption options;
     const float minValue = 0.0;
-    const float maxValue = 1.0;
-    options.radius = Convert<float>(src.radius);
+    options.radius = OptConvert<float>(src.radius).value_or(options.radius);
     if (LessNotEqual(options.radius, minValue)) {
         options.radius = minValue;
     }
-    options.anchor.x = Convert<float>(src.anchor.x);
-    if (LessNotEqual(options.anchor.x, minValue)) {
-        options.anchor.x = minValue;
-    }
-    if (GreatNotEqual(options.anchor.x, maxValue)) {
-        options.anchor.x = maxValue;
-    }
-    options.anchor.y = Convert<float>(src.anchor.y);
-    if (LessNotEqual(options.anchor.y, minValue)) {
-        options.anchor.y = minValue;
-    }
-    if (GreatNotEqual(options.anchor.y, maxValue)) {
-        options.anchor.y = maxValue;
-    }
+    options.anchor = OptConvert<MotionBlurAnchor>(src.anchor).value_or(MotionBlurAnchor());
     return options;
 }
 
@@ -1325,8 +1322,8 @@ RotateOpt Convert(const Ark_RotateOptions& src)
     options.vec5f.emplace_back(angle);
     options.vec5f.emplace_back(OptConvert<float>(src.perspective));
 
-    auto centerX =  OptConvert<Dimension>(src.centerX);
-    auto centerY =  OptConvert<Dimension>(src.centerY);
+    auto centerX =  OptConvert<CalcDimension>(src.centerX);
+    auto centerY =  OptConvert<CalcDimension>(src.centerY);
     auto center = DimensionOffset(Dimension(0.5f, DimensionUnit::PERCENT), Dimension(0.5f, DimensionUnit::PERCENT));
     center.SetZ(Dimension(0, DimensionUnit::VP));
     if (centerX.has_value()) {
@@ -1362,34 +1359,6 @@ void AssignCast(std::optional<FocusDrawLevel>& dst, const Ark_FocusDrawLevel& sr
         case ARK_FOCUS_DRAW_LEVEL_TOP: dst = FocusDrawLevel::TOP; break;
         default: LOGE("Unexpected enum value in Ark_FocusDrawLevel: %{public}d", src);
     }
-}
-
-template<>
-ScaleOptions Convert(const Ark_ScaleOptions& src)
-{
-    ScaleOptions scaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
-    auto coord = OptConvert<float>(src.x);
-    if (coord.has_value()) {
-        scaleOptions.xScale = coord.value();
-    }
-    coord = OptConvert<float>(src.y);
-    if (coord.has_value()) {
-        scaleOptions.yScale = coord.value();
-    }
-    coord = OptConvert<float>(src.z);
-    if (coord.has_value()) {
-        scaleOptions.zScale = coord.value();
-    }
-
-    auto center = OptConvert<Dimension>(src.centerX);
-    if (center.has_value()) {
-        scaleOptions.centerX = center.value();
-    }
-    center = OptConvert<Dimension>(src.centerY);
-    if (center.has_value()) {
-        scaleOptions.centerY = center.value();
-    }
-    return scaleOptions;
 }
 
 template<>
@@ -1442,8 +1411,9 @@ GradientDirection Convert(const Ark_GradientDirection& value)
     auto optVal = OptConvert<GradientDirection>(value);
     return optVal.has_value() ? optVal.value() : GradientDirection::NONE;
 }
+using FractionStopType = std::pair<float, float>;
 template<>
-std::pair<float, float> Convert(const Ark_FractionStop& value)
+FractionStopType Convert(const Ark_FractionStop& value)
 {
     return std::make_pair(Convert<float>(value.value0), Convert<float>(value.value1));
 }
@@ -1451,14 +1421,9 @@ template<>
 NG::LinearGradientBlurPara Convert(const Ark_LinearGradientBlurOptions& value)
 {
     auto blurRadius = Dimension(0);
-    std::pair<float, float> pair;
-    std::vector<std::pair<float, float>> fractionStops;
-    auto fractionStopsVec = Convert<std::vector<Ark_FractionStop>>(value.fractionStops);
-    for (auto& arkPair : fractionStopsVec) {
-        pair = Convert<std::pair<float, float>>(arkPair);
-        fractionStops.push_back(pair);
-    }
-    auto direction = Convert<GradientDirection>(value.direction);
+    auto fractionStops = OptConvert<std::vector<FractionStopType>>(value.fractionStops)
+        .value_or(std::vector<FractionStopType>());
+    auto direction = OptConvert<GradientDirection>(value.direction).value_or(GradientDirection());
     return NG::LinearGradientBlurPara(blurRadius, fractionStops, direction);
 }
 template<>
@@ -1563,12 +1528,12 @@ GeometryTransitionOptions Convert(const Ark_GeometryTransitionOptions& src)
 }
 
 template<>
-void AssignCast(std::optional<PopupKeyboardAvoidMode> &dst, const Ark_KeyboardAvoidMode& src)
+void AssignCast(std::optional<PopupKeyboardAvoidMode> &dst, const Ark_arkui_component_common_KeyboardAvoidMode& src)
 {
     switch (src) {
-        case ARK_KEYBOARD_AVOID_MODE_DEFAULT: dst = PopupKeyboardAvoidMode::DEFAULT; break;
-        case ARK_KEYBOARD_AVOID_MODE_NONE: dst = PopupKeyboardAvoidMode::NONE; break;
-        default: LOGE("Unexpected enum value in Ark_KeyboardAvoidMode: %{public}d", src);
+        case ARK_ARKUI_COMPONENT_COMMON_KEYBOARD_AVOID_MODE_DEFAULT: dst = PopupKeyboardAvoidMode::DEFAULT; break;
+        case ARK_ARKUI_COMPONENT_COMMON_KEYBOARD_AVOID_MODE_NONE: dst = PopupKeyboardAvoidMode::NONE; break;
+        default: LOGE("Unexpected enum value in Ark_arkui_component_common_KeyboardAvoidMode: %{public}d", src);
     }
 }
 
@@ -1632,7 +1597,7 @@ RefPtr<PopupParam> Convert(const Ark_PopupOptions& src)
         if (textColorOpt.has_value()) {
             popupParam->SetTextColor(textColorOpt.value());
         }
-        auto font = Converter::OptConvert<Ark_Font>(messageOptions.value().font);
+        auto font = Converter::OptConvert<Ark_arkui_component_units_Font>(messageOptions.value().font);
         if (font.has_value()) {
             auto fontSizeOpt = Converter::OptConvert<CalcDimension>(font.value().size);
             if (fontSizeOpt.has_value()) {
@@ -1975,23 +1940,6 @@ void SetHeightImpl(Ark_NativePointer node,
             SetHeightInternal(frameNode, std::nullopt);
         });
 }
-void SetDrawModifierImpl(Ark_NativePointer node,
-                         const Opt_DrawModifier* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (!frameNode->IsSupportDrawModifier()) {
-        return;
-    }
-    auto convValue = Converter::OptConvertPtr<Ark_DrawModifier>(value);
-    auto peer = convValue.value();
-    CHECK_NULL_VOID(peer);
-    if (!peer->drawModifier) {
-        peer->drawModifier = AceType::MakeRefPtr<DrawModifier>();
-    }
-    peer->frameNode = AceType::WeakClaim(frameNode);
-    ViewAbstractModelStatic::SetDrawModifier(frameNode, peer->drawModifier);
-}
 void SetResponseRegionImpl(Ark_NativePointer node,
                            const Opt_Union_Array_Rectangle_Rectangle* value)
 {
@@ -2115,7 +2063,7 @@ void SetOnChildTouchTestImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetOnTouchTestFunc(frameNode, std::move(onTouchTestFunc));
 }
 void SetLayoutWeightImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String* value)
+                         const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2163,7 +2111,7 @@ void SetSafeAreaPaddingImpl(Ark_NativePointer node,
     );
 }
 void SetMarginImpl(Ark_NativePointer node,
-                   const Opt_Union_Margin_Length_LocalizedMargin* value)
+                   const Opt_Union_Padding_Length_LocalizedPadding* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2211,6 +2159,14 @@ void SetPixelRoundImpl(Ark_NativePointer node,
         return;
     }
     ViewAbstractModelStatic::SetPixelRound(frameNode, *convValue);
+}
+void SetBackgroundImage0Impl(Ark_NativePointer node,
+                             const Opt_Union_ResourceStr_image_PixelMap* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto sourceInfo = Converter::OptConvertPtr<ImageSourceInfo>(value);
+    ViewAbstractModelStatic::SetBackgroundImage(frameNode, sourceInfo);
 }
 void SetBackgroundImageSizeImpl(Ark_NativePointer node,
                                 const Opt_Union_SizeOptions_ImageSize* value)
@@ -2277,11 +2233,6 @@ void SetBackgroundImagePositionImpl(Ark_NativePointer node, const Opt_Union_Posi
     bgImgPosition.SetSizeX(AnimatableDimension(valueX, typeX, option));
     bgImgPosition.SetSizeY(AnimatableDimension(valueY, typeY, option));
     ViewAbstractModelStatic::SetBackgroundImagePosition(frameNode, bgImgPosition, isReset);
-}
-void SetBackgroundEffect0Impl(Ark_NativePointer node,
-                              const Opt_BackgroundEffectOptions* value)
-{
-    SetBackgroundEffect1Impl(node, value, nullptr);
 }
 void SetBackgroundImageResizableImpl(Ark_NativePointer node,
                                      const Opt_ResizableOptions* value)
@@ -2832,6 +2783,13 @@ void SetOnAccessibilityHoverImpl(Ark_NativePointer node,
     };
     ViewAbstractModelStatic::SetOnAccessibilityHover(frameNode, std::move(onAccessibilityHover));
 }
+void SetOnAccessibilityHoverTransparentImpl(Ark_NativePointer node,
+                                            const Opt_AccessibilityTransparentCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    LOGI("ARKOALA CommonMethod::SetOnAccessibilityHoverTransparentImpl: is not implemented yet");
+}
 void SetHoverEffectImpl(Ark_NativePointer node,
                         const Opt_HoverEffect* value)
 {
@@ -3059,7 +3017,7 @@ void SetTabStopImpl(Ark_NativePointer node,
     ViewAbstract::SetTabStop(frameNode, convValue.value_or(false));
 }
 void SetOnFocusImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+                    const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3074,7 +3032,7 @@ void SetOnFocusImpl(Ark_NativePointer node,
     ViewAbstract::SetOnFocus(frameNode, std::move(onEvent));
 }
 void SetOnBlurImpl(Ark_NativePointer node,
-                   const Opt_Callback_Void* value)
+                   const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3258,7 +3216,7 @@ void SetGrayscaleImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetGrayScale(frameNode, convValue);
 }
 void SetColorBlendImpl(Ark_NativePointer node,
-                       const Opt_Union_Color_String_Resource* value)
+                       const Opt_Union_arkui_component_enums_Color_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3309,19 +3267,16 @@ void SetHueRotateImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    auto convValue = std::optional<float>();
-    if (optValue.has_value()) {
-        Converter::VisitUnion(optValue.value(),
-            [&convValue](const Ark_Float64& val) {
-                convValue = Converter::Convert<float>(val);
-            },
-            [&convValue](const Ark_String& val) {
-                std::string degreeStr = Converter::Convert<std::string>(val);
-                convValue = static_cast<float>(StringUtils::StringToDegree(degreeStr));
-            },
-            []() {});
-    }
+    std::optional<float> convValue;
+    Converter::VisitUnionPtr(value,
+        [&convValue](const Ark_Float64& val) {
+            convValue = Converter::Convert<float>(val);
+        },
+        [&convValue](const Ark_String& val) {
+            std::string degreeStr = Converter::Convert<std::string>(val);
+            convValue = static_cast<float>(StringUtils::StringToDegree(degreeStr));
+        },
+        []() {});
     Validator::ValidateDegree(convValue);
     ViewAbstract::SetHueRotate(frameNode, convValue.value_or(0.0f));
 }
@@ -3409,7 +3364,8 @@ void SetRotateImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetRotate(frameNode, convValue->vec5f);
     ViewAbstractModelStatic::SetPivot(frameNode, convValue->center);
 }
-void SetTransformImpl(Ark_NativePointer node, const Opt_matrix4_Matrix4Transit* value)
+void SetTransformImpl(Ark_NativePointer node,
+                      const Opt_matrix4_Matrix4Transit* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3421,7 +3377,7 @@ void SetTransformImpl(Ark_NativePointer node, const Opt_matrix4_Matrix4Transit* 
     ViewAbstract::SetTransformMatrix(frameNode, matrixOpt.value());
 }
 void SetOnAppearImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+                     const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3436,7 +3392,7 @@ void SetOnAppearImpl(Ark_NativePointer node,
     ViewAbstract::SetOnAppear(frameNode, std::move(onEvent));
 }
 void SetOnDisAppearImpl(Ark_NativePointer node,
-                        const Opt_Callback_Void* value)
+                        const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3551,7 +3507,7 @@ void SetVisibilityImpl(Ark_NativePointer node,
     ViewAbstract::SetVisibility(frameNode, convValue.value());
 }
 void SetFlexGrowImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
+                     const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3562,7 +3518,7 @@ void SetFlexGrowImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetFlexGrow(frameNode, *convValue);
 }
 void SetFlexShrinkImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+                       const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3577,7 +3533,7 @@ void SetFlexShrinkImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetFlexShrink(frameNode, *convValue);
 }
 void SetFlexBasisImpl(Ark_NativePointer node,
-                      const Opt_Union_Number_String* value)
+                      const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3602,7 +3558,7 @@ void SetAlignSelfImpl(Ark_NativePointer node,
     }
 }
 void SetDisplayPriorityImpl(Ark_NativePointer node,
-                            const Opt_Number* value)
+                            const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3730,53 +3686,23 @@ void SetEnabledImpl(Ark_NativePointer node,
     }
     ViewAbstract::SetEnabled(frameNode, *convValue);
 }
-void SetAlignRulesInternal(FrameNode *frameNode, std::optional<std::map<AlignDirection, AlignRule>> convMapValue,
-                           std::optional<BiasOpt> convBiasValue)
-{
-    if (convMapValue) {
-        ViewAbstractModelStatic::SetAlignRules(frameNode, convMapValue);
-    } else {
-        ViewAbstractModelStatic::SetAlignRules(frameNode, std::map<AlignDirection, AlignRule>());
-    }
-    if (convBiasValue.has_value()) {
-        ViewAbstractModelStatic::SetBias(frameNode, convBiasValue.value().first, convBiasValue.value().second);
-    } else {
-        ViewAbstractModelStatic::SetBias(frameNode, std::nullopt);
-    }
-}
 void SetAlignRulesImpl(Ark_NativePointer node,
                        const Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        ViewAbstractModelStatic::SetAlignRules(frameNode, std::map<AlignDirection, AlignRule>());
+    auto convMapValue = Converter::OptConvertPtr<std::map<AlignDirection, AlignRule>>(value);
+    ViewAbstractModelStatic::SetAlignRules(frameNode, convMapValue);
+    auto convBiasValue = Converter::OptConvertPtr<BiasOpt>(value);
+    if (convBiasValue.has_value()) {
+        ViewAbstractModelStatic::SetBias(frameNode, convBiasValue->horizontal, convBiasValue->vertical);
+    } else {
         ViewAbstractModelStatic::SetBias(frameNode, std::nullopt);
         return;
     }
-    switch (optValue->selector) {
-        case CASE_0: {
-            auto alignRulesvalue = optValue->value0;
-            auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(alignRulesvalue);
-            auto convBiasValue = optValue ? Converter::OptConvert<BiasOpt>(alignRulesvalue.bias) : std::nullopt;
-            SetAlignRulesInternal(frameNode, convMapValue, convBiasValue);
-            break;
-        }
-        case CASE_1: {
-            auto alignRulesvalue = optValue->value1;
-            auto convMapValue = Converter::OptConvert<std::map<AlignDirection, AlignRule>>(alignRulesvalue);
-            auto convBiasValue = optValue ? Converter::OptConvert<BiasOpt>(alignRulesvalue.bias) : std::nullopt;
-            SetAlignRulesInternal(frameNode, convMapValue, convBiasValue);
-            break;
-        }
-        default:
-            LOGE("ARKOALA:SetAlignRulesImpl: Unexpected value->selector: %{public}d\n", optValue->selector);
-            return;
-    }
 }
 void SetAspectRatioImpl(Ark_NativePointer node,
-                        const Opt_Number* value)
+                        const Opt_Float64* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3855,13 +3781,13 @@ void SetOnDragStartImpl(Ark_NativePointer node,
 #endif
             }
         };
-        auto handler = [&parseCustBuilder, &parseDragI](Ark_Union_CustomBuilder_DragItemInfo arkResult) {
+        auto handler = [&parseCustBuilder, &parseDragI](Ark_Union_CustomNodeBuilder_DragItemInfo arkResult) {
             Converter::VisitUnion(arkResult, parseCustBuilder, parseDragI, []() {});
         };
 
         PipelineContext::SetCallBackNode(weakNode);
 
-        auto continuation = CallbackKeeper::Claim<Callback_Union_CustomBuilder_DragItemInfo_Void>(handler);
+        auto continuation = CallbackKeeper::Claim<Callback_Union_CustomNodeBuilder_DragItemInfo_Void>(handler);
         callback.InvokeSync(arkDragInfo, arkExtraParam, continuation.ArkValue());
         return result;
     };
@@ -3973,38 +3899,6 @@ void SetDraggableImpl(Ark_NativePointer node,
         return;
     }
     ViewAbstract::SetDraggable(frameNode, *convValue);
-}
-void SetDragPreview0Impl(Ark_NativePointer node,
-                         const Opt_Union_CustomBuilder_DragItemInfo_String* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    Converter::VisitUnionPtr(value,
-        [frameNode](const Ark_String& val) {
-            ViewAbstract::SetDragPreview(frameNode,
-                DragDropInfo { .inspectorId = Converter::Convert<std::string>(val) });
-        },
-        [node, frameNode](const CustomNodeBuilder& val) {
-            CallbackHelper(val).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-                ViewAbstract::SetDragPreview(frameNode, DragDropInfo { .customNode = uiNode });
-                }, node);
-        },
-        [node, frameNode](const Ark_DragItemInfo& value) {
-            auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
-            if (builder) {
-                CallbackHelper(builder.value()).BuildAsync([frameNode](
-                    const RefPtr<UINode>& uiNode) {
-                    DragDropInfo info;
-                    info.customNode = uiNode;
-                    ViewAbstract::SetDragPreview(frameNode, info);
-                    }, node);
-            } else {
-                ViewAbstract::SetDragPreview(frameNode, DragDropInfo {});
-            }
-        },
-        [frameNode]() {
-            ViewAbstract::SetDragPreview(frameNode, DragDropInfo {});
-        });
 }
 void SetOnPreDragImpl(Ark_NativePointer node,
                       const Opt_Callback_PreDragStatus_Void* value)
@@ -4198,22 +4092,6 @@ void SetIdImpl(Ark_NativePointer node,
     auto id = Converter::OptConvertPtr<std::string>(value);
     ViewAbstract::SetInspectorId(frameNode, id.value_or(""));
 }
-void SetGeometryTransition0Impl(Ark_NativePointer node,
-                                const Opt_String* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto idOpt = Converter::OptConvertPtr<std::string>(value);
-    if (!idOpt) {
-        return; // undefined return, same with ArktsDyn
-    }
-    // follow flag
-    bool followWithoutTransition { false };
-    // hierarchy flag
-    bool doRegisterSharedTransition { true };
-    ViewAbstractModelStatic::SetGeometryTransition(
-        frameNode, idOpt.value(), followWithoutTransition, doRegisterSharedTransition);
-}
 void SetRestoreIdImpl(Ark_NativePointer node,
                       const Opt_Int32* value)
 {
@@ -4275,30 +4153,6 @@ void SetPixelStretchEffectImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::SetPixelStretchEffect(frameNode, convValue);
 }
-void SetAccessibilityGroupWithValueImpl(Ark_NativePointer node,
-                                        const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    bool isGroupFlag = false;
-    if (convValue) {
-        isGroupFlag = *convValue;
-    }
-    ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupFlag);
-}
-void SetAccessibilityTextOfStringTypeImpl(Ark_NativePointer node,
-                                          const Opt_String* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<std::string>(value);
-    if (!convValue) {
-        // keep the same processing
-        return;
-    }
-    ViewAbstractModelNG::SetAccessibilityText(frameNode, *convValue);
-}
 void SetAccessibilityNextFocusIdImpl(Ark_NativePointer node,
                                      const Opt_String* value)
 {
@@ -4352,8 +4206,8 @@ void SetAccessibilityScrollTriggerableImpl(Ark_NativePointer node,
     }
     ViewAbstractModelNG::SetAccessibilityScrollTriggerable(frameNode, scrollTriggerable, resetValue);
 }
-void SetAccessibilityTextOfResourceTypeImpl(Ark_NativePointer node,
-                                            const Opt_Resource* value)
+void SetAccessibilityTextImpl(Ark_NativePointer node,
+                              const Opt_Union_Resource_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4427,8 +4281,8 @@ void SetAccessibilityTextHintImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::SetAccessibilityTextHint(frameNode, *convValue);
 }
-void SetAccessibilityDescriptionOfStringTypeImpl(Ark_NativePointer node,
-                                                 const Opt_String* value)
+void SetAccessibilityDescriptionImpl(Ark_NativePointer node,
+                                     const Opt_Union_Resource_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4440,7 +4294,7 @@ void SetAccessibilityDescriptionOfStringTypeImpl(Ark_NativePointer node,
     ViewAbstractModelNG::SetAccessibilityDescription(frameNode, *convValue);
 }
 void SetAccessibilityDescriptionOfResourceTypeImpl(Ark_NativePointer node,
-                                                   const Opt_Resource* value)
+                                                   const Ark_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -4695,13 +4549,12 @@ void SetAccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
     }
     ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, drawLevel);
 }
-void SetCustomPropertyImpl(Ark_NativePointer node,
-                           const Ark_String* name,
-                           const Opt_Object* value)
+void SetOnTouchTestDoneImpl(Ark_NativePointer node,
+                            const Opt_TouchTestDoneCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("CommonMethodModifier::CustomPropertyImpl is not implemented");
+    LOGI("ARKOALA SaveButtonAttributeModifier::SetOnTouchTestDoneImpl: is not implemented yet");
 }
 void SetExpandSafeAreaImpl(Ark_NativePointer node,
                            const Opt_Array_SafeAreaType* types,
@@ -4750,45 +4603,32 @@ void SetBackgroundImpl(Ark_NativePointer node,
             ViewAbstractModelStatic::BindBackground(frameNode, builder, optAlign);
         }, node);
 }
-void SetBackgroundImage0Impl(Ark_NativePointer node,
-                             const Opt_Union_ResourceStr_PixelMap* src)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-
-    std::optional<ImageSourceInfo> sourceInfo = Converter::OptConvertPtr<ImageSourceInfo>(src);
-    ViewAbstractModelStatic::SetBackgroundImage(frameNode, sourceInfo);
-}
 void SetBackgroundImage1Impl(Ark_NativePointer node,
-                             const Opt_Union_ResourceStr_PixelMap* src,
-                             const Opt_BackgroundImageOptions* options)
+                             const Opt_Union_ResourceStr_image_PixelMap* src,
+                             const Ark_BackgroundImageOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-
-    std::optional<ImageSourceInfo> sourceInfo = Converter::OptConvertPtr<ImageSourceInfo>(src);
-    ViewAbstractModelStatic::SetBackgroundImage(frameNode, sourceInfo);
     CHECK_NULL_VOID(options);
 
-    auto syncLoad = static_cast<bool>(options->value.syncLoad.value);
-    ViewAbstractModelStatic::SetBackgroundImageSyncMode(frameNode, syncLoad);
-
-    auto imageRepeat = Converter::OptConvertPtr<ImageRepeat>(&options->value.repeat);
-    if (imageRepeat.has_value()) {
-        ViewAbstractModelStatic::SetBackgroundImageRepeat(frameNode, imageRepeat.value());
-    }
-}
-void SetBackgroundImage2Impl(Ark_NativePointer node,
-                             const Opt_Union_ResourceStr_PixelMap* src,
-                             const Opt_ImageRepeat* repeat)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-
     std::optional<ImageSourceInfo> sourceInfo = Converter::OptConvertPtr<ImageSourceInfo>(src);
     ViewAbstractModelStatic::SetBackgroundImage(frameNode, sourceInfo);
 
-    auto imageRepeat = Converter::OptConvertPtr<ImageRepeat>(repeat);
+    auto syncLoad = Converter::OptConvert<bool>(options->syncLoad).value_or(false);
+    ViewAbstractModelStatic::SetBackgroundImageSyncMode(frameNode, syncLoad);
+
+    auto imageRepeat = Converter::OptConvert<ImageRepeat>(options->repeat);
+    ViewAbstractModelStatic::SetBackgroundImageRepeat(frameNode, imageRepeat.value());
+}
+void SetBackgroundImage2Impl(Ark_NativePointer node,
+                             const Opt_Union_ResourceStr_image_PixelMap* src,
+                             Ark_ImageRepeat repeat)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<ImageSourceInfo> sourceInfo = Converter::OptConvertPtr<ImageSourceInfo>(src);
+    ViewAbstractModelStatic::SetBackgroundImage(frameNode, sourceInfo);
+    auto imageRepeat = Converter::OptConvert<ImageRepeat>(repeat);
     ViewAbstractModelStatic::SetBackgroundImageRepeat(frameNode, imageRepeat);
 }
 void SetBackgroundBlurStyleImpl(Ark_NativePointer node,
@@ -4812,9 +4652,9 @@ void SetBackgroundBlurStyleImpl(Ark_NativePointer node,
     }
     ViewAbstract::SetBackgroundBlurStyle(frameNode, convValue);
 }
-void SetBackgroundEffect1Impl(Ark_NativePointer node,
-                              const Opt_BackgroundEffectOptions* options,
-                              const Opt_SystemAdaptiveOptions* sysOptions)
+void SetBackgroundEffectImpl(Ark_NativePointer node,
+                             const Opt_BackgroundEffectOptions* options,
+                             const Opt_SystemAdaptiveOptions* sysOptions)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -5009,10 +4849,11 @@ void SetChainModeImpl(Ark_NativePointer node,
 }
 void SetOnDrop1Impl(Ark_NativePointer node,
                     const Opt_OnDragEventCallback* eventCallback,
-                    const Opt_DropOptions* dropOptions)
+                    const Ark_DropOptions* dropOptions)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(dropOptions);
     auto optValue = Converter::GetOptPtr(eventCallback);
     if (!optValue) {
         ViewAbstract::SetOnDrop(frameNode, nullptr);
@@ -5028,17 +4869,12 @@ void SetOnDrop1Impl(Ark_NativePointer node,
 
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto optValueDropOption = Converter::GetOptPtr(dropOptions);
-    if (!optValueDropOption) {
-        eventHub->SetDisableDataPrefetch(false);
-        return;
-    }
-    auto disableDataPrefetch = Converter::OptConvert<bool>(optValueDropOption->disableDataPrefetch).value_or(false);
+    auto disableDataPrefetch = Converter::OptConvert<bool>(dropOptions->disableDataPrefetch).value_or(false);
     eventHub->SetDisableDataPrefetch(disableDataPrefetch);
 }
-void SetDragPreview1Impl(Ark_NativePointer node,
-                         const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
-                         const Opt_PreviewConfiguration* config)
+void SetDragPreviewImpl(Ark_NativePointer node,
+                        const Opt_Union_CustomNodeBuilder_DragItemInfo_String* preview,
+                        const Opt_PreviewConfiguration* config)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -5083,7 +4919,7 @@ void SetDragPreview1Impl(Ark_NativePointer node,
         });
 }
 void SetOverlayImpl(Ark_NativePointer node,
-                    const Opt_Union_String_CustomBuilder_ComponentContent* value,
+                    const Opt_Union_String_CustomNodeBuilder_ComponentContent* value,
                     const Opt_OverlayOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -5120,7 +4956,7 @@ void SetBlendModeImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetBlendApplyType(frameNode, blendApplyType);
 }
 void SetAdvancedBlendModeImpl(Ark_NativePointer node,
-                              const Ark_Union_BlendMode_Blender* effect,
+                              const Opt_Union_BlendMode_uiEffect_BrightnessBlender* effect,
                               const Opt_BlendApplyType* type)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -5143,9 +4979,9 @@ void SetAdvancedBlendModeImpl(Ark_NativePointer node,
     blendApplyType = blendApplyTypeOpt.value_or(blendApplyType);
     ViewAbstractModelStatic::SetBlendApplyType(frameNode, blendApplyType);
 }
-void SetGeometryTransition1Impl(Ark_NativePointer node,
-                                const Opt_String* id,
-                                const Opt_GeometryTransitionOptions* options)
+void SetGeometryTransitionImpl(Ark_NativePointer node,
+                               const Opt_String* id,
+                               const Opt_GeometryTransitionOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -5271,7 +5107,7 @@ void CallMenuOnModifyDone(RefPtr<UINode> uiNode)
 void BindMenuBase(Ark_NativePointer node,
     const Opt_Boolean *isShow,
     const bool setShow,
-    const Opt_Union_Array_MenuElement_CustomBuilder* content,
+    const Opt_Union_Array_MenuElement_CustomNodeBuilder* content,
     const Opt_MenuOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -5314,7 +5150,7 @@ void BindMenuBase(Ark_NativePointer node,
         });
 }
 void SetBindMenu0Impl(Ark_NativePointer node,
-                      const Opt_Union_Array_MenuElement_CustomBuilder* content,
+                      const Opt_Union_Array_MenuElement_CustomNodeBuilder* content,
                       const Opt_MenuOptions* options)
 {
     auto show = ArkValue<Opt_Boolean>(false);
@@ -5322,7 +5158,7 @@ void SetBindMenu0Impl(Ark_NativePointer node,
 }
 void SetBindMenu1Impl(Ark_NativePointer node,
                       const Opt_Boolean* isShow,
-                      const Opt_Union_Array_MenuElement_CustomBuilder* content,
+                      const Opt_Union_Array_MenuElement_CustomNodeBuilder* content,
                       const Opt_MenuOptions* options)
 {
     BindMenuBase(node, isShow, true, content, options);
@@ -5430,7 +5266,7 @@ void SetBindContextMenu1Impl(Ark_NativePointer node,
     BindContextMenuBase(node, content, &type, options, menuParam);
 }
 void SetBindContentCover0Impl(Ark_NativePointer node,
-                              const Opt_Union_Boolean_Bindable* isShow,
+                              const Opt_Union_Boolean_Bindable_Boolean* isShow,
                               const Opt_CustomNodeBuilder* builder,
                               const Opt_ModalTransition* type)
 {
@@ -5462,7 +5298,7 @@ void SetBindContentCover0Impl(Ark_NativePointer node,
     }
 }
 void SetBindContentCover1Impl(Ark_NativePointer node,
-                              const Opt_Union_Boolean_Bindable* isShow,
+                              const Opt_Union_Boolean_Bindable_Boolean* isShow,
                               const Opt_CustomNodeBuilder* builder,
                               const Opt_ContentCoverOptions* options)
 {
@@ -5514,7 +5350,7 @@ void SetBindContentCover1Impl(Ark_NativePointer node,
     }
 }
 void SetBindSheetImpl(Ark_NativePointer node,
-                      const Opt_Union_Boolean_Bindable* isShow,
+                      const Opt_Union_Boolean_Bindable_Boolean* isShow,
                       const Opt_CustomNodeBuilder* builder,
                       const Opt_SheetOptions* options)
 {
@@ -5570,7 +5406,7 @@ void SetBindSheetImpl(Ark_NativePointer node,
         }, node);
 }
 void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
-                                const Opt_Array_Float64* ratios,
+                                const Opt_Array_F64* ratios,
                                 const Opt_VisibleAreaChangeCallback* event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -5585,8 +5421,8 @@ void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
     auto weakNode = AceType::WeakClaim(frameNode);
     auto onVisibleAreaChange =
         [arkCallback = CallbackHelper(*optEvent), node = weakNode](bool visible, double ratio) {
-            Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
-            Ark_Float64 currentRatio = Converter::ArkValue<Ark_Float64>(static_cast<float>(ratio));
+            auto isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+            auto currentRatio = Converter::ArkValue<Ark_Float64>(ratio);
             PipelineContext::SetCallBackNode(node);
             arkCallback.InvokeSync(isExpanding, currentRatio);
         };
@@ -5666,7 +5502,7 @@ void SetOnVisibleAreaApproximateChangeImpl(Ark_NativePointer node,
 void SetKeyboardShortcutImpl(Ark_NativePointer node,
                              const Opt_Union_String_FunctionKey* value,
                              const Opt_Array_ModifierKey* keys,
-                             const Opt_Callback_Void* action)
+                             const Opt_synthetic_Callback_Void* action)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -5703,9 +5539,9 @@ void SetKeyboardShortcutImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::SetKeyboardShortcut(frameNode, strValue.value(), keysVect, nullptr);
 }
-void SetAccessibilityGroupWithConfigImpl(Ark_NativePointer node,
-                                         const Opt_Boolean* isGroup,
-                                         const Opt_AccessibilityOptions* config)
+void SetAccessibilityGroupImpl(Ark_NativePointer node,
+                               const Opt_Boolean* isGroup,
+                               const Opt_AccessibilityOptions* accessibilityOptions)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -5714,7 +5550,7 @@ void SetAccessibilityGroupWithConfigImpl(Ark_NativePointer node,
     if (isGroupValue) {
         isGroupFlag = *isGroupValue;
     }
-    auto optValue = Converter::GetOptPtr(config);
+    auto optValue = Converter::GetOptPtr(accessibilityOptions);
     auto accessibilityPreferred = optValue ?
         Converter::OptConvert<bool>(optValue->accessibilityPreferred) : std::nullopt;
     ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupFlag);
@@ -5746,8 +5582,9 @@ void SetOnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
         CHECK_NULL_RETURN(arkGestEvent, defVal);
         auto arkValCurrent = CreateArkGestureRecognizer(current);
         auto arkValOthers = CreateArkGestureRecognizerArray(others);
+        auto arkValTouchRecognizers = Converter::ArkValue<Opt_Array_TouchRecognizer>();
         auto resultOpt = callback.InvokeWithOptConvertResult<GestureJudgeResult, Ark_GestureJudgeResult,
-            Callback_GestureJudgeResult_Void>(arkGestEvent, arkValCurrent, arkValOthers);
+            Callback_GestureJudgeResult_Void>(arkGestEvent, arkValCurrent, arkValOthers, arkValTouchRecognizers);
         return resultOpt.value_or(defVal);
     };
     auto convValue = Converter::OptConvertPtr<bool>(exposeInnerGesture);
@@ -5779,9 +5616,9 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetMarginImpl,
         CommonMethodModifier::SetBackgroundColorImpl,
         CommonMethodModifier::SetPixelRoundImpl,
+        CommonMethodModifier::SetBackgroundImage0Impl,
         CommonMethodModifier::SetBackgroundImageSizeImpl,
         CommonMethodModifier::SetBackgroundImagePositionImpl,
-        CommonMethodModifier::SetBackgroundEffect0Impl,
         CommonMethodModifier::SetBackgroundImageResizableImpl,
         CommonMethodModifier::SetForegroundEffectImpl,
         CommonMethodModifier::SetVisualEffectImpl,
@@ -5805,6 +5642,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnHoverImpl,
         CommonMethodModifier::SetOnHoverMoveImpl,
         CommonMethodModifier::SetOnAccessibilityHoverImpl,
+        CommonMethodModifier::SetOnAccessibilityHoverTransparentImpl,
         CommonMethodModifier::SetHoverEffectImpl,
         CommonMethodModifier::SetOnMouseImpl,
         CommonMethodModifier::SetOnTouchImpl,
@@ -5871,7 +5709,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnDrop0Impl,
         CommonMethodModifier::SetOnDragEndImpl,
         CommonMethodModifier::SetDraggableImpl,
-        CommonMethodModifier::SetDragPreview0Impl,
         CommonMethodModifier::SetOnPreDragImpl,
         CommonMethodModifier::SetLinearGradientImpl,
         CommonMethodModifier::SetSweepGradientImpl,
@@ -5884,24 +5721,20 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetMaskShapeImpl,
         CommonMethodModifier::SetKeyImpl,
         CommonMethodModifier::SetIdImpl,
-        CommonMethodModifier::SetGeometryTransition0Impl,
         CommonMethodModifier::SetRestoreIdImpl,
         CommonMethodModifier::SetSphericalEffectImpl,
         CommonMethodModifier::SetLightUpEffectImpl,
         CommonMethodModifier::SetPixelStretchEffectImpl,
-        CommonMethodModifier::SetAccessibilityGroupWithValueImpl,
-        CommonMethodModifier::SetAccessibilityTextOfStringTypeImpl,
         CommonMethodModifier::SetAccessibilityNextFocusIdImpl,
         CommonMethodModifier::SetAccessibilityDefaultFocusImpl,
         CommonMethodModifier::SetAccessibilityUseSamePageImpl,
         CommonMethodModifier::SetAccessibilityScrollTriggerableImpl,
-        CommonMethodModifier::SetAccessibilityTextOfResourceTypeImpl,
+        CommonMethodModifier::SetAccessibilityTextImpl,
         CommonMethodModifier::SetAccessibilityRoleImpl,
         CommonMethodModifier::SetOnAccessibilityFocusImpl,
         CommonMethodModifier::SetOnAccessibilityActionInterceptImpl,
         CommonMethodModifier::SetAccessibilityTextHintImpl,
-        CommonMethodModifier::SetAccessibilityDescriptionOfStringTypeImpl,
-        CommonMethodModifier::SetAccessibilityDescriptionOfResourceTypeImpl,
+        CommonMethodModifier::SetAccessibilityDescriptionImpl,
         CommonMethodModifier::SetAccessibilityLevelImpl,
         CommonMethodModifier::SetAccessibilityVirtualNodeImpl,
         CommonMethodModifier::SetAccessibilityCheckedImpl,
@@ -5918,13 +5751,13 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnTouchInterceptImpl,
         CommonMethodModifier::SetOnSizeChangeImpl,
         CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
+        CommonMethodModifier::SetOnTouchTestDoneImpl,
         CommonMethodModifier::SetExpandSafeAreaImpl,
         CommonMethodModifier::SetBackgroundImpl,
-        CommonMethodModifier::SetBackgroundImage0Impl,
         CommonMethodModifier::SetBackgroundImage1Impl,
         CommonMethodModifier::SetBackgroundImage2Impl,
         CommonMethodModifier::SetBackgroundBlurStyleImpl,
-        CommonMethodModifier::SetBackgroundEffect1Impl,
+        CommonMethodModifier::SetBackgroundEffectImpl,
         CommonMethodModifier::SetForegroundBlurStyleImpl,
         CommonMethodModifier::SetOnClick1Impl,
         CommonMethodModifier::SetFocusScopeIdImpl,
@@ -5938,11 +5771,11 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetSharedTransitionImpl,
         CommonMethodModifier::SetChainModeImpl,
         CommonMethodModifier::SetOnDrop1Impl,
-        CommonMethodModifier::SetDragPreview1Impl,
+        CommonMethodModifier::SetDragPreviewImpl,
         CommonMethodModifier::SetOverlayImpl,
         CommonMethodModifier::SetBlendModeImpl,
         CommonMethodModifier::SetAdvancedBlendModeImpl,
-        CommonMethodModifier::SetGeometryTransition1Impl,
+        CommonMethodModifier::SetGeometryTransitionImpl,
         CommonMethodModifier::SetBindTipsImpl,
         CommonMethodModifier::SetBindPopupImpl,
         CommonMethodModifier::SetBindMenu0Impl,
@@ -5955,7 +5788,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnVisibleAreaChangeImpl,
         CommonMethodModifier::SetOnVisibleAreaApproximateChangeImpl,
         CommonMethodModifier::SetKeyboardShortcutImpl,
-        CommonMethodModifier::SetAccessibilityGroupWithConfigImpl,
+        CommonMethodModifier::SetAccessibilityGroupImpl,
         CommonMethodModifier::SetOnGestureRecognizerJudgeBegin1Impl,
     };
     return &ArkUICommonMethodModifierImpl;

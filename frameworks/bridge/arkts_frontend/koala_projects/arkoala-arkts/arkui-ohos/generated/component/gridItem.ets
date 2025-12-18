@@ -16,23 +16,24 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { AttributeModifier, hookGridItemAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { GridItemModifier } from "./../GridItemModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent } from './common'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { AttributeModifier, hookGridItemAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { GridItemModifier } from './../GridItemModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkGridItemPeer extends ArkCommonMethodPeer {
     attributeSet?: GridItemModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkGridItemPeer {
@@ -43,6 +44,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setGridItemOptionsAttribute(value?: GridItemOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -123,7 +125,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as boolean
                 thisSerializer.writeBoolean(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Bindable<boolean>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, valueTmpValueForIdx1)
@@ -156,80 +158,40 @@ export interface GridItemOptions {
 }
 export interface GridItemAttribute extends CommonMethod {
     setGridItemOptions(value?: GridItemOptions): this {
-        throw new Error("Unimplemented method setGridItemOptions")
+        throw new Error('Unimplemented method setGridItemOptions')
     }
     rowStart(value: int32 | undefined): this {
-        throw new Error("Unimplemented method rowStart")
+        throw new Error('Unimplemented method rowStart')
     }
     rowEnd(value: int32 | undefined): this {
-        throw new Error("Unimplemented method rowEnd")
+        throw new Error('Unimplemented method rowEnd')
     }
     columnStart(value: int32 | undefined): this {
-        throw new Error("Unimplemented method columnStart")
+        throw new Error('Unimplemented method columnStart')
     }
     columnEnd(value: int32 | undefined): this {
-        throw new Error("Unimplemented method columnEnd")
+        throw new Error('Unimplemented method columnEnd')
     }
     selectable(value: boolean | undefined): this {
-        throw new Error("Unimplemented method selectable")
+        throw new Error('Unimplemented method selectable')
     }
     selected(value: boolean | Bindable<boolean> | undefined): this {
-        throw new Error("Unimplemented method selected")
+        throw new Error('Unimplemented method selected')
     }
     onSelect(value: ((isSelected: boolean) => void) | undefined): this {
-        throw new Error("Unimplemented method onSelect")
+        throw new Error('Unimplemented method onSelect')
     }
     attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAttribute {
-    rowStart_value?: int32 | undefined
-    rowEnd_value?: int32 | undefined
-    columnStart_value?: int32 | undefined
-    columnEnd_value?: int32 | undefined
-    selectable_value?: boolean | undefined
-    selected_value?: boolean | Bindable<boolean> | undefined
-    onSelect_value?: ((isSelected: boolean) => void) | undefined
-    attributeModifier_value?: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined
-    setGridItemOptions(value?: GridItemOptions): this {
-        return this
-    }
-    rowStart(value: int32 | undefined): this {
-        return this
-    }
-    rowEnd(value: int32 | undefined): this {
-        return this
-    }
-    columnStart(value: int32 | undefined): this {
-        return this
-    }
-    columnEnd(value: int32 | undefined): this {
-        return this
-    }
-    selectable(value: boolean | undefined): this {
-        return this
-    }
-    selected(value: boolean | Bindable<boolean> | undefined): this {
-        return this
-    }
-    onSelect(value: ((isSelected: boolean) => void) | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkGridItemComponent extends ArkCommonMethodComponent implements GridItemAttribute {
     getPeer(): ArkGridItemPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkGridItemPeer)
     }
     public setGridItemOptions(value?: GridItemOptions): this {
-        if (this.checkPriority("setGridItemOptions")) {
+        if (this.checkPriority('setGridItemOptions')) {
             const value_casted = value as (GridItemOptions | undefined)
             this.getPeer()?.setGridItemOptionsAttribute(value_casted)
             this.applyOptionsFinish('GridItemAttribute');
@@ -238,7 +200,7 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
         return this
     }
     public rowStart(value: int32 | undefined): this {
-        if (this.checkPriority("rowStart")) {
+        if (this.checkPriority('rowStart')) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setRowStartAttribute(value_casted)
             return this
@@ -246,7 +208,7 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
         return this
     }
     public rowEnd(value: int32 | undefined): this {
-        if (this.checkPriority("rowEnd")) {
+        if (this.checkPriority('rowEnd')) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setRowEndAttribute(value_casted)
             return this
@@ -254,7 +216,7 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
         return this
     }
     public columnStart(value: int32 | undefined): this {
-        if (this.checkPriority("columnStart")) {
+        if (this.checkPriority('columnStart')) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setColumnStartAttribute(value_casted)
             return this
@@ -262,7 +224,7 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
         return this
     }
     public columnEnd(value: int32 | undefined): this {
-        if (this.checkPriority("columnEnd")) {
+        if (this.checkPriority('columnEnd')) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setColumnEndAttribute(value_casted)
             return this
@@ -270,7 +232,7 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
         return this
     }
     public selectable(value: boolean | undefined): this {
-        if (this.checkPriority("selectable")) {
+        if (this.checkPriority('selectable')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setSelectableAttribute(value_casted)
             return this
@@ -278,7 +240,7 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
         return this
     }
     public selected(value: boolean | Bindable<boolean> | undefined): this {
-        if (this.checkPriority("selected")) {
+        if (this.checkPriority('selected')) {
             const value_casted = value as (boolean | Bindable<boolean> | undefined)
             this.getPeer()?.setSelectedAttribute(value_casted)
             return this
@@ -286,7 +248,7 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
         return this
     }
     public onSelect(value: ((isSelected: boolean) => void) | undefined): this {
-        if (this.checkPriority("onSelect")) {
+        if (this.checkPriority('onSelect')) {
             const value_casted = value as (((isSelected: boolean) => void) | undefined)
             this.getPeer()?.setOnSelectAttribute(value_casted)
             return this
@@ -294,9 +256,9 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
         return this
     }
     public attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-          ModifierStateManager.INSTANCE.scope(() => {
-            hookGridItemAttributeModifier(this, value); 
-         })
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookGridItemAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
@@ -310,18 +272,16 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
 
 @memo
 export function GridItemImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: GridItemAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkGridItemComponent>((): ArkGridItemComponent => {
         return new ArkGridItemComponent()
     })
-    NodeAttach<ArkGridItemPeer>((): ArkGridItemPeer => ArkGridItemPeer.create(receiver), (peer: ArkGridItemPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkGridItemPeer>((): ArkGridItemPeer => ArkGridItemPeer.create(receiver), (_: ArkGridItemPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -340,7 +300,7 @@ export class GridItemOptions_serializer {
     }
     public static read(buffer: DeserializerBase): GridItemOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const styleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let styleTmpBuf : GridItemStyle | undefined = undefined
         if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             styleTmpBuf = GridItemStyle.fromValue(valueDeserializer.readInt32())

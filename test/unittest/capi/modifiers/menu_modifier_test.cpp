@@ -46,7 +46,9 @@ const auto COLOR_STRING_RES = CreateResource("color_name", ResourceType::STRING)
 
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -401,9 +403,9 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerColorTest, TestSize.Level1
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
     EXPECT_EQ(dividerObject, nullptr);
 
-    // set valid values, color as Ark_Color aka int
-    Ark_DividerStyleOptions dividerOptions = {.color = Converter::ArkValue<Opt_ResourceColor>
-        (Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE))
+    // set valid values, color as Ark_arkui_component_enums_Color aka int
+    Ark_DividerStyleOptions dividerOptions = {.color = Converter::ArkValue<Opt_ResourceColor>(
+        Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE))
     };
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
@@ -460,7 +462,13 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerStrokeTest, TestSize.Level1)
 
     // set valid strokeWidth value
     auto arkStroke = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
-    Ark_DividerStyleOptions dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(arkStroke)};
+    Ark_DividerStyleOptions dividerOptions = {
+        .strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(arkStroke),
+        .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
+        .endMargin = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+        .startMargin = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+        .mode = Converter::ArkValue<Opt_DividerMode>(Ark_Empty())
+    };
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -470,7 +478,13 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerStrokeTest, TestSize.Level1)
 
     // set invalid strokeWidth value
     arkStroke = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[1]));
-    dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(arkStroke)};
+    dividerOptions = {
+        .strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(arkStroke),
+        .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
+        .endMargin = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+        .startMargin = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+        .mode = Converter::ArkValue<Opt_DividerMode>(Ark_Empty())
+    };
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -493,7 +507,13 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerStartMarginTest, TestSize.Level1)
 
     // set valid startMargin value
     auto arkStartMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
-    Ark_DividerStyleOptions dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetrics>(arkStartMargin)};
+    Ark_DividerStyleOptions dividerOptions = {
+        .startMargin = Converter::ArkValue<Opt_LengthMetrics>(arkStartMargin),
+        .strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+        .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
+        .endMargin = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+        .mode = Converter::ArkValue<Opt_DividerMode>(Ark_Empty())
+    };
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -503,7 +523,13 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerStartMarginTest, TestSize.Level1)
 
     // set invalid startMargin value
     arkStartMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[1]));
-    dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetrics>(arkStartMargin)};
+    dividerOptions = {
+        .startMargin = Converter::ArkValue<Opt_LengthMetrics>(arkStartMargin),
+        .strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+        .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
+        .endMargin = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+        .mode = Converter::ArkValue<Opt_DividerMode>(Ark_Empty())
+    };
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -526,7 +552,13 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerEndMarginTest, TestSize.Level1)
 
     // set valid endMargin value
     auto arkEndMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
-    Ark_DividerStyleOptions dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetrics>(arkEndMargin)};
+    Ark_DividerStyleOptions dividerOptions = {
+        .endMargin = Converter::ArkValue<Opt_LengthMetrics>(arkEndMargin),
+        .strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+        .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
+        .startMargin = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+        .mode = Converter::ArkValue<Opt_DividerMode>(Ark_Empty())
+    };
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -536,7 +568,13 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerEndMarginTest, TestSize.Level1)
 
     // set invalid endMargin value
     arkEndMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[1]));
-    dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetrics>(arkEndMargin)};
+    dividerOptions = {
+        .endMargin = Converter::ArkValue<Opt_LengthMetrics>(arkEndMargin),
+        .strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+        .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
+        .startMargin = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
+        .mode = Converter::ArkValue<Opt_DividerMode>(Ark_Empty())
+    };
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -599,9 +637,9 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemGroupDividerColorTest, TestSize.L
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
     EXPECT_EQ(dividerObject, nullptr);
 
-    // set valid values, color as Ark_Color aka int
-    Ark_DividerStyleOptions dividerOptions = {.color = Converter::ArkValue<Opt_ResourceColor>
-        (Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE))
+    // set valid values, color as Ark_arkui_component_enums_Color aka int
+    Ark_DividerStyleOptions dividerOptions = {.color = Converter::ArkValue<Opt_ResourceColor>(
+        Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE))
     };
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
@@ -793,7 +831,7 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerUndefinedTest, TestSize.Level1
 HWTEST_F(MenuModifierTest, setFontTest1, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFont, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -805,7 +843,7 @@ HWTEST_F(MenuModifierTest, setFontTest1, TestSize.Level1)
 
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
-        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        auto optFont = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "font");
@@ -828,7 +866,7 @@ HWTEST_F(MenuModifierTest, setFontTest1, TestSize.Level1)
 HWTEST_F(MenuModifierTest, setFontTest2, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFont, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -840,7 +878,7 @@ HWTEST_F(MenuModifierTest, setFontTest2, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
-        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        auto optFont = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "font");
@@ -863,7 +901,7 @@ HWTEST_F(MenuModifierTest, setFontTest2, TestSize.Level1)
 HWTEST_F(MenuModifierTest, setFontTest3, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFont, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -875,7 +913,7 @@ HWTEST_F(MenuModifierTest, setFontTest3, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
-        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        auto optFont = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "font");
@@ -898,7 +936,7 @@ HWTEST_F(MenuModifierTest, setFontTest3, TestSize.Level1)
 HWTEST_F(MenuModifierTest, setFontTest4, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFont, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -910,7 +948,7 @@ HWTEST_F(MenuModifierTest, setFontTest4, TestSize.Level1)
 
     for (auto family : UNION_RESOURCE_STRING_PLAN) {
         font.family = family.first;
-        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        auto optFont = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "font");
@@ -933,7 +971,7 @@ HWTEST_F(MenuModifierTest, setFontTest4, TestSize.Level1)
 HWTEST_F(MenuModifierTest, DISABLED_setFontTest5, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setFont, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -945,7 +983,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setFontTest5, TestSize.Level1)
 
     for (auto size : OPT_LENGTH_TEST_PLAN) {
         font.size = size.first;
-        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        auto optFont = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "font");

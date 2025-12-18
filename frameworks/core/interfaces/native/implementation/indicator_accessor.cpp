@@ -125,8 +125,4 @@ const GENERATED_ArkUIIndicatorAccessor* GetIndicatorAccessor()
     };
     return &IndicatorAccessorImpl;
 }
-
-struct IndicatorPeer {
-    virtual ~IndicatorPeer() = default;
-};
 }

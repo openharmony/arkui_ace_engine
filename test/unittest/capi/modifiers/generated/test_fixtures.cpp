@@ -572,46 +572,100 @@ std::vector<std::tuple<std::string, Ark_ProgressType>> testFixtureProgressTypeIn
         Converter::ArkValue<Ark_ProgressType>(static_cast<Ark_ProgressType>(INT_MAX), &fixCtx) },
 };
 
-// Fixture 'ColorsEnum' for type 'Ark_Color'
-std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsEnumValidValues = {
-    { "ARK_COLOR_WHITE", Converter::ArkValue<Ark_Color>(ARK_COLOR_WHITE, &fixCtx), "#FFFFFFFF" },
-    { "ARK_COLOR_BLACK", Converter::ArkValue<Ark_Color>(ARK_COLOR_BLACK, &fixCtx), "#FF000000" },
-    { "ARK_COLOR_BLUE", Converter::ArkValue<Ark_Color>(ARK_COLOR_BLUE, &fixCtx), "#FF0000FF" },
-    { "ARK_COLOR_BROWN", Converter::ArkValue<Ark_Color>(ARK_COLOR_BROWN, &fixCtx), "#FFA52A2A" },
-    { "ARK_COLOR_GRAY", Converter::ArkValue<Ark_Color>(ARK_COLOR_GRAY, &fixCtx), "#FF808080" },
-    { "ARK_COLOR_GREEN", Converter::ArkValue<Ark_Color>(ARK_COLOR_GREEN, &fixCtx), "#FF008000" },
-    { "ARK_COLOR_GREY", Converter::ArkValue<Ark_Color>(ARK_COLOR_GREY, &fixCtx), "#FF808080" },
-    { "ARK_COLOR_ORANGE", Converter::ArkValue<Ark_Color>(ARK_COLOR_ORANGE, &fixCtx), "#FFFFA500" },
-    { "ARK_COLOR_PINK", Converter::ArkValue<Ark_Color>(ARK_COLOR_PINK, &fixCtx), "#FFFFC0CB" },
-    { "ARK_COLOR_RED", Converter::ArkValue<Ark_Color>(ARK_COLOR_RED, &fixCtx), "#FFFF0000" },
-    { "ARK_COLOR_YELLOW", Converter::ArkValue<Ark_Color>(ARK_COLOR_YELLOW, &fixCtx), "#FFFFFF00" },
-    { "ARK_COLOR_TRANSPARENT", Converter::ArkValue<Ark_Color>(ARK_COLOR_TRANSPARENT, &fixCtx), "#00000000" },
+// Fixture 'ColorsEnum' for type 'Ark_arkui_component_enums_Color'
+std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color, std::string>>
+    testFixtureColorsEnumValidValues = {
+    { "ARK_COLOR_WHITE", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE, &fixCtx),
+        "#FFFFFFFF" },
+    { "ARK_COLOR_BLACK", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK, &fixCtx),
+        "#FF000000" },
+    { "ARK_COLOR_BLUE", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE, &fixCtx),
+        "#FF0000FF" },
+    { "ARK_COLOR_BROWN", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN, &fixCtx),
+        "#FFA52A2A" },
+    { "ARK_COLOR_GRAY", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY, &fixCtx),
+        "#FF808080" },
+    { "ARK_COLOR_GREEN", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN, &fixCtx),
+        "#FF008000" },
+    { "ARK_COLOR_GREY", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY, &fixCtx),
+        "#FF808080" },
+    { "ARK_COLOR_ORANGE", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE, &fixCtx),
+        "#FFFFA500" },
+    { "ARK_COLOR_PINK", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK, &fixCtx),
+        "#FFFFC0CB" },
+    { "ARK_COLOR_RED", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED, &fixCtx),
+        "#FFFF0000" },
+    { "ARK_COLOR_YELLOW", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW, &fixCtx),
+        "#FFFFFF00" },
+    { "ARK_COLOR_TRANSPARENT", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT, &fixCtx),
+        "#00000000" },
 };
 
-std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsEnumInvalidValues = {
-    { "static_cast<Ark_Color>(-1)", Converter::ArkValue<Ark_Color>(static_cast<Ark_Color>(-1), &fixCtx) },
-    { "static_cast<Ark_Color>(INT_MAX)", Converter::ArkValue<Ark_Color>(static_cast<Ark_Color>(INT_MAX), &fixCtx) },
+std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color>> testFixtureColorsEnumInvalidValues = {
+    { "static_cast<Ark_arkui_component_enums_Color>(-1)", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        static_cast<Ark_arkui_component_enums_Color>(-1), &fixCtx) },
+    { "static_cast<Ark_arkui_component_enums_Color>(INT_MAX)", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        static_cast<Ark_arkui_component_enums_Color>(INT_MAX), &fixCtx) },
 };
 
-// Fixture 'ColorsAlpha20Enum' for type 'Ark_Color'
-std::vector<std::tuple<std::string, Ark_Color, std::string>> testFixtureColorsAlpha20EnumValidValues = {
-    { "ARK_COLOR_WHITE", Converter::ArkValue<Ark_Color>(ARK_COLOR_WHITE, &fixCtx), "#33FFFFFF" },
-    { "ARK_COLOR_BLACK", Converter::ArkValue<Ark_Color>(ARK_COLOR_BLACK, &fixCtx), "#33000000" },
-    { "ARK_COLOR_BLUE", Converter::ArkValue<Ark_Color>(ARK_COLOR_BLUE, &fixCtx), "#330000FF" },
-    { "ARK_COLOR_BROWN", Converter::ArkValue<Ark_Color>(ARK_COLOR_BROWN, &fixCtx), "#33A52A2A" },
-    { "ARK_COLOR_GRAY", Converter::ArkValue<Ark_Color>(ARK_COLOR_GRAY, &fixCtx), "#33808080" },
-    { "ARK_COLOR_GREEN", Converter::ArkValue<Ark_Color>(ARK_COLOR_GREEN, &fixCtx), "#33008000" },
-    { "ARK_COLOR_GREY", Converter::ArkValue<Ark_Color>(ARK_COLOR_GREY, &fixCtx), "#33808080" },
-    { "ARK_COLOR_ORANGE", Converter::ArkValue<Ark_Color>(ARK_COLOR_ORANGE, &fixCtx), "#33FFA500" },
-    { "ARK_COLOR_PINK", Converter::ArkValue<Ark_Color>(ARK_COLOR_PINK, &fixCtx), "#33FFC0CB" },
-    { "ARK_COLOR_RED", Converter::ArkValue<Ark_Color>(ARK_COLOR_RED, &fixCtx), "#33FF0000" },
-    { "ARK_COLOR_YELLOW", Converter::ArkValue<Ark_Color>(ARK_COLOR_YELLOW, &fixCtx), "#33FFFF00" },
-    { "ARK_COLOR_TRANSPARENT", Converter::ArkValue<Ark_Color>(ARK_COLOR_TRANSPARENT, &fixCtx), "#00000000" },
+// Fixture 'ColorsAlpha20Enum' for type 'Ark_arkui_component_enums_Color'
+std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color, std::string>>
+    testFixtureColorsAlpha20EnumValidValues = {
+    { "ARK_COLOR_WHITE", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE, &fixCtx),
+        "#33FFFFFF" },
+    { "ARK_COLOR_BLACK", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK, &fixCtx),
+        "#33000000" },
+    { "ARK_COLOR_BLUE", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE, &fixCtx),
+        "#330000FF" },
+    { "ARK_COLOR_BROWN", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN, &fixCtx),
+        "#33A52A2A" },
+    { "ARK_COLOR_GRAY", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY, &fixCtx),
+        "#33808080" },
+    { "ARK_COLOR_GREEN", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN, &fixCtx),
+        "#33008000" },
+    { "ARK_COLOR_GREY", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY, &fixCtx),
+        "#33808080" },
+    { "ARK_COLOR_ORANGE", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE, &fixCtx),
+        "#33FFA500" },
+    { "ARK_COLOR_PINK", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK, &fixCtx),
+        "#33FFC0CB" },
+    { "ARK_COLOR_RED", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED, &fixCtx),
+        "#33FF0000" },
+    { "ARK_COLOR_YELLOW", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW, &fixCtx),
+        "#33FFFF00" },
+    { "ARK_COLOR_TRANSPARENT", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT, &fixCtx),
+        "#00000000" },
 };
 
-std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsAlpha20EnumInvalidValues = {
-    { "static_cast<Ark_Color>(-1)", Converter::ArkValue<Ark_Color>(static_cast<Ark_Color>(-1), &fixCtx) },
-    { "static_cast<Ark_Color>(INT_MAX)", Converter::ArkValue<Ark_Color>(static_cast<Ark_Color>(INT_MAX), &fixCtx) },
+std::vector<std::tuple<std::string, Ark_arkui_component_enums_Color>> testFixtureColorsAlpha20EnumInvalidValues = {
+    { "static_cast<Ark_arkui_component_enums_Color>(-1)", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        static_cast<Ark_arkui_component_enums_Color>(-1), &fixCtx) },
+    { "static_cast<Ark_arkui_component_enums_Color>(INT_MAX)", Converter::ArkValue<Ark_arkui_component_enums_Color>(
+        static_cast<Ark_arkui_component_enums_Color>(INT_MAX), &fixCtx) },
 };
 
 // Fixture 'VariableFontWeightEnum' for type 'Ark_FontWeight'

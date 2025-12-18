@@ -30,7 +30,7 @@ void DestroyPeerImpl(Ark_ColorFilter peer)
         peer = nullptr;
     }
 }
-Ark_ColorFilter ConstructImpl(const Array_Float64* value)
+Ark_ColorFilter ConstructImpl(const Array_F64* value)
 {
     auto peer = new ColorFilterPeer();
     CHECK_NULL_RETURN(value, peer);

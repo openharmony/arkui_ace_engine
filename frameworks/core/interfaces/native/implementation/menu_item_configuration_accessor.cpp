@@ -33,7 +33,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void TriggerSelectImpl(Ark_MenuItemConfiguration peer,
-                       const Ark_Int32 index,
+                       Ark_Int32 index,
                        const Ark_String* value)
 {
     CHECK_NULL_VOID(value);
@@ -109,7 +109,7 @@ Ark_Int32 GetIndexImpl(Ark_MenuItemConfiguration peer)
     return Converter::ArkValue<Ark_Int32>(peer->index_);
 }
 void SetIndexImpl(Ark_MenuItemConfiguration peer,
-                  const Ark_Int32 index)
+                  Ark_Int32 index)
 {
 }
 } // MenuItemConfigurationAccessor

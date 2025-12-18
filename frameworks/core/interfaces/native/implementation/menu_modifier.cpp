@@ -77,7 +77,7 @@ void SetMenuOptionsImpl(Ark_NativePointer node)
 } // MenuInterfaceModifier
 namespace MenuAttributeModifier {
 void SetFontImpl(Ark_NativePointer node,
-                 const Opt_Font* value)
+                 const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

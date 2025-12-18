@@ -16,23 +16,24 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, hookFlowItemAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { FlowItemModifier } from "./../FlowItemModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { int32, int64, float32 } from '@koalaui/common'
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from '@koalaui/interop'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { AttributeModifier, hookFlowItemAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { FlowItemModifier } from './../FlowItemModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkFlowItemPeer extends ArkCommonMethodPeer {
     attributeSet?: FlowItemModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkFlowItemPeer {
@@ -43,36 +44,25 @@ export class ArkFlowItemPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setFlowItemOptionsAttribute(): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._FlowItemInterface_setFlowItemOptions(this.peer.ptr)
     }
 }
 export interface FlowItemAttribute extends CommonMethod {
     setFlowItemOptions(): this {
-        throw new Error("Unimplemented method setFlowItemOptions")
+        throw new Error('Unimplemented method setFlowItemOptions')
     }
     attributeModifier(value: AttributeModifier<FlowItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkFlowItemStyle extends ArkCommonMethodStyle implements FlowItemAttribute {
-    attributeModifier_value?: AttributeModifier<FlowItemAttribute> | AttributeModifier<CommonMethod> | undefined
-    setFlowItemOptions(): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<FlowItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkFlowItemComponent extends ArkCommonMethodComponent implements FlowItemAttribute {
     getPeer(): ArkFlowItemPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkFlowItemPeer)
     }
     public setFlowItemOptions(): this {
-        if (this.checkPriority("setFlowItemOptions")) {
+        if (this.checkPriority('setFlowItemOptions')) {
             this.getPeer()?.setFlowItemOptionsAttribute()
             this.applyOptionsFinish('FlowItemAttribute');
             return this
@@ -80,7 +70,7 @@ export class ArkFlowItemComponent extends ArkCommonMethodComponent implements Fl
         return this
     }
     public attributeModifier(value: AttributeModifier<FlowItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-         ModifierStateManager.INSTANCE.scope(() => {
+        ModifierStateManager.INSTANCE.scope(() => {
             hookFlowItemAttributeModifier(this, value);
         })
         return this
@@ -96,18 +86,16 @@ export class ArkFlowItemComponent extends ArkCommonMethodComponent implements Fl
 
 @memo
 export function FlowItemImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: FlowItemAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkFlowItemComponent>((): ArkFlowItemComponent => {
         return new ArkFlowItemComponent()
     })
-    NodeAttach<ArkFlowItemPeer>((): ArkFlowItemPeer => ArkFlowItemPeer.create(receiver), (peer: ArkFlowItemPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkFlowItemPeer>((): ArkFlowItemPeer => ArkFlowItemPeer.create(receiver), (_: ArkFlowItemPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }

@@ -16,33 +16,34 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { Resource_serializer } from "./../framework/resource"
-import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
-import { ColorFilter_serializer, ColorFilter, ResourceStr } from "./units"
-import { drawing_ColorFilter_serializer } from "./../framework/ohos.graphics.drawing"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkBaseSpanPeer, BaseSpan, ArkBaseSpanComponent, ArkBaseSpanStyle } from "./span"
-import { ImageSpanAlignment, ImageFit } from "./enums"
-import { extractors, AttributeModifier, hookImageSpanAttributeModifier, AttributeUpdater } from "#handwritten"
-import { default as drawing } from "@ohos.graphics.drawing"
-import { ImageErrorCallback, ImageError } from "./image"
-import { default as image } from "@ohos.multimedia.image"
-import { CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { Resource } from "global.resource"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { ImageSpanModifier } from "./../ImageSpanModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
+import { ColorFilter_serializer, ColorFilter, ResourceStr as arkui_component_units_ResourceStr, Resource as arkui_component_units_Resource } from './units'
+import { drawing_ColorFilter_serializer } from './../framework/ohos.graphics.drawing'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkBaseSpanPeer, BaseSpan, ArkBaseSpanComponent } from './span'
+import { ImageSpanAlignment, ImageFit } from './enums'
+import { DrawingColorFilter, ImageErrorCallback, ImageError } from './image'
+import { extractors, AttributeModifier, hookImageSpanAttributeModifier, AttributeUpdater } from '#handwritten'
+import { default as drawing } from '@ohos.graphics.drawing'
+import { PixelMap, CommonMethod, ArkCommonMethodComponent } from './common'
+import { default as image } from '@ohos.multimedia.image'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { ImageSpanModifier } from './../ImageSpanModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkImageSpanPeer extends ArkBaseSpanPeer {
     attributeSet?: ImageSpanModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkImageSpanPeer {
@@ -52,23 +53,24 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setImageSpanOptionsAttribute(value: ResourceStr | image.PixelMap): void {
+    setImageSpanOptionsAttribute(value: arkui_component_units_ResourceStr | PixelMap): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value instanceof ResourceStr) {
+        if (value instanceof arkui_component_units_ResourceStr) {
             thisSerializer.writeInt8((0).toByte())
-            const valueForIdx0  = value as ResourceStr
+            const valueForIdx0  = value as arkui_component_units_ResourceStr
             if (valueForIdx0 instanceof string) {
                 thisSerializer.writeInt8((0).toByte())
                 const valueForIdx0ForIdx0  = valueForIdx0 as string
                 thisSerializer.writeString(valueForIdx0ForIdx0)
-            } else if (valueForIdx0 instanceof Resource) {
+            } else if (valueForIdx0 instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueForIdx0ForIdx1  = valueForIdx0 as Resource
-                Resource_serializer.write(thisSerializer, valueForIdx0ForIdx1)
+                const valueForIdx0ForIdx1  = valueForIdx0 as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueForIdx0ForIdx1)
             }
-        } else if (value instanceof image.PixelMap) {
+        } else if (value instanceof PixelMap) {
             thisSerializer.writeInt8((1).toByte())
-            const valueForIdx1  = value as image.PixelMap
+            const valueForIdx1  = value as PixelMap
             image_PixelMap_serializer.write(thisSerializer, valueForIdx1)
         }
         ArkUIGeneratedNativeModule._ImageSpanInterface_setImageSpanOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -86,7 +88,7 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
         ArkUIGeneratedNativeModule._ImageSpanAttribute_setVerticalAlign(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setColorFilterAttribute(value: ColorFilter | drawing.ColorFilter | undefined): void {
+    setColorFilterAttribute(value: ColorFilter | DrawingColorFilter | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -95,9 +97,9 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as ColorFilter
                 ColorFilter_serializer.write(thisSerializer, valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof drawing.ColorFilter) {
+            } else if (valueTmpValue instanceof DrawingColorFilter) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as drawing.ColorFilter
+                const valueTmpValueForIdx1  = valueTmpValue as DrawingColorFilter
                 drawing_ColorFilter_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
         } else {
@@ -142,7 +144,7 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
         ArkUIGeneratedNativeModule._ImageSpanAttribute_setOnError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAltAttribute(value: image.PixelMap | undefined): void {
+    setAltAttribute(value: PixelMap | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -156,62 +158,29 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
     }
 }
 export interface ImageSpanAttribute extends BaseSpan {
-    setImageSpanOptions(value: ResourceStr | image.PixelMap): this {
-        throw new Error("Unimplemented method setImageSpanOptions")
+    setImageSpanOptions(value: arkui_component_units_ResourceStr | PixelMap): this {
+        throw new Error('Unimplemented method setImageSpanOptions')
     }
     verticalAlign(value: ImageSpanAlignment | undefined): this {
-        throw new Error("Unimplemented method verticalAlign")
+        throw new Error('Unimplemented method verticalAlign')
     }
-    colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
-        throw new Error("Unimplemented method colorFilter")
+    colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
+        throw new Error('Unimplemented method colorFilter')
     }
     objectFit(value: ImageFit | undefined): this {
-        throw new Error("Unimplemented method objectFit")
+        throw new Error('Unimplemented method objectFit')
     }
     onComplete(value: ImageCompleteCallback | undefined): this {
-        throw new Error("Unimplemented method onComplete")
+        throw new Error('Unimplemented method onComplete')
     }
     onError(value: ImageErrorCallback | undefined): this {
-        throw new Error("Unimplemented method onError")
+        throw new Error('Unimplemented method onError')
     }
-    alt(value: image.PixelMap | undefined): this {
-        throw new Error("Unimplemented method alt")
+    alt(value: PixelMap | undefined): this {
+        throw new Error('Unimplemented method alt')
     }
     attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttribute {
-    verticalAlign_value?: ImageSpanAlignment | undefined
-    colorFilter_value?: ColorFilter | drawing.ColorFilter | undefined
-    objectFit_value?: ImageFit | undefined
-    onComplete_value?: ImageCompleteCallback | undefined
-    onError_value?: ImageErrorCallback | undefined
-    alt_value?: image.PixelMap | undefined
-    attributeModifier_value?: AttributeModifier<ImageSpanAttribute> | AttributeModifier<CommonMethod> | undefined
-    setImageSpanOptions(value: ResourceStr | image.PixelMap): this {
-        return this
-    }
-    verticalAlign(value: ImageSpanAlignment | undefined): this {
-        return this
-    }
-    colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
-        return this
-    }
-    objectFit(value: ImageFit | undefined): this {
-        return this
-    }
-    onComplete(value: ImageCompleteCallback | undefined): this {
-        return this
-    }
-    onError(value: ImageErrorCallback | undefined): this {
-        return this
-    }
-    alt(value: image.PixelMap | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 export type ImageCompleteCallback = (result: ImageLoadResult) => void;
@@ -229,14 +198,11 @@ export interface ImageLoadResult {
 
 export class ArkImageSpanComponent extends ArkBaseSpanComponent implements ImageSpanAttribute {
     getPeer(): ArkImageSpanPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkImageSpanPeer)
     }
-    public setImageSpanOptions(value: ResourceStr | image.PixelMap): this {
-        if (this.checkPriority("setImageSpanOptions")) {
-            const value_casted = value as (ResourceStr | image.PixelMap)
+    public setImageSpanOptions(value: arkui_component_units_ResourceStr | PixelMap): this {
+        if (this.checkPriority('setImageSpanOptions')) {
+            const value_casted = value as (arkui_component_units_ResourceStr | PixelMap)
             this.getPeer()?.setImageSpanOptionsAttribute(value_casted)
             this.applyOptionsFinish('ImageSpanAttribute');
             return this
@@ -244,23 +210,23 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
         return this
     }
     public verticalAlign(value: ImageSpanAlignment | undefined): this {
-        if (this.checkPriority("verticalAlign")) {
+        if (this.checkPriority('verticalAlign')) {
             const value_casted = value as (ImageSpanAlignment | undefined)
             this.getPeer()?.setVerticalAlignAttribute(value_casted)
             return this
         }
         return this
     }
-    public colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
-        if (this.checkPriority("colorFilter")) {
-            const value_casted = value as (ColorFilter | drawing.ColorFilter | undefined)
+    public colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
+        if (this.checkPriority('colorFilter')) {
+            const value_casted = value as (ColorFilter | DrawingColorFilter | undefined)
             this.getPeer()?.setColorFilterAttribute(value_casted)
             return this
         }
         return this
     }
     public objectFit(value: ImageFit | undefined): this {
-        if (this.checkPriority("objectFit")) {
+        if (this.checkPriority('objectFit')) {
             const value_casted = value as (ImageFit | undefined)
             this.getPeer()?.setObjectFitAttribute(value_casted)
             return this
@@ -268,7 +234,7 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
         return this
     }
     public onComplete(value: ImageCompleteCallback | undefined): this {
-        if (this.checkPriority("onComplete")) {
+        if (this.checkPriority('onComplete')) {
             const value_casted = value as (ImageCompleteCallback | undefined)
             this.getPeer()?.setOnCompleteAttribute(value_casted)
             return this
@@ -276,23 +242,23 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
         return this
     }
     public onError(value: ImageErrorCallback | undefined): this {
-        if (this.checkPriority("onError")) {
+        if (this.checkPriority('onError')) {
             const value_casted = value as (ImageErrorCallback | undefined)
             this.getPeer()?.setOnErrorAttribute(value_casted)
             return this
         }
         return this
     }
-    public alt(value: image.PixelMap | undefined): this {
-        if (this.checkPriority("alt")) {
-            const value_casted = value as (image.PixelMap | undefined)
+    public alt(value: PixelMap | undefined): this {
+        if (this.checkPriority('alt')) {
+            const value_casted = value as (PixelMap | undefined)
             this.getPeer()?.setAltAttribute(value_casted)
             return this
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-         ModifierStateManager.INSTANCE.scope(() => {
+        ModifierStateManager.INSTANCE.scope(() => {
             hookImageSpanAttributeModifier(this, value);
         })
         return this
@@ -308,18 +274,16 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
 
 @memo
 export function ImageSpanImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: ImageSpanAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkImageSpanComponent>((): ArkImageSpanComponent => {
         return new ArkImageSpanComponent()
     })
-    NodeAttach<ArkImageSpanPeer>((): ArkImageSpanPeer => ArkImageSpanPeer.create(receiver), (peer: ArkImageSpanPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkImageSpanPeer>((): ArkImageSpanPeer => ArkImageSpanPeer.create(receiver), (_: ArkImageSpanPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }

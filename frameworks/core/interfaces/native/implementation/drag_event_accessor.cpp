@@ -183,8 +183,14 @@ Ark_Float64 GetVelocityImpl(Ark_DragEvent peer)
     const auto value = PipelineBase::Px2VpWithCurrentDensity(info->GetVelocity().GetVelocityValue());
     return Converter::ArkValue<Ark_Float64>(value);
 }
+Opt_String StartDataLoadingImpl(Ark_DragEvent peer,
+                                const Ark_unifiedDataChannel_GetDataParams* options)
+{
+    LOGE("ARKOALA DragEventAccessor.StartDataLoading not implemented yet");
+    return Converter::ArkValue<Opt_String>("", Converter::FC);
+}
 void ExecuteDropAnimationImpl(Ark_DragEvent peer,
-                              const Callback_Void* customDropAnimation)
+                              const VoidCallback* customDropAnimation)
 {
     CHECK_NULL_VOID(customDropAnimation);
     CHECK_NULL_VOID(peer);
@@ -274,6 +280,7 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
         DragEventAccessor::GetVelocityXImpl,
         DragEventAccessor::GetVelocityYImpl,
         DragEventAccessor::GetVelocityImpl,
+        DragEventAccessor::StartDataLoadingImpl,
         DragEventAccessor::ExecuteDropAnimationImpl,
         DragEventAccessor::EnableInternalDropAnimationImpl,
         DragEventAccessor::GetDragBehaviorImpl,

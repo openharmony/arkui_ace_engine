@@ -231,7 +231,8 @@ HWTEST_F(CheckboxModifierTest, setSelectTestValidValues, TestSize.Level1)
 
     // Verifying attribute's  values
     for (auto&& value: selectSelectValidValues) {
-        auto inputValueSelect = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(std::get<1>(value));
+        auto inputValueSelect = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(
+            std::get<1>(value));
         modifier_->setSelect(node_, &inputValueSelect);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECT_NAME);
@@ -256,8 +257,12 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setSelectedColorTestDefaultValues, TestS
 
 // Valid values for attribute 'selectedColor' of method 'selectedColor'
 static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> selectedColorSelectedColorValidValues = {
-    { "ARK_COLOR_BLUE", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-    { "ARK_COLOR_RED", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
+    { "ARK_COLOR_BLUE", Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
+    { "ARK_COLOR_RED", Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED),
+        "#FFFF0000" },
 };
 
 /*
@@ -294,7 +299,7 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setSelectedColorTestInvalidValues, TestS
     Ark_ResourceColor inputValueSelectedColor;
 
     // Initial setup
-    auto value = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    auto value = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(true);
     modifier_->setSelect(node_, &value);
 
     // Verifying attribute's  values
@@ -325,8 +330,12 @@ HWTEST_F(CheckboxModifierTest, setUnselectedColorTestDefaultValues, TestSize.Lev
 namespace {
 // Valid values for attribute 'unselectedColor' of method 'unselectedColor'
 std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> unselectedColorUnselectedColorValidValues = {
-    { "ARK_COLOR_BLUE", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-    { "ARK_COLOR_RED", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
+    { "ARK_COLOR_BLUE", Converter::ArkUnion<Ark_ResourceColor, enum Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
+    { "ARK_COLOR_RED", Converter::ArkUnion<Ark_ResourceColor, enum Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED),
+        "#FFFF0000" },
 };
 } // namespace
 
@@ -372,7 +381,7 @@ HWTEST_F(CheckboxModifierTest, DISABLED_setUnselectedColorTestInvalidValues, Tes
     Ark_ResourceColor inputValueUnselectedColor;
 
     // Initial setup
-    auto optValueTrue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    auto optValueTrue = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(true);
     modifier_->setSelect(node_, &optValueTrue);
 
     // Verifying attribute's  values

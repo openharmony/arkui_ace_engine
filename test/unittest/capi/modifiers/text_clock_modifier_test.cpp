@@ -88,13 +88,13 @@ public:
 
 void TextClockModifierTest::InitTextShadow(Ark_Union_ShadowOptions_Array_ShadowOptions &options)
 {
-    WriteToUnion<Ark_ShadowOptions>(options).radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(
+    WriteToUnion<Ark_ShadowOptions>(options).radius = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
         std::get<1>(testFixtureShadowRadiusNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(options).type =
         ArkValue<Opt_ShadowType>(std::get<1>(Fixtures::testFixtureShadowTypeValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(options).color =
-        ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
-            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy,
+            Ark_arkui_component_enums_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(options).offsetX = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
         std::get<1>(testFixtureShadowOffsetNumberValidValues[0]));
     WriteToUnion<Ark_ShadowOptions>(options).offsetY = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(
@@ -339,7 +339,8 @@ HWTEST_F(TextClockModifierTest, setTextShadowTestTextShadowShadowOptionsRadiusVa
         Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow;
         WriteTo(inputValueTextShadow) = initValueTextShadow;
 
-        WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).radius = value;
+        WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).radius =
+            Converter::ArkValue<Opt_Union_F64_Resource>(value);
         modifier_->setTextShadow(node_, &inputValueTextShadow);
         auto textClockProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
         ASSERT_NE(textClockProperty, nullptr);
@@ -385,7 +386,8 @@ HWTEST_F(TextClockModifierTest, setTextShadowTestTextShadowShadowOptionsRadiusIn
         WriteTo(inputValueTextShadow) = initValueTextShadow;
 
         modifier_->setTextShadow(node_, &inputValueTextShadow);
-        WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).radius = value;
+        WriteToUnion<Ark_ShadowOptions>(WriteTo(inputValueTextShadow)).radius =
+            Converter::ArkValue<Opt_Union_F64_Resource>(value);
         modifier_->setTextShadow(node_, &inputValueTextShadow);
         EXPECT_TRUE(textClockProperty->GetTextShadow().has_value());
         auto resultTextShadow = textClockProperty->GetTextShadow().value();
@@ -507,7 +509,7 @@ HWTEST_F(TextClockModifierTest, setTextShadowTestTextShadowShadowOptionsColorVal
 
     auto checkValue = [this, textClockProperty, &initValueTextShadow](
         const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_Color_String_Resource_ColoringStrategy& value) {
+                          const Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy& value) {
         Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow;
         WriteTo(inputValueTextShadow) = initValueTextShadow;
 
@@ -524,17 +526,21 @@ HWTEST_F(TextClockModifierTest, setTextShadowTestTextShadowShadowOptionsColorVal
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(value));
+        checkValue(input, expected,
+            ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy,
+                Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Resource>(value));
+        checkValue(input, expected,
+            ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_Resource>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(value));
+        checkValue(input, expected,
+            ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_String>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDummyColoringStrategyValidValues) {
-        checkValue(
-            input, expected, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_ColoringStrategy>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy,
+            Ark_ColoringStrategy>(value));
     }
 }
 
@@ -557,7 +563,8 @@ HWTEST_F(TextClockModifierTest, setTextShadowTestTextShadowShadowOptionsColorInv
     InitTextShadow(initValueTextShadow);
 
     auto checkValue = [this, textClockProperty, &initValueTextShadow](
-                          const std::string& input, const Opt_Union_Color_String_Resource_ColoringStrategy& value) {
+        const std::string& input,
+        const Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy& value) {
         Opt_Union_ShadowOptions_Array_ShadowOptions inputValueTextShadow;
         WriteTo(inputValueTextShadow) = initValueTextShadow;
 
@@ -575,15 +582,18 @@ HWTEST_F(TextClockModifierTest, setTextShadowTestTextShadowShadowOptionsColorInv
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(value));
+        checkValue(input,
+            ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy,
+            Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Empty>(nullptr));
+    checkValue("invalid union",
+        ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_Color_String_Resource_ColoringStrategy>());
+    checkValue("undefined", ArkValue<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy>());
 }
 
 /*

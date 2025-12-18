@@ -16,18 +16,17 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { LengthMetrics, ColorMetrics } from "arkui.Graphics"
-import { LengthMetrics_serializer, ColorMetrics_serializer } from "./../Graphics"
-import { TypeChecker } from "#components"
-import { CallbackTransformer } from "./../CallbackTransformer"
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { memo, memo_stable } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { LengthMetrics as arkui_Graphics_LengthMetrics, ColorMetrics as arkui_Graphics_ColorMetrics } from '@arkui.Graphics'
+import { arkui_Graphics_LengthMetrics_serializer, arkui_Graphics_ColorMetrics_serializer } from './../framework/Graphics'
+import { CallbackTransformer } from './../CallbackTransformer'
 export interface FocusBoxStyle {
-    margin?: LengthMetrics;
-    strokeColor?: ColorMetrics;
-    strokeWidth?: LengthMetrics;
+    margin?: arkui_Graphics_LengthMetrics;
+    strokeColor?: arkui_Graphics_ColorMetrics;
+    strokeWidth?: arkui_Graphics_LengthMetrics;
 }
 export enum FocusPriority {
     AUTO = 0,
@@ -45,7 +44,7 @@ export class FocusBoxStyle_serializer {
         if (valueHolderForMargin !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForMarginTmpValue  = valueHolderForMargin!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderForMarginTmpValue)
+            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForMarginTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -53,7 +52,7 @@ export class FocusBoxStyle_serializer {
         if (valueHolderForStrokeColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStrokeColorTmpValue  = valueHolderForStrokeColor!
-            ColorMetrics_serializer.write(valueSerializer, valueHolderForStrokeColorTmpValue)
+            arkui_Graphics_ColorMetrics_serializer.write(valueSerializer, valueHolderForStrokeColorTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -61,31 +60,31 @@ export class FocusBoxStyle_serializer {
         if (valueHolderForStrokeWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStrokeWidthTmpValue  = valueHolderForStrokeWidth!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValue)
+            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
     }
     public static read(buffer: DeserializerBase): FocusBoxStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const marginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let marginTmpBuf : LengthMetrics | undefined = undefined
+        const marginTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let marginTmpBuf : arkui_Graphics_LengthMetrics | undefined = undefined
         if ((marginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            marginTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            marginTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
         }
-        const marginTmpResult : LengthMetrics | undefined = marginTmpBuf
-        const strokeColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let strokeColorTmpBuf : ColorMetrics | undefined = undefined
+        const marginTmpResult : arkui_Graphics_LengthMetrics | undefined = marginTmpBuf
+        const strokeColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let strokeColorTmpBuf : arkui_Graphics_ColorMetrics | undefined = undefined
         if ((strokeColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            strokeColorTmpBuf = ColorMetrics_serializer.read(valueDeserializer)
+            strokeColorTmpBuf = arkui_Graphics_ColorMetrics_serializer.read(valueDeserializer)
         }
-        const strokeColorTmpResult : ColorMetrics | undefined = strokeColorTmpBuf
-        const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let strokeWidthTmpBuf : LengthMetrics | undefined = undefined
+        const strokeColorTmpResult : arkui_Graphics_ColorMetrics | undefined = strokeColorTmpBuf
+        const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let strokeWidthTmpBuf : arkui_Graphics_LengthMetrics | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            strokeWidthTmpBuf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
+            strokeWidthTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
         }
-        const strokeWidthTmpResult : LengthMetrics | undefined = strokeWidthTmpBuf
+        const strokeWidthTmpResult : arkui_Graphics_LengthMetrics | undefined = strokeWidthTmpBuf
         let value : FocusBoxStyle = ({margin: marginTmpResult, strokeColor: strokeColorTmpResult, strokeWidth: strokeWidthTmpResult} as FocusBoxStyle)
         return value
     }

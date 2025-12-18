@@ -87,7 +87,7 @@ HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestValidStrValues, TestSize.
     std::string resultStr;
     std::string expectedStr = TEST_VALUE;
     auto subvalue = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(TEST_VALUE));
-    auto options = Converter::ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(subvalue);
+    auto options = Converter::ArkUnion<Ark_Union_ResourceStr_image_PixelMap, Ark_ResourceStr>(subvalue);
     modifier_->setImageSpanOptions(node_, &options);
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
@@ -107,7 +107,7 @@ HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestValidResValues, TestSize.
     std::string expectedStr = TEST_VALUE;
     auto subvalue = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(
         CreateResource(IMAGES_OK_STR.c_str(), ResourceType::STRING));
-    auto options = Converter::ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(subvalue);
+    auto options = Converter::ArkUnion<Ark_Union_ResourceStr_image_PixelMap, Ark_ResourceStr>(subvalue);
     modifier_->setImageSpanOptions(node_, &options);
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
@@ -128,7 +128,7 @@ HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestValidPixMapValues, TestSi
     RefPtr<PixelMap> pixelMap = CreatePixelMap(imagesSrc);
     image_PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = pixelMap;
-    auto options = Converter::ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_image_PixelMap>(&pixelMapPeer);
+    auto options = Converter::ArkUnion<Ark_Union_ResourceStr_image_PixelMap, Ark_image_PixelMap>(&pixelMapPeer);
     modifier_->setImageSpanOptions(node_, &options);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -191,8 +191,8 @@ HWTEST_F(ImageSpanModifierTest, DISABLED_setColorFilterTest, TestSize.Level1)
         expectedStream << std::fixed << std::setprecision(PRECISION);
         auto peer = accessor->construct(&value);
         ASSERT_TRUE(peer);
-        auto unionValue = Converter::ArkUnion<Ark_Union_ColorFilter_DrawingColorFilter, Ark_ColorFilter>(peer);
-        auto optUnionValue = Converter::ArkValue<Opt_Union_ColorFilter_DrawingColorFilter>(unionValue);
+        auto unionValue = Converter::ArkUnion<Ark_Union_ColorFilter_drawing_ColorFilter, Ark_ColorFilter>(peer);
+        auto optUnionValue = Converter::ArkValue<Opt_Union_ColorFilter_drawing_ColorFilter>(unionValue);
         modifier_->setColorFilter(node_, &optUnionValue);
         jsonValue = GetJsonValue(node_);
         for (const auto& elem : expected) {

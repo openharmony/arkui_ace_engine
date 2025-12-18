@@ -30,8 +30,8 @@ struct FrameNodePeer {
 
     OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> weakNode;
     int32_t nodeId_ = -1;
-    static std::map<int32_t, std::shared_ptr<FrameNodePeer>> peerMap_;
-    static std::mutex peerMapMutex_;
+    inline static std::map<int32_t, std::shared_ptr<FrameNodePeer>> peerMap_;
+    inline static std::mutex peerMapMutex_;
 
     static FrameNodePeer* Create(Ark_UIContext uiContext)
     {

@@ -46,7 +46,7 @@ import {
     NavigationCustomTitle,
     NavPathStack,
 } from 'arkui.component.navigation';
-import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
+import { SymbolGlyphModifier } from '@arkui.SymbolGlyphModifier';
 import window from '@ohos.window';
 import { Length, ResourceStr, Dimension } from 'arkui.component.units';
 import { Resource } from 'global.resource';

@@ -44,7 +44,8 @@ public:
 
 using OneColorStep = std::tuple<Ark_ResourceColor, std::string>;
 const std::vector<OneColorStep> COLOR_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE),
+        "#FFFFFFFF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(Converter::ArkValue<Ark_Int32>(0x123456)), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(Converter::ArkValue<Ark_Int32>(0.5f)), "#00000000" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(Converter::ArkValue<Ark_String>("#11223344")), "#11223344" },
@@ -176,50 +177,43 @@ HWTEST_F(DividerModifierTest, DividerModifierTest004, TestSize.Level1)
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal1, DEFAULT_STROKE_WIDTH);
 
-    Ark_Union_Number_String intVal = { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(123) };
-    auto optValue = Converter::ArkValue<Opt_Union_Number_String>(intVal);
-    modifier_->setStrokeWidth(node_, &optValue);
+    Opt_Union_F64_String intVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(123);
+    modifier_->setStrokeWidth(node_, &intVal);
     auto checkVal2 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, "123.00vp");
 
-    Ark_Union_Number_String floatVal = { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(1.23f) };
-    optValue = Converter::ArkValue<Opt_Union_Number_String>(floatVal);
-    modifier_->setStrokeWidth(node_, &optValue);
+    Opt_Union_F64_String floatVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(1.23f);
+    modifier_->setStrokeWidth(node_, &floatVal);
     auto checkVal3 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, "1.23vp");
 
-    Ark_Union_Number_String pxVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("45px") };
-    optValue = Converter::ArkValue<Opt_Union_Number_String>(pxVal);
-    modifier_->setStrokeWidth(node_, &optValue);
+    Opt_Union_F64_String pxVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("45px");
+    modifier_->setStrokeWidth(node_, &pxVal);
     auto checkVal4 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal4, "45.00px");
 
-    Ark_Union_Number_String vpVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("5.6vp") };
-    optValue = Converter::ArkValue<Opt_Union_Number_String>(vpVal);
-    modifier_->setStrokeWidth(node_, &optValue);
+    Opt_Union_F64_String vpVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("5.6vp");
+    modifier_->setStrokeWidth(node_, &vpVal);
     auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, "5.60vp");
 
-    Ark_Union_Number_String percentVal = { .selector = 1, .value1 = Converter::ArkValue<Ark_String>("10%") };
-    optValue = Converter::ArkValue<Opt_Union_Number_String>(percentVal);
-    modifier_->setStrokeWidth(node_, &optValue);
+    Opt_Union_F64_String percentVal = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("10%");
+    modifier_->setStrokeWidth(node_, &percentVal);
     auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal6, DEFAULT_STROKE_WIDTH);
 }
 
-using OneWidthStep = std::tuple<Ark_Union_Number_String, std::string>;
+using OneWidthStep = std::tuple<Opt_Union_F64_String, std::string>;
 const std::vector<OneWidthStep> WIDTH_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(-123)), "-123.00vp" },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(Converter::ArkValue<Ark_Number>(-1.23f)), "-1.23vp" },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-4.5px")), "-4.50px" },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-56vp")), "-56.00vp" },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("undefVal")),
-        "0.00vp" },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-10%")),
-        DEFAULT_STROKE_WIDTH },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("")), "0.00vp" },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("qw111vp")), "0.00vp" },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("qw111")), "0.00vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(-123), "-123.00vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(-1.23f), "-1.23vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-4.5px"), "-4.50px" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-56vp"), "-56.00vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("undefVal"), "0.00vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-10%"), DEFAULT_STROKE_WIDTH },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(""), "0.00vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("qw111vp"), "0.00vp" },
+    { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("qw111"), "0.00vp" },
 };
 
 /**
@@ -236,7 +230,7 @@ HWTEST_F(DividerModifierTest, DividerModifierTest005, TestSize.Level1)
     EXPECT_EQ(checkVal, DEFAULT_STROKE_WIDTH);
 
     for (const auto& [value, expectVal] : WIDTH_TEST_PLAN) {
-        auto width = Converter::ArkValue<Opt_Union_Number_String>(value);
+        auto width = Converter::ArkValue<Opt_Union_F64_String>(value);
         modifier_->setStrokeWidth(node_, &width);
         auto fullJson = GetJsonValue(node_);
         checkVal = GetStringAttribute(node_, PROP_NAME);

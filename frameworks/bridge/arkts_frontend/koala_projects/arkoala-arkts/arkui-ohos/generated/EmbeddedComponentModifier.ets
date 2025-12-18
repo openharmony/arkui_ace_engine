@@ -16,18 +16,23 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, extractors } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkEmbeddedComponentPeer, EmbeddedComponentAttribute } from "./component/embeddedComponent"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod, TerminationInfo } from "./component/common"
-import { ErrorCallback, BusinessError } from "@ohos.base"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier, ArkEmbeddedComponentPeer, extractors, EmbeddedComponentAttribute } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod, TerminationInfo } from './component/common'
+import { Callback as ohos_base_Callback, ErrorCallback, BusinessError } from '@ohos.base'
 export class EmbeddedComponentModifier extends CommonMethodModifier implements EmbeddedComponentAttribute,AttributeModifier<EmbeddedComponentAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -37,106 +42,104 @@ export class EmbeddedComponentModifier extends CommonMethodModifier implements E
     applyFocusedAttribute(instance: EmbeddedComponentAttribute): void { }
     applyDisabledAttribute(instance: EmbeddedComponentAttribute): void { }
     applySelectedAttribute(instance: EmbeddedComponentAttribute): void { }
-    _onTerminated_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onTerminated_0_0value?: ((value0: TerminationInfo) => void) | undefined
-    _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onError_0_0value?: ErrorCallback<BusinessError> | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _onTerminated_0_0value?: ohos_base_Callback<TerminationInfo> | undefined
+    public _onError_0_0value?: ErrorCallback<BusinessError<void>> | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkEmbeddedComponentPeer;
-        if (this._onTerminated_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onTerminated_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnTerminatedAttribute((this._onTerminated_0_0value as ((value0: TerminationInfo) => void) | undefined));
-                    this._onTerminated_0_flag = AttributeUpdaterFlag.RESET;
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkEmbeddedComponentPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
+                    peer.setOnTerminatedAttribute((this._onTerminated_0_0value as ohos_base_Callback<TerminationInfo> | undefined));
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onTerminated_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._onTerminated_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnTerminatedAttribute((undefined as ((value0: TerminationInfo) => void) | undefined));
+                    flagArray[0] = 0;
+                    peer.setOnTerminatedAttribute((undefined as ohos_base_Callback<TerminationInfo> | undefined));
                 }
             }
         }
-        if (this._onError_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onError_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnErrorAttribute((this._onError_0_0value as ErrorCallback<BusinessError> | undefined));
-                    this._onError_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
+                    peer.setOnErrorAttribute((this._onError_0_0value as ErrorCallback<BusinessError<void>> | undefined));
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onError_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._onError_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnErrorAttribute((undefined as ErrorCallback<BusinessError> | undefined));
+                    flagArray[1] = 0;
+                    peer.setOnErrorAttribute((undefined as ErrorCallback<BusinessError<void>> | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: EmbeddedComponentModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._onTerminated_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onTerminated_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: EmbeddedComponentModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.onTerminated(modifier._onTerminated_0_0value);
                     break;
                 }
                 default: {
-                    this.onTerminated((undefined as ((value0: TerminationInfo) => void) | undefined));
+                    this.onTerminated((undefined as ohos_base_Callback<TerminationInfo> | undefined));
                 }
             }
         }
-        if (modifier._onError_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onError_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.onError(modifier._onError_0_0value);
                     break;
                 }
                 default: {
-                    this.onError((undefined as ErrorCallback<BusinessError> | undefined));
+                    this.onError((undefined as ErrorCallback<BusinessError<void>> | undefined));
                 }
             }
         }
     }
-    onTerminated(value: ((value0: TerminationInfo) => void) | undefined): this {
-        if (((this._onTerminated_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onTerminated_0_flag = AttributeUpdaterFlag.UPDATE
+    onTerminated(value: ohos_base_Callback<TerminationInfo> | undefined): this {
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._onTerminated_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onTerminated_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
-    onError(value: ErrorCallback<BusinessError> | undefined): this {
-        if (((this._onError_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onError_0_flag = AttributeUpdaterFlag.UPDATE
+    onError(value: ErrorCallback<BusinessError<void>> | undefined): this {
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._onError_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onError_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

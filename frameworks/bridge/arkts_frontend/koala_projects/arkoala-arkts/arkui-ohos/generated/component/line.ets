@@ -16,26 +16,27 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { Resource_serializer } from "./../framework/resource"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { Length } from "./units"
-import { Resource } from "global.resource"
-import { AttributeModifier, hookLineAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { LineModifier } from "./../LineModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonShapeMethodPeer, CommonShapeMethod as arkui_component_common_CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonMethodComponent } from './common'
+import { Length, Resource as arkui_component_units_Resource } from './units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { AttributeModifier, hookLineAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { LineModifier } from './../LineModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkLinePeer extends ArkCommonShapeMethodPeer {
     attributeSet?: LineModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkLinePeer {
@@ -46,6 +47,7 @@ export class ArkLinePeer extends ArkCommonShapeMethodPeer {
         return _peer
     }
     setLineOptionsAttribute(options?: LineOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -71,10 +73,10 @@ export class ArkLinePeer extends ArkCommonShapeMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValue_0ForIdx1  = valueTmpValue_0 as double
                 thisSerializer.writeFloat64(valueTmpValue_0ForIdx1)
-            } else if (valueTmpValue_0 instanceof Resource) {
+            } else if (valueTmpValue_0 instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValue_0ForIdx2  = valueTmpValue_0 as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValue_0ForIdx2)
+                const valueTmpValue_0ForIdx2  = valueTmpValue_0 as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValue_0ForIdx2)
             }
             const valueTmpValue_1  = valueTmpValue[1]
             if (valueTmpValue_1 instanceof string) {
@@ -85,10 +87,10 @@ export class ArkLinePeer extends ArkCommonShapeMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValue_1ForIdx1  = valueTmpValue_1 as double
                 thisSerializer.writeFloat64(valueTmpValue_1ForIdx1)
-            } else if (valueTmpValue_1 instanceof Resource) {
+            } else if (valueTmpValue_1 instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValue_1ForIdx2  = valueTmpValue_1 as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValue_1ForIdx2)
+                const valueTmpValue_1ForIdx2  = valueTmpValue_1 as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValue_1ForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -110,10 +112,10 @@ export class ArkLinePeer extends ArkCommonShapeMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValue_0ForIdx1  = valueTmpValue_0 as double
                 thisSerializer.writeFloat64(valueTmpValue_0ForIdx1)
-            } else if (valueTmpValue_0 instanceof Resource) {
+            } else if (valueTmpValue_0 instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValue_0ForIdx2  = valueTmpValue_0 as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValue_0ForIdx2)
+                const valueTmpValue_0ForIdx2  = valueTmpValue_0 as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValue_0ForIdx2)
             }
             const valueTmpValue_1  = valueTmpValue[1]
             if (valueTmpValue_1 instanceof string) {
@@ -124,10 +126,10 @@ export class ArkLinePeer extends ArkCommonShapeMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValue_1ForIdx1  = valueTmpValue_1 as double
                 thisSerializer.writeFloat64(valueTmpValue_1ForIdx1)
-            } else if (valueTmpValue_1 instanceof Resource) {
+            } else if (valueTmpValue_1 instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValue_1ForIdx2  = valueTmpValue_1 as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValue_1ForIdx2)
+                const valueTmpValue_1ForIdx2  = valueTmpValue_1 as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValue_1ForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -144,47 +146,27 @@ export interface LineOptions {
     width?: string | double;
     height?: string | double;
 }
-export interface LineAttribute extends CommonShapeMethod {
+export interface LineAttribute extends arkui_component_common_CommonShapeMethod {
     setLineOptions(options?: LineOptions): this {
-        throw new Error("Unimplemented method setLineOptions")
+        throw new Error('Unimplemented method setLineOptions')
     }
     startPoint(value: ShapePoint | undefined): this {
-        throw new Error("Unimplemented method startPoint")
+        throw new Error('Unimplemented method startPoint')
     }
     endPoint(value: ShapePoint | undefined): this {
-        throw new Error("Unimplemented method endPoint")
+        throw new Error('Unimplemented method endPoint')
     }
-    attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkLineStyle extends ArkCommonShapeMethodStyle implements LineAttribute {
-    startPoint_value?: ShapePoint | undefined
-    endPoint_value?: ShapePoint | undefined
-    attributeModifier_value?: AttributeModifier<LineAttribute> | AttributeModifier<CommonMethod> | undefined
-    setLineOptions(options?: LineOptions): this {
-        return this
-    }
-    startPoint(value: ShapePoint | undefined): this {
-        return this
-    }
-    endPoint(value: ShapePoint | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+    attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<arkui_component_common_CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkLineComponent extends ArkCommonShapeMethodComponent implements LineAttribute {
     getPeer(): ArkLinePeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkLinePeer)
     }
     public setLineOptions(options?: LineOptions): this {
-        if (this.checkPriority("setLineOptions")) {
+        if (this.checkPriority('setLineOptions')) {
             const options_casted = options as (LineOptions | undefined)
             this.getPeer()?.setLineOptionsAttribute(options_casted)
             this.applyOptionsFinish('LineAttribute');
@@ -193,7 +175,7 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements L
         return this
     }
     public startPoint(value: ShapePoint | undefined): this {
-        if (this.checkPriority("startPoint")) {
+        if (this.checkPriority('startPoint')) {
             const value_casted = value as (ShapePoint | undefined)
             this.getPeer()?.setStartPointAttribute(value_casted)
             return this
@@ -201,14 +183,14 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements L
         return this
     }
     public endPoint(value: ShapePoint | undefined): this {
-        if (this.checkPriority("endPoint")) {
+        if (this.checkPriority('endPoint')) {
             const value_casted = value as (ShapePoint | undefined)
             this.getPeer()?.setEndPointAttribute(value_casted)
             return this
         }
         return this
     }
-    public attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+    public attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<arkui_component_common_CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
             hookLineAttributeModifier(this, value);
         })
@@ -225,18 +207,16 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements L
 
 @memo
 export function LineImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: LineAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkLineComponent>((): ArkLineComponent => {
         return new ArkLineComponent()
     })
-    NodeAttach<ArkLinePeer>((): ArkLinePeer => ArkLinePeer.create(receiver), (peer: ArkLinePeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkLinePeer>((): ArkLinePeer => ArkLinePeer.create(receiver), (_: ArkLinePeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -279,34 +259,34 @@ export class LineOptions_serializer {
     }
     public static read(buffer: DeserializerBase): LineOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let widthTmpBuf : string | double | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : string | double | undefined
-            if (widthTmpBuf_UnionSelector == (0).toChar()) {
-                widthTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
-                widthTmpBuf_ = valueDeserializer.readFloat64()
+            const widthTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBufOpt : string | double | undefined
+            if (widthTmpBufOptUnionSelector == (0).toByte()) {
+                widthTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (widthTmpBufOptUnionSelector == (1).toByte()) {
+                widthTmpBufOpt = valueDeserializer.readFloat64()
             } else {
-                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for widthTmpBufOpt has to be chosen through deserialisation.')
             }
-            widthTmpBuf = (widthTmpBuf_ as string | double)
+            widthTmpBuf = (widthTmpBufOpt as string | double)
         }
         const widthTmpResult : string | double | undefined = widthTmpBuf
-        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let heightTmpBuf : string | double | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBuf_ : string | double | undefined
-            if (heightTmpBuf_UnionSelector == (0).toChar()) {
-                heightTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
-                heightTmpBuf_ = valueDeserializer.readFloat64()
+            const heightTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBufOpt : string | double | undefined
+            if (heightTmpBufOptUnionSelector == (0).toByte()) {
+                heightTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (heightTmpBufOptUnionSelector == (1).toByte()) {
+                heightTmpBufOpt = valueDeserializer.readFloat64()
             } else {
-                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for heightTmpBufOpt has to be chosen through deserialisation.')
             }
-            heightTmpBuf = (heightTmpBuf_ as string | double)
+            heightTmpBuf = (heightTmpBufOpt as string | double)
         }
         const heightTmpResult : string | double | undefined = heightTmpBuf
         let value : LineOptions = ({width: widthTmpResult, height: heightTmpResult} as LineOptions)

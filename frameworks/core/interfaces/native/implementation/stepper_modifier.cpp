@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<int32_t> ProcessBindableIndex(FrameNode* frameNode, const Opt_Union_I32_Bindable& value)
+std::optional<int32_t> ProcessBindableIndex(FrameNode* frameNode, const Opt_Union_I32_Bindable_I32& value)
 {
     std::optional<int32_t> result;
     Converter::VisitUnion(value,
@@ -69,7 +69,7 @@ void SetStepperOptionsImpl(Ark_NativePointer node,
 } // StepperInterfaceModifier
 namespace StepperAttributeModifier {
 void SetOnFinishImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+                     const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -82,7 +82,7 @@ void SetOnFinishImpl(Ark_NativePointer node,
     StepperModelStatic::SetOnFinish(frameNode, std::move(onFinish));
 }
 void SetOnSkipImpl(Ark_NativePointer node,
-                   const Opt_Callback_Void* value)
+                   const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -16,27 +16,28 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { Resource_serializer } from "./../framework/resource"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ShapePoint } from "./line"
-import { Length } from "./units"
-import { Resource } from "global.resource"
-import { AttributeModifier, hookPolylineAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { PolylineModifier } from "./../PolylineModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonShapeMethodPeer, CommonShapeMethod as arkui_component_common_CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonMethodComponent } from './common'
+import { ShapePoint } from './line'
+import { Length, Resource as arkui_component_units_Resource } from './units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { AttributeModifier, hookPolylineAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { PolylineModifier } from './../PolylineModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkPolylinePeer extends ArkCommonShapeMethodPeer {
     attributeSet?: PolylineModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkPolylinePeer {
@@ -47,6 +48,7 @@ export class ArkPolylinePeer extends ArkCommonShapeMethodPeer {
         return _peer
     }
     setPolylineOptionsAttribute(options?: PolylineOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -75,10 +77,10 @@ export class ArkPolylinePeer extends ArkCommonShapeMethodPeer {
                     thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueTmpElement_0ForIdx1  = valueTmpValueTmpElement_0 as double
                     thisSerializer.writeFloat64(valueTmpValueTmpElement_0ForIdx1)
-                } else if (valueTmpValueTmpElement_0 instanceof Resource) {
+                } else if (valueTmpValueTmpElement_0 instanceof arkui_component_units_Resource) {
                     thisSerializer.writeInt8((2).toByte())
-                    const valueTmpValueTmpElement_0ForIdx2  = valueTmpValueTmpElement_0 as Resource
-                    Resource_serializer.write(thisSerializer, valueTmpValueTmpElement_0ForIdx2)
+                    const valueTmpValueTmpElement_0ForIdx2  = valueTmpValueTmpElement_0 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, valueTmpValueTmpElement_0ForIdx2)
                 }
                 const valueTmpValueTmpElement_1  = valueTmpValueTmpElement[1]
                 if (valueTmpValueTmpElement_1 instanceof string) {
@@ -89,10 +91,10 @@ export class ArkPolylinePeer extends ArkCommonShapeMethodPeer {
                     thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueTmpElement_1ForIdx1  = valueTmpValueTmpElement_1 as double
                     thisSerializer.writeFloat64(valueTmpValueTmpElement_1ForIdx1)
-                } else if (valueTmpValueTmpElement_1 instanceof Resource) {
+                } else if (valueTmpValueTmpElement_1 instanceof arkui_component_units_Resource) {
                     thisSerializer.writeInt8((2).toByte())
-                    const valueTmpValueTmpElement_1ForIdx2  = valueTmpValueTmpElement_1 as Resource
-                    Resource_serializer.write(thisSerializer, valueTmpValueTmpElement_1ForIdx2)
+                    const valueTmpValueTmpElement_1ForIdx2  = valueTmpValueTmpElement_1 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, valueTmpValueTmpElement_1ForIdx2)
                 }
             }
         } else {
@@ -106,40 +108,24 @@ export interface PolylineOptions {
     width?: string | double;
     height?: string | double;
 }
-export interface PolylineAttribute extends CommonShapeMethod {
+export interface PolylineAttribute extends arkui_component_common_CommonShapeMethod {
     setPolylineOptions(options?: PolylineOptions): this {
-        throw new Error("Unimplemented method setPolylineOptions")
+        throw new Error('Unimplemented method setPolylineOptions')
     }
     points(value: Array<ShapePoint> | undefined): this {
-        throw new Error("Unimplemented method points")
+        throw new Error('Unimplemented method points')
     }
-    attributeModifier(value: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkPolylineStyle extends ArkCommonShapeMethodStyle implements PolylineAttribute {
-    points_value?: Array<ShapePoint> | undefined
-    attributeModifier_value?: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonMethod> | undefined
-    setPolylineOptions(options?: PolylineOptions): this {
-        return this
-    }
-    points(value: Array<ShapePoint> | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+    attributeModifier(value: AttributeModifier<PolylineAttribute> | AttributeModifier<arkui_component_common_CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implements PolylineAttribute {
     getPeer(): ArkPolylinePeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkPolylinePeer)
     }
     public setPolylineOptions(options?: PolylineOptions): this {
-        if (this.checkPriority("setPolylineOptions")) {
+        if (this.checkPriority('setPolylineOptions')) {
             const options_casted = options as (PolylineOptions | undefined)
             this.getPeer()?.setPolylineOptionsAttribute(options_casted)
             this.applyOptionsFinish('PolylineAttribute');
@@ -148,14 +134,14 @@ export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implemen
         return this
     }
     public points(value: Array<ShapePoint> | undefined): this {
-        if (this.checkPriority("points")) {
+        if (this.checkPriority('points')) {
             const value_casted = value as (Array<ShapePoint> | undefined)
             this.getPeer()?.setPointsAttribute(value_casted)
             return this
         }
         return this
     }
-    public attributeModifier(value: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+    public attributeModifier(value: AttributeModifier<PolylineAttribute> | AttributeModifier<arkui_component_common_CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
             hookPolylineAttributeModifier(this, value);
         })
@@ -172,18 +158,16 @@ export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implemen
 
 @memo
 export function PolylineImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: PolylineAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkPolylineComponent>((): ArkPolylineComponent => {
         return new ArkPolylineComponent()
     })
-    NodeAttach<ArkPolylinePeer>((): ArkPolylinePeer => ArkPolylinePeer.create(receiver), (peer: ArkPolylinePeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkPolylinePeer>((): ArkPolylinePeer => ArkPolylinePeer.create(receiver), (_: ArkPolylinePeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -226,34 +210,34 @@ export class PolylineOptions_serializer {
     }
     public static read(buffer: DeserializerBase): PolylineOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let widthTmpBuf : string | double | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : string | double | undefined
-            if (widthTmpBuf_UnionSelector == (0).toChar()) {
-                widthTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
-                widthTmpBuf_ = valueDeserializer.readFloat64()
+            const widthTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBufOpt : string | double | undefined
+            if (widthTmpBufOptUnionSelector == (0).toByte()) {
+                widthTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (widthTmpBufOptUnionSelector == (1).toByte()) {
+                widthTmpBufOpt = valueDeserializer.readFloat64()
             } else {
-                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for widthTmpBufOpt has to be chosen through deserialisation.')
             }
-            widthTmpBuf = (widthTmpBuf_ as string | double)
+            widthTmpBuf = (widthTmpBufOpt as string | double)
         }
         const widthTmpResult : string | double | undefined = widthTmpBuf
-        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let heightTmpBuf : string | double | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBuf_ : string | double | undefined
-            if (heightTmpBuf_UnionSelector == (0).toChar()) {
-                heightTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
-                heightTmpBuf_ = valueDeserializer.readFloat64()
+            const heightTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBufOpt : string | double | undefined
+            if (heightTmpBufOptUnionSelector == (0).toByte()) {
+                heightTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (heightTmpBufOptUnionSelector == (1).toByte()) {
+                heightTmpBufOpt = valueDeserializer.readFloat64()
             } else {
-                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for heightTmpBufOpt has to be chosen through deserialisation.')
             }
-            heightTmpBuf = (heightTmpBuf_ as string | double)
+            heightTmpBuf = (heightTmpBufOpt as string | double)
         }
         const heightTmpResult : string | double | undefined = heightTmpBuf
         let value : PolylineOptions = ({width: widthTmpResult, height: heightTmpResult} as PolylineOptions)

@@ -26,7 +26,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-const Ark_Color g_fontColor = ARK_COLOR_BLUE;
+const Ark_arkui_component_enums_Color g_fontColor = ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE;
 const std::string g_fontFamily = "Arial";
 const Dimension g_fontSize = 55._px;
 const std::string g_fontWeight = "200";
@@ -45,7 +45,7 @@ public:
 
     void *CreatePeerInstance() override
     {
-        auto arkFontColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(g_fontColor);
+        auto arkFontColor = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(g_fontColor);
         Ark_TextStyleInterface options {
             .fontColor = Converter::ArkValue<Opt_ResourceColor>(arkFontColor),
             .fontFamily = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(g_fontFamily, Converter::FC),

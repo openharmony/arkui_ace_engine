@@ -16,19 +16,25 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkComponent3DPeer, Component3DAttribute } from "./component/component3d"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod } from "./component/common"
-import { ResourceStr, Dimension } from "./component/units"
-import { Resource } from "global.resource"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkComponent3DPeer, Component3DAttribute } from './component/component3d'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod } from './component/common'
+import { ResourceStr as arkui_component_units_ResourceStr, Resource as arkui_component_units_Resource, Dimension } from './component/units'
+import { Resource as global_resource_Resource } from 'global.resource'
 export class Component3DModifier extends CommonMethodModifier implements Component3DAttribute,AttributeModifier<Component3DAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -38,212 +44,201 @@ export class Component3DModifier extends CommonMethodModifier implements Compone
     applyFocusedAttribute(instance: Component3DAttribute): void { }
     applyDisabledAttribute(instance: Component3DAttribute): void { }
     applySelectedAttribute(instance: Component3DAttribute): void { }
-    _environment_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _environment_0_0value?: ResourceStr | undefined
-    _shader_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _shader_0_0value?: ResourceStr | undefined
-    _shaderImageTexture_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _shaderImageTexture_0_0value?: ResourceStr | undefined
-    _shaderInputBuffer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _shaderInputBuffer_0_0value?: Array<number> | undefined
-    _renderWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _renderWidth_0_0value?: Dimension | undefined
-    _renderHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _renderHeight_0_0value?: Dimension | undefined
-    _customRender_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _customRender_0_0value?: ResourceStr | undefined
-    _customRender_0_1value?: boolean | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _environment_0_0value?: arkui_component_units_ResourceStr | undefined
+    public _shader_0_0value?: arkui_component_units_ResourceStr | undefined
+    public _shaderImageTexture_0_0value?: arkui_component_units_ResourceStr | undefined
+    public _shaderInputBuffer_0_0value?: Array<double> | undefined
+    public _renderWidth_0_0value?: Dimension | undefined
+    public _renderHeight_0_0value?: Dimension | undefined
+    public _customRender_0_0value?: arkui_component_units_ResourceStr | undefined
+    public _customRender_0_1value?: boolean | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkComponent3DPeer;
-        if (this._environment_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._environment_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setEnvironmentAttribute((this._environment_0_0value as ResourceStr | undefined));
-                    this._environment_0_flag = AttributeUpdaterFlag.RESET;
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkComponent3DPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
+                    peer.setEnvironmentAttribute((this._environment_0_0value as arkui_component_units_ResourceStr | undefined));
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._environment_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                default: {
-                    this._environment_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setEnvironmentAttribute((undefined as ResourceStr | undefined));
-                }
-            }
-        }
-        if (this._shader_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._shader_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setShaderAttribute((this._shader_0_0value as ResourceStr | undefined));
-                    this._shader_0_flag = AttributeUpdaterFlag.RESET;
-                    break;
-                }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._shader_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._shader_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setShaderAttribute((undefined as ResourceStr | undefined));
+                    flagArray[0] = 0;
+                    peer.setEnvironmentAttribute((undefined as arkui_component_units_ResourceStr | undefined));
                 }
             }
         }
-        if (this._shaderImageTexture_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._shaderImageTexture_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setShaderImageTextureAttribute((this._shaderImageTexture_0_0value as ResourceStr | undefined));
-                    this._shaderImageTexture_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
+                    peer.setShaderAttribute((this._shader_0_0value as arkui_component_units_ResourceStr | undefined));
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._shaderImageTexture_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._shaderImageTexture_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setShaderImageTextureAttribute((undefined as ResourceStr | undefined));
+                    flagArray[1] = 0;
+                    peer.setShaderAttribute((undefined as arkui_component_units_ResourceStr | undefined));
                 }
             }
         }
-        if (this._shaderInputBuffer_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._shaderInputBuffer_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setShaderInputBufferAttribute((this._shaderInputBuffer_0_0value as Array<number> | undefined));
-                    this._shaderInputBuffer_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
+                    peer.setShaderImageTextureAttribute((this._shaderImageTexture_0_0value as arkui_component_units_ResourceStr | undefined));
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._shaderInputBuffer_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._shaderInputBuffer_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setShaderInputBufferAttribute((undefined as Array<number> | undefined));
+                    flagArray[2] = 0;
+                    peer.setShaderImageTextureAttribute((undefined as arkui_component_units_ResourceStr | undefined));
                 }
             }
         }
-        if (this._renderWidth_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._renderWidth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
+                    peer.setShaderInputBufferAttribute((this._shaderInputBuffer_0_0value as Array<double> | undefined));
+                    flagArray[3] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[3] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[3] = 0;
+                    peer.setShaderInputBufferAttribute((undefined as Array<double> | undefined));
+                }
+            }
+        }
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1: {
                     peer.setRenderWidthAttribute((this._renderWidth_0_0value as Dimension | undefined));
-                    this._renderWidth_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._renderWidth_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._renderWidth_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[4] = 0;
                     peer.setRenderWidthAttribute((undefined as Dimension | undefined));
                 }
             }
         }
-        if (this._renderHeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._renderHeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1: {
                     peer.setRenderHeightAttribute((this._renderHeight_0_0value as Dimension | undefined));
-                    this._renderHeight_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[5] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._renderHeight_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[5] = 2;
                     break;
                 }
                 default: {
-                    this._renderHeight_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[5] = 0;
                     peer.setRenderHeightAttribute((undefined as Dimension | undefined));
                 }
             }
         }
-        if (this._customRender_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._customRender_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCustomRenderAttribute((this._customRender_0_0value as ResourceStr | undefined), (this._customRender_0_1value as boolean | undefined));
-                    this._customRender_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1: {
+                    peer.setCustomRenderAttribute((this._customRender_0_0value as arkui_component_units_ResourceStr | undefined), (this._customRender_0_1value as boolean | undefined));
+                    flagArray[6] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._customRender_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[6] = 2;
                     break;
                 }
                 default: {
-                    this._customRender_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCustomRenderAttribute((undefined as ResourceStr | undefined), (undefined as boolean | undefined));
+                    flagArray[6] = 0;
+                    peer.setCustomRenderAttribute((undefined as arkui_component_units_ResourceStr | undefined), (undefined as boolean | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: Component3DModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._environment_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._environment_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: Component3DModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.environment(modifier._environment_0_0value);
                     break;
                 }
                 default: {
-                    this.environment((undefined as ResourceStr | undefined));
+                    this.environment((undefined as arkui_component_units_ResourceStr | undefined));
                 }
             }
         }
-        if (modifier._shader_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._shader_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.shader(modifier._shader_0_0value);
                     break;
                 }
                 default: {
-                    this.shader((undefined as ResourceStr | undefined));
+                    this.shader((undefined as arkui_component_units_ResourceStr | undefined));
                 }
             }
         }
-        if (modifier._shaderImageTexture_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._shaderImageTexture_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.shaderImageTexture(modifier._shaderImageTexture_0_0value);
                     break;
                 }
                 default: {
-                    this.shaderImageTexture((undefined as ResourceStr | undefined));
+                    this.shaderImageTexture((undefined as arkui_component_units_ResourceStr | undefined));
                 }
             }
         }
-        if (modifier._shaderInputBuffer_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._shaderInputBuffer_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
                     this.shaderInputBuffer(modifier._shaderInputBuffer_0_0value);
                     break;
                 }
                 default: {
-                    this.shaderInputBuffer((undefined as Array<number> | undefined));
+                    this.shaderInputBuffer((undefined as Array<double> | undefined));
                 }
             }
         }
-        if (modifier._renderWidth_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._renderWidth_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
                     this.renderWidth(modifier._renderWidth_0_0value);
                     break;
                 }
@@ -252,11 +247,10 @@ export class Component3DModifier extends CommonMethodModifier implements Compone
                 }
             }
         }
-        if (modifier._renderHeight_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._renderHeight_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1:
+                case 3: {
                     this.renderHeight(modifier._renderHeight_0_0value);
                     break;
                 }
@@ -265,106 +259,91 @@ export class Component3DModifier extends CommonMethodModifier implements Compone
                 }
             }
         }
-        if (modifier._customRender_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._customRender_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1:
+                case 3: {
                     this.customRender(modifier._customRender_0_0value, modifier._customRender_0_1value);
                     break;
                 }
                 default: {
-                    this.customRender((undefined as ResourceStr | undefined), (undefined as boolean | undefined));
+                    this.customRender((undefined as arkui_component_units_ResourceStr | undefined), (undefined as boolean | undefined));
                 }
             }
         }
     }
-    environment(value: ResourceStr | undefined): this {
-        if (((this._environment_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._environment_0_flag = AttributeUpdaterFlag.UPDATE
+    environment(value: arkui_component_units_ResourceStr | undefined): this {
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._environment_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._environment_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
-    shader(value: ResourceStr | undefined): this {
-        if (((this._shader_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._shader_0_flag = AttributeUpdaterFlag.UPDATE
+    shader(value: arkui_component_units_ResourceStr | undefined): this {
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._shader_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._shader_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
-    shaderImageTexture(value: ResourceStr | undefined): this {
-        if (((this._shaderImageTexture_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._shaderImageTexture_0_flag = AttributeUpdaterFlag.UPDATE
+    shaderImageTexture(value: arkui_component_units_ResourceStr | undefined): this {
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._shaderImageTexture_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._shaderImageTexture_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
-    shaderInputBuffer(value: Array<number> | undefined): this {
-        if (((this._shaderInputBuffer_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._shaderInputBuffer_0_0value) !== (value)))
-        {
-            this._shaderInputBuffer_0_flag = AttributeUpdaterFlag.UPDATE
+    shaderInputBuffer(value: Array<double> | undefined): this {
+        if (((this._flagArray[3]) == (0)) || ((this._shaderInputBuffer_0_0value) !== (value))) {
+            this._flagArray[3] = 1
             this._shaderInputBuffer_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._shaderInputBuffer_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }
     renderWidth(value: Dimension | undefined): this {
-        if (((this._renderWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._renderWidth_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[4]) == (0)) || (true)) {
+            this._flagArray[4] = 1
             this._renderWidth_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._renderWidth_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[4] = 3
         }
         return this
     }
     renderHeight(value: Dimension | undefined): this {
-        if (((this._renderHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._renderHeight_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[5]) == (0)) || (true)) {
+            this._flagArray[5] = 1
             this._renderHeight_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._renderHeight_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[5] = 3
         }
         return this
     }
-    customRender(uri: ResourceStr | undefined, selfRenderUpdate: boolean | undefined): this {
-        if (((this._customRender_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._customRender_0_1value) !== (selfRenderUpdate)))
-        {
-            this._customRender_0_flag = AttributeUpdaterFlag.UPDATE
+    customRender(uri: arkui_component_units_ResourceStr | undefined, selfRenderUpdate: boolean | undefined): this {
+        if (((this._flagArray[6]) == (0)) || (true) || ((this._customRender_0_1value) !== (selfRenderUpdate))) {
+            this._flagArray[6] = 1
             this._customRender_0_0value = uri
             this._customRender_0_1value = selfRenderUpdate
             this._state.fireChange()
-        } else
-        {
-            this._customRender_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[6] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<Component3DAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

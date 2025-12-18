@@ -16,29 +16,30 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
-import { Resource_serializer } from "./../framework/resource"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ResourceColor, Length } from "./units"
-import { Color, LineCapStyle, LineJoinStyle } from "./enums"
-import { Resource } from "global.resource"
-import { AttributeModifier, extractors, hookShapeAttributeModifier, AttributeUpdater } from "#handwritten"
-import { default as image } from "@ohos.multimedia.image"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { ShapeModifier } from "./../ShapeModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, PixelMap, ArkCommonMethodComponent } from './common'
+import { ResourceColor, Resource as arkui_component_units_Resource, Length } from './units'
+import { Color as arkui_component_enums_Color, LineCapStyle, LineJoinStyle } from './enums'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { AttributeModifier, extractors, hookShapeAttributeModifier, AttributeUpdater } from '#handwritten'
+import { default as image } from '@ohos.multimedia.image'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { ShapeModifier } from './../ShapeModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkShapePeer extends ArkCommonMethodPeer {
     attributeSet?: ShapeModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkShapePeer {
@@ -48,7 +49,8 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setShapeOptionsAttribute(value?: image.PixelMap): void {
+    setShapeOptionsAttribute(value?: PixelMap): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -77,10 +79,10 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0  = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
@@ -89,10 +91,10 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -105,10 +107,10 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0  = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
@@ -117,10 +119,10 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -164,10 +166,10 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
                     thisSerializer.writeInt8((1).toByte())
                     const valueTmpValueTmpElementForIdx1  = valueTmpValueTmpElement as double
                     thisSerializer.writeFloat64(valueTmpValueTmpElementForIdx1)
-                } else if (valueTmpValueTmpElement instanceof Resource) {
+                } else if (valueTmpValueTmpElement instanceof arkui_component_units_Resource) {
                     thisSerializer.writeInt8((2).toByte())
-                    const valueTmpValueTmpElementForIdx2  = valueTmpValueTmpElement as Resource
-                    Resource_serializer.write(thisSerializer, valueTmpValueTmpElementForIdx2)
+                    const valueTmpValueTmpElementForIdx2  = valueTmpValueTmpElement as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, valueTmpValueTmpElementForIdx2)
                 }
             }
         } else {
@@ -220,7 +222,7 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ShapeAttribute_setStrokeMiterLimit(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setStrokeOpacityAttribute(value: double | string | Resource | undefined): void {
+    setStrokeOpacityAttribute(value: double | string | global_resource_Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -233,10 +235,10 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -244,7 +246,7 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ShapeAttribute_setStrokeOpacity(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFillOpacityAttribute(value: double | string | Resource | undefined): void {
+    setFillOpacityAttribute(value: double | string | global_resource_Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -257,10 +259,10 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -338,123 +340,60 @@ export interface ViewportRect {
     height?: double | string;
 }
 export interface ShapeAttribute extends CommonMethod {
-    setShapeOptions(value?: image.PixelMap): this {
-        throw new Error("Unimplemented method setShapeOptions")
+    setShapeOptions(value?: PixelMap): this {
+        throw new Error('Unimplemented method setShapeOptions')
     }
     viewPort(value: ViewportRect | undefined): this {
-        throw new Error("Unimplemented method viewPort")
+        throw new Error('Unimplemented method viewPort')
     }
     stroke(value: ResourceColor | undefined): this {
-        throw new Error("Unimplemented method stroke")
+        throw new Error('Unimplemented method stroke')
     }
     fill(value: ResourceColor | undefined): this {
-        throw new Error("Unimplemented method fill")
+        throw new Error('Unimplemented method fill')
     }
     strokeDashOffset(value: double | string | undefined): this {
-        throw new Error("Unimplemented method strokeDashOffset")
+        throw new Error('Unimplemented method strokeDashOffset')
     }
     strokeDashArray(value: Array<Length> | undefined): this {
-        throw new Error("Unimplemented method strokeDashArray")
+        throw new Error('Unimplemented method strokeDashArray')
     }
     strokeLineCap(value: LineCapStyle | undefined): this {
-        throw new Error("Unimplemented method strokeLineCap")
+        throw new Error('Unimplemented method strokeLineCap')
     }
     strokeLineJoin(value: LineJoinStyle | undefined): this {
-        throw new Error("Unimplemented method strokeLineJoin")
+        throw new Error('Unimplemented method strokeLineJoin')
     }
     strokeMiterLimit(value: double | string | undefined): this {
-        throw new Error("Unimplemented method strokeMiterLimit")
+        throw new Error('Unimplemented method strokeMiterLimit')
     }
-    strokeOpacity(value: double | string | Resource | undefined): this {
-        throw new Error("Unimplemented method strokeOpacity")
+    strokeOpacity(value: double | string | global_resource_Resource | undefined): this {
+        throw new Error('Unimplemented method strokeOpacity')
     }
-    fillOpacity(value: double | string | Resource | undefined): this {
-        throw new Error("Unimplemented method fillOpacity")
+    fillOpacity(value: double | string | global_resource_Resource | undefined): this {
+        throw new Error('Unimplemented method fillOpacity')
     }
     strokeWidth(value: double | string | undefined): this {
-        throw new Error("Unimplemented method strokeWidth")
+        throw new Error('Unimplemented method strokeWidth')
     }
     antiAlias(value: boolean | undefined): this {
-        throw new Error("Unimplemented method antiAlias")
+        throw new Error('Unimplemented method antiAlias')
     }
     mesh(value: Array<double> | undefined, column: int32 | undefined, row: int32 | undefined): this {
-        throw new Error("Unimplemented method mesh")
+        throw new Error('Unimplemented method mesh')
     }
     attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribute {
-    viewPort_value?: ViewportRect | undefined
-    stroke_value?: ResourceColor | undefined
-    fill_value?: ResourceColor | undefined
-    strokeDashOffset_value?: double | string | undefined
-    strokeDashArray_value?: Array<Length> | undefined
-    strokeLineCap_value?: LineCapStyle | undefined
-    strokeLineJoin_value?: LineJoinStyle | undefined
-    strokeMiterLimit_value?: double | string | undefined
-    strokeOpacity_value?: double | string | Resource | undefined
-    fillOpacity_value?: double | string | Resource | undefined
-    strokeWidth_value?: double | string | undefined
-    antiAlias_value?: boolean | undefined
-    attributeModifier_value?: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined
-    setShapeOptions(value?: image.PixelMap): this {
-        return this
-    }
-    viewPort(value: ViewportRect | undefined): this {
-        return this
-    }
-    stroke(value: ResourceColor | undefined): this {
-        return this
-    }
-    fill(value: ResourceColor | undefined): this {
-        return this
-    }
-    strokeDashOffset(value: double | string | undefined): this {
-        return this
-    }
-    strokeDashArray(value: Array<Length> | undefined): this {
-        return this
-    }
-    strokeLineCap(value: LineCapStyle | undefined): this {
-        return this
-    }
-    strokeLineJoin(value: LineJoinStyle | undefined): this {
-        return this
-    }
-    strokeMiterLimit(value: double | string | undefined): this {
-        return this
-    }
-    strokeOpacity(value: double | string | Resource | undefined): this {
-        return this
-    }
-    fillOpacity(value: double | string | Resource | undefined): this {
-        return this
-    }
-    strokeWidth(value: double | string | undefined): this {
-        return this
-    }
-    antiAlias(value: boolean | undefined): this {
-        return this
-    }
-    mesh(value: Array<double> | undefined, column: int32 | undefined, row: int32 | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkShapeComponent extends ArkCommonMethodComponent implements ShapeAttribute {
     getPeer(): ArkShapePeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkShapePeer)
     }
-    public setShapeOptions(value?: image.PixelMap): this {
-        if (this.checkPriority("setShapeOptions")) {
-            const value_casted = value as (image.PixelMap | undefined)
+    public setShapeOptions(value?: PixelMap): this {
+        if (this.checkPriority('setShapeOptions')) {
+            const value_casted = value as (PixelMap | undefined)
             this.getPeer()?.setShapeOptionsAttribute(value_casted)
             this.applyOptionsFinish('ShapeAttribute');
             return this
@@ -462,7 +401,7 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         return this
     }
     public viewPort(value: ViewportRect | undefined): this {
-        if (this.checkPriority("viewPort")) {
+        if (this.checkPriority('viewPort')) {
             const value_casted = value as (ViewportRect | undefined)
             this.getPeer()?.setViewPortAttribute(value_casted)
             return this
@@ -470,7 +409,7 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         return this
     }
     public stroke(value: ResourceColor | undefined): this {
-        if (this.checkPriority("stroke")) {
+        if (this.checkPriority('stroke')) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.setStrokeAttribute(value_casted)
             return this
@@ -478,7 +417,7 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         return this
     }
     public fill(value: ResourceColor | undefined): this {
-        if (this.checkPriority("fill")) {
+        if (this.checkPriority('fill')) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.setFillAttribute(value_casted)
             return this
@@ -486,7 +425,7 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         return this
     }
     public strokeDashOffset(value: double | string | undefined): this {
-        if (this.checkPriority("strokeDashOffset")) {
+        if (this.checkPriority('strokeDashOffset')) {
             const value_casted = value as (double | string | undefined)
             this.getPeer()?.setStrokeDashOffsetAttribute(value_casted)
             return this
@@ -494,7 +433,7 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         return this
     }
     public strokeDashArray(value: Array<Length> | undefined): this {
-        if (this.checkPriority("strokeDashArray")) {
+        if (this.checkPriority('strokeDashArray')) {
             const value_casted = value as (Array<Length> | undefined)
             this.getPeer()?.setStrokeDashArrayAttribute(value_casted)
             return this
@@ -502,7 +441,7 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         return this
     }
     public strokeLineCap(value: LineCapStyle | undefined): this {
-        if (this.checkPriority("strokeLineCap")) {
+        if (this.checkPriority('strokeLineCap')) {
             const value_casted = value as (LineCapStyle | undefined)
             this.getPeer()?.setStrokeLineCapAttribute(value_casted)
             return this
@@ -510,7 +449,7 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         return this
     }
     public strokeLineJoin(value: LineJoinStyle | undefined): this {
-        if (this.checkPriority("strokeLineJoin")) {
+        if (this.checkPriority('strokeLineJoin')) {
             const value_casted = value as (LineJoinStyle | undefined)
             this.getPeer()?.setStrokeLineJoinAttribute(value_casted)
             return this
@@ -518,31 +457,31 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         return this
     }
     public strokeMiterLimit(value: double | string | undefined): this {
-        if (this.checkPriority("strokeMiterLimit")) {
+        if (this.checkPriority('strokeMiterLimit')) {
             const value_casted = value as (double | string | undefined)
             this.getPeer()?.setStrokeMiterLimitAttribute(value_casted)
             return this
         }
         return this
     }
-    public strokeOpacity(value: double | string | Resource | undefined): this {
-        if (this.checkPriority("strokeOpacity")) {
-            const value_casted = value as (double | string | Resource | undefined)
+    public strokeOpacity(value: double | string | global_resource_Resource | undefined): this {
+        if (this.checkPriority('strokeOpacity')) {
+            const value_casted = value as (double | string | global_resource_Resource | undefined)
             this.getPeer()?.setStrokeOpacityAttribute(value_casted)
             return this
         }
         return this
     }
-    public fillOpacity(value: double | string | Resource | undefined): this {
-        if (this.checkPriority("fillOpacity")) {
-            const value_casted = value as (double | string | Resource | undefined)
+    public fillOpacity(value: double | string | global_resource_Resource | undefined): this {
+        if (this.checkPriority('fillOpacity')) {
+            const value_casted = value as (double | string | global_resource_Resource | undefined)
             this.getPeer()?.setFillOpacityAttribute(value_casted)
             return this
         }
         return this
     }
     public strokeWidth(value: double | string | undefined): this {
-        if (this.checkPriority("strokeWidth")) {
+        if (this.checkPriority('strokeWidth')) {
             const value_casted = value as (double | string | undefined)
             this.getPeer()?.setStrokeWidthAttribute(value_casted)
             return this
@@ -550,7 +489,7 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         return this
     }
     public antiAlias(value: boolean | undefined): this {
-        if (this.checkPriority("antiAlias")) {
+        if (this.checkPriority('antiAlias')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setAntiAliasAttribute(value_casted)
             return this
@@ -558,7 +497,7 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         return this
     }
     public mesh(value: Array<double> | undefined, column: int32 | undefined, row: int32 | undefined): this {
-        if (this.checkPriority("mesh")) {
+        if (this.checkPriority('mesh')) {
             const value_casted = value as (Array<double> | undefined)
             const column_casted = column as (int32 | undefined)
             const row_casted = row as (int32 | undefined)
@@ -584,18 +523,16 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
 
 @memo
 export function ShapeImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: ShapeAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkShapeComponent>((): ArkShapeComponent => {
         return new ArkShapeComponent()
     })
-    NodeAttach<ArkShapePeer>((): ArkShapePeer => ArkShapePeer.create(receiver), (peer: ArkShapePeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkShapePeer>((): ArkShapePeer => ArkShapePeer.create(receiver), (_: ArkShapePeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -670,64 +607,64 @@ export class ViewportRect_serializer {
     }
     public static read(buffer: DeserializerBase): ViewportRect {
         let valueDeserializer : DeserializerBase = buffer
-        const xTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const xTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let xTmpBuf : double | string | undefined = undefined
         if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const xTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let xTmpBuf_ : double | string | undefined
-            if (xTmpBuf_UnionSelector == (0).toChar()) {
-                xTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (xTmpBuf_UnionSelector == (1).toChar()) {
-                xTmpBuf_ = (valueDeserializer.readString() as string)
+            const xTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let xTmpBufOpt : double | string | undefined
+            if (xTmpBufOptUnionSelector == (0).toByte()) {
+                xTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (xTmpBufOptUnionSelector == (1).toByte()) {
+                xTmpBufOpt = (valueDeserializer.readString() as string)
             } else {
-                throw new Error("One of the branches for xTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for xTmpBufOpt has to be chosen through deserialisation.')
             }
-            xTmpBuf = (xTmpBuf_ as double | string)
+            xTmpBuf = (xTmpBufOpt as double | string)
         }
         const xTmpResult : double | string | undefined = xTmpBuf
-        const yTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const yTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let yTmpBuf : double | string | undefined = undefined
         if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const yTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let yTmpBuf_ : double | string | undefined
-            if (yTmpBuf_UnionSelector == (0).toChar()) {
-                yTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (yTmpBuf_UnionSelector == (1).toChar()) {
-                yTmpBuf_ = (valueDeserializer.readString() as string)
+            const yTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let yTmpBufOpt : double | string | undefined
+            if (yTmpBufOptUnionSelector == (0).toByte()) {
+                yTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (yTmpBufOptUnionSelector == (1).toByte()) {
+                yTmpBufOpt = (valueDeserializer.readString() as string)
             } else {
-                throw new Error("One of the branches for yTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for yTmpBufOpt has to be chosen through deserialisation.')
             }
-            yTmpBuf = (yTmpBuf_ as double | string)
+            yTmpBuf = (yTmpBufOpt as double | string)
         }
         const yTmpResult : double | string | undefined = yTmpBuf
-        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let widthTmpBuf : double | string | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : double | string | undefined
-            if (widthTmpBuf_UnionSelector == (0).toChar()) {
-                widthTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
-                widthTmpBuf_ = (valueDeserializer.readString() as string)
+            const widthTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBufOpt : double | string | undefined
+            if (widthTmpBufOptUnionSelector == (0).toByte()) {
+                widthTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (widthTmpBufOptUnionSelector == (1).toByte()) {
+                widthTmpBufOpt = (valueDeserializer.readString() as string)
             } else {
-                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for widthTmpBufOpt has to be chosen through deserialisation.')
             }
-            widthTmpBuf = (widthTmpBuf_ as double | string)
+            widthTmpBuf = (widthTmpBufOpt as double | string)
         }
         const widthTmpResult : double | string | undefined = widthTmpBuf
-        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let heightTmpBuf : double | string | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBuf_ : double | string | undefined
-            if (heightTmpBuf_UnionSelector == (0).toChar()) {
-                heightTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
-                heightTmpBuf_ = (valueDeserializer.readString() as string)
+            const heightTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBufOpt : double | string | undefined
+            if (heightTmpBufOptUnionSelector == (0).toByte()) {
+                heightTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (heightTmpBufOptUnionSelector == (1).toByte()) {
+                heightTmpBufOpt = (valueDeserializer.readString() as string)
             } else {
-                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for heightTmpBufOpt has to be chosen through deserialisation.')
             }
-            heightTmpBuf = (heightTmpBuf_ as double | string)
+            heightTmpBuf = (heightTmpBufOpt as double | string)
         }
         const heightTmpResult : double | string | undefined = heightTmpBuf
         let value : ViewportRect = ({x: xTmpResult, y: yTmpResult, width: widthTmpResult, height: heightTmpResult} as ViewportRect)

@@ -53,7 +53,7 @@ using VectorOptionsTest = std::vector<TupleOptionsTest>;
 TupleOptionsTest getTestTuple(const RatingOptionsTestRow& src)
 {
     Ark_RatingOptions arkInputValue = {
-        .rating = Converter::ArkUnion<Opt_Union_F64_Bindable, Ark_Float64>(src.input.rating),
+        .rating = Converter::ArkUnion<Opt_Union_F64_Bindable_F64, Ark_Float64>(src.input.rating),
         .indicator = Converter::ArkValue<Opt_Boolean>(src.input.indicator)
     };
     auto optInputValue = Converter::ArkValue<Opt_RatingOptions>(arkInputValue);

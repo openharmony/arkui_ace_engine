@@ -47,11 +47,11 @@ const auto RESOURCE_OPACITY_BY_NUMBER = 0.5f;
 const auto CHECK_RESOURCE_OPACITY_BY_STRING = "0.400000";
 const auto CHECK_RESOURCE_OPACITY_BY_NUMBER = "0.500000";
 
-using OneUnionNumStrResStep = std::pair<Ark_Union_Number_String_Resource, std::string>;
+using OneUnionNumStrResStep = std::pair<Ark_Union_F64_String_Resource, std::string>;
 
 static const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_RESOURECES_TEST_PLAN = {
-    { CreateResourceUnion<Ark_Union_Number_String_Resource>(RES_NAME_ID), CHECK_RESOURCE_OPACITY_BY_STRING },
-    { CreateResourceUnion<Ark_Union_Number_String_Resource>(RES_INT_ID), CHECK_RESOURCE_OPACITY_BY_NUMBER },
+    { CreateResourceUnion<Ark_Union_F64_String_Resource>(RES_NAME_ID), CHECK_RESOURCE_OPACITY_BY_STRING },
+    { CreateResourceUnion<Ark_Union_F64_String_Resource>(RES_INT_ID), CHECK_RESOURCE_OPACITY_BY_NUMBER },
 };
 } // namespace;
 class CommonShapeMethodModifierResourcesTest : public ModifierTestBase<GENERATED_ArkUICommonShapeMethodModifier,
@@ -107,7 +107,7 @@ HWTEST_F(CommonShapeMethodModifierResourcesTest, setFillOpacityTestResources, Te
     std::unique_ptr<JsonValue> jsonValue;
 
     for (const auto &[value, expectVal]: UNION_NUM_STR_RES_RESOURECES_TEST_PLAN) {
-        auto res = Converter::ArkValue<Opt_Union_Number_String_Resource>(value);
+        auto res = Converter::ArkValue<Opt_Union_F64_String_Resource>(value);
         modifier_->setFillOpacity(node_, &res);
         jsonValue = GetJsonValue(node_);
         auto checkVal = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_OPACITY_NAME);
@@ -123,9 +123,9 @@ HWTEST_F(CommonShapeMethodModifierResourcesTest, setFillOpacityTestResources, Te
 HWTEST_F(CommonShapeMethodModifierResourcesTest, setStrokeOpacityTestResources, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
-    Opt_Union_Number_String_Resource res;
+    Opt_Union_F64_String_Resource res;
     for (const auto &[value, expectVal]: UNION_NUM_STR_RES_RESOURECES_TEST_PLAN) {
-        res = Converter::ArkValue<Opt_Union_Number_String_Resource>(value);
+        res = Converter::ArkValue<Opt_Union_F64_String_Resource>(value);
         modifier_->setStrokeOpacity(node_, &res);
         jsonValue = GetJsonValue(node_);
         auto checkVal = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_OPACITY_NAME);

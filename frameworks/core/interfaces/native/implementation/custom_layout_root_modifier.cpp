@@ -61,9 +61,9 @@ Ark_GeometryInfo GenGeometryInfo(const RefPtr<OHOS::Ace::NG::LayoutProperty>& la
             : 0.0f;
     const std::unique_ptr<NG::BorderWidthProperty>& borderWidth = layoutProperty->GetBorderWidthProperty();
     Ark_GeometryInfo selfLayoutInfo;
-    selfLayoutInfo.width = Converter::ArkValue<Ark_Number>((NearEqual(width, 0.0f) && !NearZero(dipScale))
+    selfLayoutInfo.width = Converter::ArkValue<Ark_Float64>((NearEqual(width, 0.0f) && !NearZero(dipScale))
         ? layoutProperty->GetLayoutConstraint()->percentReference.Width() / dipScale : width);
-    selfLayoutInfo.height = Converter::ArkValue<Ark_Number>((NearEqual(height, 0.0f) && !NearZero(dipScale))
+    selfLayoutInfo.height = Converter::ArkValue<Ark_Float64>((NearEqual(height, 0.0f) && !NearZero(dipScale))
         ? layoutProperty->GetLayoutConstraint()->percentReference.Height() / dipScale : height);
     selfLayoutInfo.borderWidth.left = Converter::ArkValue<Opt_Length>(borderWidth
         ? borderWidth->leftDimen->ConvertToVp() : 0.0f);

@@ -16,27 +16,27 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { Finalizable, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 export class ImageAnalyzerControllerInternal {
     public static fromPtr(ptr: KPointer): ImageAnalyzerController {
-        return new ImageAnalyzerController(ptr)
+        return new ImageAnalyzerController(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class ImageAnalyzerController implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ImageAnalyzerController.getFinalizer())
     }
     constructor() {
-        this(ImageAnalyzerController.construct())
+        this(MaterializedBaseTag.NOP, ImageAnalyzerController.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._ImageAnalyzerController_construct()
@@ -48,7 +48,7 @@ export class ImageAnalyzerController implements MaterializedBase {
     public getImageAnalyzerSupportTypes(): Array<ImageAnalyzerType> {
         return this.getImageAnalyzerSupportTypes_serialize()
     }
-    getImageAnalyzerSupportTypes_serialize(): Array<ImageAnalyzerType> {
+    private getImageAnalyzerSupportTypes_serialize(): Array<ImageAnalyzerType> {
         const retval  = ArkUIGeneratedNativeModule._ImageAnalyzerController_getImageAnalyzerSupportTypes(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const bufferLength : int32 = retvalDeserializer.readInt32()
@@ -70,7 +70,7 @@ export interface ImageAnalyzerConfig {
 }
 export interface ImageAIOptions {
     types?: Array<ImageAnalyzerType>;
-    aiController?: ImageAnalyzerController | ESValue;
+    aiController?: ImageAnalyzerController | Object;
 }
 export class ImageAnalyzerController_serializer {
     public static write(buffer: SerializerBase, value: ImageAnalyzerController): void {
@@ -117,32 +117,32 @@ export class ImageAIOptions_serializer {
     }
     public static read(buffer: DeserializerBase): ImageAIOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const typesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const typesTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let typesTmpBuf : Array<ImageAnalyzerType> | undefined = undefined
         if ((typesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const typesTmpBuf_Length : int32 = valueDeserializer.readInt32()
-            let typesTmpBuf_ : Array<ImageAnalyzerType> = new Array<ImageAnalyzerType>(typesTmpBuf_Length)
-            for (let typesTmpBuf_BufCounterI = 0; typesTmpBuf_BufCounterI < typesTmpBuf_Length; typesTmpBuf_BufCounterI++) {
-                typesTmpBuf_[typesTmpBuf_BufCounterI] = ImageAnalyzerType.fromValue(valueDeserializer.readInt32())
+            const typesTmpBufOptLength : int32 = valueDeserializer.readInt32()
+            let typesTmpBufOpt : Array<ImageAnalyzerType> = new Array<ImageAnalyzerType>(typesTmpBufOptLength)
+            for (let typesTmpBufOptBufCounterI = 0; typesTmpBufOptBufCounterI < typesTmpBufOptLength; typesTmpBufOptBufCounterI++) {
+                typesTmpBufOpt[typesTmpBufOptBufCounterI] = ImageAnalyzerType.fromValue(valueDeserializer.readInt32())
             }
-            typesTmpBuf = typesTmpBuf_
+            typesTmpBuf = typesTmpBufOpt
         }
         const typesTmpResult : Array<ImageAnalyzerType> | undefined = typesTmpBuf
-        const aiControllerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let aiControllerTmpBuf : ImageAnalyzerController | ESValue | undefined = undefined
+        const aiControllerTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let aiControllerTmpBuf : ImageAnalyzerController | Object | undefined = undefined
         if ((aiControllerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const aiControllerTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let aiControllerTmpBuf_ : ImageAnalyzerController | ESValue | undefined
-            if (aiControllerTmpBuf_UnionSelector == (0).toChar()) {
-                aiControllerTmpBuf_ = (ImageAnalyzerController_serializer.read(valueDeserializer) as ImageAnalyzerController)
-            } else if (aiControllerTmpBuf_UnionSelector == (1).toChar()) {
-                aiControllerTmpBuf_ = (valueDeserializer.readObject() as ESValue)
+            const aiControllerTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let aiControllerTmpBufOpt : ImageAnalyzerController | Object | undefined
+            if (aiControllerTmpBufOptUnionSelector == (0).toByte()) {
+                aiControllerTmpBufOpt = (ImageAnalyzerController_serializer.read(valueDeserializer) as ImageAnalyzerController)
+            } else if (aiControllerTmpBufOptUnionSelector == (1).toByte()) {
+                aiControllerTmpBufOpt = (valueDeserializer.readObject() as object)
             } else {
-                throw new Error("One of the branches for aiControllerTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for aiControllerTmpBufOpt has to be chosen through deserialisation.')
             }
-            aiControllerTmpBuf = (aiControllerTmpBuf_ as ImageAnalyzerController | ESValue)
+            aiControllerTmpBuf = (aiControllerTmpBufOpt as ImageAnalyzerController | Object)
         }
-        const aiControllerTmpResult : ImageAnalyzerController | ESValue | undefined = aiControllerTmpBuf
+        const aiControllerTmpResult : ImageAnalyzerController | Object | undefined = aiControllerTmpBuf
         let value : ImageAIOptions = ({types: typesTmpResult, aiController: aiControllerTmpResult} as ImageAIOptions)
         return value
     }

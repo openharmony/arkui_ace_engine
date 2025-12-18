@@ -16,24 +16,26 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { VoidCallback } from "./units"
-import { AttributeModifier, hookPluginComponentAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { PluginComponentModifier } from "./../PluginComponentModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { VoidCallback } from './units'
+import { AttributeModifier, hookPluginComponentAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { RecordData } from '@ohos.base'
+import { PluginComponentModifier } from './../PluginComponentModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkPluginComponentPeer extends ArkCommonMethodPeer {
     attributeSet?: PluginComponentModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkPluginComponentPeer {
@@ -44,6 +46,7 @@ export class ArkPluginComponentPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setPluginComponentOptionsAttribute(options: PluginComponentOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         PluginComponentOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._PluginComponentInterface_setPluginComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -78,7 +81,6 @@ export interface PluginComponentTemplate {
     source: string | undefined;
     bundleName: string | undefined;
 }
-export type RecordData = Object | null | undefined;
 export interface PluginComponentOptions {
     template: PluginComponentTemplate;
     data: RecordData;
@@ -90,45 +92,25 @@ export interface PluginErrorData {
 export type PluginErrorCallback = (info: PluginErrorData) => void;
 export interface PluginComponentAttribute extends CommonMethod {
     setPluginComponentOptions(options: PluginComponentOptions): this {
-        throw new Error("Unimplemented method setPluginComponentOptions")
+        throw new Error('Unimplemented method setPluginComponentOptions')
     }
     onComplete(value: VoidCallback | undefined): this {
-        throw new Error("Unimplemented method onComplete")
+        throw new Error('Unimplemented method onComplete')
     }
     onError(value: PluginErrorCallback | undefined): this {
-        throw new Error("Unimplemented method onError")
+        throw new Error('Unimplemented method onError')
     }
     attributeModifier(value: AttributeModifier<PluginComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkPluginComponentStyle extends ArkCommonMethodStyle implements PluginComponentAttribute {
-    onComplete_value?: VoidCallback | undefined
-    onError_value?: PluginErrorCallback | undefined
-    attributeModifier_value?: AttributeModifier<PluginComponentAttribute> | AttributeModifier<CommonMethod> | undefined
-    setPluginComponentOptions(options: PluginComponentOptions): this {
-        return this
-    }
-    onComplete(value: VoidCallback | undefined): this {
-        return this
-    }
-    onError(value: PluginErrorCallback | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<PluginComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkPluginComponentComponent extends ArkCommonMethodComponent implements PluginComponentAttribute {
     getPeer(): ArkPluginComponentPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkPluginComponentPeer)
     }
     public setPluginComponentOptions(options: PluginComponentOptions): this {
-        if (this.checkPriority("setPluginComponentOptions")) {
+        if (this.checkPriority('setPluginComponentOptions')) {
             const options_casted = options as (PluginComponentOptions)
             this.getPeer()?.setPluginComponentOptionsAttribute(options_casted)
             this.applyOptionsFinish('PluginComponentAttribute');
@@ -137,7 +119,7 @@ export class ArkPluginComponentComponent extends ArkCommonMethodComponent implem
         return this
     }
     public onComplete(value: VoidCallback | undefined): this {
-        if (this.checkPriority("onComplete")) {
+        if (this.checkPriority('onComplete')) {
             const value_casted = value as (VoidCallback | undefined)
             this.getPeer()?.setOnCompleteAttribute(value_casted)
             return this
@@ -145,7 +127,7 @@ export class ArkPluginComponentComponent extends ArkCommonMethodComponent implem
         return this
     }
     public onError(value: PluginErrorCallback | undefined): this {
-        if (this.checkPriority("onError")) {
+        if (this.checkPriority('onError')) {
             const value_casted = value as (PluginErrorCallback | undefined)
             this.getPeer()?.setOnErrorAttribute(value_casted)
             return this
@@ -169,18 +151,16 @@ export class ArkPluginComponentComponent extends ArkCommonMethodComponent implem
 
 @memo
 export function PluginComponentImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: PluginComponentAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkPluginComponentComponent>((): ArkPluginComponentComponent => {
         return new ArkPluginComponentComponent()
     })
-    NodeAttach<ArkPluginComponentPeer>((): ArkPluginComponentPeer => ArkPluginComponentPeer.create(receiver), (peer: ArkPluginComponentPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkPluginComponentPeer>((): ArkPluginComponentPeer => ArkPluginComponentPeer.create(receiver), (_: ArkPluginComponentPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -207,13 +187,13 @@ export class PluginComponentTemplate_serializer {
     }
     public static read(buffer: DeserializerBase): PluginComponentTemplate {
         let valueDeserializer : DeserializerBase = buffer
-        const sourceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const sourceTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let sourceTmpBuf : string | undefined = undefined
         if ((sourceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             sourceTmpBuf = (valueDeserializer.readString() as string)
         }
         const sourceTmpResult : string | undefined = sourceTmpBuf
-        const bundleNameTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const bundleNameTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let bundleNameTmpBuf : string | undefined = undefined
         if ((bundleNameTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             bundleNameTmpBuf = (valueDeserializer.readString() as string)
@@ -256,7 +236,7 @@ export class PluginComponentOptions_serializer {
     public static read(buffer: DeserializerBase): PluginComponentOptions {
         let valueDeserializer : DeserializerBase = buffer
         const templateTmpResult : PluginComponentTemplate = PluginComponentTemplate_serializer.read(valueDeserializer)
-        const dataTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const dataTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let dataTmpBuf : Object | null | undefined = undefined
         if ((dataTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             dataTmpBuf = (valueDeserializer.readObject() as object)

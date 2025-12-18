@@ -16,44 +16,45 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, KInt32ArrayPtr } from "@koalaui/interop"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { VoidCallback, Length, ResourceColor, VP, Font, Font_serializer } from "./units"
-import { Bindable_I32_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { IndicatorComponentController_serializer, IndicatorComponentController } from "./indicatorcomponent"
-import { curves_ICurve_serializer } from "./../framework/ohos.curves"
-import { Resource_serializer } from "./../framework/resource"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { EdgeEffect, PageFlipMode, Color } from "./enums"
-import { default as curves } from "@ohos.curves"
-import { extractors, AttributeModifier, hookSwiperAttributeModifier, AttributeUpdater } from "#handwritten"
-import { Resource } from "global.resource"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { SwiperModifier } from "./../SwiperModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { LengthMetrics } from "arkui.Graphics"
-import { LengthMetrics_serializer } from "./../Graphics"
-import { ModifierStateManager } from '../CommonModifier';
+import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, resourceFinalizerRegister } from '@koalaui/interop'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { Length, Resource as arkui_component_units_Resource, LengthMetrics as arkui_component_units_LengthMetrics, VoidCallback, ResourceColor, VP, arkui_component_units_Font_serializer, Font as arkui_component_units_Font } from './units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { LengthMetrics as arkui_Graphics_LengthMetrics } from '@arkui.Graphics'
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { ArkThemeScopeManager } from '#arktheme'
+import { Bindable_I32_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ICurve, Callback as arkui_component_common_Callback, ArkCommonMethodComponent } from './common'
+import { IndicatorComponentController_serializer, IndicatorComponentController } from './indicatorcomponent'
+import { curves_ICurve_serializer } from './../framework/ohos.curves'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { EdgeEffect, Curve, PageFlipMode, Color as arkui_component_enums_Color } from './enums'
+import { default as curves } from '@ohos.curves'
+import { extractors, AttributeModifier, hookSwiperAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { SwiperModifier } from './../SwiperModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class IndicatorInternal {
     public static fromPtr(ptr: KPointer): Indicator {
-        return new Indicator(ptr)
+        return new Indicator(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class Indicator implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, Indicator.getFinalizer())
     }
     constructor() {
-        this(Indicator.construct())
+        this(MaterializedBaseTag.NOP, Indicator.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._Indicator_construct()
@@ -62,12 +63,18 @@ export class Indicator implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._Indicator_getFinalizer()
     }
-    static dot_serialize(): DotIndicator {
+    public static dot(): DotIndicator {
+        return Indicator.dot_serialize()
+    }
+    public static digit(): DigitIndicator {
+        return Indicator.digit_serialize()
+    }
+    private static dot_serialize(): DotIndicator {
         const retval  = ArkUIGeneratedNativeModule._Indicator_dot()
         const obj : DotIndicator = DotIndicatorInternal.fromPtr(retval)
         return obj
     }
-    static digit_serialize(): DigitIndicator {
+    private static digit_serialize(): DigitIndicator {
         const retval  = ArkUIGeneratedNativeModule._Indicator_digit()
         const obj : DigitIndicator = DigitIndicatorInternal.fromPtr(retval)
         return obj
@@ -92,29 +99,23 @@ export class Indicator implements MaterializedBase {
         this.bottom0_serialize(value_casted)
         return this
     }
-    public bottom(bottom: LengthMetrics | Length | undefined, ignoreSize: boolean): this {
-        const bottom_casted = bottom as (LengthMetrics | Length | undefined)
+    public bottom(bottom: arkui_component_units_LengthMetrics | Length | undefined, ignoreSize: boolean): this {
+        const bottom_casted = bottom as (arkui_component_units_LengthMetrics | Length | undefined)
         const ignoreSize_casted = ignoreSize as (boolean)
         this.bottom1_serialize(bottom_casted, ignoreSize_casted)
         return this
     }
-    public start(value: LengthMetrics | undefined): this {
-        const value_casted = value as (LengthMetrics | undefined)
+    public start(value: arkui_component_units_LengthMetrics | undefined): this {
+        const value_casted = value as (arkui_component_units_LengthMetrics | undefined)
         this.start_serialize(value_casted)
         return this
     }
-    public end(value: LengthMetrics | undefined): this {
-        const value_casted = value as (LengthMetrics | undefined)
+    public end(value: arkui_component_units_LengthMetrics | undefined): this {
+        const value_casted = value as (arkui_component_units_LengthMetrics | undefined)
         this.end_serialize(value_casted)
         return this
     }
-    public static dot(): DotIndicator {
-        return Indicator.dot_serialize()
-    }
-    public static digit(): DigitIndicator {
-        return Indicator.digit_serialize()
-    }
-    left_serialize(value: Length | undefined): this {
+    private left_serialize(value: Length | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -127,10 +128,10 @@ export class Indicator implements MaterializedBase {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -139,7 +140,7 @@ export class Indicator implements MaterializedBase {
         thisSerializer.release()
         return this
     }
-    top_serialize(value: Length | undefined): this {
+    private top_serialize(value: Length | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -152,10 +153,10 @@ export class Indicator implements MaterializedBase {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -164,7 +165,7 @@ export class Indicator implements MaterializedBase {
         thisSerializer.release()
         return this
     }
-    right_serialize(value: Length | undefined): this {
+    private right_serialize(value: Length | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -177,10 +178,10 @@ export class Indicator implements MaterializedBase {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -189,7 +190,7 @@ export class Indicator implements MaterializedBase {
         thisSerializer.release()
         return this
     }
-    bottom0_serialize(value: Length | undefined): this {
+    private bottom0_serialize(value: Length | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -202,10 +203,10 @@ export class Indicator implements MaterializedBase {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -214,15 +215,15 @@ export class Indicator implements MaterializedBase {
         thisSerializer.release()
         return this
     }
-    bottom1_serialize(bottom: LengthMetrics | Length | undefined, ignoreSize: boolean): this {
+    private bottom1_serialize(bottom: arkui_component_units_LengthMetrics | Length | undefined, ignoreSize: boolean): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (bottom !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const bottomTmpValue  = bottom!
-            if (bottomTmpValue instanceof LengthMetrics) {
+            if (bottomTmpValue instanceof arkui_component_units_LengthMetrics) {
                 thisSerializer.writeInt8((0).toByte())
-                const bottomTmpValueForIdx0  = bottomTmpValue as LengthMetrics
-                LengthMetrics_serializer.write(thisSerializer, bottomTmpValueForIdx0)
+                const bottomTmpValueForIdx0  = bottomTmpValue as arkui_component_units_LengthMetrics
+                arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, bottomTmpValueForIdx0)
             } else if (bottomTmpValue instanceof Length) {
                 thisSerializer.writeInt8((1).toByte())
                 const bottomTmpValueForIdx1  = bottomTmpValue as Length
@@ -234,25 +235,25 @@ export class Indicator implements MaterializedBase {
                     thisSerializer.writeInt8((1).toByte())
                     const bottomTmpValueForIdx1ForIdx1  = bottomTmpValueForIdx1 as double
                     thisSerializer.writeFloat64(bottomTmpValueForIdx1ForIdx1)
-                } else if (bottomTmpValueForIdx1 instanceof Resource) {
+                } else if (bottomTmpValueForIdx1 instanceof arkui_component_units_Resource) {
                     thisSerializer.writeInt8((2).toByte())
-                    const bottomTmpValueForIdx1ForIdx2  = bottomTmpValueForIdx1 as Resource
-                    Resource_serializer.write(thisSerializer, bottomTmpValueForIdx1ForIdx2)
+                    const bottomTmpValueForIdx1ForIdx2  = bottomTmpValueForIdx1 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(thisSerializer, bottomTmpValueForIdx1ForIdx2)
                 }
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._Indicator_bottom1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), ignoreSize ? 1 : 0)
+        ArkUIGeneratedNativeModule._Indicator_bottom1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), ignoreSize ? true : false)
         thisSerializer.release()
         return this
     }
-    start_serialize(value: LengthMetrics | undefined): this {
+    private start_serialize(value: arkui_component_units_LengthMetrics | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -260,12 +261,12 @@ export class Indicator implements MaterializedBase {
         thisSerializer.release()
         return this
     }
-    end_serialize(value: LengthMetrics | undefined): this {
+    private end_serialize(value: arkui_component_units_LengthMetrics | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -282,39 +283,27 @@ export interface SwiperContentTransitionProxy {
     finishTransition(): void
 }
 export class SwiperContentTransitionProxyInternal implements MaterializedBase,SwiperContentTransitionProxy {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get selectedIndex(): int32 {
-        return this.getSelectedIndex()
-    }
-    set selectedIndex(selectedIndex: int32) {
-        this.setSelectedIndex(selectedIndex)
-    }
-    get index(): int32 {
-        return this.getIndex()
-    }
-    set index(index: int32) {
-        this.setIndex(index)
-    }
-    get position(): double {
-        return this.getPosition()
-    }
-    set position(position: double) {
-        this.setPosition(position)
-    }
-    get mainAxisLength(): double {
-        return this.getMainAxisLength()
-    }
-    set mainAxisLength(mainAxisLength: double) {
-        this.setMainAxisLength(mainAxisLength)
-    }
-    constructor(peerPtr: KPointer) {
+    public selectedIndex: int32
+    public index: int32
+    public position: double
+    public mainAxisLength: double
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, SwiperContentTransitionProxyInternal.getFinalizer())
+        this.selectedIndex = this.getSelectedIndex()
+        this.index = this.getIndex()
+        this.position = this.getPosition()
+        this.mainAxisLength = this.getMainAxisLength()
     }
     constructor() {
-        this(SwiperContentTransitionProxyInternal.construct())
+        this(MaterializedBaseTag.NOP, SwiperContentTransitionProxyInternal.construct())
+        this.selectedIndex = this.getSelectedIndex()
+        this.index = this.getIndex()
+        this.position = this.getPosition()
+        this.mainAxisLength = this.getMainAxisLength()
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._SwiperContentTransitionProxy_construct()
@@ -324,7 +313,7 @@ export class SwiperContentTransitionProxyInternal implements MaterializedBase,Sw
         return ArkUIGeneratedNativeModule._SwiperContentTransitionProxy_getFinalizer()
     }
     public static fromPtr(ptr: KPointer): SwiperContentTransitionProxyInternal {
-        return new SwiperContentTransitionProxyInternal(ptr)
+        return new SwiperContentTransitionProxyInternal(MaterializedBaseTag.NOP, ptr)
     }
     public finishTransition(): void {
         this.finishTransition_serialize()
@@ -362,7 +351,7 @@ export class SwiperContentTransitionProxyInternal implements MaterializedBase,Sw
         this.setMainAxisLength_serialize(mainAxisLength_casted)
         return
     }
-    finishTransition_serialize(): void {
+    private finishTransition_serialize(): void {
         ArkUIGeneratedNativeModule._SwiperContentTransitionProxy_finishTransition(this.peer!.ptr)
     }
     private getSelectedIndex_serialize(): int32 {
@@ -396,19 +385,19 @@ export class SwiperContentTransitionProxyInternal implements MaterializedBase,Sw
 }
 export class SwiperControllerInternal {
     public static fromPtr(ptr: KPointer): SwiperController {
-        return new SwiperController(ptr)
+        return new SwiperController(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class SwiperController implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    constructor(peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, SwiperController.getFinalizer())
     }
     constructor() {
-        this(SwiperController.construct())
+        this(MaterializedBaseTag.NOP, SwiperController.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._SwiperController_construct()
@@ -440,13 +429,13 @@ export class SwiperController implements MaterializedBase {
         const indices_casted = indices as (Array<int32> | undefined)
         return this.preloadItems_serialize(indices_casted)
     }
-    showNext_serialize(): void {
+    private showNext_serialize(): void {
         ArkUIGeneratedNativeModule._SwiperController_showNext(this.peer!.ptr)
     }
-    showPrevious_serialize(): void {
+    private showPrevious_serialize(): void {
         ArkUIGeneratedNativeModule._SwiperController_showPrevious(this.peer!.ptr)
     }
-    changeIndex_serialize(index: int32 | undefined, animationMode?: SwiperAnimationMode | boolean): void {
+    private changeIndex_serialize(index: int32 | undefined, animationMode?: SwiperAnimationMode | boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (index !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -473,7 +462,7 @@ export class SwiperController implements MaterializedBase {
         ArkUIGeneratedNativeModule._SwiperController_changeIndex(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    finishAnimation_serialize(callback_?: VoidCallback): void {
+    private finishAnimation_serialize(callback_?: VoidCallback): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (callback_ !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -485,7 +474,7 @@ export class SwiperController implements MaterializedBase {
         ArkUIGeneratedNativeModule._SwiperController_finishAnimation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    preloadItems_serialize(indices: Array<int32> | undefined): Promise<void> {
+    private preloadItems_serialize(indices: Array<int32> | undefined): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (indices !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -506,7 +495,7 @@ export class SwiperController implements MaterializedBase {
 }
 export class ArkSwiperPeer extends ArkCommonMethodPeer {
     attributeSet?: SwiperModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkSwiperPeer {
@@ -517,6 +506,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setSwiperOptionsAttribute(controller?: SwiperController): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (controller !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -537,7 +527,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as int32
                 thisSerializer.writeInt32(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Bindable<int32>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(thisSerializer, valueTmpValueForIdx1)
@@ -704,22 +694,22 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SwiperAttribute_setDisableSwipe(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCurveAttribute(value: curves.Curve | string | curves.ICurve | undefined): void {
+    setCurveAttribute(value: Curve | string | ICurve | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof curves.Curve) {
+            if (valueTmpValue instanceof Curve) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as curves.Curve
+                const valueTmpValueForIdx0  = valueTmpValue as Curve
                 thisSerializer.writeInt32(valueTmpValueForIdx0.valueOf())
             } else if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof curves.ICurve) {
+            } else if (valueTmpValue instanceof ICurve) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as curves.ICurve
+                const valueTmpValueForIdx2  = valueTmpValue as ICurve
                 curves_ICurve_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
@@ -728,7 +718,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SwiperAttribute_setCurve(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnChangeAttribute(value: ((value0: int32) => void) | undefined): void {
+    setOnChangeAttribute(value: arkui_component_common_Callback<int32, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -740,7 +730,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SwiperAttribute_setOnChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnSelectedAttribute(value: ((value0: int32) => void) | undefined): void {
+    setOnSelectedAttribute(value: arkui_component_common_Callback<int32, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -752,7 +742,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SwiperAttribute_setOnSelected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnUnselectedAttribute(value: ((value0: int32) => void) | undefined): void {
+    setOnUnselectedAttribute(value: arkui_component_common_Callback<int32, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -981,10 +971,10 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1012,10 +1002,10 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1067,235 +1057,108 @@ export type OnSwiperAnimationEndCallback = (index: int32, extraInfo: SwiperAnima
 export type OnSwiperGestureSwipeCallback = (index: int32, extraInfo: SwiperAnimationEvent) => void;
 export interface SwiperAttribute extends CommonMethod {
     setSwiperOptions(controller?: SwiperController): this {
-        throw new Error("Unimplemented method setSwiperOptions")
+        throw new Error('Unimplemented method setSwiperOptions')
     }
     index(value: int32 | Bindable<int32> | undefined): this {
-        throw new Error("Unimplemented method index")
+        throw new Error('Unimplemented method index')
     }
     autoPlay(value: boolean | undefined): this {
-        throw new Error("Unimplemented method autoPlay")
+        throw new Error('Unimplemented method autoPlay')
     }
     interval(value: int32 | undefined): this {
-        throw new Error("Unimplemented method interval")
+        throw new Error('Unimplemented method interval')
     }
     indicator(value: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this {
-        throw new Error("Unimplemented method indicator")
+        throw new Error('Unimplemented method indicator')
     }
     loop(value: boolean | undefined): this {
-        throw new Error("Unimplemented method loop")
+        throw new Error('Unimplemented method loop')
     }
     duration(value: int32 | undefined): this {
-        throw new Error("Unimplemented method duration")
+        throw new Error('Unimplemented method duration')
     }
     vertical(value: boolean | undefined): this {
-        throw new Error("Unimplemented method vertical")
+        throw new Error('Unimplemented method vertical')
     }
     itemSpace(value: double | string | undefined): this {
-        throw new Error("Unimplemented method itemSpace")
+        throw new Error('Unimplemented method itemSpace')
     }
     displayMode(value: SwiperDisplayMode | undefined): this {
-        throw new Error("Unimplemented method displayMode")
+        throw new Error('Unimplemented method displayMode')
     }
     cachedCount(value: int32 | undefined): this {
-        throw new Error("Unimplemented method cachedCount")
+        throw new Error('Unimplemented method cachedCount')
     }
     effectMode(value: EdgeEffect | undefined): this {
-        throw new Error("Unimplemented method effectMode")
+        throw new Error('Unimplemented method effectMode')
     }
     disableSwipe(value: boolean | undefined): this {
-        throw new Error("Unimplemented method disableSwipe")
+        throw new Error('Unimplemented method disableSwipe')
     }
-    curve(value: curves.Curve | string | curves.ICurve | undefined): this {
-        throw new Error("Unimplemented method curve")
+    curve(value: Curve | string | ICurve | undefined): this {
+        throw new Error('Unimplemented method curve')
     }
-    onChange(value: ((value0: int32) => void) | undefined): this {
-        throw new Error("Unimplemented method onChange")
+    onChange(value: arkui_component_common_Callback<int32, void> | undefined): this {
+        throw new Error('Unimplemented method onChange')
     }
-    onSelected(value: ((value0: int32) => void) | undefined): this {
-        throw new Error("Unimplemented method onSelected")
+    onSelected(value: arkui_component_common_Callback<int32, void> | undefined): this {
+        throw new Error('Unimplemented method onSelected')
     }
-    onUnselected(value: ((value0: int32) => void) | undefined): this {
-        throw new Error("Unimplemented method onUnselected")
+    onUnselected(value: arkui_component_common_Callback<int32, void> | undefined): this {
+        throw new Error('Unimplemented method onUnselected')
     }
     onAnimationStart(value: OnSwiperAnimationStartCallback | undefined): this {
-        throw new Error("Unimplemented method onAnimationStart")
+        throw new Error('Unimplemented method onAnimationStart')
     }
     onAnimationEnd(value: OnSwiperAnimationEndCallback | undefined): this {
-        throw new Error("Unimplemented method onAnimationEnd")
+        throw new Error('Unimplemented method onAnimationEnd')
     }
     onGestureSwipe(value: OnSwiperGestureSwipeCallback | undefined): this {
-        throw new Error("Unimplemented method onGestureSwipe")
+        throw new Error('Unimplemented method onGestureSwipe')
     }
     nestedScroll(value: SwiperNestedScrollMode | undefined): this {
-        throw new Error("Unimplemented method nestedScroll")
+        throw new Error('Unimplemented method nestedScroll')
     }
     customContentTransition(value: SwiperContentAnimatedTransition | undefined): this {
-        throw new Error("Unimplemented method customContentTransition")
+        throw new Error('Unimplemented method customContentTransition')
     }
     onContentDidScroll(value: ContentDidScrollCallback | undefined): this {
-        throw new Error("Unimplemented method onContentDidScroll")
+        throw new Error('Unimplemented method onContentDidScroll')
     }
     indicatorInteractive(value: boolean | undefined): this {
-        throw new Error("Unimplemented method indicatorInteractive")
+        throw new Error('Unimplemented method indicatorInteractive')
     }
     pageFlipMode(value: PageFlipMode | undefined): this {
-        throw new Error("Unimplemented method pageFlipMode")
+        throw new Error('Unimplemented method pageFlipMode')
     }
     onContentWillScroll(value: ContentWillScrollCallback | undefined): this {
-        throw new Error("Unimplemented method onContentWillScroll")
+        throw new Error('Unimplemented method onContentWillScroll')
     }
     autoPlay(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): this {
-        throw new Error("Unimplemented method autoPlay")
+        throw new Error('Unimplemented method autoPlay')
     }
     displayArrow(value: ArrowStyle | boolean | undefined, isHoverShow?: boolean): this {
-        throw new Error("Unimplemented method displayArrow")
+        throw new Error('Unimplemented method displayArrow')
     }
     cachedCount(count: int32 | undefined, isShown: boolean | undefined): this {
-        throw new Error("Unimplemented method cachedCount")
+        throw new Error('Unimplemented method cachedCount')
     }
     displayCount(value: int32 | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
-        throw new Error("Unimplemented method displayCount")
+        throw new Error('Unimplemented method displayCount')
     }
     prevMargin(value: Length | undefined, ignoreBlank?: boolean): this {
-        throw new Error("Unimplemented method prevMargin")
+        throw new Error('Unimplemented method prevMargin')
     }
     nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
-        throw new Error("Unimplemented method nextMargin")
+        throw new Error('Unimplemented method nextMargin')
     }
     attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttribute {
-    index_value?: int32 | Bindable<int32> | undefined
-    autoPlay_value?: boolean | undefined
-    interval_value?: int32 | undefined
-    indicator_value?: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined
-    loop_value?: boolean | undefined
-    duration_value?: int32 | undefined
-    vertical_value?: boolean | undefined
-    itemSpace_value?: double | string | undefined
-    displayMode_value?: SwiperDisplayMode | undefined
-    cachedCount_value?: int32 | undefined
-    effectMode_value?: EdgeEffect | undefined
-    disableSwipe_value?: boolean | undefined
-    curve_value?: curves.Curve | string | curves.ICurve | undefined
-    onChange_value?: ((value0: int32) => void) | undefined
-    onSelected_value?: ((value0: int32) => void) | undefined
-    onUnselected_value?: ((value0: int32) => void) | undefined
-    onAnimationStart_value?: OnSwiperAnimationStartCallback | undefined
-    onAnimationEnd_value?: OnSwiperAnimationEndCallback | undefined
-    onGestureSwipe_value?: OnSwiperGestureSwipeCallback | undefined
-    nestedScroll_value?: SwiperNestedScrollMode | undefined
-    customContentTransition_value?: SwiperContentAnimatedTransition | undefined
-    onContentDidScroll_value?: ContentDidScrollCallback | undefined
-    indicatorInteractive_value?: boolean | undefined
-    pageFlipMode_value?: PageFlipMode | undefined
-    onContentWillScroll_value?: ContentWillScrollCallback | undefined
-    attributeModifier_value?: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined
-    setSwiperOptions(controller?: SwiperController): this {
-        return this
-    }
-    index(value: int32 | Bindable<int32> | undefined): this {
-        return this
-    }
-    autoPlay(value: boolean | undefined): this {
-        return this
-    }
-    interval(value: int32 | undefined): this {
-        return this
-    }
-    indicator(value: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this {
-        return this
-    }
-    loop(value: boolean | undefined): this {
-        return this
-    }
-    duration(value: int32 | undefined): this {
-        return this
-    }
-    vertical(value: boolean | undefined): this {
-        return this
-    }
-    itemSpace(value: double | string | undefined): this {
-        return this
-    }
-    displayMode(value: SwiperDisplayMode | undefined): this {
-        return this
-    }
-    cachedCount(value: int32 | undefined): this {
-        return this
-    }
-    effectMode(value: EdgeEffect | undefined): this {
-        return this
-    }
-    disableSwipe(value: boolean | undefined): this {
-        return this
-    }
-    curve(value: curves.Curve | string | curves.ICurve | undefined): this {
-        return this
-    }
-    onChange(value: ((value0: int32) => void) | undefined): this {
-        return this
-    }
-    onSelected(value: ((value0: int32) => void) | undefined): this {
-        return this
-    }
-    onUnselected(value: ((value0: int32) => void) | undefined): this {
-        return this
-    }
-    onAnimationStart(value: OnSwiperAnimationStartCallback | undefined): this {
-        return this
-    }
-    onAnimationEnd(value: OnSwiperAnimationEndCallback | undefined): this {
-        return this
-    }
-    onGestureSwipe(value: OnSwiperGestureSwipeCallback | undefined): this {
-        return this
-    }
-    nestedScroll(value: SwiperNestedScrollMode | undefined): this {
-        return this
-    }
-    customContentTransition(value: SwiperContentAnimatedTransition | undefined): this {
-        return this
-    }
-    onContentDidScroll(value: ContentDidScrollCallback | undefined): this {
-        return this
-    }
-    indicatorInteractive(value: boolean | undefined): this {
-        return this
-    }
-    pageFlipMode(value: PageFlipMode | undefined): this {
-        return this
-    }
-    onContentWillScroll(value: ContentWillScrollCallback | undefined): this {
-        return this
-    }
-    autoPlay(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): this {
-        return this
-    }
-    displayArrow(value: ArrowStyle | boolean | undefined, isHoverShow?: boolean): this {
-        return this
-    }
-    cachedCount(count: int32 | undefined, isShown: boolean | undefined): this {
-        return this
-    }
-    displayCount(value: int32 | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
-        return this
-    }
-    prevMargin(value: Length | undefined, ignoreBlank?: boolean): this {
-        return this
-    }
-    nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 export interface SwiperContentAnimatedTransition {
     timeout?: int32;
-    transition: ((value0: SwiperContentTransitionProxy) => void);
+    transition: arkui_component_common_Callback<SwiperContentTransitionProxy, void>;
 }
 export interface SwiperContentWillScrollResult {
     currentIndex: int32;
@@ -1307,13 +1170,10 @@ export type ContentWillScrollCallback = (result: SwiperContentWillScrollResult) 
 
 export class ArkSwiperComponent extends ArkCommonMethodComponent implements SwiperAttribute {
     getPeer(): ArkSwiperPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkSwiperPeer)
     }
     public setSwiperOptions(controller?: SwiperController): this {
-        if (this.checkPriority("setSwiperOptions")) {
+        if (this.checkPriority('setSwiperOptions')) {
             const controller_casted = controller as (SwiperController | undefined)
             this.getPeer()?.setSwiperOptionsAttribute(controller_casted)
             this.applyOptionsFinish('SwiperAttribute');
@@ -1322,7 +1182,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public index(value: int32 | Bindable<int32> | undefined): this {
-        if (this.checkPriority("index")) {
+        if (this.checkPriority('index')) {
             const value_casted = value as (int32 | Bindable<int32> | undefined)
             this.getPeer()?.setIndexAttribute(value_casted)
             return this
@@ -1330,7 +1190,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public autoPlay(value: boolean | undefined): this {
-        if (this.checkPriority("autoPlay")) {
+        if (this.checkPriority('autoPlay')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setAutoPlay0Attribute(value_casted)
             return this
@@ -1338,7 +1198,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public interval(value: int32 | undefined): this {
-        if (this.checkPriority("interval")) {
+        if (this.checkPriority('interval')) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setIntervalAttribute(value_casted)
             return this
@@ -1346,7 +1206,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public indicator(value: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this {
-        if (this.checkPriority("indicator")) {
+        if (this.checkPriority('indicator')) {
             const value_casted = value as (IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined)
             this.getPeer()?.setIndicatorAttribute(value_casted)
             return this
@@ -1354,7 +1214,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public loop(value: boolean | undefined): this {
-        if (this.checkPriority("loop")) {
+        if (this.checkPriority('loop')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setLoopAttribute(value_casted)
             return this
@@ -1362,7 +1222,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public duration(value: int32 | undefined): this {
-        if (this.checkPriority("duration")) {
+        if (this.checkPriority('duration')) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setDurationAttribute(value_casted)
             return this
@@ -1370,7 +1230,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public vertical(value: boolean | undefined): this {
-        if (this.checkPriority("vertical")) {
+        if (this.checkPriority('vertical')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setVerticalAttribute(value_casted)
             return this
@@ -1378,7 +1238,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public itemSpace(value: double | string | undefined): this {
-        if (this.checkPriority("itemSpace")) {
+        if (this.checkPriority('itemSpace')) {
             const value_casted = value as (double | string | undefined)
             this.getPeer()?.setItemSpaceAttribute(value_casted)
             return this
@@ -1386,7 +1246,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public displayMode(value: SwiperDisplayMode | undefined): this {
-        if (this.checkPriority("displayMode")) {
+        if (this.checkPriority('displayMode')) {
             const value_casted = value as (SwiperDisplayMode | undefined)
             this.getPeer()?.setDisplayModeAttribute(value_casted)
             return this
@@ -1394,7 +1254,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public cachedCount(value: int32 | undefined): this {
-        if (this.checkPriority("cachedCount")) {
+        if (this.checkPriority('cachedCount')) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setCachedCount0Attribute(value_casted)
             return this
@@ -1402,7 +1262,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public effectMode(value: EdgeEffect | undefined): this {
-        if (this.checkPriority("effectMode")) {
+        if (this.checkPriority('effectMode')) {
             const value_casted = value as (EdgeEffect | undefined)
             this.getPeer()?.setEffectModeAttribute(value_casted)
             return this
@@ -1410,47 +1270,47 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public disableSwipe(value: boolean | undefined): this {
-        if (this.checkPriority("disableSwipe")) {
+        if (this.checkPriority('disableSwipe')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setDisableSwipeAttribute(value_casted)
             return this
         }
         return this
     }
-    public curve(value: curves.Curve | string | curves.ICurve | undefined): this {
-        if (this.checkPriority("curve")) {
-            const value_casted = value as (curves.Curve | string | curves.ICurve | undefined)
+    public curve(value: Curve | string | ICurve | undefined): this {
+        if (this.checkPriority('curve')) {
+            const value_casted = value as (Curve | string | ICurve | undefined)
             this.getPeer()?.setCurveAttribute(value_casted)
             return this
         }
         return this
     }
-    public onChange(value: ((value0: int32) => void) | undefined): this {
-        if (this.checkPriority("onChange")) {
-            const value_casted = value as (((value0: int32) => void) | undefined)
+    public onChange(value: arkui_component_common_Callback<int32, void> | undefined): this {
+        if (this.checkPriority('onChange')) {
+            const value_casted = value as (arkui_component_common_Callback<int32, void> | undefined)
             this.getPeer()?.setOnChangeAttribute(value_casted)
             return this
         }
         return this
     }
-    public onSelected(value: ((value0: int32) => void) | undefined): this {
-        if (this.checkPriority("onSelected")) {
-            const value_casted = value as (((value0: int32) => void) | undefined)
+    public onSelected(value: arkui_component_common_Callback<int32, void> | undefined): this {
+        if (this.checkPriority('onSelected')) {
+            const value_casted = value as (arkui_component_common_Callback<int32, void> | undefined)
             this.getPeer()?.setOnSelectedAttribute(value_casted)
             return this
         }
         return this
     }
-    public onUnselected(value: ((value0: int32) => void) | undefined): this {
-        if (this.checkPriority("onUnselected")) {
-            const value_casted = value as (((value0: int32) => void) | undefined)
+    public onUnselected(value: arkui_component_common_Callback<int32, void> | undefined): this {
+        if (this.checkPriority('onUnselected')) {
+            const value_casted = value as (arkui_component_common_Callback<int32, void> | undefined)
             this.getPeer()?.setOnUnselectedAttribute(value_casted)
             return this
         }
         return this
     }
     public onAnimationStart(value: OnSwiperAnimationStartCallback | undefined): this {
-        if (this.checkPriority("onAnimationStart")) {
+        if (this.checkPriority('onAnimationStart')) {
             const value_casted = value as (OnSwiperAnimationStartCallback | undefined)
             this.getPeer()?.setOnAnimationStartAttribute(value_casted)
             return this
@@ -1458,7 +1318,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public onAnimationEnd(value: OnSwiperAnimationEndCallback | undefined): this {
-        if (this.checkPriority("onAnimationEnd")) {
+        if (this.checkPriority('onAnimationEnd')) {
             const value_casted = value as (OnSwiperAnimationEndCallback | undefined)
             this.getPeer()?.setOnAnimationEndAttribute(value_casted)
             return this
@@ -1466,7 +1326,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public onGestureSwipe(value: OnSwiperGestureSwipeCallback | undefined): this {
-        if (this.checkPriority("onGestureSwipe")) {
+        if (this.checkPriority('onGestureSwipe')) {
             const value_casted = value as (OnSwiperGestureSwipeCallback | undefined)
             this.getPeer()?.setOnGestureSwipeAttribute(value_casted)
             return this
@@ -1474,7 +1334,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public nestedScroll(value: SwiperNestedScrollMode | undefined): this {
-        if (this.checkPriority("nestedScroll")) {
+        if (this.checkPriority('nestedScroll')) {
             const value_casted = value as (SwiperNestedScrollMode | undefined)
             this.getPeer()?.setNestedScrollAttribute(value_casted)
             return this
@@ -1482,7 +1342,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public customContentTransition(value: SwiperContentAnimatedTransition | undefined): this {
-        if (this.checkPriority("customContentTransition")) {
+        if (this.checkPriority('customContentTransition')) {
             const value_casted = value as (SwiperContentAnimatedTransition | undefined)
             this.getPeer()?.setCustomContentTransitionAttribute(value_casted)
             return this
@@ -1490,7 +1350,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public onContentDidScroll(value: ContentDidScrollCallback | undefined): this {
-        if (this.checkPriority("onContentDidScroll")) {
+        if (this.checkPriority('onContentDidScroll')) {
             const value_casted = value as (ContentDidScrollCallback | undefined)
             this.getPeer()?.setOnContentDidScrollAttribute(value_casted)
             return this
@@ -1498,7 +1358,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public indicatorInteractive(value: boolean | undefined): this {
-        if (this.checkPriority("indicatorInteractive")) {
+        if (this.checkPriority('indicatorInteractive')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setIndicatorInteractiveAttribute(value_casted)
             return this
@@ -1506,7 +1366,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public pageFlipMode(value: PageFlipMode | undefined): this {
-        if (this.checkPriority("pageFlipMode")) {
+        if (this.checkPriority('pageFlipMode')) {
             const value_casted = value as (PageFlipMode | undefined)
             this.getPeer()?.setPageFlipModeAttribute(value_casted)
             return this
@@ -1514,7 +1374,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public onContentWillScroll(value: ContentWillScrollCallback | undefined): this {
-        if (this.checkPriority("onContentWillScroll")) {
+        if (this.checkPriority('onContentWillScroll')) {
             const value_casted = value as (ContentWillScrollCallback | undefined)
             this.getPeer()?.setOnContentWillScrollAttribute(value_casted)
             return this
@@ -1522,7 +1382,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public autoPlay(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): this {
-        if (this.checkPriority("autoPlay")) {
+        if (this.checkPriority('autoPlay')) {
             const autoPlay_casted = autoPlay as (boolean | undefined)
             const options_casted = options as (AutoPlayOptions | undefined)
             this.getPeer()?.setAutoPlay1Attribute(autoPlay_casted, options_casted)
@@ -1531,7 +1391,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public displayArrow(value: ArrowStyle | boolean | undefined, isHoverShow?: boolean): this {
-        if (this.checkPriority("displayArrow")) {
+        if (this.checkPriority('displayArrow')) {
             const value_casted = value as (ArrowStyle | boolean | undefined)
             const isHoverShow_casted = isHoverShow as (boolean | undefined)
             this.getPeer()?.setDisplayArrowAttribute(value_casted, isHoverShow_casted)
@@ -1540,7 +1400,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public cachedCount(count: int32 | undefined, isShown: boolean | undefined): this {
-        if (this.checkPriority("cachedCount")) {
+        if (this.checkPriority('cachedCount')) {
             const count_casted = count as (int32 | undefined)
             const isShown_casted = isShown as (boolean | undefined)
             this.getPeer()?.setCachedCount1Attribute(count_casted, isShown_casted)
@@ -1549,7 +1409,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public displayCount(value: int32 | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
-        if (this.checkPriority("displayCount")) {
+        if (this.checkPriority('displayCount')) {
             const value_casted = value as (int32 | string | SwiperAutoFill | undefined)
             const swipeByGroup_casted = swipeByGroup as (boolean | undefined)
             this.getPeer()?.setDisplayCountAttribute(value_casted, swipeByGroup_casted)
@@ -1558,7 +1418,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public prevMargin(value: Length | undefined, ignoreBlank?: boolean): this {
-        if (this.checkPriority("prevMargin")) {
+        if (this.checkPriority('prevMargin')) {
             const value_casted = value as (Length | undefined)
             const ignoreBlank_casted = ignoreBlank as (boolean | undefined)
             this.getPeer()?.setPrevMarginAttribute(value_casted, ignoreBlank_casted)
@@ -1567,7 +1427,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         return this
     }
     public nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
-        if (this.checkPriority("nextMargin")) {
+        if (this.checkPriority('nextMargin')) {
             const value_casted = value as (Length | undefined)
             const ignoreBlank_casted = ignoreBlank as (boolean | undefined)
             this.getPeer()?.setNextMarginAttribute(value_casted, ignoreBlank_casted)
@@ -1592,18 +1452,16 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
 
 @memo
 export function SwiperImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: SwiperAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkSwiperComponent>((): ArkSwiperComponent => {
         return new ArkSwiperComponent()
     })
-    NodeAttach<ArkSwiperPeer>((): ArkSwiperPeer => ArkSwiperPeer.create(receiver), (peer: ArkSwiperPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkSwiperPeer>((): ArkSwiperPeer => ArkSwiperPeer.create(receiver), (_: ArkSwiperPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -1732,12 +1590,12 @@ export class SwiperAutoFill_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const minSizeTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
         let minSizeTmpBuf : string | double | undefined
-        if (minSizeTmpBufUnionSelector == (0).toChar()) {
+        if (minSizeTmpBufUnionSelector == (0).toByte()) {
             minSizeTmpBuf = (valueDeserializer.readString() as string)
-        } else if (minSizeTmpBufUnionSelector == (1).toChar()) {
+        } else if (minSizeTmpBufUnionSelector == (1).toByte()) {
             minSizeTmpBuf = valueDeserializer.readFloat64()
         } else {
-            throw new Error("One of the branches for minSizeTmpBuf has to be chosen through deserialisation.")
+            throw new Error('One of the branches for minSizeTmpBuf has to be chosen through deserialisation.')
         }
         const minSizeTmpResult : VP = (minSizeTmpBuf as string | double)
         let value : SwiperAutoFill = ({minSize: minSizeTmpResult} as SwiperAutoFill)
@@ -1760,7 +1618,7 @@ export class SwiperContentAnimatedTransition_serializer {
     }
     public static read(buffer: DeserializerBase): SwiperContentAnimatedTransition {
         let valueDeserializer : DeserializerBase = buffer
-        const timeoutTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const timeoutTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let timeoutTmpBuf : int32 | undefined = undefined
         if ((timeoutTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             timeoutTmpBuf = valueDeserializer.readInt32()
@@ -1769,16 +1627,18 @@ export class SwiperContentAnimatedTransition_serializer {
         const transitionTmpBufBufResource : CallbackResource = valueDeserializer.readCallbackResource()
         const transitionTmpBufBufCall : KPointer = valueDeserializer.readPointer()
         const transitionTmpBufBufCallSync : KPointer = valueDeserializer.readPointer()
-        const transitionTmpResult : ((value0: SwiperContentTransitionProxy) => void) = (value0: SwiperContentTransitionProxy):void => {
+        const transitionTmpBufClosure  = (data: SwiperContentTransitionProxy):void => {
             const transitionTmpBufBufArgsSerializer : SerializerBase = SerializerBase.hold();
             transitionTmpBufBufArgsSerializer.writeInt32(transitionTmpBufBufResource.resourceId);
             transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCall);
             transitionTmpBufBufArgsSerializer.writePointer(transitionTmpBufBufCallSync);
-            SwiperContentTransitionProxy_serializer.write(transitionTmpBufBufArgsSerializer, value0);
-            InteropNativeModule._CallCallbackSync(10, -416053361, transitionTmpBufBufArgsSerializer.asBuffer(), transitionTmpBufBufArgsSerializer.length());
+            SwiperContentTransitionProxy_serializer.write(transitionTmpBufBufArgsSerializer, data);
+            InteropNativeModule._CallCallbackSync(10, -1848766417, transitionTmpBufBufArgsSerializer.asBuffer(), transitionTmpBufBufArgsSerializer.length());
             transitionTmpBufBufArgsSerializer.release();
             return;
         }
+        resourceFinalizerRegister(transitionTmpBufClosure, transitionTmpBufBufResource)
+        const transitionTmpResult : arkui_component_common_Callback<SwiperContentTransitionProxy, void> = transitionTmpBufClosure
         let value : SwiperContentAnimatedTransition = ({timeout: timeoutTmpResult, transition: transitionTmpResult} as SwiperContentAnimatedTransition)
         return value
     }
@@ -1814,10 +1674,10 @@ export class ArrowStyle_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundSizeTmpValueForIdx1  = valueHolderForBackgroundSizeTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForBackgroundSizeTmpValueForIdx1)
-            } else if (valueHolderForBackgroundSizeTmpValue instanceof Resource) {
+            } else if (valueHolderForBackgroundSizeTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForBackgroundSizeTmpValueForIdx2  = valueHolderForBackgroundSizeTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForBackgroundSizeTmpValueForIdx2)
+                const valueHolderForBackgroundSizeTmpValueForIdx2  = valueHolderForBackgroundSizeTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForBackgroundSizeTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1826,10 +1686,10 @@ export class ArrowStyle_serializer {
         if (valueHolderForBackgroundColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBackgroundColorTmpValue  = valueHolderForBackgroundColor!
-            if (valueHolderForBackgroundColorTmpValue instanceof Color) {
+            if (valueHolderForBackgroundColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal())
+                const valueHolderForBackgroundColorTmpValueForIdx0  = valueHolderForBackgroundColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForBackgroundColorTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueHolderForBackgroundColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx1  = valueHolderForBackgroundColorTmpValue as int32
@@ -1838,10 +1698,10 @@ export class ArrowStyle_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForBackgroundColorTmpValueForIdx2  = valueHolderForBackgroundColorTmpValue as string
                 valueSerializer.writeString(valueHolderForBackgroundColorTmpValueForIdx2)
-            } else if (valueHolderForBackgroundColorTmpValue instanceof Resource) {
+            } else if (valueHolderForBackgroundColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
+                const valueHolderForBackgroundColorTmpValueForIdx3  = valueHolderForBackgroundColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForBackgroundColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1858,10 +1718,10 @@ export class ArrowStyle_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowSizeTmpValueForIdx1  = valueHolderForArrowSizeTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForArrowSizeTmpValueForIdx1)
-            } else if (valueHolderForArrowSizeTmpValue instanceof Resource) {
+            } else if (valueHolderForArrowSizeTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForArrowSizeTmpValueForIdx2  = valueHolderForArrowSizeTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForArrowSizeTmpValueForIdx2)
+                const valueHolderForArrowSizeTmpValueForIdx2  = valueHolderForArrowSizeTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForArrowSizeTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1870,10 +1730,10 @@ export class ArrowStyle_serializer {
         if (valueHolderForArrowColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForArrowColorTmpValue  = valueHolderForArrowColor!
-            if (valueHolderForArrowColorTmpValue instanceof Color) {
+            if (valueHolderForArrowColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForArrowColorTmpValueForIdx0  = valueHolderForArrowColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForArrowColorTmpValueForIdx0.getOrdinal())
+                const valueHolderForArrowColorTmpValueForIdx0  = valueHolderForArrowColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForArrowColorTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueHolderForArrowColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForArrowColorTmpValueForIdx1  = valueHolderForArrowColorTmpValue as int32
@@ -1882,10 +1742,10 @@ export class ArrowStyle_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForArrowColorTmpValueForIdx2  = valueHolderForArrowColorTmpValue as string
                 valueSerializer.writeString(valueHolderForArrowColorTmpValueForIdx2)
-            } else if (valueHolderForArrowColorTmpValue instanceof Resource) {
+            } else if (valueHolderForArrowColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForArrowColorTmpValueForIdx3  = valueHolderForArrowColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForArrowColorTmpValueForIdx3)
+                const valueHolderForArrowColorTmpValueForIdx3  = valueHolderForArrowColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForArrowColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1893,88 +1753,88 @@ export class ArrowStyle_serializer {
     }
     public static read(buffer: DeserializerBase): ArrowStyle {
         let valueDeserializer : DeserializerBase = buffer
-        const showBackgroundTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const showBackgroundTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let showBackgroundTmpBuf : boolean | undefined = undefined
         if ((showBackgroundTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             showBackgroundTmpBuf = valueDeserializer.readBoolean()
         }
         const showBackgroundTmpResult : boolean | undefined = showBackgroundTmpBuf
-        const isSidebarMiddleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const isSidebarMiddleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let isSidebarMiddleTmpBuf : boolean | undefined = undefined
         if ((isSidebarMiddleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             isSidebarMiddleTmpBuf = valueDeserializer.readBoolean()
         }
         const isSidebarMiddleTmpResult : boolean | undefined = isSidebarMiddleTmpBuf
-        const backgroundSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const backgroundSizeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let backgroundSizeTmpBuf : Length | undefined = undefined
         if ((backgroundSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const backgroundSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundSizeTmpBuf_ : string | double | Resource | undefined
-            if (backgroundSizeTmpBuf_UnionSelector == (0).toChar()) {
-                backgroundSizeTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (backgroundSizeTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundSizeTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (backgroundSizeTmpBuf_UnionSelector == (2).toChar()) {
-                backgroundSizeTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const backgroundSizeTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let backgroundSizeTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (backgroundSizeTmpBufOptUnionSelector == (0).toByte()) {
+                backgroundSizeTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (backgroundSizeTmpBufOptUnionSelector == (1).toByte()) {
+                backgroundSizeTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (backgroundSizeTmpBufOptUnionSelector == (2).toByte()) {
+                backgroundSizeTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for backgroundSizeTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for backgroundSizeTmpBufOpt has to be chosen through deserialisation.')
             }
-            backgroundSizeTmpBuf = (backgroundSizeTmpBuf_ as string | double | Resource)
+            backgroundSizeTmpBuf = (backgroundSizeTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const backgroundSizeTmpResult : Length | undefined = backgroundSizeTmpBuf
-        const backgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const backgroundColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let backgroundColorTmpBuf : ResourceColor | undefined = undefined
         if ((backgroundColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const backgroundColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let backgroundColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (backgroundColorTmpBuf_UnionSelector == (0).toChar()) {
-                backgroundColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (backgroundColorTmpBuf_UnionSelector == (1).toChar()) {
-                backgroundColorTmpBuf_ = (valueDeserializer.readInt32())
-            } else if (backgroundColorTmpBuf_UnionSelector == (2).toChar()) {
-                backgroundColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (backgroundColorTmpBuf_UnionSelector == (3).toChar()) {
-                backgroundColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const backgroundColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let backgroundColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (backgroundColorTmpBufOptUnionSelector == (0).toByte()) {
+                backgroundColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (backgroundColorTmpBufOptUnionSelector == (1).toByte()) {
+                backgroundColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (backgroundColorTmpBufOptUnionSelector == (2).toByte()) {
+                backgroundColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (backgroundColorTmpBufOptUnionSelector == (3).toByte()) {
+                backgroundColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for backgroundColorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for backgroundColorTmpBufOpt has to be chosen through deserialisation.')
             }
-            backgroundColorTmpBuf = (backgroundColorTmpBuf_ as Color | int32 | string | Resource)
+            backgroundColorTmpBuf = (backgroundColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const backgroundColorTmpResult : ResourceColor | undefined = backgroundColorTmpBuf
-        const arrowSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const arrowSizeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let arrowSizeTmpBuf : Length | undefined = undefined
         if ((arrowSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const arrowSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let arrowSizeTmpBuf_ : string | double | Resource | undefined
-            if (arrowSizeTmpBuf_UnionSelector == (0).toChar()) {
-                arrowSizeTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (arrowSizeTmpBuf_UnionSelector == (1).toChar()) {
-                arrowSizeTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (arrowSizeTmpBuf_UnionSelector == (2).toChar()) {
-                arrowSizeTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const arrowSizeTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let arrowSizeTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (arrowSizeTmpBufOptUnionSelector == (0).toByte()) {
+                arrowSizeTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (arrowSizeTmpBufOptUnionSelector == (1).toByte()) {
+                arrowSizeTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (arrowSizeTmpBufOptUnionSelector == (2).toByte()) {
+                arrowSizeTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for arrowSizeTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for arrowSizeTmpBufOpt has to be chosen through deserialisation.')
             }
-            arrowSizeTmpBuf = (arrowSizeTmpBuf_ as string | double | Resource)
+            arrowSizeTmpBuf = (arrowSizeTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const arrowSizeTmpResult : Length | undefined = arrowSizeTmpBuf
-        const arrowColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const arrowColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let arrowColorTmpBuf : ResourceColor | undefined = undefined
         if ((arrowColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const arrowColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let arrowColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (arrowColorTmpBuf_UnionSelector == (0).toChar()) {
-                arrowColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (arrowColorTmpBuf_UnionSelector == (1).toChar()) {
-                arrowColorTmpBuf_ = (valueDeserializer.readInt32())
-            } else if (arrowColorTmpBuf_UnionSelector == (2).toChar()) {
-                arrowColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (arrowColorTmpBuf_UnionSelector == (3).toChar()) {
-                arrowColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const arrowColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let arrowColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (arrowColorTmpBufOptUnionSelector == (0).toByte()) {
+                arrowColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (arrowColorTmpBufOptUnionSelector == (1).toByte()) {
+                arrowColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (arrowColorTmpBufOptUnionSelector == (2).toByte()) {
+                arrowColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (arrowColorTmpBufOptUnionSelector == (3).toByte()) {
+                arrowColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for arrowColorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for arrowColorTmpBufOpt has to be chosen through deserialisation.')
             }
-            arrowColorTmpBuf = (arrowColorTmpBuf_ as Color | int32 | string | Resource)
+            arrowColorTmpBuf = (arrowColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const arrowColorTmpResult : ResourceColor | undefined = arrowColorTmpBuf
         let value : ArrowStyle = ({showBackground: showBackgroundTmpResult, isSidebarMiddle: isSidebarMiddleTmpResult, backgroundSize: backgroundSizeTmpResult, backgroundColor: backgroundColorTmpResult, arrowSize: arrowSizeTmpResult, arrowColor: arrowColorTmpResult} as ArrowStyle)
@@ -1983,15 +1843,15 @@ export class ArrowStyle_serializer {
 }
 export class DigitIndicatorInternal {
     public static fromPtr(ptr: KPointer): DigitIndicator {
-        return new DigitIndicator(ptr)
+        return new DigitIndicator(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class DigitIndicator extends Indicator implements MaterializedBase {
-    constructor(peerPtr: KPointer) {
-        super(peerPtr)
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
     }
     constructor() {
-        this(DigitIndicator.construct())
+        this(MaterializedBaseTag.NOP, DigitIndicator.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._DigitIndicator_construct()
@@ -2010,25 +1870,25 @@ export class DigitIndicator extends Indicator implements MaterializedBase {
         this.selectedFontColor_serialize(value_casted)
         return this
     }
-    public digitFont(value: Font | undefined): this {
-        const value_casted = value as (Font | undefined)
+    public digitFont(value: arkui_component_units_Font | undefined): this {
+        const value_casted = value as (arkui_component_units_Font | undefined)
         this.digitFont_serialize(value_casted)
         return this
     }
-    public selectedDigitFont(value: Font | undefined): this {
-        const value_casted = value as (Font | undefined)
+    public selectedDigitFont(value: arkui_component_units_Font | undefined): this {
+        const value_casted = value as (arkui_component_units_Font | undefined)
         this.selectedDigitFont_serialize(value_casted)
         return this
     }
-    fontColor_serialize(value: ResourceColor | undefined): this {
+    private fontColor_serialize(value: ResourceColor | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0  = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
@@ -2037,11 +1897,11 @@ export class DigitIndicator extends Indicator implements MaterializedBase {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
-                }
+                const valueTmpValueForIdx3  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2049,15 +1909,15 @@ export class DigitIndicator extends Indicator implements MaterializedBase {
         thisSerializer.release()
         return this
     }
-    selectedFontColor_serialize(value: ResourceColor | undefined): this {
+    private selectedFontColor_serialize(value: ResourceColor | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0  = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
@@ -2066,24 +1926,24 @@ export class DigitIndicator extends Indicator implements MaterializedBase {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-         ArkUIGeneratedNativeModule._DigitIndicator_selectedFontColor(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._DigitIndicator_selectedFontColor(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return this
     }
-    digitFont_serialize(value: Font | undefined): this {
+    private digitFont_serialize(value: arkui_component_units_Font | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            Font_serializer.write(thisSerializer, valueTmpValue)
+            arkui_component_units_Font_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2091,12 +1951,12 @@ export class DigitIndicator extends Indicator implements MaterializedBase {
         thisSerializer.release()
         return this
     }
-    selectedDigitFont_serialize(value: Font | undefined): this {
+    private selectedDigitFont_serialize(value: arkui_component_units_Font | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            Font_serializer.write(thisSerializer, valueTmpValue)
+            arkui_component_units_Font_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2107,15 +1967,15 @@ export class DigitIndicator extends Indicator implements MaterializedBase {
 }
 export class DotIndicatorInternal {
     public static fromPtr(ptr: KPointer): DotIndicator {
-        return new DotIndicator(ptr)
+        return new DotIndicator(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class DotIndicator extends Indicator implements MaterializedBase {
-    constructor(peerPtr: KPointer) {
-        super(peerPtr)
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
     }
     constructor() {
-        this(DotIndicator.construct())
+        this(MaterializedBaseTag.NOP, DotIndicator.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._DotIndicator_construct()
@@ -2164,12 +2024,12 @@ export class DotIndicator extends Indicator implements MaterializedBase {
         this.maxDisplayCount_serialize(maxDisplayCount_casted)
         return this
     }
-    public space(space: LengthMetrics | undefined): this {
-        const space_casted = space as (LengthMetrics | undefined)
+    public space(space: arkui_component_units_LengthMetrics | undefined): this {
+        const space_casted = space as (arkui_component_units_LengthMetrics | undefined)
         this.space_serialize(space_casted)
         return this
     }
-    itemWidth_serialize(value: Length | undefined): this {
+    private itemWidth_serialize(value: Length | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2182,10 +2042,10 @@ export class DotIndicator extends Indicator implements MaterializedBase {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -2194,7 +2054,7 @@ export class DotIndicator extends Indicator implements MaterializedBase {
         thisSerializer.release()
         return this
     }
-    itemHeight_serialize(value: Length | undefined): this {
+    private itemHeight_serialize(value: Length | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2207,10 +2067,10 @@ export class DotIndicator extends Indicator implements MaterializedBase {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -2219,7 +2079,7 @@ export class DotIndicator extends Indicator implements MaterializedBase {
         thisSerializer.release()
         return this
     }
-    selectedItemWidth_serialize(value: Length | undefined): this {
+    private selectedItemWidth_serialize(value: Length | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2232,10 +2092,10 @@ export class DotIndicator extends Indicator implements MaterializedBase {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -2244,7 +2104,7 @@ export class DotIndicator extends Indicator implements MaterializedBase {
         thisSerializer.release()
         return this
     }
-    selectedItemHeight_serialize(value: Length | undefined): this {
+    private selectedItemHeight_serialize(value: Length | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2257,10 +2117,10 @@ export class DotIndicator extends Indicator implements MaterializedBase {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -2269,7 +2129,7 @@ export class DotIndicator extends Indicator implements MaterializedBase {
         thisSerializer.release()
         return this
     }
-    mask_serialize(value: boolean | undefined): this {
+    private mask_serialize(value: boolean | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2282,15 +2142,15 @@ export class DotIndicator extends Indicator implements MaterializedBase {
         thisSerializer.release()
         return this
     }
-    color_serialize(value: ResourceColor | undefined): this {
+    private color_serialize(value: ResourceColor | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0  = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
@@ -2299,10 +2159,10 @@ export class DotIndicator extends Indicator implements MaterializedBase {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -2311,15 +2171,15 @@ export class DotIndicator extends Indicator implements MaterializedBase {
         thisSerializer.release()
         return this
     }
-    selectedColor_serialize(value: ResourceColor | undefined): this {
+    private selectedColor_serialize(value: ResourceColor | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0  = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
@@ -2328,10 +2188,10 @@ export class DotIndicator extends Indicator implements MaterializedBase {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -2340,7 +2200,7 @@ export class DotIndicator extends Indicator implements MaterializedBase {
         thisSerializer.release()
         return this
     }
-    maxDisplayCount_serialize(maxDisplayCount: int32 | undefined): this {
+    private maxDisplayCount_serialize(maxDisplayCount: int32 | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (maxDisplayCount !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2353,13 +2213,13 @@ export class DotIndicator extends Indicator implements MaterializedBase {
         thisSerializer.release()
         return this
     }
-    space_serialize(space: LengthMetrics | undefined): this {
+    private space_serialize(space: arkui_component_units_LengthMetrics | undefined): this {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (space !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const spaceTmpValue  = space!
-            LengthMetrics_serializer.write(thisSerializer, spaceTmpValue)
-         } else {
+            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, spaceTmpValue)
+        } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._DotIndicator_space(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())

@@ -60,8 +60,10 @@ constexpr double DEFAULT_ROTATION_ANGLE = 1.0;
 constexpr double DEFAULT_MAX_ROTATION_ANGLE = 360.0;
 } // namespace
 namespace GestureOpsAccessor {
-Ark_NativePointer CreateTapGestureImpl(const Ark_Number* fingers, const Ark_Number* count,
-    const Ark_Number* distanceThreshold, Ark_Boolean isFingerCountLimited)
+Ark_NativePointer CreateTapGestureImpl(const Ark_Number* fingers,
+                                       const Ark_Number* count,
+                                       const Ark_Number* distanceThreshold,
+                                       Ark_Boolean isFingerCountLimited)
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
     if (fingerValue > DEFAULT_MAX_FINGERS || fingerValue < DEFAULT_TAP_FINGER) {
@@ -78,8 +80,10 @@ Ark_NativePointer CreateTapGestureImpl(const Ark_Number* fingers, const Ark_Numb
     tapGestureObject->IncRefCount();
     return AceType::RawPtr(tapGestureObject);
 }
-Ark_NativePointer CreateLongPressGestureImpl(
-    const Ark_Number* fingers, Ark_Boolean repeat, const Ark_Number* duration, Ark_Boolean isFingerCountLimited)
+Ark_NativePointer CreateLongPressGestureImpl(const Ark_Number* fingers,
+                                             Ark_Boolean repeat,
+                                             const Ark_Number* duration,
+                                             Ark_Boolean isFingerCountLimited)
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
     if (fingerValue > DEFAULT_MAX_FINGERS || fingerValue < DEFAULT_TAP_FINGER) {
@@ -94,8 +98,10 @@ Ark_NativePointer CreateLongPressGestureImpl(
     longPressGestureObject->IncRefCount();
     return AceType::RawPtr(longPressGestureObject);
 }
-Ark_NativePointer CreatePanGestureImpl(
-    const Ark_Number* fingers, Ark_PanDirection direction, const Ark_Number* distance, Ark_Boolean isFingerCountLimited)
+Ark_NativePointer CreatePanGestureImpl(const Ark_Number* fingers,
+                                       Ark_PanDirection direction,
+                                       const Ark_Number* distance,
+                                       Ark_Boolean isFingerCountLimited)
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
     if (fingerValue > DEFAULT_MAX_FINGERS || fingerValue < DEFAULT_TAP_FINGER) {
@@ -127,8 +133,9 @@ Ark_NativePointer CreatePanGestureWithPanGestureOptionsImpl(Ark_NativePointer pa
     panGestureObject->IncRefCount();
     return AceType::RawPtr(panGestureObject);
 }
-Ark_NativePointer CreatePinchGestureImpl(
-    const Ark_Number* fingers, const Ark_Number* distance, Ark_Boolean isFingerCountLimited)
+Ark_NativePointer CreatePinchGestureImpl(const Ark_Number* fingers,
+                                         const Ark_Number* distance,
+                                         Ark_Boolean isFingerCountLimited)
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
     if (fingerValue > DEFAULT_MAX_FINGERS || fingerValue < DEFAULT_TAP_FINGER) {
@@ -141,8 +148,9 @@ Ark_NativePointer CreatePinchGestureImpl(
     pinchGestureObject->IncRefCount();
     return AceType::RawPtr(pinchGestureObject);
 }
-Ark_NativePointer CreateRotationGestureImpl(
-    const Ark_Number* fingers, const Ark_Number* angle, Ark_Boolean isFingerCountLimited)
+Ark_NativePointer CreateRotationGestureImpl(const Ark_Number* fingers,
+                                            const Ark_Number* angle,
+                                            Ark_Boolean isFingerCountLimited)
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
     if (fingerValue > DEFAULT_MAX_FINGERS || fingerValue < DEFAULT_TAP_FINGER) {
@@ -158,8 +166,10 @@ Ark_NativePointer CreateRotationGestureImpl(
     rotationGestureObject->IncRefCount();
     return AceType::RawPtr(rotationGestureObject);
 }
-Ark_NativePointer CreateSwipeGestureImpl(
-    const Ark_Number* fingers, Ark_SwipeDirection direction, const Ark_Number* speed, Ark_Boolean isFingerCountLimited)
+Ark_NativePointer CreateSwipeGestureImpl(const Ark_Number* fingers,
+                                         Ark_SwipeDirection direction,
+                                         const Ark_Number* speed,
+                                         Ark_Boolean isFingerCountLimited)
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
     if (fingerValue > DEFAULT_MAX_FINGERS || fingerValue < DEFAULT_TAP_FINGER) {
@@ -183,7 +193,8 @@ Ark_NativePointer CreateGestureGroupImpl(Ark_GestureMode mode)
     gestureGroupObject->IncRefCount();
     return AceType::RawPtr(gestureGroupObject);
 }
-void SetOnActionImpl(Ark_NativePointer gesture, const Callback_GestureEvent_Void* onAction)
+void SetOnActionImpl(Ark_NativePointer gesture,
+                     const GestureEventHandler* onAction)
 {
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
@@ -193,7 +204,8 @@ void SetOnActionImpl(Ark_NativePointer gesture, const Callback_GestureEvent_Void
     };
     gesturePtr->SetOnActionId(onActionEvent);
 }
-void SetOnActionStartImpl(Ark_NativePointer gesture, const Callback_GestureEvent_Void* onActionStart)
+void SetOnActionStartImpl(Ark_NativePointer gesture,
+                          const GestureEventHandler* onActionStart)
 {
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
@@ -203,7 +215,8 @@ void SetOnActionStartImpl(Ark_NativePointer gesture, const Callback_GestureEvent
     };
     gesturePtr->SetOnActionStartId(onActionStartEvent);
 }
-void SetOnActionUpdateImpl(Ark_NativePointer gesture, const Callback_GestureEvent_Void* onActionUpdate)
+void SetOnActionUpdateImpl(Ark_NativePointer gesture,
+                           const GestureEventHandler* onActionUpdate)
 {
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
@@ -213,7 +226,8 @@ void SetOnActionUpdateImpl(Ark_NativePointer gesture, const Callback_GestureEven
     };
     gesturePtr->SetOnActionUpdateId(onActionUpdateEvent);
 }
-void SetOnActionEndImpl(Ark_NativePointer gesture, const Callback_GestureEvent_Void* onActionEnd)
+void SetOnActionEndImpl(Ark_NativePointer gesture,
+                        const GestureEventHandler* onActionEnd)
 {
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
@@ -223,7 +237,8 @@ void SetOnActionEndImpl(Ark_NativePointer gesture, const Callback_GestureEvent_V
     };
     gesturePtr->SetOnActionEndId(onActionEndEvent);
 }
-void SetOnActionCancelImpl(Ark_NativePointer gesture, const Callback_GestureEvent_Void* onActionCancel)
+void SetOnActionCancelImpl(Ark_NativePointer gesture,
+                           const GestureEventHandler* onActionCancel)
 {
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
@@ -233,27 +248,33 @@ void SetOnActionCancelImpl(Ark_NativePointer gesture, const Callback_GestureEven
     };
     gesturePtr->SetOnActionCancelId(onActionCancelEvent);
 }
-void SetOnCancelImpl(Ark_NativePointer gesture, const Callback_Void* onCancel)
+void SetOnCancelImpl(Ark_NativePointer gesture,
+                     const synthetic_Callback_Void* onCancel)
 {
     auto* gesturePtr = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gesturePtr);
     auto onCancelEvent = [callback = CallbackHelper(*onCancel)](GestureEvent& info) { callback.InvokeSync(); };
     gesturePtr->SetOnActionCancelId(onCancelEvent);
 }
-void SetGestureTagImpl(Ark_NativePointer gesture, const Ark_String* tag)
+void SetGestureTagImpl(Ark_NativePointer gesture,
+                       const Ark_String* tag)
 {
     auto* gestureObject = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gestureObject);
     gestureObject->SetTag(Converter::Convert<std::string>(*tag));
 }
-void SetAllowedTypesImpl(Ark_NativePointer gesture, const Array_SourceTool* types)
+void SetAllowedTypesImpl(Ark_NativePointer gesture,
+                         const Array_SourceTool* types)
 {
     auto* gestureObject = reinterpret_cast<Gesture*>(gesture);
     CHECK_NULL_VOID(gestureObject);
     gestureObject->SetAllowedTypes(Converter::Convert<std::set<SourceTool>>(*types));
 }
-void AddGestureToNodeImpl(Ark_NativePointer node, const Ark_Number* priority, Ark_GestureMask mask,
-    Ark_NativePointer gesture, Ark_Boolean isModifier)
+void AddGestureToNodeImpl(Ark_NativePointer node,
+                          const Ark_Number* priority,
+                          Ark_GestureMask mask,
+                          Ark_NativePointer gesture,
+                          Ark_Boolean isModifier)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -280,7 +301,8 @@ void AddGestureToNodeImpl(Ark_NativePointer node, const Ark_Number* priority, Ar
     // Gesture ptr ref count is not decrease, so need to decrease after attach to gestureEventHub.
     gesturePtr->DecRefCount();
 }
-void AddGestureToGroupImpl(Ark_NativePointer group, Ark_NativePointer gesture)
+void AddGestureToGroupImpl(Ark_NativePointer group,
+                           Ark_NativePointer gesture)
 {
     auto* gestureGroup = reinterpret_cast<GestureGroup*>(group);
     CHECK_NULL_VOID(gestureGroup);
@@ -289,7 +311,8 @@ void AddGestureToGroupImpl(Ark_NativePointer group, Ark_NativePointer gesture)
     gestureGroup->AddGesture(AceType::Claim(gesturePtr));
     gesturePtr->DecRefCount();
 }
-void RemoveGestureByTagImpl(Ark_NativePointer node, const Ark_String* tag)
+void RemoveGestureByTagImpl(Ark_NativePointer node,
+                            const Ark_String* tag)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -305,21 +328,20 @@ void ClearGesturesImpl(Ark_NativePointer node)
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     gestureHub->ClearModifierGesture();
 }
-Ark_Number GetGestureEventType(Ark_NativePointer event)
+Ark_Number GetGestureEventTypeImpl(Ark_NativePointer event)
 {
     auto* peer = reinterpret_cast<Ark_BaseGestureEvent>(event);
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(-1));
     return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(peer->GetRecognizerType()));
 }
-Ark_Boolean IsScrollableComponent(Ark_NativePointer event)
+Ark_Boolean IsScrollableComponentImpl(Ark_NativePointer event)
 {
     auto defaultResult = Converter::ArkValue<Ark_Boolean>(true);
     auto* peer = reinterpret_cast<Ark_EventTargetInfo>(event);
     CHECK_NULL_RETURN(peer, defaultResult);
     return Converter::ArkValue<Ark_Boolean>(peer->isScrollableComponent_);
 }
-} // namespace GestureOpsAccessor
-
+} // GestureOpsAccessor
 const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor()
 {
     static const GENERATED_ArkUIGestureOpsAccessor GestureOpsAccessorImpl {
@@ -343,10 +365,10 @@ const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor()
         GestureOpsAccessor::AddGestureToGroupImpl,
         GestureOpsAccessor::RemoveGestureByTagImpl,
         GestureOpsAccessor::ClearGesturesImpl,
-        GestureOpsAccessor::GetGestureEventType,
-        GestureOpsAccessor::IsScrollableComponent,
+        GestureOpsAccessor::GetGestureEventTypeImpl,
+        GestureOpsAccessor::IsScrollableComponentImpl,
     };
     return &GestureOpsAccessorImpl;
 }
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

@@ -18,10 +18,8 @@
 
 import { AttributeModifier } from "#handwritten"
 import { ArkAlphabetIndexerComponent, AlphabetIndexerAttribute } from "./../../component/alphabetIndexer"
-import { ArkCommonMethodStyle, CommonMethod, ArkCommonShapeMethodStyle, CommonShapeMethod, ArkScrollableCommonMethodStyle, ScrollableCommonMethod } from "./../../component/common"
+import { CommonMethod, CommonShapeMethod, ScrollableCommonMethod } from "./../../component/common"
 import { AlphabetIndexerModifier } from "./../../AlphabetIndexerModifier"
-import { ArkAnimatorComponent, AnimatorAttribute } from "./../../component/animator"
-import { AnimatorModifier } from "./../../AnimatorModifier"
 import { ArkBadgeComponent, BadgeAttribute } from "./../../component/badge"
 import { BadgeModifier } from "./../../BadgeModifier"
 import { ArkBlankComponent, BlankAttribute } from "./../../component/blank"
@@ -91,14 +89,12 @@ import { ImageModifier } from "./../../ImageModifier"
 import { ArkImageAnimatorComponent, ImageAnimatorAttribute } from "./../../component/imageAnimator"
 import { ImageAnimatorModifier } from "./../../ImageAnimatorModifier"
 import { ArkImageSpanComponent, ImageSpanAttribute } from "./../../component/imageSpan"
-import { ArkBaseSpanStyle, BaseSpan } from "./../../component/span"
+import { BaseSpan } from "./../../component/span"
 import { ImageSpanModifier } from "./../../ImageSpanModifier"
 import { ArkIndicatorComponentComponent, IndicatorComponentAttribute } from "./../../component/indicatorcomponent"
 import { IndicatorComponentModifier } from "./../../IndicatorComponentModifier"
 import { ArkLineComponent, LineAttribute,ArkLinePeer,LineOptions} from './../../component/line';
 import { LineModifier } from "./../../LineModifier"
-import { ArkLinearIndicatorComponent, LinearIndicatorAttribute } from "./../../component/linearindicator"
-import { LinearIndicatorModifier } from "./../../LinearIndicatorModifier"
 import { ArkListComponent, ListAttribute } from "./../../component/list"
 import { ListModifier } from "./../../ListModifier"
 import { ArkListItemComponent, ListItemAttribute } from "./../../component/listItem"
@@ -110,7 +106,7 @@ import { LoadingProgressModifier } from "./../../LoadingProgressModifier"
 import { ArkMarqueeComponent, MarqueeAttribute } from "./../../component/marquee"
 import { MarqueeModifier } from "./../../MarqueeModifier"
 import { ArkMediaCachedImageComponent, MediaCachedImageAttribute } from "./../../component/mediaCachedImage"
-import { ArkImageStyle, ImageAttribute } from "./../../component/image"
+import { ImageAttribute } from "./../../component/image"
 import { MediaCachedImageModifier } from "./../../MediaCachedImageModifier"
 import { ArkMenuComponent, MenuAttribute } from "./../../component/menu"
 import { MenuModifier } from "./../../MenuModifier"
@@ -124,7 +120,6 @@ import { NavDestinationModifier } from "./../../NavDestinationModifier"
 import { ArkNavigationComponent, NavigationAttribute } from "./../../component/navigation"
 import { NavigationModifier } from "./../../NavigationModifier"
 import { ArkNodeContainerComponent, NodeContainerAttribute } from './../../component/nodeContainer';
-import { NodeContainerModifier } from "./../../NodeContainerModifier"
 import { ArkPathComponent, PathAttribute, PathOptions, ArkPathPeer } from "./../../component/path"
 import { PathModifier } from "./../../PathModifier"
 import { ArkPatternLockComponent, PatternLockAttribute } from "./../../component/patternLock"
@@ -261,6 +256,7 @@ import { ImageAIOptions, DataPanelOptions, GaugeOptions, PatternLockController, 
 import { ArkUIAniModule } from 'arkui.ani';
 import { KPointer } from '@koalaui/interop';
 import { UIContextUtil } from '../../base/UIContextUtil';
+import { NodeContainerModifier } from "#generated"
 
 export function hookAlphabetIndexerAttributeModifier(component: ArkAlphabetIndexerComponent, modifier: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined):void {
      if (modifier === undefined) {
@@ -293,7 +289,6 @@ export function hookAlphabetIndexerAttributeModifier(component: ArkAlphabetIndex
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<AlphabetIndexerAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
-export function hookAnimatorAttributeModifier(componenet: ArkAnimatorComponent, value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookBadgeAttributeModifier(componenet: ArkBadgeComponent, value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookCanvasAttributeModifier(component: ArkCanvasComponent, modifier: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined):void {
     if (modifier === undefined) {
@@ -503,7 +498,6 @@ export function hookLineAttributeModifier(component: ArkLineComponent, modifier:
     applyAttributeModifierBase(modifier as Object as AttributeModifier<LineAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
-export function hookLinearIndicatorAttributeModifier(componenet: ArkLinearIndicatorComponent, value: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookMediaCachedImageAttributeModifier(componenet: ArkMediaCachedImageComponent, value: AttributeModifier<MediaCachedImageAttribute> | AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookNavDestinationAttributeModifier(component: ArkNavDestinationComponent, modifier: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined):void {
         if (modifier === undefined) {

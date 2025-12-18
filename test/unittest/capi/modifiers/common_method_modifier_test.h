@@ -27,11 +27,6 @@ inline void AssignArkValue(Ark_Tuple_ResourceColor_F64& dst, const ColorStep& sr
     dst.value0 = src.first;
     dst.value1 = ArkValue<Ark_Float64>(src.second);
 }
-inline void AssignArkValue(Ark_Tuple_ResourceColor_Number& dst, const ColorStep& src, ConvContext *ctx)
-{
-    dst.value0 = src.first;
-    dst.value1 = ArkValue<Ark_Number>(src.second);
-}
 } // namespace OHOS::Ace::NG::Converter
 
 #endif

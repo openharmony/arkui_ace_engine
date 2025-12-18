@@ -70,7 +70,7 @@ void SetUsePopupImpl(Ark_NativePointer node, const Opt_Boolean* enabled)
     std::optional<bool> usePopupOpt = Converter::OptConvert<bool>(*enabled);
     IndexerModelStatic::SetUsingPopup(frameNode, usePopupOpt);
 }
-void SetSelectedFontImpl(Ark_NativePointer node, const Opt_Font* font)
+void SetSelectedFontImpl(Ark_NativePointer node, const Opt_arkui_component_units_Font* font)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -82,7 +82,7 @@ void SetSelectedFontImpl(Ark_NativePointer node, const Opt_Font* font)
         IndexerModelStatic::SetSelectedFont(frameNode, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     }
 }
-void SetPopupFontImpl(Ark_NativePointer node, const Opt_Font* font)
+void SetPopupFontImpl(Ark_NativePointer node, const Opt_arkui_component_units_Font* font)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -94,7 +94,7 @@ void SetPopupFontImpl(Ark_NativePointer node, const Opt_Font* font)
         IndexerModelStatic::SetPopupFont(frameNode, std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     }
 }
-void SetFontImpl(Ark_NativePointer node, const Opt_Font* font)
+void SetFontImpl(Ark_NativePointer node, const Opt_arkui_component_units_Font* font)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<int32_t> ProcessBindableIndex(FrameNode* frameNode, const Opt_Union_I32_Bindable& value)
+std::optional<int32_t> ProcessBindableIndex(FrameNode* frameNode, const Opt_Union_I32_Bindable_I32& value)
 {
     std::optional<int32_t> result;
     Converter::VisitUnion(value,
@@ -268,7 +268,7 @@ void SetEdgeEffectImpl(Ark_NativePointer node,
     TabsModelStatic::SetEdgeEffect(frameNode, OHOS::Ace::NG::EnumToInt(edgeEffectOpt));
 }
 void SetOnChangeImpl(Ark_NativePointer node,
-                     const Opt_Callback_I32_Void* value)
+                     const Opt_arkui_component_common_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -289,7 +289,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
     TabsModelStatic::SetOnChange(frameNode, std::move(onChange));
 }
 void SetOnSelectedImpl(Ark_NativePointer node,
-                       const Opt_Callback_I32_Void* value)
+                       const Opt_arkui_component_common_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -312,7 +312,7 @@ void SetOnSelectedImpl(Ark_NativePointer node,
     TabsModelStatic::SetOnSelected(frameNode, std::move(onSelected));
 }
 void SetOnTabBarClickImpl(Ark_NativePointer node,
-                          const Opt_Callback_I32_Void* value)
+                          const Opt_arkui_component_common_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -333,7 +333,7 @@ void SetOnTabBarClickImpl(Ark_NativePointer node,
     TabsModelStatic::SetOnTabBarClick(frameNode, std::move(onTabBarClick));
 }
 void SetOnUnselectedImpl(Ark_NativePointer node,
-                         const Opt_Callback_I32_Void* value)
+                         const Opt_arkui_component_common_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -139,7 +139,7 @@ HWTEST_F(TabsControllerAccessorTest, DISABLED_preloadItemsTest, TestSize.Level1)
     auto cont = Converter::ArkValue<Callback_Opt_Array_String_Void>(returnResFunc, expectedResourceId);
 
     // check of the work created
-    auto validValue = Converter::ArkValue<Opt_Array_Int32>(indexList, Converter::FC);
+    auto validValue = Converter::ArkValue<Opt_Array_I32>(indexList, Converter::FC);
     accessor_->preloadItems(vmContext_, AsyncWorkTestHelper::GetWorkerPtr(), peer_, &validValue, &cont);
     ASSERT_TRUE(AsyncWorkTestHelper::HasWorkCreated());
     auto fireFinish = mockSwiperController_->GetPreloadFinishCallback();

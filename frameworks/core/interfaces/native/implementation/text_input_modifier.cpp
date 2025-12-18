@@ -44,7 +44,7 @@ struct InputCounterOptions {
 };
 
 std::optional<std::u16string> ProcessBindableText(FrameNode* frameNode,
-    const Opt_Union_ResourceStr_Bindable_Bindable_Bindable& value)
+    const Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String& value)
 {
     std::optional<std::u16string> result;
     Converter::VisitUnion(value,
@@ -60,7 +60,7 @@ std::optional<std::u16string> ProcessBindableText(FrameNode* frameNode,
             };
             TextFieldModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
         },
-        [&result, frameNode](const Ark_Bindable_Arkui_Component_Units_ResourceStr& src) {
+        [&result, frameNode](const Ark_Bindable_ResourceStr& src) {
             result = Converter::OptConvert<std::u16string>(src.value);
             auto onEvent = [arkCallback = CallbackHelper(src.onChange)](const std::u16string& content) {
                 Converter::ConvContext ctx;
@@ -69,7 +69,7 @@ std::optional<std::u16string> ProcessBindableText(FrameNode* frameNode,
             };
             TextFieldModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
         },
-        [](const Ark_Bindable_Global_Resource_Resource& src) {
+        [](const Ark_Bindable_Resource& src) {
             // Invalid case, should be deleted from SDK
         },
         [] {});
@@ -194,7 +194,7 @@ void SetTextIndentImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetTextIndent(frameNode, convValue);
 }
 void SetPlaceholderFontImpl(Ark_NativePointer node,
-                            const Opt_Font* value)
+                            const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -218,7 +218,7 @@ void SetCaretColorImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetCaretColor(frameNode, convValue);
 }
 void SetOnEditChangeImpl(Ark_NativePointer node,
-                         const Opt_Callback_Boolean_Void* value)
+                         const Opt_arkui_component_common_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -584,13 +584,14 @@ void SetLineBreakStrategyImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<LineBreakStrategy>(value);
     TextFieldModelStatic::SetLineBreakStrategy(frameNode, convValue);
 }
-void SetCancelButton0Impl(Ark_NativePointer node, const Opt_CancelButtonOptions* value)
+void SetCancelButton0Impl(Ark_NativePointer node,
+                          const Opt_CancelButtonOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
-    auto cleanButtonStyle = optValue ? Converter::OptConvert<CleanNodeStyle>(optValue->style) : std::nullopt;
-    auto optIconOptions = optValue ? Converter::OptConvert<Ark_IconOptions>(optValue->icon) : std::nullopt;
+    auto cleanButtonStyle = OPT_CONVERT_FIELD(CleanNodeStyle, optValue, style);
+    auto optIconOptions = OPT_CONVERT_FIELD(Ark_IconOptions, optValue, icon);
     TextFieldModelStatic::SetCleanNodeStyle(frameNode, cleanButtonStyle);
     TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
     TextFieldModelNG::SetCancelButtonSymbol(frameNode, false);
@@ -622,7 +623,8 @@ void SetCancelButton0Impl(Ark_NativePointer node, const Opt_CancelButtonOptions*
     }
     TextFieldModelStatic::SetCancelIconColor(frameNode, iconColor);
 }
-void SetCancelButton1Impl(Ark_NativePointer node, const Opt_CancelButtonSymbolOptions* value)
+void SetCancelButton1Impl(Ark_NativePointer node,
+                          const Opt_CancelButtonSymbolOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -768,7 +770,7 @@ void SetShowPasswordImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetShowPassword(frameNode, convValue);
 }
 void SetOnSecurityStateChangeImpl(Ark_NativePointer node,
-                                  const Opt_Callback_Boolean_Void* value)
+                                  const Opt_arkui_component_common_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

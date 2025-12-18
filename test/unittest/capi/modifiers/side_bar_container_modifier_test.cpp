@@ -77,7 +77,8 @@ const auto CUSTOM_COLOR_STRING("#FF123456");
 const int CUSTOM_COLOR_INT(0xFF123456);
 const float CUSTOM_COLOR_FLOAT(0.1f);
 
-const Ark_ResourceColor COLOR_COLOR = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_GREEN);
+const Ark_ResourceColor COLOR_COLOR = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+    ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN);
 const Ark_ResourceColor COLOR_INT = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(CUSTOM_COLOR_INT);
 const Ark_ResourceColor COLOR_FLOAT = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(CUSTOM_COLOR_FLOAT);
 const Ark_ResourceColor COLOR_STRING = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(CUSTOM_COLOR_STRING);
@@ -275,7 +276,7 @@ HWTEST_F(SideBarContainerModifierTest, setShowSideBarTestValidValues, TestSize.L
     std::string resultStr;
     std::string expectedStr;
     for (auto [passed, checkVal, expected]: showSideBarValidValues) {
-        auto inputValueShowSideBar = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(checkVal);
+        auto inputValueShowSideBar = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(checkVal);
         modifier_->setShowSideBar(node_, &inputValueShowSideBar);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_SIDE_BAR_NAME);
@@ -358,11 +359,11 @@ Ark_ButtonStyle GetButtonStyle()
     style.top = Converter::ArkValue<Opt_Float64>();
     style.width = Converter::ArkValue<Opt_Float64>();
     style.height = Converter::ArkValue<Opt_Float64>();
-    WriteTo(style.icons).shown = Converter::ArkUnion<Ark_Union_String_PixelMap_Resource, Ark_String>(
+    WriteTo(style.icons).shown = Converter::ArkUnion<Ark_Union_String_image_PixelMap_Resource, Ark_String>(
         ICON_STRING_DEF);
-    WriteTo(style.icons).hidden = Converter::ArkUnion<Ark_Union_String_PixelMap_Resource, Ark_String>(
+    WriteTo(style.icons).hidden = Converter::ArkUnion<Ark_Union_String_image_PixelMap_Resource, Ark_String>(
         ICON_STRING_DEF);
-    WriteTo(style.icons).switching = Converter::ArkUnion<Opt_Union_String_PixelMap_Resource, Ark_String>(
+    WriteTo(style.icons).switching = Converter::ArkUnion<Opt_Union_String_image_PixelMap_Resource, Ark_String>(
         ICON_STRING_DEF);
     return style;
 }
@@ -376,11 +377,11 @@ HWTEST_F(SideBarContainerModifierTest, setControlButtonTestIconsStringValidValue
 {
     auto style = GetButtonStyle();
     auto checkValue = [this, &style](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_String_PixelMap_Resource& value) {
+                          const Ark_Union_String_image_PixelMap_Resource& value) {
         Ark_ButtonStyle inputStyle = style;
         WriteTo(inputStyle.icons).shown = value;
         WriteTo(inputStyle.icons).hidden = value;
-        WriteTo(inputStyle.icons).switching = Converter::ArkValue<Opt_Union_String_PixelMap_Resource>(value);
+        WriteTo(inputStyle.icons).switching = Converter::ArkValue<Opt_Union_String_image_PixelMap_Resource>(value);
         auto style = Converter::ArkValue<Opt_ButtonStyle>(inputStyle);
         modifier_->setControlButton(node_, &style);
         auto jsonValue = GetJsonValue(node_);
@@ -399,10 +400,10 @@ HWTEST_F(SideBarContainerModifierTest, setControlButtonTestIconsStringValidValue
     };
 
     for (auto& [input, value, expected] : controlButtonIconStringValues) {
-        checkValue(input, expected, Converter::ArkUnion<Ark_Union_String_PixelMap_Resource, Ark_String>(value));
+        checkValue(input, expected, Converter::ArkUnion<Ark_Union_String_image_PixelMap_Resource, Ark_String>(value));
     }
     auto res = CreateResource(RES_SRC_TEST, ResourceType::STRING);
-    auto valueRes = Converter::ArkUnion<Ark_Union_String_PixelMap_Resource, Ark_Resource>(res);
+    auto valueRes = Converter::ArkUnion<Ark_Union_String_image_PixelMap_Resource, Ark_Resource>(res);
     checkValue(ICON_STRING, ICON_STRING, valueRes);
 }
 
@@ -421,11 +422,11 @@ HWTEST_F(SideBarContainerModifierTest, DISABLED_setControlButtonTestIconsPixelMa
     image_PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = pixelMap;
     auto checkValue = [this, &style, pixelMap](const std::string& input, const std::string& expectedStr,
-        const Ark_Union_String_PixelMap_Resource& value) {
+        const Ark_Union_String_image_PixelMap_Resource& value) {
         Ark_ButtonStyle inputStyle = style;
         WriteTo(inputStyle.icons).shown = value;
         WriteTo(inputStyle.icons).hidden = value;
-        WriteTo(inputStyle.icons).switching = Converter::ArkValue<Opt_Union_String_PixelMap_Resource>(value);
+        WriteTo(inputStyle.icons).switching = Converter::ArkValue<Opt_Union_String_image_PixelMap_Resource>(value);
         auto style = Converter::ArkValue<Opt_ButtonStyle>(inputStyle);
         modifier_->setControlButton(node_, &style);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -444,7 +445,7 @@ HWTEST_F(SideBarContainerModifierTest, DISABLED_setControlButtonTestIconsPixelMa
         EXPECT_TRUE(info->IsPixmap());
         EXPECT_EQ(info->GetPixmap(), pixelMap);
     };
-    auto valuePx = Converter::ArkUnion<Ark_Union_String_PixelMap_Resource, Ark_image_PixelMap>(&pixelMapPeer);
+    auto valuePx = Converter::ArkUnion<Ark_Union_String_image_PixelMap_Resource, Ark_image_PixelMap>(&pixelMapPeer);
     checkValue(ICON_STRING, ICON_STRING, valuePx);
 }
 
@@ -550,7 +551,7 @@ HWTEST_F(SideBarContainerModifierTest, setSideBarWidthTestValidValues, TestSize.
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     for (auto [passed, checkVal, expected]: mSideBarWidthValidValues1) {
-        auto width = Converter::ArkUnion<Opt_Union_Length_Bindable, Ark_Length>(checkVal);
+        auto width = Converter::ArkUnion<Opt_Union_Length_Bindable_Length, Ark_Length>(checkVal);
         modifier_->setSideBarWidth(node_, &width);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SIDE_BAR_WIDTH_NAME);

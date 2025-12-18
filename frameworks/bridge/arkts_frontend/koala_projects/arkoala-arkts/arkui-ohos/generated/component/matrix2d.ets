@@ -16,68 +16,68 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { LengthMetricsUnit } from "arkui.Graphics"
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
-import { CallbackTransformer } from "./../CallbackTransformer"
+import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { LengthMetricsUnit as arkui_Graphics_LengthMetricsUnit } from '@arkui.Graphics'
+import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { CallbackTransformer } from './../CallbackTransformer'
 export class Matrix2DInternal {
     public static fromPtr(ptr: KPointer): Matrix2D {
-        return new Matrix2D(false, ptr)
+        return new Matrix2D(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class Matrix2D implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
+    public peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get scaleX(): number | undefined {
+    get scaleX(): double | undefined {
         return this.getScaleX()
     }
-    set scaleX(scaleX: number | undefined) {
+    set scaleX(scaleX: double | undefined) {
         this.setScaleX(scaleX)
     }
-    get scaleY(): number | undefined {
+    get scaleY(): double | undefined {
         return this.getScaleY()
     }
-    set scaleY(scaleY: number | undefined) {
+    set scaleY(scaleY: double | undefined) {
         this.setScaleY(scaleY)
     }
-    get rotateX(): number | undefined {
+    get rotateX(): double | undefined {
         return this.getRotateX()
     }
-    set rotateX(rotateX: number | undefined) {
+    set rotateX(rotateX: double | undefined) {
         this.setRotateX(rotateX)
     }
-    get rotateY(): number | undefined {
+    get rotateY(): double | undefined {
         return this.getRotateY()
     }
-    set rotateY(rotateY: number | undefined) {
+    set rotateY(rotateY: double | undefined) {
         this.setRotateY(rotateY)
     }
-    get translateX(): number | undefined {
+    get translateX(): double | undefined {
         return this.getTranslateX()
     }
-    set translateX(translateX: number | undefined) {
+    set translateX(translateX: double | undefined) {
         this.setTranslateX(translateX)
     }
-    get translateY(): number | undefined {
+    get translateY(): double | undefined {
         return this.getTranslateY()
     }
-    set translateY(translateY: number | undefined) {
+    set translateY(translateY: double | undefined) {
         this.setTranslateY(translateY)
     }
-    constructor(_0: boolean, peerPtr: KPointer) {
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, Matrix2D.getFinalizer())
     }
-    constructor(unit?: LengthMetricsUnit) {
-        this(false, Matrix2D.construct(unit))
+    constructor(unit?: arkui_Graphics_LengthMetricsUnit) {
+        this(MaterializedBaseTag.NOP, Matrix2D.construct(unit))
     }
-    static construct(unit?: LengthMetricsUnit): KPointer {
+    static construct(unit?: arkui_Graphics_LengthMetricsUnit): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (unit !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const unitTmpValue  = (unit as LengthMetricsUnit)
+            const unitTmpValue  = (unit as arkui_Graphics_LengthMetricsUnit)
             thisSerializer.writeInt32(unitTmpValue.valueOf())
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -95,93 +95,93 @@ export class Matrix2D implements MaterializedBase {
     public invert(): Matrix2D {
         return this.invert_serialize()
     }
-    public rotate(degree: number, rx?: number, ry?: number): Matrix2D {
-        const degree_casted = degree as (number)
-        const rx_casted = rx as (number | undefined)
-        const ry_casted = ry as (number | undefined)
+    public rotate(degree: double, rx?: double, ry?: double): Matrix2D {
+        const degree_casted = degree as (double)
+        const rx_casted = rx as (double | undefined)
+        const ry_casted = ry as (double | undefined)
         return this.rotate_serialize(degree_casted, rx_casted, ry_casted)
     }
-    public translate(tx?: number, ty?: number): Matrix2D {
-        const tx_casted = tx as (number | undefined)
-        const ty_casted = ty as (number | undefined)
+    public translate(tx?: double, ty?: double): Matrix2D {
+        const tx_casted = tx as (double | undefined)
+        const ty_casted = ty as (double | undefined)
         return this.translate_serialize(tx_casted, ty_casted)
     }
-    public scale(sx?: number, sy?: number): Matrix2D {
-        const sx_casted = sx as (number | undefined)
-        const sy_casted = sy as (number | undefined)
+    public scale(sx?: double, sy?: double): Matrix2D {
+        const sx_casted = sx as (double | undefined)
+        const sy_casted = sy as (double | undefined)
         return this.scale_serialize(sx_casted, sy_casted)
     }
-    private getScaleX(): number | undefined {
+    private getScaleX(): double | undefined {
         return this.getScaleX_serialize()
     }
-    private setScaleX(scaleX: number | undefined): void {
-        const scaleX_casted = scaleX as (number | undefined)
+    private setScaleX(scaleX: double | undefined): void {
+        const scaleX_casted = scaleX as (double | undefined)
         this.setScaleX_serialize(scaleX_casted)
         return
     }
-    private getScaleY(): number | undefined {
+    private getScaleY(): double | undefined {
         return this.getScaleY_serialize()
     }
-    private setScaleY(scaleY: number | undefined): void {
-        const scaleY_casted = scaleY as (number | undefined)
+    private setScaleY(scaleY: double | undefined): void {
+        const scaleY_casted = scaleY as (double | undefined)
         this.setScaleY_serialize(scaleY_casted)
         return
     }
-    private getRotateX(): number | undefined {
+    private getRotateX(): double | undefined {
         return this.getRotateX_serialize()
     }
-    private setRotateX(rotateX: number | undefined): void {
-        const rotateX_casted = rotateX as (number | undefined)
+    private setRotateX(rotateX: double | undefined): void {
+        const rotateX_casted = rotateX as (double | undefined)
         this.setRotateX_serialize(rotateX_casted)
         return
     }
-    private getRotateY(): number | undefined {
+    private getRotateY(): double | undefined {
         return this.getRotateY_serialize()
     }
-    private setRotateY(rotateY: number | undefined): void {
-        const rotateY_casted = rotateY as (number | undefined)
+    private setRotateY(rotateY: double | undefined): void {
+        const rotateY_casted = rotateY as (double | undefined)
         this.setRotateY_serialize(rotateY_casted)
         return
     }
-    private getTranslateX(): number | undefined {
+    private getTranslateX(): double | undefined {
         return this.getTranslateX_serialize()
     }
-    private setTranslateX(translateX: number | undefined): void {
-        const translateX_casted = translateX as (number | undefined)
+    private setTranslateX(translateX: double | undefined): void {
+        const translateX_casted = translateX as (double | undefined)
         this.setTranslateX_serialize(translateX_casted)
         return
     }
-    private getTranslateY(): number | undefined {
+    private getTranslateY(): double | undefined {
         return this.getTranslateY_serialize()
     }
-    private setTranslateY(translateY: number | undefined): void {
-        const translateY_casted = translateY as (number | undefined)
+    private setTranslateY(translateY: double | undefined): void {
+        const translateY_casted = translateY as (double | undefined)
         this.setTranslateY_serialize(translateY_casted)
         return
     }
-    identity_serialize(): Matrix2D {
+    private identity_serialize(): Matrix2D {
         const retval  = ArkUIGeneratedNativeModule._Matrix2D_identity(this.peer!.ptr)
         const obj : Matrix2D = Matrix2DInternal.fromPtr(retval)
         return obj
     }
-    invert_serialize(): Matrix2D {
+    private invert_serialize(): Matrix2D {
         const retval  = ArkUIGeneratedNativeModule._Matrix2D_invert(this.peer!.ptr)
         const obj : Matrix2D = Matrix2DInternal.fromPtr(retval)
         return obj
     }
-    rotate_serialize(degree: number, rx?: number, ry?: number): Matrix2D {
+    private rotate_serialize(degree: double, rx?: double, ry?: double): Matrix2D {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (rx !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const rxTmpValue  = rx!
-            thisSerializer.writeNumber(rxTmpValue)
+            thisSerializer.writeFloat64(rxTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         if (ry !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const ryTmpValue  = ry!
-            thisSerializer.writeNumber(ryTmpValue)
+            thisSerializer.writeFloat64(ryTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -190,19 +190,19 @@ export class Matrix2D implements MaterializedBase {
         const obj : Matrix2D = Matrix2DInternal.fromPtr(retval)
         return obj
     }
-    translate_serialize(tx?: number, ty?: number): Matrix2D {
+    private translate_serialize(tx?: double, ty?: double): Matrix2D {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (tx !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const txTmpValue  = tx!
-            thisSerializer.writeNumber(txTmpValue)
+            thisSerializer.writeFloat64(txTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         if (ty !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const tyTmpValue  = ty!
-            thisSerializer.writeNumber(tyTmpValue)
+            thisSerializer.writeFloat64(tyTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -211,19 +211,19 @@ export class Matrix2D implements MaterializedBase {
         const obj : Matrix2D = Matrix2DInternal.fromPtr(retval)
         return obj
     }
-    scale_serialize(sx?: number, sy?: number): Matrix2D {
+    private scale_serialize(sx?: double, sy?: double): Matrix2D {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (sx !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const sxTmpValue  = sx!
-            thisSerializer.writeNumber(sxTmpValue)
+            thisSerializer.writeFloat64(sxTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         if (sy !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const syTmpValue  = sy!
-            thisSerializer.writeNumber(syTmpValue)
+            thisSerializer.writeFloat64(syTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -232,138 +232,138 @@ export class Matrix2D implements MaterializedBase {
         const obj : Matrix2D = Matrix2DInternal.fromPtr(retval)
         return obj
     }
-    private getScaleX_serialize(): number | undefined {
+    private getScaleX_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._Matrix2D_getScaleX(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setScaleX_serialize(scaleX: number | undefined): void {
+    private setScaleX_serialize(scaleX: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (scaleX !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const scaleXTmpValue  = scaleX!
-            thisSerializer.writeNumber(scaleXTmpValue)
+            thisSerializer.writeFloat64(scaleXTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._Matrix2D_setScaleX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getScaleY_serialize(): number | undefined {
+    private getScaleY_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._Matrix2D_getScaleY(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setScaleY_serialize(scaleY: number | undefined): void {
+    private setScaleY_serialize(scaleY: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (scaleY !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const scaleYTmpValue  = scaleY!
-            thisSerializer.writeNumber(scaleYTmpValue)
+            thisSerializer.writeFloat64(scaleYTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._Matrix2D_setScaleY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getRotateX_serialize(): number | undefined {
+    private getRotateX_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._Matrix2D_getRotateX(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setRotateX_serialize(rotateX: number | undefined): void {
+    private setRotateX_serialize(rotateX: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (rotateX !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const rotateXTmpValue  = rotateX!
-            thisSerializer.writeNumber(rotateXTmpValue)
+            thisSerializer.writeFloat64(rotateXTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._Matrix2D_setRotateX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getRotateY_serialize(): number | undefined {
+    private getRotateY_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._Matrix2D_getRotateY(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setRotateY_serialize(rotateY: number | undefined): void {
+    private setRotateY_serialize(rotateY: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (rotateY !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const rotateYTmpValue  = rotateY!
-            thisSerializer.writeNumber(rotateYTmpValue)
+            thisSerializer.writeFloat64(rotateYTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._Matrix2D_setRotateY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getTranslateX_serialize(): number | undefined {
+    private getTranslateX_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._Matrix2D_getTranslateX(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setTranslateX_serialize(translateX: number | undefined): void {
+    private setTranslateX_serialize(translateX: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (translateX !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const translateXTmpValue  = translateX!
-            thisSerializer.writeNumber(translateXTmpValue)
+            thisSerializer.writeFloat64(translateXTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._Matrix2D_setTranslateX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getTranslateY_serialize(): number | undefined {
+    private getTranslateY_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._Matrix2D_getTranslateY(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        const buffer_runtimeType  = retvalDeserializer.readInt8()!.toInt()
+        let buffer : double | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = retvalDeserializer.readFloat64()
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : double | undefined = buffer
         return returnResult
     }
-    private setTranslateY_serialize(translateY: number | undefined): void {
+    private setTranslateY_serialize(translateY: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (translateY !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const translateYTmpValue  = translateY!
-            thisSerializer.writeNumber(translateYTmpValue)
+            thisSerializer.writeFloat64(translateYTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }

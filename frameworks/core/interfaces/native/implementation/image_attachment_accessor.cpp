@@ -129,7 +129,7 @@ RefPtr<ImageSpan> Convert(const Ark_ResourceImageAttachmentOptions& value)
 void AssignArkValue(Ark_ImageAttachmentLayoutStyle& dst, const ImageSpanAttribute& src, ConvContext *ctx)
 {
     Ark_ImageAttachmentLayoutStyle style = {
-        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(src.marginProp, ctx),
+        .margin = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(src.marginProp, ctx),
         .padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(src.paddingProp, ctx),
         .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(src.borderRadius, ctx),
     };
@@ -216,8 +216,7 @@ Opt_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
         peer->span->GetImageAttribute()->drawingColorFilter, empty);
     if (peer->span->GetImageAttribute()->colorFilterMatrix) {
         auto& colorFilter = peer->span->GetImageAttribute()->colorFilterMatrix.value();
-        ArkArrayHolder<Array_Float64> colorFilterHolder(colorFilter);
-        auto arrayNumber = ArkValue<Array_Float64>(colorFilterHolder.ArkValue());
+        auto arrayNumber = ArkValue<Array_F64>(colorFilter, Converter::FC);
         auto colorFilterPeer = GeneratedModifier::GetColorFilterAccessor()->construct(&arrayNumber);
         return ArkUnion<Opt_ColorFilterType, Ark_ColorFilter>(colorFilterPeer);
     } else {

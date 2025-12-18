@@ -24,15 +24,15 @@ using namespace TestConst::TextInput;
  */
 HWTEST_F(TextInputModifierTest, DISABLED_setLineHeightTestLineHeightInvalidValues, TestSize.Level1)
 {
-    Opt_Union_Number_String_Resource initValueLineHeight;
+    Opt_Union_F64_String_Resource initValueLineHeight;
 
     // Initial setup
-    initValueLineHeight = ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(
+    initValueLineHeight = ArkUnion<Opt_Union_F64_String_Resource, Ark_Number>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueLineHeight](
-                          const std::string& input, const Opt_Union_Number_String_Resource& value) {
-        Opt_Union_Number_String_Resource inputValueLineHeight = initValueLineHeight;
+                          const std::string& input, const Opt_Union_F64_String_Resource& value) {
+        Opt_Union_F64_String_Resource inputValueLineHeight = initValueLineHeight;
 
         modifier_->setLineHeight(node_, &inputValueLineHeight);
         inputValueLineHeight = value;
@@ -44,18 +44,18 @@ HWTEST_F(TextInputModifierTest, DISABLED_setLineHeightTestLineHeightInvalidValue
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Union_F64_String_Resource, Ark_Number>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_F64_String_Resource, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_String_Resource, Ark_Resource>(value));
+        checkValue(input, ArkUnion<Opt_Union_F64_String_Resource, Ark_Resource>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_Number_String_Resource, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_F64_String_Resource, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_Number_String_Resource>());
+    checkValue("undefined", ArkValue<Opt_Union_F64_String_Resource>());
 }
 
 /*

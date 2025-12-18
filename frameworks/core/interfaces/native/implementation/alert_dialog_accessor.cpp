@@ -48,10 +48,10 @@ struct DialogPropsForUpdate {
     Ark_ResourceStr message;
     Opt_Offset offset;
     Opt_Callback_DismissDialogAction_Void onWillDismiss;
-    Opt_Callback_Void onDidAppear;
-    Opt_Callback_Void onDidDisappear;
-    Opt_Callback_Void onWillAppear;
-    Opt_Callback_Void onWillDisappear;
+    Opt_VoidCallback onDidAppear;
+    Opt_VoidCallback onDidDisappear;
+    Opt_VoidCallback onWillAppear;
+    Opt_VoidCallback onWillDisappear;
     Opt_Union_ShadowOptions_ShadowStyle shadow;
     Opt_Boolean showInSubWindow;
     Opt_ResourceStr subtitle;
@@ -84,7 +84,6 @@ void AssignArkValue(Ark_DismissReason& dst, const DialogDismissReason& src)
             LOGE("Unexpected enum value in DialogDismissReason: %{public}d", src);
     }
 }
-
 template<>
 ButtonInfo Convert(const Ark_AlertDialogButtonOptions& src)
 {
@@ -301,19 +300,19 @@ DialogProperties CreateDialogProperties(const DialogPropsForUpdate props)
     dialogProps.height = Converter::OptConvert<CalcDimension>(props.height);
 
     AddOnWillDismiss(dialogProps, props.onWillDismiss);
-    auto onDidAppear = Converter::OptConvert<Callback_Void>(props.onDidAppear);
+    auto onDidAppear = Converter::OptConvert<VoidCallback>(props.onDidAppear);
     if (onDidAppear) {
         dialogProps.onDidAppear = [arkCallback = CallbackHelper(onDidAppear.value())]() { arkCallback.InvokeSync(); };
     }
-    auto onDidDisappear = Converter::OptConvert<Callback_Void>(props.onDidDisappear);
+    auto onDidDisappear = Converter::OptConvert<VoidCallback>(props.onDidDisappear);
     if (onDidDisappear) {
         dialogProps.onDidDisappear = [arkCallback = CallbackHelper(onDidDisappear.value())]() { arkCallback.Invoke(); };
     }
-    auto onWillAppear = Converter::OptConvert<Callback_Void>(props.onWillAppear);
+    auto onWillAppear = Converter::OptConvert<VoidCallback>(props.onWillAppear);
     if (onWillAppear) {
         dialogProps.onWillAppear = [arkCallback = CallbackHelper(onWillAppear.value())]() { arkCallback.Invoke(); };
     }
-    auto onWillDisappear = Converter::OptConvert<Callback_Void>(props.onWillDisappear);
+    auto onWillDisappear = Converter::OptConvert<VoidCallback>(props.onWillDisappear);
     if (onWillDisappear) {
         dialogProps.onWillDisappear = [arkCallback = CallbackHelper(onWillDisappear.value())]() {
             arkCallback.Invoke();

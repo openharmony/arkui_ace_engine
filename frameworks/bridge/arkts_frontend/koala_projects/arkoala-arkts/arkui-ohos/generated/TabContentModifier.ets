@@ -16,21 +16,27 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkTabContentPeer, SubTabBarStyle, BottomTabBarStyle, TabBarOptions, TabContentAttribute } from "./component/tabContent"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod } from "./component/common"
-import { ComponentContent } from "arkui.ComponentContent"
-import { Resource } from "global.resource"
-import { CustomBuilder } from "./component/builder"
-import { VoidCallback } from "./component/units"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier, extractors } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkTabContentPeer, SubTabBarStyle, BottomTabBarStyle, TabBarOptions, TabContentAttribute } from './component/tabContent'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod } from './component/common'
+import { ComponentContent } from '@arkui.ComponentContent'
+import { Resource as arkui_component_units_Resource, VoidCallback } from './component/units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { CustomBuilder } from './component/builder'
 export class TabContentModifier extends CommonMethodModifier implements TabContentAttribute,AttributeModifier<TabContentAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -40,92 +46,92 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
     applyFocusedAttribute(instance: TabContentAttribute): void { }
     applyDisabledAttribute(instance: TabContentAttribute): void { }
     applySelectedAttribute(instance: TabContentAttribute): void { }
-    _tabBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _tabBar_0_0value?: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined
-    _onWillShow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onWillShow_0_0value?: VoidCallback | undefined
-    _onWillHide_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onWillHide_0_0value?: VoidCallback | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _tabBar_0_0value?: ComponentContent<undefined> | SubTabBarStyle | BottomTabBarStyle | string | arkui_component_units_Resource | CustomBuilder | TabBarOptions | undefined
+    public _onWillShow_0_0value?: VoidCallback | undefined
+    public _onWillHide_0_0value?: VoidCallback | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkTabContentPeer;
-        if (this._tabBar_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._tabBar_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setTabBarAttribute((this._tabBar_0_0value as ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined));
-                    this._tabBar_0_flag = AttributeUpdaterFlag.RESET;
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkTabContentPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
+                    peer.setTabBarAttribute((this._tabBar_0_0value as ComponentContent<undefined> | SubTabBarStyle | BottomTabBarStyle | string | arkui_component_units_Resource | CustomBuilder | TabBarOptions | undefined));
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._tabBar_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._tabBar_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setTabBarAttribute((undefined as ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined));
+                    flagArray[0] = 0;
+                    peer.setTabBarAttribute((undefined as ComponentContent<undefined> | SubTabBarStyle | BottomTabBarStyle | string | arkui_component_units_Resource | CustomBuilder | TabBarOptions | undefined));
                 }
             }
         }
-        if (this._onWillShow_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onWillShow_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
                     peer.setOnWillShowAttribute((this._onWillShow_0_0value as VoidCallback | undefined));
-                    this._onWillShow_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onWillShow_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._onWillShow_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
                     peer.setOnWillShowAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
-        if (this._onWillHide_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onWillHide_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
                     peer.setOnWillHideAttribute((this._onWillHide_0_0value as VoidCallback | undefined));
-                    this._onWillHide_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onWillHide_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._onWillHide_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[2] = 0;
                     peer.setOnWillHideAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: TabContentModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._tabBar_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._tabBar_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: TabContentModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.tabBar(modifier._tabBar_0_0value);
                     break;
                 }
                 default: {
-                    this.tabBar((undefined as ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined));
+                    this.tabBar((undefined as ComponentContent<undefined> | SubTabBarStyle | BottomTabBarStyle | string | arkui_component_units_Resource | CustomBuilder | TabBarOptions | undefined));
                 }
             }
         }
-        if (modifier._onWillShow_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onWillShow_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.onWillShow(modifier._onWillShow_0_0value);
                     break;
                 }
@@ -134,11 +140,10 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
                 }
             }
         }
-        if (modifier._onWillHide_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onWillHide_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.onWillHide(modifier._onWillHide_0_0value);
                     break;
                 }
@@ -148,43 +153,37 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
             }
         }
     }
-    tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
-        if (((this._tabBar_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._tabBar_0_flag = AttributeUpdaterFlag.UPDATE
+    tabBar(value: ComponentContent<undefined> | SubTabBarStyle | BottomTabBarStyle | string | arkui_component_units_Resource | CustomBuilder | TabBarOptions | undefined): this {
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._tabBar_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._tabBar_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     onWillShow(value: VoidCallback | undefined): this {
-        if (((this._onWillShow_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onWillShow_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._onWillShow_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onWillShow_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     onWillHide(value: VoidCallback | undefined): this {
-        if (((this._onWillHide_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onWillHide_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._onWillHide_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onWillHide_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

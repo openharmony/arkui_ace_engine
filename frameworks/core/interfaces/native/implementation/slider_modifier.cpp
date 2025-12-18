@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<float> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_F64_Bindable& value)
+std::optional<float> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_F64_Bindable_F64& value)
 {
     std::optional<float> result;
     Converter::VisitUnion(value,
@@ -170,7 +170,7 @@ void SetSelectedColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    Converter::VisitUnion(*value,
+    Converter::VisitUnionPtr(value,
         [frameNode](const Ark_ResourceColor& value) {
             auto colorOpt = Converter::OptConvert<Color>(value);
             auto gradientOpt = colorOpt.has_value() ?
@@ -217,7 +217,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
         return;
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue)](float newValue, int32_t mode) {
-        Ark_Float64 arkValue = Converter::ArkValue<Ark_Float64>(newValue);
+        auto arkValue = Converter::ArkValue<Ark_Int32>(newValue);
         Ark_SliderChangeMode arkMode = Converter::ArkValue<Ark_SliderChangeMode>(
             static_cast<SliderModel::SliderChangeMode>(mode));
         arkCallback.Invoke(arkValue, arkMode);

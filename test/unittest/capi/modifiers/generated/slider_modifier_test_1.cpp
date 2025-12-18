@@ -665,7 +665,8 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorValidValues, TestSize.Le
 
     // Initial setup
     initValueBlockColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueBlockColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -680,7 +681,7 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorValidValues, TestSize.Le
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
@@ -704,7 +705,8 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorInvalidValues, TestSize.
 
     // Initial setup
     initValueBlockColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueBlockColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_ResourceColor inputValueBlockColor = initValueBlockColor;
@@ -722,7 +724,7 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorInvalidValues, TestSize.
         checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
@@ -755,7 +757,8 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestTrackColorValidValues, Te
 
     // Initial setup
     initValueTrackColor = ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+        ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
 
     auto checkValue = [this, &initValueTrackColor](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_ResourceColor_LinearGradient& value) {
@@ -772,7 +775,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestTrackColorValidValues, Te
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(input, expected,
             ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+                ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected,
@@ -802,7 +805,8 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestTrackColorInvalidValues, 
 
     // Initial setup
     initValueTrackColor = ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+        ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
 
     auto checkValue = [this, &initValueTrackColor](
                           const std::string& input, const Opt_Union_ResourceColor_LinearGradient& value) {
@@ -823,7 +827,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestTrackColorInvalidValues, 
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
         checkValue(input, ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-                              ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+                              ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(value)));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_Empty>(nullptr));
@@ -858,7 +862,8 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorValidValues, TestS
 
     // Initial setup
     initValueSelectedColor = ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+        ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
 
     auto checkValue = [this, &initValueSelectedColor](const std::string& input, const std::string& expectedStr,
                           const Opt_Union_ResourceColor_LinearGradient& value) {
@@ -875,7 +880,7 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorValidValues, TestS
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(input, expected,
             ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-                ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+                ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected,
@@ -905,7 +910,8 @@ HWTEST_F(SliderModifierTest, DISABLED_setSelectedColorTestSelectedColorInvalidVa
 
     // Initial setup
     initValueSelectedColor = ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-        ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
+        ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
 
     auto checkValue = [this, &initValueSelectedColor](
                           const std::string& input, const Opt_Union_ResourceColor_LinearGradient& value) {
@@ -926,7 +932,7 @@ HWTEST_F(SliderModifierTest, DISABLED_setSelectedColorTestSelectedColorInvalidVa
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
         checkValue(input, ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(
-                              ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
+                              ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(value)));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_LinearGradient, Ark_Empty>(nullptr));
@@ -1123,7 +1129,8 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorValidValues,
 
     // Initial setup
     initValueBlockBorderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueBlockBorderColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -1138,7 +1145,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorValidValues,
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
@@ -1162,7 +1169,8 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorInvalidValue
 
     // Initial setup
     initValueBlockBorderColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueBlockBorderColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_ResourceColor inputValueBlockBorderColor = initValueBlockBorderColor;
@@ -1180,7 +1188,7 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorInvalidValue
         checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
@@ -1304,7 +1312,8 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorValidValues, TestSize.Leve
 
     // Initial setup
     initValueStepColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueStepColor](
                           const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
@@ -1319,7 +1328,7 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorValidValues, TestSize.Leve
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
@@ -1343,7 +1352,8 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorInvalidValues, TestSize.Le
 
     // Initial setup
     initValueStepColor =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+        ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+            std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
 
     auto checkValue = [this, &initValueStepColor](const std::string& input, const Opt_ResourceColor& value) {
         Opt_ResourceColor inputValueStepColor = initValueStepColor;
@@ -1361,7 +1371,7 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorInvalidValues, TestSize.Le
         checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));

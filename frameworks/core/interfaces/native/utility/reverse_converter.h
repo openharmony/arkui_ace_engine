@@ -91,6 +91,7 @@
 #include "core/gestures/drag_event.h"
 #include "generated/converter_generated.h"
 #include "ace_engine_types.h"
+#include "patch.h"
 
 using Ark_Empty = InteropVoid;
 
@@ -293,7 +294,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_MouseButton& dst, const MouseButton& src);
     void AssignArkValue(Ark_NativeEmbedInfo& dst, const EmbedInfo& src);
     void AssignArkValue(Ark_NativeEmbedStatus& dst, const NativeEmbedStatus& src);
-    void AssignArkValue(Ark_NavContentInfo& dst, const RefPtr<NG::NavDestinationContext>& src);
+    void AssignArkValue(Ark_NavContentInfo& dst, const RefPtr<NG::NavDestinationContext>& src, ConvContext *ctx);
     void AssignArkValue(Ark_NavDestinationContext& dst, const RefPtr<NG::NavDestinationContext>& src);
     void AssignArkValue(Ark_NavPathInfo& dst, const OHOS::Ace::NG::GeneratedModifier::NavigationContext::PathInfo& src);
     void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src);
@@ -354,7 +355,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src);
     void AssignArkValue(Ark_ScrollSource& dst, const ScrollSource& src);
     void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src);
-    void AssignArkValue(Ark_SectionOptions& dst, const WaterFlowSections::Section& src);
     void AssignArkValue(Ark_SelectStatus& dst, const int32_t& src);
     void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx);
     void AssignArkValue(Ark_ShadowType& dst, const ShadowType& src);
@@ -428,7 +428,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_text_TextStyle& dst, const TextStyle& src, ConvContext *ctx);
     void AssignArkValue(Ark_uiObserver_NavigationInfo& dst, const std::shared_ptr<OHOS::Ace::NG::NavigationInfo>& src);
     void AssignArkValue(Ark_unifiedDataChannel_UnifiedData& dst, const RefPtr<UnifiedData>& src);
-    void AssignArkValue(Map_Int32_text_RunMetrics& dst, const std::map<size_t, RunMetrics>& src, ConvContext *ctx);
+    void AssignArkValue(Map_I32_text_RunMetrics& dst, const std::map<size_t, RunMetrics>& src, ConvContext *ctx);
 
     // Long declarations
     void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src,
@@ -906,7 +906,6 @@ namespace OHOS::Ace::NG::Converter {
     using ArkMouseEventSync = SyncEvent<Ark_MouseEvent>;
     using ArkSubmitEventSync = SyncEvent<Ark_SubmitEvent>;
     using ArkTouchEventSync = SyncEvent<Ark_TouchEvent>;
-    using ArkAxisEventSync = SyncEvent<Ark_AxisEvent>;
 } // namespace OHOS::Ace::NG::Converter
 
 #endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_REVERSE_CONVERTER_H

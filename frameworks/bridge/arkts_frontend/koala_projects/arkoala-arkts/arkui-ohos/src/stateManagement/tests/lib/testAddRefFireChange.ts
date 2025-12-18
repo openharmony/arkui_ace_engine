@@ -5,7 +5,7 @@ import { IMutableStateMeta } from '../../decorator';
 import { IMutableKeyedStateMeta } from '../../decorator';
 import { DecoratorBackingValue } from '../../base/backingValue';
 import { MutableStateMeta, MutableKeyedStateMeta } from '../../base/mutableStateMeta'
-import { StateTracker } from "./stateTracker.ts";
+import { StateTracker } from "./stateTracker";
 import { int32 } from '@koalaui/common';
 
 export class TestFactory implements IFactoryInternal {

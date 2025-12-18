@@ -28,7 +28,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 std::optional<std::u16string> ProcessBindableText(FrameNode* frameNode,
-    const Opt_Union_ResourceStr_Bindable_Bindable_Bindable& value)
+    const Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String& value)
 {
     std::optional<std::u16string> result;
     Converter::VisitUnion(value,
@@ -44,7 +44,7 @@ std::optional<std::u16string> ProcessBindableText(FrameNode* frameNode,
             };
             TextFieldModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
         },
-        [&result, frameNode](const Ark_Bindable_Arkui_Component_Units_ResourceStr& src) {
+        [&result, frameNode](const Ark_Bindable_ResourceStr& src) {
             result = Converter::OptConvert<std::u16string>(src.value);
             auto onEvent = [arkCallback = CallbackHelper(src.onChange)](const std::u16string& content) {
                 Converter::ConvContext ctx;
@@ -53,7 +53,7 @@ std::optional<std::u16string> ProcessBindableText(FrameNode* frameNode,
             };
             TextFieldModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
         },
-        [](const Ark_Bindable_Global_Resource_Resource& src) {
+        [](const Ark_Bindable_Resource& src) {
             // Invalid case, should be deleted from SDK
         },
         [] {});
@@ -109,7 +109,7 @@ void SetPlaceholderColorImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetPlaceholderColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void SetPlaceholderFontImpl(Ark_NativePointer node,
-                            const Opt_Font* value)
+                            const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -217,7 +217,8 @@ void SetSelectedBackgroundColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     TextFieldModelStatic::SetSelectedBackgroundColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
-void SetOnSubmitImpl(Ark_NativePointer node, const Opt_TextAreaSubmitCallback* value)
+void SetOnSubmitImpl(Ark_NativePointer node,
+                     const Opt_TextAreaSubmitCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -291,7 +292,7 @@ void SetOnContentScrollImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnContentScroll(frameNode, std::move(onContentScroll));
 }
 void SetOnEditChangeImpl(Ark_NativePointer node,
-                         const Opt_Callback_Boolean_Void* value)
+                         const Opt_synthetic_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -306,7 +307,7 @@ void SetOnEditChangeImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnEditChange(frameNode, std::move(onEditEvent));
 }
 void SetOnCopyImpl(Ark_NativePointer node,
-                   const Opt_Callback_String_Void* value)
+                   const Opt_synthetic_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -323,7 +324,7 @@ void SetOnCopyImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
 void SetOnCutImpl(Ark_NativePointer node,
-                  const Opt_Callback_String_Void* value)
+                  const Opt_synthetic_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -770,7 +771,7 @@ void SetKeyboardAppearanceImpl(Ark_NativePointer node,
 }
 void SetInputFilterImpl(Ark_NativePointer node,
                         const Opt_ResourceStr* value,
-                        const Opt_Callback_String_Void* error)
+                        const Opt_synthetic_Callback_String_Void* error)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

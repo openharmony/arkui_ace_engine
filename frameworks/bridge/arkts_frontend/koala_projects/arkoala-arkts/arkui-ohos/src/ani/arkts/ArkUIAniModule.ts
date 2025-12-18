@@ -21,10 +21,10 @@ import common from '@ohos.app.ability.common';
 import unifiedDataChannel from '@ohos.data.unifiedDataChannel';
 import uniformTypeDescriptor from '@ohos.data.uniformTypeDescriptor';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
-import { DrawContext } from 'arkui.Graphics';
+import { DrawContext } from '@arkui.Graphics';
 import { AnimatableArithmetic, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from '#generated';
 import { ArkCustomComponent } from 'arkui/ArkCustomComponent';
-import { SectionChangeInfo, WaterFlowSections, OverlayOptions } from '#generated';
+import { WaterFlowSections, OverlayOptions } from '#generated';
 import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from '#generated';
 import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
@@ -33,7 +33,7 @@ import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
 import { KeyboardAvoidMode } from '@ohos/arkui/UIContext';
 import { DrawableDescriptor } from '@ohos.arkui.drawableDescriptor';
 import { default as uiObserver }  from '@ohos/arkui/observer';
-import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
+import { SymbolGlyphModifier } from '@arkui.SymbolGlyphModifier';
 import { TextModifier } from 'arkui.TextModifier'
 import { NodeAdapter } from 'arkui.FrameNode'
 import { Scene } from '@ohos.graphics.scene';
@@ -41,7 +41,7 @@ import { RectShape, CircleShape, EllipseShape, PathShape } from '@ohos.arkui.sha
 import curves from '@ohos.curves';
 import matrix4 from '@ohos.matrix4';
 import uiEffect from '@ohos.graphics.uiEffect';
-import { DrawModifier } from "#handwritten"
+import { DrawModifier, SectionChangeInfo } from "#handwritten"
 import { FrameNode } from "arkui.FrameNode"
 
 export class ArkUIAniModule {

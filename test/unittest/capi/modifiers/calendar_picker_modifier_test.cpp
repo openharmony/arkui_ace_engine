@@ -168,18 +168,42 @@ HWTEST_F(CalendarPickerModifierTest, setEdgeAlignTest, TestSize.Level1)
 
 typedef std::pair<Opt_ResourceColor, std::string> ArkColorTest;
 const std::vector<ArkColorTest> COLOR_TEST_PLAN = {
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLACK), "#FF000000" },
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BROWN), "#FFA52A2A" },
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GRAY), "#FF808080" },
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GREEN), "#FF008000" },
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GREY), "#FF808080" },
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_ORANGE), "#FFFFA500" },
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_PINK), "#FFFFC0CB" },
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_YELLOW), "#FFFFFF00" },
-    { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_TRANSPARENT), "#00000000" },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE),
+        "#FFFFFFFF" },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK),
+        "#FF000000" },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN),
+        "#FFA52A2A" },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY),
+        "#FF808080" },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN),
+        "#FF008000" },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY),
+        "#FF808080" },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE),
+        "#FFFFA500" },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK),
+        "#FFFFC0CB" },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED),
+        "#FFFF0000" },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW),
+        "#FFFFFF00" },
+    { Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT),
+        "#00000000" },
 };
 
 typedef std::pair<Opt_Union_FontWeight_I32_String, std::string> ArkFontWeightTest;
@@ -206,7 +230,7 @@ const std::vector<OptLengthTestStep> FONT_SIZE_TEST_PLAN = {
 HWTEST_F(CalendarPickerModifierTest, setTextStyleColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
     };
@@ -235,7 +259,7 @@ HWTEST_F(CalendarPickerModifierTest, setTextStyleColorTest, TestSize.Level1)
 HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleFontWeightTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
     };
@@ -268,7 +292,7 @@ HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleFontWeightTest, TestSi
 HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleFontSizeTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .size = FONT_SIZE_TEST_PLAN[0].first,
         .weight = FONT_WEIGHT_TEST_PLAN[0].first
     };
@@ -293,11 +317,11 @@ HWTEST_F(CalendarPickerModifierTest, DISABLED_setTextStyleFontSizeTest, TestSize
     }
 }
 
-typedef std::pair<Ark_Union_Number_Resource, PickerDate> OptionsArgsStepTest;
+typedef std::pair<Opt_Union_F64_Resource, PickerDate> OptionsArgsStepTest;
 typedef std::pair<std::string, std::string> PickerOptionsStringStepTest;
 typedef std::pair<OptionsArgsStepTest, PickerOptionsStringStepTest> PickerDateOptionsStepTest;
 const std::vector<PickerDateOptionsStepTest> OPTIONS_TEST_PLAN = {
-    { { {.selector = 0, .value0 = Converter::ArkValue<Ark_Number>(0.7) }, PickerDate(2023, 7, 21) },
+    { { Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(0.7), PickerDate(2023, 7, 21) },
         { "0.7", "2023-7-21" } }
 };
 
@@ -312,7 +336,7 @@ HWTEST_F(CalendarPickerModifierTest, DISABLED_setCalendarPickerOptionsTest, Test
 
     for (const auto& [actual, expected] : OPTIONS_TEST_PLAN) {
         Ark_CalendarOptions arkOptions = {
-            .hintRadius = Converter::ArkValue<Opt_Union_Number_Resource>(std::get<0>(actual)),
+            .hintRadius = Converter::ArkValue<Opt_Union_F64_Resource>(std::get<0>(actual)),
             .selected = Converter::ArkValue<Opt_Date>(std::get<1>(actual)),
         };
         auto optOptions = Converter::ArkValue<Opt_CalendarOptions>(arkOptions);

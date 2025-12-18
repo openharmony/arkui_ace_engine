@@ -51,7 +51,9 @@ const auto COLOR_STRING_RES = CreateResource("color_name", ResourceType::STRING)
 
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -65,7 +67,9 @@ const std::vector<ColorTestStep> COLOR_TEST_PLAN_INVALID = {
 
 
 const std::vector<ColorTestStep> COLOR_TEST_PLAN1 = {
-    { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -222,7 +226,8 @@ public:
  */
 HWTEST_F(MenuItemModifierTest, setMenuItemOptionsCustomBuilderTest, TestSize.Level1)
 {
-    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, CustomNodeBuilder>(getBuilderCb());
+    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomNodeBuilder, CustomNodeBuilder>(
+        getBuilderCb());
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     ASSERT_EQ(checkEventIcon.has_value(), true);
     EXPECT_EQ(checkEventIcon->resourceId, TEST_RESOURCE_ID);
@@ -242,7 +247,7 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsStartIconStringTest, TestSize.L
     EXPECT_EQ(startIcon, "");
     Ark_MenuItemOptions options = { .startIcon =
         Converter::ArkUnion<Opt_ResourceStr, Ark_String>(START_ICON_PATH, Converter::FC)};
-    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
+    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomNodeBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     startIcon = GetAttrValue<std::string>(node_, START_ICON_PROP);
     EXPECT_EQ(startIcon, START_ICON_PATH);
@@ -259,7 +264,7 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsStartIconResourceTest, TestSize
     EXPECT_EQ(startIcon, "");
     Ark_MenuItemOptions options = { .startIcon =
         Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(CreateResource(START_ICON_RES, ResourceType::STRING))};
-    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
+    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomNodeBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     startIcon = GetAttrValue<std::string>(node_, START_ICON_PROP);
     EXPECT_EQ(startIcon, START_ICON_PATH);
@@ -276,7 +281,7 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsEndIconStringTest, TestSize.Lev
     EXPECT_EQ(endIcon, "");
     Ark_MenuItemOptions options = { .endIcon =
         Converter::ArkUnion<Opt_ResourceStr, Ark_String>(END_ICON_PATH, Converter::FC)};
-    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
+    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomNodeBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     endIcon = GetAttrValue<std::string>(node_, END_ICON_PROP);
     EXPECT_EQ(endIcon, END_ICON_PATH);
@@ -293,7 +298,7 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsEndIconResourceTest, TestSize.L
     EXPECT_EQ(endIcon, "");
     Ark_MenuItemOptions options = { .endIcon =
         Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(CreateResource(END_ICON_RES, ResourceType::STRING))};
-    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
+    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomNodeBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     endIcon = GetAttrValue<std::string>(node_, END_ICON_PROP);
     EXPECT_EQ(endIcon, END_ICON_PATH);
@@ -310,7 +315,7 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsContentStringTest, TestSize.Lev
     EXPECT_EQ(content, "");
     Ark_MenuItemOptions options = { .content =
         Converter::ArkUnion<Opt_ResourceStr, Ark_String>(CONTENT, Converter::FC)};
-    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
+    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomNodeBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     content = GetAttrValue<std::string>(node_, CONTENT_PROP);
     EXPECT_EQ(content, CONTENT);
@@ -327,7 +332,7 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsContentResourceTest, TestSize.L
     EXPECT_EQ(content, "");
     Ark_MenuItemOptions options = { .content =
         Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(CreateResource(CONTENT_RES, ResourceType::STRING))};
-    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
+    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomNodeBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     content = GetAttrValue<std::string>(node_, CONTENT_PROP);
     EXPECT_EQ(content, CONTENT);
@@ -344,7 +349,7 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsLabelInfoStringTest, TestSize.L
     EXPECT_EQ(labelInfo, "");
     Ark_MenuItemOptions options = { .labelInfo =
         Converter::ArkUnion<Opt_ResourceStr, Ark_String>(LABEL_INFO, Converter::FC)};
-    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
+    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomNodeBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     labelInfo = GetAttrValue<std::string>(node_, LABEL_INFO_PROP);
     EXPECT_EQ(labelInfo, LABEL_INFO);
@@ -361,7 +366,7 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsLabelInfoResourceTest, TestSize
     EXPECT_EQ(labelInfo, "");
     Ark_MenuItemOptions options = { .labelInfo =
         Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(CreateResource(LABEL_INFO_RES, ResourceType::STRING))};
-    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
+    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomNodeBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     labelInfo = GetAttrValue<std::string>(node_, LABEL_INFO_PROP);
     EXPECT_EQ(labelInfo, LABEL_INFO);
@@ -383,7 +388,7 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsSymbolStartIconTest, TestSize.L
     auto symbolPeer = PeerUtils::CreatePeer<SymbolGlyphModifierPeer>();
     symbolPeer->symbolApply = [](WeakPtr<NG::FrameNode>) {};
     Ark_MenuItemOptions options = {.symbolStartIcon = Converter::ArkValue<Opt_SymbolGlyphModifier>(symbolPeer)};
-    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
+    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomNodeBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
@@ -406,7 +411,7 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsSymbolEndIconTest, TestSize.Lev
     auto symbolPeer = PeerUtils::CreatePeer<SymbolGlyphModifierPeer>();
     symbolPeer->symbolApply = [](WeakPtr<NG::FrameNode>) {};
     Ark_MenuItemOptions options = {.symbolEndIcon = Converter::ArkValue<Opt_SymbolGlyphModifier>(symbolPeer)};
-    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
+    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomNodeBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
@@ -429,7 +434,7 @@ HWTEST_F(MenuItemModifierTest, setMenuItemOptionsMenuItemOptionsCustomBuilderTes
     auto builder = getBuilderCb();
     auto iconBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
     Ark_MenuItemOptions options = {.builder = iconBuilder};
-    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomBuilder, Ark_MenuItemOptions>(options);
+    auto optionsOpt = Converter::ArkUnion<Opt_Union_MenuItemOptions_CustomNodeBuilder, Ark_MenuItemOptions>(options);
     modifier_->setMenuItemOptions(node_, &optionsOpt);
     pattern = frameNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -468,7 +473,7 @@ HWTEST_F(MenuItemModifierTest, setSelectedTest, TestSize.Level1)
 {
     bool selected = GetAttrValue<bool>(node_, "selected");
     EXPECT_FALSE(selected);
-    auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
+    auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable_Boolean, Ark_Boolean>(true);
     modifier_->setSelected(node_, &optValue);
     selected = GetAttrValue<bool>(node_, "selected");
     EXPECT_TRUE(selected);
@@ -648,7 +653,7 @@ HWTEST_F(MenuItemModifierTest, setLabelFontColorInvalidTest, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, setContentFontTest1, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFont, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -660,7 +665,7 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest1, TestSize.Level1)
 
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
-        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        auto optFont = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setContentFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "contentFont");
@@ -683,7 +688,7 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest1, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, setContentFontTest2, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFont, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -695,7 +700,7 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest2, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
-        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        auto optFont = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setContentFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "contentFont");
@@ -718,7 +723,7 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest2, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, setContentFontTest3, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFont, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -730,7 +735,7 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest3, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
-        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        auto optFont = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setContentFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "contentFont");
@@ -753,7 +758,7 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest3, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, setContentFontTest4, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFont, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -765,7 +770,7 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest4, TestSize.Level1)
 
     for (auto family : UNION_RESOURCE_STRING_PLAN) {
         font.family = family.first;
-        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        auto optFont = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setContentFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "contentFont");
@@ -788,7 +793,7 @@ HWTEST_F(MenuItemModifierTest, setContentFontTest4, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, DISABLED_setContentFontTest5, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContentFont, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -800,7 +805,7 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setContentFontTest5, TestSize.Level1)
 
     for (auto size : OPT_LENGTH_TEST_PLAN) {
         font.size = size.first;
-        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        auto optFont = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setContentFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "contentFont");
@@ -823,7 +828,7 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setContentFontTest5, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, setLabelFontTest1, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFont, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -835,7 +840,7 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest1, TestSize.Level1)
 
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
-        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        auto optFont = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setLabelFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "labelFont");
@@ -858,7 +863,7 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest1, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, setLabelFontTest2, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFont, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -870,7 +875,7 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest2, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
-        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        auto optFont = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setLabelFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "labelFont");
@@ -893,7 +898,7 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest2, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, setLabelFontTest3, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFont, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -905,7 +910,7 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest3, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
-        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        auto optFont = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setLabelFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "labelFont");
@@ -928,7 +933,7 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest3, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, setLabelFontTest4, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFont, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -940,7 +945,7 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest4, TestSize.Level1)
 
     for (auto family : UNION_RESOURCE_STRING_PLAN) {
         font.family = family.first;
-        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        auto optFont = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setLabelFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "labelFont");
@@ -963,7 +968,7 @@ HWTEST_F(MenuItemModifierTest, setLabelFontTest4, TestSize.Level1)
 HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontTest5, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLabelFont, nullptr);
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -975,7 +980,7 @@ HWTEST_F(MenuItemModifierTest, DISABLED_setLabelFontTest5, TestSize.Level1)
 
     for (auto size : OPT_LENGTH_TEST_PLAN) {
         font.size = size.first;
-        auto optFont = Converter::ArkValue<Opt_Font>(font);
+        auto optFont = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setLabelFont(node_, &optFont);
         auto fullJson = GetJsonValue(node_);
         auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "labelFont");

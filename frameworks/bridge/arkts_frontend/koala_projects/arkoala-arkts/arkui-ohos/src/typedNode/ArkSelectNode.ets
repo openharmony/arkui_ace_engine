@@ -164,10 +164,11 @@ export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
         return this;
     }
     divider(value: DividerOptions | null | undefined): this {
-        const value_casted = value as ( DividerOptions | null | undefined);
-        this.getPeer()?.setDividerAttribute(value_casted);  
-        this.markDirty();
-        return this;
+        // const value_casted = value as ( DividerOptions | null | undefined);
+        // this.getPeer()?.setDividerAttribute(value_casted);  
+        // this.markDirty();
+        // return this;
+        throw new Error("Unimplemented method setDividerAttribute")
     }
     textModifier(value: TextModifier | undefined): this {
         const value_casted = value as ( TextModifier | undefined);

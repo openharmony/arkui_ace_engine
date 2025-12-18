@@ -16,11 +16,10 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { default as router } from "@ohos.router"
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { TypeChecker } from "#components"
-import { CallbackTransformer } from "./../CallbackTransformer"
+import { default as router } from '@ohos.router'
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { CallbackTransformer } from './../CallbackTransformer'
 export class router_RouterOptions_serializer {
     public static write(buffer: SerializerBase, value: router.RouterOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -46,13 +45,13 @@ export class router_RouterOptions_serializer {
     public static read(buffer: DeserializerBase): router.RouterOptions {
         let valueDeserializer : DeserializerBase = buffer
         const urlTmpResult : string = (valueDeserializer.readString() as string)
-        const paramsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const paramsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let paramsTmpBuf : Object | undefined = undefined
         if ((paramsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             paramsTmpBuf = (valueDeserializer.readObject() as object)
         }
         const paramsTmpResult : Object | undefined = paramsTmpBuf
-        const recoverableTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const recoverableTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let recoverableTmpBuf : boolean | undefined = undefined
         if ((recoverableTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             recoverableTmpBuf = valueDeserializer.readBoolean()
@@ -76,7 +75,7 @@ export class router_RouterState_serializer {
     }
     public static read(buffer: DeserializerBase): router.RouterState {
         let valueDeserializer : DeserializerBase = buffer
-        const indexTmpResult : int32 = (valueDeserializer.readInt32() as int32)
+        const indexTmpResult : int32 = valueDeserializer.readInt32()
         const nameTmpResult : string = (valueDeserializer.readString() as string)
         const pathTmpResult : string = (valueDeserializer.readString() as string)
         const paramsTmpResult : Object = (valueDeserializer.readObject() as object)

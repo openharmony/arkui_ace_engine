@@ -16,20 +16,26 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkBlankPeer, BlankAttribute } from "./component/blank"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod } from "./component/common"
-import { ResourceColor } from "./component/units"
-import { Color } from "./component/enums"
-import { Resource } from "global.resource"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkBlankPeer, BlankAttribute } from './component/blank'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod } from './component/common'
+import { ResourceColor, Resource as arkui_component_units_Resource } from './component/units'
+import { Color as arkui_component_enums_Color } from './component/enums'
+import { Resource as global_resource_Resource } from 'global.resource'
 export class BlankModifier extends CommonMethodModifier implements BlankAttribute,AttributeModifier<BlankAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -39,26 +45,28 @@ export class BlankModifier extends CommonMethodModifier implements BlankAttribut
     applyFocusedAttribute(instance: BlankAttribute): void { }
     applyDisabledAttribute(instance: BlankAttribute): void { }
     applySelectedAttribute(instance: BlankAttribute): void { }
-    _color_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _color_0_0value?: ResourceColor | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _color_0_0value?: ResourceColor | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkBlankPeer;
-        if (this._color_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._color_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkBlankPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setColorAttribute((this._color_0_0value as ResourceColor | undefined));
-                    this._color_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._color_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._color_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
@@ -66,12 +74,15 @@ export class BlankModifier extends CommonMethodModifier implements BlankAttribut
     }
     mergeModifier(modifier: BlankModifier): void {
         super.mergeModifier(modifier)
-        this._state = modifier._state
-        if (modifier._color_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._color_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        this._state = modifier._state;
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: BlankModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.color(modifier._color_0_0value);
                     break;
                 }
@@ -82,18 +93,16 @@ export class BlankModifier extends CommonMethodModifier implements BlankAttribut
         }
     }
     color(value: ResourceColor | undefined): this {
-        if (((this._color_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._color_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._color_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._color_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

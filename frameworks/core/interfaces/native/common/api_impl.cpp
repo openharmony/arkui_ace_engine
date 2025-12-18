@@ -185,6 +185,7 @@ Ark_Int32 InsertChildAfter(Ark_NodeHandle parentNode, Ark_NodeHandle childNode, 
     } else {
         parent->AddChild(AceType::Claim(child));
     }
+
     auto* frameNode = AceType::DynamicCast<FrameNode>(child);
     if (frameNode) {
         frameNode->OnMountToParentDone();

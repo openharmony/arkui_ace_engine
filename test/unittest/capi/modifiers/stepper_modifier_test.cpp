@@ -47,11 +47,11 @@ HWTEST_F(StepperModifierTest, setStepperOptionsTestIndexDefaultValues, TestSize.
     EXPECT_EQ(resultStr, ATTRIBUTE_STEPPER_INDEX_DEFAULT_VALUE);
 }
 
-static std::vector<std::tuple<std::string, Opt_Union_I32_Bindable, std::string>> optionsIndexValidValues = {
-    {"0", Converter::ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(0), "0"},
-    {"11", Converter::ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(11), "11"},
-    {"77", Converter::ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(77), "77"},
-    {"99", Converter::ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(99), "99"},
+static std::vector<std::tuple<std::string, Opt_Union_I32_Bindable_I32, std::string>> optionsIndexValidValues = {
+    {"0", Converter::ArkUnion<Opt_Union_I32_Bindable_I32, Ark_Int32>(0), "0"},
+    {"11", Converter::ArkUnion<Opt_Union_I32_Bindable_I32, Ark_Int32>(11), "11"},
+    {"77", Converter::ArkUnion<Opt_Union_I32_Bindable_I32, Ark_Int32>(77), "77"},
+    {"99", Converter::ArkUnion<Opt_Union_I32_Bindable_I32, Ark_Int32>(99), "99"},
 };
 
 /*
@@ -77,9 +77,9 @@ HWTEST_F(StepperModifierTest, DISABLED_setStepperOptionsTestIndexValidValues, Te
     }
 }
 
-static std::vector<std::tuple<std::string, Opt_Union_I32_Bindable>> optionsIndexInvalidValues = {
-    {"-1", Converter::ArkUnion<Opt_Union_I32_Bindable, Ark_Int32>(-1)},
-    {"", Converter::ArkValue<Opt_Union_I32_Bindable>()},
+static std::vector<std::tuple<std::string, Opt_Union_I32_Bindable_I32>> optionsIndexInvalidValues = {
+    {"-1", Converter::ArkUnion<Opt_Union_I32_Bindable_I32, Ark_Int32>(-1)},
+    {"", Converter::ArkValue<Opt_Union_I32_Bindable_I32>()},
 };
 
 /*

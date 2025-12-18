@@ -40,7 +40,7 @@ struct SearchButtonOptions {
     std::optional<bool> autoDisable;
 };
 
-std::optional<std::string> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_String_Bindable& value)
+std::optional<std::string> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_String_Bindable_String& value)
 {
     std::optional<std::string> result;
     Converter::VisitUnion(value,
@@ -197,7 +197,7 @@ void SetTextIndentImpl(Ark_NativePointer node,
     SearchModelStatic::SetTextIndent(frameNode, indentValue);
 }
 void SetOnEditChangeImpl(Ark_NativePointer node,
-                         const Opt_Callback_Boolean_Void* value)
+                         const Opt_arkui_component_common_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -239,7 +239,7 @@ void SetPlaceholderColorImpl(Ark_NativePointer node,
     SearchModelStatic::SetPlaceholderColor(frameNode, placeHolderColor);
 }
 void SetPlaceholderFontImpl(Ark_NativePointer node,
-                            const Opt_Font* value)
+                            const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -247,7 +247,7 @@ void SetPlaceholderFontImpl(Ark_NativePointer node,
     SearchModelStatic::SetPlaceholderFont(frameNode, fontValue);
 }
 void SetTextFontImpl(Ark_NativePointer node,
-                     const Opt_Font* value)
+                     const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -261,7 +261,8 @@ void SetEnterKeyTypeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     SearchModelStatic::SetSearchEnterKeyType(frameNode, Converter::OptConvertPtr<TextInputAction>(value));
 }
-void SetOnSubmitImpl(Ark_NativePointer node, const Opt_SearchSubmitCallback* value)
+void SetOnSubmitImpl(Ark_NativePointer node,
+                     const Opt_SearchSubmitCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

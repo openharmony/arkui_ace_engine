@@ -100,7 +100,7 @@ export class FontImpl extends Font {
     }
     public getFontByName(fontName : string) : font.FontInfo {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let fontInfo : font.FontInfo = GlobalScope_ohos_font.getFontByName(fontName);
+        let fontInfo : font.FontInfo = GlobalScope_ohos_font.getFontByName(fontName) as font.FontInfo;
         ArkUIAniModule._Common_Restore_InstanceId();
         return fontInfo;
     }
@@ -1518,7 +1518,7 @@ export class UIContextImpl extends UIContext {
         return this.atomicServiceBar_;
     }
 
-    public dispatchKeyEvent(node: int | string, event: KeyEvent): boolean {
+    public dispatchKeyEvent(node: number | string, event: KeyEvent): boolean {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let result = IUIContext.dispatchKeyEvent(node, event);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -1790,7 +1790,9 @@ export class UIContextImpl extends UIContext {
             ArkUIAniModule._Common_Restore_InstanceId();
             return [];
         }
-        let tag = ArkUIGeneratedNativeModule._FrameNodeExtender_getNodeType(nodePtr);
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getNodeType(nodePtr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const tag : string = (retvalDeserializer.readString() as string)
         if (tag === 'Swiper') {
             let ret: Array<SwiperDynamicSyncScene> =
                 [new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.GESTURE, nodePtr),

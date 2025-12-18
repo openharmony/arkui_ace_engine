@@ -114,7 +114,8 @@ Ark_Float64 GetDisplayXImpl(Ark_MouseEvent peer)
     const auto value = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
     return Converter::ArkValue<Ark_Float64>(value);
 }
-void SetDisplayXImpl(Ark_MouseEvent peer, Ark_Float64 displayX)
+void SetDisplayXImpl(Ark_MouseEvent peer,
+                     Ark_Float64 displayX)
 {
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();
@@ -136,7 +137,8 @@ Ark_Float64 GetDisplayYImpl(Ark_MouseEvent peer)
     const auto value = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
     return Converter::ArkValue<Ark_Float64>(value);
 }
-void SetDisplayYImpl(Ark_MouseEvent peer, Ark_Float64 displayY)
+void SetDisplayYImpl(Ark_MouseEvent peer,
+                     Ark_Float64 displayY)
 {
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();
@@ -158,9 +160,11 @@ Ark_Float64 GetWindowXImpl(Ark_MouseEvent peer)
     const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
     return Converter::ArkValue<Ark_Float64>(value);
 }
-void SetWindowXImpl(Ark_MouseEvent peer, Ark_Float64 windowX)
+void SetWindowXImpl(Ark_MouseEvent peer,
+                    Ark_Float64 windowX)
 {
     CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(windowX);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
     auto globalLocation = info->GetGlobalLocation();
@@ -180,7 +184,8 @@ Ark_Float64 GetWindowYImpl(Ark_MouseEvent peer)
     const auto value = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
     return Converter::ArkValue<Ark_Float64>(value);
 }
-void SetWindowYImpl(Ark_MouseEvent peer, Ark_Float64 windowY)
+void SetWindowYImpl(Ark_MouseEvent peer,
+                    Ark_Float64 windowY)
 {
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();
@@ -202,7 +207,8 @@ Ark_Float64 GetXImpl(Ark_MouseEvent peer)
     const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
     return Converter::ArkValue<Ark_Float64>(value);
 }
-void SetXImpl(Ark_MouseEvent peer, Ark_Float64 x)
+void SetXImpl(Ark_MouseEvent peer,
+              Ark_Float64 x)
 {
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();
@@ -224,7 +230,8 @@ Ark_Float64 GetYImpl(Ark_MouseEvent peer)
     const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
     return Converter::ArkValue<Ark_Float64>(value);
 }
-void SetYImpl(Ark_MouseEvent peer, Ark_Float64 y)
+void SetYImpl(Ark_MouseEvent peer,
+              Ark_Float64 y)
 {
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();

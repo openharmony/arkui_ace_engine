@@ -16,25 +16,26 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, hookScrollBarAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { Scroller, Scroller_serializer } from "./scroll"
-import { BarState } from "./enums"
-import { ScrollBarModifier } from "./../ScrollBarModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { AttributeModifier, hookScrollBarAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { Scroller, Scroller_serializer } from './scroll'
+import { BarState } from './enums'
+import { ScrollBarModifier } from './../ScrollBarModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkScrollBarPeer extends ArkCommonMethodPeer {
     attributeSet?: ScrollBarModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkScrollBarPeer {
@@ -45,6 +46,7 @@ export class ArkScrollBarPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setScrollBarOptionsAttribute(value: ScrollBarOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         ScrollBarOptions_serializer.write(thisSerializer, value)
         ArkUIGeneratedNativeModule._ScrollBarInterface_setScrollBarOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -64,10 +66,10 @@ export class ArkScrollBarPeer extends ArkCommonMethodPeer {
     }
 }
 export enum ScrollBarDirection {
-    VERTICAL = 0,
     Vertical = 0,
-    HORIZONTAL = 1,
-    Horizontal = 1
+    Horizontal = 1,
+    VERTICAL = 0,
+    HORIZONTAL = 1
 }
 export interface ScrollBarOptions {
     scroller: Scroller;
@@ -76,38 +78,22 @@ export interface ScrollBarOptions {
 }
 export interface ScrollBarAttribute extends CommonMethod {
     setScrollBarOptions(value: ScrollBarOptions): this {
-        throw new Error("Unimplemented method setScrollBarOptions")
+        throw new Error('Unimplemented method setScrollBarOptions')
     }
     enableNestedScroll(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableNestedScroll")
+        throw new Error('Unimplemented method enableNestedScroll')
     }
     attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkScrollBarStyle extends ArkCommonMethodStyle implements ScrollBarAttribute {
-    enableNestedScroll_value?: boolean | undefined
-    attributeModifier_value?: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined
-    setScrollBarOptions(value: ScrollBarOptions): this {
-        return this
-    }
-    enableNestedScroll(value: boolean | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkScrollBarComponent extends ArkCommonMethodComponent implements ScrollBarAttribute {
     getPeer(): ArkScrollBarPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkScrollBarPeer)
     }
     public setScrollBarOptions(value: ScrollBarOptions): this {
-        if (this.checkPriority("setScrollBarOptions")) {
+        if (this.checkPriority('setScrollBarOptions')) {
             const value_casted = value as (ScrollBarOptions)
             this.getPeer()?.setScrollBarOptionsAttribute(value_casted)
             this.applyOptionsFinish('ScrollBarAttribute');
@@ -116,7 +102,7 @@ export class ArkScrollBarComponent extends ArkCommonMethodComponent implements S
         return this
     }
     public enableNestedScroll(value: boolean | undefined): this {
-        if (this.checkPriority("enableNestedScroll")) {
+        if (this.checkPriority('enableNestedScroll')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableNestedScrollAttribute(value_casted)
             return this
@@ -140,18 +126,16 @@ export class ArkScrollBarComponent extends ArkCommonMethodComponent implements S
 
 @memo
 export function ScrollBarImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: ScrollBarAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkScrollBarComponent>((): ArkScrollBarComponent => {
         return new ArkScrollBarComponent()
     })
-    NodeAttach<ArkScrollBarPeer>((): ArkScrollBarPeer => ArkScrollBarPeer.create(receiver), (peer: ArkScrollBarPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkScrollBarPeer>((): ArkScrollBarPeer => ArkScrollBarPeer.create(receiver), (_: ArkScrollBarPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -181,13 +165,13 @@ export class ScrollBarOptions_serializer {
     public static read(buffer: DeserializerBase): ScrollBarOptions {
         let valueDeserializer : DeserializerBase = buffer
         const scrollerTmpResult : Scroller = (Scroller_serializer.read(valueDeserializer) as Scroller)
-        const directionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const directionTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let directionTmpBuf : ScrollBarDirection | undefined = undefined
         if ((directionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             directionTmpBuf = ScrollBarDirection.fromValue(valueDeserializer.readInt32())
         }
         const directionTmpResult : ScrollBarDirection | undefined = directionTmpBuf
-        const stateTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const stateTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let stateTmpBuf : BarState | undefined = undefined
         if ((stateTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             stateTmpBuf = BarState.fromValue(valueDeserializer.readInt32())

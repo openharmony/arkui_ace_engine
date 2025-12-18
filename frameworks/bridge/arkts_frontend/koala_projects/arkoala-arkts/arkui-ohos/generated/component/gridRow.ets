@@ -16,28 +16,28 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ItemAlign } from "./enums"
-import { AttributeModifier, hookGridRowAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { Length } from "./units"
-import { Resource } from "global.resource"
-import { GridRowModifier } from "./../GridRowModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource_serializer } from "./../framework/resource"
-import { ModifierStateManager } from '../CommonModifier';
-
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { ItemAlign } from './enums'
+import { AttributeModifier, hookGridRowAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { Length, Resource as arkui_component_units_Resource } from './units'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { GridRowModifier } from './../GridRowModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
+import { global_resource_Resource_serializer } from './../framework/resource'
 export class ArkGridRowPeer extends ArkCommonMethodPeer {
     attributeSet?: GridRowModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkGridRowPeer {
@@ -48,6 +48,7 @@ export class ArkGridRowPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setGridRowOptionsAttribute(option?: GridRowOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (option !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -105,16 +106,16 @@ export interface GutterOption {
     y?: Length | GridRowSizeOption;
 }
 export enum BreakpointsReference {
-    WINDOW_SIZE = 0,
     WindowSize = 0,
-    COMPONENT_SIZE = 1,
-    ComponentSize = 1
+    ComponentSize = 1,
+    WINDOW_SIZE = 0,
+    COMPONENT_SIZE = 1
 }
 export enum GridRowDirection {
-    ROW = 0,
     Row = 0,
-    ROW_REVERSE = 1,
-    RowReverse = 1
+    RowReverse = 1,
+    ROW = 0,
+    ROW_REVERSE = 1
 }
 export interface BreakPoints {
     value?: Array<string>;
@@ -128,45 +129,25 @@ export interface GridRowOptions {
 }
 export interface GridRowAttribute extends CommonMethod {
     setGridRowOptions(option?: GridRowOptions): this {
-        throw new Error("Unimplemented method setGridRowOptions")
+        throw new Error('Unimplemented method setGridRowOptions')
     }
     onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this {
-        throw new Error("Unimplemented method onBreakpointChange")
+        throw new Error('Unimplemented method onBreakpointChange')
     }
     alignItems(value: ItemAlign | undefined): this {
-        throw new Error("Unimplemented method alignItems")
+        throw new Error('Unimplemented method alignItems')
     }
     attributeModifier(value: AttributeModifier<GridRowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkGridRowStyle extends ArkCommonMethodStyle implements GridRowAttribute {
-    onBreakpointChange_value?: ((breakpoints: string) => void) | undefined
-    alignItems_value?: ItemAlign | undefined
-    attributeModifier_value?: AttributeModifier<GridRowAttribute> | AttributeModifier<CommonMethod> | undefined
-    setGridRowOptions(option?: GridRowOptions): this {
-        return this
-    }
-    onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this {
-        return this
-    }
-    alignItems(value: ItemAlign | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<GridRowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkGridRowComponent extends ArkCommonMethodComponent implements GridRowAttribute {
     getPeer(): ArkGridRowPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkGridRowPeer)
     }
     public setGridRowOptions(option?: GridRowOptions): this {
-        if (this.checkPriority("setGridRowOptions")) {
+        if (this.checkPriority('setGridRowOptions')) {
             const option_casted = option as (GridRowOptions | undefined)
             this.getPeer()?.setGridRowOptionsAttribute(option_casted)
             this.applyOptionsFinish('GridRowAttribute');
@@ -175,7 +156,7 @@ export class ArkGridRowComponent extends ArkCommonMethodComponent implements Gri
         return this
     }
     public onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this {
-        if (this.checkPriority("onBreakpointChange")) {
+        if (this.checkPriority('onBreakpointChange')) {
             const value_casted = value as (((breakpoints: string) => void) | undefined)
             this.getPeer()?.setOnBreakpointChangeAttribute(value_casted)
             return this
@@ -183,7 +164,7 @@ export class ArkGridRowComponent extends ArkCommonMethodComponent implements Gri
         return this
     }
     public alignItems(value: ItemAlign | undefined): this {
-        if (this.checkPriority("alignItems")) {
+        if (this.checkPriority('alignItems')) {
             const value_casted = value as (ItemAlign | undefined)
             this.getPeer()?.setAlignItemsAttribute(value_casted)
             return this
@@ -207,18 +188,16 @@ export class ArkGridRowComponent extends ArkCommonMethodComponent implements Gri
 
 @memo
 export function GridRowImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: GridRowAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkGridRowComponent>((): ArkGridRowComponent => {
         return new ArkGridRowComponent()
     })
-    NodeAttach<ArkGridRowPeer>((): ArkGridRowPeer => ArkGridRowPeer.create(receiver), (peer: ArkGridRowPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkGridRowPeer>((): ArkGridRowPeer => ArkGridRowPeer.create(receiver), (_: ArkGridRowPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -249,18 +228,18 @@ export class BreakPoints_serializer {
     }
     public static read(buffer: DeserializerBase): BreakPoints {
         let valueDeserializer : DeserializerBase = buffer
-        const valueTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const valueTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let valueTmpBuf : Array<string> | undefined = undefined
         if ((valueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const valueTmpBuf_Length : int32 = valueDeserializer.readInt32()
-            let valueTmpBuf_ : Array<string> = new Array<string>(valueTmpBuf_Length)
-            for (let valueTmpBuf_BufCounterI = 0; valueTmpBuf_BufCounterI < valueTmpBuf_Length; valueTmpBuf_BufCounterI++) {
-                valueTmpBuf_[valueTmpBuf_BufCounterI] = (valueDeserializer.readString() as string)
+            const valueTmpBufOptLength : int32 = valueDeserializer.readInt32()
+            let valueTmpBufOpt : Array<string> = new Array<string>(valueTmpBufOptLength)
+            for (let valueTmpBufOptBufCounterI = 0; valueTmpBufOptBufCounterI < valueTmpBufOptLength; valueTmpBufOptBufCounterI++) {
+                valueTmpBufOpt[valueTmpBufOptBufCounterI] = (valueDeserializer.readString() as string)
             }
-            valueTmpBuf = valueTmpBuf_
+            valueTmpBuf = valueTmpBufOpt
         }
         const valueTmpResult : Array<string> | undefined = valueTmpBuf
-        const referenceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const referenceTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let referenceTmpBuf : BreakpointsReference | undefined = undefined
         if ((referenceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             referenceTmpBuf = BreakpointsReference.fromValue(valueDeserializer.readInt32())
@@ -324,37 +303,37 @@ export class GridRowColumnOption_serializer {
     }
     public static read(buffer: DeserializerBase): GridRowColumnOption {
         let valueDeserializer : DeserializerBase = buffer
-        const xsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const xsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let xsTmpBuf : int32 | undefined = undefined
         if ((xsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             xsTmpBuf = valueDeserializer.readInt32()
         }
         const xsTmpResult : int32 | undefined = xsTmpBuf
-        const smTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const smTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let smTmpBuf : int32 | undefined = undefined
         if ((smTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             smTmpBuf = valueDeserializer.readInt32()
         }
         const smTmpResult : int32 | undefined = smTmpBuf
-        const mdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const mdTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let mdTmpBuf : int32 | undefined = undefined
         if ((mdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             mdTmpBuf = valueDeserializer.readInt32()
         }
         const mdTmpResult : int32 | undefined = mdTmpBuf
-        const lgTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const lgTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let lgTmpBuf : int32 | undefined = undefined
         if ((lgTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             lgTmpBuf = valueDeserializer.readInt32()
         }
         const lgTmpResult : int32 | undefined = lgTmpBuf
-        const xlTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const xlTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let xlTmpBuf : int32 | undefined = undefined
         if ((xlTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             xlTmpBuf = valueDeserializer.readInt32()
         }
         const xlTmpResult : int32 | undefined = xlTmpBuf
-        const xxlTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const xxlTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let xxlTmpBuf : int32 | undefined = undefined
         if ((xxlTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             xxlTmpBuf = valueDeserializer.readInt32()
@@ -379,10 +358,10 @@ export class GridRowSizeOption_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForXsTmpValueForIdx1  = valueHolderForXsTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForXsTmpValueForIdx1)
-            } else if (valueHolderForXsTmpValue instanceof Resource) {
+            } else if (valueHolderForXsTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForXsTmpValueForIdx2  = valueHolderForXsTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForXsTmpValueForIdx2)
+                const valueHolderForXsTmpValueForIdx2  = valueHolderForXsTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForXsTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -399,10 +378,10 @@ export class GridRowSizeOption_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSmTmpValueForIdx1  = valueHolderForSmTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForSmTmpValueForIdx1)
-            } else if (valueHolderForSmTmpValue instanceof Resource) {
+            } else if (valueHolderForSmTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForSmTmpValueForIdx2  = valueHolderForSmTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForSmTmpValueForIdx2)
+                const valueHolderForSmTmpValueForIdx2  = valueHolderForSmTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForSmTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -419,10 +398,10 @@ export class GridRowSizeOption_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMdTmpValueForIdx1  = valueHolderForMdTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForMdTmpValueForIdx1)
-            } else if (valueHolderForMdTmpValue instanceof Resource) {
+            } else if (valueHolderForMdTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForMdTmpValueForIdx2  = valueHolderForMdTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForMdTmpValueForIdx2)
+                const valueHolderForMdTmpValueForIdx2  = valueHolderForMdTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForMdTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -439,10 +418,10 @@ export class GridRowSizeOption_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForLgTmpValueForIdx1  = valueHolderForLgTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForLgTmpValueForIdx1)
-            } else if (valueHolderForLgTmpValue instanceof Resource) {
+            } else if (valueHolderForLgTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForLgTmpValueForIdx2  = valueHolderForLgTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForLgTmpValueForIdx2)
+                const valueHolderForLgTmpValueForIdx2  = valueHolderForLgTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForLgTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -459,10 +438,10 @@ export class GridRowSizeOption_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForXlTmpValueForIdx1  = valueHolderForXlTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForXlTmpValueForIdx1)
-            } else if (valueHolderForXlTmpValue instanceof Resource) {
+            } else if (valueHolderForXlTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForXlTmpValueForIdx2  = valueHolderForXlTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForXlTmpValueForIdx2)
+                const valueHolderForXlTmpValueForIdx2  = valueHolderForXlTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForXlTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -479,10 +458,10 @@ export class GridRowSizeOption_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForXxlTmpValueForIdx1  = valueHolderForXxlTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForXxlTmpValueForIdx1)
-            } else if (valueHolderForXxlTmpValue instanceof Resource) {
+            } else if (valueHolderForXxlTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForXxlTmpValueForIdx2  = valueHolderForXxlTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForXxlTmpValueForIdx2)
+                const valueHolderForXxlTmpValueForIdx2  = valueHolderForXxlTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForXxlTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -490,106 +469,106 @@ export class GridRowSizeOption_serializer {
     }
     public static read(buffer: DeserializerBase): GridRowSizeOption {
         let valueDeserializer : DeserializerBase = buffer
-        const xsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const xsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let xsTmpBuf : Length | undefined = undefined
         if ((xsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const xsTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let xsTmpBuf_ : string | double | Resource | undefined
-            if (xsTmpBuf_UnionSelector == (0).toChar()) {
-                xsTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (xsTmpBuf_UnionSelector == (1).toChar()) {
-                xsTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (xsTmpBuf_UnionSelector == (2).toChar()) {
-                xsTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const xsTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let xsTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (xsTmpBufOptUnionSelector == (0).toByte()) {
+                xsTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (xsTmpBufOptUnionSelector == (1).toByte()) {
+                xsTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (xsTmpBufOptUnionSelector == (2).toByte()) {
+                xsTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for xsTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for xsTmpBufOpt has to be chosen through deserialisation.')
             }
-            xsTmpBuf = (xsTmpBuf_ as string | double | Resource)
+            xsTmpBuf = (xsTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const xsTmpResult : Length | undefined = xsTmpBuf
-        const smTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const smTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let smTmpBuf : Length | undefined = undefined
         if ((smTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const smTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let smTmpBuf_ : string | double | Resource | undefined
-            if (smTmpBuf_UnionSelector == (0).toChar()) {
-                smTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (smTmpBuf_UnionSelector == (1).toChar()) {
-                smTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (smTmpBuf_UnionSelector == (2).toChar()) {
-                smTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const smTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let smTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (smTmpBufOptUnionSelector == (0).toByte()) {
+                smTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (smTmpBufOptUnionSelector == (1).toByte()) {
+                smTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (smTmpBufOptUnionSelector == (2).toByte()) {
+                smTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for smTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for smTmpBufOpt has to be chosen through deserialisation.')
             }
-            smTmpBuf = (smTmpBuf_ as string | double | Resource)
+            smTmpBuf = (smTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const smTmpResult : Length | undefined = smTmpBuf
-        const mdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const mdTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let mdTmpBuf : Length | undefined = undefined
         if ((mdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const mdTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let mdTmpBuf_ : string | double | Resource | undefined
-            if (mdTmpBuf_UnionSelector == (0).toChar()) {
-                mdTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (mdTmpBuf_UnionSelector == (1).toChar()) {
-                mdTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (mdTmpBuf_UnionSelector == (2).toChar()) {
-                mdTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const mdTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let mdTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (mdTmpBufOptUnionSelector == (0).toByte()) {
+                mdTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (mdTmpBufOptUnionSelector == (1).toByte()) {
+                mdTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (mdTmpBufOptUnionSelector == (2).toByte()) {
+                mdTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for mdTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for mdTmpBufOpt has to be chosen through deserialisation.')
             }
-            mdTmpBuf = (mdTmpBuf_ as string | double | Resource)
+            mdTmpBuf = (mdTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const mdTmpResult : Length | undefined = mdTmpBuf
-        const lgTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const lgTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let lgTmpBuf : Length | undefined = undefined
         if ((lgTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const lgTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let lgTmpBuf_ : string | double | Resource | undefined
-            if (lgTmpBuf_UnionSelector == (0).toChar()) {
-                lgTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (lgTmpBuf_UnionSelector == (1).toChar()) {
-                lgTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (lgTmpBuf_UnionSelector == (2).toChar()) {
-                lgTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const lgTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let lgTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (lgTmpBufOptUnionSelector == (0).toByte()) {
+                lgTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (lgTmpBufOptUnionSelector == (1).toByte()) {
+                lgTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (lgTmpBufOptUnionSelector == (2).toByte()) {
+                lgTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for lgTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for lgTmpBufOpt has to be chosen through deserialisation.')
             }
-            lgTmpBuf = (lgTmpBuf_ as string | double | Resource)
+            lgTmpBuf = (lgTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const lgTmpResult : Length | undefined = lgTmpBuf
-        const xlTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const xlTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let xlTmpBuf : Length | undefined = undefined
         if ((xlTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const xlTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let xlTmpBuf_ : string | double | Resource | undefined
-            if (xlTmpBuf_UnionSelector == (0).toChar()) {
-                xlTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (xlTmpBuf_UnionSelector == (1).toChar()) {
-                xlTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (xlTmpBuf_UnionSelector == (2).toChar()) {
-                xlTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const xlTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let xlTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (xlTmpBufOptUnionSelector == (0).toByte()) {
+                xlTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (xlTmpBufOptUnionSelector == (1).toByte()) {
+                xlTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (xlTmpBufOptUnionSelector == (2).toByte()) {
+                xlTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for xlTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for xlTmpBufOpt has to be chosen through deserialisation.')
             }
-            xlTmpBuf = (xlTmpBuf_ as string | double | Resource)
+            xlTmpBuf = (xlTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const xlTmpResult : Length | undefined = xlTmpBuf
-        const xxlTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const xxlTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let xxlTmpBuf : Length | undefined = undefined
         if ((xxlTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const xxlTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let xxlTmpBuf_ : string | double | Resource | undefined
-            if (xxlTmpBuf_UnionSelector == (0).toChar()) {
-                xxlTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (xxlTmpBuf_UnionSelector == (1).toChar()) {
-                xxlTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (xxlTmpBuf_UnionSelector == (2).toChar()) {
-                xxlTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const xxlTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let xxlTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (xxlTmpBufOptUnionSelector == (0).toByte()) {
+                xxlTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (xxlTmpBufOptUnionSelector == (1).toByte()) {
+                xxlTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (xxlTmpBufOptUnionSelector == (2).toByte()) {
+                xxlTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for xxlTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for xxlTmpBufOpt has to be chosen through deserialisation.')
             }
-            xxlTmpBuf = (xxlTmpBuf_ as string | double | Resource)
+            xxlTmpBuf = (xxlTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const xxlTmpResult : Length | undefined = xxlTmpBuf
         let value : GridRowSizeOption = ({xs: xsTmpResult, sm: smTmpResult, md: mdTmpResult, lg: lgTmpResult, xl: xlTmpResult, xxl: xxlTmpResult} as GridRowSizeOption)
@@ -614,10 +593,10 @@ export class GutterOption_serializer {
                     valueSerializer.writeInt8((1).toByte())
                     const valueHolderForXTmpValueForIdx0ForIdx1  = valueHolderForXTmpValueForIdx0 as double
                     valueSerializer.writeFloat64(valueHolderForXTmpValueForIdx0ForIdx1)
-                } else if (valueHolderForXTmpValueForIdx0 instanceof Resource) {
+                } else if (valueHolderForXTmpValueForIdx0 instanceof arkui_component_units_Resource) {
                     valueSerializer.writeInt8((2).toByte())
-                    const valueHolderForXTmpValueForIdx0ForIdx2  = valueHolderForXTmpValueForIdx0 as Resource
-                    Resource_serializer.write(valueSerializer, valueHolderForXTmpValueForIdx0ForIdx2)
+                    const valueHolderForXTmpValueForIdx0ForIdx2  = valueHolderForXTmpValueForIdx0 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(valueSerializer, valueHolderForXTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForXTmpValue instanceof GridRowSizeOption) {
                 valueSerializer.writeInt8((1).toByte())
@@ -642,10 +621,10 @@ export class GutterOption_serializer {
                     valueSerializer.writeInt8((1).toByte())
                     const valueHolderForYTmpValueForIdx0ForIdx1  = valueHolderForYTmpValueForIdx0 as double
                     valueSerializer.writeFloat64(valueHolderForYTmpValueForIdx0ForIdx1)
-                } else if (valueHolderForYTmpValueForIdx0 instanceof Resource) {
+                } else if (valueHolderForYTmpValueForIdx0 instanceof arkui_component_units_Resource) {
                     valueSerializer.writeInt8((2).toByte())
-                    const valueHolderForYTmpValueForIdx0ForIdx2  = valueHolderForYTmpValueForIdx0 as Resource
-                    Resource_serializer.write(valueSerializer, valueHolderForYTmpValueForIdx0ForIdx2)
+                    const valueHolderForYTmpValueForIdx0ForIdx2  = valueHolderForYTmpValueForIdx0 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(valueSerializer, valueHolderForYTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForYTmpValue instanceof GridRowSizeOption) {
                 valueSerializer.writeInt8((1).toByte())
@@ -658,56 +637,56 @@ export class GutterOption_serializer {
     }
     public static read(buffer: DeserializerBase): GutterOption {
         let valueDeserializer : DeserializerBase = buffer
-        const xTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const xTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let xTmpBuf : Length | GridRowSizeOption | undefined = undefined
         if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const xTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let xTmpBuf_ : Length | GridRowSizeOption | undefined
-            if (xTmpBuf_UnionSelector == (0).toChar()) {
-                const xTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let xTmpBuf_BufU : string | double | Resource | undefined
-                if (xTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    xTmpBuf_BufU = (valueDeserializer.readString() as string)
-                } else if (xTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    xTmpBuf_BufU = valueDeserializer.readFloat64()
-                } else if (xTmpBuf_BufUUnionSelector == (2).toChar()) {
-                    xTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+            const xTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let xTmpBufOpt : Length | GridRowSizeOption | undefined
+            if (xTmpBufOptUnionSelector == (0).toByte()) {
+                const xTmpBufOptBufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let xTmpBufOptBufU : string | double | arkui_component_units_Resource | undefined
+                if (xTmpBufOptBufUUnionSelector == (0).toByte()) {
+                    xTmpBufOptBufU = (valueDeserializer.readString() as string)
+                } else if (xTmpBufOptBufUUnionSelector == (1).toByte()) {
+                    xTmpBufOptBufU = valueDeserializer.readFloat64()
+                } else if (xTmpBufOptBufUUnionSelector == (2).toByte()) {
+                    xTmpBufOptBufU = global_resource_Resource_serializer.read(valueDeserializer)
                 } else {
-                    throw new Error("One of the branches for xTmpBuf_BufU has to be chosen through deserialisation.")
+                    throw new Error('One of the branches for xTmpBufOptBufU has to be chosen through deserialisation.')
                 }
-                xTmpBuf_ = (xTmpBuf_BufU as string | double | Resource)
-            } else if (xTmpBuf_UnionSelector == (1).toChar()) {
-                xTmpBuf_ = GridRowSizeOption_serializer.read(valueDeserializer)
+                xTmpBufOpt = (xTmpBufOptBufU as string | double | arkui_component_units_Resource)
+            } else if (xTmpBufOptUnionSelector == (1).toByte()) {
+                xTmpBufOpt = GridRowSizeOption_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for xTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for xTmpBufOpt has to be chosen through deserialisation.')
             }
-            xTmpBuf = (xTmpBuf_ as Length | GridRowSizeOption)
+            xTmpBuf = (xTmpBufOpt as Length | GridRowSizeOption)
         }
         const xTmpResult : Length | GridRowSizeOption | undefined = xTmpBuf
-        const yTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const yTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let yTmpBuf : Length | GridRowSizeOption | undefined = undefined
         if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const yTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let yTmpBuf_ : Length | GridRowSizeOption | undefined
-            if (yTmpBuf_UnionSelector == (0).toChar()) {
-                const yTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let yTmpBuf_BufU : string | double | Resource | undefined
-                if (yTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    yTmpBuf_BufU = (valueDeserializer.readString() as string)
-                } else if (yTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    yTmpBuf_BufU = valueDeserializer.readFloat64()
-                } else if (yTmpBuf_BufUUnionSelector == (2).toChar()) {
-                    yTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+            const yTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let yTmpBufOpt : Length | GridRowSizeOption | undefined
+            if (yTmpBufOptUnionSelector == (0).toByte()) {
+                const yTmpBufOptBufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let yTmpBufOptBufU : string | double | arkui_component_units_Resource | undefined
+                if (yTmpBufOptBufUUnionSelector == (0).toByte()) {
+                    yTmpBufOptBufU = (valueDeserializer.readString() as string)
+                } else if (yTmpBufOptBufUUnionSelector == (1).toByte()) {
+                    yTmpBufOptBufU = valueDeserializer.readFloat64()
+                } else if (yTmpBufOptBufUUnionSelector == (2).toByte()) {
+                    yTmpBufOptBufU = global_resource_Resource_serializer.read(valueDeserializer)
                 } else {
-                    throw new Error("One of the branches for yTmpBuf_BufU has to be chosen through deserialisation.")
+                    throw new Error('One of the branches for yTmpBufOptBufU has to be chosen through deserialisation.')
                 }
-                yTmpBuf_ = (yTmpBuf_BufU as string | double | Resource)
-            } else if (yTmpBuf_UnionSelector == (1).toChar()) {
-                yTmpBuf_ = GridRowSizeOption_serializer.read(valueDeserializer)
+                yTmpBufOpt = (yTmpBufOptBufU as string | double | arkui_component_units_Resource)
+            } else if (yTmpBufOptUnionSelector == (1).toByte()) {
+                yTmpBufOpt = GridRowSizeOption_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for yTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for yTmpBufOpt has to be chosen through deserialisation.')
             }
-            yTmpBuf = (yTmpBuf_ as Length | GridRowSizeOption)
+            yTmpBuf = (yTmpBufOpt as Length | GridRowSizeOption)
         }
         const yTmpResult : Length | GridRowSizeOption | undefined = yTmpBuf
         let value : GutterOption = ({x: xTmpResult, y: yTmpResult} as GutterOption)
@@ -732,10 +711,10 @@ export class GridRowOptions_serializer {
                     valueSerializer.writeInt8((1).toByte())
                     const valueHolderForGutterTmpValueForIdx0ForIdx1  = valueHolderForGutterTmpValueForIdx0 as double
                     valueSerializer.writeFloat64(valueHolderForGutterTmpValueForIdx0ForIdx1)
-                } else if (valueHolderForGutterTmpValueForIdx0 instanceof Resource) {
+                } else if (valueHolderForGutterTmpValueForIdx0 instanceof arkui_component_units_Resource) {
                     valueSerializer.writeInt8((2).toByte())
-                    const valueHolderForGutterTmpValueForIdx0ForIdx2  = valueHolderForGutterTmpValueForIdx0 as Resource
-                    Resource_serializer.write(valueSerializer, valueHolderForGutterTmpValueForIdx0ForIdx2)
+                    const valueHolderForGutterTmpValueForIdx0ForIdx2  = valueHolderForGutterTmpValueForIdx0 as arkui_component_units_Resource
+                    global_resource_Resource_serializer.write(valueSerializer, valueHolderForGutterTmpValueForIdx0ForIdx2)
                 }
             } else if (valueHolderForGutterTmpValue instanceof GutterOption) {
                 valueSerializer.writeInt8((1).toByte())
@@ -780,54 +759,54 @@ export class GridRowOptions_serializer {
     }
     public static read(buffer: DeserializerBase): GridRowOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const gutterTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const gutterTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let gutterTmpBuf : Length | GutterOption | undefined = undefined
         if ((gutterTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const gutterTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let gutterTmpBuf_ : Length | GutterOption | undefined
-            if (gutterTmpBuf_UnionSelector == (0).toChar()) {
-                const gutterTmpBuf_BufUUnionSelector : int32 = valueDeserializer.readInt8()
-                let gutterTmpBuf_BufU : string | double | Resource | undefined
-                if (gutterTmpBuf_BufUUnionSelector == (0).toChar()) {
-                    gutterTmpBuf_BufU = (valueDeserializer.readString() as string)
-                } else if (gutterTmpBuf_BufUUnionSelector == (1).toChar()) {
-                    gutterTmpBuf_BufU = valueDeserializer.readFloat64()
-                } else if (gutterTmpBuf_BufUUnionSelector == (2).toChar()) {
-                    gutterTmpBuf_BufU = Resource_serializer.read(valueDeserializer)
+            const gutterTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let gutterTmpBufOpt : Length | GutterOption | undefined
+            if (gutterTmpBufOptUnionSelector == (0).toByte()) {
+                const gutterTmpBufOptBufUUnionSelector : int32 = valueDeserializer.readInt8()
+                let gutterTmpBufOptBufU : string | double | arkui_component_units_Resource | undefined
+                if (gutterTmpBufOptBufUUnionSelector == (0).toByte()) {
+                    gutterTmpBufOptBufU = (valueDeserializer.readString() as string)
+                } else if (gutterTmpBufOptBufUUnionSelector == (1).toByte()) {
+                    gutterTmpBufOptBufU = valueDeserializer.readFloat64()
+                } else if (gutterTmpBufOptBufUUnionSelector == (2).toByte()) {
+                    gutterTmpBufOptBufU = global_resource_Resource_serializer.read(valueDeserializer)
                 } else {
-                    throw new Error("One of the branches for gutterTmpBuf_BufU has to be chosen through deserialisation.")
+                    throw new Error('One of the branches for gutterTmpBufOptBufU has to be chosen through deserialisation.')
                 }
-                gutterTmpBuf_ = (gutterTmpBuf_BufU as string | double | Resource)
-            } else if (gutterTmpBuf_UnionSelector == (1).toChar()) {
-                gutterTmpBuf_ = GutterOption_serializer.read(valueDeserializer)
+                gutterTmpBufOpt = (gutterTmpBufOptBufU as string | double | arkui_component_units_Resource)
+            } else if (gutterTmpBufOptUnionSelector == (1).toByte()) {
+                gutterTmpBufOpt = GutterOption_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for gutterTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for gutterTmpBufOpt has to be chosen through deserialisation.')
             }
-            gutterTmpBuf = (gutterTmpBuf_ as Length | GutterOption)
+            gutterTmpBuf = (gutterTmpBufOpt as Length | GutterOption)
         }
         const gutterTmpResult : Length | GutterOption | undefined = gutterTmpBuf
-        const columnsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const columnsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let columnsTmpBuf : int32 | GridRowColumnOption | undefined = undefined
         if ((columnsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const columnsTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let columnsTmpBuf_ : int32 | GridRowColumnOption | undefined
-            if (columnsTmpBuf_UnionSelector == (0).toChar()) {
-                columnsTmpBuf_ = valueDeserializer.readInt32()
-            } else if (columnsTmpBuf_UnionSelector == (1).toChar()) {
-                columnsTmpBuf_ = GridRowColumnOption_serializer.read(valueDeserializer)
+            const columnsTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let columnsTmpBufOpt : int32 | GridRowColumnOption | undefined
+            if (columnsTmpBufOptUnionSelector == (0).toByte()) {
+                columnsTmpBufOpt = valueDeserializer.readInt32()
+            } else if (columnsTmpBufOptUnionSelector == (1).toByte()) {
+                columnsTmpBufOpt = GridRowColumnOption_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for columnsTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for columnsTmpBufOpt has to be chosen through deserialisation.')
             }
-            columnsTmpBuf = (columnsTmpBuf_ as int32 | GridRowColumnOption)
+            columnsTmpBuf = (columnsTmpBufOpt as int32 | GridRowColumnOption)
         }
         const columnsTmpResult : int32 | GridRowColumnOption | undefined = columnsTmpBuf
-        const breakpointsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const breakpointsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let breakpointsTmpBuf : BreakPoints | undefined = undefined
         if ((breakpointsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             breakpointsTmpBuf = BreakPoints_serializer.read(valueDeserializer)
         }
         const breakpointsTmpResult : BreakPoints | undefined = breakpointsTmpBuf
-        const directionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const directionTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let directionTmpBuf : GridRowDirection | undefined = undefined
         if ((directionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             directionTmpBuf = GridRowDirection.fromValue(valueDeserializer.readInt32())

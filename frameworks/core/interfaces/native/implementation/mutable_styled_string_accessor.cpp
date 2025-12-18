@@ -86,8 +86,8 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void ReplaceStringImpl(Ark_MutableStyledString peer,
-                       const Ark_Int32 start,
-                       const Ark_Int32 length,
+                       Ark_Int32 start,
+                       Ark_Int32 length,
                        const Ark_String* other)
 {
     CHECK_NULL_VOID(peer && other);
@@ -105,7 +105,7 @@ void ReplaceStringImpl(Ark_MutableStyledString peer,
     }
 }
 void InsertStringImpl(Ark_MutableStyledString peer,
-                      const Ark_Int32 start,
+                      Ark_Int32 start,
                       const Ark_String* other)
 {
     CHECK_NULL_VOID(peer && other);
@@ -123,8 +123,8 @@ void InsertStringImpl(Ark_MutableStyledString peer,
     }
 }
 void RemoveStringImpl(Ark_MutableStyledString peer,
-                      const Ark_Int32 start,
-                      const Ark_Int32 length)
+                      Ark_Int32 start,
+                      Ark_Int32 length)
 {
     CHECK_NULL_VOID(peer);
     auto mutableString = peer->GetMutableString();
@@ -181,8 +181,8 @@ void SetStyleImpl(Ark_MutableStyledString peer,
     }
 }
 void RemoveStyleImpl(Ark_MutableStyledString peer,
-                     const Ark_Int32 start,
-                     const Ark_Int32 length,
+                     Ark_Int32 start,
+                     Ark_Int32 length,
                      Ark_StyledStringKey styledKey)
 {
     CHECK_NULL_VOID(peer);
@@ -196,8 +196,8 @@ void RemoveStyleImpl(Ark_MutableStyledString peer,
     mutableString->RemoveSpan(convStart, convLength, type.value());
 }
 void RemoveStylesImpl(Ark_MutableStyledString peer,
-                      const Ark_Int32 start,
-                      const Ark_Int32 length)
+                      Ark_Int32 start,
+                      Ark_Int32 length)
 {
     CHECK_NULL_VOID(peer);
     auto mutableString = peer->GetMutableString();
@@ -215,8 +215,8 @@ void ClearStylesImpl(Ark_MutableStyledString peer)
     mutableString->ClearAllSpans();
 }
 void ReplaceStyledStringImpl(Ark_MutableStyledString peer,
-                             const Ark_Int32 start,
-                             const Ark_Int32 length,
+                             Ark_Int32 start,
+                             Ark_Int32 length,
                              Ark_StyledString other)
 {
     CHECK_NULL_VOID(peer && other);
@@ -235,7 +235,7 @@ void ReplaceStyledStringImpl(Ark_MutableStyledString peer,
     }
 }
 void InsertStyledStringImpl(Ark_MutableStyledString peer,
-                            const Ark_Int32 start,
+                            Ark_Int32 start,
                             Ark_StyledString other)
 {
     CHECK_NULL_VOID(peer && other);

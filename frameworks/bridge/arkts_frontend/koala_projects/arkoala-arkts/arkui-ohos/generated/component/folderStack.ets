@@ -16,25 +16,26 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { Alignment, FoldStatus, AppRotation } from "./enums"
-import { AttributeModifier, hookFolderStackAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { default as window } from "@ohos.window"
-import { FolderStackModifier } from "./../FolderStackModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { Alignment, FoldStatus, AppRotation } from './enums'
+import { AttributeModifier, hookFolderStackAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { default as window } from '@ohos.window'
+import { FolderStackModifier } from './../FolderStackModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkFolderStackPeer extends ArkCommonMethodPeer {
     attributeSet?: FolderStackModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkFolderStackPeer {
@@ -45,6 +46,7 @@ export class ArkFolderStackPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setFolderStackOptionsAttribute(options?: FolderStackOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -128,72 +130,40 @@ export type OnFoldStatusChangeCallback = (event: OnFoldStatusChangeInfo) => void
 export type OnHoverStatusChangeCallback = (param: HoverEventParam) => void;
 export interface FolderStackAttribute extends CommonMethod {
     setFolderStackOptions(options?: FolderStackOptions): this {
-        throw new Error("Unimplemented method setFolderStackOptions")
+        throw new Error('Unimplemented method setFolderStackOptions')
     }
     alignContent(value: Alignment | undefined): this {
-        throw new Error("Unimplemented method alignContent")
+        throw new Error('Unimplemented method alignContent')
     }
     onFolderStateChange(value: OnFoldStatusChangeCallback | undefined): this {
-        throw new Error("Unimplemented method onFolderStateChange")
+        throw new Error('Unimplemented method onFolderStateChange')
     }
     onHoverStatusChange(value: OnHoverStatusChangeCallback | undefined): this {
-        throw new Error("Unimplemented method onHoverStatusChange")
+        throw new Error('Unimplemented method onHoverStatusChange')
     }
     enableAnimation(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableAnimation")
+        throw new Error('Unimplemented method enableAnimation')
     }
     autoHalfFold(value: boolean | undefined): this {
-        throw new Error("Unimplemented method autoHalfFold")
+        throw new Error('Unimplemented method autoHalfFold')
     }
     attributeModifier(value: AttributeModifier<FolderStackAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkFolderStackStyle extends ArkCommonMethodStyle implements FolderStackAttribute {
-    alignContent_value?: Alignment | undefined
-    onFolderStateChange_value?: OnFoldStatusChangeCallback | undefined
-    onHoverStatusChange_value?: OnHoverStatusChangeCallback | undefined
-    enableAnimation_value?: boolean | undefined
-    autoHalfFold_value?: boolean | undefined
-    attributeModifier_value?: AttributeModifier<FolderStackAttribute> | AttributeModifier<CommonMethod> | undefined
-    setFolderStackOptions(options?: FolderStackOptions): this {
-        return this
-    }
-    alignContent(value: Alignment | undefined): this {
-        return this
-    }
-    onFolderStateChange(value: OnFoldStatusChangeCallback | undefined): this {
-        return this
-    }
-    onHoverStatusChange(value: OnHoverStatusChangeCallback | undefined): this {
-        return this
-    }
-    enableAnimation(value: boolean | undefined): this {
-        return this
-    }
-    autoHalfFold(value: boolean | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<FolderStackAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 export interface HoverEventParam {
     foldStatus: FoldStatus;
     isHoverMode: boolean;
     appRotation: AppRotation;
-    windowStatusType: window.WindowStatusType;
+    windowStatusType: WindowStatusType;
 }
 
 export class ArkFolderStackComponent extends ArkCommonMethodComponent implements FolderStackAttribute {
     getPeer(): ArkFolderStackPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkFolderStackPeer)
     }
     public setFolderStackOptions(options?: FolderStackOptions): this {
-        if (this.checkPriority("setFolderStackOptions")) {
+        if (this.checkPriority('setFolderStackOptions')) {
             const options_casted = options as (FolderStackOptions | undefined)
             this.getPeer()?.setFolderStackOptionsAttribute(options_casted)
             this.applyOptionsFinish('FolderStackAttribute');
@@ -202,7 +172,7 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         return this
     }
     public alignContent(value: Alignment | undefined): this {
-        if (this.checkPriority("alignContent")) {
+        if (this.checkPriority('alignContent')) {
             const value_casted = value as (Alignment | undefined)
             this.getPeer()?.setAlignContentAttribute(value_casted)
             return this
@@ -210,7 +180,7 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         return this
     }
     public onFolderStateChange(value: OnFoldStatusChangeCallback | undefined): this {
-        if (this.checkPriority("onFolderStateChange")) {
+        if (this.checkPriority('onFolderStateChange')) {
             const value_casted = value as (OnFoldStatusChangeCallback | undefined)
             this.getPeer()?.setOnFolderStateChangeAttribute(value_casted)
             return this
@@ -218,7 +188,7 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         return this
     }
     public onHoverStatusChange(value: OnHoverStatusChangeCallback | undefined): this {
-        if (this.checkPriority("onHoverStatusChange")) {
+        if (this.checkPriority('onHoverStatusChange')) {
             const value_casted = value as (OnHoverStatusChangeCallback | undefined)
             this.getPeer()?.setOnHoverStatusChangeAttribute(value_casted)
             return this
@@ -226,7 +196,7 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         return this
     }
     public enableAnimation(value: boolean | undefined): this {
-        if (this.checkPriority("enableAnimation")) {
+        if (this.checkPriority('enableAnimation')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableAnimationAttribute(value_casted)
             return this
@@ -234,7 +204,7 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
         return this
     }
     public autoHalfFold(value: boolean | undefined): this {
-        if (this.checkPriority("autoHalfFold")) {
+        if (this.checkPriority('autoHalfFold')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setAutoHalfFoldAttribute(value_casted)
             return this
@@ -258,18 +228,16 @@ export class ArkFolderStackComponent extends ArkCommonMethodComponent implements
 
 @memo
 export function FolderStackImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: FolderStackAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkFolderStackComponent>((): ArkFolderStackComponent => {
         return new ArkFolderStackComponent()
     })
-    NodeAttach<ArkFolderStackPeer>((): ArkFolderStackPeer => ArkFolderStackPeer.create(receiver), (peer: ArkFolderStackPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkFolderStackPeer>((): ArkFolderStackPeer => ArkFolderStackPeer.create(receiver), (_: ArkFolderStackPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -305,15 +273,15 @@ export class FolderStackOptions_serializer {
     }
     public static read(buffer: DeserializerBase): FolderStackOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const upperItemsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const upperItemsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let upperItemsTmpBuf : Array<string> | undefined = undefined
         if ((upperItemsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const upperItemsTmpBuf_Length : int32 = valueDeserializer.readInt32()
-            let upperItemsTmpBuf_ : Array<string> = new Array<string>(upperItemsTmpBuf_Length)
-            for (let upperItemsTmpBuf_BufCounterI = 0; upperItemsTmpBuf_BufCounterI < upperItemsTmpBuf_Length; upperItemsTmpBuf_BufCounterI++) {
-                upperItemsTmpBuf_[upperItemsTmpBuf_BufCounterI] = (valueDeserializer.readString() as string)
+            const upperItemsTmpBufOptLength : int32 = valueDeserializer.readInt32()
+            let upperItemsTmpBufOpt : Array<string> = new Array<string>(upperItemsTmpBufOptLength)
+            for (let upperItemsTmpBufOptBufCounterI = 0; upperItemsTmpBufOptBufCounterI < upperItemsTmpBufOptLength; upperItemsTmpBufOptBufCounterI++) {
+                upperItemsTmpBufOpt[upperItemsTmpBufOptBufCounterI] = (valueDeserializer.readString() as string)
             }
-            upperItemsTmpBuf = upperItemsTmpBuf_
+            upperItemsTmpBuf = upperItemsTmpBufOpt
         }
         const upperItemsTmpResult : Array<string> | undefined = upperItemsTmpBuf
         let value : FolderStackOptions = ({upperItems: upperItemsTmpResult} as FolderStackOptions)
@@ -337,7 +305,7 @@ export class HoverEventParam_serializer {
         const foldStatusTmpResult : FoldStatus = FoldStatus.fromValue(valueDeserializer.readInt32())
         const isHoverModeTmpResult : boolean = valueDeserializer.readBoolean()
         const appRotationTmpResult : AppRotation = AppRotation.fromValue(valueDeserializer.readInt32())
-        const windowStatusTypeTmpResult : window.WindowStatusType = window.WindowStatusType.fromValue(valueDeserializer.readInt32())
+        const windowStatusTypeTmpResult : WindowStatusType = window.WindowStatusType.fromValue(valueDeserializer.readInt32())
         let value : HoverEventParam = ({foldStatus: foldStatusTmpResult, isHoverMode: isHoverModeTmpResult, appRotation: appRotationTmpResult, windowStatusType: windowStatusTypeTmpResult} as HoverEventParam)
         return value
     }

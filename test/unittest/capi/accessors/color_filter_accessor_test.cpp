@@ -42,20 +42,20 @@ const std::vector<float> VALID_MATRIX_1 = {
     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 };
 
-ArkArrayHolder<Array_Float64> EMPTY_HOLDER(EMPTY_VECTOR);
-ArkArrayHolder<Array_Float64> INVALID_HOLDER_0(INVALID_MATRIX_LESS);
-ArkArrayHolder<Array_Float64> INVALID_HOLDER_1(INVALID_MATRIX_MORE);
-ArkArrayHolder<Array_Float64> VALID_HOLDER_0(VALID_MATRIX_0);
-ArkArrayHolder<Array_Float64> VALID_HOLDER_1(VALID_MATRIX_1);
-ArkArrayHolder<Array_Float64> VALID_HOLDER_2(VALID_MATRIX);
+ArkArrayHolder<Array_F64> EMPTY_HOLDER(EMPTY_VECTOR);
+ArkArrayHolder<Array_F64> INVALID_HOLDER_0(INVALID_MATRIX_LESS);
+ArkArrayHolder<Array_F64> INVALID_HOLDER_1(INVALID_MATRIX_MORE);
+ArkArrayHolder<Array_F64> VALID_HOLDER_0(VALID_MATRIX_0);
+ArkArrayHolder<Array_F64> VALID_HOLDER_1(VALID_MATRIX_1);
+ArkArrayHolder<Array_F64> VALID_HOLDER_2(VALID_MATRIX);
 
-const std::vector<std::tuple<std::string, Array_Float64, std::vector<float>>> floatMatrixTest {
-    { "EMPTY_VECTOR", ArkValue<Array_Float64>(EMPTY_HOLDER.ArkValue()), EMPTY_VECTOR },
-    { "VALID_HOLDER_0", ArkValue<Array_Float64>(VALID_HOLDER_0.ArkValue()), VALID_MATRIX_0 },
-    { "INVALID_HOLDER_0", ArkValue<Array_Float64>(INVALID_HOLDER_0.ArkValue()), EMPTY_VECTOR },
-    { "VALID_HOLDER_1", ArkValue<Array_Float64>(VALID_HOLDER_1.ArkValue()), VALID_MATRIX_1 },
-    { "INVALID_HOLDER_1", ArkValue<Array_Float64>(INVALID_HOLDER_1.ArkValue()), EMPTY_VECTOR },
-    { "VALID_HOLDER_2", ArkValue<Array_Float64>(VALID_HOLDER_2.ArkValue()), VALID_MATRIX }
+const std::vector<std::tuple<std::string, Array_F64, std::vector<float>>> floatMatrixTest {
+    { "EMPTY_VECTOR", ArkValue<Array_F64>(EMPTY_HOLDER.ArkValue()), EMPTY_VECTOR },
+    { "VALID_HOLDER_0", ArkValue<Array_F64>(VALID_HOLDER_0.ArkValue()), VALID_MATRIX_0 },
+    { "INVALID_HOLDER_0", ArkValue<Array_F64>(INVALID_HOLDER_0.ArkValue()), EMPTY_VECTOR },
+    { "VALID_HOLDER_1", ArkValue<Array_F64>(VALID_HOLDER_1.ArkValue()), VALID_MATRIX_1 },
+    { "INVALID_HOLDER_1", ArkValue<Array_F64>(INVALID_HOLDER_1.ArkValue()), EMPTY_VECTOR },
+    { "VALID_HOLDER_2", ArkValue<Array_F64>(VALID_HOLDER_2.ArkValue()), VALID_MATRIX }
 };
 } // namespace
 

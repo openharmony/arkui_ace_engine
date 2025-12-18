@@ -123,7 +123,7 @@ void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
 } // UIExtensionComponentInterfaceModifier
 namespace UIExtensionComponentAttributeModifier {
 void SetOnRemoteReadyImpl(Ark_NativePointer node,
-                          const Opt_Callback_UIExtensionProxy_Void* value)
+                          const Opt_Callback_UIExtensionProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -147,14 +147,14 @@ void SetOnRemoteReadyImpl(Ark_NativePointer node,
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void SetOnReceiveImpl(Ark_NativePointer node,
-                      const Opt_Callback_Map_String_RecordData_Void* value)
+                      const Opt_Callback_Map_String_Opt_Object* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     LOGE("UIExtensionComponentInterfaceModifier::OnReceiveImpl - is not supported");
 }
 void SetOnErrorImpl(Ark_NativePointer node,
-                    const Opt_ErrorCallback_Ohos_Base_BusinessError* value)
+                    const Opt_ErrorCallback_BusinessErrorInterface_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -183,7 +183,7 @@ void SetOnErrorImpl(Ark_NativePointer node,
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void SetOnTerminatedImpl(Ark_NativePointer node,
-                         const Opt_Callback_TerminationInfo_Void* value)
+                         const Opt_Callback_TerminationInfo* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -231,7 +231,7 @@ void SetOnTerminatedImpl(Ark_NativePointer node,
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void SetOnDrawReadyImpl(Ark_NativePointer node,
-                        const Opt_Callback_Void* value)
+                        const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

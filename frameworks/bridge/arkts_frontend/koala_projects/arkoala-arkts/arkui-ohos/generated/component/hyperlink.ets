@@ -16,26 +16,27 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
-import { Resource_serializer } from "./../framework/resource"
-import { int32, int64, float32 } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { Color } from "./enums"
-import { Resource } from "global.resource"
-import { AttributeModifier, hookHyperlinkAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { HyperlinkModifier } from "./../HyperlinkModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from '@koalaui/interop'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { int32, int64, float32 } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { Color as arkui_component_enums_Color } from './enums'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { AttributeModifier, hookHyperlinkAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { HyperlinkModifier } from './../HyperlinkModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
     attributeSet?: HyperlinkModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkHyperlinkPeer {
@@ -45,7 +46,8 @@ export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setHyperlinkOptionsAttribute(address: string | Resource | undefined, content?: string | Resource): void {
+    setHyperlinkOptionsAttribute(address: string | global_resource_Resource | undefined, content?: string | global_resource_Resource): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (address !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -54,10 +56,10 @@ export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const addressTmpValueForIdx0  = addressTmpValue as string
                 thisSerializer.writeString(addressTmpValueForIdx0)
-            } else if (addressTmpValue instanceof Resource) {
+            } else if (addressTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((1).toByte())
-                const addressTmpValueForIdx1  = addressTmpValue as Resource
-                Resource_serializer.write(thisSerializer, addressTmpValueForIdx1)
+                const addressTmpValueForIdx1  = addressTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, addressTmpValueForIdx1)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -69,10 +71,10 @@ export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const contentTmpValueForIdx0  = contentTmpValue as string
                 thisSerializer.writeString(contentTmpValueForIdx0)
-            } else if (contentTmpValue instanceof Resource) {
+            } else if (contentTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((1).toByte())
-                const contentTmpValueForIdx1  = contentTmpValue as Resource
-                Resource_serializer.write(thisSerializer, contentTmpValueForIdx1)
+                const contentTmpValueForIdx1  = contentTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, contentTmpValueForIdx1)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -80,15 +82,15 @@ export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._HyperlinkInterface_setHyperlinkOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setColorAttribute(value: Color | int32 | string | Resource | undefined): void {
+    setColorAttribute(value: arkui_component_enums_Color | int32 | string | global_resource_Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0  = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
@@ -97,10 +99,10 @@ export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3  = valueTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -110,50 +112,34 @@ export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
     }
 }
 export interface HyperlinkAttribute extends CommonMethod {
-    setHyperlinkOptions(address: string | Resource | undefined, content?: string | Resource): this {
-        throw new Error("Unimplemented method setHyperlinkOptions")
+    setHyperlinkOptions(address: string | global_resource_Resource | undefined, content?: string | global_resource_Resource): this {
+        throw new Error('Unimplemented method setHyperlinkOptions')
     }
-    color(value: Color | int32 | string | Resource | undefined): this {
-        throw new Error("Unimplemented method color")
+    color(value: arkui_component_enums_Color | int32 | string | global_resource_Resource | undefined): this {
+        throw new Error('Unimplemented method color')
     }
     attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkHyperlinkStyle extends ArkCommonMethodStyle implements HyperlinkAttribute {
-    color_value?: Color | int32 | string | Resource | undefined
-    attributeModifier_value?: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined
-    setHyperlinkOptions(address: string | Resource | undefined, content?: string | Resource): this {
-        return this
-    }
-    color(value: Color | int32 | string | Resource | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements HyperlinkAttribute {
     getPeer(): ArkHyperlinkPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkHyperlinkPeer)
     }
-    public setHyperlinkOptions(address: string | Resource | undefined, content?: string | Resource): this {
-        if (this.checkPriority("setHyperlinkOptions")) {
-            const address_casted = address as (string | Resource | undefined)
-            const content_casted = content as (string | Resource | undefined)
+    public setHyperlinkOptions(address: string | global_resource_Resource | undefined, content?: string | global_resource_Resource): this {
+        if (this.checkPriority('setHyperlinkOptions')) {
+            const address_casted = address as (string | global_resource_Resource | undefined)
+            const content_casted = content as (string | global_resource_Resource | undefined)
             this.getPeer()?.setHyperlinkOptionsAttribute(address_casted, content_casted)
             this.applyOptionsFinish('HyperlinkAttribute');
             return this
         }
         return this
     }
-    public color(value: Color | int32 | string | Resource | undefined): this {
-        if (this.checkPriority("color")) {
-            const value_casted = value as (Color | int32 | string | Resource | undefined)
+    public color(value: arkui_component_enums_Color | int32 | string | global_resource_Resource | undefined): this {
+        if (this.checkPriority('color')) {
+            const value_casted = value as (arkui_component_enums_Color | int32 | string | global_resource_Resource | undefined)
             this.getPeer()?.setColorAttribute(value_casted)
             return this
         }
@@ -176,18 +162,16 @@ export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements H
 
 @memo
 export function HyperlinkImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: HyperlinkAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkHyperlinkComponent>((): ArkHyperlinkComponent => {
         return new ArkHyperlinkComponent()
     })
-    NodeAttach<ArkHyperlinkPeer>((): ArkHyperlinkPeer => ArkHyperlinkPeer.create(receiver), (peer: ArkHyperlinkPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkHyperlinkPeer>((): ArkHyperlinkPeer => ArkHyperlinkPeer.create(receiver), (_: ArkHyperlinkPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }

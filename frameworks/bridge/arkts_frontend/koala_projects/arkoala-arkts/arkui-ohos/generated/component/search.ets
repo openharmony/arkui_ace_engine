@@ -16,33 +16,34 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable } from "@koalaui/interop"
-import { Resource_serializer } from "./../framework/resource"
-import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
-import { CaretStyle_serializer, EditMenuOptions_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance } from "./textCommon"
-import { Font_serializer, ResourceColor, Dimension, Font, ResourceStr, Length } from "./units"
-import { TextDecorationOptions_serializer, ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_String_serializer, SelectionOptions_serializer, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
-import { KeyboardOptions_serializer, PasteEvent, KeyboardOptions } from "./richEditor"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { Color, CopyOptions, TextAlign } from "./enums"
-import { Resource } from "global.resource"
-import { extractors, AttributeModifier, hookSearchAttributeModifier, AttributeUpdater } from "#handwritten"
-import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
-import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from "./textInput"
-import { CustomBuilder } from "./builder"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { SearchModifier } from "./../SearchModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable, MaterializedBaseTag } from '@koalaui/interop'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { SymbolGlyphModifier_serializer } from './../framework/SymbolGlyphModifier'
+import { CaretStyle_serializer, EditMenuOptions_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance } from './textCommon'
+import { arkui_component_units_Font_serializer, ResourceColor, Resource as arkui_component_units_Resource, Dimension, Font as arkui_component_units_Font, ResourceStr as arkui_component_units_ResourceStr, Length } from './units'
+import { TextDecorationOptions_serializer, ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, TextDecorationOptions, Bindable, ArkCommonMethodComponent, Bindable_String_serializer, SelectionOptions_serializer, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from './common'
+import { KeyboardOptions_serializer, PasteEvent, KeyboardOptions } from './richEditor'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { Color as arkui_component_enums_Color, CopyOptions, TextAlign } from './enums'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { extractors, AttributeModifier, hookSearchAttributeModifier, AttributeUpdater } from '#handwritten'
+import { SymbolGlyphModifier } from '@arkui.SymbolGlyphModifier'
+import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from './textInput'
+import { CustomBuilder } from './builder'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { SearchModifier } from './../SearchModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkSearchPeer extends ArkCommonMethodPeer {
     attributeSet?: SearchModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkSearchPeer {
@@ -53,6 +54,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setSearchOptionsAttribute(options?: SearchOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -69,10 +71,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0  = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
@@ -81,10 +83,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -145,10 +147,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as number
                 thisSerializer.writeNumber(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -156,7 +158,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setTextIndent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnEditChangeAttribute(value: ((value0: boolean) => void) | undefined): void {
+    setOnEditChangeAttribute(value: arkui_component_common_Callback<boolean, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -173,10 +175,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0  = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
@@ -185,10 +187,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -213,10 +215,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0  = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
@@ -225,10 +227,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -236,24 +238,24 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setPlaceholderColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setPlaceholderFontAttribute(value: Font | undefined): void {
+    setPlaceholderFontAttribute(value: arkui_component_units_Font | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            Font_serializer.write(thisSerializer, valueTmpValue)
+            arkui_component_units_Font_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SearchAttribute_setPlaceholderFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setTextFontAttribute(value: Font | undefined): void {
+    setTextFontAttribute(value: arkui_component_units_Font | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            Font_serializer.write(thisSerializer, valueTmpValue)
+            arkui_component_units_Font_serializer.write(thisSerializer, valueTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -320,7 +322,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setOnContentScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnCopyAttribute(value: ((value0: string) => void) | undefined): void {
+    setOnCopyAttribute(value: arkui_component_common_Callback<string, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -332,7 +334,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setOnCopy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnCutAttribute(value: ((value0: string) => void) | undefined): void {
+    setOnCutAttribute(value: arkui_component_common_Callback<string, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -416,7 +418,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setSelectionMenuHidden(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinFontSizeAttribute(value: double | string | Resource | undefined): void {
+    setMinFontSizeAttribute(value: double | string | global_resource_Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -429,10 +431,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -440,7 +442,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setMinFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxFontSizeAttribute(value: double | string | Resource | undefined): void {
+    setMaxFontSizeAttribute(value: double | string | global_resource_Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -453,10 +455,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -464,7 +466,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setMaxFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinFontScaleAttribute(value: double | Resource | undefined): void {
+    setMinFontScaleAttribute(value: double | global_resource_Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -473,10 +475,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -484,7 +486,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setMinFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMaxFontScaleAttribute(value: double | Resource | undefined): void {
+    setMaxFontScaleAttribute(value: double | global_resource_Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -493,10 +495,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as double
                 thisSerializer.writeFloat64(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -516,7 +518,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setDecoration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLetterSpacingAttribute(value: double | string | Resource | undefined): void {
+    setLetterSpacingAttribute(value: double | string | global_resource_Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -529,10 +531,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -540,7 +542,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setLetterSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLineHeightAttribute(value: double | string | Resource | undefined): void {
+    setLineHeightAttribute(value: double | string | global_resource_Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -553,10 +555,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof global_resource_Resource) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as global_resource_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -588,7 +590,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setFontFeature(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnWillInsertAttribute(value: ((value0: InsertValue) => boolean) | undefined): void {
+    setOnWillInsertAttribute(value: arkui_component_common_Callback<InsertValue, boolean> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -600,7 +602,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setOnWillInsert(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnDidInsertAttribute(value: ((value0: InsertValue) => void) | undefined): void {
+    setOnDidInsertAttribute(value: arkui_component_common_Callback<InsertValue, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -612,7 +614,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setOnDidInsert(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnWillDeleteAttribute(value: ((value0: DeleteValue) => boolean) | undefined): void {
+    setOnWillDeleteAttribute(value: arkui_component_common_Callback<DeleteValue, boolean> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -624,7 +626,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setOnWillDelete(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnDidDeleteAttribute(value: ((value0: DeleteValue) => void) | undefined): void {
+    setOnDidDeleteAttribute(value: arkui_component_common_Callback<DeleteValue, void> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -708,7 +710,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setStopBackPress(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnWillChangeAttribute(value: ((value0: EditableTextChangeValue) => boolean) | undefined): void {
+    setOnWillChangeAttribute(value: arkui_component_common_Callback<EditableTextChangeValue, boolean> | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -751,7 +753,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setSearchButton(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setInputFilterAttribute(value: ResourceStr | undefined, error?: ((value0: string) => void)): void {
+    setInputFilterAttribute(value: arkui_component_units_ResourceStr | undefined, error?: arkui_component_common_Callback<string, void>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -760,10 +762,10 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -813,14 +815,14 @@ export enum SearchType {
 }
 export interface SearchOptions {
     value?: string | Bindable<string>;
-    placeholder?: ResourceStr;
+    placeholder?: arkui_component_units_ResourceStr;
     icon?: string;
     controller?: SearchController;
 }
 export interface IconOptions {
     size?: Length;
     color?: ResourceColor;
-    src?: ResourceStr;
+    src?: arkui_component_units_ResourceStr;
 }
 export interface SearchButtonOptions {
     fontSize?: Length;
@@ -838,357 +840,160 @@ export interface CancelButtonSymbolOptions {
 export type SearchSubmitCallback = (searchContent: string, event?: SubmitEvent) => void;
 export interface SearchAttribute extends CommonMethod {
     setSearchOptions(options?: SearchOptions): this {
-        throw new Error("Unimplemented method setSearchOptions")
+        throw new Error('Unimplemented method setSearchOptions')
     }
     fontColor(value: ResourceColor | undefined): this {
-        throw new Error("Unimplemented method fontColor")
+        throw new Error('Unimplemented method fontColor')
     }
     searchIcon(value: IconOptions | SymbolGlyphModifier | undefined): this {
-        throw new Error("Unimplemented method searchIcon")
+        throw new Error('Unimplemented method searchIcon')
     }
     cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this {
-        throw new Error("Unimplemented method cancelButton")
+        throw new Error('Unimplemented method cancelButton')
     }
     textIndent(value: Dimension | undefined): this {
-        throw new Error("Unimplemented method textIndent")
+        throw new Error('Unimplemented method textIndent')
     }
-    onEditChange(value: ((value0: boolean) => void) | undefined): this {
-        throw new Error("Unimplemented method onEditChange")
+    onEditChange(value: arkui_component_common_Callback<boolean, void> | undefined): this {
+        throw new Error('Unimplemented method onEditChange')
     }
     selectedBackgroundColor(value: ResourceColor | undefined): this {
-        throw new Error("Unimplemented method selectedBackgroundColor")
+        throw new Error('Unimplemented method selectedBackgroundColor')
     }
     caretStyle(value: CaretStyle | undefined): this {
-        throw new Error("Unimplemented method caretStyle")
+        throw new Error('Unimplemented method caretStyle')
     }
     placeholderColor(value: ResourceColor | undefined): this {
-        throw new Error("Unimplemented method placeholderColor")
+        throw new Error('Unimplemented method placeholderColor')
     }
-    placeholderFont(value: Font | undefined): this {
-        throw new Error("Unimplemented method placeholderFont")
+    placeholderFont(value: arkui_component_units_Font | undefined): this {
+        throw new Error('Unimplemented method placeholderFont')
     }
-    textFont(value: Font | undefined): this {
-        throw new Error("Unimplemented method textFont")
+    textFont(value: arkui_component_units_Font | undefined): this {
+        throw new Error('Unimplemented method textFont')
     }
     enterKeyType(value: EnterKeyType | undefined): this {
-        throw new Error("Unimplemented method enterKeyType")
+        throw new Error('Unimplemented method enterKeyType')
     }
     onSubmit(value: SearchSubmitCallback | undefined): this {
-        throw new Error("Unimplemented method onSubmit")
+        throw new Error('Unimplemented method onSubmit')
     }
     onChange(value: EditableTextOnChangeCallback | undefined): this {
-        throw new Error("Unimplemented method onChange")
+        throw new Error('Unimplemented method onChange')
     }
     onTextSelectionChange(value: OnTextSelectionChangeCallback | undefined): this {
-        throw new Error("Unimplemented method onTextSelectionChange")
+        throw new Error('Unimplemented method onTextSelectionChange')
     }
     onContentScroll(value: OnContentScrollCallback | undefined): this {
-        throw new Error("Unimplemented method onContentScroll")
+        throw new Error('Unimplemented method onContentScroll')
     }
-    onCopy(value: ((value0: string) => void) | undefined): this {
-        throw new Error("Unimplemented method onCopy")
+    onCopy(value: arkui_component_common_Callback<string, void> | undefined): this {
+        throw new Error('Unimplemented method onCopy')
     }
-    onCut(value: ((value0: string) => void) | undefined): this {
-        throw new Error("Unimplemented method onCut")
+    onCut(value: arkui_component_common_Callback<string, void> | undefined): this {
+        throw new Error('Unimplemented method onCut')
     }
     onPaste(value: OnPasteCallback | undefined): this {
-        throw new Error("Unimplemented method onPaste")
+        throw new Error('Unimplemented method onPaste')
     }
     copyOption(value: CopyOptions | undefined): this {
-        throw new Error("Unimplemented method copyOption")
+        throw new Error('Unimplemented method copyOption')
     }
     maxLength(value: int32 | undefined): this {
-        throw new Error("Unimplemented method maxLength")
+        throw new Error('Unimplemented method maxLength')
     }
     textAlign(value: TextAlign | undefined): this {
-        throw new Error("Unimplemented method textAlign")
+        throw new Error('Unimplemented method textAlign')
     }
     enableKeyboardOnFocus(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableKeyboardOnFocus")
+        throw new Error('Unimplemented method enableKeyboardOnFocus')
     }
     selectionMenuHidden(value: boolean | undefined): this {
-        throw new Error("Unimplemented method selectionMenuHidden")
+        throw new Error('Unimplemented method selectionMenuHidden')
     }
-    minFontSize(value: double | string | Resource | undefined): this {
-        throw new Error("Unimplemented method minFontSize")
+    minFontSize(value: double | string | global_resource_Resource | undefined): this {
+        throw new Error('Unimplemented method minFontSize')
     }
-    maxFontSize(value: double | string | Resource | undefined): this {
-        throw new Error("Unimplemented method maxFontSize")
+    maxFontSize(value: double | string | global_resource_Resource | undefined): this {
+        throw new Error('Unimplemented method maxFontSize')
     }
-    minFontScale(value: double | Resource | undefined): this {
-        throw new Error("Unimplemented method minFontScale")
+    minFontScale(value: double | global_resource_Resource | undefined): this {
+        throw new Error('Unimplemented method minFontScale')
     }
-    maxFontScale(value: double | Resource | undefined): this {
-        throw new Error("Unimplemented method maxFontScale")
+    maxFontScale(value: double | global_resource_Resource | undefined): this {
+        throw new Error('Unimplemented method maxFontScale')
     }
     decoration(value: TextDecorationOptions | undefined): this {
-        throw new Error("Unimplemented method decoration")
+        throw new Error('Unimplemented method decoration')
     }
-    letterSpacing(value: double | string | Resource | undefined): this {
-        throw new Error("Unimplemented method letterSpacing")
+    letterSpacing(value: double | string | global_resource_Resource | undefined): this {
+        throw new Error('Unimplemented method letterSpacing')
     }
-    lineHeight(value: double | string | Resource | undefined): this {
-        throw new Error("Unimplemented method lineHeight")
+    lineHeight(value: double | string | global_resource_Resource | undefined): this {
+        throw new Error('Unimplemented method lineHeight')
     }
     type(value: SearchType | undefined): this {
-        throw new Error("Unimplemented method type")
+        throw new Error('Unimplemented method type')
     }
     fontFeature(value: string | undefined): this {
-        throw new Error("Unimplemented method fontFeature")
+        throw new Error('Unimplemented method fontFeature')
     }
-    onWillInsert(value: ((value0: InsertValue) => boolean) | undefined): this {
-        throw new Error("Unimplemented method onWillInsert")
+    onWillInsert(value: arkui_component_common_Callback<InsertValue, boolean> | undefined): this {
+        throw new Error('Unimplemented method onWillInsert')
     }
-    onDidInsert(value: ((value0: InsertValue) => void) | undefined): this {
-        throw new Error("Unimplemented method onDidInsert")
+    onDidInsert(value: arkui_component_common_Callback<InsertValue, void> | undefined): this {
+        throw new Error('Unimplemented method onDidInsert')
     }
-    onWillDelete(value: ((value0: DeleteValue) => boolean) | undefined): this {
-        throw new Error("Unimplemented method onWillDelete")
+    onWillDelete(value: arkui_component_common_Callback<DeleteValue, boolean> | undefined): this {
+        throw new Error('Unimplemented method onWillDelete')
     }
-    onDidDelete(value: ((value0: DeleteValue) => void) | undefined): this {
-        throw new Error("Unimplemented method onDidDelete")
+    onDidDelete(value: arkui_component_common_Callback<DeleteValue, void> | undefined): this {
+        throw new Error('Unimplemented method onDidDelete')
     }
     editMenuOptions(value: EditMenuOptions | undefined): this {
-        throw new Error("Unimplemented method editMenuOptions")
+        throw new Error('Unimplemented method editMenuOptions')
     }
     enablePreviewText(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enablePreviewText")
+        throw new Error('Unimplemented method enablePreviewText')
     }
     enableHapticFeedback(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableHapticFeedback")
+        throw new Error('Unimplemented method enableHapticFeedback')
     }
     autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this {
-        throw new Error("Unimplemented method autoCapitalizationMode")
+        throw new Error('Unimplemented method autoCapitalizationMode')
     }
     halfLeading(value: boolean | undefined): this {
-        throw new Error("Unimplemented method halfLeading")
+        throw new Error('Unimplemented method halfLeading')
     }
     stopBackPress(value: boolean | undefined): this {
-        throw new Error("Unimplemented method stopBackPress")
+        throw new Error('Unimplemented method stopBackPress')
     }
-    onWillChange(value: ((value0: EditableTextChangeValue) => boolean) | undefined): this {
-        throw new Error("Unimplemented method onWillChange")
+    onWillChange(value: arkui_component_common_Callback<EditableTextChangeValue, boolean> | undefined): this {
+        throw new Error('Unimplemented method onWillChange')
     }
     keyboardAppearance(value: KeyboardAppearance | undefined): this {
-        throw new Error("Unimplemented method keyboardAppearance")
+        throw new Error('Unimplemented method keyboardAppearance')
     }
     searchButton(value: string | undefined, option?: SearchButtonOptions): this {
-        throw new Error("Unimplemented method searchButton")
+        throw new Error('Unimplemented method searchButton')
     }
-    inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this {
-        throw new Error("Unimplemented method inputFilter")
+    inputFilter(value: arkui_component_units_ResourceStr | undefined, error?: arkui_component_common_Callback<string, void>): this {
+        throw new Error('Unimplemented method inputFilter')
     }
     customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
-        throw new Error("Unimplemented method customKeyboard")
+        throw new Error('Unimplemented method customKeyboard')
     }
     attributeModifier(value: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttribute {
-    fontColor_value?: ResourceColor | undefined
-    searchIcon_value?: IconOptions | SymbolGlyphModifier | undefined
-    cancelButton_value?: CancelButtonOptions | CancelButtonSymbolOptions | undefined
-    textIndent_value?: Dimension | undefined
-    onEditChange_value?: ((value0: boolean) => void) | undefined
-    selectedBackgroundColor_value?: ResourceColor | undefined
-    caretStyle_value?: CaretStyle | undefined
-    placeholderColor_value?: ResourceColor | undefined
-    placeholderFont_value?: Font | undefined
-    textFont_value?: Font | undefined
-    enterKeyType_value?: EnterKeyType | undefined
-    onSubmit_value?: SearchSubmitCallback | undefined
-    onChange_value?: EditableTextOnChangeCallback | undefined
-    onTextSelectionChange_value?: OnTextSelectionChangeCallback | undefined
-    onContentScroll_value?: OnContentScrollCallback | undefined
-    onCopy_value?: ((value0: string) => void) | undefined
-    onCut_value?: ((value0: string) => void) | undefined
-    onPaste_value?: OnPasteCallback | undefined
-    copyOption_value?: CopyOptions | undefined
-    maxLength_value?: int32 | undefined
-    textAlign_value?: TextAlign | undefined
-    enableKeyboardOnFocus_value?: boolean | undefined
-    selectionMenuHidden_value?: boolean | undefined
-    minFontSize_value?: double | string | Resource | undefined
-    maxFontSize_value?: double | string | Resource | undefined
-    minFontScale_value?: double | Resource | undefined
-    maxFontScale_value?: double | Resource | undefined
-    decoration_value?: TextDecorationOptions | undefined
-    letterSpacing_value?: double | string | Resource | undefined
-    lineHeight_value?: double | string | Resource | undefined
-    type_value?: SearchType | undefined
-    fontFeature_value?: string | undefined
-    onWillInsert_value?: ((value0: InsertValue) => boolean) | undefined
-    onDidInsert_value?: ((value0: InsertValue) => void) | undefined
-    onWillDelete_value?: ((value0: DeleteValue) => boolean) | undefined
-    onDidDelete_value?: ((value0: DeleteValue) => void) | undefined
-    editMenuOptions_value?: EditMenuOptions | undefined
-    enablePreviewText_value?: boolean | undefined
-    enableHapticFeedback_value?: boolean | undefined
-    autoCapitalizationMode_value?: AutoCapitalizationMode | undefined
-    halfLeading_value?: boolean | undefined
-    stopBackPress_value?: boolean | undefined
-    onWillChange_value?: ((value0: EditableTextChangeValue) => boolean) | undefined
-    keyboardAppearance_value?: KeyboardAppearance | undefined
-    attributeModifier_value?: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined
-    setSearchOptions(options?: SearchOptions): this {
-        return this
-    }
-    fontColor(value: ResourceColor | undefined): this {
-        return this
-    }
-    searchIcon(value: IconOptions | SymbolGlyphModifier | undefined): this {
-        return this
-    }
-    cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this {
-        return this
-    }
-    textIndent(value: Dimension | undefined): this {
-        return this
-    }
-    onEditChange(value: ((value0: boolean) => void) | undefined): this {
-        return this
-    }
-    selectedBackgroundColor(value: ResourceColor | undefined): this {
-        return this
-    }
-    caretStyle(value: CaretStyle | undefined): this {
-        return this
-    }
-    placeholderColor(value: ResourceColor | undefined): this {
-        return this
-    }
-    placeholderFont(value: Font | undefined): this {
-        return this
-    }
-    textFont(value: Font | undefined): this {
-        return this
-    }
-    enterKeyType(value: EnterKeyType | undefined): this {
-        return this
-    }
-    onSubmit(value: SearchSubmitCallback | undefined): this {
-        return this
-    }
-    onChange(value: EditableTextOnChangeCallback | undefined): this {
-        return this
-    }
-    onTextSelectionChange(value: OnTextSelectionChangeCallback | undefined): this {
-        return this
-    }
-    onContentScroll(value: OnContentScrollCallback | undefined): this {
-        return this
-    }
-    onCopy(value: ((value0: string) => void) | undefined): this {
-        return this
-    }
-    onCut(value: ((value0: string) => void) | undefined): this {
-        return this
-    }
-    onPaste(value: OnPasteCallback | undefined): this {
-        return this
-    }
-    copyOption(value: CopyOptions | undefined): this {
-        return this
-    }
-    maxLength(value: int32 | undefined): this {
-        return this
-    }
-    textAlign(value: TextAlign | undefined): this {
-        return this
-    }
-    enableKeyboardOnFocus(value: boolean | undefined): this {
-        return this
-    }
-    selectionMenuHidden(value: boolean | undefined): this {
-        return this
-    }
-    minFontSize(value: double | string | Resource | undefined): this {
-        return this
-    }
-    maxFontSize(value: double | string | Resource | undefined): this {
-        return this
-    }
-    minFontScale(value: double | Resource | undefined): this {
-        return this
-    }
-    maxFontScale(value: double | Resource | undefined): this {
-        return this
-    }
-    decoration(value: TextDecorationOptions | undefined): this {
-        return this
-    }
-    letterSpacing(value: double | string | Resource | undefined): this {
-        return this
-    }
-    lineHeight(value: double | string | Resource | undefined): this {
-        return this
-    }
-    type(value: SearchType | undefined): this {
-        return this
-    }
-    fontFeature(value: string | undefined): this {
-        return this
-    }
-    onWillInsert(value: ((value0: InsertValue) => boolean) | undefined): this {
-        return this
-    }
-    onDidInsert(value: ((value0: InsertValue) => void) | undefined): this {
-        return this
-    }
-    onWillDelete(value: ((value0: DeleteValue) => boolean) | undefined): this {
-        return this
-    }
-    onDidDelete(value: ((value0: DeleteValue) => void) | undefined): this {
-        return this
-    }
-    editMenuOptions(value: EditMenuOptions | undefined): this {
-        return this
-    }
-    enablePreviewText(value: boolean | undefined): this {
-        return this
-    }
-    enableHapticFeedback(value: boolean | undefined): this {
-        return this
-    }
-    autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this {
-        return this
-    }
-    halfLeading(value: boolean | undefined): this {
-        return this
-    }
-    stopBackPress(value: boolean | undefined): this {
-        return this
-    }
-    onWillChange(value: ((value0: EditableTextChangeValue) => boolean) | undefined): this {
-        return this
-    }
-    keyboardAppearance(value: KeyboardAppearance | undefined): this {
-        return this
-    }
-    searchButton(value: string | undefined, option?: SearchButtonOptions): this {
-        return this
-    }
-    inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this {
-        return this
-    }
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkSearchComponent extends ArkCommonMethodComponent implements SearchAttribute {
     getPeer(): ArkSearchPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkSearchPeer)
     }
     public setSearchOptions(options?: SearchOptions): this {
-        if (this.checkPriority("setSearchOptions")) {
+        if (this.checkPriority('setSearchOptions')) {
             const options_casted = options as (SearchOptions | undefined)
             this.getPeer()?.setSearchOptionsAttribute(options_casted)
             this.applyOptionsFinish('SearchAttribute');
@@ -1197,7 +1002,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public fontColor(value: ResourceColor | undefined): this {
-        if (this.checkPriority("fontColor")) {
+        if (this.checkPriority('fontColor')) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.setFontColorAttribute(value_casted)
             return this
@@ -1205,7 +1010,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public searchIcon(value: IconOptions | SymbolGlyphModifier | undefined): this {
-        if (this.checkPriority("searchIcon")) {
+        if (this.checkPriority('searchIcon')) {
             const value_casted = value as (IconOptions | SymbolGlyphModifier | undefined)
             this.getPeer()?.setSearchIconAttribute(value_casted)
             return this
@@ -1213,7 +1018,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public cancelButton(value: CancelButtonOptions | CancelButtonSymbolOptions | undefined): this {
-        if (this.checkPriority("cancelButton")) {
+        if (this.checkPriority('cancelButton')) {
             const value_casted = value as (CancelButtonOptions | CancelButtonSymbolOptions | undefined)
             this.getPeer()?.setCancelButtonAttribute(value_casted)
             return this
@@ -1221,23 +1026,23 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public textIndent(value: Dimension | undefined): this {
-        if (this.checkPriority("textIndent")) {
+        if (this.checkPriority('textIndent')) {
             const value_casted = value as (Dimension | undefined)
             this.getPeer()?.setTextIndentAttribute(value_casted)
             return this
         }
         return this
     }
-    public onEditChange(value: ((value0: boolean) => void) | undefined): this {
-        if (this.checkPriority("onEditChange")) {
-            const value_casted = value as (((value0: boolean) => void) | undefined)
+    public onEditChange(value: arkui_component_common_Callback<boolean, void> | undefined): this {
+        if (this.checkPriority('onEditChange')) {
+            const value_casted = value as (arkui_component_common_Callback<boolean, void> | undefined)
             this.getPeer()?.setOnEditChangeAttribute(value_casted)
             return this
         }
         return this
     }
     public selectedBackgroundColor(value: ResourceColor | undefined): this {
-        if (this.checkPriority("selectedBackgroundColor")) {
+        if (this.checkPriority('selectedBackgroundColor')) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.setSelectedBackgroundColorAttribute(value_casted)
             return this
@@ -1245,7 +1050,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public caretStyle(value: CaretStyle | undefined): this {
-        if (this.checkPriority("caretStyle")) {
+        if (this.checkPriority('caretStyle')) {
             const value_casted = value as (CaretStyle | undefined)
             this.getPeer()?.setCaretStyleAttribute(value_casted)
             return this
@@ -1253,31 +1058,31 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public placeholderColor(value: ResourceColor | undefined): this {
-        if (this.checkPriority("placeholderColor")) {
+        if (this.checkPriority('placeholderColor')) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.setPlaceholderColorAttribute(value_casted)
             return this
         }
         return this
     }
-    public placeholderFont(value: Font | undefined): this {
-        if (this.checkPriority("placeholderFont")) {
-            const value_casted = value as (Font | undefined)
+    public placeholderFont(value: arkui_component_units_Font | undefined): this {
+        if (this.checkPriority('placeholderFont')) {
+            const value_casted = value as (arkui_component_units_Font | undefined)
             this.getPeer()?.setPlaceholderFontAttribute(value_casted)
             return this
         }
         return this
     }
-    public textFont(value: Font | undefined): this {
-        if (this.checkPriority("textFont")) {
-            const value_casted = value as (Font | undefined)
+    public textFont(value: arkui_component_units_Font | undefined): this {
+        if (this.checkPriority('textFont')) {
+            const value_casted = value as (arkui_component_units_Font | undefined)
             this.getPeer()?.setTextFontAttribute(value_casted)
             return this
         }
         return this
     }
     public enterKeyType(value: EnterKeyType | undefined): this {
-        if (this.checkPriority("enterKeyType")) {
+        if (this.checkPriority('enterKeyType')) {
             const value_casted = value as (EnterKeyType | undefined)
             this.getPeer()?.setEnterKeyTypeAttribute(value_casted)
             return this
@@ -1285,7 +1090,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public onSubmit(value: SearchSubmitCallback | undefined): this {
-        if (this.checkPriority("onSubmit")) {
+        if (this.checkPriority('onSubmit')) {
             const value_casted = value as (SearchSubmitCallback | undefined)
             this.getPeer()?.setOnSubmitAttribute(value_casted)
             return this
@@ -1293,7 +1098,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public onChange(value: EditableTextOnChangeCallback | undefined): this {
-        if (this.checkPriority("onChange")) {
+        if (this.checkPriority('onChange')) {
             const value_casted = value as (EditableTextOnChangeCallback | undefined)
             this.getPeer()?.setOnChangeAttribute(value_casted)
             return this
@@ -1301,7 +1106,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public onTextSelectionChange(value: OnTextSelectionChangeCallback | undefined): this {
-        if (this.checkPriority("onTextSelectionChange")) {
+        if (this.checkPriority('onTextSelectionChange')) {
             const value_casted = value as (OnTextSelectionChangeCallback | undefined)
             this.getPeer()?.setOnTextSelectionChangeAttribute(value_casted)
             return this
@@ -1309,31 +1114,31 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public onContentScroll(value: OnContentScrollCallback | undefined): this {
-        if (this.checkPriority("onContentScroll")) {
+        if (this.checkPriority('onContentScroll')) {
             const value_casted = value as (OnContentScrollCallback | undefined)
             this.getPeer()?.setOnContentScrollAttribute(value_casted)
             return this
         }
         return this
     }
-    public onCopy(value: ((value0: string) => void) | undefined): this {
-        if (this.checkPriority("onCopy")) {
-            const value_casted = value as (((value0: string) => void) | undefined)
+    public onCopy(value: arkui_component_common_Callback<string, void> | undefined): this {
+        if (this.checkPriority('onCopy')) {
+            const value_casted = value as (arkui_component_common_Callback<string, void> | undefined)
             this.getPeer()?.setOnCopyAttribute(value_casted)
             return this
         }
         return this
     }
-    public onCut(value: ((value0: string) => void) | undefined): this {
-        if (this.checkPriority("onCut")) {
-            const value_casted = value as (((value0: string) => void) | undefined)
+    public onCut(value: arkui_component_common_Callback<string, void> | undefined): this {
+        if (this.checkPriority('onCut')) {
+            const value_casted = value as (arkui_component_common_Callback<string, void> | undefined)
             this.getPeer()?.setOnCutAttribute(value_casted)
             return this
         }
         return this
     }
     public onPaste(value: OnPasteCallback | undefined): this {
-        if (this.checkPriority("onPaste")) {
+        if (this.checkPriority('onPaste')) {
             const value_casted = value as (OnPasteCallback | undefined)
             this.getPeer()?.setOnPasteAttribute(value_casted)
             return this
@@ -1341,7 +1146,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public copyOption(value: CopyOptions | undefined): this {
-        if (this.checkPriority("copyOption")) {
+        if (this.checkPriority('copyOption')) {
             const value_casted = value as (CopyOptions | undefined)
             this.getPeer()?.setCopyOptionAttribute(value_casted)
             return this
@@ -1349,7 +1154,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public maxLength(value: int32 | undefined): this {
-        if (this.checkPriority("maxLength")) {
+        if (this.checkPriority('maxLength')) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setMaxLengthAttribute(value_casted)
             return this
@@ -1357,7 +1162,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public textAlign(value: TextAlign | undefined): this {
-        if (this.checkPriority("textAlign")) {
+        if (this.checkPriority('textAlign')) {
             const value_casted = value as (TextAlign | undefined)
             this.getPeer()?.setTextAlignAttribute(value_casted)
             return this
@@ -1365,7 +1170,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public enableKeyboardOnFocus(value: boolean | undefined): this {
-        if (this.checkPriority("enableKeyboardOnFocus")) {
+        if (this.checkPriority('enableKeyboardOnFocus')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableKeyboardOnFocusAttribute(value_casted)
             return this
@@ -1373,71 +1178,71 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public selectionMenuHidden(value: boolean | undefined): this {
-        if (this.checkPriority("selectionMenuHidden")) {
+        if (this.checkPriority('selectionMenuHidden')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setSelectionMenuHiddenAttribute(value_casted)
             return this
         }
         return this
     }
-    public minFontSize(value: double | string | Resource | undefined): this {
-        if (this.checkPriority("minFontSize")) {
-            const value_casted = value as (double | string | Resource | undefined)
+    public minFontSize(value: double | string | global_resource_Resource | undefined): this {
+        if (this.checkPriority('minFontSize')) {
+            const value_casted = value as (double | string | global_resource_Resource | undefined)
             this.getPeer()?.setMinFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public maxFontSize(value: double | string | Resource | undefined): this {
-        if (this.checkPriority("maxFontSize")) {
-            const value_casted = value as (double | string | Resource | undefined)
+    public maxFontSize(value: double | string | global_resource_Resource | undefined): this {
+        if (this.checkPriority('maxFontSize')) {
+            const value_casted = value as (double | string | global_resource_Resource | undefined)
             this.getPeer()?.setMaxFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public minFontScale(value: double | Resource | undefined): this {
-        if (this.checkPriority("minFontScale")) {
-            const value_casted = value as (double | Resource | undefined)
+    public minFontScale(value: double | global_resource_Resource | undefined): this {
+        if (this.checkPriority('minFontScale')) {
+            const value_casted = value as (double | global_resource_Resource | undefined)
             this.getPeer()?.setMinFontScaleAttribute(value_casted)
             return this
         }
         return this
     }
-    public maxFontScale(value: double | Resource | undefined): this {
-        if (this.checkPriority("maxFontScale")) {
-            const value_casted = value as (double | Resource | undefined)
+    public maxFontScale(value: double | global_resource_Resource | undefined): this {
+        if (this.checkPriority('maxFontScale')) {
+            const value_casted = value as (double | global_resource_Resource | undefined)
             this.getPeer()?.setMaxFontScaleAttribute(value_casted)
             return this
         }
         return this
     }
     public decoration(value: TextDecorationOptions | undefined): this {
-        if (this.checkPriority("decoration")) {
+        if (this.checkPriority('decoration')) {
             const value_casted = value as (TextDecorationOptions | undefined)
             this.getPeer()?.setDecorationAttribute(value_casted)
             return this
         }
         return this
     }
-    public letterSpacing(value: double | string | Resource | undefined): this {
-        if (this.checkPriority("letterSpacing")) {
-            const value_casted = value as (double | string | Resource | undefined)
+    public letterSpacing(value: double | string | global_resource_Resource | undefined): this {
+        if (this.checkPriority('letterSpacing')) {
+            const value_casted = value as (double | string | global_resource_Resource | undefined)
             this.getPeer()?.setLetterSpacingAttribute(value_casted)
             return this
         }
         return this
     }
-    public lineHeight(value: double | string | Resource | undefined): this {
-        if (this.checkPriority("lineHeight")) {
-            const value_casted = value as (double | string | Resource | undefined)
+    public lineHeight(value: double | string | global_resource_Resource | undefined): this {
+        if (this.checkPriority('lineHeight')) {
+            const value_casted = value as (double | string | global_resource_Resource | undefined)
             this.getPeer()?.setLineHeightAttribute(value_casted)
             return this
         }
         return this
     }
     public type(value: SearchType | undefined): this {
-        if (this.checkPriority("type")) {
+        if (this.checkPriority('type')) {
             const value_casted = value as (SearchType | undefined)
             this.getPeer()?.setTypeAttribute(value_casted)
             return this
@@ -1445,47 +1250,47 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public fontFeature(value: string | undefined): this {
-        if (this.checkPriority("fontFeature")) {
+        if (this.checkPriority('fontFeature')) {
             const value_casted = value as (string | undefined)
             this.getPeer()?.setFontFeatureAttribute(value_casted)
             return this
         }
         return this
     }
-    public onWillInsert(value: ((value0: InsertValue) => boolean) | undefined): this {
-        if (this.checkPriority("onWillInsert")) {
-            const value_casted = value as (((value0: InsertValue) => boolean) | undefined)
+    public onWillInsert(value: arkui_component_common_Callback<InsertValue, boolean> | undefined): this {
+        if (this.checkPriority('onWillInsert')) {
+            const value_casted = value as (arkui_component_common_Callback<InsertValue, boolean> | undefined)
             this.getPeer()?.setOnWillInsertAttribute(value_casted)
             return this
         }
         return this
     }
-    public onDidInsert(value: ((value0: InsertValue) => void) | undefined): this {
-        if (this.checkPriority("onDidInsert")) {
-            const value_casted = value as (((value0: InsertValue) => void) | undefined)
+    public onDidInsert(value: arkui_component_common_Callback<InsertValue, void> | undefined): this {
+        if (this.checkPriority('onDidInsert')) {
+            const value_casted = value as (arkui_component_common_Callback<InsertValue, void> | undefined)
             this.getPeer()?.setOnDidInsertAttribute(value_casted)
             return this
         }
         return this
     }
-    public onWillDelete(value: ((value0: DeleteValue) => boolean) | undefined): this {
-        if (this.checkPriority("onWillDelete")) {
-            const value_casted = value as (((value0: DeleteValue) => boolean) | undefined)
+    public onWillDelete(value: arkui_component_common_Callback<DeleteValue, boolean> | undefined): this {
+        if (this.checkPriority('onWillDelete')) {
+            const value_casted = value as (arkui_component_common_Callback<DeleteValue, boolean> | undefined)
             this.getPeer()?.setOnWillDeleteAttribute(value_casted)
             return this
         }
         return this
     }
-    public onDidDelete(value: ((value0: DeleteValue) => void) | undefined): this {
-        if (this.checkPriority("onDidDelete")) {
-            const value_casted = value as (((value0: DeleteValue) => void) | undefined)
+    public onDidDelete(value: arkui_component_common_Callback<DeleteValue, void> | undefined): this {
+        if (this.checkPriority('onDidDelete')) {
+            const value_casted = value as (arkui_component_common_Callback<DeleteValue, void> | undefined)
             this.getPeer()?.setOnDidDeleteAttribute(value_casted)
             return this
         }
         return this
     }
     public editMenuOptions(value: EditMenuOptions | undefined): this {
-        if (this.checkPriority("editMenuOptions")) {
+        if (this.checkPriority('editMenuOptions')) {
             const value_casted = value as (EditMenuOptions | undefined)
             this.getPeer()?.setEditMenuOptionsAttribute(value_casted)
             return this
@@ -1493,7 +1298,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public enablePreviewText(value: boolean | undefined): this {
-        if (this.checkPriority("enablePreviewText")) {
+        if (this.checkPriority('enablePreviewText')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnablePreviewTextAttribute(value_casted)
             return this
@@ -1501,7 +1306,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public enableHapticFeedback(value: boolean | undefined): this {
-        if (this.checkPriority("enableHapticFeedback")) {
+        if (this.checkPriority('enableHapticFeedback')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableHapticFeedbackAttribute(value_casted)
             return this
@@ -1509,7 +1314,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this {
-        if (this.checkPriority("autoCapitalizationMode")) {
+        if (this.checkPriority('autoCapitalizationMode')) {
             const value_casted = value as (AutoCapitalizationMode | undefined)
             this.getPeer()?.setAutoCapitalizationModeAttribute(value_casted)
             return this
@@ -1517,7 +1322,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public halfLeading(value: boolean | undefined): this {
-        if (this.checkPriority("halfLeading")) {
+        if (this.checkPriority('halfLeading')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setHalfLeadingAttribute(value_casted)
             return this
@@ -1525,23 +1330,23 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public stopBackPress(value: boolean | undefined): this {
-        if (this.checkPriority("stopBackPress")) {
+        if (this.checkPriority('stopBackPress')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setStopBackPressAttribute(value_casted)
             return this
         }
         return this
     }
-    public onWillChange(value: ((value0: EditableTextChangeValue) => boolean) | undefined): this {
-        if (this.checkPriority("onWillChange")) {
-            const value_casted = value as (((value0: EditableTextChangeValue) => boolean) | undefined)
+    public onWillChange(value: arkui_component_common_Callback<EditableTextChangeValue, boolean> | undefined): this {
+        if (this.checkPriority('onWillChange')) {
+            const value_casted = value as (arkui_component_common_Callback<EditableTextChangeValue, boolean> | undefined)
             this.getPeer()?.setOnWillChangeAttribute(value_casted)
             return this
         }
         return this
     }
     public keyboardAppearance(value: KeyboardAppearance | undefined): this {
-        if (this.checkPriority("keyboardAppearance")) {
+        if (this.checkPriority('keyboardAppearance')) {
             const value_casted = value as (KeyboardAppearance | undefined)
             this.getPeer()?.setKeyboardAppearanceAttribute(value_casted)
             return this
@@ -1549,7 +1354,7 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         return this
     }
     public searchButton(value: string | undefined, option?: SearchButtonOptions): this {
-        if (this.checkPriority("searchButton")) {
+        if (this.checkPriority('searchButton')) {
             const value_casted = value as (string | undefined)
             const option_casted = option as (SearchButtonOptions | undefined)
             this.getPeer()?.setSearchButtonAttribute(value_casted, option_casted)
@@ -1557,17 +1362,17 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         }
         return this
     }
-    public inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this {
-        if (this.checkPriority("inputFilter")) {
-            const value_casted = value as (ResourceStr | undefined)
-            const error_casted = error as (((value0: string) => void) | undefined)
+    public inputFilter(value: arkui_component_units_ResourceStr | undefined, error?: arkui_component_common_Callback<string, void>): this {
+        if (this.checkPriority('inputFilter')) {
+            const value_casted = value as (arkui_component_units_ResourceStr | undefined)
+            const error_casted = error as (arkui_component_common_Callback<string, void> | undefined)
             this.getPeer()?.setInputFilterAttribute(value_casted, error_casted)
             return this
         }
         return this
     }
     public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
-        if (this.checkPriority("customKeyboard")) {
+        if (this.checkPriority('customKeyboard')) {
             const value_casted = value as (CustomBuilder | undefined)
             const options_casted = options as (KeyboardOptions | undefined)
             this.getPeer()?.setCustomKeyboardAttribute(value_casted, options_casted)
@@ -1592,18 +1397,16 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
 
 @memo
 export function SearchImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: SearchAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkSearchComponent>((): ArkSearchComponent => {
         return new ArkSearchComponent()
     })
-    NodeAttach<ArkSearchPeer>((): ArkSearchPeer => ArkSearchPeer.create(receiver), (peer: ArkSearchPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkSearchPeer>((): ArkSearchPeer => ArkSearchPeer.create(receiver), (_: ArkSearchPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -1641,13 +1444,13 @@ export class CancelButtonSymbolOptions_serializer {
     }
     public static read(buffer: DeserializerBase): CancelButtonSymbolOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const styleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let styleTmpBuf : CancelButtonStyle | undefined = undefined
         if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             styleTmpBuf = CancelButtonStyle.fromValue(valueDeserializer.readInt32())
         }
         const styleTmpResult : CancelButtonStyle | undefined = styleTmpBuf
-        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let iconTmpBuf : SymbolGlyphModifier | undefined = undefined
         if ((iconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             iconTmpBuf = (SymbolGlyphModifier_serializer.read(valueDeserializer) as SymbolGlyphModifier)
@@ -1668,7 +1471,7 @@ export class SearchOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForValueTmpValueForIdx0  = valueHolderForValueTmpValue as string
                 valueSerializer.writeString(valueHolderForValueTmpValueForIdx0)
-            } else if (valueHolderForValueTmpValue instanceof Bindable<string>) {
+            } else if (valueHolderForValueTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForValueTmpValueForIdx1  = valueHolderForValueTmpValue as Bindable<string>
                 Bindable_String_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx1)
@@ -1684,10 +1487,10 @@ export class SearchOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPlaceholderTmpValueForIdx0  = valueHolderForPlaceholderTmpValue as string
                 valueSerializer.writeString(valueHolderForPlaceholderTmpValueForIdx0)
-            } else if (valueHolderForPlaceholderTmpValue instanceof Resource) {
+            } else if (valueHolderForPlaceholderTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForPlaceholderTmpValueForIdx1  = valueHolderForPlaceholderTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForPlaceholderTmpValueForIdx1)
+                const valueHolderForPlaceholderTmpValueForIdx1  = valueHolderForPlaceholderTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForPlaceholderTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1711,43 +1514,43 @@ export class SearchOptions_serializer {
     }
     public static read(buffer: DeserializerBase): SearchOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const valueTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const valueTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let valueTmpBuf : string | Bindable<string> | undefined = undefined
         if ((valueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const valueTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let valueTmpBuf_ : string | Bindable<string> | undefined
-            if (valueTmpBuf_UnionSelector == (0).toChar()) {
-                valueTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (valueTmpBuf_UnionSelector == (1).toChar()) {
-                valueTmpBuf_ = Bindable_String_serializer.read(valueDeserializer)
+            const valueTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let valueTmpBufOpt : string | Bindable<string> | undefined
+            if (valueTmpBufOptUnionSelector == (0).toByte()) {
+                valueTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (valueTmpBufOptUnionSelector == (1).toByte()) {
+                valueTmpBufOpt = Bindable_String_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for valueTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for valueTmpBufOpt has to be chosen through deserialisation.')
             }
-            valueTmpBuf = (valueTmpBuf_ as string | Bindable<string>)
+            valueTmpBuf = (valueTmpBufOpt as string | Bindable<string>)
         }
         const valueTmpResult : string | Bindable<string> | undefined = valueTmpBuf
-        const placeholderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let placeholderTmpBuf : ResourceStr | undefined = undefined
+        const placeholderTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let placeholderTmpBuf : arkui_component_units_ResourceStr | undefined = undefined
         if ((placeholderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const placeholderTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let placeholderTmpBuf_ : string | Resource | undefined
-            if (placeholderTmpBuf_UnionSelector == (0).toChar()) {
-                placeholderTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (placeholderTmpBuf_UnionSelector == (1).toChar()) {
-                placeholderTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const placeholderTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let placeholderTmpBufOpt : string | arkui_component_units_Resource | undefined
+            if (placeholderTmpBufOptUnionSelector == (0).toByte()) {
+                placeholderTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (placeholderTmpBufOptUnionSelector == (1).toByte()) {
+                placeholderTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for placeholderTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for placeholderTmpBufOpt has to be chosen through deserialisation.')
             }
-            placeholderTmpBuf = (placeholderTmpBuf_ as string | Resource)
+            placeholderTmpBuf = (placeholderTmpBufOpt as string | arkui_component_units_Resource)
         }
-        const placeholderTmpResult : ResourceStr | undefined = placeholderTmpBuf
-        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const placeholderTmpResult : arkui_component_units_ResourceStr | undefined = placeholderTmpBuf
+        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let iconTmpBuf : string | undefined = undefined
         if ((iconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             iconTmpBuf = (valueDeserializer.readString() as string)
         }
         const iconTmpResult : string | undefined = iconTmpBuf
-        const controllerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const controllerTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let controllerTmpBuf : SearchController | undefined = undefined
         if ((controllerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             controllerTmpBuf = (SearchController_serializer.read(valueDeserializer) as SearchController)
@@ -1772,10 +1575,10 @@ export class IconOptions_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSizeTmpValueForIdx1  = valueHolderForSizeTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForSizeTmpValueForIdx1)
-            } else if (valueHolderForSizeTmpValue instanceof Resource) {
+            } else if (valueHolderForSizeTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForSizeTmpValueForIdx2  = valueHolderForSizeTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForSizeTmpValueForIdx2)
+                const valueHolderForSizeTmpValueForIdx2  = valueHolderForSizeTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForSizeTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1784,10 +1587,10 @@ export class IconOptions_serializer {
         if (valueHolderForColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForColorTmpValue  = valueHolderForColor!
-            if (valueHolderForColorTmpValue instanceof Color) {
+            if (valueHolderForColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
+                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForColorTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
@@ -1796,10 +1599,10 @@ export class IconOptions_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
                 valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
-            } else if (valueHolderForColorTmpValue instanceof Resource) {
+            } else if (valueHolderForColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
+                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1812,10 +1615,10 @@ export class IconOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSrcTmpValueForIdx0  = valueHolderForSrcTmpValue as string
                 valueSerializer.writeString(valueHolderForSrcTmpValueForIdx0)
-            } else if (valueHolderForSrcTmpValue instanceof Resource) {
+            } else if (valueHolderForSrcTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForSrcTmpValueForIdx1  = valueHolderForSrcTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForSrcTmpValueForIdx1)
+                const valueHolderForSrcTmpValueForIdx1  = valueHolderForSrcTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForSrcTmpValueForIdx1)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1823,57 +1626,57 @@ export class IconOptions_serializer {
     }
     public static read(buffer: DeserializerBase): IconOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const sizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const sizeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let sizeTmpBuf : Length | undefined = undefined
         if ((sizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const sizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let sizeTmpBuf_ : string | double | Resource | undefined
-            if (sizeTmpBuf_UnionSelector == (0).toChar()) {
-                sizeTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (sizeTmpBuf_UnionSelector == (1).toChar()) {
-                sizeTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (sizeTmpBuf_UnionSelector == (2).toChar()) {
-                sizeTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const sizeTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let sizeTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (sizeTmpBufOptUnionSelector == (0).toByte()) {
+                sizeTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (sizeTmpBufOptUnionSelector == (1).toByte()) {
+                sizeTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (sizeTmpBufOptUnionSelector == (2).toByte()) {
+                sizeTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for sizeTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for sizeTmpBufOpt has to be chosen through deserialisation.')
             }
-            sizeTmpBuf = (sizeTmpBuf_ as string | double | Resource)
+            sizeTmpBuf = (sizeTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const sizeTmpResult : Length | undefined = sizeTmpBuf
-        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let colorTmpBuf : ResourceColor | undefined = undefined
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (colorTmpBuf_UnionSelector == (0).toChar()) {
-                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readInt32())
-            } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
-                colorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
-                colorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const colorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let colorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (colorTmpBufOptUnionSelector == (0).toByte()) {
+                colorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (colorTmpBufOptUnionSelector == (1).toByte()) {
+                colorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (colorTmpBufOptUnionSelector == (2).toByte()) {
+                colorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (colorTmpBufOptUnionSelector == (3).toByte()) {
+                colorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for colorTmpBufOpt has to be chosen through deserialisation.')
             }
-            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
+            colorTmpBuf = (colorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const colorTmpResult : ResourceColor | undefined = colorTmpBuf
-        const srcTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let srcTmpBuf : ResourceStr | undefined = undefined
+        const srcTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let srcTmpBuf : arkui_component_units_ResourceStr | undefined = undefined
         if ((srcTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const srcTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let srcTmpBuf_ : string | Resource | undefined
-            if (srcTmpBuf_UnionSelector == (0).toChar()) {
-                srcTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (srcTmpBuf_UnionSelector == (1).toChar()) {
-                srcTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const srcTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let srcTmpBufOpt : string | arkui_component_units_Resource | undefined
+            if (srcTmpBufOptUnionSelector == (0).toByte()) {
+                srcTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (srcTmpBufOptUnionSelector == (1).toByte()) {
+                srcTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for srcTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for srcTmpBufOpt has to be chosen through deserialisation.')
             }
-            srcTmpBuf = (srcTmpBuf_ as string | Resource)
+            srcTmpBuf = (srcTmpBufOpt as string | arkui_component_units_Resource)
         }
-        const srcTmpResult : ResourceStr | undefined = srcTmpBuf
+        const srcTmpResult : arkui_component_units_ResourceStr | undefined = srcTmpBuf
         let value : IconOptions = ({size: sizeTmpResult, color: colorTmpResult, src: srcTmpResult} as IconOptions)
         return value
     }
@@ -1893,10 +1696,10 @@ export class SearchButtonOptions_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontSizeTmpValueForIdx1  = valueHolderForFontSizeTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForFontSizeTmpValueForIdx1)
-            } else if (valueHolderForFontSizeTmpValue instanceof Resource) {
+            } else if (valueHolderForFontSizeTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderForFontSizeTmpValueForIdx2  = valueHolderForFontSizeTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForFontSizeTmpValueForIdx2)
+                const valueHolderForFontSizeTmpValueForIdx2  = valueHolderForFontSizeTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForFontSizeTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1905,10 +1708,10 @@ export class SearchButtonOptions_serializer {
         if (valueHolderForFontColor !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontColorTmpValue  = valueHolderForFontColor!
-            if (valueHolderForFontColorTmpValue instanceof Color) {
+            if (valueHolderForFontColorTmpValue instanceof arkui_component_enums_Color) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderForFontColorTmpValueForIdx0.getOrdinal())
+                const valueHolderForFontColorTmpValueForIdx0  = valueHolderForFontColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForFontColorTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueHolderForFontColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFontColorTmpValueForIdx1  = valueHolderForFontColorTmpValue as int32
@@ -1917,10 +1720,10 @@ export class SearchButtonOptions_serializer {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForFontColorTmpValueForIdx2  = valueHolderForFontColorTmpValue as string
                 valueSerializer.writeString(valueHolderForFontColorTmpValueForIdx2)
-            } else if (valueHolderForFontColorTmpValue instanceof Resource) {
+            } else if (valueHolderForFontColorTmpValue instanceof arkui_component_units_Resource) {
                 valueSerializer.writeInt8((3).toByte())
-                const valueHolderForFontColorTmpValueForIdx3  = valueHolderForFontColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderForFontColorTmpValueForIdx3)
+                const valueHolderForFontColorTmpValueForIdx3  = valueHolderForFontColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForFontColorTmpValueForIdx3)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1936,43 +1739,43 @@ export class SearchButtonOptions_serializer {
     }
     public static read(buffer: DeserializerBase): SearchButtonOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const fontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const fontSizeTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let fontSizeTmpBuf : Length | undefined = undefined
         if ((fontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const fontSizeTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontSizeTmpBuf_ : string | double | Resource | undefined
-            if (fontSizeTmpBuf_UnionSelector == (0).toChar()) {
-                fontSizeTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (fontSizeTmpBuf_UnionSelector == (1).toChar()) {
-                fontSizeTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (fontSizeTmpBuf_UnionSelector == (2).toChar()) {
-                fontSizeTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const fontSizeTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let fontSizeTmpBufOpt : string | double | arkui_component_units_Resource | undefined
+            if (fontSizeTmpBufOptUnionSelector == (0).toByte()) {
+                fontSizeTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (fontSizeTmpBufOptUnionSelector == (1).toByte()) {
+                fontSizeTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (fontSizeTmpBufOptUnionSelector == (2).toByte()) {
+                fontSizeTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for fontSizeTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for fontSizeTmpBufOpt has to be chosen through deserialisation.')
             }
-            fontSizeTmpBuf = (fontSizeTmpBuf_ as string | double | Resource)
+            fontSizeTmpBuf = (fontSizeTmpBufOpt as string | double | arkui_component_units_Resource)
         }
         const fontSizeTmpResult : Length | undefined = fontSizeTmpBuf
-        const fontColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const fontColorTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let fontColorTmpBuf : ResourceColor | undefined = undefined
         if ((fontColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const fontColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let fontColorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (fontColorTmpBuf_UnionSelector == (0).toChar()) {
-                fontColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (fontColorTmpBuf_UnionSelector == (1).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readInt32())
-            } else if (fontColorTmpBuf_UnionSelector == (2).toChar()) {
-                fontColorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (fontColorTmpBuf_UnionSelector == (3).toChar()) {
-                fontColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            const fontColorTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let fontColorTmpBufOpt : arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (fontColorTmpBufOptUnionSelector == (0).toByte()) {
+                fontColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (fontColorTmpBufOptUnionSelector == (1).toByte()) {
+                fontColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (fontColorTmpBufOptUnionSelector == (2).toByte()) {
+                fontColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (fontColorTmpBufOptUnionSelector == (3).toByte()) {
+                fontColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
             } else {
-                throw new Error("One of the branches for fontColorTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for fontColorTmpBufOpt has to be chosen through deserialisation.')
             }
-            fontColorTmpBuf = (fontColorTmpBuf_ as Color | int32 | string | Resource)
+            fontColorTmpBuf = (fontColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const fontColorTmpResult : ResourceColor | undefined = fontColorTmpBuf
-        const autoDisableTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const autoDisableTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let autoDisableTmpBuf : boolean | undefined = undefined
         if ((autoDisableTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             autoDisableTmpBuf = valueDeserializer.readBoolean()
@@ -2004,13 +1807,13 @@ export class CancelButtonOptions_serializer {
     }
     public static read(buffer: DeserializerBase): CancelButtonOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const styleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const styleTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let styleTmpBuf : CancelButtonStyle | undefined = undefined
         if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             styleTmpBuf = CancelButtonStyle.fromValue(valueDeserializer.readInt32())
         }
         const styleTmpResult : CancelButtonStyle | undefined = styleTmpBuf
-        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const iconTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let iconTmpBuf : IconOptions | undefined = undefined
         if ((iconTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             iconTmpBuf = IconOptions_serializer.read(valueDeserializer)
@@ -2022,15 +1825,15 @@ export class CancelButtonOptions_serializer {
 }
 export class SearchControllerInternal {
     public static fromPtr(ptr: KPointer): SearchController {
-        return new SearchController(ptr)
+        return new SearchController(MaterializedBaseTag.NOP, ptr)
     }
 }
 export class SearchController extends TextContentControllerBase implements MaterializedBase {
-    constructor(peerPtr: KPointer) {
-        super(peerPtr)
+    constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
+        super(tag, peerPtr)
     }
     constructor() {
-        this(SearchController.construct())
+        this(MaterializedBaseTag.NOP, SearchController.construct())
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._SearchController_construct()
@@ -2055,13 +1858,13 @@ export class SearchController extends TextContentControllerBase implements Mater
         this.setTextSelection_serialize(selectionStart_casted, selectionEnd_casted, options_casted)
         return
     }
-    caretPosition_serialize(value: int32): void {
+    private caretPosition_serialize(value: int32): void {
         ArkUIGeneratedNativeModule._SearchController_caretPosition(this.peer!.ptr, value)
     }
-    stopEditing_serialize(): void {
+    private stopEditing_serialize(): void {
         ArkUIGeneratedNativeModule._SearchController_stopEditing(this.peer!.ptr)
     }
-    setTextSelection_serialize(selectionStart: int32, selectionEnd: int32, options?: SelectionOptions): void {
+    private setTextSelection_serialize(selectionStart: int32, selectionEnd: int32, options?: SelectionOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)

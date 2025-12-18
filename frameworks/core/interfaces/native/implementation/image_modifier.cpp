@@ -93,13 +93,12 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // ImageModifier
 namespace ImageInterfaceModifier {
 void SetImageOptionsImpl(Ark_NativePointer node,
-                         const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src,
+                         const Opt_Union_image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src,
                          const Opt_ImageAIOptions* imageAIOptions)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(src);
-    Converter::VisitUnion(*src,
+    Converter::VisitUnionPtr(src,
         [frameNode](const Ark_DrawableDescriptor& value) {
             auto desc = Converter::Convert<DrawableDescriptor *>(value);
             ImageModelStatic::SetDrawableDescriptor(frameNode, desc);
@@ -122,7 +121,7 @@ void SetImageOptionsImpl(Ark_NativePointer node,
 } // ImageInterfaceModifier
 namespace ImageAttributeModifier {
 void SetAltImpl(Ark_NativePointer node,
-                const Opt_Union_String_Resource_PixelMap* value)
+                const Opt_Union_String_Resource_image_PixelMap* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -247,7 +246,7 @@ void SetSyncLoadImpl(Ark_NativePointer node,
     ImageModelNG::SetSyncMode(frameNode, *convValue);
 }
 void SetColorFilterImpl(Ark_NativePointer node,
-                        const Opt_Union_ColorFilter_DrawingColorFilter* value)
+                        const Opt_Union_ColorFilter_drawing_ColorFilter* value)
 {
     ImageCommonMethods::ApplyColorFilterValues(node, value);
 }
@@ -358,7 +357,7 @@ void SetOnErrorImpl(Ark_NativePointer node,
     ImageModelNG::SetOnError(frameNode, std::move(onError));
 }
 void SetOnFinishImpl(Ark_NativePointer node,
-                     const Opt_Callback_Void* value)
+                     const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

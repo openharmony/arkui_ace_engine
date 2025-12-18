@@ -65,7 +65,9 @@ constexpr auto X_STR = "10.00vp";
 constexpr auto Y_STR = "20.00vp";
 
 const std::vector<OneTestColorStep> TEST_COLOR_PLAN = {
-    { ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+    { ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE),
+        "#FFFFFFFF" },
     { ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
 #ifdef WRONG_COLOR
     { ArkUnion<Opt_ResourceColor, Ark_Int32>(0), "#00000000" },
@@ -571,7 +573,7 @@ HWTEST_F(ShapeModifierTest, setMeshTest, TestSize.Level1)
     int32_t row = 3;
     std::vector<double> mesh = { 1, 2, 4, 6, 4, 2, 1, 3, 5, 1, 3, 5, 6, 3, 2, 2, 4, 5, 5, 3, 2, 2, 2, 4 };
 
-    auto arkMesh = Converter::ArkValue<Opt_Array_Float64>(mesh, Converter::FC);
+    auto arkMesh = Converter::ArkValue<Opt_Array_F64>(mesh, Converter::FC);
     auto arkColumn = Converter::ArkValue<Opt_Int32>(column);
     auto arkRow = Converter::ArkValue<Opt_Int32>(row);
 
@@ -606,7 +608,7 @@ HWTEST_F(ShapeModifierTest, DISABLED_setMeshInvalidTest, TestSize.Level1)
     int32_t row = 3;
     std::vector<double> mesh = { 1, 2, 4, 6, 4, 2, 1, 3, 5, 1, 3, 5, 6, 3, 2, 2, 4, 5, 5, 3, 2, 2, 2, 4 };
 
-    auto arkMesh = Converter::ArkValue<Opt_Array_Float64>(mesh, Converter::FC);
+    auto arkMesh = Converter::ArkValue<Opt_Array_F64>(mesh, Converter::FC);
     auto arkColumn = Converter::ArkValue<Opt_Int32>(column);
     auto arkRow = Converter::ArkValue<Opt_Int32>(row);
 

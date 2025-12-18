@@ -389,7 +389,8 @@ HWTEST_F(GaugeModifierTest, setColorsTestDefaultValues, TestSize.Level1)
 }
 
 namespace {
-const auto COLORS_ENUM_RED = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED);
+const auto COLORS_ENUM_RED = Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+    ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED);
 const auto COLORS_NUMBER_GREEN = Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xF000FF00);
 const auto COLORS_STRING_BLUE = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("rgba(0, 0, 255, 0.5)");
 const auto COLORS_RES_BY_NAME = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(
@@ -488,7 +489,7 @@ GaugeColorsValues CreateColorsValidValues()
 {
     GaugeColorsValues colorsValidValues {
         {
-            "ARK_COLOR_RED", Converter::ArkUnion<ArkColorColor, Ark_ResourceColor>(COLORS_ENUM_RED), "#FFFF0000"
+            "Res:Mock", Converter::ArkUnion<ArkColorColor, Ark_ResourceColor>(COLORS_ENUM_RED), "#FFFF0000"
         }, {
             "0xF000FF00", Converter::ArkUnion<ArkColorColor, Ark_ResourceColor>(COLORS_NUMBER_GREEN), "#F000FF00"
         }, {
@@ -636,6 +637,10 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> strokeWidth
     {"0.0fp", Converter::ArkValue<Ark_Length>("0.0fp"), "0.00fp"},
     {"35.0fp", Converter::ArkValue<Ark_Length>("35.0fp"), "35.00fp"},
     {"35.5fp", Converter::ArkValue<Ark_Length>("35.5fp"), "35.50fp"},
+    {"-5.0f", Converter::ArkValue<Ark_Length>(-5.0f), "-5.00vp"},
+    {"-15.5vp", Converter::ArkValue<Ark_Length>("-15.5vp"), "-15.50vp"},
+    {"-25.0px", Converter::ArkValue<Ark_Length>("-25.0px"), "-25.00px"},
+    {"-0.5fp", Converter::ArkValue<Ark_Length>("-0.5fp"), "-0.50fp"},
 };
 
 /*

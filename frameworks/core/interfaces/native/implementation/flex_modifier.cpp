@@ -175,30 +175,23 @@ void SetPointLightImpl(Ark_NativePointer node,
     auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
     auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
     CHECK_NULL_VOID(themeConstants);
-    if (pointLightStyle) {
-        if (pointLightStyle->lightSource) {
-            ViewAbstractModelStatic::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
-                pointLightStyle->lightSource->y,
-                pointLightStyle->lightSource->z);
-            ViewAbstractModelStatic::SetLightIntensity(frameNode,
-                pointLightStyle->lightSource->intensity);
-            ViewAbstractModelStatic::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
-        } else {
-            ViewAbstractModelStatic::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
-            ViewAbstractModelStatic::SetLightIntensity(frameNode, std::nullopt);
-            ViewAbstractModelStatic::SetLightColor(frameNode, std::nullopt);
-        }
-        // illuminated
-        ViewAbstractModelStatic::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
-        // bloom
-        ViewAbstractModelStatic::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
+
+    if (pointLightStyle && pointLightStyle->lightSource) {
+        ViewAbstractModelStatic::SetLightPosition(frameNode,
+            pointLightStyle->lightSource->x, pointLightStyle->lightSource->y, pointLightStyle->lightSource->z);
+        ViewAbstractModelStatic::SetLightIntensity(frameNode, pointLightStyle->lightSource->intensity);
+        ViewAbstractModelStatic::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
     } else {
         ViewAbstractModelStatic::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
         ViewAbstractModelStatic::SetLightIntensity(frameNode, std::nullopt);
         ViewAbstractModelStatic::SetLightColor(frameNode, std::nullopt);
-        ViewAbstractModelStatic::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
-        ViewAbstractModelStatic::SetBloom(frameNode, std::nullopt, themeConstants);
     }
+    // illuminated
+    ViewAbstractModelStatic::SetLightIlluminated(frameNode,
+        pointLightStyle ? pointLightStyle->illuminationType : std::nullopt, themeConstants);
+    // bloom
+    ViewAbstractModelStatic::SetBloom(
+        frameNode, pointLightStyle ? pointLightStyle->bloom : std::nullopt, themeConstants);
 #endif
 }
 } // FlexAttributeModifier
@@ -207,6 +200,7 @@ const GENERATED_ArkUIFlexModifier* GetFlexModifier()
     static const GENERATED_ArkUIFlexModifier ArkUIFlexModifierImpl {
         FlexModifier::ConstructImpl,
         FlexInterfaceModifier::SetFlexOptionsImpl,
+        FlexAttributeModifier::SetPointLightImpl,
     };
     return &ArkUIFlexModifierImpl;
 }

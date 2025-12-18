@@ -16,27 +16,28 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { Resource_serializer } from "./../framework/resource"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ResourceColor } from "./units"
-import { Color } from "./enums"
-import { Resource } from "global.resource"
-import { ContentModifier, AttributeModifier, hookLoadingProgressContentModifier, hookLoadingProgressAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { LoadingProgressModifier } from "./../LoadingProgressModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { global_resource_Resource_serializer } from './../framework/resource'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, ArkCommonMethodComponent } from './common'
+import { ResourceColor, Resource as arkui_component_units_Resource } from './units'
+import { Color as arkui_component_enums_Color } from './enums'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { ContentModifier, AttributeModifier, hookLoadingProgressContentModifier, hookLoadingProgressAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { LoadingProgressModifier } from './../LoadingProgressModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkLoadingProgressPeer extends ArkCommonMethodPeer {
     attributeSet?: LoadingProgressModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkLoadingProgressPeer {
@@ -47,6 +48,7 @@ export class ArkLoadingProgressPeer extends ArkCommonMethodPeer {
         return _peer
     }
     setLoadingProgressOptionsAttribute(): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._LoadingProgressInterface_setLoadingProgressOptions(this.peer.ptr)
     }
     setColorAttribute(value: ResourceColor | undefined): void {
@@ -54,10 +56,10 @@ export class ArkLoadingProgressPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof Color) {
+            if (valueTmpValue instanceof arkui_component_enums_Color) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as Color
-                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+                const valueTmpValueForIdx0  = valueTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((valueTmpValueForIdx0.getOrdinal()) % (12))
             } else if (valueTmpValue instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as int32
@@ -66,10 +68,10 @@ export class ArkLoadingProgressPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Resource) {
+            } else if (valueTmpValue instanceof arkui_component_units_Resource) {
                 thisSerializer.writeInt8((3).toByte())
-                const valueTmpValueForIdx3  = valueTmpValue as Resource
-                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                const valueTmpValueForIdx3  = valueTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -91,49 +93,28 @@ export class ArkLoadingProgressPeer extends ArkCommonMethodPeer {
     }
 }
 export enum LoadingProgressStyle {
-    DEFAULT = 0,
     Default = 0,
-    CIRCULAR = 1,
     Circular = 1,
-    ORBITAL = 2,
-    Orbital = 2
+    Orbital = 2,
+    DEFAULT = 0,
+    CIRCULAR = 1,
+    ORBITAL = 2
 }
 export interface LoadingProgressAttribute extends CommonMethod {
     setLoadingProgressOptions(): this {
-        throw new Error("Unimplemented method setLoadingProgressOptions")
+        throw new Error('Unimplemented method setLoadingProgressOptions')
     }
     color(value: ResourceColor | undefined): this {
-        throw new Error("Unimplemented method color")
+        throw new Error('Unimplemented method color')
     }
     enableLoading(value: boolean | undefined): this {
-        throw new Error("Unimplemented method enableLoading")
+        throw new Error('Unimplemented method enableLoading')
     }
     contentModifier(value: ContentModifier<LoadingProgressConfiguration> | undefined): this {
-        throw new Error("Unimplemented method contentModifier")
+        throw new Error('Unimplemented method contentModifier')
     }
     attributeModifier(value: AttributeModifier<LoadingProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkLoadingProgressStyle extends ArkCommonMethodStyle implements LoadingProgressAttribute {
-    color_value?: ResourceColor | undefined
-    enableLoading_value?: boolean | undefined
-    contentModifier_value?: ContentModifier<LoadingProgressConfiguration> | undefined
-    attributeModifier_value?: AttributeModifier<LoadingProgressAttribute> | AttributeModifier<CommonMethod> | undefined
-    setLoadingProgressOptions(): this {
-        return this
-    }
-    color(value: ResourceColor | undefined): this {
-        return this
-    }
-    enableLoading(value: boolean | undefined): this {
-        return this
-    }
-    contentModifier(value: ContentModifier<LoadingProgressConfiguration> | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<LoadingProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 export interface LoadingProgressConfiguration extends CommonConfiguration<LoadingProgressConfiguration> {
@@ -142,13 +123,10 @@ export interface LoadingProgressConfiguration extends CommonConfiguration<Loadin
 
 export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implements LoadingProgressAttribute {
     getPeer(): ArkLoadingProgressPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkLoadingProgressPeer)
     }
     public setLoadingProgressOptions(): this {
-        if (this.checkPriority("setLoadingProgressOptions")) {
+        if (this.checkPriority('setLoadingProgressOptions')) {
             this.getPeer()?.setLoadingProgressOptionsAttribute()
             this.applyOptionsFinish('LoadingProgressAttribute');
             return this
@@ -156,7 +134,7 @@ export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implem
         return this
     }
     public color(value: ResourceColor | undefined): this {
-        if (this.checkPriority("color")) {
+        if (this.checkPriority('color')) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.setColorAttribute(value_casted)
             return this
@@ -164,7 +142,7 @@ export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implem
         return this
     }
     public enableLoading(value: boolean | undefined): this {
-        if (this.checkPriority("enableLoading")) {
+        if (this.checkPriority('enableLoading')) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableLoadingAttribute(value_casted)
             return this
@@ -172,7 +150,7 @@ export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implem
         return this
     }
     public contentModifier(value: ContentModifier<LoadingProgressConfiguration> | undefined): this {
-        if (this.checkPriority("contentModifier")) {
+        if (this.checkPriority('contentModifier')) {
             hookLoadingProgressContentModifier(this, value)
         }
         return this
@@ -194,18 +172,16 @@ export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implem
 
 @memo
 export function LoadingProgressImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: LoadingProgressAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkLoadingProgressComponent>((): ArkLoadingProgressComponent => {
         return new ArkLoadingProgressComponent()
     })
-    NodeAttach<ArkLoadingProgressPeer>((): ArkLoadingProgressPeer => ArkLoadingProgressPeer.create(receiver), (peer: ArkLoadingProgressPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkLoadingProgressPeer>((): ArkLoadingProgressPeer => ArkLoadingProgressPeer.create(receiver), (_: ArkLoadingProgressPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }

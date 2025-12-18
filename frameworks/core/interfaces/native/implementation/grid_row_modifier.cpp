@@ -54,11 +54,6 @@ namespace OHOS::Ace::NG::Converter {
         return toValue;
     }
     template<>
-    GridRowSizeOption Convert(const Ark_Number& value)
-    {
-        return GridRowSizeOptionFromDimension(OptConvert<Dimension>(value));
-    }
-    template<>
     GridRowSizeOption Convert(const Ark_Float64& value)
     {
         return GridRowSizeOptionFromDimension(OptConvert<Dimension>(value));
@@ -292,7 +287,7 @@ void SetGridRowOptionsImpl(Ark_NativePointer node,
 } // GridRowInterfaceModifier
 namespace GridRowAttributeModifier {
 void SetOnBreakpointChangeImpl(Ark_NativePointer node,
-                               const Opt_Callback_String_Void* value)
+                               const Opt_synthetic_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

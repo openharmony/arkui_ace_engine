@@ -40,7 +40,7 @@ inline void AssignCast(std::optional<GridItemStyle>& dst, const Ark_GridItemOpti
 } // namespace OHOS::Ace::NG::Converter
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<bool> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
+std::optional<bool> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Boolean_Bindable_Boolean *value)
 {
     std::optional<bool> result;
     Converter::VisitUnionPtr(value,
@@ -148,7 +148,7 @@ void SetSelectableImpl(Ark_NativePointer node,
     GridItemModelStatic::SetSelectable(frameNode, *convValue);
 }
 void SetSelectedImpl(Ark_NativePointer node,
-                     const Opt_Union_Boolean_Bindable* value)
+                     const Opt_Union_Boolean_Bindable_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -161,7 +161,7 @@ void SetSelectedImpl(Ark_NativePointer node,
     GridItemModelStatic::SetSelected(frameNode, *convValue);
 }
 void SetOnSelectImpl(Ark_NativePointer node,
-                     const Opt_Callback_Boolean_Void* value)
+                     const Opt_synthetic_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

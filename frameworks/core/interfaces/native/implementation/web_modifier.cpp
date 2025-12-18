@@ -353,13 +353,6 @@ void SetGeolocationAccessImpl(Ark_NativePointer node,
     WebModelStatic::SetGeolocationAccessEnabled(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
-void SetJavaScriptProxyImpl(Ark_NativePointer node,
-                            const Opt_JavaScriptProxy* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    LOGE("WebInterfaceModifier::JavaScriptProxyImpl method is not implemented");
-}
 void SetCacheModeImpl(Ark_NativePointer node,
                       const Opt_CacheMode* value)
 {
@@ -513,26 +506,6 @@ void SetMetaViewportImpl(Ark_NativePointer node,
     WebModelStatic::SetMetaViewport(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
-void SetOnPageEndImpl(Ark_NativePointer node,
-                      const Opt_Callback_OnPageEndEvent_Void* value)
-{
-#ifdef WEB_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // Implement Reset value
-        return;
-    }
-    auto instanceId = Container::CurrentId();
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onPageEnd = [callback = CallbackHelper(*optValue), weakNode, instanceId](
-        const BaseEventInfo* info) {
-        OnPageEnd(callback, weakNode, instanceId, info);
-    };
-    WebModelStatic::SetOnPageFinish(frameNode, std::move(onPageEnd));
-#endif // WEB_SUPPORTED
-}
 void SetOnPageBeginImpl(Ark_NativePointer node,
                         const Opt_Callback_OnPageBeginEvent_Void* value)
 {
@@ -551,6 +524,26 @@ void SetOnPageBeginImpl(Ark_NativePointer node,
         OnPageBegin(callback, weakNode, instanceId, info);
     };
     WebModelStatic::SetOnPageStart(frameNode, onPageBegin);
+#endif // WEB_SUPPORTED
+}
+void SetOnPageEndImpl(Ark_NativePointer node,
+                      const Opt_Callback_OnPageEndEvent_Void* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onPageEnd = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) {
+        OnPageEnd(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetOnPageFinish(frameNode, std::move(onPageEnd));
 #endif // WEB_SUPPORTED
 }
 void SetOnLoadStartedImpl(Ark_NativePointer node,
@@ -610,7 +603,7 @@ void SetOnTitleReceiveImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnGeolocationHideImpl(Ark_NativePointer node,
-                              const Opt_Callback_Void* value)
+                              const Opt_synthetic_Callback_Void* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -650,7 +643,7 @@ void SetOnGeolocationShowImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnRequestSelectedImpl(Ark_NativePointer node,
-                              const Opt_Callback_Void* value)
+                              const Opt_synthetic_Callback_Void* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -908,7 +901,7 @@ void SetOnResourceLoadImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnFullScreenExitImpl(Ark_NativePointer node,
-                             const Opt_Callback_Void* value)
+                             const Opt_synthetic_Callback_Void* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -988,7 +981,7 @@ void SetOnHttpAuthRequestImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnInterceptRequestImpl(Ark_NativePointer node,
-                               const Opt_Type_WebAttribute_onInterceptRequest* value)
+                               const Opt_Callback_OnInterceptRequestEvent_Opt_WebResourceResponse* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1222,7 +1215,7 @@ void SetOnWindowNewImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnWindowExitImpl(Ark_NativePointer node,
-                         const Opt_Callback_Void* value)
+                         const Opt_synthetic_Callback_Void* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1256,7 +1249,7 @@ void SetMultiWindowAccessImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnInterceptKeyEventImpl(Ark_NativePointer node,
-                                const Opt_Callback_KeyEvent_Boolean* value)
+                                const Opt_synthetic_Callback_KeyEvent_Boolean* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1694,7 +1687,7 @@ void SetOnLoadInterceptImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void SetOnControllerAttachedImpl(Ark_NativePointer node,
-                                 const Opt_Callback_Void* value)
+                                 const Opt_synthetic_Callback_Void* value)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -2170,16 +2163,6 @@ void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
     WebModelStatic::SetEnabledHapticFeedback(frameNode, *convValue);
 #endif // WEB_SUPPORTED
 }
-void SetOptimizeParserBudgetImpl(Ark_NativePointer node,
-                                 const Opt_Boolean* value)
-{
-#ifdef WEB_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    WebModelStatic::SetOptimizeParserBudgetEnabled(frameNode, convValue);
-#endif
-}
 void SetEnableFollowSystemFontWeightImpl(Ark_NativePointer node,
                                          const Opt_Boolean* value)
 {
@@ -2199,6 +2182,16 @@ void SetEnableWebAVSessionImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<bool>(*value);
     WebModelStatic::SetWebMediaAVSessionEnabled(frameNode, convValue);
 #endif // WEB_SUPPORTED
+}
+void SetOptimizeParserBudgetImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    WebModelStatic::SetOptimizeParserBudgetEnabled(frameNode, convValue);
+#endif
 }
 void SetRunJavaScriptOnDocumentStartImpl(Ark_NativePointer node,
                                          const Opt_Array_ScriptItem* value)
@@ -2287,11 +2280,11 @@ void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
     WebModelStatic::RegisterNativeEmbedRule(frameNode, *convValueTag, *convValueType);
 #endif // WEB_SUPPORTED
 }
-void InitCallbackParams_(FrameNode* frameNode, MenuParam& dst, const Opt_Callback_Void& onAppear,
-                         const Opt_Callback_Void& onDisappear)
+void InitCallbackParams_(FrameNode* frameNode, MenuParam& dst, const Opt_Callback_Void_Void& onAppear,
+                         const Opt_Callback_Void_Void& onDisappear)
 {
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto arkOnDisappear = Converter::OptConvert<Callback_Void>(onDisappear);
+    auto arkOnDisappear = Converter::OptConvert<Callback_Void_Void>(onDisappear);
     if (arkOnDisappear) {
         auto onDisappear = [arkCallback = CallbackHelper(arkOnDisappear.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
@@ -2299,7 +2292,7 @@ void InitCallbackParams_(FrameNode* frameNode, MenuParam& dst, const Opt_Callbac
         };
         dst.onDisappear = std::move(onDisappear);
     }
-    auto arkOnAppear = Converter::OptConvert<Callback_Void>(onAppear);
+    auto arkOnAppear = Converter::OptConvert<Callback_Void_Void>(onAppear);
     if (arkOnAppear) {
         auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
@@ -2397,7 +2390,6 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetMixedModeImpl,
         WebAttributeModifier::SetZoomAccessImpl,
         WebAttributeModifier::SetGeolocationAccessImpl,
-        WebAttributeModifier::SetJavaScriptProxyImpl,
         WebAttributeModifier::SetCacheModeImpl,
         WebAttributeModifier::SetDarkModeImpl,
         WebAttributeModifier::SetForceDarkAccessImpl,
@@ -2409,8 +2401,8 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetDatabaseAccessImpl,
         WebAttributeModifier::SetInitialScaleImpl,
         WebAttributeModifier::SetMetaViewportImpl,
-        WebAttributeModifier::SetOnPageEndImpl,
         WebAttributeModifier::SetOnPageBeginImpl,
+        WebAttributeModifier::SetOnPageEndImpl,
         WebAttributeModifier::SetOnLoadStartedImpl,
         WebAttributeModifier::SetOnLoadFinishedImpl,
         WebAttributeModifier::SetOnProgressChangeImpl,
@@ -2500,9 +2492,9 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetKeyboardAvoidModeImpl,
         WebAttributeModifier::SetEditMenuOptionsImpl,
         WebAttributeModifier::SetEnableHapticFeedbackImpl,
-        WebAttributeModifier::SetOptimizeParserBudgetImpl,
         WebAttributeModifier::SetEnableFollowSystemFontWeightImpl,
         WebAttributeModifier::SetEnableWebAVSessionImpl,
+        WebAttributeModifier::SetOptimizeParserBudgetImpl,
         WebAttributeModifier::SetRunJavaScriptOnDocumentStartImpl,
         WebAttributeModifier::SetRunJavaScriptOnDocumentEndImpl,
         WebAttributeModifier::SetRunJavaScriptOnHeadEndImpl,

@@ -126,8 +126,12 @@ HWTEST_F(MarqueeModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
 
 // Valid values for attribute 'fontColor' of method 'fontColor'
 static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> fontColorFontColorValidValues = {
-    { "ARK_COLOR_BLUE", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-    { "ARK_COLOR_RED", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
+    { "ARK_COLOR_BLUE", Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
+    { "ARK_COLOR_RED", Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED),
+        "#FFFF0000" },
 };
 
 /*

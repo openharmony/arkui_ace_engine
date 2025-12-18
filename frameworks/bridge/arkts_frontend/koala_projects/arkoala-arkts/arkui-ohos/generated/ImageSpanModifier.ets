@@ -16,25 +16,31 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethod } from "./component/common"
-import { TextBackgroundStyle, BaseSpan } from "./component/span"
-import { LengthMetrics } from "arkui.Graphics"
-import { BaseSpanModifier } from "./BaseSpanModifier"
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, extractors } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkImageSpanPeer, ImageCompleteCallback, ImageLoadResult, ImageSpanAttribute } from "./component/imageSpan"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { ImageSpanAlignment, ImageFit } from "./component/enums"
-import { ColorFilter } from "./component/units"
-import { default as drawing } from "@ohos.graphics.drawing"
-import { ImageErrorCallback, ImageError } from "./component/image"
-import { default as image } from "@ohos.multimedia.image"
+import { CommonMethod, PixelMap } from './component/common'
+import { TextBackgroundStyle, BaseSpan } from './component/span'
+import { LengthMetrics as arkui_Graphics_LengthMetrics } from '@arkui.Graphics'
+import { BaseSpanModifier } from './BaseSpanModifier'
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier, extractors } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkImageSpanPeer, ImageCompleteCallback, ImageLoadResult, ImageSpanAttribute } from './component/imageSpan'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { ImageSpanAlignment, ImageFit } from './component/enums'
+import { ColorFilter } from './component/units'
+import { DrawingColorFilter, ImageErrorCallback, ImageError } from './component/image'
+import { default as drawing } from '@ohos.graphics.drawing'
+import { default as image } from '@ohos.multimedia.image'
 export class ImageSpanModifier extends CommonMethodModifier implements ImageSpanAttribute,AttributeModifier<ImageSpanAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -44,179 +50,170 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
     applyFocusedAttribute(instance: ImageSpanAttribute): void { }
     applyDisabledAttribute(instance: ImageSpanAttribute): void { }
     applySelectedAttribute(instance: ImageSpanAttribute): void { }
-    _verticalAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _verticalAlign_0_0value?: ImageSpanAlignment | undefined
-    _colorFilter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _colorFilter_0_0value?: ColorFilter | drawing.ColorFilter | undefined
-    _objectFit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _objectFit_0_0value?: ImageFit | undefined
-    _onComplete_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onComplete_0_0value?: ImageCompleteCallback | undefined
-    _onError_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onError_0_0value?: ImageErrorCallback | undefined
-    _alt_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _alt_0_0value?: image.PixelMap | undefined
-    _textBackgroundStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
-    _baselineOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _baselineOffset_0_0value?: LengthMetrics | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _verticalAlign_0_0value?: ImageSpanAlignment | undefined
+    public _colorFilter_0_0value?: ColorFilter | DrawingColorFilter | undefined
+    public _objectFit_0_0value?: ImageFit | undefined
+    public _onComplete_0_0value?: ImageCompleteCallback | undefined
+    public _onError_0_0value?: ImageErrorCallback | undefined
+    public _alt_0_0value?: PixelMap | undefined
+    public _textBackgroundStyle_0_0value?: TextBackgroundStyle | undefined
+    public _baselineOffset_0_0value?: arkui_Graphics_LengthMetrics | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkImageSpanPeer;
-        if (this._verticalAlign_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._verticalAlign_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkImageSpanPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
                     peer.setVerticalAlignAttribute((this._verticalAlign_0_0value as ImageSpanAlignment | undefined));
-                    this._verticalAlign_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._verticalAlign_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._verticalAlign_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[0] = 0;
                     peer.setVerticalAlignAttribute((undefined as ImageSpanAlignment | undefined));
                 }
             }
         }
-        if (this._colorFilter_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._colorFilter_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setColorFilterAttribute((this._colorFilter_0_0value as ColorFilter | drawing.ColorFilter | undefined));
-                    this._colorFilter_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
+                    peer.setColorFilterAttribute((this._colorFilter_0_0value as ColorFilter | DrawingColorFilter | undefined));
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._colorFilter_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._colorFilter_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setColorFilterAttribute((undefined as ColorFilter | drawing.ColorFilter | undefined));
+                    flagArray[1] = 0;
+                    peer.setColorFilterAttribute((undefined as ColorFilter | DrawingColorFilter | undefined));
                 }
             }
         }
-        if (this._objectFit_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._objectFit_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
                     peer.setObjectFitAttribute((this._objectFit_0_0value as ImageFit | undefined));
-                    this._objectFit_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[2] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._objectFit_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[2] = 2;
                     break;
                 }
                 default: {
-                    this._objectFit_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[2] = 0;
                     peer.setObjectFitAttribute((undefined as ImageFit | undefined));
                 }
             }
         }
-        if (this._onComplete_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onComplete_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
                     peer.setOnCompleteAttribute((this._onComplete_0_0value as ImageCompleteCallback | undefined));
-                    this._onComplete_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[3] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onComplete_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[3] = 2;
                     break;
                 }
                 default: {
-                    this._onComplete_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[3] = 0;
                     peer.setOnCompleteAttribute((undefined as ImageCompleteCallback | undefined));
                 }
             }
         }
-        if (this._onError_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onError_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1: {
                     peer.setOnErrorAttribute((this._onError_0_0value as ImageErrorCallback | undefined));
-                    this._onError_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onError_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._onError_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[4] = 0;
                     peer.setOnErrorAttribute((undefined as ImageErrorCallback | undefined));
                 }
             }
         }
-        if (this._alt_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._alt_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setAltAttribute((this._alt_0_0value as image.PixelMap | undefined));
-                    this._alt_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1: {
+                    peer.setAltAttribute((this._alt_0_0value as PixelMap | undefined));
+                    flagArray[5] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._alt_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[5] = 2;
                     break;
                 }
                 default: {
-                    this._alt_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setAltAttribute((undefined as image.PixelMap | undefined));
+                    flagArray[5] = 0;
+                    peer.setAltAttribute((undefined as PixelMap | undefined));
                 }
             }
         }
-        if (this._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._textBackgroundStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1: {
                     peer.setTextBackgroundStyleAttribute((this._textBackgroundStyle_0_0value as TextBackgroundStyle | undefined));
-                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[6] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[6] = 2;
                     break;
                 }
                 default: {
-                    this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[6] = 0;
                     peer.setTextBackgroundStyleAttribute((undefined as TextBackgroundStyle | undefined));
                 }
             }
         }
-        if (this._baselineOffset_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._baselineOffset_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBaselineOffsetAttribute((this._baselineOffset_0_0value as LengthMetrics | undefined));
-                    this._baselineOffset_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1: {
+                    peer.setBaselineOffsetAttribute((this._baselineOffset_0_0value as arkui_Graphics_LengthMetrics | undefined));
+                    flagArray[7] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._baselineOffset_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[7] = 2;
                     break;
                 }
                 default: {
-                    this._baselineOffset_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBaselineOffsetAttribute((undefined as LengthMetrics | undefined));
+                    flagArray[7] = 0;
+                    peer.setBaselineOffsetAttribute((undefined as arkui_Graphics_LengthMetrics | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: ImageSpanModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._verticalAlign_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._verticalAlign_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: ImageSpanModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.verticalAlign(modifier._verticalAlign_0_0value);
                     break;
                 }
@@ -225,24 +222,22 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
                 }
             }
         }
-        if (modifier._colorFilter_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._colorFilter_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
                     this.colorFilter(modifier._colorFilter_0_0value);
                     break;
                 }
                 default: {
-                    this.colorFilter((undefined as ColorFilter | drawing.ColorFilter | undefined));
+                    this.colorFilter((undefined as ColorFilter | DrawingColorFilter | undefined));
                 }
             }
         }
-        if (modifier._objectFit_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._objectFit_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.objectFit(modifier._objectFit_0_0value);
                     break;
                 }
@@ -251,11 +246,10 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
                 }
             }
         }
-        if (modifier._onComplete_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onComplete_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
                     this.onComplete(modifier._onComplete_0_0value);
                     break;
                 }
@@ -264,11 +258,10 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
                 }
             }
         }
-        if (modifier._onError_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onError_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
                     this.onError(modifier._onError_0_0value);
                     break;
                 }
@@ -277,24 +270,22 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
                 }
             }
         }
-        if (modifier._alt_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._alt_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[5] != 0) {
+            switch (flagArray[5]) {
+                case 1:
+                case 3: {
                     this.alt(modifier._alt_0_0value);
                     break;
                 }
                 default: {
-                    this.alt((undefined as image.PixelMap | undefined));
+                    this.alt((undefined as PixelMap | undefined));
                 }
             }
         }
-        if (modifier._textBackgroundStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._textBackgroundStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[6] != 0) {
+            switch (flagArray[6]) {
+                case 1:
+                case 3: {
                     this.textBackgroundStyle(modifier._textBackgroundStyle_0_0value);
                     break;
                 }
@@ -303,117 +294,100 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
                 }
             }
         }
-        if (modifier._baselineOffset_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._baselineOffset_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[7] != 0) {
+            switch (flagArray[7]) {
+                case 1:
+                case 3: {
                     this.baselineOffset(modifier._baselineOffset_0_0value);
                     break;
                 }
                 default: {
-                    this.baselineOffset((undefined as LengthMetrics | undefined));
+                    this.baselineOffset((undefined as arkui_Graphics_LengthMetrics | undefined));
                 }
             }
         }
     }
     verticalAlign(value: ImageSpanAlignment | undefined): this {
-        if (((this._verticalAlign_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._verticalAlign_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._verticalAlign_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._verticalAlign_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
         }
         return this
     }
-    colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
-        if (((this._colorFilter_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._colorFilter_0_flag = AttributeUpdaterFlag.UPDATE
+    colorFilter(value: ColorFilter | DrawingColorFilter | undefined): this {
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
             this._colorFilter_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._colorFilter_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     objectFit(value: ImageFit | undefined): this {
-        if (((this._objectFit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._objectFit_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._objectFit_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._objectFit_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     onComplete(value: ImageCompleteCallback | undefined): this {
-        if (((this._onComplete_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onComplete_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[3]) == (0)) || (true)) {
+            this._flagArray[3] = 1
             this._onComplete_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onComplete_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }
     onError(value: ImageErrorCallback | undefined): this {
-        if (((this._onError_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onError_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[4]) == (0)) || (true)) {
+            this._flagArray[4] = 1
             this._onError_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onError_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[4] = 3
         }
         return this
     }
-    alt(value: image.PixelMap | undefined): this {
-        if (((this._alt_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._alt_0_flag = AttributeUpdaterFlag.UPDATE
+    alt(value: PixelMap | undefined): this {
+        if (((this._flagArray[5]) == (0)) || (true)) {
+            this._flagArray[5] = 1
             this._alt_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._alt_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[5] = 3
         }
         return this
     }
     textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
-        if (((this._textBackgroundStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[6]) == (0)) || (true)) {
+            this._flagArray[6] = 1
             this._textBackgroundStyle_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[6] = 3
         }
         return this
     }
-    baselineOffset(value: LengthMetrics | undefined): this {
-        if (((this._baselineOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._baselineOffset_0_flag = AttributeUpdaterFlag.UPDATE
+    baselineOffset(value: arkui_Graphics_LengthMetrics | undefined): this {
+        if (((this._flagArray[7]) == (0)) || (true)) {
+            this._flagArray[7] = 1
             this._baselineOffset_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._baselineOffset_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[7] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

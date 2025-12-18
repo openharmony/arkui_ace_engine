@@ -16,25 +16,26 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
-import { Position_serializer, Position, Length } from "./units"
-import { int32, int64, float32 } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, hookWindowSceneAttributeModifier, AttributeUpdater } from "#handwritten"
-import { Resource } from "global.resource"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { WindowSceneModifier } from "./../WindowSceneModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from '@koalaui/interop'
+import { Position_serializer, Position, Length, Resource as arkui_component_units_Resource } from './units'
+import { int32, int64, float32 } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent } from './common'
+import { AttributeModifier, hookWindowSceneAttributeModifier, AttributeUpdater } from '#handwritten'
+import { Resource as global_resource_Resource } from 'global.resource'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { WindowSceneModifier } from './../WindowSceneModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkWindowScenePeer extends ArkCommonMethodPeer {
     attributeSet?: WindowSceneModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkWindowScenePeer {
@@ -44,10 +45,11 @@ export class ArkWindowScenePeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setWindowSceneOptionsAttribute(persistentId: number): void {
+    setWindowSceneOptionsAttribute(persistentId: int32): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._WindowSceneInterface_setWindowSceneOptions(this.peer.ptr, persistentId)
     }
-    setAttractionEffectAttribute(destination: Position | undefined, fraction: number | undefined): void {
+    setAttractionEffectAttribute(destination: Position | undefined, fraction: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (destination !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -59,7 +61,7 @@ export class ArkWindowScenePeer extends ArkCommonMethodPeer {
         if (fraction !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const fractionTmpValue  = fraction!
-            thisSerializer.writeNumber(fractionTmpValue)
+            thisSerializer.writeFloat64(fractionTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -68,49 +70,34 @@ export class ArkWindowScenePeer extends ArkCommonMethodPeer {
     }
 }
 export interface WindowSceneAttribute extends CommonMethod {
-    setWindowSceneOptions(persistentId: number): this {
-        throw new Error("Unimplemented method setWindowSceneOptions")
+    setWindowSceneOptions(persistentId: int32): this {
+        throw new Error('Unimplemented method setWindowSceneOptions')
     }
-    attractionEffect(destination: Position | undefined, fraction: number | undefined): this {
-        throw new Error("Unimplemented method attractionEffect")
+    attractionEffect(destination: Position | undefined, fraction: double | undefined): this {
+        throw new Error('Unimplemented method attractionEffect')
     }
     attributeModifier(value: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkWindowSceneStyle extends ArkCommonMethodStyle implements WindowSceneAttribute {
-    attributeModifier_value?: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined
-    setWindowSceneOptions(persistentId: number): this {
-        return this
-    }
-    attractionEffect(destination: Position | undefined, fraction: number | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<WindowSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements WindowSceneAttribute {
     getPeer(): ArkWindowScenePeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkWindowScenePeer)
     }
-    public setWindowSceneOptions(persistentId: number): this {
-        if (this.checkPriority("setWindowSceneOptions")) {
-            const persistentId_casted = persistentId as (number)
+    public setWindowSceneOptions(persistentId: int32): this {
+        if (this.checkPriority('setWindowSceneOptions')) {
+            const persistentId_casted = persistentId as (int32)
             this.getPeer()?.setWindowSceneOptionsAttribute(persistentId_casted)
             this.applyOptionsFinish('WindowSceneAttribute');
             return this
         }
         return this
     }
-    public attractionEffect(destination: Position | undefined, fraction: number | undefined): this {
-        if (this.checkPriority("attractionEffect")) {
+    public attractionEffect(destination: Position | undefined, fraction: double | undefined): this {
+        if (this.checkPriority('attractionEffect')) {
             const destination_casted = destination as (Position | undefined)
-            const fraction_casted = fraction as (number | undefined)
+            const fraction_casted = fraction as (double | undefined)
             this.getPeer()?.setAttractionEffectAttribute(destination_casted, fraction_casted)
             return this
         }
@@ -133,18 +120,16 @@ export class ArkWindowSceneComponent extends ArkCommonMethodComponent implements
 
 @memo
 export function WindowSceneImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: WindowSceneAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkWindowSceneComponent>((): ArkWindowSceneComponent => {
         return new ArkWindowSceneComponent()
     })
-    NodeAttach<ArkWindowScenePeer>((): ArkWindowScenePeer => ArkWindowScenePeer.create(receiver), (peer: ArkWindowScenePeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkWindowScenePeer>((): ArkWindowScenePeer => ArkWindowScenePeer.create(receiver), (_: ArkWindowScenePeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }

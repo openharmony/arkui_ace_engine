@@ -70,11 +70,11 @@ HWTEST_F(RowModifierTest, setRowOptionsTestOptionsRowOptionsSpaceValidValues, Te
     Opt_Union_RowOptions_RowOptionsV2 initValueOptions;
 
     // Initial setup
-    WriteToUnion<Ark_RowOptions>(WriteTo(initValueOptions)).space = ArkUnion<Opt_Union_String_Number, Ark_Number>(
+    WriteToUnion<Ark_RowOptions>(WriteTo(initValueOptions)).space = ArkUnion<Opt_Union_String_F64, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueOptions](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_String_Number& value) {
+                          const Opt_Union_String_F64& value) {
         Opt_Union_RowOptions_RowOptionsV2 inputValueOptions = initValueOptions;
 
         // Re-create node for 'options' attribute
@@ -89,10 +89,10 @@ HWTEST_F(RowModifierTest, setRowOptionsTestOptionsRowOptionsSpaceValidValues, Te
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_String_Number, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_String_F64, Ark_Float64>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_String_Number, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_String_F64, Ark_String>(value));
     }
 }
 
@@ -106,10 +106,10 @@ HWTEST_F(RowModifierTest, setRowOptionsTestOptionsRowOptionsSpaceInvalidValues, 
     Opt_Union_RowOptions_RowOptionsV2 initValueOptions;
 
     // Initial setup
-    WriteToUnion<Ark_RowOptions>(WriteTo(initValueOptions)).space = ArkUnion<Opt_Union_String_Number, Ark_Number>(
+    WriteToUnion<Ark_RowOptions>(WriteTo(initValueOptions)).space = ArkUnion<Opt_Union_String_F64, Ark_Float64>(
         std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
-    auto checkValue = [this, &initValueOptions](const std::string& input, const Opt_Union_String_Number& value) {
+    auto checkValue = [this, &initValueOptions](const std::string& input, const Opt_Union_String_F64& value) {
         Opt_Union_RowOptions_RowOptionsV2 inputValueOptions = initValueOptions;
 
         // Re-create node for 'options' attribute
@@ -124,14 +124,14 @@ HWTEST_F(RowModifierTest, setRowOptionsTestOptionsRowOptionsSpaceInvalidValues, 
     };
 
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_String_Number, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Union_String_F64, Ark_Float64>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_String_Number, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_String_F64, Ark_String>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_String_Number, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_String_F64, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_String_Number>());
+    checkValue("undefined", ArkValue<Opt_Union_String_F64>());
 }
 } // namespace OHOS::Ace::NG

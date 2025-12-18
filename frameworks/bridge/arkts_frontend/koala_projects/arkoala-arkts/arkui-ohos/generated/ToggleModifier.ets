@@ -16,20 +16,26 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethodModifier } from "./CommonMethodModifier"
-import { AttributeModifier, ContentModifier } from "#handwritten"
-import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
-import { PeerNode } from "./PeerNode"
-import { ArkTogglePeer, ToggleConfiguration, SwitchStyle, ToggleAttribute } from "./component/toggle"
-import { int32 } from "@koalaui/common"
-import { ModifierState } from "./CommonModifier"
-import { CommonMethod } from "./component/common"
-import { ResourceColor } from "./component/units"
-import { Color } from "./component/enums"
-import { Resource } from "global.resource"
+import { CommonMethodModifier } from './CommonMethodModifier'
+import { AttributeModifier, ContentModifier, hookToggleContentModifier } from '#handwritten'
+import { AttributeUpdaterFlag } from './AttributeUpdaterFlag'
+import { PeerNode } from './PeerNode'
+import { ArkTogglePeer, ToggleConfiguration, SwitchStyle, ToggleAttribute } from './component/toggle'
+import { int32, int64 } from '@koalaui/common'
+import { ModifierState } from './CommonModifier'
+import { CommonMethod } from './component/common'
+import { ResourceColor, Resource as arkui_component_units_Resource } from './component/units'
+import { Color as arkui_component_enums_Color } from './component/enums'
+import { Resource as global_resource_Resource } from 'global.resource'
 export class ToggleModifier extends CommonMethodModifier implements ToggleAttribute,AttributeModifier<ToggleAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState
+    _state: ModifierState = new ModifierState;
+    _addr: ArrayBuffer = new ArrayBuffer(4096);
+    _flagArray: Uint8Array = new Uint8Array(this._addr);
+    constructor() {
+        super();
+        this._flagArray.fill(0);
+    }
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -39,112 +45,140 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
     applyFocusedAttribute(instance: ToggleAttribute): void { }
     applyDisabledAttribute(instance: ToggleAttribute): void { }
     applySelectedAttribute(instance: ToggleAttribute): void { }
-    _onChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onChange_0_0value?: ((value0: boolean) => void) | undefined
-    _selectedColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _selectedColor_0_0value?: ResourceColor | undefined
-    _switchPointColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _switchPointColor_0_0value?: ResourceColor | undefined
-    _switchStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _switchStyle_0_0value?: SwitchStyle | undefined
-    applyModifierPatch(node: PeerNode): void {
-        this._state.addRef()
+    public _onChange_0_0value?: ((isSelected: boolean) => void) | undefined
+    public _contentModifier_0_0value?: ContentModifier<ToggleConfiguration> | undefined
+    public _selectedColor_0_0value?: ResourceColor | undefined
+    public _switchPointColor_0_0value?: ResourceColor | undefined
+    public _switchStyle_0_0value?: SwitchStyle | undefined
+    applyModifierPatch(node: object): void {
         super.applyModifierPatch(node)
+        this._state.addRef()
         const peer = node as ArkTogglePeer;
-        if (this._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._onChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnChangeAttribute((this._onChange_0_0value as ((value0: boolean) => void) | undefined));
-                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkTogglePeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1: {
+                    peer.setOnChangeAttribute((this._onChange_0_0value as ((isSelected: boolean) => void) | undefined));
+                    flagArray[0] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._onChange_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[0] = 2;
                     break;
                 }
                 default: {
-                    this._onChange_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnChangeAttribute((undefined as ((value0: boolean) => void) | undefined));
+                    flagArray[0] = 0;
+                    peer.setOnChangeAttribute((undefined as ((isSelected: boolean) => void) | undefined));
                 }
             }
         }
-        if (this._selectedColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._selectedColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
-                    peer.setSelectedColorAttribute((this._selectedColor_0_0value as ResourceColor | undefined));
-                    this._selectedColor_0_flag = AttributeUpdaterFlag.RESET;
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1: {
+                    hookToggleContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<ToggleConfiguration> | undefined));
+                    flagArray[1] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._selectedColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[1] = 2;
                     break;
                 }
                 default: {
-                    this._selectedColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[1] = 0;
+                    hookToggleContentModifier(peer, (undefined as ContentModifier<ToggleConfiguration> | undefined));
+                }
+            }
+        }
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1: {
+                    peer.setSelectedColorAttribute((this._selectedColor_0_0value as ResourceColor | undefined));
+                    flagArray[2] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[2] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[2] = 0;
                     peer.setSelectedColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._switchPointColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._switchPointColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1: {
                     peer.setSwitchPointColorAttribute((this._switchPointColor_0_0value as ResourceColor | undefined));
-                    this._switchPointColor_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[3] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._switchPointColor_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[3] = 2;
                     break;
                 }
                 default: {
-                    this._switchPointColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[3] = 0;
                     peer.setSwitchPointColorAttribute((undefined as ResourceColor | undefined));
                 }
             }
         }
-        if (this._switchStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (this._switchStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1: {
                     peer.setSwitchStyleAttribute((this._switchStyle_0_0value as SwitchStyle | undefined));
-                    this._switchStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    flagArray[4] = 2;
                     break;
                 }
-                case AttributeUpdaterFlag.SKIP: {
-                    this._switchStyle_0_flag = AttributeUpdaterFlag.RESET;
+                case 3: {
+                    flagArray[4] = 2;
                     break;
                 }
                 default: {
-                    this._switchStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    flagArray[4] = 0;
                     peer.setSwitchStyleAttribute((undefined as SwitchStyle | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: ToggleModifier): void {
-       super.mergeModifier(modifier)
+        super.mergeModifier(modifier)
         this._state = modifier._state;
-        if (modifier._onChange_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._onChange_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: ToggleModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0) {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
                     this.onChange(modifier._onChange_0_0value);
                     break;
                 }
                 default: {
-                    this.onChange((undefined as ((value0: boolean) => void) | undefined));
+                    this.onChange((undefined as ((isSelected: boolean) => void) | undefined));
                 }
             }
         }
-        if (modifier._selectedColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._selectedColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[1] != 0) {
+            switch (flagArray[1]) {
+                case 1:
+                case 3: {
+                    this.contentModifier(modifier._contentModifier_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentModifier((undefined as ContentModifier<ToggleConfiguration> | undefined));
+                }
+            }
+        }
+        if (flagArray[2] != 0) {
+            switch (flagArray[2]) {
+                case 1:
+                case 3: {
                     this.selectedColor(modifier._selectedColor_0_0value);
                     break;
                 }
@@ -153,11 +187,10 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
                 }
             }
         }
-        if (modifier._switchPointColor_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._switchPointColor_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[3] != 0) {
+            switch (flagArray[3]) {
+                case 1:
+                case 3: {
                     this.switchPointColor(modifier._switchPointColor_0_0value);
                     break;
                 }
@@ -166,11 +199,10 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
                 }
             }
         }
-        if (modifier._switchStyle_0_flag != AttributeUpdaterFlag.INITIAL)
-        {
-            switch (modifier._switchStyle_0_flag) {
-                case AttributeUpdaterFlag.UPDATE:
-                case AttributeUpdaterFlag.SKIP: {
+        if (flagArray[4] != 0) {
+            switch (flagArray[4]) {
+                case 1:
+                case 3: {
                     this.switchStyle(modifier._switchStyle_0_0value);
                     break;
                 }
@@ -180,55 +212,57 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
             }
         }
     }
-    onChange(value: ((value0: boolean) => void) | undefined): this {
-        if (((this._onChange_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
+    onChange(value: ((isSelected: boolean) => void) | undefined): this {
+        if (((this._flagArray[0]) == (0)) || (true)) {
+            this._flagArray[0] = 1
             this._onChange_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._onChange_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[0] = 3
+        }
+        return this
+    }
+    contentModifier(value: ContentModifier<ToggleConfiguration> | undefined): this {
+        if (((this._flagArray[1]) == (0)) || (true)) {
+            this._flagArray[1] = 1
+            this._contentModifier_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[1] = 3
         }
         return this
     }
     selectedColor(value: ResourceColor | undefined): this {
-        if (((this._selectedColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._selectedColor_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[2]) == (0)) || (true)) {
+            this._flagArray[2] = 1
             this._selectedColor_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._selectedColor_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[2] = 3
         }
         return this
     }
     switchPointColor(value: ResourceColor | undefined): this {
-        if (((this._switchPointColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._switchPointColor_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[3]) == (0)) || (true)) {
+            this._flagArray[3] = 1
             this._switchPointColor_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._switchPointColor_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[3] = 3
         }
         return this
     }
     switchStyle(value: SwitchStyle | undefined): this {
-        if (((this._switchStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
-        {
-            this._switchStyle_0_flag = AttributeUpdaterFlag.UPDATE
+        if (((this._flagArray[4]) == (0)) || (true)) {
+            this._flagArray[4] = 1
             this._switchStyle_0_0value = value
             this._state.fireChange()
-        } else
-        {
-            this._switchStyle_0_flag = AttributeUpdaterFlag.SKIP
+        } else {
+            this._flagArray[4] = 3
         }
         return this
     }
     public attributeModifier(value: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+        throw new Error('Not implemented')
     }
 }

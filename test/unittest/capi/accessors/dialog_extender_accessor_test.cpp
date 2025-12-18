@@ -73,7 +73,7 @@ HWTEST_F(DialogExtenderAccessorTest, DISABLED_showDatePickerDialogTest, TestSize
 
     for (const auto& [date, expected] : DATE_TEST_PLAN) {
         Ark_DatePickerDialogOptions options {
-            .selected = Converter::ArkUnion<Opt_Union_Date_Bindable, Ark_Date>(date)
+            .selected = Converter::ArkUnion<Opt_Union_Date_Bindable_Date, Ark_Date>(date)
         };
         accessor_->showDatePickerDialog(&options);
         dialogInfo = MockDatePickerDialog::GetDialogInfo();

@@ -16,23 +16,24 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { ComponentBase } from "./../ComponentBase"
-import { PeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { AttributeModifier, hookPathAttributeModifier, AttributeUpdater } from "#handwritten"
-import { CallbackKind } from "./../framework/peers/CallbackKind"
-import { CallbackTransformer } from "./../CallbackTransformer"
-import { memo, memo_stable } from "@koalaui/runtime/annotations"
-import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { PathModifier } from "./../PathModifier"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ModifierStateManager } from '../CommonModifier';
+import { ArkThemeScopeManager } from '#arktheme'
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { ComponentBase } from './../ComponentBase'
+import { PeerNode } from './../PeerNode'
+import { ArkUIGeneratedNativeModule } from '#components'
+import { ArkCommonShapeMethodPeer, CommonShapeMethod as arkui_component_common_CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonMethodComponent } from './common'
+import { AttributeModifier, hookPathAttributeModifier, AttributeUpdater } from '#handwritten'
+import { CallbackKind } from './../framework/peers/CallbackKind'
+import { CallbackTransformer } from './../CallbackTransformer'
+import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
+import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
+import { PathModifier } from './../PathModifier'
+import { NodeAttach, remember } from '@koalaui/runtime'
+import { ModifierStateManager } from './../CommonModifier'
 export class ArkPathPeer extends ArkCommonShapeMethodPeer {
     attributeSet?: PathModifier;
-    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component?: ComponentBase, flags: int32 = 0): ArkPathPeer {
@@ -43,6 +44,7 @@ export class ArkPathPeer extends ArkCommonShapeMethodPeer {
         return _peer
     }
     setPathOptionsAttribute(options?: PathOptions): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -72,40 +74,24 @@ export interface PathOptions {
     height?: double | string;
     commands?: string;
 }
-export interface PathAttribute extends CommonShapeMethod {
+export interface PathAttribute extends arkui_component_common_CommonShapeMethod {
     setPathOptions(options?: PathOptions): this {
-        throw new Error("Unimplemented method setPathOptions")
+        throw new Error('Unimplemented method setPathOptions')
     }
     commands(value: string | undefined): this {
-        throw new Error("Unimplemented method commands")
+        throw new Error('Unimplemented method commands')
     }
-    attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Unimplemented method attributeModifier")
-    }
-}
-export class ArkPathStyle extends ArkCommonShapeMethodStyle implements PathAttribute {
-    commands_value?: string | undefined
-    attributeModifier_value?: AttributeModifier<PathAttribute> | AttributeModifier<CommonMethod> | undefined
-    setPathOptions(options?: PathOptions): this {
-        return this
-    }
-    commands(value: string | undefined): this {
-        return this
-    }
-    public attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
+    attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<arkui_component_common_CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error('Unimplemented method attributeModifier')
     }
 }
 
 export class ArkPathComponent extends ArkCommonShapeMethodComponent implements PathAttribute {
     getPeer(): ArkPathPeer {
-        if (!this.peer) {
-            throw new Error("Attribute function should be called in memo context")
-        }
         return (this.peer as ArkPathPeer)
     }
     public setPathOptions(options?: PathOptions): this {
-        if (this.checkPriority("setPathOptions")) {
+        if (this.checkPriority('setPathOptions')) {
             const options_casted = options as (PathOptions | undefined)
             this.getPeer()?.setPathOptionsAttribute(options_casted)
             this.applyOptionsFinish('PathAttribute');
@@ -114,14 +100,14 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements P
         return this
     }
     public commands(value: string | undefined): this {
-        if (this.checkPriority("commands")) {
+        if (this.checkPriority('commands')) {
             const value_casted = value as (string | undefined)
             this.getPeer()?.setCommandsAttribute(value_casted)
             return this
         }
         return this
     }
-    public attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+    public attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<arkui_component_common_CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
             hookPathAttributeModifier(this, value);
         })
@@ -138,18 +124,16 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements P
 
 @memo
 export function PathImpl(
-    @memo
+    @memo @memo_skip
     style: ((attributes: PathAttribute) => void) | undefined,
-    @memo
+    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkPathComponent>((): ArkPathComponent => {
         return new ArkPathComponent()
     })
-    NodeAttach<ArkPathPeer>((): ArkPathPeer => ArkPathPeer.create(receiver), (peer: ArkPathPeer): void => {
-        receiver.setPeer(peer)
+    NodeAttach<ArkPathPeer>((): ArkPathPeer => ArkPathPeer.create(receiver), (_: ArkPathPeer): void => {
         style?.(receiver)
-        receiver.setPeer(undefined)
         content_?.()
     })
 }
@@ -200,37 +184,37 @@ export class PathOptions_serializer {
     }
     public static read(buffer: DeserializerBase): PathOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const widthTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let widthTmpBuf : double | string | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : double | string | undefined
-            if (widthTmpBuf_UnionSelector == (0).toChar()) {
-                widthTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
-                widthTmpBuf_ = (valueDeserializer.readString() as string)
+            const widthTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let widthTmpBufOpt : double | string | undefined
+            if (widthTmpBufOptUnionSelector == (0).toByte()) {
+                widthTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (widthTmpBufOptUnionSelector == (1).toByte()) {
+                widthTmpBufOpt = (valueDeserializer.readString() as string)
             } else {
-                throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for widthTmpBufOpt has to be chosen through deserialisation.')
             }
-            widthTmpBuf = (widthTmpBuf_ as double | string)
+            widthTmpBuf = (widthTmpBufOpt as double | string)
         }
         const widthTmpResult : double | string | undefined = widthTmpBuf
-        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const heightTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let heightTmpBuf : double | string | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBuf_ : double | string | undefined
-            if (heightTmpBuf_UnionSelector == (0).toChar()) {
-                heightTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
-                heightTmpBuf_ = (valueDeserializer.readString() as string)
+            const heightTmpBufOptUnionSelector : int32 = valueDeserializer.readInt8()
+            let heightTmpBufOpt : double | string | undefined
+            if (heightTmpBufOptUnionSelector == (0).toByte()) {
+                heightTmpBufOpt = valueDeserializer.readFloat64()
+            } else if (heightTmpBufOptUnionSelector == (1).toByte()) {
+                heightTmpBufOpt = (valueDeserializer.readString() as string)
             } else {
-                throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
+                throw new Error('One of the branches for heightTmpBufOpt has to be chosen through deserialisation.')
             }
-            heightTmpBuf = (heightTmpBuf_ as double | string)
+            heightTmpBuf = (heightTmpBufOpt as double | string)
         }
         const heightTmpResult : double | string | undefined = heightTmpBuf
-        const commandsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        const commandsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
         let commandsTmpBuf : string | undefined = undefined
         if ((commandsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             commandsTmpBuf = (valueDeserializer.readString() as string)

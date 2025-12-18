@@ -16,11 +16,10 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CustomTheme, CustomColors } from "@ohos.arkui.theme"
-import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
-import { TypeChecker } from "#components"
-import { CallbackTransformer } from "./../CallbackTransformer"
+import { CustomTheme, CustomColors as ohos_arkui_theme_CustomColors } from '@ohos.arkui.theme'
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
+import { int32, int64, float32, unsafeCast } from '@koalaui/common'
+import { CallbackTransformer } from './../CallbackTransformer'
 export class CustomTheme_serializer {
     public static write(buffer: SerializerBase, value: CustomTheme): void {
         let valueSerializer : SerializerBase = buffer
@@ -34,17 +33,16 @@ export class CustomTheme_serializer {
         }
     }
     public static read(buffer: DeserializerBase): CustomTheme {
-        // instructive changes, need to be removed
-        throw new Error("Not implemented");
-        // let valueDeserializer : DeserializerBase = buffer
-        // const colorsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        // let colorsTmpBuf : CustomColors | undefined
-        // if ((colorsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-        //     colorsTmpBuf = (valueDeserializer.readObject() as object)
-        // }
-        // const colorsTmpResult : CustomColors | undefined = colorsTmpBuf
-        // let value : CustomTheme = ({colors: colorsTmpResult} as CustomTheme)
-        // return value
-        // instructive changes, need to be removed
+        let valueDeserializer : DeserializerBase = buffer
+        const colorsTmpBuf_runtimeType  = valueDeserializer.readInt8()!.toInt()
+        let colorsTmpBuf : ohos_arkui_theme_CustomColors | undefined = undefined
+        if ((colorsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            // instructive change start
+            colorsTmpBuf = (valueDeserializer.readObject() as ohos_arkui_theme_CustomColors | undefined)
+            // instructive change end
+        }
+        const colorsTmpResult : ohos_arkui_theme_CustomColors | undefined = colorsTmpBuf
+        let value : CustomTheme = ({colors: colorsTmpResult} as CustomTheme)
+        return value
     }
 }

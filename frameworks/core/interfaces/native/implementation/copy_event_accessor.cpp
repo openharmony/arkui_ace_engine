@@ -23,24 +23,20 @@ void DestroyPeerImpl(Ark_CopyEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-
 Ark_CopyEvent ConstructImpl()
 {
     return PeerUtils::CreatePeer<CopyEventPeer>();
 }
-
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-
 void PreventDefaultImpl(Ark_CopyEvent peer)
 {
     CHECK_NULL_VOID(peer);
     peer->HandlePreventDefault();
 }
 } // CopyEventAccessor
-
 const GENERATED_ArkUICopyEventAccessor* GetCopyEventAccessor()
 {
     static const GENERATED_ArkUICopyEventAccessor CopyEventAccessorImpl {
@@ -51,4 +47,5 @@ const GENERATED_ArkUICopyEventAccessor* GetCopyEventAccessor()
     };
     return &CopyEventAccessorImpl;
 }
+
 }

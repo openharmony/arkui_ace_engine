@@ -53,7 +53,7 @@ HWTEST_F(WindowSceneModifierTest, setAttractionEffectTest, TestSize.Level1)
     destination.x = Converter::ArkValue<Opt_Length>(DESTINATION_X, &ctx);
     destination.y = Converter::ArkValue<Opt_Length>(DESTINATION_Y, &ctx);
     Opt_Position optDestination = Converter::ArkValue<Opt_Position>(destination);
-    Opt_Number fraction = Converter::ArkValue<Opt_Number>(FRACTION);
+    Opt_Float64 fraction = Converter::ArkValue<Opt_Float64>(FRACTION);
 
     modifier_->setAttractionEffect(node_, &optDestination, &fraction);
     AttractionEffect effect = WindowSceneModel::GetAttractionEffect();
@@ -71,11 +71,8 @@ HWTEST_F(WindowSceneModifierTest, setAttractionEffectTest, TestSize.Level1)
  */
 HWTEST_F(WindowSceneModifierTest, setWindowSceneOptionsTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setWindowSceneOptions, nullptr);
-    modifier_->setWindowSceneOptions(node_, nullptr);
-
-    Ark_Number persistentId = Converter::ArkValue<Ark_Number>(PERSISTENT_ID);
-    modifier_->setWindowSceneOptions(node_, &persistentId);
+    Ark_Int32 persistentId = Converter::ArkValue<Ark_Int32>(PERSISTENT_ID);
+    modifier_->setWindowSceneOptions(node_, persistentId);
     int32_t id = WindowSceneModel::GetPersistentId();
     EXPECT_EQ(id, PERSISTENT_ID);
 }

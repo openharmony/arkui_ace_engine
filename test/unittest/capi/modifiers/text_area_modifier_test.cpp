@@ -58,7 +58,9 @@ const auto ATTRIBUTE_CUSTOM_KEYBOARD_AVOIDANCE_DEFAULT_VALUE = false;
 const std::string TEST_CONTENT_ONE = "ContentTestOne";
 const std::string TEST_CONTENT_TWO = "ContentTestTwo";
 const std::vector<std::tuple<Ark_ResourceColor, std::string>> COLOR_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE),
+        "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
@@ -479,7 +481,7 @@ HWTEST_F(TextAreaModifierTest, setTextIndentTest, TestSize.Level1)
     const std::vector<std::tuple<Opt_Dimension, std::string>> ARK_LENGTH_TEST_PLAN = {
         { Converter::ArkValue<Opt_Dimension>(1.11f), "1.11fp" },
         { Converter::ArkValue<Opt_Dimension>("2.22"), "2.22fp" },
-        { Converter::ArkValue<Opt_Dimension>(""), DEFAULT_TEXT_INDENT },
+        { Converter::ArkValue<Opt_Dimension>(""), "0.00vp" },
         { Converter::ArkValue<Opt_Dimension>("1.23px"), "1.23px" },
         { Converter::ArkValue<Opt_Dimension>(), DEFAULT_TEXT_INDENT },
         { Converter::ArkValue<Opt_Dimension>("-5.68px"), "-5.68px" },
@@ -1171,7 +1173,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setOnCopyTest, TestSize.Level1)
             auto textString = Converter::Convert<std::u16string>(value);
             g_EventTestString = textString;
         };
-    auto func = Converter::ArkCallback<Opt_Callback_String_Void>(onCopy);
+    auto func = Converter::ArkCallback<Opt_synthetic_Callback_String_Void>(onCopy);
     modifier_->setOnCopy(node_, &func);
     textFieldEventHub->FireOnCopy(CHECK_TEXT);
     EXPECT_EQ(g_EventTestString, CHECK_TEXT);
@@ -1195,7 +1197,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setOnCutTest, TestSize.Level1)
         [](Ark_Int32 nodeId, Ark_String value) {
             g_EventTestString = Converter::Convert<std::u16string>(value);
         };
-    auto func = Converter::ArkCallback<Opt_Callback_String_Void>(onCut);
+    auto func = Converter::ArkCallback<Opt_synthetic_Callback_String_Void>(onCut);
     modifier_->setOnCut(node_, &func);
     textFieldEventHub->FireOnCut(CHECK_TEXT);
     EXPECT_EQ(g_EventTestString, CHECK_TEXT);
@@ -1283,7 +1285,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setInputFilterTestValidValues, TestSize.
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
-    auto optCallbackValue = Converter::ArkCallback<Opt_Callback_String_Void>(onErrorChange, frameNode->GetId());
+    auto optCallbackValue = Converter::ArkCallback<Opt_synthetic_Callback_String_Void>(
+        onErrorChange, frameNode->GetId());
     Converter::ConvContext ctx;
     auto sendResource = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(STR_TEST_TEXT, &ctx);
     auto sendResource2 = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(STR_TEST_TEXT2, &ctx);
@@ -1318,7 +1321,7 @@ HWTEST_F(TextAreaModifierTest, setInputFilterTestInvalidValues, TestSize.Level1)
     ASSERT_NE(modifier_->setInputFilter, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
-    auto optCallbackValue = Converter::ArkValue<Opt_Callback_String_Void>();
+    auto optCallbackValue = Converter::ArkValue<Opt_synthetic_Callback_String_Void>();
     Converter::ConvContext ctx;
     auto sendResource = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(STR_TEST_TEXT, &ctx);
     auto sendResource2 = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(STR_TEST_TEXT2, &ctx);
@@ -1343,7 +1346,7 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest1, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPlaceholderFont, nullptr);
 
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -1355,7 +1358,7 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest1, TestSize.Level1)
 
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
-        auto inputValue = Converter::ArkValue<Opt_Font>(font);
+        auto inputValue = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setPlaceholderFont(node_, &inputValue);
         auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
@@ -1379,7 +1382,7 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest2, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPlaceholderFont, nullptr);
 
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -1391,7 +1394,7 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest2, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
-        auto inputValue = Converter::ArkValue<Opt_Font>(font);
+        auto inputValue = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setPlaceholderFont(node_, &inputValue);
         auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
@@ -1415,7 +1418,7 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest3, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPlaceholderFont, nullptr);
 
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -1427,7 +1430,7 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest3, TestSize.Level1)
 
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
-        auto inputValue = Converter::ArkValue<Opt_Font>(font);
+        auto inputValue = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setPlaceholderFont(node_, &inputValue);
         auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
@@ -1451,7 +1454,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderFontTest4, TestSize.Level1
 {
     ASSERT_NE(modifier_->setPlaceholderFont, nullptr);
 
-    Ark_Font font = {
+    Ark_arkui_component_units_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = OPT_LENGTH_TEST_PLAN[0].first,
         .style = FONT_STYLE_TEST_PLAN[0].first,
@@ -1463,7 +1466,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderFontTest4, TestSize.Level1
 
     for (auto size : OPT_LENGTH_TEST_PLAN) {
         font.size = size.first;
-        auto inputValue = Converter::ArkValue<Opt_Font>(font);
+        auto inputValue = Converter::ArkValue<Opt_arkui_component_units_Font>(font);
         modifier_->setPlaceholderFont(node_, &inputValue);
         auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
@@ -1612,7 +1615,8 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest, TestSize.Level1)
     modifier_->setTextAreaOptions(node_, &optionsUndef);
 
     Ark_TextAreaOptions optionsInvalid;
-    optionsInvalid.text = Converter::ArkValue<Opt_Union_ResourceStr_Bindable_Bindable_Bindable>();
+    optionsInvalid.text =
+        Converter::ArkValue<Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String>();
     optionsInvalid.placeholder = Converter::ArkValue<Opt_ResourceStr>();
     optionsInvalid.controller = Converter::ArkValue<Opt_TextAreaController>();
     auto optionsInvalidDef = Converter::ArkValue<Opt_TextAreaOptions>();
@@ -1633,8 +1637,9 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest, TestSize.Level1)
     // create the external TextAreaController peer and attach modifier to it
     TextAreaControllerPeer peer;
     Ark_TextAreaOptions options;
-    options.text = Converter::ArkUnion<Opt_Union_ResourceStr_Bindable_Bindable_Bindable, Ark_ResourceStr>(
-        Converter::ArkUnion<Ark_ResourceStr, Ark_String>(ATTRIBUTE_TEXT_VALUE));
+    options.text = Converter::ArkUnion<
+        Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String, Ark_ResourceStr>(
+            Converter::ArkUnion<Ark_ResourceStr, Ark_String>(ATTRIBUTE_TEXT_VALUE));
     options.placeholder = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(ATTRIBUTE_PLACEHOLDER_VALUE);
     options.controller = Converter::ArkValue<Opt_TextAreaController>(&peer);
     auto optionsDef = Converter::ArkValue<Opt_TextAreaOptions>(options);
@@ -1668,7 +1673,8 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest2, TestSize.Level1)
             const std::string& expectedStr, const Ark_ResourceStr& value) {
         Ark_TextAreaOptions options;
         TextAreaControllerPeer peer;
-        options.text = Converter::ArkUnion<Opt_Union_ResourceStr_Bindable_Bindable_Bindable, Ark_ResourceStr>(value);
+        options.text = Converter::ArkUnion<
+            Opt_Union_ResourceStr_Bindable_ResourceStr_Bindable_Resource_Bindable_String, Ark_ResourceStr>(value);
         options.placeholder = Converter::ArkValue<Opt_ResourceStr>(value);
         options.controller = Converter::ArkValue<Opt_TextAreaController>(&peer);
         auto optionsDef = Converter::ArkValue<Opt_TextAreaOptions>(options);

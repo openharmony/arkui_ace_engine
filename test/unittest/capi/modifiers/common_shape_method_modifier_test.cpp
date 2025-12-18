@@ -45,7 +45,7 @@ const auto ATTRIBUTE_STROKE_WIDTH_DEFAULT_VALUE = 0.0f;
 
 // global types
 using OneTestColorStep = std::pair<Opt_ResourceColor, std::string>;
-using OneUnionNumStrResStep = std::pair<Opt_Union_Number_String_Resource, std::string>;
+using OneUnionNumStrResStep = std::pair<Opt_Union_F64_String_Resource, std::string>;
 
 // global test plans
 const auto RES_NAME = NamedResourceId{"aa.bb.cc", ResourceType::COLOR};
@@ -53,7 +53,9 @@ const auto RES_ID = IntResourceId{11111, ResourceType::COLOR};
 static const std::string EXPECTED_RESOURCE_COLOR =
     Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
 static const std::vector<OneTestColorStep> TEST_COLOR_PLAN = {
-    { ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+    { ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+        ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE),
+        "#FFFFFFFF" },
     { ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123456), "#FF123456" },
     { ArkUnion<Opt_ResourceColor, Ark_Int32>(0.5f), "#00000000" },
     { ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"), "#11223344" },
@@ -277,34 +279,34 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeOpacityTestDefault, TestSize.Le
 HWTEST_F(CommonShapeMethodModifierTest, setStrokeOpacityTest, TestSize.Level1)
 {
     static const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN = {
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(123))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-123))), "0.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("5.6vp"))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-5.6vp"))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45px"))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-45px"))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(0.23f))), "0.230000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-0.23f))), "0.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("10%"))), "0.100000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45dp"))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("undefVal"))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>(""))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111vp"))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111"))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_Float64>(ArkValue<Ark_Float64>(123))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_Float64>(ArkValue<Ark_Float64>(-123))), "0.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("5.6vp"))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("-5.6vp"))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("45px"))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("-45px"))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_Float64>(ArkValue<Ark_Float64>(0.23f))), "0.230000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_Float64>(ArkValue<Ark_Float64>(-0.23f))), "0.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("10%"))), "0.100000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("45dp"))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("undefVal"))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>(""))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111vp"))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111"))), "1.000000" },
     };
 
     for (const auto &[value, expectVal]: UNION_NUM_STR_RES_TEST_PLAN) {
@@ -334,34 +336,34 @@ HWTEST_F(CommonShapeMethodModifierTest, setFillOpacityTestDefault, TestSize.Leve
 HWTEST_F(CommonShapeMethodModifierTest, setFillOpacityTest, TestSize.Level1)
 {
     static const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN = {
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(123))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-123))), "0.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("5.6vp"))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-5.6vp"))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45px"))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-45px"))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(0.23f))), "0.230000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-0.23f))), "0.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("10%"))), "0.100000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45dp"))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("undefVal"))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>(""))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111vp"))), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String_Resource>(
-            ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111"))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_Float64>(ArkValue<Ark_Float64>(123))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_Float64>(ArkValue<Ark_Float64>(-123))), "0.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("5.6vp"))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("-5.6vp"))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("45px"))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("-45px"))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_Float64>(ArkValue<Ark_Float64>(0.23f))), "0.230000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_Float64>(ArkValue<Ark_Float64>(-0.23f))), "0.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("10%"))), "0.100000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("45dp"))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("undefVal"))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>(""))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111vp"))), "1.000000" },
+        { Converter::ArkValue<Opt_Union_F64_String_Resource>(
+            ArkUnion<Ark_Union_F64_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111"))), "1.000000" },
     };
 
     for (const auto &[value, expectVal]: UNION_NUM_STR_RES_TEST_PLAN) {
@@ -440,36 +442,24 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeDashOffsetTestDefault, TestSize
  */
 HWTEST_F(CommonShapeMethodModifierTest, setStrokeDashOffsetTest, TestSize.Level1)
 {
-    using OneTestStep = std::pair<Opt_Union_Number_String, std::string>;
+    using OneTestStep = std::pair<Opt_Union_F64_String, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_Number>(1)), "1.00vp" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_Number>(0)), "0.00px" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_Number>(2.45f)),
-             "2.45vp" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_Number>(-2.45f)),
-             "0.00px" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("5px")),
-             "5.00px" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("22.35px")),
-             "22.35px" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("7vp")),
-             "7.00vp" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("1.65vp")),
-             "1.65vp" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("65fp")),
-             "65.00fp" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("4.3fp")),
-             "4.30fp" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("11lpx")),
-             "11.00lpx" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("0.5lpx")),
-             "0.50lpx" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("3")), "3.00vp" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("")), "0.00px" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("10.65")),
-             "10.65vp" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("23%")),
-             "0.00px" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(1), "1.00vp" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(0), "0.00px" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(2.45f), "2.45vp" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(-2.45f), "0.00px" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("5px"), "5.00px" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("22.35px"), "22.35px" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("7vp"), "7.00vp" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("1.65vp"), "1.65vp" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("65fp"), "65.00fp" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("4.3fp"), "4.30fp" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("11lpx"), "11.00lpx" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("0.5lpx"), "0.50lpx" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("3"), "3.00vp" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(""), "0.00px" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("10.65"), "10.65vp" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("23%"), "0.00px" },
     };
 
     std::unique_ptr<JsonValue> jsonValue;
@@ -506,38 +496,24 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeMiterLimitTestDefaultValue, Tes
  */
 HWTEST_F(CommonShapeMethodModifierTest, setStrokeMiterLimitTest, TestSize.Level1)
 {
-    using OneTestStep = std::pair<Opt_Union_Number_String, std::string>;
+    using OneTestStep = std::pair<Opt_Union_F64_String, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_Number>(1)), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_Number>(0)), "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_Number>(2.45f)),
-             "2.450000" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("5px")),
-             "4.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("22.35px")),
-             "4.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("7vp")),
-             "4.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("1.65vp")),
-             "4.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("65fp")),
-             "4.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("4.3fp")),
-             "4.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("11lpx")),
-             "4.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("0.5lpx")),
-             "4.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("3")),
-             "3.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("-3")),
-             "1.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("")),
-             "4.000000" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("10.65")),
-             "10.650000" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("23%")),
-             "1.000000" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(1), "1.000000" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(0), "1.000000" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(2.45f), "2.450000" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("5px"), "4.000000" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("22.35px"), "4.000000" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("7vp"), "4.000000" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("1.65vp"), "4.000000" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("65fp"), "4.000000" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("4.3fp"), "4.000000" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("11lpx"), "4.000000" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("0.5lpx"), "4.000000" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("3"), "3.000000" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("-3"), "1.000000" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(""), "4.000000" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("10.65"), "10.650000" },
+        { Converter::ArkUnion<Opt_Union_F64_String, Ark_String>("23%"), "1.000000" },
     };
 
     std::unique_ptr<JsonValue> jsonValue;

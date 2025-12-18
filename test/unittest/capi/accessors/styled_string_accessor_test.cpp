@@ -84,7 +84,7 @@ const std::string TEST_LENGTHMETRICS_BR_STR =
     "radiusTopLeft: [123.00vp]radiusTopRight: [123.00vp]radiusBottomLeft: [123.00vp]radiusBottomRight: [123.00vp]";
 
 const Ark_ImageAttachmentLayoutStyle TEST_IMAGELAYOUTSTYLE {
-    .margin = Converter::ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_LengthMetrics>(TEST_LENGTHMETRICS),
+    .margin = Converter::ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_LengthMetrics>(TEST_LENGTHMETRICS),
     .padding = Converter::ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_LengthMetrics>(TEST_LENGTHMETRICS),
     .borderRadius = Converter::ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_LengthMetrics>(TEST_LENGTHMETRICS)
 };
@@ -100,11 +100,11 @@ const Ark_ImageAttachmentInterface IMAGEATTACHMENT_TEST_VALUE {
 const std::tuple<std::string, Dimension> TEST_FONT_SIZE = { "16.00vp", 16.0_vp };
 const std::tuple<Ace::FontWeight, int32_t> TEST_FONT_WEIGHT = { FontWeight::W900, 900 };
 const std::vector<std::string> TEST_FONT_FAMILIES = { "Arial" };
-const std::tuple<std::string, Ark_Color> TEST_FONT_COLOR = {
-    "#FFFF0000", Converter::ArkValue<Ark_Color>(ARK_COLOR_RED) };
+const std::tuple<std::string, Ark_arkui_component_enums_Color> TEST_FONT_COLOR = {
+    "#FFFF0000", ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED };
 const Ace::FontStyle TEST_FONT_STYLE = Ace::FontStyle::ITALIC;
-const std::tuple<std::string, Ark_Color> TEST_DCRN_COLOR = {
-    "#FFFFFF00", Converter::ArkValue<Ark_Color>(ARK_COLOR_YELLOW) };
+const std::tuple<std::string, Ark_arkui_component_enums_Color> TEST_DCRN_COLOR = {
+    "#FFFFFF00", ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW };
 const Ace::TextDecoration TEST_DCRN_TYPE = Ace::TextDecoration::UNDERLINE;
 const auto TEST_DCRN_TYPES = std::vector{Ace::TextDecoration::UNDERLINE};
 const Ace::TextDecorationStyle TEST_DCRN_STYLE = TextDecorationStyle::SOLID;
@@ -115,10 +115,10 @@ const int TEST_TEXT_SHADOW_RADIUS = 5;
 const int TEST_TEXT_SHADOW_OFFSET = 3;
 const std::tuple<ShadowType, Ark_ShadowType> TEST_TEXT_SHADOW_TYPE = {
     Ace::ShadowType::COLOR, ARK_SHADOW_TYPE_COLOR };
-const std::tuple<std::string, Ark_Color> TEST_TEXT_SHADOW_COLOR = {
-    "#FFFF0000", Converter::ArkValue<Ark_Color>(ARK_COLOR_RED) };
-const std::tuple<std::string, Ark_Color> TEST_BGCL_COLOR = {
-    "#FFFFFF00", Converter::ArkValue<Ark_Color>(ARK_COLOR_YELLOW) };
+const std::tuple<std::string, Ark_arkui_component_enums_Color> TEST_TEXT_SHADOW_COLOR = {
+    "#FFFF0000", ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED };
+const std::tuple<std::string, Ark_arkui_component_enums_Color> TEST_BGCL_COLOR = {
+    "#FFFFFF00", ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW };
 const std::tuple<std::string, float> TEST_BGCL_RADIUS = { "10.00vp", 10.f };
 const std::string TEST_URL = "https://www.test.test";
 const std::tuple<Ace::TextAlign, Ark_TextAlign> TEST_PSST_TEXT_ALIGN = {
@@ -228,7 +228,8 @@ private:
     {
         auto fontSizePeer = CreateLengthMetricsPeer(std::get<1>(TEST_FONT_SIZE));
         const Ark_TextStyleInterface textStyle = {
-            .fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_FONT_COLOR)),
+            .fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+                std::get<1>(TEST_FONT_COLOR)),
             .fontFamily =  Converter::ArkUnion<Opt_ResourceStr, Ark_String>(TEST_FONT_FAMILIES[0]),
             .fontSize = Converter::ArkValue<Opt_LengthMetrics>(fontSizePeer),
             .fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(
@@ -246,7 +247,8 @@ private:
     {
         const Ark_DecorationStyleInterface decorationStyle = {
             .type = Converter::ArkValue<Opt_TextDecorationType>(TEST_DCRN_TYPE),
-            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_DCRN_COLOR)),
+            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+                std::get<1>(TEST_DCRN_COLOR)),
             .style = Converter::ArkValue<Opt_TextDecorationStyle>(TEST_DCRN_STYLE),
         };
         decorationStylePeer = GeneratedModifier::GetDecorationStyleAccessor()->construct(&decorationStyle);
@@ -276,10 +278,10 @@ private:
     void FillTextShadow(Ark_StyledStringValue& styledValue)
     {
         const Ark_ShadowOptions shadowOptions = {
-            .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(TEST_TEXT_SHADOW_RADIUS),
+            .radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(TEST_TEXT_SHADOW_RADIUS),
             .type = Converter::ArkValue<Opt_ShadowType>(std::get<1>(TEST_TEXT_SHADOW_TYPE)),
-            .color= Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
-                std::get<1>(TEST_TEXT_SHADOW_COLOR)),
+            .color= Converter::ArkUnion<Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy,
+                Ark_arkui_component_enums_Color>(std::get<1>(TEST_TEXT_SHADOW_COLOR)),
             .offsetX = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(TEST_TEXT_SHADOW_OFFSET),
             .offsetY = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(TEST_TEXT_SHADOW_OFFSET),
             .fill = Converter::ArkValue<Opt_Boolean>(true)
@@ -304,7 +306,8 @@ private:
     void FillBackgroundColor(Ark_StyledStringValue& styledValue)
     {
         Ark_TextBackgroundStyle textBackgroundStyle = {
-            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_BGCL_COLOR)),
+            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(
+                std::get<1>(TEST_BGCL_COLOR)),
             .radius = Converter::ArkUnion<
                 Opt_Union_Dimension_BorderRadiuses, Ark_Dimension>(std::get<1>(TEST_BGCL_RADIUS))
         };
@@ -336,6 +339,7 @@ private:
             .wordBreak = Converter::ArkValue<Opt_WordBreak>(std::get<1>(TEST_PSST_WORD_BREAK)),
             .leadingMargin = Converter::ArkUnion<
                 Opt_Union_LengthMetrics_LeadingMarginPlaceholder, Ark_LengthMetrics>(leadingMarginPeer),
+            .paragraphSpacing = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
         };
         auto optParagraphStyle = Converter::ArkValue<Opt_ParagraphStyleInterface>(paragraphStyle);
         peerParagraphStyle = GeneratedModifier::GetParagraphStyleAccessor()->construct(&optParagraphStyle);
@@ -356,6 +360,7 @@ private:
             .overflow = Converter::ArkValue<Opt_TextOverflow>(std::get<1>(TEST_PSST_OVERFLOW)),
             .wordBreak = Converter::ArkValue<Opt_WordBreak>(std::get<1>(TEST_PSST_WORD_BREAK)),
             .leadingMargin = leadingMargin,
+            .paragraphSpacing = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
         };
         auto optParagraphStyle = Converter::ArkValue<Opt_ParagraphStyleInterface>(paragraphStyle);
         peerParagraphStylePM = GeneratedModifier::GetParagraphStyleAccessor()->construct(&optParagraphStyle);
@@ -476,6 +481,7 @@ public:
     {
         auto value = settings.Union();
         auto styles = settings.Styles();
+        accessor_->construct(value, styles);
         return accessor_->construct(value, styles);
     }
 
@@ -1053,7 +1059,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringMarshalling0Unmarshall
 
     static RefPtr<OHOS::Ace::SpanString> checkSpanString = nullptr;
     auto unmarshallUserDataFunc = [](Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Buffer buf,
-        const Callback_StyledStringMarshallingValue_Void continuation) {
+        const Callback_UserDataSpan_Void continuation) {
             EXPECT_EQ(resourceId, EXPECTED_NODE_ID);
             EXPECT_EQ(std::memcmp(marshallResult, buf.data, marshallResultLen), 0);
             Ark_UserDataSpan arkUserDataSpan = {

@@ -98,10 +98,10 @@ void BindSheetUtil::ParseFunctionalCallbacks(SheetCallbacks& callbacks, const Ar
             arkCallback.Invoke(parameter);
         };
     }
-    auto onHeightDidChange = Converter::OptConvert<Callback_I32_Void>(sheetOptions.onHeightDidChange);
+    auto onHeightDidChange = Converter::OptConvert<Callback_Number_Void>(sheetOptions.onHeightDidChange);
     if (onHeightDidChange) {
         callbacks.onHeightDidChange = [arkCallback = CallbackHelper(onHeightDidChange.value())](int32_t value) {
-            arkCallback.Invoke(Converter::ArkValue<Ark_Int32>(value));
+            arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
         };
     }
     auto onWidthDidChange = Converter::OptConvert<Callback_I32_Void>(sheetOptions.onWidthDidChange);
@@ -127,37 +127,17 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
     std::optional<SheetHeight> value1;
     std::optional<SheetHeight> value2;
     if (auto detentsOpt = GetOpt(sheetOptions.detents)) {
-        switch (detentsOpt.value().selector) {
-            case DETENTS_SELECT_ZERO:
-                value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value0.value0);
-                if (value0) {
-                    detents.emplace_back(value0.value());
-                }
-                break;
-            case DETENTS_SELECT_ONE:
-                value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value1.value0);
-                if (value0) {
-                    detents.emplace_back(value0.value());
-                }
-                value1 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value1.value1);
-                if (value1) {
-                    detents.emplace_back(value1.value());
-                }
-                break;
-            case DETENTS_SELECT_TWO:
-                value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2.value0);
-                if (value0) {
-                    detents.emplace_back(value0.value());
-                }
-                value1 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2.value1);
-                if (value1) {
-                    detents.emplace_back(value1.value());
-                }
-                value2 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2.value2);
-                if (value2) {
-                    detents.emplace_back(value2.value());
-                }
-                break;
+        value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value0);
+        if (value0) {
+            detents.emplace_back(value0.value());
+        }
+        value1 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value1);
+        if (value1) {
+            detents.emplace_back(value1.value());
+        }
+        value2 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2);
+        if (value2) {
+            detents.emplace_back(value2.value());
         }
         sheetStyle.detents = detents;
     }

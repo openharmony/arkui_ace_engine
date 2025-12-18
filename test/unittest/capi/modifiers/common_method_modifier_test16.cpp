@@ -244,7 +244,7 @@ Opt_ContextMenuAnimationOptions getContextMenuAnimationOptions()
     return ArkValue<Opt_ContextMenuAnimationOptions>(options);
 }
 
-Opt_Union_MenuPreviewMode_CustomBuilder getPreviewCustomBuilder()
+Opt_Union_MenuPreviewMode_CustomNodeBuilder getPreviewCustomBuilder()
 {
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                              const Callback_Pointer_Void continuation) {
@@ -254,8 +254,8 @@ Opt_Union_MenuPreviewMode_CustomBuilder getPreviewCustomBuilder()
         }
     };
     CustomNodeBuilder customBuilder = ArkValue<CustomNodeBuilder>(checkCallback, nullptr, TEST_RESOURCE_ID_2);
-    auto builderUnion = ArkUnion<Ark_Union_MenuPreviewMode_CustomBuilder, CustomNodeBuilder>(customBuilder);
-    return ArkValue<Opt_Union_MenuPreviewMode_CustomBuilder>(builderUnion);
+    auto builderUnion = ArkUnion<Ark_Union_MenuPreviewMode_CustomNodeBuilder, CustomNodeBuilder>(customBuilder);
+    return ArkValue<Opt_Union_MenuPreviewMode_CustomNodeBuilder>(builderUnion);
 }
 
 Opt_ContextMenuOptions getContextMenuOptions(Ark_ContextMenuOptions options = {})
@@ -501,7 +501,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu0TestPreviewPreview
     for (auto& [text, value, expected] : testFixtureMenuPreviewMode) {
         CommonMethodModifierTest16::InitBindContextMenu0();
         Ark_ContextMenuOptions optionsPlacement = {
-            .preview = ArkUnion<Opt_Union_MenuPreviewMode_CustomBuilder, Ark_MenuPreviewMode>(value),
+            .preview = ArkUnion<Opt_Union_MenuPreviewMode_CustomNodeBuilder, Ark_MenuPreviewMode>(value),
         };
         auto options = getContextMenuOptions(optionsPlacement);
         modifier_->setBindContextMenu0(node_, &arkBuilder, &responseType, &options);
@@ -825,7 +825,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu0TestBackgroundColo
         CommonMethodModifierTest16::ResetParams(node_);
     };
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
@@ -864,7 +864,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu0TestBackgroundColo
         checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
@@ -1087,7 +1087,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestPreviewPreview
     for (auto& [text, value, expected] : testFixtureMenuPreviewMode) {
         auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
         Ark_ContextMenuOptions optionsPlacement = {
-            .preview = ArkUnion<Opt_Union_MenuPreviewMode_CustomBuilder, Ark_MenuPreviewMode>(value),
+            .preview = ArkUnion<Opt_Union_MenuPreviewMode_CustomNodeBuilder, Ark_MenuPreviewMode>(value),
         };
         auto options = getContextMenuOptions(optionsPlacement);
         auto isShown = ArkValue<Opt_Boolean>(true);
@@ -1412,7 +1412,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestBackgroundColo
         CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
     };
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Int32>(value));
@@ -1451,7 +1451,7 @@ HWTEST_F(CommonMethodModifierTest16, DISABLED_BindContextMenu1TestBackgroundColo
         checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_arkui_component_enums_Color>(value));
     }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));

@@ -30,23 +30,21 @@ void DestroyPeerImpl(Ark_NativePointer peer)
         delete peerImpl;
     }
 }
-
 Ark_NativePointer ConstructorNodeContentImpl()
 {
     auto NodeContent = AceType::MakeRefPtr<NG::NodeContent>();
     auto peer = NodeContentPeer::Create(NodeContent);
     return peer;
 }
-
 Ark_NativePointer GetDestroyImpl()
 {
     return reinterpret_cast<void*>(&DestroyPeerImpl);
 }
-
-Ark_Boolean AddFrameNodeImpl(Ark_NativePointer peer, Ark_NativePointer node)
+Ark_Boolean AddFrameNodeImpl(Ark_NativePointer content,
+                             Ark_NativePointer node)
 {
-    CHECK_NULL_RETURN(peer, false);
-    auto peerImpl = reinterpret_cast<NodeContentPeer*>(peer);
+    CHECK_NULL_RETURN(content, false);
+    auto peerImpl = reinterpret_cast<NodeContentPeer*>(content);
     CHECK_NULL_RETURN(peerImpl->content, false);
     CHECK_NULL_RETURN(node, false);
     auto frameNodePeer = reinterpret_cast<FrameNodePeer*>(node);
@@ -59,11 +57,11 @@ Ark_Boolean AddFrameNodeImpl(Ark_NativePointer peer, Ark_NativePointer node)
     childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     return true;
 }
-
-Ark_Boolean RemoveFrameNodeImpl(Ark_NativePointer peer, Ark_NativePointer node)
+Ark_Boolean RemoveFrameNodeImpl(Ark_NativePointer content,
+                                Ark_NativePointer node)
 {
-    CHECK_NULL_RETURN(peer, false);
-    auto peerImpl = reinterpret_cast<NodeContentPeer*>(peer);
+    CHECK_NULL_RETURN(content, false);
+    auto peerImpl = reinterpret_cast<NodeContentPeer*>(content);
     CHECK_NULL_RETURN(peerImpl->content, false);
     CHECK_NULL_RETURN(node, false);
     auto frameNodePeer = reinterpret_cast<FrameNodePeer*>(node);
@@ -76,7 +74,7 @@ Ark_Boolean RemoveFrameNodeImpl(Ark_NativePointer peer, Ark_NativePointer node)
     nodeContent->RemoveNode(AceType::RawPtr(childNode));
     return true;
 }
-} // namespace NodeContentExtenderAccessor
+} // NodeContentExtenderAccessor
 const GENERATED_ArkUINodeContentExtenderAccessor* GetNodeContentExtenderAccessor()
 {
     static const GENERATED_ArkUINodeContentExtenderAccessor NodeContentExtenderAccessorImpl {
@@ -88,4 +86,4 @@ const GENERATED_ArkUINodeContentExtenderAccessor* GetNodeContentExtenderAccessor
     return &NodeContentExtenderAccessorImpl;
 }
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

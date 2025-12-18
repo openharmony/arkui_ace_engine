@@ -148,13 +148,14 @@ void SetBadgeOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 
-    auto convValue = Converter::OptConvert<BadgeParameters>(*value);
-    CHECK_NULL_VOID(convValue);
-    auto badgeParameters = *convValue;
-    bool isDefaultFontSize = !badgeParameters.badgeFontSize.has_value();
-    bool isDefaultBadgeSize = !badgeParameters.badgeCircleSize.has_value();
+    auto badgeParameters = Converter::OptConvert<BadgeParameters>(*value);
+    if (!badgeParameters) {
+        return;
+    }
+    bool isDefaultFontSize = !badgeParameters->badgeFontSize.has_value();
+    bool isDefaultBadgeSize = !badgeParameters->badgeCircleSize.has_value();
 
-    BadgeModelNG::SetBadgeParam(frameNode, badgeParameters, isDefaultFontSize, isDefaultBadgeSize);
+    BadgeModelNG::SetBadgeParam(frameNode, *badgeParameters, isDefaultFontSize, isDefaultBadgeSize);
 }
 } // BadgeInterfaceModifier
 const GENERATED_ArkUIBadgeModifier* GetBadgeModifier()

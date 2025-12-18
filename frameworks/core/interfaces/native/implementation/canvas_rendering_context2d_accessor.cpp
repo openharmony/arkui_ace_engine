@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasRenderingContext2DAccessor {
-const Ark_Number ARK_ERROR_VALUE = OHOS::Ace::NG::Converter::ArkValue<Ark_Number>(-1);
+const auto ARK_ERROR_VALUE = OHOS::Ace::NG::Converter::ArkValue<Ark_Float64>(-1);
 
 void DestroyPeerImpl(Ark_CanvasRenderingContext2D peer)
 {
@@ -53,7 +53,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_String ToDataURLImpl(Ark_CanvasRenderingContext2D peer,
                          const Opt_String* type,
-                         const Opt_Number* quality)
+                         const Opt_Float64* quality)
 {
     CHECK_NULL_RETURN(peer, {});
     auto optType = Converter::OptConvertPtr<std::string>(type);
@@ -107,31 +107,19 @@ void OffDetachImpl(Ark_CanvasRenderingContext2D peer,
     auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<VoidCallback>();
     peer->Off(std::move(arkCallback), CanvasRenderingContext2DPeer::CanvasCallbackType::ON_DETACH);
 }
-Ark_Number GetHeightImpl(Ark_CanvasRenderingContext2D peer)
+Ark_Float64 GetHeightImpl(Ark_CanvasRenderingContext2D peer)
 {
     CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
-    return Converter::ArkValue<Ark_Number>(peer->GetHeight());
+    return Converter::ArkValue<Ark_Float64>(peer->GetHeight());
 }
-void SetHeightImpl(Ark_CanvasRenderingContext2D peer,
-                   const Ark_Number* height)
-{
-}
-Ark_Number GetWidthImpl(Ark_CanvasRenderingContext2D peer)
+Ark_Float64 GetWidthImpl(Ark_CanvasRenderingContext2D peer)
 {
     CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
-    return Converter::ArkValue<Ark_Number>(peer->GetWidth());
-}
-void SetWidthImpl(Ark_CanvasRenderingContext2D peer,
-                  const Ark_Number* width)
-{
+    return Converter::ArkValue<Ark_Float64>(peer->GetWidth());
 }
 Ark_FrameNode GetCanvasImpl(Ark_CanvasRenderingContext2D peer)
 {
     return FrameNodePeer::Create(static_cast<Ark_UIContext>(nullptr));
-}
-void SetCanvasImpl(Ark_CanvasRenderingContext2D peer,
-                   Ark_FrameNode canvas)
-{
 }
 } // CanvasRenderingContext2DAccessor
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor()
@@ -148,11 +136,8 @@ const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext
         CanvasRenderingContext2DAccessor::OnDetachImpl,
         CanvasRenderingContext2DAccessor::OffDetachImpl,
         CanvasRenderingContext2DAccessor::GetHeightImpl,
-        CanvasRenderingContext2DAccessor::SetHeightImpl,
         CanvasRenderingContext2DAccessor::GetWidthImpl,
-        CanvasRenderingContext2DAccessor::SetWidthImpl,
         CanvasRenderingContext2DAccessor::GetCanvasImpl,
-        CanvasRenderingContext2DAccessor::SetCanvasImpl,
     };
     return &CanvasRenderingContext2DAccessorImpl;
 }

@@ -181,22 +181,22 @@ void AssignCast(std::optional<ButtonStyleMode>& dst, const Ark_ButtonStyleMode& 
 }
 
 template<>
-void AssignCast(std::optional<Color>& dst, const enum Ark_Color& src)
+void AssignCast(std::optional<Color>& dst, const enum Ark_arkui_component_enums_Color& src)
 {
     switch (src) {
-        case ARK_COLOR_WHITE: dst = Color(0xffffffff); break; // White
-        case ARK_COLOR_BLACK: dst = Color(0xff000000); break; // Black
-        case ARK_COLOR_BLUE: dst = Color(0xff0000ff); break; // Blue
-        case ARK_COLOR_BROWN: dst = Color(0xffa52a2a); break; // Brown
-        case ARK_COLOR_GRAY: dst = Color(0xff808080); break; // Gray
-        case ARK_COLOR_GREEN: dst = Color(0xff008000); break; // Green
-        case ARK_COLOR_GREY: dst = Color(0xff808080); break; // Grey
-        case ARK_COLOR_ORANGE: dst = Color(0xffffa500); break; // Orange
-        case ARK_COLOR_PINK: dst = Color(0xffffc0cb); break; // Pink
-        case ARK_COLOR_RED: dst = Color(0xffff0000); break; // Red
-        case ARK_COLOR_YELLOW: dst = Color(0xffffff00); break; // Yellow
-        case ARK_COLOR_TRANSPARENT: dst = Color(0x00000000); break; // Transparent
-        default: LOGE("Unexpected enum value in Ark_Color: %{public}d", src);
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_WHITE: dst = Color(0xffffffff); break; // White
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLACK: dst = Color(0xff000000); break; // Black
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_BLUE: dst = Color(0xff0000ff); break; // Blue
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_BROWN: dst = Color(0xffa52a2a); break; // Brown
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_GRAY: dst = Color(0xff808080); break; // Gray
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREEN: dst = Color(0xff008000); break; // Green
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_GREY: dst = Color(0xff808080); break; // Grey
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_ORANGE: dst = Color(0xffffa500); break; // Orange
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_PINK: dst = Color(0xffffc0cb); break; // Pink
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_RED: dst = Color(0xffff0000); break; // Red
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_YELLOW: dst = Color(0xffffff00); break; // Yellow
+        case ARK_ARKUI_COMPONENT_ENUMS_COLOR_TRANSPARENT: dst = Color(0x00000000); break; // Transparent
+        default: LOGE("Unexpected enum value in Ark_arkui_component_enums_Color: %{public}d", src);
     }
 }
 
@@ -2247,6 +2247,34 @@ void AssignCast(std::optional<SourceTool>& dst, const Ark_SourceTool& src)
             LOGE("Unexpected enum value in Ark_SourceTool: %{public}d", src);
             dst = std::nullopt;
         }
+    }
+}
+
+template<>
+void AssignCast(std::optional<RouteType>& dst, const Ark_RouteType& src)
+{
+    switch (src) {
+        case ARK_ROUTE_TYPE_NONE: dst = RouteType::NONE; break;
+        case ARK_ROUTE_TYPE_PUSH: dst = RouteType::PUSH; break;
+        case ARK_ROUTE_TYPE_POP: dst = RouteType::POP; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_RouteType: %{public}d", src);
+            dst = std::nullopt;
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<SlideEffect>& dst, const Ark_SlideEffect& src)
+{
+    switch (src) {
+        case ARK_SLIDE_EFFECT_LEFT: dst = SlideEffect::LEFT; break;
+        case ARK_SLIDE_EFFECT_RIGHT: dst = SlideEffect::RIGHT; break;
+        case ARK_SLIDE_EFFECT_TOP: dst = SlideEffect::TOP; break;
+        case ARK_SLIDE_EFFECT_BOTTOM: dst = SlideEffect::BOTTOM; break;
+        case ARK_SLIDE_EFFECT_START: dst = SlideEffect::START; break;
+        case ARK_SLIDE_EFFECT_END: dst = SlideEffect::END; break;
+        default: dst = SlideEffect::NONE; break;
     }
 }
 
