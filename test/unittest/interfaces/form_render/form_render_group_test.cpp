@@ -666,6 +666,10 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_SetUiContentParams_001, TestSi
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_SetUiContentParams_001 start";
     auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderGroupTest_SetUiContentParams_001");
+    ASSERT_TRUE(eventRunner);
+    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+    auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
+    EXPECT_TRUE(group);
     OHOS::AAFwk::Want want;
     group->SetUiContentParams(want);
     GTEST_LOG_(INFO) << "FormRenderGroupTest_SetUiContentParams_001 end";
