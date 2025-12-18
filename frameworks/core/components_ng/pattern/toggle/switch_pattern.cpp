@@ -768,7 +768,7 @@ void SwitchPattern::OnColorConfigurationUpdate()
     if (SystemProperties::ConfigChangePerform()) {
         auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<SwitchTheme>();
+        auto theme = pipeline->GetTheme<SwitchTheme>(host->GetThemeScopeId());
         CHECK_NULL_VOID(theme);
         auto pops = host->GetPaintProperty<SwitchPaintProperty>();
         CHECK_NULL_VOID(pops);
