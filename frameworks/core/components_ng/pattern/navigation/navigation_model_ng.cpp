@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
@@ -497,6 +498,11 @@ bool NavigationModelNG::ParseCommonTitle(
         if (mainTitle) {
             // update main title
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
+            std::string titleString = NavigationTitleUtil::GetTitleString(titleBarNode, false);
+            if (titleString != title) {
+                UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
+                    "Navigation.title");
+            }
             textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TITLEBAR_MAX_LINES);
             textLayoutProperty->UpdateContent(title);
             break;
@@ -505,6 +511,8 @@ bool NavigationModelNG::ParseCommonTitle(
         mainTitle = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
+            "Navigation.title");
         textLayoutProperty->UpdateContent(title);
         titleBarPattern->SetNeedResetMainTitleProperty(true);
         titleBarNode->SetTitle(mainTitle);
@@ -522,12 +530,19 @@ bool NavigationModelNG::ParseCommonTitle(
     if (subTitle) {
         // update subtitle
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
+        std::string subTitleString = NavigationTitleUtil::GetSubtitleString(titleBarNode);
+        if (subTitleString != subtitle) {
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
+                "Navigation.subTitle");
+        }
         textLayoutProperty->UpdateContent(subtitle);
     } else {
         // create and init subtitle
         subTitle = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
+            "Navigation.subTitle");
         textLayoutProperty->UpdateContent(subtitle);
         titleBarPattern->SetNeedResetSubTitleProperty(true);
         titleBarNode->SetSubtitle(subTitle);
@@ -654,6 +669,8 @@ void NavigationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
         // do nothing
         return;
     }
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
+        "Navigation.title");
     // update custom title
     titleBarNode->RemoveChild(currentTitle);
     titleBarNode->SetTitle(customTitle);
@@ -989,6 +1006,11 @@ void NavigationModelNG::SetHideTitleBar(bool hideTitleBar, bool animated)
     CHECK_NULL_VOID(navBarNode);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
+    if (!navBarLayoutProperty->HasHideTitleBar() ||
+        (navBarLayoutProperty->GetHideTitleBar() != hideTitleBar)) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
+            "Navigation.hideTitleBar");
+    }
     navBarLayoutProperty->UpdateHideTitleBar(hideTitleBar);
     navBarLayoutProperty->UpdateIsAnimatedTitleBar(animated);
 }
@@ -1253,6 +1275,8 @@ void NavigationModelNG::SetHideBackButton(bool hideBackButton)
     CHECK_NULL_VOID(navBarLayoutProperty);
     if (!navBarLayoutProperty->HasHideBackButton() ||
         (hideBackButton != navBarLayoutProperty->GetHideBackButtonValue())) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
+            "Navigation.hideBackButton");
         SetNeedResetTitleProperty(AceType::DynamicCast<FrameNode>(navBarNode->GetTitleBarNode()));
     }
     navBarLayoutProperty->UpdateHideBackButton(hideBackButton);
@@ -2319,6 +2343,10 @@ void NavigationModelNG::SetHideNavBarInner(
     CHECK_NULL_VOID(navigationLayoutProperty);
 
     auto lastHideNavBarValue = navigationLayoutProperty->GetHideNavBar();
+    if (!navigationLayoutProperty->HasHideNavBar() || lastHideNavBarValue != hideNavBar) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
+            "Navigation.hideNavBar");
+    }
     if (lastHideNavBarValue.has_value()) {
         pattern->SetNavBarVisibilityChange(hideNavBar != lastHideNavBarValue.value());
     } else {
@@ -2359,6 +2387,11 @@ void NavigationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar,
     CHECK_NULL_VOID(navBarNode);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
+    if (!navBarLayoutProperty->HasHideTitleBar() ||
+        (navBarLayoutProperty->GetHideTitleBar() != hideTitleBar)) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
+            "Navigation.hideTitleBar");
+    }
     navBarLayoutProperty->UpdateHideTitleBar(hideTitleBar);
     navBarLayoutProperty->UpdateIsAnimatedTitleBar(animated);
 }
@@ -2432,6 +2465,11 @@ void NavigationModelNG::SetSubtitle(FrameNode* frameNode, const std::string& sub
     if (subTitle) {
         // update subtitle
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
+        std::string subTitleString = NavigationTitleUtil::GetSubtitleString(titleBarNode);
+        if (subTitleString != subtitle) {
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
+                "Navigation.subTitle");
+        }
         textLayoutProperty->UpdateContent(subtitle);
         auto renderContext = subTitle->GetRenderContext();
         renderContext->UpdateOpacity(1.0);
@@ -2440,6 +2478,8 @@ void NavigationModelNG::SetSubtitle(FrameNode* frameNode, const std::string& sub
         subTitle = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
+            "Navigation.subTitle");
         textLayoutProperty->UpdateContent(subtitle);
         titleBarPattern->SetNeedResetSubTitleProperty(true);
         titleBarNode->SetSubtitle(subTitle);
@@ -2458,6 +2498,8 @@ void NavigationModelNG::SetHideBackButton(FrameNode* frameNode, bool hideBackBut
     CHECK_NULL_VOID(navBarLayoutProperty);
     if (!navBarLayoutProperty->HasHideBackButton() ||
         (hideBackButton != navBarLayoutProperty->GetHideBackButtonValue())) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
+            "Navigation.hideBackButton");
         SetNeedResetTitleProperty(AceType::DynamicCast<FrameNode>(navBarNode->GetTitleBarNode()));
     }
     navBarLayoutProperty->UpdateHideBackButton(hideBackButton);
@@ -2903,6 +2945,11 @@ void NavigationModelNG::ParseCommonTitle(FrameNode* frameNode, const NG::Navigat
         titleBarPattern->MarkIsInitialTitle(true);
     }
 
+    std::string titleString = NavigationTitleUtil::GetTitleString(titleBarNode, false);
+    if (titleString != titleInfo.title) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
+            "Navigation.title");
+    }
     // create or update main title
     NavigationTitleUtil::CreateOrUpdateMainTitle(titleBarNode, titleInfo, ignoreMainTitle);
 
@@ -3104,6 +3151,8 @@ void NavigationModelNG::SetCustomTitle(FrameNode* frameNode, const RefPtr<AceTyp
         // do nothing
         return;
     }
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
+        "Navigation.title");
     // update custom title
     titleBarNode->RemoveChild(currentTitle);
     titleBarNode->SetTitle(customTitle);
