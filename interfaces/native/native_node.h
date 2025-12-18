@@ -2369,7 +2369,7 @@ typedef enum {
      * The default value is <b>ARKUI_TEXT_DECORATION_TYPE_NONE</b>.\n
      * .value[1]?.u32: text decoration color, in 0xARGB format. For example, 0xFFFF0000 indicates red. Optional.\n
      * .value[2]?.i32: text decoration style {@link ArkUI_TextDecorationStyle}. \n
-     * .value[3].f32: text decoration thickness scale. \n
+     * .value[3]?.f32: text decoration thickness scale. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: text decoration type {@link ArkUI_TextDecorationType}.\n
@@ -2377,7 +2377,7 @@ typedef enum {
      * .value[2].i32: text decoration style {@link ArkUI_TextDecorationStyle}. \n
      * .value[3].f32: text decoration thickness scale. \n
      *
-     *  since 23
+     *  since 22
      */
     NODE_TEXT_DECORATION,
     /**
@@ -2872,10 +2872,10 @@ typedef enum {
     /**
      * @brief Gets the TextLayoutManager of the text.
      *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .object: the layout manager of text. The parameter type is {@link OH_ArkUI_TextLayoutManager}.\n
      *
-     * @since 23
+     * @since 22
      */
     NODE_TEXT_LAYOUT_MANAGER = 1043,
 
@@ -2885,20 +2885,20 @@ typedef enum {
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .object: the edit menu options of text. The parameter type is {@link OH_ArkUI_EditMenuOptions}.\n
      *
-     * @since 23
+     * @since 22
      */
-     NODE_TEXT_EDIT_MENU_OPTIONS = 1044,
+    NODE_TEXT_EDIT_MENU_OPTIONS = 1044,
 
-     /**
-      * @brief Bind the selection menu for text.
-      *
-      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-      * .object: the custom selection menu of text.
-      *     The parameter type is {@link ArkUI_TextSelectionMenuOptions}.\n
-      *
-      * @since 23
-      */
-     NODE_TEXT_BIND_SELECTION_MENU = 1045,
+    /**
+     * @brief Bind the selection menu for text.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the custom selection menu of text.
+     *     The parameter type is {@link ArkUI_TextSelectionMenuOptions}.\n
+     *
+     * @since 22
+     */
+    NODE_TEXT_BIND_SELECTION_MENU = 1045,
 
     /**
      * @brief Sets the text selection area, which will be highlighted.
