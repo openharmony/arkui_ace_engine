@@ -100,6 +100,8 @@ class PipelineContextFourTestNg : public testing::Test {
 
     static void CreateCycleDirtyNode(int cycle, bool& flagUpdate);
 
+    static void AssertValidContext();
+
 private:
     static ElementIdType frameNodeId_;
     static ElementIdType customNodeId_;
