@@ -226,9 +226,9 @@ void JSList::SetCachedCount(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         NG::CacheRange cacheRange = { 1, 1 };
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        int32_t minCacheCount = obj->GetProperty("minCount")->IsNumber() ? 1 :
+        int32_t minCacheCount = !obj->GetProperty("minCount")->IsNumber() ? 1 :
                                 obj->GetProperty("minCount")->ToNumber<int32_t>();
-        int32_t maxCacheCount = obj->GetProperty("maxCount")->IsNumber() ? minCacheCount :
+        int32_t maxCacheCount = !obj->GetProperty("maxCount")->IsNumber() ? minCacheCount :
                                 obj->GetProperty("maxCount")->ToNumber<int32_t>();
         minCacheCount = minCacheCount < 0 ? 1 : minCacheCount;
         maxCacheCount = maxCacheCount < 0 ? minCacheCount : maxCacheCount;
