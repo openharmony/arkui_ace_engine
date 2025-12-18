@@ -24877,6 +24877,8 @@ typedef struct GENERATED_ArkUISearchModifier {
                                    const Opt_Boolean* value);
     void (*setSelectedDragPreviewStyle)(Ark_NativePointer node,
                                         const Opt_SelectedDragPreviewStyle* value);
+    void (*setTextDirection)(Ark_NativePointer node,
+                             const Opt_TextDirection* value);
     void (*setSearchButton)(Ark_NativePointer node,
                             const Opt_String* value,
                             const Opt_SearchButtonOptions* option);
@@ -25533,6 +25535,8 @@ typedef struct GENERATED_ArkUITextModifier {
                                    const Opt_Boolean* value);
     void (*setSelectedDragPreviewStyle)(Ark_NativePointer node,
                                         const Opt_SelectedDragPreviewStyle* value);
+    void (*setTextDirection)(Ark_NativePointer node,
+                             const Opt_TextDirection* value);
     void (*setFont)(Ark_NativePointer node,
                     const Opt_Font* fontValue,
                     const Opt_FontSettingOptions* options);
@@ -25676,6 +25680,8 @@ typedef struct GENERATED_ArkUITextAreaModifier {
                                    const Opt_Boolean* value);
     void (*setSelectedDragPreviewStyle)(Ark_NativePointer node,
                                         const Opt_SelectedDragPreviewStyle* value);
+    void (*setTextDirection)(Ark_NativePointer node,
+                             const Opt_TextDirection* value);
     void (*setInputFilter)(Ark_NativePointer node,
                            const Opt_ResourceStr* value,
                            const Opt_Callback_String_Void* error);
@@ -25865,6 +25871,8 @@ typedef struct GENERATED_ArkUITextInputModifier {
                                    const Opt_Boolean* value);
     void (*setSelectedDragPreviewStyle)(Ark_NativePointer node,
                                         const Opt_SelectedDragPreviewStyle* value);
+    void (*setTextDirection)(Ark_NativePointer node,
+                             const Opt_TextDirection* value);
     void (*setInputFilter)(Ark_NativePointer node,
                            const Opt_ResourceStr* value,
                            const Opt_Callback_String_Void* error);

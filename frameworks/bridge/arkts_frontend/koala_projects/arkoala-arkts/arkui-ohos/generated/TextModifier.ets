@@ -29,7 +29,7 @@ import { Color, FontStyle, TextAlign, TextCase, CopyOptions, TextHeightAdaptiveP
 import { Resource } from "global.resource"
 import { LengthMetrics } from "arkui.Graphics"
 import { DecorationStyleInterface } from "./component/styledString"
-import { TextDataDetectorConfig, EditMenuOptions, FontSettingOptions, SelectedDragPreviewStyle } from "./component/textCommon"
+import { TextDataDetectorConfig, EditMenuOptions, TextDirection, FontSettingOptions, SelectedDragPreviewStyle } from "./component/textCommon"
 import { CustomBuilder } from "./component/builder"
 import { SelectionMenuOptions } from "./component/richEditor"
 import { TextModifier } from "arkui.TextModifier"
@@ -126,6 +126,8 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     _halfLeading_0_0value?: boolean | undefined
     _enableHapticFeedback_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableHapticFeedback_0_0value?: boolean | undefined
+    _textDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textDirection_0_0value?: TextDirection | undefined
     _compressLeadingPunctuation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _compressLeadingPunctuation_0_0value?: boolean | undefined
     _includeFontPadding_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -926,6 +928,24 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
             }
         }
+        if (this._textDirection_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textDirection_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextDirectionAttribute((this._textDirection_0_0value as TextDirection | undefined));
+                    this._textDirection_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textDirection_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textDirection_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextDirectionAttribute((undefined as TextDirection | undefined));
+                }
+            }
+        }
         if (this._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._font_0_flag) {
@@ -1561,6 +1581,19 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
             }
         }
+        if (modifier._textDirection_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textDirection_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textDirection(modifier._textDirection_0_0value);
+                    break;
+                }
+                default: {
+                    this.textDirection((undefined as TextDirection | undefined));
+                }
+            }
+        }
         if (modifier._font_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._font_0_flag) {
@@ -2084,6 +2117,17 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         } else
         {
             this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    textDirection(value: TextDirection | undefined): this {
+        if (((this._textDirection_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textDirection_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textDirection_0_0value = value
+        } else
+        {
+            this._textDirection_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

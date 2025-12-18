@@ -20,7 +20,7 @@ import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
-import { CaretStyle_serializer, EditMenuOptions_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer } from "./textCommon"
+import { CaretStyle_serializer, EditMenuOptions_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer, TextDirection } from "./textCommon"
 import { Font_serializer, ResourceColor, Dimension, Font, ResourceStr, Length } from "./units"
 import { TextDecorationOptions_serializer, ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_String_serializer, SelectionOptions_serializer, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"
 import { ColorMetrics_serializer } from "./../Graphics"
@@ -796,6 +796,18 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setSelectedDragPreviewStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setTextDirectionAttribute(value: TextDirection | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as TextDirection)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SearchAttribute_setTextDirection(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setSearchButtonAttribute(value: string | undefined, option?: SearchButtonOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1051,6 +1063,9 @@ export interface SearchAttribute extends CommonMethod {
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
         throw new Error("Unimplemented method selectedDragPreviewStyle")
     }
+    textDirection(value: TextDirection | undefined): this {
+        throw new Error("Unimplemented method textDirection")
+    }
     searchButton(value: string | undefined, option?: SearchButtonOptions): this {
         throw new Error("Unimplemented method searchButton")
     }
@@ -1115,6 +1130,7 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     dividerColor_value?: ColorMetrics | undefined
     attributeModifier_value?: AttributeModifier<SearchAttribute> | AttributeModifier<CommonMethod> | undefined
     selectedDragPreviewStyle_value?: SelectedDragPreviewStyle | undefined
+    textDirection_value?: TextDirection | undefined
     setSearchOptions(options?: SearchOptions): this {
         return this
     }
@@ -1263,6 +1279,9 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
         return this
     }
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        return this
+    }
+    textDirection(value: TextDirection | undefined): this {
         return this
     }
     searchButton(value: string | undefined, option?: SearchButtonOptions): this {
@@ -1683,6 +1702,14 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         if (this.checkPriority("selectedDragPreviewStyle")) {
             const value_casted = value as (SelectedDragPreviewStyle | undefined)
             this.getPeer()?.setSelectedDragPreviewStyleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public textDirection(value: TextDirection | undefined): this {
+        if (this.checkPriority("textDirection")) {
+            const value_casted = value as (TextDirection | undefined)
+            this.getPeer()?.setTextDirectionAttribute(value_casted)
             return this
         }
         return this

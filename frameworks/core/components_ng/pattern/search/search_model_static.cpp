@@ -346,6 +346,19 @@ void SearchModelStatic::SetTextAlign(FrameNode* frameNode, const std::optional<T
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchModelStatic::SetTextDirection(FrameNode* frameNode, const std::optional<TextDirection>& valueOpt)
+{
+    if (valueOpt.has_value()) {
+        SearchModelNG::SetTextDirection(frameNode, valueOpt.value());
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextFieldLayoutProperty, TextDirection, PROPERTY_UPDATE_MEASURE_SELF, textFieldChild);
+}
+
 void SearchModelStatic::SetCancelDefaultIcon(FrameNode* frameNode)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);

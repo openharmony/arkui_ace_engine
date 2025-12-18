@@ -36,6 +36,7 @@ public:
     static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetItalicFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value);
     static void SetTextAlign(FrameNode* frameNode, const std::optional<Ace::TextAlign>& value);
+    static void SetTextDirection(FrameNode* frameNode, const std::optional<TextDirection>& valueOpt);
     static void SetTextColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetLineHeight(FrameNode* frameNode, const std::optional<Dimension>& value);
