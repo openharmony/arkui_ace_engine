@@ -103,6 +103,8 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
     _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
     _stopBackPress_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _stopBackPress_0_0value?: boolean | undefined
+    _singleLine_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _singleLine_0_0value?: boolean | undefined
     _compressLeadingPunctuation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _compressLeadingPunctuation_0_0value?: boolean | undefined
     _includeFontPadding_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -666,6 +668,24 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
+        if (this._singleLine_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._singleLine_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSingleLineAttribute((this._singleLine_0_0value as boolean | undefined));
+                    this._singleLine_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._singleLine_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._singleLine_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSingleLineAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._compressLeadingPunctuation_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._compressLeadingPunctuation_0_flag) {
@@ -1186,6 +1206,19 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
+        if (modifier._singleLine_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._singleLine_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.singleLine(modifier._singleLine_0_0value);
+                    break;
+                }
+                default: {
+                    this.singleLine((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._compressLeadingPunctuation_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._compressLeadingPunctuation_0_flag) {
@@ -1605,6 +1638,17 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         } else
         {
             this._stopBackPress_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    singleLine(value: boolean | undefined): this {
+        if (((this._singleLine_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._singleLine_0_0value) !== (value)))
+        {
+            this._singleLine_0_flag = AttributeUpdaterFlag.UPDATE
+            this._singleLine_0_0value = value
+        } else
+        {
+            this._singleLine_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

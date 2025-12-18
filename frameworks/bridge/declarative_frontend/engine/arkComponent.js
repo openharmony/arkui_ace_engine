@@ -10836,6 +10836,24 @@ class RichEditorFallbackLineSpacingModifier extends ModifierWithKey {
 }
 RichEditorFallbackLineSpacingModifier.identity = Symbol('richEditorFallbackLineSpacing');
 
+class RichEditorSingleLineModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetSingleLine(node);
+    }
+    else {
+      getUINativeModule().richEditor.setSingleLine(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RichEditorSingleLineModifier.identity = Symbol('richEditorSingleLine');
+
 class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -11027,6 +11045,10 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   fallbackLineSpacing(enable) {
     modifierWithKey(this._modifiersWithKeys, RichEditorFallbackLineSpacingModifier.identity, RichEditorFallbackLineSpacingModifier, enable);
+    return this;
+  }
+  singleLine(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorSingleLineModifier.identity, RichEditorSingleLineModifier, value);
     return this;
   }
 }

@@ -11587,6 +11587,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetSingleLineImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSingleLine(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
                                            const Opt_Boolean* value)
     {
@@ -23348,6 +23360,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorAttributeModifier::SetMaxLinesImpl,
             RichEditorAttributeModifier::SetKeyboardAppearanceImpl,
             RichEditorAttributeModifier::SetStopBackPressImpl,
+            RichEditorAttributeModifier::SetSingleLineImpl,
             RichEditorAttributeModifier::SetCompressLeadingPunctuationImpl,
             RichEditorAttributeModifier::SetIncludeFontPaddingImpl,
             RichEditorAttributeModifier::SetFallbackLineSpacingImpl,

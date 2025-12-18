@@ -2291,4 +2291,37 @@ ArkUINativeModuleValue RichEditorBridge::ResetSelectedDragPreviewStyle(ArkUIRunt
     GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorSelectedDragPreviewStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue RichEditorBridge::SetSingleLine(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> singleLineArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    if (singleLineArg->IsNull() || singleLineArg->IsUndefined() ||
+        !singleLineArg->IsBoolean()) {
+        nodeModifiers->getRichEditorModifier()->resetRichEditorSingleLine(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    uint32_t singleLine = singleLineArg->Uint32Value(vm);
+    nodeModifiers->getRichEditorModifier()->setRichEditorSingleLine(nativeNode, singleLine);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetSingleLine(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getRichEditorModifier()->resetRichEditorSingleLine(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 }

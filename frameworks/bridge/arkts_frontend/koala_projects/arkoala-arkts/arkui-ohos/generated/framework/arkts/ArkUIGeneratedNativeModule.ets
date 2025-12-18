@@ -1637,6 +1637,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RichEditorAttribute_setStopBackPress(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _RichEditorAttribute_setSingleLine(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _RichEditorAttribute_setCompressLeadingPunctuation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RichEditorAttribute_setIncludeFontPadding(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void

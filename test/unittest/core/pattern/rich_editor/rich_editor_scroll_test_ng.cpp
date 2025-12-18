@@ -131,11 +131,17 @@ HWTEST_F(RichEditorScrollTestOneNg, OnScrollCallback002, TestSize.Level0)
         richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
     EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
 
+    /**
+     * @tc.steps: step1. init handle
+     */
     RectF rect(0, 0, 5, 5);
     richEditorPattern->CreateHandles();
     richEditorPattern->textSelector_.Update(0, 5);
     richEditorPattern->selectOverlay_->OnHandleMoveDone(rect, true);
 
+    /**
+     * @tc.steps: step2. check scroll by handle move
+     */
     EXPECT_TRUE(richEditorPattern->selectOverlay_->SelectOverlayIsOn());
     bool ret = false;
     int32_t SCROLL_FROM_START = 10;

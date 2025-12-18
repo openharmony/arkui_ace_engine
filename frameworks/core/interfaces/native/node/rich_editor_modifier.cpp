@@ -820,6 +820,27 @@ ArkUI_Uint32 GetRichEditorSelectedDragPreviewStyle(ArkUINodeHandle node)
     return RichEditorModelNG::GetSelectedDragPreviewStyle(frameNode).GetValue();
 }
 
+void SetRichEditorSingleLine(ArkUINodeHandle node, ArkUI_Bool singleLine)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetSingleLine(frameNode, singleLine);
+}
+
+void ResetRichEditorSingleLine(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::ResetSingleLine(frameNode);
+}
+
+ArkUI_Bool GetRichEditorSingleLine(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return RichEditorModelNG::GetSingleLine(frameNode);
+}
+
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
@@ -905,7 +926,10 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorScrollBarColor = ResetRichEditorScrollBarColor,
         .setRichEditorSelectedDragPreviewStyle = SetRichEditorSelectedDragPreviewStyle,
         .resetRichEditorSelectedDragPreviewStyle = ResetRichEditorSelectedDragPreviewStyle,
-        .getRichEditorSelectedDragPreviewStyle = GetRichEditorSelectedDragPreviewStyle
+        .getRichEditorSelectedDragPreviewStyle = GetRichEditorSelectedDragPreviewStyle,
+        .setRichEditorSingleLine = SetRichEditorSingleLine,
+        .resetRichEditorSingleLine = ResetRichEditorSingleLine,
+        .getRichEditorSingleLine = GetRichEditorSingleLine,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -933,6 +957,9 @@ const CJUIRichEditorModifier* GetCJUIRichEditorModifier()
         .resetRichEditorEnterKeyType = ResetRichEditorEnterKeyType,
         .setRichEditorBarState = SetRichEditorBarState,
         .resetRichEditorBarState = ResetRichEditorBarState,
+        .setRichEditorSingleLine = SetRichEditorSingleLine,
+        .resetRichEditorSingleLine = ResetRichEditorSingleLine,
+        .getRichEditorSingleLine = GetRichEditorSingleLine,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
