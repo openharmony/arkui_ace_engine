@@ -670,16 +670,19 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "event action is invalid.");
         return;
     }
 
     auto actionType = eventAction->GetValue("action");
     if (!actionType->IsValid()) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "action type is invalid.");
         return;
     }
 
     auto type = actionType->GetString();
     if (type != "router" && type != "message" && type != "call") {
+        TAG_LOGE(AceLogTag::ACE_FORM, "action type: %{public}s is error.", type.c_str());
         return;
     }
 
@@ -722,6 +725,7 @@ void FormManagerDelegate::DispatchPointerEvent(const
     SerializedGesture& serializedGesture)
 {
     if (!isDynamic_ || !pointerEvent) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "form is static or pointer event is null.");
         return;
     }
 
@@ -731,7 +735,7 @@ void FormManagerDelegate::DispatchPointerEvent(const
         std::lock_guard<std::mutex> lock(recycleMutex_);
         if (recycleStatus_ == RecycleStatus::RECYCLED) {
             SetGestureInnerFlag();
-            TAG_LOGI(AceLogTag::ACE_FORM,
+            TAG_LOGW(AceLogTag::ACE_FORM,
                 "form is recycled, recover it first, action=%{public}d, formId=%{public}" PRId64 "",
                 pointerEvent->GetPointerAction(), runningCardId_);
             recycleStatus_ = RecycleStatus::RECOVERING;
@@ -742,7 +746,7 @@ void FormManagerDelegate::DispatchPointerEvent(const
             want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM_TO_HANDLE_CLICK_EVENT, true);
             OHOS::AppExecFwk::FormMgr::GetInstance().RecoverForms(formIds, want);
         } else if (recycleStatus_ == RecycleStatus::RECOVERING) {
-            TAG_LOGI(AceLogTag::ACE_FORM, "form is recovering, cache pointer event, action=%{public}d",
+            TAG_LOGW(AceLogTag::ACE_FORM, "form is recovering, cache pointer event, action=%{public}d",
                 pointerEvent->GetPointerAction());
             pointerEventCache_.emplace_back(pointerEvent);
         } else {
@@ -752,7 +756,7 @@ void FormManagerDelegate::DispatchPointerEvent(const
     }
 
     if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "dispatch down event to renderer");
+        TAG_LOGW(AceLogTag::ACE_FORM, "dispatch down event to renderer");
     }
 
     bool disablePanGesture;
