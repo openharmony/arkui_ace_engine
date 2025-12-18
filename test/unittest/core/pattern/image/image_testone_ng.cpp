@@ -2846,7 +2846,7 @@ HWTEST_F(ImageTestOneNg, SetImageModelStaticImageFill001, TestSize.Level1)
     pipeline->GetTheme<ImageTheme>()->fillColor_ = defaultThemeColor;
     value = std::nullopt;
     ImageModelStatic::SetImageFill(frameNode, value);
-    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), defaultThemeColor);
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().has_value(), false);
 }
 
 /**
@@ -2945,7 +2945,8 @@ HWTEST_F(ImageTestOneNg, SetImageModelStaticDynamicRangeMode001, TestSize.Level1
      */
     value = std::nullopt;
     ImageModelStatic::SetDynamicRangeMode(frameNode, value);
-    EXPECT_EQ(imageRenderProperty->GetDynamicMode().has_value(), false);
+    DynamicRangeMode defaultValue = DynamicRangeMode::STANDARD;
+    EXPECT_EQ(imageRenderProperty->GetDynamicMode().value(), defaultValue);
 }
 
 /**
