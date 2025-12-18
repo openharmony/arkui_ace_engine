@@ -135,6 +135,7 @@ ArkUINativeModuleValue LoadingProgressBridge::SetContentModifierBuilder(ArkUIRun
     LoadingProgressModelNG::SetBuilderFunc(frameNode,
         [vm, frameNode, obj = std::move(obj), containerId = Container::CurrentId()](
             LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
+            LocalScope pandaScope(vm);
             ContainerScope scope(containerId);
             auto context = ArkTSUtils::GetContext(vm);
             CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
@@ -146,7 +147,6 @@ ArkUINativeModuleValue LoadingProgressBridge::SetContentModifierBuilder(ArkUIRun
             loadingprogress->SetNativePointerFieldCount(vm, 1);
             loadingprogress->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
             panda::Local<panda::JSValueRef> params[2] = { context, loadingprogress };
-            LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));

@@ -556,6 +556,7 @@ ArkUINativeModuleValue GaugeBridge::SetContentModifierBuilder(ArkUIRuntimeCallIn
     GaugeModelNG::SetBuilderFunc(frameNode,
         [vm, frameNode, obj = std::move(obj), containerId](
             GaugeConfiguration config) -> RefPtr<FrameNode> {
+            LocalScope pandaScope(vm);
             ContainerScope scope(containerId);
             auto context = ArkTSUtils::GetContext(vm);
             const char* keyOfGauge[] = { "value", "min", "max" };
@@ -566,7 +567,6 @@ ArkUINativeModuleValue GaugeBridge::SetContentModifierBuilder(ArkUIRuntimeCallIn
             gauge->SetNativePointerFieldCount(vm, 1);
             gauge->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
             panda::Local<panda::JSValueRef> params[NUM_2] = { context, gauge };
-            LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
