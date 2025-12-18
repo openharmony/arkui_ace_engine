@@ -51,8 +51,8 @@ HWTEST_F(StatisticEventReporterTest, ConvertToEventName001, TestSize.Level1)
 {
     auto reporter = std::make_shared<StatisticEventReporter>();
     ASSERT_TRUE(reporter != nullptr);
-    std::string eventName = reporter->ConvertToEventName(StatisticEventType::FA_APP_START);
-    EXPECT_EQ(eventName, "FA_APP_START");
+    StatisticEventInfo event = reporter->ConvertToEvent(StatisticEventType::FA_APP_START);
+    EXPECT_EQ(event.subEventName, "FA_APP_START");
 }
 
 /**
