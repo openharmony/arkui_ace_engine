@@ -175,6 +175,20 @@ const Type = __Type__;
  */
 class UIUtils {
   /**
+   * Determine whether the data object is observable and return the observation result.
+	 *
+   * @param { T } source - input source object data.
+   * @returns { ObservedResult } return result of whether a class is observable.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @stagemodelonly
+   * @crossplatform
+   * @atomicservice
+   * @since 23 dynamic
+   */
+  static canBeObserved(source) {
+    return UIUtils.uiUtilsImpl_.canBeObserved(source);
+  }
+  /**
    * Get raw object from the Object wrapped with Proxy added by statemanagement framework.
    * If input parameter is a regular Object without Proxy, return Object itself.
    *

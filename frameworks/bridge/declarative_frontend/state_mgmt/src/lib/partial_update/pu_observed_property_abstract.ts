@@ -229,6 +229,10 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     return { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() };
   }
 
+  public getElementNameById(elmtId: number): string {
+    return this.owningView_?.getElementNameById(elmtId) ?? '';
+  }
+
   public dumpSyncPeers(isProfiler: boolean, changedTrackPropertyName?: string): ObservedPropertyInfo<T>[] {
     let res: ObservedPropertyInfo<T>[] = [];
     this.getSubscriberRefs()?.forEach((subscriber: IPropertySubscriber) => {

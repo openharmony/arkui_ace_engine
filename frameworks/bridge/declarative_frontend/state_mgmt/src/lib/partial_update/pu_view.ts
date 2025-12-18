@@ -167,6 +167,10 @@ abstract class ViewPU extends PUV2ViewBase
     this.localStoragebackStore_ = instance;
   }
 
+  public getElementNameById(elmtId: number): string {
+    return this.updateFuncByElmtId.getElementNameById(elmtId);
+  }
+
   // FIXME
   // indicate if this is  V1 or a V2 component
   // V1 by default, changed to V2 by the first V2 decorated variable

@@ -116,6 +116,7 @@
     // sdk
     "src/lib/sdk/v2_persistence.ts",
     "src/lib/sdk/ui_utils.ts",
+    "src/lib/sdk/observed_util.ts",
     "src/lib/sdk/business_error.ts",
 
     // common
