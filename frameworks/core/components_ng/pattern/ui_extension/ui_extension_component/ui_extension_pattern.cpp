@@ -606,14 +606,18 @@ void UIExtensionPattern::OnConnect()
     }
     surfaceNode->CreateNodeInRenderThread();
     surfaceNode->SetForeground(usage_ == UIExtensionUsage::MODAL);
-    FireOnRemoteReadyCallback();
     auto focusHub = host->GetFocusHub();
+    bool isFocusedBeforeCallback = focusHub && focusHub->IsCurrentFocus();
+    FireOnRemoteReadyCallback();
+    bool isFocusedAfterCallback = focusHub && focusHub->IsCurrentFocus();
     if ((usage_ == UIExtensionUsage::MODAL) && focusHub && isModalRequestFocus_) {
         focusHub->RequestFocusImmediately();
     }
     bool isFocused = focusHub && focusHub->IsCurrentFocus();
     RegisterVisibleAreaChange();
-    DispatchFocusState(isFocused);
+    if (isFocusedBeforeCallback || !isFocusedAfterCallback) {
+        DispatchFocusState(isFocused);
+    }
     UpdateSessionViewportConfigFromContext();
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
