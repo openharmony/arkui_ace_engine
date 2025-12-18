@@ -125,7 +125,6 @@ template("bridge_common") {
     if (defined(config.rich_components_support) &&
         config.rich_components_support) {
       sources += [
-        "dom/dom_camera.cpp",
         "dom/dom_menu.cpp",
         "dom/dom_navigation_menu.cpp",
         "dom/dom_option.cpp",
