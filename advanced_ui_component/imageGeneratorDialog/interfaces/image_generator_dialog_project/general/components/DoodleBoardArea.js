@@ -27,17 +27,20 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 import { Constants } from '../common/CommonConstants';
+import { CanvasLayoutDirection } from '../types/Declaration';
 import { ImageOperate } from './ImageOperate';
 export class DoodleBoardArea extends ViewV2 {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
         super(parent, elmtId, extraInfo);
         this.initParam("imageInfoArr", (params && "imageInfoArr" in params) ? params.imageInfoArr : undefined);
         this.initParam("imageMatrixArr", (params && "imageMatrixArr" in params) ? params.imageMatrixArr : undefined);
+        this.curLayoutDirection = CanvasLayoutDirection.DEFAULT;
         this.finalizeConstruction();
     }
     resetStateVarsOnReuse(params) {
         this.resetParam("imageInfoArr", (params && "imageInfoArr" in params) ? params.imageInfoArr : undefined);
         this.resetParam("imageMatrixArr", (params && "imageMatrixArr" in params) ? params.imageMatrixArr : undefined);
+        this.resetConsumer("curLayoutDirection", CanvasLayoutDirection.DEFAULT);
     }
     invalidImageInfo(index) {
         if (index < 0 || index >= DoodleBoardArea.DEFAULT_COUNT) {
@@ -94,7 +97,7 @@ export class DoodleBoardArea extends ViewV2 {
                                     setMatrixCallback: (imageMatrixArr) => {
                                         this.setMatrix(index, imageMatrixArr);
                                     }
-                                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/DoodleBoardArea.ets", line: 66, col: 7 });
+                                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/DoodleBoardArea.ets", line: 68, col: 7 });
                                 ViewV2.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
@@ -135,8 +138,8 @@ export class DoodleBoardArea extends ViewV2 {
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
-            Stack.width(386);
-            Stack.height(386);
+            Stack.width(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 386 : 288);
+            Stack.height(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 386 : 288);
             Stack.borderRadius(24);
             Stack.borderWidth(2);
             Stack.borderColor('#33000000');
@@ -179,8 +182,8 @@ export class DoodleBoardArea extends ViewV2 {
         Stack.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.width(386);
-            Column.height(386);
+            Column.width(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 386 : 288);
+            Column.height(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 386 : 288);
             Column.borderRadius(24);
             Column.clip(true);
         }, Column);
@@ -274,3 +277,6 @@ __decorate([
 __decorate([
     Param
 ], DoodleBoardArea.prototype, "imageMatrixArr", void 0);
+__decorate([
+    Consumer('globalLayoutDirection')
+], DoodleBoardArea.prototype, "curLayoutDirection", void 0);

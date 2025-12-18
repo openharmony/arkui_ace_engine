@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { ImageGenerateState } from "../types/Declaration";
+import { CanvasLayoutDirection, ImageGenerateState } from "../types/Declaration";
 import { MeasureUtils } from "@ohos.arkui.UIContext";
 @ComponentV2
 export declare struct TextInputArea {
@@ -59,6 +59,8 @@ export declare struct TextInputArea {
     updateInputText: string;
     @Local
     textMaxLength: number;
+    @Consumer('globalLayoutDirection')
+    curLayoutDirection: CanvasLayoutDirection;
     private getTextMaxLength;
     @Monitor('imgCounts', 'isClickKeepLayout', 'updateInputText', 'isSelectedPatches')
     watchKeepLayout(monitor: IMonitor): void;

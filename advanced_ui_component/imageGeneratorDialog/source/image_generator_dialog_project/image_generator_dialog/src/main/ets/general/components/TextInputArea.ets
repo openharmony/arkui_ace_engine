@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ImageGenerateState } from "../types/Declaration";
+import { CanvasLayoutDirection, ImageGenerateState } from "../types/Declaration";
 import { KeyboardAvoidMode, MeasureUtils } from '@kit.ArkUI';
 import { AIGenerateOptions } from '../utils/AIGenerateOptions';
 import { unifiedDataChannel } from '@kit.ArkData';
@@ -47,6 +47,7 @@ export struct TextInputArea {
   @Local stack: NavPathStack | undefined = undefined;
   @Local updateInputText: string = '';
   @Local textMaxLength: number = 280;
+  @Consumer('globalLayoutDirection') curLayoutDirection: CanvasLayoutDirection = CanvasLayoutDirection.DEFAULT;
 
   private getTextMaxLength() {
     this.textMaxLength = textBaseMaxLength;
@@ -297,7 +298,7 @@ export struct TextInputArea {
             })
         }
         .height(this.inputHeight)
-        .width(510)
+        .width(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 510 : 344)
         .backgroundColor('#99FFFFFF')
         .backdropBlur(120)
         .borderRadius(24)

@@ -15,8 +15,9 @@
 
 import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
 import { styleItem } from "./CanvasFramework";
+import { CanvasLayoutDirection } from "../types/Declaration";
 @ComponentV2
-export declare struct LandscapeSelectFuncArea {
+export declare struct SelectFuncArea {
     @Param
     @Require
     readonly styles?: Array<imageGeneration.ImageStyle>;
@@ -35,6 +36,8 @@ export declare struct LandscapeSelectFuncArea {
     selectedIndex: number;
     @Event
     setImgCounts: (count: number) => void;
+    @Consumer('globalLayoutDirection')
+    curLayoutDirection: CanvasLayoutDirection;
     aboutToAppear(): void;
     build(): void;
 }

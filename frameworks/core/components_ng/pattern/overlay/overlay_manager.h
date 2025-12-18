@@ -787,6 +787,8 @@ public:
     }
     bool CheckTargetIdIsValid(int32_t targetId);
 
+    void UpdateImageGeneratorSheetKey(const RefPtr<UINode>& sheetNode, int32_t rootId);
+    bool CloseImageGeneratorSheet();
 private:
     RefPtr<PipelineContext> GetPipelineContext() const;
     void SetSheetProperty(
@@ -937,8 +939,7 @@ private:
     void UpdateMenuVisibility(const RefPtr<FrameNode>& menu);
     void RemoveMenuNotInSubWindow(
         const WeakPtr<FrameNode>& menuWK, const WeakPtr<UINode>& rootWeak, const WeakPtr<OverlayManager>& overlayWeak);
-    bool CreateSheetKey(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t targetId,
-        SheetKey& sheetKey);
+    bool CreateSheetKey(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t targetId, SheetKey& sheetKey);
 
     bool CheckTopModalNode(const RefPtr<FrameNode>& topModalNode, int32_t targetId);
     void HandleModalShow(std::function<void(const std::string&)>&& callback,
@@ -1076,6 +1077,7 @@ private:
     int32_t oldTargetId_ = -1;
     std::unordered_set<int32_t> onDisappearFilterIds_;
     std::unordered_map<int32_t, std::function<void(const MenuLifeCycleEvent&)>> menuLifeCycleCallbackMap_;
+    std::optional<SheetKey> imageGeneratorSheetKey_ = std::nullopt;
 };
 } // namespace OHOS::Ace::NG
 

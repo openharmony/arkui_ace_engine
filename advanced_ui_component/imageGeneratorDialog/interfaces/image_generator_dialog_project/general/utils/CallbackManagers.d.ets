@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,14 @@
  * limitations under the License.
  */
 
-export class Constants {
-  /**
-   * File buffer size
-   */
-  public static readonly FILE_BUFFER_SIZE: number = 4096;
-  /**
-   * Photo picker default placeholder
-   */
-  public static readonly NOT_SELECTED_NAME: string = 'notSelectedPic';
-  /**
-   * Min breakpoint when display as content cover
-   */
-  public static readonly CONTENT_COVER_DISPLAY_MIN_WIDTH: number = 600;
+export declare class WinSizeChangeCallbackManager {
+    private static instance__;
+    private callbacks;
+    addCallback(callback: WindowSizeChangeCallback): void;
+    removeCallback(callback: WindowSizeChangeCallback): void;
+    executeCallback(size: Size): void;
+    destroy(): void;
+    static getOrCreateInstance(): WinSizeChangeCallbackManager;
 }
+declare type WindowSizeChangeCallback = (size: Size) => void;
+export {};

@@ -209,6 +209,13 @@ struct SheetStyle {
     std::optional<bool> showInSubWindow;
     std::optional<ModalTransition> modalTransition;
 
+    SheetStyle() = default;
+    // constructor for image generator dialog
+    SheetStyle(SheetHeight sheetHeight, std::optional<bool> showCloseIcon, std::optional<SheetType> sheetType,
+        std::optional<Color> backgroundColor, std::optional<Color>maskColor, std::optional<Dimension> width):
+        sheetHeight(sheetHeight), showCloseIcon(showCloseIcon), sheetType(sheetType),
+        backgroundColor(backgroundColor), maskColor(maskColor), width(width) {}
+
     bool operator==(const SheetStyle& sheetStyle) const
     {
         return (sheetHeight == sheetStyle.sheetHeight &&

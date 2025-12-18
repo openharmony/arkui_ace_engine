@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::Framework {
 panda::Local<panda::JSValueRef> JsLoadImageGeneratorDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+panda::Local<panda::JSValueRef> JsOnXIconClicked(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 } // namespace OHOS::Ace::Framework
 
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_IMAGE_GENERATOR_DIALOG_VIEW_REGISTER_H

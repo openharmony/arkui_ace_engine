@@ -26,6 +26,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
+import { CanvasLayoutDirection } from "../types/Declaration";
 import { AIGenerateOptions } from "../utils/AIGenerateOptions";
 export function UserInteractiveTabBarBuilder(index, name, icon, parent = null) {
     {
@@ -35,7 +36,7 @@ export function UserInteractiveTabBarBuilder(index, name, icon, parent = null) {
                     index: index,
                     name: name,
                     icon: icon
-                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserFunctionArea.ets", line: 20, col: 3 });
+                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserFunctionArea.ets", line: 21, col: 3 });
                 ViewV2.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -61,7 +62,7 @@ export function StyleSelectBuilder(styleItems, parent = null) {
     {
         (parent ? parent : this).observeComponentCreation2((elmtId, isInitialRender, styleItems = __styleItems__) => {
             if (isInitialRender) {
-                let componentCall = new StyleSelect(parent ? parent : this, { stylesArray: styleItems }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserFunctionArea.ets", line: 28, col: 3 });
+                let componentCall = new StyleSelect(parent ? parent : this, { stylesArray: styleItems }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserFunctionArea.ets", line: 29, col: 3 });
                 ViewV2.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -306,50 +307,194 @@ class UserInteractiveAreaTabBar extends ViewV2 {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
         super(parent, elmtId, extraInfo);
         this.initParam("index", (params && "index" in params) ? params.index : 0);
-        this.selectedIndex = 0;
         this.initParam("name", (params && "name" in params) ? params.name : '__NA__');
         this.initParam("icon", (params && "icon" in params) ? params.icon : undefined);
+        this.selectedIndex = 0;
+        this.curLayoutDirection = CanvasLayoutDirection.DEFAULT;
         this.finalizeConstruction();
     }
     resetStateVarsOnReuse(params) {
         this.resetParam("index", (params && "index" in params) ? params.index : 0);
-        this.resetConsumer("selectedIndex", 0);
         this.resetParam("name", (params && "name" in params) ? params.name : '__NA__');
         this.resetParam("icon", (params && "icon" in params) ? params.icon : undefined);
+        this.resetConsumer("selectedIndex", 0);
+        this.resetConsumer("curLayoutDirection", CanvasLayoutDirection.DEFAULT);
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Column.create();
-            Column.padding(12);
-            Column.width(48);
-            Column.height(48);
-            Column.margin({ bottom: 4 });
-            Column.borderRadius(24);
-            Column.backgroundColor(this.index === this.selectedIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.05)');
-        }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Image.create(this.icon);
-            Image.width(24);
-            Image.height(24);
-            Image.opacity(this.index === this.selectedIndex ? 0.9 : 0.6);
-        }, Image);
-        Column.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Column.create();
-            Column.height(10);
-        }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Text.create(this.name);
-            Text.fontFamily('HarmonyHeiTi');
-            Text.fontColor(this.index === this.selectedIndex ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.6)');
-            Text.fontSize(10);
-            Text.fontWeight(500);
-        }, Text);
-        Text.pop();
-        Column.pop();
+            If.create();
+            if (this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Column.create();
+                    }, Column);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        __Common__.create();
+                        __Common__.margin({ bottom: 4 });
+                    }, __Common__);
+                    {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new UserInteractiveAreaTabBarIcon(this, {
+                                    iconSize: 48,
+                                    iconPadding: 12,
+                                    totalBorderRadius: 24,
+                                    index: this.index,
+                                    icon: this.icon
+                                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserFunctionArea.ets", line: 185, col: 11 });
+                                ViewV2.create(componentCall);
+                                let paramsLambda = () => {
+                                    return {
+                                        iconSize: 48,
+                                        iconPadding: 12,
+                                        totalBorderRadius: 24,
+                                        index: this.index,
+                                        icon: this.icon
+                                    };
+                                };
+                                componentCall.paramsGenerator_ = paramsLambda;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    iconSize: 48,
+                                    iconPadding: 12,
+                                    totalBorderRadius: 24,
+                                    index: this.index,
+                                    icon: this.icon
+                                });
+                            }
+                        }, { name: "UserInteractiveAreaTabBarIcon" });
+                    }
+                    __Common__.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        __Common__.create();
+                        __Common__.height(10);
+                    }, __Common__);
+                    {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new UserInteractiveAreaTabBarText(this, {
+                                    name: this.name,
+                                    fontSize: 10,
+                                    fontWeight: 500,
+                                    index: this.index
+                                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserFunctionArea.ets", line: 193, col: 11 });
+                                ViewV2.create(componentCall);
+                                let paramsLambda = () => {
+                                    return {
+                                        name: this.name,
+                                        fontSize: 10,
+                                        fontWeight: 500,
+                                        index: this.index
+                                    };
+                                };
+                                componentCall.paramsGenerator_ = paramsLambda;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    name: this.name,
+                                    fontSize: 10,
+                                    fontWeight: 500,
+                                    index: this.index
+                                });
+                            }
+                        }, { name: "UserInteractiveAreaTabBarText" });
+                    }
+                    __Common__.pop();
+                    Column.pop();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Row.create();
+                        Row.padding({ left: 10, right: 10 });
+                        Row.width(64);
+                        Row.height(28);
+                        Row.borderRadius(8);
+                        Row.backgroundColor(this.index === this.selectedIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.05)');
+                    }, Row);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        __Common__.create();
+                        __Common__.margin({ right: 4 });
+                    }, __Common__);
+                    {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new UserInteractiveAreaTabBarIcon(this, {
+                                    iconSize: 16,
+                                    iconPadding: 1.33,
+                                    totalBorderRadius: 0,
+                                    index: this.index,
+                                    icon: this.icon
+                                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserFunctionArea.ets", line: 203, col: 11 });
+                                ViewV2.create(componentCall);
+                                let paramsLambda = () => {
+                                    return {
+                                        iconSize: 16,
+                                        iconPadding: 1.33,
+                                        totalBorderRadius: 0,
+                                        index: this.index,
+                                        icon: this.icon
+                                    };
+                                };
+                                componentCall.paramsGenerator_ = paramsLambda;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    iconSize: 16,
+                                    iconPadding: 1.33,
+                                    totalBorderRadius: 0,
+                                    index: this.index,
+                                    icon: this.icon
+                                });
+                            }
+                        }, { name: "UserInteractiveAreaTabBarIcon" });
+                    }
+                    __Common__.pop();
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        __Common__.create();
+                        __Common__.height(10);
+                    }, __Common__);
+                    {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new UserInteractiveAreaTabBarText(this, {
+                                    name: this.name,
+                                    fontSize: 12,
+                                    fontWeight: 400,
+                                    index: this.index
+                                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserFunctionArea.ets", line: 211, col: 11 });
+                                ViewV2.create(componentCall);
+                                let paramsLambda = () => {
+                                    return {
+                                        name: this.name,
+                                        fontSize: 12,
+                                        fontWeight: 400,
+                                        index: this.index
+                                    };
+                                };
+                                componentCall.paramsGenerator_ = paramsLambda;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    name: this.name,
+                                    fontSize: 12,
+                                    fontWeight: 400,
+                                    index: this.index
+                                });
+                            }
+                        }, { name: "UserInteractiveAreaTabBarText" });
+                    }
+                    __Common__.pop();
+                    Row.pop();
+                });
+            }
+        }, If);
+        If.pop();
         Column.pop();
     }
     updateStateVars(params) {
@@ -374,11 +519,159 @@ __decorate([
     Param
 ], UserInteractiveAreaTabBar.prototype, "index", void 0);
 __decorate([
-    Consumer('functionAreaSelectedIndex')
-], UserInteractiveAreaTabBar.prototype, "selectedIndex", void 0);
-__decorate([
     Param
 ], UserInteractiveAreaTabBar.prototype, "name", void 0);
 __decorate([
     Param
 ], UserInteractiveAreaTabBar.prototype, "icon", void 0);
+__decorate([
+    Consumer('functionAreaSelectedIndex')
+], UserInteractiveAreaTabBar.prototype, "selectedIndex", void 0);
+__decorate([
+    Consumer('globalLayoutDirection')
+], UserInteractiveAreaTabBar.prototype, "curLayoutDirection", void 0);
+class UserInteractiveAreaTabBarIcon extends ViewV2 {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
+        this.initParam("index", (params && "index" in params) ? params.index : 0);
+        this.initParam("iconSize", (params && "iconSize" in params) ? params.iconSize : 0);
+        this.initParam("icon", (params && "icon" in params) ? params.icon : undefined);
+        this.initParam("iconPadding", (params && "iconPadding" in params) ? params.iconPadding : 0);
+        this.initParam("totalBorderRadius", (params && "totalBorderRadius" in params) ? params.totalBorderRadius : 0);
+        this.selectedIndex = 0;
+        this.finalizeConstruction();
+    }
+    resetStateVarsOnReuse(params) {
+        this.resetParam("index", (params && "index" in params) ? params.index : 0);
+        this.resetParam("iconSize", (params && "iconSize" in params) ? params.iconSize : 0);
+        this.resetParam("icon", (params && "icon" in params) ? params.icon : undefined);
+        this.resetParam("iconPadding", (params && "iconPadding" in params) ? params.iconPadding : 0);
+        this.resetParam("totalBorderRadius", (params && "totalBorderRadius" in params) ? params.totalBorderRadius : 0);
+        this.resetConsumer("selectedIndex", 0);
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+            Column.padding(this.iconPadding);
+            Column.width(this.iconSize);
+            Column.height(this.iconSize);
+            Column.borderRadius(this.totalBorderRadius);
+            Column.backgroundColor(this.index === this.selectedIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.05)');
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Image.create(this.icon);
+            Image.width('100%');
+            Image.height('100%');
+            Image.opacity(this.index === this.selectedIndex ? 0.9 : 0.6);
+        }, Image);
+        Column.pop();
+    }
+    updateStateVars(params) {
+        if (params === undefined) {
+            return;
+        }
+        if ("index" in params) {
+            this.updateParam("index", params.index);
+        }
+        if ("iconSize" in params) {
+            this.updateParam("iconSize", params.iconSize);
+        }
+        if ("icon" in params) {
+            this.updateParam("icon", params.icon);
+        }
+        if ("iconPadding" in params) {
+            this.updateParam("iconPadding", params.iconPadding);
+        }
+        if ("totalBorderRadius" in params) {
+            this.updateParam("totalBorderRadius", params.totalBorderRadius);
+        }
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+__decorate([
+    Param
+], UserInteractiveAreaTabBarIcon.prototype, "index", void 0);
+__decorate([
+    Param
+], UserInteractiveAreaTabBarIcon.prototype, "iconSize", void 0);
+__decorate([
+    Param
+], UserInteractiveAreaTabBarIcon.prototype, "icon", void 0);
+__decorate([
+    Param
+], UserInteractiveAreaTabBarIcon.prototype, "iconPadding", void 0);
+__decorate([
+    Param
+], UserInteractiveAreaTabBarIcon.prototype, "totalBorderRadius", void 0);
+__decorate([
+    Consumer('functionAreaSelectedIndex')
+], UserInteractiveAreaTabBarIcon.prototype, "selectedIndex", void 0);
+class UserInteractiveAreaTabBarText extends ViewV2 {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
+        this.initParam("index", (params && "index" in params) ? params.index : 0);
+        this.initParam("name", (params && "name" in params) ? params.name : '__NA__');
+        this.initParam("fontSize", (params && "fontSize" in params) ? params.fontSize : 0);
+        this.initParam("fontWeight", (params && "fontWeight" in params) ? params.fontWeight : 0);
+        this.selectedIndex = 0;
+        this.finalizeConstruction();
+    }
+    resetStateVarsOnReuse(params) {
+        this.resetParam("index", (params && "index" in params) ? params.index : 0);
+        this.resetParam("name", (params && "name" in params) ? params.name : '__NA__');
+        this.resetParam("fontSize", (params && "fontSize" in params) ? params.fontSize : 0);
+        this.resetParam("fontWeight", (params && "fontWeight" in params) ? params.fontWeight : 0);
+        this.resetConsumer("selectedIndex", 0);
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(this.name);
+            Text.fontFamily('HarmonyHeiTi');
+            Text.fontColor(this.index === this.selectedIndex ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.6)');
+            Text.fontSize(10);
+            Text.fontWeight(500);
+        }, Text);
+        Text.pop();
+        Column.pop();
+    }
+    updateStateVars(params) {
+        if (params === undefined) {
+            return;
+        }
+        if ("index" in params) {
+            this.updateParam("index", params.index);
+        }
+        if ("name" in params) {
+            this.updateParam("name", params.name);
+        }
+        if ("fontSize" in params) {
+            this.updateParam("fontSize", params.fontSize);
+        }
+        if ("fontWeight" in params) {
+            this.updateParam("fontWeight", params.fontWeight);
+        }
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+__decorate([
+    Param
+], UserInteractiveAreaTabBarText.prototype, "index", void 0);
+__decorate([
+    Param
+], UserInteractiveAreaTabBarText.prototype, "name", void 0);
+__decorate([
+    Param
+], UserInteractiveAreaTabBarText.prototype, "fontSize", void 0);
+__decorate([
+    Param
+], UserInteractiveAreaTabBarText.prototype, "fontWeight", void 0);
+__decorate([
+    Consumer('functionAreaSelectedIndex')
+], UserInteractiveAreaTabBarText.prototype, "selectedIndex", void 0);
