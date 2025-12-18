@@ -4311,6 +4311,7 @@ void WebPattern::OnModifyDone()
             }
         }
         RecordWebEvent(true);
+        RegisterWebDomNativeInterface();
 
         UpdateJavaScriptOnDocumentStartByOrder();
         UpdateJavaScriptOnDocumentEndByOrder();
@@ -4550,7 +4551,65 @@ void WebPattern::DumpSimplifyInfoOnlyForParamConfig(
     std::shared_ptr<JsonValue>& json, ParamConfig config)
 {
     ACE_SCOPED_TRACE("WebPattern::DumpSimplifyInfoOnlyForParamConfig");
-    TAG_LOGI(AceLogTag::ACE_WEB, "web-dom-tree config.withWeb:%{public}d", config.withWeb);
+    TAG_LOGI(AceLogTag::ACE_WEB, "add attrs config.withWeb:%{public}d", config.withWeb);
+    if (config.withWeb && webDomDocument_->IsValid()) {
+        json->Put(WEB_DOM_JSON_URL, webDomDocument_->GetUrl().c_str());
+        json->Put(WEB_DOM_JSON_TITLE, webDomDocument_->GetTitle().c_str());
+    }
+}
+
+void WebPattern::AddExtraInfoWithParamConfig(
+    std::shared_ptr<JsonValue>& json, ParamConfig config)
+{
+    ACE_SCOPED_TRACE("WebPattern::AddExtraInfoWithParamConfig");
+    TAG_LOGI(AceLogTag::ACE_WEB, "add children config.withWeb:%{public}d", config.withWeb);
+    if (config.withWeb && webDomDocument_->IsValid()) {
+        auto offset = GetCoordinatePoint().value_or(OffsetF());
+        webDomDocument_->UpdateOffset(offset);
+        json->PutRef(WEB_DOM_JSON_CHILDREN, webDomDocument_->ExportToJson());
+    }
+}
+
+void WebPattern::RegisterWebDomNativeInterface()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RegisterWebDomNativeInterface");
+    CHECK_NULL_VOID(delegate_);
+    delegate_->RegisterNativeJavaScriptProxy(
+        WEB_NATIVE_OBJ_DOM,
+        {WEB_NATIVE_FUNC_INIT, WEB_NATIVE_FUNC_INCR, WEB_NATIVE_FUNC_SCROLL},
+        {
+            [weak = AceType::WeakClaim(this)](const std::vector<std::string>& param) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern report web dom init");
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (param.size() != WEB_NATIVE_PARAM_SIZE) {
+                    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern dom init parmas size error");
+                    return;
+                }
+                pattern->webDomDocument_->CreateFromJsonString(param[WEB_NATIVE_PARAM_INDEX]);
+            },
+            [weak = AceType::WeakClaim(this)](const std::vector<std::string>& param) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern report web dom update");
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (param.size() != WEB_NATIVE_PARAM_SIZE) {
+                    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern dom update size error");
+                    return;
+                }
+                pattern->webDomDocument_->CreateFromJsonString(param[WEB_NATIVE_PARAM_INDEX]);
+            },
+            [weak = AceType::WeakClaim(this)](const std::vector<std::string>& param) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern report web dom scroll");
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (param.size() != WEB_NATIVE_PARAM_SIZE) {
+                    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern dom scroll size error"); 
+                    return;
+                }
+                pattern->webDomDocument_->UpdateScrollInfoFromJsonString(param[WEB_NATIVE_PARAM_INDEX]);
+            },
+        },
+        false, "", false);
 }
 
 void WebPattern::RecordWebEvent(bool isInit)

@@ -16,18 +16,101 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_WEB_DOM_DOCUMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_WEB_DOM_DOCUMENT_H
 
+#include <string>
+#include <unordered_map>
+
 #include "base/geometry/ng/rect_t.h"
+#include "base/geometry/ng/offset_t.h"
+
+namespace OHOS::Ace {
+class JsonValue;
+}  // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+class WebDomDocument;
+
+constexpr char WEB_DOM_JSON_CHILDREN[] = "$children-web";
+constexpr char WEB_DOM_JSON_TITLE[] = "title";
+constexpr char WEB_DOM_JSON_URL[] = "url";
+constexpr char WEB_DOM_JSON_TYPE_OUTER[] = "web";
+
+constexpr char WEB_NATIVE_OBJ_DOM[] = "_arkWebDomTree";
+constexpr char WEB_NATIVE_FUNC_INIT[] = "init";
+constexpr char WEB_NATIVE_FUNC_INCR[] = "incremental";
+constexpr char WEB_NATIVE_FUNC_SCROLL[] = "scrollInfo";
+constexpr int32_t WEB_NATIVE_PARAM_SIZE = 1;
+constexpr int32_t WEB_NATIVE_PARAM_INDEX = 0;
+
+class WebDomNode : public std::enable_shared_from_this<WebDomNode> {
+public:
+    WebDomNode(int32_t id, const std::string& tagName);
+
+    void SetAttributes(std::unique_ptr<JsonValue> attributes);
+    std::unique_ptr<JsonValue> ToJson(const WebDomDocument& document);
+
+private:
+    friend class WebDomDocument;
+
+    int32_t id_;
+    std::string tagName_;
+    std::string type_ = WEB_DOM_JSON_TYPE_OUTER;
+    RectF rect_;
+    std::unique_ptr<JsonValue> attributes_;
+
+    std::weak_ptr<WebDomNode> parent_;
+    std::vector<std::shared_ptr<WebDomNode>> children_;
+};
 
 class WebDomDocument : public virtual AceType {
     DECLARE_ACE_TYPE(WebDomDocument, AceType);
+
 public:
     WebDomDocument();
 
-    std::pair<int32_t, RectF> GetScrollAreaInfoById(int32_t id);
-    std::string GetXpathById(int32_t id);
-    std::string GetImageUrlById(int32_t id);
+    void CreateFromJsonString(const std::string& jsonString);
+    void UpdateScrollInfoFromJsonString(const std::string& jsonString);
+
+    bool IsValid()
+    {
+        return root_ != nullptr;
+    }
+
+    std::string GetUrl() const
+    {
+        return url_;
+    }
+
+    std::string GetTitle() const
+    {
+        return title_;
+    }
+
+    void UpdateOffset(OffsetF offset)
+    {
+        offset_ = offset;
+    }
+
+    OffsetF GetOffset() const
+    {
+        return offset_;
+    }
+
+    std::unique_ptr<JsonValue> ExportToJson();
+    const WebDomNode* GetNodeById(int32_t id) const;
+    std::pair<int32_t, RectF> GetScrollAreaInfoById(int32_t id) const;
+    std::string GetXpathById(int32_t id) const;
+    std::string GetImageUrlById(int32_t id) const;
+
+private:
+    std::string url_ = "";
+    std::string title_ = "";
+    OffsetF offset_;
+    std::unique_ptr<JsonValue> snapshot_;
+    std::shared_ptr<WebDomNode> root_;
+
+    std::unordered_map<int32_t, std::shared_ptr<WebDomNode>> idToNodeMap_;
+    std::shared_ptr<WebDomNode> CreateNode(std::unique_ptr<JsonValue>& json);
+    void UpdateNodeScrollInfo(WebDomNode* node, const OffsetF& delta);
 };
 }  // namespace OHOS::Ace::NG
 

@@ -16,26 +16,256 @@
 #include "core/components_ng/pattern/web/web_dom_document.h"
 
 #include "base/log/dump_log.h"
+#include "base/json/json_util.h"
+
+namespace {
+constexpr char WEB_JSON_ID[] = "$ID";
+constexpr char WEB_JSON_TYPE[] = "$type";
+constexpr char WEB_JSON_TYPE_OUTER[] = "type";
+constexpr char WEB_JSON_ATTRS[] = "$attrs";
+constexpr char WEB_JSON_RECT[] = "$rect";
+constexpr char WEB_JSON_CHILDREN[] = "$children";
+constexpr char WEB_JSON_URL[] = "url";
+constexpr char WEB_JSON_TITLE[] = "title";
+constexpr char WEB_JSON_CHILD[] = "$child";
+
+constexpr char WEB_ATTR_X[] = "x";
+constexpr char WEB_ATTR_Y[] = "y";
+constexpr char WEB_ATTR_WIDTH[] = "width";
+constexpr char WEB_ATTR_HEIGHT[] = "height";
+constexpr char WEB_ATTR_IS_SCROLLABLE[] = "isScrollable";
+constexpr char WEB_ATTR_SCROLL_LEFT[] = "scrollLeft";
+constexpr char WEB_ATTR_SCROLL_TOP[] = "scrollTop";
+constexpr char WEB_ATTR_SCROLL_WIDTH[] = "scrollWidth";
+constexpr char WEB_ATTR_SCROLL_HEIGHT[] = "scrollHeight";
+constexpr char WEB_ATTR_XPATH[] = "xpath";
+constexpr char WEB_ATTR_SRC[] = "src";
+
+constexpr char WEB_ERROR_STRING[] = "";
+constexpr int32_t WEB_ERROR_INT = -1;
+constexpr double WEB_ERROR_DOUBLE = 0.0;
+}
 
 namespace OHOS::Ace::NG {
+
+WebDomNode::WebDomNode(int32_t id, const std::string& tagName)
+    : id_(id), tagName_(tagName) {}
+
+void WebDomNode::SetAttributes(std::unique_ptr<JsonValue> attributes)
+{
+    attributes_ = std::move(attributes);
+}
+
+std::unique_ptr<JsonValue> WebDomNode::ToJson(const WebDomDocument& document)
+{
+    auto nodeJson = JsonUtil::Create(true);
+    nodeJson->Put(WEB_JSON_ID, id_);
+    nodeJson->Put(WEB_JSON_TYPE, tagName_.c_str());
+    nodeJson->Put(WEB_JSON_TYPE_OUTER, type_.c_str());
+
+    auto absoluteRect = rect_ + document.GetOffset();
+    nodeJson->Put(WEB_JSON_RECT, absoluteRect.ToBounds().c_str());
+
+    if (attributes_ && attributes_->IsValid()) {
+        nodeJson->Put(WEB_JSON_ATTRS, attributes_);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebDomNode has no attributes");
+    }
+
+    std::unique_ptr<JsonValue> outputChildren = JsonUtil::CreateArray(true);
+    for (auto& child : children_) {
+        outputChildren->Put(child->ToJson(document));
+    }
+
+    nodeJson->PutRef(WEB_JSON_CHILDREN, std::move(outputChildren));
+    return nodeJson;
+}
 
 WebDomDocument::WebDomDocument()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebDomDocument::WebDomDocument");
 }
 
-std::pair<int32_t, RectF> WebDomDocument::GetScrollAreaInfoById(int32_t id)
+std::shared_ptr<WebDomNode> WebDomDocument::CreateNode(std::unique_ptr<JsonValue>& json)
 {
-    return {-1, RectF()};
+    int32_t id = json->GetInt(WEB_JSON_ID, WEB_ERROR_INT);
+    std::string tagName = json->GetString(WEB_JSON_TYPE, WEB_ERROR_STRING);
+
+    auto node = std::make_shared<WebDomNode>(id, tagName);
+    idToNodeMap_[id] = node;
+
+    auto x = json->GetDouble(WEB_ATTR_X, WEB_ERROR_DOUBLE);
+    auto y = json->GetDouble(WEB_ATTR_Y, WEB_ERROR_DOUBLE);
+    auto width = json->GetDouble(WEB_ATTR_WIDTH, WEB_ERROR_DOUBLE);
+    auto height = json->GetDouble(WEB_ATTR_HEIGHT, WEB_ERROR_DOUBLE);
+    node->rect_ = RectF(x, y, width, height);
+
+    if (json->Contains(WEB_JSON_ATTRS) && json->GetValue(WEB_JSON_ATTRS)->IsObject()) {
+        auto current = json->GetValue(WEB_JSON_ATTRS);
+        node->SetAttributes(std::move(current));
+    }
+
+    if (json->Contains(WEB_JSON_CHILDREN) && json->GetValue(WEB_JSON_CHILDREN)->IsArray()) {
+        auto children = json->GetValue(WEB_JSON_CHILDREN);
+        for (int32_t i = 0; i < children->GetArraySize(); ++i) {
+            auto item = children->GetArrayItem(i);
+            auto child = CreateNode(item);
+            child->parent_ = node;
+            node->children_.push_back(child);
+        }
+    }
+    return node;
 }
 
-std::string WebDomDocument::GetXpathById(int32_t id)
+void WebDomDocument::CreateFromJsonString(const std::string &jsonString)
 {
-    return "";
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDomDocument CreateFromJsonString size:%{public}zu",
+        jsonString.size());
+    snapshot_ = JsonUtil::ParseJsonString(jsonString);
+    if (!snapshot_ || !snapshot_->IsValid()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "CreateFromJsonString snapshot is not valid");
+        return;
+    }
+    if (snapshot_->Contains(WEB_JSON_ATTRS) && snapshot_->GetValue(WEB_JSON_ATTRS)->IsObject()) {
+        url_ = snapshot_->GetValue(WEB_JSON_ATTRS)->GetString(WEB_JSON_URL, WEB_ERROR_STRING);
+        title_ = snapshot_->GetValue(WEB_JSON_ATTRS)->GetString(WEB_JSON_TITLE, WEB_ERROR_STRING);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WEB, "CreateFromJsonString root has no url and title");
+        url_ = WEB_ERROR_STRING;
+        title_ =WEB_ERROR_STRING;
+    }
+    if (snapshot_->Contains(WEB_JSON_CHILD) && snapshot_->GetValue(WEB_JSON_CHILD)->IsObject()) {
+        idToNodeMap_.clear();
+        auto child = snapshot_->GetValue(WEB_JSON_CHILD);
+        root_ = CreateNode(child);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WEB, "CreateFromJsonString no root");
+    }
 }
 
-std::string WebDomDocument::GetImageUrlById(int32_t id)
+void WebDomDocument::UpdateNodeScrollInfo(WebDomNode* node, const OffsetF& delta)
 {
-    return "";
+    if (!node) {
+        return;
+    }
+
+    node->rect_ -= delta;
+    for (auto& child : node->children_) {
+        UpdateNodeScrollInfo(child.get(), delta);
+    }
 }
-} // namespace OHOS::Ace::NG
+
+void WebDomDocument::UpdateScrollInfoFromJsonString(const std::string& jsonString)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDomDocument UpdateScrollInfoFromJsonString size:%{public}zu",
+        jsonString.size());
+    auto update = JsonUtil::ParseJsonString(jsonString);
+    if (!update || !update->IsValid()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "UpdateScrollInfoFromJsonString is not valid");
+        return;
+    }
+
+    int32_t id = update->GetInt(WEB_JSON_ID, WEB_ERROR_INT);
+    double updateLeft = update->GetDouble(WEB_ATTR_SCROLL_LEFT, WEB_ERROR_DOUBLE);
+    double updateTop = update->GetDouble(WEB_ATTR_SCROLL_TOP, WEB_ERROR_DOUBLE);
+    TAG_LOGI(AceLogTag::ACE_WEB, "UpdateScrollInfo id:%{public}d, left:%{public}f, top:%{public}f",
+        id, updateLeft, updateTop);
+
+    auto it = idToNodeMap_.find(id);
+    if (it == idToNodeMap_.end()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "UpdateScrollInfo node not find");
+        return;
+    }
+
+    auto& current = it->second;
+    if (!current->attributes_ || !current->attributes_->IsValid()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "UpdateScrollInfo no attributes");
+        return;
+    }
+    double oldLeft = current->attributes_->GetDouble(WEB_ATTR_SCROLL_LEFT, WEB_ERROR_DOUBLE);
+    double oldTop = current->attributes_->GetDouble(WEB_ATTR_SCROLL_TOP, WEB_ERROR_DOUBLE);
+
+    auto deltaLeft = updateLeft - oldLeft;
+    auto deltaTop = updateTop - oldTop;
+    if (NearZero(deltaLeft) && NearZero(deltaTop)) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "UpdateScrollInfo near no change");
+        return;
+    }
+
+    current->attributes_->Replace(WEB_ATTR_SCROLL_LEFT, updateLeft);
+    current->attributes_->Replace(WEB_ATTR_SCROLL_TOP, updateTop);
+
+    UpdateNodeScrollInfo(it->second.get(), OffsetF(deltaLeft, deltaTop));
+}
+
+std::unique_ptr<JsonValue> WebDomDocument::ExportToJson()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDomDocument::ExportToJson");
+    std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
+    if (IsValid()) {
+        auto rootJson = root_->ToJson(*this);
+        children->Put(rootJson);
+        return children;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "document root is null");
+    return children;
+}
+
+const WebDomNode* WebDomDocument::GetNodeById(int32_t id) const
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDomDocument::GetNodeById id : %{public}d", id);
+    auto it = idToNodeMap_.find(id);
+    if (it == idToNodeMap_.end()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebDomDocument::GetNodeById key is null");
+        return nullptr;
+    }
+    if (!it->second) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebDomDocument::GetNodeById value is null");
+        return nullptr;
+    }
+    return it->second.get();
+}
+
+std::pair<int32_t, RectF> WebDomDocument::GetScrollAreaInfoById(int32_t id) const
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDomDocument::GetScrollAreaInfoById id : %{public}d", id);
+    auto it = idToNodeMap_.find(id);
+    if (it == idToNodeMap_.end()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebDomDocument::GetScrollAreaInfoById key is null");
+        return {WEB_ERROR_INT, RectF()};
+    }
+    auto current = it->second;
+    while (current && current->attributes_ && current->attributes_->IsValid()) {
+        if (current->attributes_->GetBool(WEB_ATTR_IS_SCROLLABLE, false)) {
+            auto scrollLeft = current->attributes_->GetDouble(WEB_ATTR_SCROLL_LEFT, WEB_ERROR_DOUBLE);
+            auto scrollTop = current->attributes_->GetDouble(WEB_ATTR_SCROLL_TOP, WEB_ERROR_DOUBLE);
+            auto scrollWidth = current->attributes_->GetDouble(WEB_ATTR_SCROLL_WIDTH, WEB_ERROR_DOUBLE);
+            auto scrollHeight = current->attributes_->GetDouble(WEB_ATTR_SCROLL_HEIGHT, WEB_ERROR_DOUBLE);
+            return {current->id_, RectF(scrollLeft, scrollTop, scrollWidth, scrollHeight)};
+        }
+        current = current->parent_.lock();
+    }
+    return {WEB_ERROR_INT, RectF()};
+}
+
+std::string WebDomDocument::GetXpathById(int32_t id) const
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDomDocument::GetXpathById id : %{public}d", id);
+    auto current = GetNodeById(id);
+    if (current == nullptr || !current->attributes_ || !current->attributes_->IsValid()) {
+        return WEB_ERROR_STRING;
+    }
+    return current->attributes_->GetString(WEB_ATTR_XPATH, WEB_ERROR_STRING);
+}
+
+std::string WebDomDocument::GetImageUrlById(int32_t id) const
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDomDocument::GetImageUrlById id : %{public}d", id);
+    auto current = GetNodeById(id);
+    if (current == nullptr || !current->attributes_ || !current->attributes_->IsValid()) {
+        return WEB_ERROR_STRING;
+    }
+    return current->attributes_->GetString(WEB_ATTR_SRC, WEB_ERROR_STRING);
+}
+
+}  // namespace OHOS::Ace::NG

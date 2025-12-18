@@ -1240,6 +1240,7 @@ void FrameNode::DumpSimplifyInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& j
     if (pattern_) {
         auto child = JsonUtil::CreateSharedPtrJson();
         pattern_->DumpSimplifyInfoOnlyForParamConfig(child, config);
+        pattern_->AddExtraInfoWithParamConfig(json, config);
         MergeAttributesIntoJson(json, child);
     }
 }
