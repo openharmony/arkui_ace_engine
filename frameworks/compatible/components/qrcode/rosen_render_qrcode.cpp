@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components/qrcode/rosen_render_qrcode.h"
+#include "compatible/components/qrcode/rosen_render_qrcode.h"
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"

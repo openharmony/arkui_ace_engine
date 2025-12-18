@@ -13,17 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DOM_DOM_QRCODE_H
-#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DOM_DOM_QRCODE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_QRCODE_DOM_QRCODE_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_QRCODE_DOM_QRCODE_H
 
-#include "core/components/qrcode/qrcode_component.h"
+#include "compatible/components/qrcode/qrcode_component.h"
 #include "core/components/qrcode/qrcode_theme.h"
+#include "frameworks/bridge/common/dom/dom_configs.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 
 namespace OHOS::Ace::Framework {
 
-class DOMQrcode final : public DOMNode {
+extern const char DOM_QRCODE_BACKGROUND_COLOR[];
+extern const char DOM_QRCODE_COLOR[];
+extern const char DOM_QRCODE_HEIGHT[];
+extern const char DOM_QRCODE_WIDTH[];
+extern const char DOM_QRCODE_TYPE[];
+extern const char DOM_QRCODE_VALUE[];
+
+class ACE_FORCE_EXPORT DOMQrcode final : public DOMNode {
     DECLARE_ACE_TYPE(DOMQrcode, DOMNode);
 
 public:
@@ -45,4 +53,4 @@ private:
 
 } // namespace OHOS::Ace::Framework
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DOM_DOM_QRCODE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_QRCODE_DOM_QRCODE_H

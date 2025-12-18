@@ -17,7 +17,6 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_QRCODE_H
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "core/components/qrcode/qrcode_component.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 

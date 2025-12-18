@@ -13,9 +13,16 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/common/dom/dom_qrcode.h"
+#include "compatible/components/qrcode/dom_qrcode.h"
 
 namespace OHOS::Ace::Framework {
+
+const char DOM_QRCODE_BACKGROUND_COLOR[] = "backgroundColor";
+const char DOM_QRCODE_COLOR[] = "color";
+const char DOM_QRCODE_HEIGHT[] = "height";
+const char DOM_QRCODE_WIDTH[] = "width";
+const char DOM_QRCODE_TYPE[] = "type";
+const char DOM_QRCODE_VALUE[] = "value";
 
 DOMQrcode::DOMQrcode(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {

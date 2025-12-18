@@ -586,7 +586,6 @@ template("declarative_js_engine") {
     if (qrcodegen_support) {
       sources += [
         "jsview/js_qrcode.cpp",
-        "jsview/models/qrcode_model_impl.cpp",
       ]
     }
 

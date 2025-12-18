@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_ROSEN_RENDER_QRCODE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_ROSEN_RENDER_QRCODE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_QRCODE_ROSEN_RENDER_QRCODE_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_QRCODE_ROSEN_RENDER_QRCODE_H
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkBitmap.h"
 #endif
 #include "qrcodegen.hpp"
 
-#include "core/components/qrcode/render_qrcode.h"
+#include "compatible/components/qrcode/render_qrcode.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
 #endif
@@ -58,4 +58,4 @@ public:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_ROSEN_RENDER_QRCODE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_QRCODE_ROSEN_RENDER_QRCODE_H

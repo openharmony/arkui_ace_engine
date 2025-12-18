@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_QRCODE_QRCODE_DECLARATION_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_QRCODE_QRCODE_DECLARATION_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_QRCODE__QRCODE_DECLARATION_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_QRCODE__QRCODE_DECLARATION_H
 
 #include "core/components/declaration/common/declaration.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
@@ -35,7 +35,7 @@ struct QrcodeStyle : Style {
     bool isHeightDefined = false;
 };
 
-class QrcodeDeclaration : public Declaration {
+class ACE_FORCE_EXPORT QrcodeDeclaration : public Declaration {
     DECLARE_ACE_TYPE(QrcodeDeclaration, Declaration);
 
 public:
@@ -150,4 +150,4 @@ protected:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_QRCODE_QRCODE_DECLARATION_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_QRCODE__QRCODE_DECLARATION_H

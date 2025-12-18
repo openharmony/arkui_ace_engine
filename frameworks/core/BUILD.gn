@@ -185,7 +185,6 @@ template("ace_core_source_set") {
       "components/declaration/image/image_animator_declaration.cpp",
       "components/declaration/input/input_declaration.cpp",
       "components/declaration/piece/piece_declaration.cpp",
-      "components/declaration/qrcode/qrcode_declaration.cpp",
       "components/declaration/richtext/rich_text_declaration.cpp",
       "components/declaration/search/search_declaration.cpp",
       "components/declaration/side_bar/side_bar_declaration.cpp",
@@ -520,7 +519,6 @@ template("ace_core_source_set") {
 
     if (qrcodegen_support) {
       deps += [
-        "$ace_root/frameworks/core/components/qrcode:ace_core_components_qrcode_$platform",
         "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
       ]
     }

@@ -53,7 +53,6 @@
 #include "core/components_v2/inspector/pattern_lock_composed_element.h"
 #include "core/components_v2/inspector/picker_text_dialog_composed_element.h"
 #include "core/components_v2/inspector/progress_composed_element.h"
-#include "core/components_v2/inspector/qrcode_composed_element.h"
 #include "core/components_v2/inspector/radio_composed_element.h"
 #include "core/components_v2/inspector/rating_composed_element.h"
 #include "core/components_v2/inspector/refresh_composed_element.h"
@@ -142,7 +141,8 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { IMAGE_ANIMATOR_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ImageAnimatorComposedElement>(id); } },
     { IMAGE_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ImageComposedElement>(id); } },
-    { QRCODE_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::QrcodeComposedElement>(id); } },
+    { QRCODE_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_QRCODE, id); } },
     { SPAN_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SpanComposedElement>(id); } },
     { BOX_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::BlankComposedElement>(id); } },
     { BUTTON_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ButtonComposedElement>(id); } },

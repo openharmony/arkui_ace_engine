@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components/declaration/qrcode/qrcode_declaration.h"
+#include "compatible/components/qrcode/qrcode_declaration.h"
 
-#include "core/components/declaration/common/declaration_constants.h"
+#include <memory>
+#include "compatible/components/qrcode/dom_qrcode.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/components/qrcode/qrcode_theme.h"
 
@@ -23,10 +24,13 @@ namespace OHOS::Ace {
 
 using namespace Framework;
 
+const std::shared_ptr<QrcodeAttribute> DEFAULT_QRCODE_ATTR = std::make_shared<QrcodeAttribute>();
+const std::shared_ptr<QrcodeStyle> DEFAULT_QRCODE_STYLE = std::make_shared<QrcodeStyle>();
+
 void QrcodeDeclaration::InitSpecialized()
 {
-    AddSpecializedAttribute(DeclarationConstants::DEFAULT_QRCODE_ATTR);
-    AddSpecializedStyle(DeclarationConstants::DEFAULT_QRCODE_STYLE);
+    AddSpecializedAttribute(DEFAULT_QRCODE_ATTR);
+    AddSpecializedStyle(DEFAULT_QRCODE_STYLE);
 }
 
 void QrcodeDeclaration::InitializeStyle()

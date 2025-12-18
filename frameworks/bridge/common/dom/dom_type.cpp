@@ -1116,14 +1116,6 @@ const char DOM_TRANSITION_EFFECT[] = "transitionEffect";
 const char DOM_TRANSITION_CARD_COMPOSEID[] = "ref";
 const char DOM_TRANSITION_CARD_PARAMS[] = "paramsData";
 
-// qrcode
-const char DOM_QRCODE_BACKGROUND_COLOR[] = "backgroundColor";
-const char DOM_QRCODE_COLOR[] = "color";
-const char DOM_QRCODE_HEIGHT[] = "height";
-const char DOM_QRCODE_WIDTH[] = "width";
-const char DOM_QRCODE_TYPE[] = "type";
-const char DOM_QRCODE_VALUE[] = "value";
-
 // svg
 const char DOM_SVG_ID[] = "svgId";
 const char DOM_SVG_ANIMATION_BEGIN[] = "begin";
