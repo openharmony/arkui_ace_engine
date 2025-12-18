@@ -5678,8 +5678,8 @@ void RichEditorPattern::OnCommonColorChange()
 {
     auto host = GetHost();
     auto theme = GetTheme<RichEditorTheme>();
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(host && theme && textLayoutProperty);
+    auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_VOID(host && theme && layoutProperty);
 
     auto displayColorMode = GetDisplayColorMode();
     COLOR_MODE_LOCK(displayColorMode);
@@ -5687,12 +5687,13 @@ void RichEditorPattern::OnCommonColorChange()
     const auto& themeTextStyle = theme->GetTextStyle();
     auto themeTextColor = themeTextStyle.GetTextColor();
     auto themeTextDecColor = themeTextStyle.GetTextDecorationColor();
-    textLayoutProperty->UpdateTextColor(themeTextColor);
-    textLayoutProperty->UpdateTextDecorationColor(themeTextDecColor);
+    layoutProperty->UpdateTextColor(themeTextColor);
+    layoutProperty->UpdateTextDecorationColor(themeTextDecColor);
+    layoutProperty->UpdatePlaceholderTextColor(theme->GetPlaceholderColor());
     auto themeUrlSpanColor = GetUrlSpanColor();
-    textLayoutProperty->UpdateUrlDefualtColor(themeUrlSpanColor);
-    textLayoutProperty->UpdateUrlHoverColor(GetUrlHoverColor());
-    textLayoutProperty->UpdateUrlPressedColor(GetUrlPressColor());
+    layoutProperty->UpdateUrlDefualtColor(themeUrlSpanColor);
+    layoutProperty->UpdateUrlHoverColor(GetUrlHoverColor());
+    layoutProperty->UpdateUrlPressedColor(GetUrlPressColor());
 
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "theme, ColorMode=%{public}d, TextColor=%{public}s, DecorationColor=%{public}s",
         displayColorMode, themeTextColor.ToString().c_str(), themeTextDecColor.ToString().c_str());
