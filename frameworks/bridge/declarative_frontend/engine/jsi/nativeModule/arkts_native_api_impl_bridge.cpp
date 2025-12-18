@@ -6343,12 +6343,12 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     RegisterRatingAttributes(object, vm);
     RegisterRectAttributes(object, vm);
     RegisterRelativeContainerAttributes(object, vm);
+    RegisterScrollableAttributes(object, vm);
     RegisterSpanAttributes(object, vm);
     RegisterShapeAttributes(object, vm);
     RegisterSliderAttributes(object, vm);
     RegisterSwiperAttributes(object, vm);
     RegisterSymbolSpanAttributes(object, vm);
-    RegisterTabAttributes(object, vm);
     RegisterTextClockAttributes(object, vm);
     RegisterTextTimerAttributes(object, vm);
     RegisterToggleAttributes(object, vm);
