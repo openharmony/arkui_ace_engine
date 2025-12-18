@@ -1480,6 +1480,7 @@ public:
     bool IsBlanklessFrameValid() const;
     void SetEnableAutoFill(bool isEnabled);
     void RemoveSnapshotFrameNodeIfNeeded();
+    void CallBlanklessCallback(int32_t state, const std::string& reason);
 
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
     void SetPipNativeWindow(int delegate_id, int child_id, int frame_routing_id, void* window);

@@ -6442,9 +6442,6 @@ void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime, bool isAnimate)
 
 void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height)
 {
-    if (snapshotPath.empty()) {
-        return;
-    }
     TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::CreateSnapshotFrameNode");
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
@@ -6499,6 +6496,13 @@ void WebDelegate::RemoveSnapshotFrameNodeIfNeeded()
         TAG_LOGD(AceLogTag::ACE_WEB, "blankless RemoveSnapshotFrameNodeIfNeeded");
         RemoveSnapshotFrameNode(0);
     }
+}
+
+void WebDelegate::CallBlanklessCallback(int32_t state, const std::string& reason)
+{
+    CHECK_NULL_VOID(nweb_);
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::CallBlanklessCallback");
+    nweb_->CallExecuteBlanklessCallback(state, reason);
 }
 
 bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)

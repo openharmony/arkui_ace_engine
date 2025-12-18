@@ -1446,6 +1446,8 @@ bool WebDelegate::IsBlanklessFrameValid() const
            blanklessFrameWidth_ == resizeWidth && blanklessFrameHeight_ / resizeHeight_ >= WEB_SNAPSHOT_SIZE_TOLERANCE;
 }
 
+void WebDelegate::CallBlanklessCallback(int32_t state, const std::string& reason) {}
+
 void WebDelegate::UpdateEnableImageAnalyzer(bool enable) {}
 
 void WebDelegate::RemoveSnapshotFrameNodeIfNeeded() {}

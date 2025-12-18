@@ -893,25 +893,42 @@ RefPtr<FrameNode> WebPattern::CreatePreviewImageFrameNode(bool isImage)
     return previewNode;
 }
 
-void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height)
+bool WebPattern::CheckCreateImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "blankless WebPattern::CreateSnapshotImageFrameNode");
     if (snapshotImageNodeId_.has_value()) {
         TAG_LOGE(AceLogTag::ACE_WEB, "blankless already create snapshot image node!");
-        return;
+        if (delegate_) {
+            delegate_->CallBlanklessCallback(1, std::string("frame insertion has already completed")); // 1 LOADING_FAILED
+        }
+        return false;
     }
-    if (!IsSnapshotPathValid(snapshotPath)) {
+    if (snapshotPath.empty() || !IsSnapshotPathValid(snapshotPath)) {
         TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot path is invalid!");
-        return;
+        if (delegate_) {
+            delegate_->CallBlanklessCallback(1, std::string("Snapshot storage path is empty or invalid")); // 1 LOADING_FAILED
+        }
+        return false;
     }
 
     if (delegate_) {
         delegate_->RecordBlanklessFrameSize(width, height);
         if (!delegate_->IsBlanklessFrameValid()) {
             TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot size is invalid!");
-            return;
+            delegate_->CallBlanklessCallback(1, std::string("Snapshot file size is invalid")); // 1 LOADING_FAILED
+            return false;
         }
     }
+
+    return true;
+}
+
+void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "blankless WebPattern::CreateSnapshotImageFrameNode");
+    if (!CheckCreateImageFrameNode(snapshotPath, width, height)) {
+        return;
+    }
+
     snapshotImageNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     auto snapshotNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, snapshotImageNodeId_.value(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -946,6 +963,9 @@ void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, u
     }
     CHECK_NULL_VOID(snapshotReporter_);
     snapshotReporter_->OnAppear();
+    if (delegate_) {
+        delegate_->CallBlanklessCallback(0, std::string("")); // 0 LOADING_SUCCESS
+    }
 }
 
 void WebPattern::RemoveSnapshotFrameNode(bool isAnimate)
@@ -1007,6 +1027,9 @@ void WebPattern::RealRemoveSnapshotFrameNode()
 
     CHECK_NULL_VOID(snapshotReporter_);
     snapshotReporter_->OnDisappear();
+    if (delegate_) {
+        delegate_->CallBlanklessCallback(2, std::string("")); // 2 LOADING_REMOVE
+    }
 }
 
 void WebPattern::InitSnapshotGesture(const RefPtr<GestureEventHub>& gestureHub)
