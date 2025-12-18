@@ -1489,7 +1489,7 @@ void SheetPresentationPattern::UpdateSheetCloseIcon()
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
-    auto sheetCloseIcon = DynamicCast<FrameNode>(host->GetChildAtIndex(2));
+    auto sheetCloseIcon = GetSheetCloseIcon();
     CHECK_NULL_VOID(sheetCloseIcon);
     auto renderContext = sheetCloseIcon->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
