@@ -5717,7 +5717,7 @@ void RichEditorPattern::OnCommonColorChange()
     paragraphCache_.Clear();
     IF_PRESENT(typingTextStyle_, ReloadResources());
     IF_PRESENT(typingStyle_, ReloadResources());
-
+    IF_PRESENT(selectOverlay_, UpdateHandleColor());
     IF_PRESENT(magnifierController_, SetColorModeChange(true));
     UpdateScrollBarColor(GetScrollBarColor());
 }
