@@ -83,6 +83,10 @@
     {
       "name": "MultiDevice10",
       "value": "内容区域刷新时机"
+    },
+    {
+      "name": "AccessibilityModal",
+      "value": "无障碍信息中携带模态状态信息"
     }
   ]
 }

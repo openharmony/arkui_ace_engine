@@ -19,6 +19,7 @@
     "pages/sidePolymorphicStyle/SideSheet2",
     "pages/sidePolymorphicStyle/SideSheet3",
     "pages/sidePolymorphicStyle/SideSheetCallback",
-    "pages/popupAvoidKeyboard/Index"
+    "pages/popupAvoidKeyboard/Index",
+    "pages/accessibilityModal/Index"
   ]
 }
