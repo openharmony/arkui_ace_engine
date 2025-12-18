@@ -933,4 +933,25 @@ HWTEST_F(TextAreaTestTwo, CloseHandleAndSelect002, TestSize.Level1)
     showSelect = pattern_->showSelect_;
     EXPECT_EQ(showSelect, false);
 }
+
+/**
+ * @tc.name: TextPatternGetWindowIdFromPipeline002
+ * @tc.desc: Test TextPattern GetWindowIdFromPipeline
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, TextPatternGetWindowIdFromPipeline002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern IsShowHandle
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    textFieldNode->SetParent(frameNode_);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto windowId = pattern->GetWindowIdFromPipeline();
+    EXPECT_EQ(windowId, 0);
+}
 } // namespace OHOS::Ace::NG
