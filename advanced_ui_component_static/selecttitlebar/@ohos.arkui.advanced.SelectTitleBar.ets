@@ -43,11 +43,11 @@ export class SelectTitleBarMenuItem {
 
 const RESOURCE_TYPE_SYMBOL: number = 40000;
 
-const TEXT_EDITABLE_DIALOG = '18.3fp'
-const IMAGE_SIZE = '64vp'
-const MAX_DIALOG_SIZE = '256vp'
-const MIN_DIALOG_SIZE = '216vp'
-const ERROR_CODE = 0x3900
+const TEXT_EDITABLE_DIALOG = '18.3fp';
+const IMAGE_SIZE = '64vp';
+const MAX_DIALOG_SIZE = '256vp';
+const MIN_DIALOG_SIZE = '216vp';
+const ERROR_CODE = 0x3900;
 const LONG_PRESS_TIME: number = 500;
 
 @Observed
@@ -275,14 +275,14 @@ struct CollapsibleMenuSection {
   isFollowingSystemFontScale: boolean = false;
   maxFontScale: number = 1;
   systemFontScale?: number = 1;
-  static readonly maxCountOfVisibleItems: number = 3
-  private static readonly focusPadding: number = 4
-  private static readonly marginsNum: number = 2
-  private firstFocusableIndex: number = -1
-  @State isPopupShown: boolean = false
-  @State isMoreIconOnFocus: boolean = false
-  @State isMoreIconOnHover: boolean = false
-  @State isMoreIconOnClick: boolean = false
+  static readonly maxCountOfVisibleItems: number = 3;
+  private static readonly focusPadding: number = 4;
+  private static readonly marginsNum: number = 2;
+  private firstFocusableIndex: number = -1;
+  @State isPopupShown: boolean = false;
+  @State isMoreIconOnFocus: boolean = false;
+  @State isMoreIconOnHover: boolean = false;
+  @State isMoreIconOnClick: boolean = false;
   @PropRef @Watch('onFontSizeUpdated') fontSize: number = 1;
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: SelectTitleBarDialog({
@@ -329,10 +329,10 @@ struct CollapsibleMenuSection {
     this.menuItems.forEach((item, index) => {
       if (item.isEnabled && this.firstFocusableIndex === -1 &&
         index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
-        this.firstFocusableIndex = this.index * 1000 + index + 1
+        this.firstFocusableIndex = this.index * 1000 + index + 1;
       }
     })
-    this.fontSize = this.decideFontScale()
+    this.fontSize = this.decideFontScale();
   }
 
   decideFontScale(): number {
@@ -406,7 +406,7 @@ struct CollapsibleMenuSection {
               return false
             }
             if (event.type === KeyType.Down) {
-              this.isMoreIconOnClick = true
+              this.isMoreIconOnClick = true;
             }
             if (event.type === KeyType.Up) {
               this.isMoreIconOnClick = false
@@ -414,12 +414,12 @@ struct CollapsibleMenuSection {
           })
           .onTouch((event: TouchEvent) => {
             if (event.type === TouchType.Down) {
-              this.isMoreIconOnClick = true
+              this.isMoreIconOnClick = true;
             }
             if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
               this.isMoreIconOnClick = false
               if (this.fontSize >= this.minFontSize) {
-                this.dialogController?.close()
+                this.dialogController?.close();
               }
             }
           })
@@ -435,7 +435,7 @@ struct CollapsibleMenuSection {
             onStateChange: (e: PopupStateChangeParam) => {
               this.isPopupShown = e.isVisible
               if (!e.isVisible) {
-                this.isMoreIconOnClick = false
+                this.isMoreIconOnClick = false;
               }
             }
           } as CustomPopupOptions)
@@ -484,15 +484,15 @@ struct ImageMenuItem {
   maxFontScale: number = 1;
   systemFontScale?: number = 1;
   isPopup: boolean = true;
-  static readonly imageSize: string = '24vp'
-  static readonly imageHotZoneWidth: number = 48
-  static readonly buttonBorderRadius: number = 8
-  static readonly focusBorderWidth: number = 2
-  static readonly focusablePrefix: string = 'Id-SelectTitleBar-ImageMenuItem-'
-  @State isOnFocus: boolean = false
-  @State isOnHover: boolean = false
-  @State isOnClick: boolean = false
-  @PropRef @Watch('onFontSizeUpdated') fontSize: number = 1
+  static readonly imageSize: string = '24vp';
+  static readonly imageHotZoneWidth: number = 48;
+  static readonly buttonBorderRadius: number = 8;
+  static readonly focusBorderWidth: number = 2;
+  static readonly focusablePrefix: string = 'Id-SelectTitleBar-ImageMenuItem-';
+  @State isOnFocus: boolean = false;
+  @State isOnHover: boolean = false;
+  @State isOnClick: boolean = false;
+  @PropRef @Watch('onFontSizeUpdated') fontSize: number = 1;
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: SelectTitleBarDialog({
       cancel: () => {
@@ -671,49 +671,49 @@ struct ImageMenuItem {
       })
       .onFocus(() => {
         if (!this.item.isEnabled) {
-          return
+          return;
         }
-        this.isOnFocus = true
+        this.isOnFocus = true;
       })
       .onBlur(() => {
-        this.isOnFocus = false
+        this.isOnFocus = false;
       })
       .onHover((isOn: boolean, event?: HoverEvent) => {
         if (!this.item.isEnabled) {
-          return
+          return;
         }
-        this.isOnHover = isOn
+        this.isOnHover = isOn;
       })
       .onKeyEvent((event: KeyEvent) => {
         if (!this.item.isEnabled) {
-          return false
+          return false;
         }
         if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-          return false
+          return false;
         }
         if (event.type === KeyType.Down) {
-          this.isOnClick = true
+          this.isOnClick = true;
         }
         if (event.type === KeyType.Up) {
-          this.isOnClick = false
+          this.isOnClick = false;
         }
       })
       .onTouch((event: TouchEvent) => {
         if (!this.item.isEnabled) {
-          return
+          return;
         }
         if (event.type === TouchType.Down) {
-          this.isOnClick = true
+          this.isOnClick = true;
         }
         if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
           this.isOnClick = false
           if (this.fontSize >= this.minFontSize) {
-            this.dialogController?.close()
+            this.dialogController?.close();
           }
         }
       })
       .onClick((event?: ClickEvent) => {
-        this.item.isEnabled && this.item.action?.()
+        this.item.isEnabled && this.item.action?.();
       } as () => void)
       .gestureModifier(this.buttonGestureModifier)
     } else {
@@ -773,7 +773,7 @@ struct ImageMenuItem {
       })
       .onFocus(() => {
         if (!this.item.isEnabled) {
-          return
+          return;
         }
         this.isOnFocus = true
       })
@@ -782,40 +782,40 @@ struct ImageMenuItem {
       })
       .onHover((isOn: boolean, event?: HoverEvent) => {
         if (!this.item.isEnabled) {
-          return
+          return;
         }
         this.isOnHover = isOn
       })
       .onKeyEvent((event: KeyEvent) => {
         if (!this.item.isEnabled) {
-          return false
+          return false;
         }
         if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-          return false
+          return false;
         }
         if (event.type === KeyType.Down) {
-          this.isOnClick = true
+          this.isOnClick = true;
         }
         if (event.type === KeyType.Up) {
-          this.isOnClick = false
+          this.isOnClick = false;
         }
       })
       .onTouch((event: TouchEvent) => {
         if (!this.item.isEnabled) {
-          return
+          return;
         }
         if (event.type === TouchType.Down) {
-          this.isOnClick = true
+          this.isOnClick = true;
         }
         if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.isOnClick = false
+          this.isOnClick = false;
           if (this.fontSize >= this.minFontSize) {
-            this.dialogController?.close()
+            this.dialogController?.close();
           }
         }
       })
       .onClick((event?: ClickEvent) => {
-        this.item.isEnabled && this.item.action?.()
+        this.item.isEnabled && this.item.action?.();
       } as () => void)
     }
   }
