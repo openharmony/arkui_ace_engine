@@ -227,7 +227,7 @@ export class ColorMetrics {
                 colorMetrics.setResourceId(resourceId as int32);
             }
             return colorMetrics;
-        } else if (typeof color === 'int') {
+        } else if (color instanceof int32) {
             return ColorMetrics.numeric(color as int32);
         } else if (typeof color === 'string') {
             let colorValue = color as string;
