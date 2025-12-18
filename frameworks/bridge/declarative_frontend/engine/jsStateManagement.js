@@ -39,10 +39,11 @@ class AppStorageV2 {
    * @param { { new(...args: any): T } } type - The type of the stored value.
    * @param { string | StorageDefaultCreator<T> } [keyOrDefaultCreator] - The alias name of the key, or function generating the default value.
    * @param { StorageDefaultCreator<T> } [defaultCreator] - The function generating the default value.
+   * @param { StorageDefaultCreator<T> } [defaultSubCreator] - The function generating the default value for each collection item.
    * @returns { T } The value of the existed key or the default value.
    */
-  static connect(type, keyOrDefaultCreator, defaultCreator) {
-    return AppStorageV2.appStorageV2Impl_.connect(type, keyOrDefaultCreator, defaultCreator);
+  static connect(type, keyOrDefaultCreator, defaultCreator, defaultSubCreator) {
+    return AppStorageV2.appStorageV2Impl_.connect(type, keyOrDefaultCreator, defaultCreator, defaultSubCreator);
   }
 
   /**
@@ -94,10 +95,11 @@ class PersistenceV2 extends AppStorageV2 {
    * @param { { new(...args: any): T } } type - The type of the stored value.
    * @param { string | StorageDefaultCreator<T> } [keyOrDefaultCreator] - The alias name of the key, or function generating the default value.
    * @param { StorageDefaultCreator<T> } [defaultCreator] - The function generating the default value.
+   * @param { StorageDefaultCreator<T> } [defaultSubCreator] - The function generating the default value for each collection item.
    * @returns { T } The value of the existed key or the default value.
    */
-  static connect(type, keyOrDefaultCreator, defaultCreator) {
-    return PersistenceV2.persistenceV2Impl_.connect(type, keyOrDefaultCreator, defaultCreator);
+  static connect(type, keyOrDefaultCreator, defaultCreator, defaultSubCreator) {
+    return PersistenceV2.persistenceV2Impl_.connect(type, keyOrDefaultCreator, defaultCreator, defaultSubCreator);
   }
 
     /**
@@ -108,7 +110,8 @@ class PersistenceV2 extends AppStorageV2 {
    * use application path to store data in disk
    *
    * @template T - The original object.
-   * @param { { ConnectOptions<T extends Objects>: T } } connectOptions - Connect param.
+   * @template S - The type of items contained in the original object (collection).
+   * @param { ConnectOptions<T, S> } connectOptions - Connect param.
    * @returns { T } The value of the existed key or the default value.
    */
   static globalConnect(connectOptions) {
