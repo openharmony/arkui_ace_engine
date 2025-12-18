@@ -236,7 +236,11 @@ void ScrollableModelStatic::SetEdgeEffect(
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetEdgeEffect(edgeEffect.value_or(EdgeEffect::NONE), alwaysEnabled.value_or(false), effectEdge);
+    if (frameNode->GetTag() == V2::LIST_ETS_TAG) {
+        pattern->SetEdgeEffect(edgeEffect.value_or(EdgeEffect::SPRING), alwaysEnabled.value_or(false), effectEdge);
+    } else {
+        pattern->SetEdgeEffect(edgeEffect.value_or(EdgeEffect::NONE), alwaysEnabled.value_or(false), effectEdge);
+    }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
