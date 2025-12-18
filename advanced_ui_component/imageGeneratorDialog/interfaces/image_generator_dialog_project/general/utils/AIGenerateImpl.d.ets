@@ -18,10 +18,12 @@ import { AIGenerateCallBack } from '../types/Declaration';
 export declare class AIGenerateImpl {
     private stopTask;
     private sessionId;
+    private currentImageSessionId;
     private TextModal;
     private ImageModal;
     private static instance;
     static getInstance(): AIGenerateImpl;
+    getCurrentImageSessionId(): number;
     setSelfTextGenerateModal(modal: imageGeneration.TextGenerationModel | undefined): void;
     setSelfImageGenerateModal(modal: imageGeneration.ImageGenerationModel | undefined): void;
     private delay;

@@ -20,9 +20,14 @@ export class AIGenerateImpl {
     constructor() {
         this.stopTask = false;
         this.sessionId = 0;
+        this.currentImageSessionId = 0;
     }
     static getInstance() {
         return AIGenerateImpl.instance;
+    }
+    ;
+    getCurrentImageSessionId() {
+        return this.currentImageSessionId;
     }
     ;
     setSelfTextGenerateModal(modal) {
@@ -145,6 +150,7 @@ export class AIGenerateImpl {
                     }
                 }
             };
+            this.currentImageSessionId = retSessionId;
             this.ImageModal.requestImageGeneration(retSessionId, taskParams, userImageModalCallback);
             callback.onReady();
         }
