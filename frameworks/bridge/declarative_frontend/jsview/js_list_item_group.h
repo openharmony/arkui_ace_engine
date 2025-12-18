@@ -30,7 +30,7 @@ public:
     static void SetDivider(const JSCallbackInfo& args);
     static void SetAspectRatio(const JSCallbackInfo& args);
     static void SetChildrenMainSize(const JSCallbackInfo& args);
-    static void SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj);
+    static void SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj, NG::FrameNode* node = nullptr);
     static bool ParseHeaderAndFooterContent(const JSRef<JSVal>& contentParam, bool isHeader);
     static bool SetHeaderBuilder(const JSRef<JSObject>& obj);
     static bool SetFooterBuilder(const JSRef<JSObject>& obj);

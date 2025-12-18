@@ -1173,9 +1173,9 @@ void ListModelNG::SetScrollBy(FrameNode* frameNode, double x, double y)
     pattern->UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
 }
 
-RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize()
+RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize(FrameNode* node)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = node ? node : ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);

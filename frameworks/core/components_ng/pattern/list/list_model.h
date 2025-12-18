@@ -93,7 +93,7 @@ public:
     virtual void SetItemFillPolicy(PresetFillType fillType) = 0;
     virtual void ResetItemFillPolicy() = 0;
     virtual void SetScrollSnapAlign(ScrollSnapAlign scrollSnapAlign) {};
-    virtual RefPtr<NG::ListChildrenMainSize> GetOrCreateListChildrenMainSize()
+    virtual RefPtr<NG::ListChildrenMainSize> GetOrCreateListChildrenMainSize(NG::FrameNode* node = nullptr)
     {
         return nullptr;
     }

@@ -65,7 +65,7 @@ public:
     static void SetChainAnimation(const JSCallbackInfo& args);
     static void SetChainAnimationOptions(const JSCallbackInfo& info);
     static void SetChildrenMainSize(const JSCallbackInfo& args);
-    static void SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj);
+    static void SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj, NG::FrameNode* node = nullptr);
     static void SetMultiSelectable(bool multiSelectable);
     static void SetListItemAlign(int32_t itemAlignment);
     static void SetLanes(const JSCallbackInfo& info);

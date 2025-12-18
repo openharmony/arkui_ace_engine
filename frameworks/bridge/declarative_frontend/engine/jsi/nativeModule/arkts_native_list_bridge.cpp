@@ -925,7 +925,12 @@ ArkUINativeModuleValue ListBridge::SetListChildrenMainSize(ArkUIRuntimeCallInfo*
     if (info.Length() != 2 || !(info[1]->IsObject())) {
         return panda::JSValueRef::Undefined(vm);
     }
-    JSList::SetChildrenMainSize(Framework::JSRef<Framework::JSObject>::Cast(info[1]));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    JSList::SetChildrenMainSize(Framework::JSRef<Framework::JSObject>::Cast(info[1]), frameNode);
 
     return panda::JSValueRef::Undefined(vm);
 }
