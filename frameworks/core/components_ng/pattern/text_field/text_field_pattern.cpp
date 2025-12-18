@@ -9264,6 +9264,9 @@ void TextFieldPattern::CloseHandleAndSelect()
 {
     CloseSelectOverlay(true);
     showSelect_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool TextFieldPattern::IsShowUnit() const
