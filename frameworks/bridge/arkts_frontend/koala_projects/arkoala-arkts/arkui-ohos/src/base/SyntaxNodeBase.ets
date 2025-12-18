@@ -19,6 +19,7 @@ import { nullptr, pointer, KPointer } from '@koalaui/interop'
 import { PeerNode, LazyItemNodeType, PeerNodeType, findPeerNode } from '../PeerNode'
 import { ReusablePool } from '../ReusablePool'
 import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
+import { IExtendableComponent } from '../component/extendableComponent'
 
 export class NodeHolder {
     node?: PeerNode
@@ -32,6 +33,17 @@ export class SyntaxItemPeer extends PeerNode {
             throw new Error(`Failed to create SyntaxItemPeer with id: ${peerId}`)
         }
         return new SyntaxItemPeer(_peerPtr, peerId, 'SyntaxItem')
+    }
+
+    public component?: IExtendableComponent;
+    public isCustomComponent: boolean = false;
+    getParentNodeWhenRecycle(nodeRef?: IncrementalNode): IncrementalNode | undefined {
+        if (this.isCustomComponent) {
+            const node = this.component?.__getParentNode__Internal();
+            return node;
+        } else {
+            return nodeRef;
+        }
     }
 
     protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
@@ -81,6 +93,9 @@ export class LazyNodePeer extends PeerNode {
     }
 
     override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
+        if (this.disposing) {
+            return false
+        }
         if (!this._reusePool) {
             this._reusePool = new Map<string, ReusablePool>()
         }

@@ -102,7 +102,7 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
      * @param monitorValue
      * @returns true if value is dirty
      */
-    private recordDependenciesForMonitorValue(isFirstRun: boolean, monitorValue: MonitorValueInternal): boolean {
+    private recordDependenciesForMonitorValue(isFirstRun: boolean, monitorValue: MonitorValueInternal, isReuse: boolean = false): boolean {
         if (!isFirstRun) {
             monitorValue.clearReverseBindings();
         }
@@ -110,7 +110,7 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
         let renderingComponentRefBefore = ObserveSingleton.instance.renderingComponentRef;
         ObserveSingleton.instance.renderingComponent = ObserveSingleton.RenderingMonitor;
         ObserveSingleton.instance.renderingComponentRef = monitorValue;
-        let dirty = monitorValue.readValue(isFirstRun);
+        let dirty = isReuse ? monitorValue.readValueWhenReuse() : monitorValue.readValue(isFirstRun);
         ObserveSingleton.instance.renderingComponent = renderingComponentBefore;
         ObserveSingleton.instance.renderingComponentRef = renderingComponentRefBefore;
         return dirty;
@@ -126,6 +126,13 @@ export class MonitorFunctionDecorator implements IMonitorDecoratedVariable, IMon
         return this.values_.map(
             (value: MonitorValueInternal): string => value.path
         );
+    }
+
+    resetOnReuse(): void {
+        ObserveSingleton.instance.clearDelayedMonitorWhenReuse();
+        this.values_.forEach((monitorValue: MonitorValueInternal) => {
+            this.recordDependenciesForMonitorValue(false, monitorValue, true);
+        });
     }
 }
 
@@ -178,6 +185,16 @@ export class MonitorValueInternal implements IMonitorValue<Any>, ITrackedDecorat
             StateMgmtConsole.log(`Caught exception while reading monitor path ${this.path} value: ${e}.`);
             return false;
         }
+    }
+
+    public readValueWhenReuse(): boolean {
+        try {
+            this.now = this.lambda();
+            this.before = this.now;
+        } catch (e) {
+            StateMgmtConsole.log(`Caught exception while reading monitor path ${this.path} value: ${e}.`);
+        }
+        return true;
     }
 
     public get dirty(): boolean {

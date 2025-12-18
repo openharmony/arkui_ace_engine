@@ -19,7 +19,7 @@ import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { StateMgmtDFX } from '../tools/stateMgmtDFX';
-export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase implements IProviderDecoratedVariable<T> {
+export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase<T> implements IProviderDecoratedVariable<T> {
     private readonly provideAlias_: string;
     private readonly backing_: IBackingValue<T>;
     public viewV2?: Object;
@@ -53,5 +53,9 @@ export class ProviderDecoratedVariable<T> extends DecoratedV2VariableBase implem
             ESValue.getGlobal().getProperty('runPendingJobs').invoke();
         }
 
+    }
+
+    resetOnReuse(newValue: T): void {
+        this.set(newValue);
     }
 }

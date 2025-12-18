@@ -218,10 +218,11 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
     }
 }
 
-export abstract class DecoratedV2VariableBase extends DecoratedVariableBase implements IDecoratedV2Variable {
+export abstract class DecoratedV2VariableBase<T> extends DecoratedVariableBase implements IDecoratedV2Variable<T> {
     constructor(decorator: string, owningComponent: IVariableOwner | undefined, varName: string) {
         super(decorator, owningComponent, varName);
     }
+    abstract resetOnReuse(newValue: T): void;
     public info(): string {
         return this.varName;
     }
