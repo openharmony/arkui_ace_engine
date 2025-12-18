@@ -23,6 +23,7 @@ let TAG: string = '[AIGenerateImpl]'
 export class AIGenerateImpl {
   private stopTask: boolean = false;  // only for mock
   private sessionId: number = 0;
+  private currentImageSessionId: number = 0;
 
   private TextModal: imageGeneration.TextGenerationModel | undefined;
   private ImageModal: imageGeneration.ImageGenerationModel | undefined;
@@ -31,6 +32,10 @@ export class AIGenerateImpl {
 
   static getInstance() {
     return AIGenerateImpl.instance;
+  };
+
+  public getCurrentImageSessionId(): number {
+    return this.currentImageSessionId;
   };
 
   public setSelfTextGenerateModal(modal: imageGeneration.TextGenerationModel | undefined): void {
@@ -165,7 +170,7 @@ export class AIGenerateImpl {
           }
         }
       }
-
+      this.currentImageSessionId = retSessionId;
       this.ImageModal.requestImageGeneration(retSessionId, taskParams, userImageModalCallback);
       callback.onReady();
     } else {
