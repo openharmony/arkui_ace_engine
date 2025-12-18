@@ -39,24 +39,24 @@ class Meta {
   }
 
   public static get(obj: any, prop: string): any {
-    let proto = obj.__proto__;
+    let proto = Object.getPrototypeOf(obj);
     while (proto) {
       let meta = Meta.proto2props.get(proto);
       if (meta && meta[prop]) {
         return meta[prop];
       }
-      proto = proto.__proto__;
+      proto = Object.getPrototypeOf(proto);
     }
     return undefined;
   }
 
   public static gets(obj: any): object {
     const ret = {};
-    let proto = obj.__proto__;
+    let proto = Object.getPrototypeOf(obj);
     while (proto) {
       let meta = Meta.proto2props.get(proto);
       Object.assign(ret, meta);
-      proto = proto.__proto__;
+      proto = Object.getPrototypeOf(proto);
     }
     return ret;
   }
