@@ -393,6 +393,11 @@ public:
         onWillInsertValueEvent_ = std::move(func);
     }
 
+    bool HasOnWillInsertValueEvent()
+    {
+        return onWillInsertValueEvent_ ? true : false;
+    }
+
     bool FireOnWillInsertValueEvent(const InsertValueInfo& info)
     {
         if (onWillInsertValueEvent_) {
@@ -406,6 +411,11 @@ public:
     void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func)
     {
         onDidInsertValueEvent_ = std::move(func);
+    }
+
+    bool HasOnDidInsertValueEvent()
+    {
+        return onDidInsertValueEvent_ ? true : false;
     }
 
     void FireOnDidInsertValueEvent(const InsertValueInfo& info)
@@ -422,6 +432,11 @@ public:
         onWillDeleteEvent_ = std::move(func);
     }
 
+    bool HasOnWillDeleteValueEvent()
+    {
+        return onWillDeleteEvent_ ? true : false;
+    }
+
     bool FireOnWillDeleteEvent(const DeleteValueInfo& info)
     {
         if (onWillDeleteEvent_) {
@@ -435,6 +450,11 @@ public:
     void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func)
     {
         onDidDeleteEvent_ = std::move(func);
+    }
+
+    bool HasOnDidDeleteValueEvent()
+    {
+        return onDidDeleteEvent_ ? true : false;
     }
 
     void FireOnDidDeleteValueEvent(const DeleteValueInfo& info)
