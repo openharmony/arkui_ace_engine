@@ -335,7 +335,7 @@ abstract class ViewPU extends PUV2ViewBase
     return result;
   }
 
-  public getRecycleDump(): string {
+  public __getRecycleDump_internal(): string {
     return this.recycleManager_?.getDumpInfo();
   }
 

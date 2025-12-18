@@ -394,7 +394,9 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   protected abstract debugInfoStateVars(): string;
 
-  public abstract getRecycleDump(): string;
+  public __getRecycleDump_internal(): string {
+    return '';
+  }
 
   public isViewActive(): boolean {
     return this.activeCount_ > 0;
@@ -851,7 +853,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
           this.sendStateInfo('{}');
           break;
         case 'RecyclePool':
-          DumpLog.addDesc('RecyclePool: ' + this.getRecycleDump());
+          DumpLog.addDesc('RecyclePool: ' + this.__getRecycleDump_internal());
           break;
         default:
           DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
