@@ -887,6 +887,51 @@ void ResetNavBackButtonText(ArkUINodeHandle node)
         "navigation.backButtonIcon.accessibilityText");
 }
 
+void HideDivider(ArkUINodeHandle node)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::UpdateDividerVisibility(frameNode, false);
+}
+
+void SetDividerColor(ArkUINodeHandle node, ArkUI_CharPtr colorStr, ArkUI_VoidPtr colorRes, ArkUI_Bool definedColor)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!definedColor) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DefinedDividerColor, false, frameNode);
+        return;
+    }
+    Color color = Color::FromString(colorStr);
+    auto resource = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRes));
+    NavigationModelNG::UpdateDividerColor(frameNode, color, resource);
+}
+
+void SetDividerStartMargin(ArkUINodeHandle node, ArkUI_CharPtr startStr, ArkUI_VoidPtr startRes)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension start = StringUtils::StringToCalcDimension(startStr);
+    auto resource = AceType::Claim(reinterpret_cast<ResourceObject*>(startRes));
+    NavigationModelNG::UpdateDividerStartMargin(frameNode, start, resource);
+}
+
+void SetDividerEndMargin(ArkUINodeHandle node, ArkUI_CharPtr endStr, ArkUI_VoidPtr endRes)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension end = StringUtils::StringToCalcDimension(endStr);
+    auto resource = AceType::Claim(reinterpret_cast<ResourceObject*>(endRes));
+    NavigationModelNG::UpdateDividerEndMargin(frameNode, end, resource);
+}
+
+void ResetDividerStyle(ArkUINodeHandle node)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::ResetDividerStyle(frameNode);
+}
+
 namespace NodeModifier {
 const ArkUINavigationModifier* GetNavigationModifier()
 {
@@ -961,6 +1006,11 @@ const ArkUINavigationModifier* GetNavigationModifier()
         .setBeforeCreateLayoutWrapperCallBack = SetBeforeCreateLayoutWrapperCallBack,
         .setNavBackButtonText = SetNavBackButtonText,
         .resetNavBackButtonText = ResetNavBackButtonText,
+        .hideDivider = HideDivider,
+        .setDividerColor = SetDividerColor,
+        .setDividerStartMargin = SetDividerStartMargin,
+        .setDividerEndMargin = SetDividerEndMargin,
+        .resetDividerStyle = ResetDividerStyle,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

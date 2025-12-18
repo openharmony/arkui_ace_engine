@@ -27197,6 +27197,28 @@ class NavDestinationSystemBarStyleModifier extends ModifierWithKey {
 }
 NavDestinationSystemBarStyleModifier.identity = Symbol('systemBarStyle');
 
+class NavigationDividerStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().navigation.resetDividerStyle(node);
+    } else {
+      getUINativeModule().navigation.setDividerStyle(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return (this.value.color !== this.stageValue.color) ||
+      (this.value.startMargin !== this.stageValue.startMargin) ||
+      (this.value.endMargin !== this.stageValue.endMargin);
+  }
+}
+
+NavigationDividerStyleModifier.identity = Symbol('DividerStyle');
+
 class NavDestinationOnShownModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -28330,6 +28352,11 @@ class ArkNavigationComponent extends ArkComponent {
 
   systemBarStyle(style) {
     modifierWithKey(this._modifiersWithKeys, NavigationSystemBarStyleModifier.identity, NavigationSystemBarStyleModifier, style);
+    return this;
+  }
+
+  divider(style) {
+    modifierWithKey(this._modifiersWithKeys, NavigationDividerStyleModifier.identitiy, NavigationDividerStyleModifier, style);
     return this;
   }
 }

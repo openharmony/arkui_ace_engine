@@ -22,13 +22,19 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 
 constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 240.0_vp;
-
+struct NavigationDividerStyle {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DividerStartMargin, CalcDimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DividerEndMargin, CalcDimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DividerColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DefinedDividerColor, bool);
+};
 class ACE_EXPORT NavigationLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(NavigationLayoutProperty, LayoutProperty);
 
@@ -104,6 +110,16 @@ public:
             json->PutExtAttr("backButtonIcon", GetImageSourceValue().GetSrc().c_str(), filter);
         }
         json->PutExtAttr("enableModeChangeAnimation", GetEnableModeChangeAnimation().value_or(true), filter);
+        auto divider = JsonUtil::Create();
+        auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+        CHECK_NULL_VOID(navigationGroupNode);
+        auto theme = NavigationGetTheme(navigationGroupNode->GetThemeScopeId());
+        CHECK_NULL_VOID(theme);
+        auto dividerColor = theme->GetNavigationDividerColor();
+        divider->Put("color", GetDividerColor().value_or(dividerColor).ToString().c_str());
+        divider->Put("startMargin", GetDividerStartMargin().value_or(CalcDimension(0.0f)).ToString().c_str());
+        divider->Put("endMargin", GetDividerEndMargin().value_or(CalcDimension(0.0f)).ToString().c_str());
+        json->Put("divider", divider);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavigationMode, NavigationMode, PROPERTY_UPDATE_MEASURE);
@@ -120,6 +136,12 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageSource, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PixelMap, RefPtr<PixelMap>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableToolBarAdaptation, bool, PROPERTY_UPDATE_MEASURE);
+    // divider style
+    ACE_DEFINE_PROPERTY_GROUP(DividerStyle, NavigationDividerStyle);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DividerStyle, DividerStartMargin, CalcDimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DividerStyle, DividerEndMargin, CalcDimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DividerStyle, DividerColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DividerStyle, DefinedDividerColor, bool, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG
