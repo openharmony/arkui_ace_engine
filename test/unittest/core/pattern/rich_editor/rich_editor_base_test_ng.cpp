@@ -934,6 +934,25 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel022, TestSize.Level0)
 }
 
 /**
+ * @tc.name: RichEditorModel023
+ * @tc.desc: test IsStopBackPress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, RichEditorModel023, TestSize.Level0)
+{
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RichEditorModelNG::SetStopBackPress(richEditorNode, true);
+    EXPECT_TRUE(richEditorPattern->IsStopBackPress());
+
+    RichEditorModelNG::SetStopBackPress(richEditorNode, false);
+    EXPECT_FALSE(richEditorPattern->IsStopBackPress());
+}
+
+/**
  * @tc.name: CreateImageSourceInfo001
  * @tc.desc: test CreateImageSourceInfo
  * @tc.type: FUNC
