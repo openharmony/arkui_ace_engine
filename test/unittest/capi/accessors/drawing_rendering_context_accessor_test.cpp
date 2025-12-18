@@ -214,7 +214,7 @@ HWTEST_F(DrawingRenderingContextAccessorTest, DISABLED_getCanvasTest, TestSize.L
     peerImpl->SetCanvasPattern(mockPatternKeeper_);
     ASSERT_NE(holder->rsCallback, nullptr);
     std::shared_ptr<RSCanvas> rsCanvas = std::make_shared<RSCanvas>();
-    holder->rsCallback(rsCanvas.get(), DEFAULT_VALUE, DEFAULT_VALUE);
+    holder->rsCallback(rsCanvas, DEFAULT_VALUE, DEFAULT_VALUE);
 
     Ark_drawing_Canvas result = accessor_->getCanvas(peer_);
 

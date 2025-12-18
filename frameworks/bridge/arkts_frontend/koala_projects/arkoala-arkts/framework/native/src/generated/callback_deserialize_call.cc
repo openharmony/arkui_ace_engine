@@ -4058,6 +4058,36 @@ void deserializeAndCallSyncCallback_Union_CustomBuilder_DragItemInfo_Void(Ark_VM
     Ark_Union_CustomBuilder_DragItemInfo value = static_cast<Ark_Union_CustomBuilder_DragItemInfo>(valueTmpBuf);
     callSyncMethod(vmContext, resourceId, value);
 }
+void deserializeAndCallCallback_Union_DrawingRenderingContext_Undefined_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_DrawingRenderingContext value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Union_DrawingRenderingContext_Undefined_Void))));
+    thisDeserializer.readPointer();
+    const auto value0TmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_DrawingRenderingContext value0TmpBuf = {};
+    value0TmpBuf.tag = value0TmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((value0TmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        value0TmpBuf.value = static_cast<Ark_DrawingRenderingContext>(DrawingRenderingContext_serializer::read(thisDeserializer));
+    }
+    Opt_DrawingRenderingContext value0 = value0TmpBuf;
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_Union_DrawingRenderingContext_Undefined_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_DrawingRenderingContext value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Union_DrawingRenderingContext_Undefined_Void))));
+    const auto value0TmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_DrawingRenderingContext value0TmpBuf = {};
+    value0TmpBuf.tag = value0TmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((value0TmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        value0TmpBuf.value = static_cast<Ark_DrawingRenderingContext>(DrawingRenderingContext_serializer::read(thisDeserializer));
+    }
+    Opt_DrawingRenderingContext value0 = value0TmpBuf;
+    callSyncMethod(vmContext, resourceId, value0);
+}
 void deserializeAndCallCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -7402,6 +7432,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_Callback_Tuple_I32_I32_Void: return deserializeAndCallCallback_Tuple_I32_I32_Void(thisArray, thisLength);
         case Kind_Callback_UIExtensionProxy_Void: return deserializeAndCallCallback_UIExtensionProxy_Void(thisArray, thisLength);
         case Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void(thisArray, thisLength);
+        case Kind_Callback_Union_DrawingRenderingContext_Undefined_Void: return deserializeAndCallCallback_Union_DrawingRenderingContext_Undefined_Void(thisArray, thisLength);
         case Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return deserializeAndCallCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void(thisArray, thisLength);
         case Kind_Callback_VisibilityChangeReason_Void: return deserializeAndCallCallback_VisibilityChangeReason_Void(thisArray, thisLength);
         case Kind_Callback_Void: return deserializeAndCallCallback_Void(thisArray, thisLength);
@@ -7732,6 +7763,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Callback_Tuple_I32_I32_Void: return deserializeAndCallSyncCallback_Tuple_I32_I32_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_UIExtensionProxy_Void: return deserializeAndCallSyncCallback_UIExtensionProxy_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return deserializeAndCallSyncCallback_Union_CustomBuilder_DragItemInfo_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Union_DrawingRenderingContext_Undefined_Void: return deserializeAndCallSyncCallback_Union_DrawingRenderingContext_Undefined_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return deserializeAndCallSyncCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_VisibilityChangeReason_Void: return deserializeAndCallSyncCallback_VisibilityChangeReason_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Void: return deserializeAndCallSyncCallback_Void(vmContext, thisArray, thisLength);

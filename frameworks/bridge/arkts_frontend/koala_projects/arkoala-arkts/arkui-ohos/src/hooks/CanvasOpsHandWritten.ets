@@ -15,7 +15,7 @@
 
 import { SerializerBase, runtimeType, RuntimeType } from "@koalaui/interop"
 import { ArkUIGeneratedNativeModule } from "#components"
-import { ArkCanvasComponent, CanvasRenderingContext2D, DrawingRenderingContext, ImageAIOptions, ImageAnalyzerConfig } from "#generated"
+import { ArkCanvasComponent, CanvasRenderingContext2D, DrawingRenderingContext, ImageAIOptions, ImageAnalyzerConfig, CanvasParams } from "#generated"
 import { ImageAIOptions_serializer, VideoOptions_serializer } from "#generated"
 
 export class CanvasOpsHandWritten {
@@ -28,6 +28,35 @@ export class CanvasOpsHandWritten {
         let peerPtr = peer.peer.ptr
         const context_casted = context as (CanvasRenderingContext2D | DrawingRenderingContext | undefined);
         const imageAIOptions_casted = imageAIOptions as (ImageAIOptions | undefined);
+        if (imageAIOptions_casted !== undefined) {
+            const imageAIOptions = imageAIOptions_casted as ImageAIOptions;
+            let imageAIOptionsObj = ESValue.instantiateEmptyObject()
+            let types = imageAIOptions.types
+            if (types !== undefined) {
+                let typesObj = ESValue.instantiateEmptyArray()
+                for (let i = 0; i < types.length; i++) {
+                    typesObj.setProperty(i, Number(types[i]))
+                }
+                imageAIOptionsObj.setProperty('types', typesObj)
+            }
+            let aiController = imageAIOptions.aiController
+            if ((aiController !== undefined) && (aiController instanceof ESValue)) {
+                imageAIOptionsObj.setProperty('aiController', aiController)
+            }
+            const global = ESValue.getGlobal()
+            const imageAIOptionsFunc = global.getProperty('wrapCanvasImageAIOptions')
+            if (!(imageAIOptionsFunc.isNull() || imageAIOptionsFunc.isUndefined())) {
+                imageAIOptionsFunc.invoke(ESObject.wrap(peerPtr), imageAIOptionsObj)
+            }
+        }
+    }
+    static hookSetCanvasOptionsImpl(component: ArkCanvasComponent, params: CanvasParams): void {
+        const peer = component.getPeer();
+        if (peer === undefined) {
+            return;
+        }
+        let peerPtr = peer.peer.ptr
+        const imageAIOptions_casted = params.imageAIOptions as (ImageAIOptions | undefined);
         if (imageAIOptions_casted !== undefined) {
             const imageAIOptions = imageAIOptions_casted as ImageAIOptions;
             let imageAIOptionsObj = ESValue.instantiateEmptyObject()

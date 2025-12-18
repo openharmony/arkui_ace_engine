@@ -21,7 +21,7 @@ import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkCanvasPeer, CanvasAttribute } from "./component/canvas"
+import { ArkCanvasPeer, DrawingRenderingContext, CanvasAttribute } from "./component/canvas"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { VoidCallback } from "./component/units"
@@ -38,7 +38,7 @@ export class CanvasModifier extends CommonMethodModifier implements CanvasAttrib
     applyDisabledAttribute(instance: CanvasAttribute): void { }
     applySelectedAttribute(instance: CanvasAttribute): void { }
     _onReady_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onReady_0_0value?: VoidCallback | undefined
+    _onReady_0_0value?: VoidCallback | ((value0: DrawingRenderingContext | undefined) => void) | undefined
     _enableAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableAnalyzer_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
@@ -49,7 +49,7 @@ export class CanvasModifier extends CommonMethodModifier implements CanvasAttrib
         {
             switch (this._onReady_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnReadyAttribute((this._onReady_0_0value as VoidCallback | undefined));
+                    peer.setOnReadyAttribute((this._onReady_0_0value as VoidCallback | ((value0: DrawingRenderingContext | undefined) => void) | undefined));
                     this._onReady_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -59,7 +59,7 @@ export class CanvasModifier extends CommonMethodModifier implements CanvasAttrib
                 }
                 default: {
                     this._onReady_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnReadyAttribute((undefined as VoidCallback | undefined));
+                    peer.setOnReadyAttribute((undefined as VoidCallback | ((value0: DrawingRenderingContext | undefined) => void) | undefined));
                 }
             }
         }
@@ -94,7 +94,7 @@ export class CanvasModifier extends CommonMethodModifier implements CanvasAttrib
                     break;
                 }
                 default: {
-                    this.onReady((undefined as VoidCallback | undefined));
+                    this.onReady((undefined as VoidCallback | ((value0: DrawingRenderingContext | undefined) => void) | undefined));
                 }
             }
         }
@@ -112,7 +112,7 @@ export class CanvasModifier extends CommonMethodModifier implements CanvasAttrib
             }
         }
     }
-    onReady(value: VoidCallback | undefined): this {
+    onReady(value: VoidCallback | ((value0: DrawingRenderingContext | undefined) => void) | undefined): this {
         if (((this._onReady_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onReady_0_flag = AttributeUpdaterFlag.UPDATE

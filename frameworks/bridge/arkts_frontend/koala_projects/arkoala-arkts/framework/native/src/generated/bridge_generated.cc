@@ -1259,7 +1259,7 @@ Ark_NativePointer impl_Canvas_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getCanvasModifier()->construct(id, flags);
 }
 KOALA_INTEROP_DIRECT_2(Canvas_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
-void impl_CanvasInterface_setCanvasOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_CanvasInterface_setCanvasOptions0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto contextValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -1288,20 +1288,27 @@ void impl_CanvasInterface_setCanvasOptions(Ark_NativePointer thisPtr, KSerialize
             imageAIOptionsValueTempTmpBuf.value = ImageAIOptions_serializer::read(thisDeserializer);
         }
         Opt_ImageAIOptions imageAIOptionsValueTemp = imageAIOptionsValueTempTmpBuf;;
-        GetNodeModifiers()->getCanvasModifier()->setCanvasOptions(self, static_cast<Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext*>(&contextValueTemp), static_cast<Opt_ImageAIOptions*>(&imageAIOptionsValueTemp));
+        GetNodeModifiers()->getCanvasModifier()->setCanvasOptions0(self, static_cast<Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext*>(&contextValueTemp), static_cast<Opt_ImageAIOptions*>(&imageAIOptionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(CanvasInterface_setCanvasOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(CanvasInterface_setCanvasOptions0, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_CanvasInterface_setCanvasOptions1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_CanvasParams paramsValueTemp = CanvasParams_serializer::read(thisDeserializer);;
+        GetNodeModifiers()->getCanvasModifier()->setCanvasOptions1(self, static_cast<Ark_CanvasParams*>(&paramsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(CanvasInterface_setCanvasOptions1, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CanvasAttribute_setOnReady(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_VoidCallback valueValueTempTmpBuf = {};
+        Opt_Callback_Union_DrawingRenderingContext_Undefined_Void valueValueTempTmpBuf = {};
         valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_VoidCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_VoidCallback))))};
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_DrawingRenderingContext value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Union_DrawingRenderingContext_Undefined_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_DrawingRenderingContext value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Union_DrawingRenderingContext_Undefined_Void))))};
         }
-        Opt_VoidCallback valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getCanvasModifier()->setOnReady(self, static_cast<Opt_VoidCallback*>(&valueValueTemp));
+        Opt_Callback_Union_DrawingRenderingContext_Undefined_Void valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getCanvasModifier()->setOnReady(self, static_cast<Opt_Callback_Union_DrawingRenderingContext_Undefined_Void*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CanvasAttribute_setOnReady, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CanvasAttribute_setEnableAnalyzer(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -29005,6 +29012,18 @@ void impl_CanvasRenderingContext2D_offDetach(Ark_NativePointer thisPtr, KSeriali
         GetAccessors()->getCanvasRenderingContext2DAccessor()->offDetach(self, static_cast<Opt_VoidCallback*>(&callback_ValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CanvasRenderingContext2D_offDetach, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_CanvasRenderingContext2D_getContext2DFromDrawingContext(Ark_NativePointer drawingContext, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_RenderingContextOptions optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            optionsValueTempTmpBuf.value = RenderingContextOptions_serializer::read(thisDeserializer);
+        }
+        Opt_RenderingContextOptions optionsValueTemp = optionsValueTempTmpBuf;;
+        return GetAccessors()->getCanvasRenderingContext2DAccessor()->getContext2DFromDrawingContext(static_cast<Ark_DrawingRenderingContext>(drawingContext), static_cast<Opt_RenderingContextOptions*>(&optionsValueTemp));
+}
+KOALA_INTEROP_DIRECT_3(CanvasRenderingContext2D_getContext2DFromDrawingContext, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_Int32 impl_CanvasRenderingContext2D_getHeight(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderingContext2D self = reinterpret_cast<Ark_CanvasRenderingContext2D>(thisPtr);
         return GetAccessors()->getCanvasRenderingContext2DAccessor()->getHeight(self);

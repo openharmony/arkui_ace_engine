@@ -87,6 +87,10 @@ const std::vector<std::pair<QualityType, float>> OPT_IMAGE_QUALITY_TEST_PLAN {
     { Converter::ArkValue<QualityType>(10.0f), IMAGE_QUALITY_DEFAULT },
     { Converter::ArkValue<QualityType>(Ark_Empty()), IMAGE_QUALITY_DEFAULT },
 };
+const std::vector<std::pair<CanvasUnit, bool>> GET_CONTEXT_2D_PLAN {
+    { CanvasUnit::DEFAULT, true},
+    { CanvasUnit::PX, false },
+};
 } // namespace
 
 class CanvasRenderingContext2DAccessorTest
@@ -504,6 +508,34 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_toDataURLTest, TestSize.
             EXPECT_TRUE(holder->isCalled);
             holder->TearDown();
         }
+    }
+}
+
+/**
+ * @tc.name: getContext2DFromDrawingContextTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRenderingContext2DAccessorTest, DISABLED_getContext2DFromDrawingContextTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->getContext2DFromDrawingContext, nullptr);
+    for (auto& [unit, antialias] : GET_CONTEXT_2D_PLAN) {
+        holder->SetUp();
+        auto drawContextImpl = new DrawingRenderingContextPeerImpl();
+        drawContextImpl->SetUnit(unit);
+        auto arkDrawContext = reinterpret_cast<Ark_DrawingRenderingContext>(drawContextImpl);
+        RenderingContextOptions options;
+        options.antialias = antialias;
+        auto optRenderingContextOptions = Converter::ArkValue<Opt_RenderingContextOptions>(options);
+        auto context2d = accessor_->getContext2DFromDrawingContext(arkDrawContext, optRenderingContextOptions);
+        auto context2dImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(context2d);
+
+        EXPECT_EQ(context2dImpl->GetUnit(), unit);
+        EXPECT_EQ(context2dImpl->anti_, antialias);
+        EXPECT_EQ(holder->antialias, antialias);
+        EXPECT_TRUE(holder->isCalled);
+        holder->TearDown();
     }
 }
 } // namespace OHOS::Ace::NG

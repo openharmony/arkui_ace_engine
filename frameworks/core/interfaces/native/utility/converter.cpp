@@ -2191,6 +2191,17 @@ RefPtr<PixelMap> Convert(const Ark_image_PixelMap& src)
 }
 
 template<>
+RenderingContextOptions Convert(const Ark_RenderingContextOptions& src)
+{
+    RenderingContextOptions result;
+    auto antialiasOpt = Converter::OptConvert<Ark_Boolean>(src.antialias);
+    if (antialiasOpt) {
+        result.antialias = antialiasOpt.value();
+    }
+    return result;
+}
+
+template<>
 void AssignCast(std::optional<float>& dst, const Ark_String& src)
 {
     auto value = Convert<std::string>(src);

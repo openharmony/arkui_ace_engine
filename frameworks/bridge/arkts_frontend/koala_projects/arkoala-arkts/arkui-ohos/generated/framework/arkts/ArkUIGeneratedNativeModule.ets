@@ -169,7 +169,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _Canvas_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
-    native static _CanvasInterface_setCanvasOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _CanvasInterface_setCanvasOptions0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _CanvasInterface_setCanvasOptions1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CanvasAttribute_setOnReady(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -3751,6 +3753,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CanvasRenderingContext2D_onDetach(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CanvasRenderingContext2D_offDetach(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _CanvasRenderingContext2D_getContext2DFromDrawingContext(drawingContext: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Quick
     native static _CanvasRenderingContext2D_getHeight(ptr: KPointer): double
     @ani.unsafe.Quick

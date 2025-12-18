@@ -82,7 +82,7 @@ void JSCanvas::Create(const JSCallbackInfo& info)
         if (jsContext) {
             if (jsContext->IsBuiltIn()) {
                 JSException::Throw(ERROR_CODE_CANVAS_ERROR_CONTEXT, "%s",
-                    "The context created in system cannot be bound to other canvas component");
+                    "The context created in system cannot be bound to other canvas component.");
             }
             jsContext->SetInstanceId(Container::CurrentId());
             jsContext->SetCanvasPattern(pattern);
