@@ -10941,6 +10941,7 @@ class ArkRichEditorComponent extends ArkComponent {
     arkValue.supportAvoidance = options?.supportAvoidance;
     modifierWithKey(this._modifiersWithKeys, RichEditorCustomKeyboardModifier.identity,
       RichEditorCustomKeyboardModifier, arkValue);
+    return this;
   }
   onEditingChange(callback) {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnEditingChangeModifier.identity, RichEditorOnEditingChangeModifier, callback);
@@ -12407,6 +12408,7 @@ class ArkSearchComponent extends ArkComponent {
     arkValue.supportAvoidance = options?.supportAvoidance;
     modifierWithKey(this._modifiersWithKeys, SearchCustomKeyboardModifier.identity,
       SearchCustomKeyboardModifier, arkValue);
+    return this;
   }
   showUnit(event) {
     throw new Error('Method not implemented.');
@@ -17202,6 +17204,7 @@ class ArkTextAreaComponent extends ArkComponent {
     arkValue.supportAvoidance = options?.supportAvoidance;
     modifierWithKey(this._modifiersWithKeys, TextAreaCustomKeyboardModifier.identity,
       TextAreaCustomKeyboardModifier, arkValue);
+    return this;
   }
   decoration(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaDecorationModifier.identity, TextAreaDecorationModifier, value);
@@ -19411,6 +19414,7 @@ class ArkTextInputComponent extends ArkComponent {
     arkValue.supportAvoidance = options?.supportAvoidance;
     modifierWithKey(this._modifiersWithKeys, TextInputCustomKeyboardModifier.identity,
       TextInputCustomKeyboardModifier, arkValue);
+    return this;
   }
   decoration(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputDecorationModifier.identity, TextInputDecorationModifier, value);
