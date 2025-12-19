@@ -152,6 +152,7 @@ Ark_TransitionEffect AnimationImpl(Ark_TransitionEffect peer,
     AnimationOption option = Converter::Convert<AnimationOption>(*value);
     auto refOpt = std::make_shared<AnimationOption>(option);
     peer->handler->SetAnimationOption(refOpt);
+    peer->IncRefCount();
     return peer;
 }
 Ark_TransitionEffect CombineImpl(Ark_TransitionEffect peer,
@@ -165,6 +166,7 @@ Ark_TransitionEffect CombineImpl(Ark_TransitionEffect peer,
     }
     const auto nextPeer = transitionEffect;
     lastEffect->handler->SetNext(nextPeer->handler);
+    peer->IncRefCount();
     return peer;
 }
 Ark_TransitionEffect GetIDENTITYImpl()

@@ -57,6 +57,7 @@ Ark_BottomTabBarStyle LabelStyleImpl(Ark_BottomTabBarStyle peer,
 {
     CHECK_NULL_RETURN(peer, peer);
     peer->labelStyle = Converter::OptConvertPtr<LabelStyle>(style);
+    peer->IncRefCount();
     return peer;
 }
 Ark_BottomTabBarStyle PaddingImpl(Ark_BottomTabBarStyle peer,
@@ -81,6 +82,7 @@ Ark_BottomTabBarStyle PaddingImpl(Ark_BottomTabBarStyle peer,
     Validator::ValidatePaddingProperty(optPadding);
     peer->padding = optPadding;
     peer->useLocalizedPadding = useLocalizedPadding;
+    peer->IncRefCount();
     return peer;
 }
 Ark_BottomTabBarStyle LayoutModeImpl(Ark_BottomTabBarStyle peer,
@@ -88,6 +90,7 @@ Ark_BottomTabBarStyle LayoutModeImpl(Ark_BottomTabBarStyle peer,
 {
     CHECK_NULL_RETURN(peer, peer);
     peer->layoutMode = Converter::OptConvert<LayoutMode>(value);
+    peer->IncRefCount();
     return peer;
 }
 Ark_BottomTabBarStyle VerticalAlignImpl(Ark_BottomTabBarStyle peer,
@@ -95,6 +98,7 @@ Ark_BottomTabBarStyle VerticalAlignImpl(Ark_BottomTabBarStyle peer,
 {
     CHECK_NULL_RETURN(peer, peer);
     peer->verticalAlign = Converter::OptConvert<FlexAlign>(value);
+    peer->IncRefCount();
     return peer;
 }
 Ark_BottomTabBarStyle SymmetricExtensibleImpl(Ark_BottomTabBarStyle peer,
@@ -102,6 +106,7 @@ Ark_BottomTabBarStyle SymmetricExtensibleImpl(Ark_BottomTabBarStyle peer,
 {
     CHECK_NULL_RETURN(peer, peer);
     peer->symmetricExtensible = Converter::OptConvert<bool>(value);
+    peer->IncRefCount();
     return peer;
 }
 Ark_BottomTabBarStyle IdImpl(Ark_BottomTabBarStyle peer,
@@ -109,6 +114,7 @@ Ark_BottomTabBarStyle IdImpl(Ark_BottomTabBarStyle peer,
 {
     CHECK_NULL_RETURN(peer, peer);
     peer->id = Converter::OptConvertPtr<std::string>(value);
+    peer->IncRefCount();
     return peer;
 }
 Ark_BottomTabBarStyle IconStyleImpl(Ark_BottomTabBarStyle peer,
@@ -116,6 +122,7 @@ Ark_BottomTabBarStyle IconStyleImpl(Ark_BottomTabBarStyle peer,
 {
     CHECK_NULL_RETURN(peer, peer);
     peer->iconStyle = Converter::OptConvertPtr<IconStyle>(style);
+    peer->IncRefCount();
     return peer;
 }
 } // BottomTabBarStyleAccessor
