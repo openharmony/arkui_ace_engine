@@ -6230,14 +6230,14 @@ ArkUI_MenuPolicy OH_ArkUI_SelectionOptions_GetMenuPolicy(ArkUI_SelectionOptions*
 /**
  * @brief Defines the text menu item for edit menu item.
  *
- * @since 23
+ * @since 22
  */
 typedef struct ArkUI_TextMenuItem ArkUI_TextMenuItem;
 /**
  * @brief Create an object of the text edit menu item.
  *
  * @return A pointer to the ArkUI_TextMenuItem.
- * @since 23
+ * @since 22
  */
 ArkUI_TextMenuItem* OH_ArkUI_TextMenuItem_Create();
 
@@ -6245,7 +6245,7 @@ ArkUI_TextMenuItem* OH_ArkUI_TextMenuItem_Create();
  * @brief Dispose an object of the text edit menu options.
  *
  * @param textMenuItem Pointer to the ArkUI_TextMenuItem object to be disposed.
- * @since 23
+ * @since 22
  */
 void OH_ArkUI_TextMenuItem_Dispose(ArkUI_TextMenuItem* textMenuItem);
 
@@ -6257,8 +6257,8 @@ void OH_ArkUI_TextMenuItem_Dispose(ArkUI_TextMenuItem* textMenuItem);
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 23
-*/
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetContent(ArkUI_TextMenuItem* item, const char* content);
 
 /**
@@ -6276,8 +6276,8 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetContent(ArkUI_TextMenuItem* item, const
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the node, buffer or writeLength is null.
  *         {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} If the buffer size is less than the minimum buffer size.
- * @since 23
-*/
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetContent(const ArkUI_TextMenuItem* item, char* buffer, int32_t bufferSize,
     int32_t* writeLength);
 
@@ -6289,8 +6289,8 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetContent(const ArkUI_TextMenuItem* item,
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 23
-*/
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetIcon(ArkUI_TextMenuItem* item, const char* icon);
 
 /**
@@ -6308,8 +6308,8 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetIcon(ArkUI_TextMenuItem* item, const ch
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the node, buffer or writeLength is null.
  *         {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} If the buffer size is less than the minimum buffer size.
- * @since 23
-*/
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetIcon(const ArkUI_TextMenuItem* item, char* buffer, int32_t bufferSize,
     int32_t* writeLength);
 
@@ -6322,8 +6322,8 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetIcon(const ArkUI_TextMenuItem* item, ch
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 23
-*/
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetLabelInfo(ArkUI_TextMenuItem* item, const char* labelInfo);
 
 /**
@@ -6341,8 +6341,8 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetLabelInfo(ArkUI_TextMenuItem* item, con
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the node, buffer or writeLength is null.
  *         {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} If the buffer size is less than the minimum buffer size.
- * @since 23
-*/
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetLabelInfo(const ArkUI_TextMenuItem* item, char* buffer, int32_t bufferSize,
     int32_t* writeLength);
 
@@ -6354,8 +6354,8 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetLabelInfo(const ArkUI_TextMenuItem* ite
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 23
-*/
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetId(ArkUI_TextMenuItem* item, int32_t id);
 
 /**
@@ -6366,14 +6366,14 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItem_SetId(ArkUI_TextMenuItem* item, int32_t id
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 23
-*/
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextMenuItem_GetId(const ArkUI_TextMenuItem* item, int32_t* id);
 
 /**
  * @brief Defines text menu item array.
  *
- * @since 23
+ * @since 22
  */
 typedef struct ArkUI_TextMenuItemArray ArkUI_TextMenuItemArray;
 
@@ -6385,8 +6385,8 @@ typedef struct ArkUI_TextMenuItemArray ArkUI_TextMenuItemArray;
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 23
-*/
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_GetSize(ArkUI_TextMenuItemArray* items, int32_t* size);
 
 /**
@@ -6398,8 +6398,8 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_GetSize(ArkUI_TextMenuItemArray* item
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 23
-*/
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_GetItem(ArkUI_TextMenuItemArray* items, int32_t index,
     ArkUI_TextMenuItem** item);
 
@@ -6412,8 +6412,8 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_GetItem(ArkUI_TextMenuItemArray* item
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 23
-*/
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Insert(ArkUI_TextMenuItemArray* items, ArkUI_TextMenuItem* item,
     int32_t index);
 
@@ -6425,7 +6425,7 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Insert(ArkUI_TextMenuItemArray* items
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 23
+ * @since 22
  */
 ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Erase(ArkUI_TextMenuItemArray* items, int32_t index);
 
@@ -6435,133 +6435,102 @@ ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Erase(ArkUI_TextMenuItemArray* items,
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 23
+ * @since 22
  */
 ArkUI_ErrorCode OH_ArkUI_TextMenuItemArray_Clear(ArkUI_TextMenuItemArray* items);
 
 /**
  * @brief Enumerates the text menu item id.
  *
- * @since 23
+ * @since 22
  */
 typedef enum {
-    /** Indicates the TextMenuItemId to copy and delete the currently selected text. */
+    /**
+     * Indicates the TextMenuItemId to copy and delete the currently selected text.
+     */
     ARKUI_TEXT_MENU_ITEM_ID_CUT = 0,
 
     /**
      * Indicates the TextMenuItemId to copy the currently selected text to the clipboard.
-     * since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_COPY = 1,
 
     /**
      * Indicates the TextMenuItemId to copy the current contents of the clipboard into the text view.
-     *
-     * @since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_PASTE = 2,
 
     /**
      * Indicates the TextMenuItemId to select all text in a text view.
-     *
-     * @since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_SELECT_ALL = 3,
 
     /**
      * Indicates the TextMenuItemId for collaboration service menu items.
-     *
-     * @since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_COLLABORATION_SERVICE = 4,
 
     /**
      * Indicates the TextMenuItemId to recognize the text in the picture and input it into the text view.
-     *
-     * @since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_CAMERA_INPUT = 5,
 
     /**
      * Indicates the TextMenuItemId to help with text creation by invoking large models.
-     *
-     * @since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_AI_WRITER = 6,
 
     /**
      * Indicates the TextMenuItemId to translate the selected content.
-     *
-     * @since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_TRANSLATE = 7,
 
     /**
      * Indicates the TextMenuItemId to search the selected content.
-     *
-     * @since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_SEARCH = 8,
 
     /**
      * Indicates the TextMenuItemId to share the selected content.
-     *
-     * @since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_SHARE = 9,
 
     /**
      * Indicates the TextMenuItemId to open url.
-     *
-     * @since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_URL = 10,
 
     /**
      * Indicates the TextMenuItemId to open email.
-     *
-     * @since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_EMAIL = 11,
 
     /**
      * Indicates the TextMenuItemId to call the phone number.
-     *
-     * @since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_PHONE_NUMBER = 12,
 
     /**
      * Indicates the TextMenuItemId to open map.
-     *
-     * @since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_ADDRESS = 13,
 
     /**
      * Indicates the TextMenuItemId to open calendar.
-     *
-     * @since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_DATA_TIME = 14,
 
     /**
      * Indicates the TextMenuItemId for asking AI.
-     *
-     * @since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_ASK_AI = 15,
 
     /**
      * Inclusive begin of app-reserved ID range.
-     *
-     * @since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_APP_RESERVED_BEGIN = 10000,
     /**
      * Inclusive end of app-reserved ID range.
-     *
-     * @since 23
      */
     ARKUI_TEXT_MENU_ITEM_ID_APP_RESERVED_END = 20000,
 } ArkUI_TextMenuItemId;
@@ -6569,14 +6538,14 @@ typedef enum {
 /**
  * @brief Defines the text menu item for edit menu options.
  *
- * @since 23
+ * @since 22
  */
 typedef struct ArkUI_TextEditMenuOptions ArkUI_TextEditMenuOptions;
 /**
  * @brief Create an object of the text edit menu options.
  *
  * @return A pointer to the ArkUI_TextEditMenuOptions.
- * @since 23
+ * @since 22
  */
 ArkUI_TextEditMenuOptions* OH_ArkUI_TextEditMenuOptions_Create();
 
@@ -6584,7 +6553,7 @@ ArkUI_TextEditMenuOptions* OH_ArkUI_TextEditMenuOptions_Create();
  * @brief Dispose an object of the text edit menu options.
  *
  * @param editMenuOptions Pointer to the ArkUI_TextEditMenuOptions object to be disposed.
- * @since 23
+ * @since 22
  */
 void OH_ArkUI_TextEditMenuOptions_Dispose(ArkUI_TextEditMenuOptions* editMenuOptions);
 
@@ -6596,7 +6565,7 @@ void OH_ArkUI_TextEditMenuOptions_Dispose(ArkUI_TextEditMenuOptions* editMenuOpt
  *     {@link OH_ArkUI_TextMenuItemArray_Erase}, or similar APIs.
  *     The developer must not free the array instance.
  * @param userData User defined data.
- * @since 23
+ * @since 22
  */
 typedef void (*ArkUI_TextCreateMenuCallback)(
     ArkUI_TextMenuItemArray*    items,
@@ -6611,7 +6580,7 @@ typedef void (*ArkUI_TextCreateMenuCallback)(
  *     {@link OH_ArkUI_TextMenuItemArray_Erase}, or similar APIs.
  *     The developer must not free the array instance.
  * @param userData User defined data.
- * @since 23
+ * @since 22
  */
 typedef void (*ArkUI_TextPrepareMenuCallback)(
     ArkUI_TextMenuItemArray*    items,
@@ -6626,7 +6595,7 @@ typedef void (*ArkUI_TextPrepareMenuCallback)(
  * @param end The end offset of the selected content.
  * @param userData The user data.
  * @return bool Return True, the event is consumed, false otherwise.
- * @since 23
+ * @since 22
  */
 typedef bool (*ArkUI_TextMenuItemClickCallback)(
     const ArkUI_TextMenuItem*    item,
@@ -6636,57 +6605,57 @@ typedef bool (*ArkUI_TextMenuItemClickCallback)(
 );
 
 /**
-* @brief Set the event to be called when text menu create.
-*
-* @param editMenuOptions Pointer to the ArkUI_TextEditMenuOptions object.
-* @param userData The user data.
-* @param cb The prepare callback function.
-* @return Returns the result code.
-*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
-*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
-* @since 23
-*/
+ * @brief Set the event to be called when text menu create.
+ *
+ * @param editMenuOptions Pointer to the ArkUI_TextEditMenuOptions object.
+ * @param userData The user data.
+ * @param cb The prepare callback function.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextEditMenuOptions_RegisterOnCreateMenuCallback(
     ArkUI_TextEditMenuOptions* editMenuOptions, void* userData, ArkUI_TextCreateMenuCallback cb);
 /**
-* @brief Set the event to be called when menu prepare.
-*
-* @param editMenuOptions Pointer to the ArkUI_TextEditMenuOptions object.
-* @param userData The user data.
-* @param cb The prepare callback function.
-* @return Returns the result code.
-*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
-*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
-* @since 23
-*/
+ * @brief Set the event to be called when menu prepare.
+ *
+ * @param editMenuOptions Pointer to the ArkUI_TextEditMenuOptions object.
+ * @param userData The user data.
+ * @param cb The prepare callback function.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextEditMenuOptions_RegisterOnPrepareMenuCallback(
     ArkUI_TextEditMenuOptions* editMenuOptions, void* userData, ArkUI_TextPrepareMenuCallback cb);
 
 /**
-* @brief Set the event to be called when menu item click.
-*
-* @param editMenuOptions Pointer to the ArkUI_TextEditMenuOptions object.
-* @param userData The user data.
-* @param cb The menu item click callback function.
-* @return Returns the result code.
-*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
-*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
-* @since 23
-*/
+ * @brief Set the event to be called when menu item click.
+ *
+ * @param editMenuOptions Pointer to the ArkUI_TextEditMenuOptions object.
+ * @param userData The user data.
+ * @param cb The menu item click callback function.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextEditMenuOptions_RegisterOnMenuItemClickCallback(
     ArkUI_TextEditMenuOptions* editMenuOptions, void* userData, ArkUI_TextMenuItemClickCallback cb);
 
 /**
  * @brief Defines the selection menu.
  *
- * @since 23
+ * @since 22
  */
 typedef struct ArkUI_TextSelectionMenuOptions ArkUI_TextSelectionMenuOptions;
 
 /**
  * @brief Enumerates the text span type.
  *
- * @since 23
+ * @since 22
  */
 typedef enum {
     /** The span type only contains text. */
@@ -6706,7 +6675,7 @@ typedef enum {
 /**
  * @brief Enumerates the text response type.
  *
- * @since 23
+ * @since 22
  */
 typedef enum {
     /** The response type of right click. */
@@ -6726,7 +6695,7 @@ typedef enum {
 /**
  * @brief Enumerates the haptic feedback mode.
  *
- * @since 23
+ * @since 22
  */
 typedef enum {
     /** No haptic feedback. */
@@ -6741,7 +6710,7 @@ typedef enum {
  * @brief Create an object of the text selection menu options.
  *
  * @return A pointer to the ArkUI_TextSelectionMenuOptions.
- * @since 23
+ * @since 22
  */
 ArkUI_TextSelectionMenuOptions* OH_ArkUI_TextSelectionMenuOptions_Create();
 
@@ -6749,7 +6718,7 @@ ArkUI_TextSelectionMenuOptions* OH_ArkUI_TextSelectionMenuOptions_Create();
  * @brief Dispose an object of the text selection menu options.
  *
  * @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object to be disposed.
- * @since 23
+ * @since 22
  */
 void OH_ArkUI_TextSelectionMenuOptions_Dispose(ArkUI_TextSelectionMenuOptions* selectionMenuOptions);
 
@@ -6761,7 +6730,7 @@ void OH_ArkUI_TextSelectionMenuOptions_Dispose(ArkUI_TextSelectionMenuOptions* s
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 23
+ * @since 22
  */
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetSpanType(ArkUI_TextSelectionMenuOptions* selectionMenuOptions,
     ArkUI_TextSpanType textSpanType);
@@ -6773,33 +6742,33 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetSpanType(ArkUI_TextSelectio
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 23
+ * @since 22
  */
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetSpanType(ArkUI_TextSelectionMenuOptions* selectionMenuOptions,
     ArkUI_TextSpanType* spanType);
 
 /**
-* @brief Set custom text menu node of text.
-*
-* @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
-* @param node The custom menu node.
-* @return Returns the result code.
-*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
-*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
-* @since 23
-*/
+ * @brief Set custom text menu node of text.
+ *
+ * @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
+ * @param node The custom menu node.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetContentNode(ArkUI_TextSelectionMenuOptions* selectionMenuOptions,
     ArkUI_NodeHandle node);
 /**
-* @brief Get custom text menu node of text.
-*
-* @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
-* @param node The custom menu node.
-* @return Returns the result code.
-*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
-*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
-* @since 23
-*/
+ * @brief Get custom text menu node of text.
+ *
+ * @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
+ * @param node The custom menu node.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetContentNode(ArkUI_TextSelectionMenuOptions* selectionMenuOptions,
     ArkUI_NodeHandle* node);
 
@@ -6811,7 +6780,7 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetContentNode(ArkUI_TextSelec
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 23
+ * @since 22
  */
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetResponseType(ArkUI_TextSelectionMenuOptions* selectionMenuOptions,
     ArkUI_TextResponseType responseType);
@@ -6823,7 +6792,7 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetResponseType(ArkUI_TextSele
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 23
+ * @since 22
  */
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetResponseType(ArkUI_TextSelectionMenuOptions* selectionMenuOptions,
     ArkUI_TextResponseType* responseType);
@@ -6836,7 +6805,7 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetResponseType(ArkUI_TextSele
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 23
+ * @since 22
  */
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetHapticFeedbackMode(
     ArkUI_TextSelectionMenuOptions* selectionMenuOptions, ArkUI_HapticFeedbackMode hapticFeedbackMode);
@@ -6848,38 +6817,38 @@ ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_SetHapticFeedbackMode(
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- * @since 23
+ * @since 22
  */
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_GetHapticFeedbackMode(
     ArkUI_TextSelectionMenuOptions* selectionMenuOptions, ArkUI_HapticFeedbackMode* mode);
 
 /**
-* @brief Set the event to be called when selection menu show.
-*
-* @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
-* @param start The start offset of the selected content.
-* @param end The end offset of the selected content.
-* @param userData The user data.
-* @return Returns the result code.
-*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
-*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
-* @since 23
-*/
+ * @brief Set the event to be called when selection menu show.
+ *
+ * @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
+ * @param start The start offset of the selected content.
+ * @param end The end offset of the selected content.
+ * @param userData The user data.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuShowCallback(
     ArkUI_TextSelectionMenuOptions* selectionMenuOptions, void* userData,
     void (*callback)(int32_t start, int32_t end, void* userData));
 /**
-* @brief Set the event to be called when selection menu hide.
-*
-* @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
-* @param start The start offset of the selected content.
-* @param end The end offset of the selected content.
-* @param userData The user data.
-* @return Returns the result code.
-*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
-*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
-* @since 23
-*/
+ * @brief Set the event to be called when selection menu hide.
+ *
+ * @param selectionMenuOptions Pointer to the ArkUI_TextSelectionMenuOptions object.
+ * @param start The start offset of the selected content.
+ * @param end The end offset of the selected content.
+ * @param userData The user data.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 22
+ */
 ArkUI_ErrorCode OH_ArkUI_TextSelectionMenuOptions_RegisterOnMenuHideCallback(
     ArkUI_TextSelectionMenuOptions* selectionMenuOptions, void* userData,
     void (*callback)(int32_t start, int32_t end, void* userData));
