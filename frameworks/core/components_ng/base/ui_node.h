@@ -1319,6 +1319,7 @@ protected:
     int32_t rootNodeId_ = 0; // host is Page or NavDestination
     int32_t themeScopeId_ = 0;
     int32_t subtreeIgnoreCount_ = 0;
+    std::list<RefPtr<FrameNode>> adoptedChildren_;
 
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
@@ -1344,7 +1345,6 @@ private:
     void DumpMoreBasicInfo();
 
     std::list<RefPtr<UINode>> children_;
-    std::list<RefPtr<FrameNode>> adoptedChildren_;
     // disappearingChild、index、branchId
     std::list<std::tuple<RefPtr<UINode>, uint32_t, int32_t>> disappearingChildren_;
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;

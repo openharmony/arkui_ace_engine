@@ -1543,6 +1543,8 @@ private:
 
     bool IsPaintRectWithTransformValid();
 
+    void DetachRsNodeInAdoptedChildren();
+
     // dump self info.
     void DumpDragInfo();
     void DumpOverlayInfo();

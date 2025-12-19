@@ -8019,7 +8019,6 @@ struct ArkUINDKRenderNodeModifier {
     ArkUI_Int32 (*adoptChild)(ArkUINodeHandle node, ArkUINodeHandle child);
     ArkUI_Int32 (*getRenderNode)(ArkUINodeHandle node, ArkUIRenderNodeHandle* renderNode, ArkUI_Int32* renderNodeId);
     ArkUI_Int32 (*removeAdoptedChild)(ArkUINodeHandle node, ArkUINodeHandle child);
-    void (*detachRsNodeDuringDispose)(ArkUINodeHandle node);
 };
 
 /**

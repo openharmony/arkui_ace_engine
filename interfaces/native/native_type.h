@@ -2592,27 +2592,27 @@ typedef enum {
     ARKUI_ERROR_CODE_FORCE_DARK_CONFIG_INVALID = 106205,
     /**
      * @error The node has already been adopted.
-     * @since 23
+     * @since 22
      */
     ARKUI_ERROR_CODE_NODE_IS_ADOPTED = 106206,
     /**
      * @error This node already has a parent node.
-     * @since 23
+     * @since 22
      */
     ARKUI_ERROR_CODE_NODE_HAS_PARENT = 106207,
     /**
      * @error The node cannot be adopted.
-     * @since 23
+     * @since 22
      */
     ARKUI_ERROR_CODE_NODE_CAN_NOT_BE_ADOPTED = 106208,
     /**
      * @error The node cannot adopt children.
-     * @since 23
+     * @since 22
      */
     ARKUI_ERROR_CODE_NODE_CAN_NOT_ADOPT_TO = 106209,
     /**
      * @error This child node is not adopted by the parent node.
-     * @since 23
+     * @since 22
      */
     ARKUI_ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN = 106210,
     /**
@@ -2642,18 +2642,18 @@ typedef enum {
     ARKUI_ERROR_CODE_PARAM_OUT_OF_RANGE = 106405,
     /**
      * @error The RenderNode is obtained from a FrameNode.
-     * @since 23
+     * @since 22
      */
     ARKUI_ERROR_CODE_RENDER_IS_FROM_FRAME_NODE = 106406,
     /**
      * @error The RenderNode is obtained from a FrameNode,
      * and its corresponding FrameNode is no longer in the adopted state.
-     * @since 23
+     * @since 22
      */
     ARKUI_ERROR_CODE_RENDER_HAS_INVALID_FRAME_NODE = 106407,
     /**
      * @error The node is not adopted.
-     * @since 23
+     * @since 22
      */
     ARKUI_ERROR_CODE_RENDER_NOT_ADOPTED_NODE = 106408,
     /**
