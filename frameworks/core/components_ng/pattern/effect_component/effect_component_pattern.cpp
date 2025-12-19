@@ -73,4 +73,20 @@ bool EffectComponentPattern::OnDirtyLayoutWrapperSwap(
 
     return false;
 }
+
+void EffectComponentPattern::SetEffectLayer(EffectLayer effectLayerValue)
+{
+    CHECK_EQUAL_VOID(isfirst_, false);
+    isfirst_ = false;
+    if (effectLayer_ == effectLayerValue) {
+        return;
+    }
+    effectLayer_ = effectLayerValue;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+    CHECK_NULL_VOID(context);
+    auto param = GetContextParam();
+    context->SetEffectLayer(param.value());
+}
 } // namespace OHOS::Ace::NG

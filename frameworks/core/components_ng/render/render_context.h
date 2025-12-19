@@ -186,6 +186,7 @@ public:
         INCREMENTAL_CANVAS,
         HARDWARE_SURFACE,
         COMPOSITE_COMPONENT,
+        UNION,
 #ifdef RENDER_EXTRACT_SUPPORTED
         HARDWARE_TEXTURE,
 #endif
@@ -734,6 +735,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffectType, EffectType);
 
+    // useUnion
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseUnion, bool);
+
     // useShadowBatching
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseShadowBatching, bool);
 
@@ -957,6 +961,7 @@ protected:
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
     virtual void OnUseEffectUpdate(bool useEffect) {}
     virtual void OnUseEffectTypeUpdate(EffectType effectType) {}
+    virtual void OnUseUnionUpdate(bool useUnion) {}
     virtual bool GetStatusByEffectTypeAndWindow() { return false; }
     virtual void OnUseShadowBatchingUpdate(bool useShadowBatching) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}

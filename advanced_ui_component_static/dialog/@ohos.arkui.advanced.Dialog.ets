@@ -33,7 +33,7 @@ import display from '@ohos.display';
 import hilog from '@ohos.hilog';
 import { MeasureOptions } from '@ohos.measure';
 import resourceManager from '@ohos.resourceManager';
-import { CustomColors, CustomTheme, Theme } from '@ohos.arkui.theme';
+import { CustomColors, CustomDarkColors, CustomTheme, Theme } from '@ohos.arkui.theme';
 import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import accessibility from '@ohos.accessibility';
@@ -52,6 +52,7 @@ export class ButtonOptions {
 
 class CustomThemeImpl implements CustomTheme {
   public colors?: CustomColors;
+  public darkColors?: CustomDarkColors;
 
   constructor(colors: CustomColors) {
     this.colors = colors;

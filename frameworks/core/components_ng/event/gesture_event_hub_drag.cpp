@@ -1748,8 +1748,8 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     auto overlayManager = dragNodePipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
     auto isExpandDisplay = DragDropFuncWrapper::IsExpandDisplay(context);
-    auto dragDropManager = DragDropFuncWrapper::GetDragDropManagerForDragAnimation(context, dragNodePipeline,
-        subWindow, isExpandDisplay, container->GetInstanceId());
+    auto dragDropManager =
+        DragDropFuncWrapper::GetDragDropManagerForDragAnimation(context, dragNodePipeline, subWindow);
     CHECK_NULL_RETURN(dragDropManager, false);
     dragDropManager->SetIsDragWithContextMenu(data.isMenuShow);
 

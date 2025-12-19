@@ -1635,6 +1635,7 @@ HWTEST_F(OverlayTestNg, DialogTest008, TestSize.Level1)
     dialogParamNew.alignment = DialogAlignment::BOTTOM_END;
     dialogParamNew.offset = DimensionOffset(Dimension(10.0), Dimension(10.0));
     dialogParamNew.autoCancel = true;
+    dialogParamNew.isModal = true;
 
     /**
      * @tc.steps: step3. call OpenCustomDialog and then check dialogLayoutProp.
@@ -1674,6 +1675,14 @@ HWTEST_F(OverlayTestNg, DialogTest008, TestSize.Level1)
     EXPECT_EQ(dialogLayoutProp->propDialogAlignment_, DialogAlignment::BOTTOM_END);
     EXPECT_EQ(dialogLayoutProp->propDialogOffset_, DimensionOffset(Dimension(10.0), Dimension(10.0)));
     EXPECT_EQ(dialogLayoutProp->propAutoCancel_, true);
+
+    /**
+     * @tc.steps: step6. call OpenCustomDialog and UpdateCustomDialog.
+     * @tc.expected: The size of dialogMap is 2.
+     */
+    overlayManager->OpenCustomDialog(dialogParamNew, openCallback);
+    overlayManager->UpdateCustomDialog(contentNodeNew, dialogParamNew, updateCallbackSnd);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 2);
 }
 
 /**

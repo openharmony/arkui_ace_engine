@@ -761,6 +761,13 @@ void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
     auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
     SearchModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
 }
+void SetTextDirectionImpl(Ark_NativePointer node,
+                          const Opt_TextDirection* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelStatic::SetTextDirection(frameNode, Converter::OptConvertPtr<TextDirection>(value));
+}
 void SetSearchButtonImpl(Ark_NativePointer node,
                          const Opt_String* value,
                          const Opt_SearchButtonOptions* option)
@@ -869,6 +876,7 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::SetIncludeFontPaddingImpl,
         SearchAttributeModifier::SetFallbackLineSpacingImpl,
         SearchAttributeModifier::SetSelectedDragPreviewStyleImpl,
+        SearchAttributeModifier::SetTextDirectionImpl,
         SearchAttributeModifier::SetSearchButtonImpl,
         SearchAttributeModifier::SetInputFilterImpl,
         SearchAttributeModifier::SetCustomKeyboardImpl,

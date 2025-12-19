@@ -1134,6 +1134,11 @@ public:
         ViewAbstract::SetUseEffect(useEffect, effectType);
     }
 
+    void SetUseUnion(bool useUnion) override
+    {
+        ViewAbstract::SetUseUnion(useUnion);
+    }
+
     void SetUseShadowBatching(bool useShadowBatching) override
     {
         ViewAbstract::SetUseShadowBatching(useShadowBatching);

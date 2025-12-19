@@ -70,6 +70,8 @@ public:
     RosenRenderContext() = default;
     ~RosenRenderContext() override;
 
+    void SetEffectLayer(const ContextParam& param);
+
     void SetSurfaceChangedCallBack(const std::function<void(float, float, float, float)>& callback) override;
 
     void RemoveSurfaceChangedCallBack() override;
@@ -319,6 +321,7 @@ public:
     void SetRenderFit(RenderFit renderFit) override;
     void OnRenderStrategyUpdate(RenderStrategy renderStrategy) override;
     PipelineContext* GetPipelineContext() const;
+    void SetUnionSpacing(float spacing);
 
     RectF GetPaintRectWithTransform() override;
 
@@ -633,6 +636,7 @@ protected:
 
     void OnUseEffectUpdate(bool useEffect) override;
     void OnUseEffectTypeUpdate(EffectType effectType) override;
+    void OnUseUnionUpdate(bool useUnion) override;
     bool GetStatusByEffectTypeAndWindow() override;
     void OnUseShadowBatchingUpdate(bool useShadowBatching) override;
     void OnFreezeUpdate(bool isFreezed) override;

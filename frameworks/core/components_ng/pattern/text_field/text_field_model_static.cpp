@@ -318,6 +318,16 @@ void TextFieldModelStatic::SetTextAlign(FrameNode* frameNode, const std::optiona
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, frameNode);
 }
 
+void TextFieldModelStatic::SetTextDirection(FrameNode* frameNode, const std::optional<TextDirection>& valueOpt)
+{
+    if (valueOpt.has_value()) {
+        TextFieldModelNG::SetTextDirection(frameNode, valueOpt.value());
+        return;
+    }
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextFieldLayoutProperty, TextDirection, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+}
+
 void TextFieldModelStatic::SetTextColor(FrameNode* frameNode, const std::optional<Color>& colorOpt)
 {
     if (colorOpt) {

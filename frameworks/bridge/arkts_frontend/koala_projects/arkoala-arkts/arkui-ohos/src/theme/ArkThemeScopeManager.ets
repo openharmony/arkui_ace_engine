@@ -416,7 +416,8 @@ export class ArkThemeScopeManager {
         this.defaultTheme?.bindToScope(0);
 
         // keep for backward compatibility
-        ArkThemeNativeHelper.sendThemeToNative(this.defaultTheme!, 0); // 0 means default Theme scope id
+        const darkSetStatus: boolean = !!cloneTheme?.darkColors;
+        ArkThemeNativeHelper.sendThemeToNative(this.defaultTheme!, 0, darkSetStatus); // 0 means default Theme scope id
         // new approach to apply theme in native side
         ArkThemeNativeHelper.setDefaultTheme(cloneTheme);
 

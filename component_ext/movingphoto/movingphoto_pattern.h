@@ -164,6 +164,10 @@ public:
  
     SizeF CalculateXmageOffsetRatio(SizeF layoutSize);
 
+    void SetMovingPhotoController(const RefPtr<MovingPhotoController>& movingPhotoController);
+
+    RefPtr<MovingPhotoController> GetMovingPhotoController();
+
 protected:
     int32_t instanceId_;
 

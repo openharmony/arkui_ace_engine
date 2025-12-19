@@ -32,6 +32,7 @@
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
+#include "render_service_client/core/ui/rs_union_node.h"
 #include "rosen_render_context.h"
 
 #include "base/geometry/calc_dimension.h"
@@ -581,10 +582,43 @@ void RosenRenderContext::CreateNodeByType(
             }
             break;
         }
+        case ContextType::UNION: {
+            rsNode_ = Rosen::RSUnionNode::Create(false, isTextureExportNode, rsContext);
+            break;
+        }
         case ContextType::EXTERNAL:
             break;
         default:
             break;
+    }
+}
+
+void RosenRenderContext::SetEffectLayer(const ContextParam& param)
+{
+    std::shared_ptr<Rosen::RSUIContext> rsContext;
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        auto pipeline = GetPipelineContext();
+        rsContext = GetRSUIContext(pipeline);
+        if (!rsContext) {
+            TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN, "rsnode create before rosenwindow");
+            rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
+            rsUIDirector_->Init(true, true);
+            rsContext = rsUIDirector_->GetRSUIContext();
+        }
+    }
+    if (param.type == RenderContext::ContextType::EFFECT) {
+        auto isTextureExportNodeEffect = ViewStackProcessor::GetInstance()->IsExportTexture();
+        rsNode_ = Rosen::RSEffectNode::Create(false, isTextureExportNodeEffect, rsContext);
+    } else if (param.type == RenderContext::ContextType::COMPOSITE_COMPONENT) {
+        auto isTextureExportNodeComponent = ViewStackProcessor::GetInstance()->IsExportTexture();
+        Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param.surfaceName.value_or(""),
+            .isTextureExportNode = isTextureExportNodeComponent };
+        rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true, rsContext);
+    }
+
+    if (rsNode_) {
+        SetSkipCheckInMultiInstance();
+        SetRSNode(rsNode_);
     }
 }
 
@@ -3116,6 +3150,13 @@ void RosenRenderContext::OnUseEffectTypeUpdate(EffectType effectType)
     rsNode_->SetUseEffectType(effectTypeParam);
     auto useEffect = GetUseEffect().value_or(false);
     OnUseEffectUpdate(useEffect);
+}
+
+void RosenRenderContext::OnUseUnionUpdate(bool useUnion)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetUseUnion(useUnion);
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnUseShadowBatchingUpdate(bool useShadowBatching)
@@ -8040,5 +8081,13 @@ void RosenRenderContext::SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegi
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetNeedUseCmdlistDrawRegion(needUseCmdlistDrawRegion);
+}
+
+void RosenRenderContext::SetUnionSpacing(float spacing)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto unionNode = rsNode_->ReinterpretCastTo<Rosen::RSUnionNode>();
+    CHECK_NULL_VOID(unionNode);
+    unionNode->SetUnionSpacing(spacing);
 }
 } // namespace OHOS::Ace::NG

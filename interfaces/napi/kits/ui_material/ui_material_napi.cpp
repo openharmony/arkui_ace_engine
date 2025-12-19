@@ -43,6 +43,10 @@ const std::vector<struct JsEnumInt> g_materialTypes = {
 void UiMaterialNapi::WrapMaterialObject(napi_env env, napi_value jsThis, int32_t materialType)
 {
     UiMaterial* uiMaterial = new(std::nothrow) UiMaterial();
+    if (!uiMaterial) {
+        napi_throw_error(env, nullptr, "Failed to allocate memory for UiMaterial.");
+        return ;
+    }
     uiMaterial->SetType(materialType);
     napi_status status = napi_wrap(env, jsThis, uiMaterial, UiMaterialNapi::Destructor, nullptr, nullptr);
     if (status != napi_ok) {

@@ -19,7 +19,7 @@
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { SelectionOptions_serializer, SelectionOptions, ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { StyledString, StyledStringInternal, DecorationStyleInterface_serializer, DecorationStyleInterface } from "./styledString"
-import { LayoutManager_serializer, LayoutManager, LayoutManagerInternal, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, FontSettingOptions_serializer, TextDataDetectorConfig, EditMenuOptions, FontSettingOptions, MenuType, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer } from "./textCommon"
+import { LayoutManager_serializer, LayoutManager, LayoutManagerInternal, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, FontSettingOptions_serializer, TextDataDetectorConfig, EditMenuOptions, TextDirection, FontSettingOptions, MenuType, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer } from "./textCommon"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -844,6 +844,18 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setSelectedDragPreviewStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setTextDirectionAttribute(value: TextDirection | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as TextDirection)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setTextDirection(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setFontAttribute(fontValue: Font | undefined, options?: FontSettingOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (fontValue !== undefined) {
@@ -1081,6 +1093,9 @@ export interface TextAttribute extends CommonMethod {
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
         throw new Error("Unimplemented method selectedDragPreviewStyle")
     }
+    textDirection(value: TextDirection | undefined): this {
+        throw new Error("Unimplemented method textDirection")
+    }
     font(fontValue: Font | undefined, options?: FontSettingOptions): this {
         throw new Error("Unimplemented method font")
     }
@@ -1142,6 +1157,7 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     fallbackLineSpacing_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined
     selectedDragPreviewStyle_value?: SelectedDragPreviewStyle | undefined
+    textDirection_value?: TextDirection | undefined
     setTextOptions(content?: string | Resource, value?: TextOptions): this {
         return this
     }
@@ -1272,6 +1288,9 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
         return this
     }
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
+        return this
+    }
+    textDirection(value: TextDirection | undefined): this {
         return this
     }
     font(fontValue: Font | undefined, options?: FontSettingOptions): this {
@@ -1687,6 +1706,14 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         if (this.checkPriority("selectedDragPreviewStyle")) {
             const value_casted = value as (SelectedDragPreviewStyle | undefined)
             this.getPeer()?.setSelectedDragPreviewStyleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public textDirection(value: TextDirection | undefined): this {
+        if (this.checkPriority("textDirection")) {
+            const value_casted = value as (TextDirection | undefined)
+            this.getPeer()?.setTextDirectionAttribute(value_casted)
             return this
         }
         return this

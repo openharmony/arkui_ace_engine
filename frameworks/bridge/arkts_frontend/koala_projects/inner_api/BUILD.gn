@@ -51,6 +51,8 @@ ohos_copy("copy_arkui_ets") {
     "./@koalaui/runtime/internals.d.ets",
     "./@koalaui/runtime/memo/node.d.ets",
     "./@koalaui/runtime/memo/remember.d.ets",
+    "./@koalaui/runtime/states/Disposable.d.ets",
+    "./@koalaui/runtime/tree/IncrementalNode.d.ets",
   ]
   sources += [
     "./@ohos/router.d.ets",
