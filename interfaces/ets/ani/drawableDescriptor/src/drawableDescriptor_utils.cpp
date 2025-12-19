@@ -76,7 +76,7 @@ bool IsClassObject(ani_env* env, ani_object object, const char* classDescriptor)
 
 bool IsArrayObject(ani_env* env, ani_object object)
 {
-    return IsClassObject(env, object, "escompat.Array");
+    return IsClassObject(env, object, "std.core.Array");
 }
 
 bool IsArrayObject(ani_env* env, ani_ref ref)
