@@ -44,6 +44,7 @@ void UiMaterialNapi::WrapMaterialObject(napi_env env, napi_value jsThis, int32_t
 {
     UiMaterial* uiMaterial = new(std::nothrow) UiMaterial();
     if (!uiMaterial) {
+        napi_throw_error(env, nullptr, "Failed to allocate memory for UiMaterial.");
         return ;
     }
     uiMaterial->SetType(materialType);
