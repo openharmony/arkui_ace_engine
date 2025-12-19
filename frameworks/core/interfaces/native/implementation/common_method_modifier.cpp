@@ -47,6 +47,7 @@
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -2056,6 +2057,13 @@ RefPtr<NG::NGGestureRecognizer> Convert(const Ark_GestureRecognizer &src)
         return src->GetRecognizer().Upgrade();
     }
     return nullptr;
+}
+
+template<>
+NG::AccessibilityActionOptions Convert(const Ark_AccessibilityActionOptions& src)
+{
+    auto scrollStep = Converter::OptConvert<int32_t>(src.scrollStep).value_or(1);
+    return AccessibilityActionOptions { .scrollStep = scrollStep };
 }
 
 void AssignArkValue(Ark_TouchTestInfo& dst, const TouchTestInfo& src, ConvContext *ctx)
@@ -6336,6 +6344,33 @@ void SetOnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetOnGestureRecognizerJudgeBegin(frameNode,
         std::move(onGestureRecognizerJudgefunc), *convValue);
 }
+
+void SetAccessibilityActionOptionsImpl(Ark_NativePointer node,
+                                       const Opt_AccessibilityActionOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(options);
+    NG::AccessibilityActionOptions actions;
+    if (optValue) {
+        actions = Converter::Convert<NG::AccessibilityActionOptions>(*optValue);
+    }
+    if (actions.scrollStep <= 0) {
+        ViewAbstractModelNG::ResetAccessibilityActionOptions(frameNode);
+        return;
+    }
+    ViewAbstractModelNG::SetAccessibilityActionOptions(frameNode, actions);
+}
+
+void SetAccessibilityStateDescriptionImpl(Ark_NativePointer node,
+                                          const Opt_Union_String_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto str = Converter::OptConvert<std::string>(*value);
+    ViewAbstractModelNG::SetAccessibilityStateDescription(frameNode, str.value_or(""));
+}
 } // CommonMethodModifier
 const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
 {
@@ -6500,6 +6535,8 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetOnSizeChangeImpl,
         CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
         CommonMethodModifier::SetSystemMaterialImpl,
+        CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
+        CommonMethodModifier::SetAccessibilityActionOptionsImpl,
         CommonMethodModifier::SetExpandSafeAreaImpl,
         CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
         CommonMethodModifier::SetBackgroundImpl,

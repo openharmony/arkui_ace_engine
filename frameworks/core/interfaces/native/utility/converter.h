@@ -28,6 +28,7 @@
 #include "core/components/web/web_property.h" // Unscoped enum types
 #include "core/components_ng/pattern/list/list_item_group_pattern.h" // Unscoped enum types
 #include "core/components_ng/pattern/slider/slider_model.h" // Inner types
+#include "core/components_ng/property/accessibility_property.h"
 
 #include "converter_union.h"
 #include "generated/converter_generated.h"
@@ -685,6 +686,7 @@ namespace Converter {
     template<> RectF Convert(const Ark_Frame& src);
     template<> RectHeightStyle Convert(const Ark_text_RectHeightStyle& src);
     template<> RectWidthStyle Convert(const Ark_text_RectWidthStyle& src);
+    template<> NG::AccessibilityActionOptions Convert(const Ark_AccessibilityActionOptions& src);
     template<> RefPtr<BasicShape> Convert(const Ark_CircleShape& src);
     template<> RefPtr<BasicShape> Convert(const Ark_EllipseShape& src);
     template<> RefPtr<BasicShape> Convert(const Ark_PathShape& src);
