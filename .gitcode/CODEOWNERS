@@ -1411,6 +1411,8 @@ frameworks/bridge/declarative_frontend/jsview/js_touch_handler.cpp @ArkUI_Event
 frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/jsview/js_ui_extension.cpp @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/jsview/js_ui_extension.h @ArkUI_ability_group
+frameworks/bridge/declarative_frontend/jsview/js_union_container.cpp @arkuicodepulse
+frameworks/bridge/declarative_frontend/jsview/js_union_container.h @arkuicodepulse
 frameworks/bridge/declarative_frontend/jsview/js_utils.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/jsview/js_utils.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/jsview/js_video_controller.cpp @arkuieco3
@@ -2649,6 +2651,7 @@ frameworks/core/components_ng/pattern/toast/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/toggle/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/toolbaritem/ @ArkUI_Event
 frameworks/core/components_ng/pattern/ui_extension/ @ArkUI_ability_group
+frameworks/core/components_ng/pattern/union_container/ @arkuicodepulse
 frameworks/core/components_ng/pattern/video/ @arkuieco3
 frameworks/core/components_ng/pattern/view_context/ @arkuicodepulse
 frameworks/core/components_ng/pattern/waterflow/ @arkuiscroll
@@ -2695,6 +2698,7 @@ frameworks/core/components_ng/property/safe_area_insets.h @arkuilayout1
 frameworks/core/components_ng/property/templates_parser.cpp @arkuiscroll
 frameworks/core/components_ng/property/templates_parser.h @arkuiscroll
 frameworks/core/components_ng/property/transition_property.h @arkuicodepulse
+frameworks/core/components_ng/property/union_container_options.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/animated_image.cpp @arkui001
 frameworks/core/components_ng/render/adapter/animated_image.h @arkui001
 frameworks/core/components_ng/render/adapter/background_modifier.h @ArkUI_Event
@@ -3701,6 +3705,7 @@ test/unittest/core/pattern/time_picker/ @arkui001
 test/unittest/core/pattern/toggle/ @arkuipopupwindow_all
 test/unittest/core/pattern/ui_extension/ @ArkUI_ability_group
 test/unittest/core/pattern/ui_extension/mock/ @ArkUI_ability_group
+test/unittest/core/pattern/union_container/ @arkuicodepulse
 test/unittest/core/pattern/video/ @arkuieco3
 test/unittest/core/pattern/view_context/ @arkuicodepulse
 test/unittest/core/pattern/waterflow/ @arkuiscroll

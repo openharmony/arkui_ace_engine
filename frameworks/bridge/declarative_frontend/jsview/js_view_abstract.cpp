@@ -9719,6 +9719,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("renderGroup", &JSViewAbstract::JSRenderGroup);
     JSClass<JSViewAbstract>::StaticMethod("excludeFromRenderGroup", &JSViewAbstract::JSExcludeFromRenderGroup);
     JSClass<JSViewAbstract>::StaticMethod("renderFit", &JSViewAbstract::JSRenderFit);
+    JSClass<JSViewAbstract>::StaticMethod("useUnion", &JSViewAbstract::JSUseUnion);
 
     JSClass<JSViewAbstract>::StaticMethod("freeze", &JSViewAbstract::JsSetFreeze);
 
@@ -11666,6 +11667,19 @@ void JSViewAbstract::JSRenderFit(const JSCallbackInfo& info)
     }
     // how content fills the node duration implicit animation
     ViewAbstractModel::GetInstance()->SetRenderFit(renderFit);
+}
+
+void JSViewAbstract::JSUseUnion(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    JSRef<JSVal> argUnion = info[0];
+    bool useUnion = false;
+    if (argUnion->IsBoolean()) {
+        useUnion = argUnion->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetUseUnion(useUnion);
 }
 
 bool JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName)

@@ -641,6 +641,7 @@ public:
     static void JSRenderGroup(const JSCallbackInfo& info);
     static void JSExcludeFromRenderGroup(const JSCallbackInfo& info);
     static void JSRenderFit(const JSCallbackInfo& info);
+    static void JSUseUnion(const JSCallbackInfo& info);
     static void JsExpandSafeArea(const JSCallbackInfo& info);
     static void JsIgnoreLayoutSafeArea(const JSCallbackInfo& info);
     static void JsGestureModifier(const JSCallbackInfo& info);
