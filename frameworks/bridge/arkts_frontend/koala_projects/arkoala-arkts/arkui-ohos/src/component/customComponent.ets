@@ -557,10 +557,6 @@ export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
-<<<<<<< HEAD
-        CustomDelegate._instantiate<CustomDelegate<S, S_Options>, S_Options>(
-            () => createInstance<S, S_Options>(uiContext, factory, initializers, style), content, initializers, reuseKey);
-=======
         const reuseKeyValue = remember(() => {
             if (reuseKey) {
                 let key: string | undefined | null = reuseKey() as string | undefined | null; // this means reusekey should be only calculated once
@@ -571,9 +567,8 @@ export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options
             }
             return undefined;
         });
-        CustomDelegate._instantiate(
-            () => createInstance(uiContext, factory, initializers, style), content, initializers, reuseKeyValue);
->>>>>>> upstream/master
+        CustomDelegate._instantiate<CustomDelegate<S, S_Options>, S_Options>(
+            () => createInstance<S, S_Options>(uiContext, factory, initializers, style), content, initializers, reuseKeyValue);
     }
 
     aboutToReuse(): void {}
