@@ -1109,8 +1109,8 @@ HWTEST_F(XComponentTestNg, XComponentKeyEventTest010, TestSize.Level1)
      *            case: different sourceType & keyAction
      * @tc.expected: sourceType & keyAction fit
      */
-    std::vector<SourceType> sourceTypes { SourceType::NONE, SourceType::MOUSE,
-        SourceType::TOUCH, SourceType::TOUCH_PAD, SourceType::KEYBOARD };
+    std::vector<SourceType> sourceTypes { SourceType::NONE, SourceType::MOUSE, SourceType::TOUCH, SourceType::TOUCH_PAD,
+        SourceType::KEYBOARD };
     std::vector<KeyAction> keyActions { KeyAction::UNKNOWN, KeyAction::DOWN, KeyAction::UP };
     for (SourceType& sourceType : sourceTypes) {
         for (KeyAction& keyAction : keyActions) {
