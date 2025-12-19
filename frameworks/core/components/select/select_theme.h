@@ -395,7 +395,8 @@ public:
                 pattern->GetAttr<double>("select_font_weight", static_cast<double>(SELECT_FONT_WEIGHT))));
 
             // When the leftRow node is the last node, the space that follows (there is no content in rightRow).
-            theme->menuRowLastSpace_ = pattern->GetAttr<Dimension>("menu_row_last_space", theme->iconContentPadding_);
+            theme->menuLeftRowEndSpace_ = pattern->GetAttr<Dimension>("menu_left_row_end_space",
+                theme->iconContentPadding_);
             theme->menuHeaderFontWeight_ = FontWeight(static_cast<int32_t>(
                 pattern->GetAttr<double>("menu_header_font_weight", static_cast<double>(FontWeight::BOLD))));
             theme->menuSelectedIconAlign_ = HorizontalAlign(static_cast<int32_t>(
@@ -570,7 +571,7 @@ public:
         theme->checkMarkColor_ = checkMarkColor_;
         theme->menuHeaderFontWeight_ = menuHeaderFontWeight_;
         theme->menuSelectedIconAlign_ = menuSelectedIconAlign_;
-        theme->menuRowLastSpace_ = menuRowLastSpace_;
+        theme->menuLeftRowEndSpace_ = menuLeftRowEndSpace_;
         theme->contentMargin_ = contentMargin_;
         theme->expandDisplay_ = expandDisplay_;
         theme->maxPaddingStart_ = maxPaddingStart_;
@@ -1023,9 +1024,9 @@ public:
         return menuSelectedIconAlign_;
     }
 
-    const Dimension& GetMenuRowLastSpace() const
+    const Dimension& GetMenuLeftRowEndSpace() const
     {
-        return menuRowLastSpace_;
+        return menuLeftRowEndSpace_;
     }
 
     FontWeight GetCheckMarkFontWeight() const
@@ -1755,7 +1756,7 @@ private:
     Dimension rrectSize_;
     Dimension iconSize_;
     Dimension normalPadding_;
-    Dimension menuRowLastSpace_;
+    Dimension menuLeftRowEndSpace_;
 
     Dimension popupRRectSize_;
     Dimension popupBorderWidth_;

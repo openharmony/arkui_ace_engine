@@ -622,7 +622,7 @@ void MenuItemLayoutAlgorithm::MeasureMenuItem(LayoutWrapper* layoutWrapper, cons
         // If the size of the right row is not greater than 0, that is, there is no content displayed on the right row.
         middleSpace_ = GreatNotEqual(rightRowSize.Width(), 0.0f)
                            ? static_cast<float>(selectTheme->GetIconContentPadding().ConvertToPx())
-                           : static_cast<float>(selectTheme->GetMenuRowLastSpace().ConvertToPx());
+                           : static_cast<float>(selectTheme->GetMenuLeftRowEndSpace().ConvertToPx());
     }
     MeasureItemViews(childConstraint, layoutConstraint, layoutWrapper);
     MeasureClickableArea(layoutWrapper);
