@@ -37,6 +37,9 @@ public:
 
     void FireChangeEvent(const double& index) const
     {
+        if (selectedIndexChangeEvent_) {
+            selectedIndexChangeEvent_(index);
+        }
         if (onChangeEvent_) {
             onChangeEvent_(index);
         }
@@ -54,9 +57,15 @@ public:
         }
     }
 
+    void SetChangeEvent(ContainerPickerChangeEvent&& onChange)
+    {
+        selectedIndexChangeEvent_ = std::move(onChange);
+    }
+
 private:
     ContainerPickerChangeEvent onChangeEvent_;
     ContainerPickerChangeEvent onScrollStopEvent_;
+    ContainerPickerChangeEvent selectedIndexChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ContainerPickerEventHub);
 };

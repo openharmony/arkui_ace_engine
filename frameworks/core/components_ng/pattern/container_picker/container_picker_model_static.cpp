@@ -112,4 +112,12 @@ void ContainerPickerModelStatic::SetOnScrollStop(FrameNode* frameNode, Container
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
+
+void ContainerPickerModelStatic::SetChangeEvent(FrameNode* frameNode, ContainerPickerChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ContainerPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetChangeEvent(std::move(onChange));
+}
 } // namespace OHOS::Ace::NG

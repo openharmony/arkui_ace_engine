@@ -15,33 +15,72 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_picker.h"
 
+#include "core/common/resource/resource_object.h"
 #include "frameworks/base/log/ace_scoring_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "frameworks/core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "frameworks/core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "frameworks/core/components_ng/pattern/container_picker/container_picker_utils.h"
-#include "frameworks/core/components_ng/pattern/container_picker/container_picker_model.h"
 #include "frameworks/core/components_ng/pattern/picker/picker_type_define.h"
-#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::Framework {
 
 void JSContainerPicker::Create(const JSCallbackInfo& info)
 {
     NG::ContainerPickerModel::Create();
-    JSRef<JSVal> selectedIndex;
-    if (info.Length() >= 1 && info[0]->IsObject()) {
-        JSRef<JSObject> paramObj = JSRef<JSObject>::Cast(info[0]);
-        if (!paramObj->IsUndefined()) {
-            selectedIndex = paramObj->GetProperty("selectedIndex");
-        }
-    }
+    JSRef<JSVal> selectedIndex = ParseSelectedIndex(info);
 
     int32_t index = 0;
     if (!selectedIndex->IsNull() && selectedIndex->IsNumber()) {
         index = selectedIndex->ToNumber<int32_t>();
     }
     NG::ContainerPickerModel::SetSelectedIndex(index);
+}
+
+JSRef<JSVal> JSContainerPicker::ParseSelectedIndex(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> selectedIndex;
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return selectedIndex;
+    }
+    JSRef<JSObject> paramObj = JSRef<JSObject>::Cast(info[0]);
+    if (paramObj->IsUndefined()) {
+        return selectedIndex;
+    }
+    selectedIndex = paramObj->GetProperty("selectedIndex");
+    if (selectedIndex->IsObject()) {
+        // ComponentV1 Tow-Way Synchronization
+        JSRef<JSObject> selectedIndexObj = JSRef<JSObject>::Cast(selectedIndex);
+        JSRef<JSVal> changeEventVal = selectedIndexObj->GetProperty("changeEvent");
+        if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+            SetSelectedIndexChangeEvent(info, changeEventVal);
+            selectedIndex = selectedIndexObj->GetProperty("value");
+        }
+    } else if (selectedIndex->IsNumber()) {
+        // ComponentV2 Tow-Way Binding
+        JSRef<JSVal> changeEventVal = paramObj->GetProperty("$selectedIndex");
+        SetSelectedIndexChangeEvent(info, changeEventVal);
+    }
+    return selectedIndex;
+}
+
+void JSContainerPicker::SetSelectedIndexChangeEvent(const JSCallbackInfo& info, const JSRef<JSVal> changeEventVal)
+{
+    if (changeEventVal->IsUndefined() || !changeEventVal->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                           const double& index) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Picker.selectedIndexChange");
+        PipelineContext::SetCallBackNode(node);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(index));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    NG::ContainerPickerModel::SetChangeEvent(std::move(changeEvent));
 }
 
 void JSContainerPicker::SetCanLoop(const JSCallbackInfo& info)

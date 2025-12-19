@@ -35,6 +35,7 @@ public:
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
     static void SetOnChange(FrameNode* frameNode, ContainerPickerChangeEvent&& onChange);
     static void SetOnScrollStop(FrameNode* frameNode, ContainerPickerChangeEvent&& onScrollStop);
+    static void SetChangeEvent(FrameNode* frameNode, ContainerPickerChangeEvent&& onChange);
 };
 } // namespace OHOS::Ace::NG
 
