@@ -130,6 +130,10 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window,
         if (!rsUIDirector_->GetRSUIContext() || isGlobalPipeline) {
             rsUIDirector_->Init(true, true);
         }
+        auto rsUIcontext = rsUIDirector_->GetRSUIContext();
+        if (rsUIcontext) {
+            rsUIcontext->AttachFromUI();
+        }
         rsUIDirector_->SetUITaskRunner(
             [taskExecutor, id](const std::function<void()>& task, uint32_t delay) {
                 ContainerScope scope(id);
