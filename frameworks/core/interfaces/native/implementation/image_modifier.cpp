@@ -34,6 +34,8 @@ constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
 constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
 constexpr int32_t SELECTOR_INDEX = 3;
 constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
+constexpr float HDR_BRIGHTNESS_MIN = 0.0f;
+constexpr float HDR_BRIGHTNESS_MAX = 1.0f;
 } // namespace
 
 namespace Converter {
@@ -240,8 +242,9 @@ void SetHdrBrightnessImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelStatic::SetHdrBrightness(
-        frameNode, Converter::OptConvertPtr<float>(value).value_or(DEFAULT_HDR_BRIGHTNESS));
+    auto convValue = Converter::OptConvertPtr<float>(value);
+    Validator::ValidateByRange(convValue, HDR_BRIGHTNESS_MIN, HDR_BRIGHTNESS_MAX);
+    ImageModelStatic::SetHdrBrightness(frameNode, convValue.value_or(DEFAULT_HDR_BRIGHTNESS));
 }
 void SetInterpolationImpl(Ark_NativePointer node,
                           const Opt_ImageInterpolation* value)
