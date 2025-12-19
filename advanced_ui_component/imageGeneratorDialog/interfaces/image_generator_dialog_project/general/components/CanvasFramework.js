@@ -42,7 +42,7 @@ export class styleItem {
 export class CanvasHome extends ViewV2 {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
         super(parent, elmtId, extraInfo);
-        this.titleName = '灵感画布';
+        this.titleName = '';
         this.currentCanvasMode = CanvasMode.GENERAL_MODE;
         this.currentGenerateState = ImageGenerateState.CONFIGURATION;
         this.initParam("imageInfoArr", (params && "imageInfoArr" in params) ? params.imageInfoArr : undefined);
@@ -54,7 +54,7 @@ export class CanvasHome extends ViewV2 {
         this.finalizeConstruction();
     }
     resetStateVarsOnReuse(params) {
-        this.titleName = '灵感画布';
+        this.titleName = '';
         this.currentCanvasMode = CanvasMode.GENERAL_MODE;
         this.currentGenerateState = ImageGenerateState.CONFIGURATION;
         this.resetParam("imageInfoArr", (params && "imageInfoArr" in params) ? params.imageInfoArr : undefined);

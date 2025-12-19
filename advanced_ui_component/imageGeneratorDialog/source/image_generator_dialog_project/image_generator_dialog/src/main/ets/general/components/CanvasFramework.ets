@@ -30,7 +30,7 @@ export class styleItem {
 
 @ComponentV2
 export struct CanvasHome {
-  @Local titleName: string = '灵感画布'
+  @Local titleName: string = ''
   @Local currentCanvasMode: CanvasMode = CanvasMode.GENERAL_MODE;
   @Local currentGenerateState: ImageGenerateState = ImageGenerateState.CONFIGURATION;
   @Param @Require imageInfoArr: Array<imageGeneration.ImageItem>;
