@@ -13,11 +13,19 @@
  * limitations under the License.
  */
 
+export const LogTag = '[imageGenerator]';
 export var CanvasMode;
 (function (CanvasMode) {
     CanvasMode[CanvasMode["GENERAL_MODE"] = 0] = "GENERAL_MODE";
     CanvasMode[CanvasMode["DOODLE_MODE"] = 1] = "DOODLE_MODE";
+    CanvasMode[CanvasMode["DEFAULT"] = 0] = "DEFAULT";
 })(CanvasMode || (CanvasMode = {}));
+export var CanvasLayoutDirection;
+(function (CanvasLayoutDirection) {
+    CanvasLayoutDirection[CanvasLayoutDirection["HORIZONTAL"] = 0] = "HORIZONTAL";
+    CanvasLayoutDirection[CanvasLayoutDirection["VERTICAL"] = 1] = "VERTICAL";
+    CanvasLayoutDirection[CanvasLayoutDirection["DEFAULT"] = 0] = "DEFAULT";
+})(CanvasLayoutDirection || (CanvasLayoutDirection = {}));
 export var ImageGenerateState;
 (function (ImageGenerateState) {
     ImageGenerateState[ImageGenerateState["CONFIGURATION"] = 0] = "CONFIGURATION";

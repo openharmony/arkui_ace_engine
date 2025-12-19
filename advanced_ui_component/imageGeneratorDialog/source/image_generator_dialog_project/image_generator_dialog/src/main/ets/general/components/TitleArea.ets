@@ -49,7 +49,7 @@ export struct HomeTitle {
         .width('50%')
       }
       .height(56)
-      .width(618)
+      .width('100%')
     }
     .height(64)
     .width('100%')

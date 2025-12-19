@@ -17,3 +17,4 @@ export class Constants {
 }
 Constants.FILE_BUFFER_SIZE = 4096;
 Constants.NOT_SELECTED_NAME = 'notSelectedPic';
+Constants.CONTENT_COVER_DISPLAY_MIN_WIDTH = 600;
