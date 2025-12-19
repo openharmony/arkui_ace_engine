@@ -43,6 +43,10 @@ void SelectableItemEventHub::BindContextMenu()
             return;
         }
 
+        if (gestureHub->GetPreviewMode() == MenuPreviewMode::NONE) {
+            return;
+        }
+
         auto frameNode = eventHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         if (!SelectableUtils::IsGatherSelectedItemsAnimationEnabled(frameNode)) {

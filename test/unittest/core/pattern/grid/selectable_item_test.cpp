@@ -15,6 +15,9 @@
 
 #include "test/unittest/core/pattern/grid/grid_test_ng.h"
 
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
 #include "core/components_ng/pattern/scrollable/selectable_utils.h"
@@ -142,5 +145,38 @@ HWTEST_F(SelectableItemUtilsTestNG, BindContextMenu, TestSize.Level1)
     SelectableUtils::BindContextMenu(AceType::RawPtr(gridItemNode));
     auto actuator = AceType::DynamicCast<LongPressEventActuatorWithMultiSelect>(longPressEventActuator);
     EXPECT_NE(actuator->multiSelectHandler_, nullptr);
+
+    /**
+     * @tc.steps: step1. Init overlayManager.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    frameNode_->AttachContext(AceType::RawPtr(pipelineContext), true);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step2. selected items
+     */
+    for (int32_t i = 0; i < 10; i++) {
+        auto gridItemNode = GetChildFrameNode(frameNode_, i);
+        auto selectableItemPattern = gridItemNode->GetPattern<SelectableItemPattern>();
+        selectableItemPattern->SetSelected(true);
+    }
+
+    /**
+     * @tc.steps: step3. ShowGatherNodeAnimation
+     */
+    auto itemNode = GetChildFrameNode(frameNode_, 0);
+    itemNode->AttachContext(AceType::RawPtr(pipelineContext), true);
+    EXPECT_TRUE(DragAnimationHelper::ShowGatherNodeAnimation(itemNode));
+    SelectableUtils::GetInstance().PublishMenuStatus(true, itemNode);
+    EXPECT_TRUE(overlayManager->GetHasGatherNode());
+
+    /**
+     * @tc.steps: step4. RemoveGatherNode
+     */
+    SelectableUtils::GetInstance().PublishMenuStatus(false, nullptr);
+    EXPECT_FALSE(overlayManager->GetHasGatherNode());
 }
 } // namespace OHOS::Ace::NG
