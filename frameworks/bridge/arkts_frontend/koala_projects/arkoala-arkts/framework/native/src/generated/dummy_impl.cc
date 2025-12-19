@@ -5884,13 +5884,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // EffectComponentModifier
     namespace EffectComponentInterfaceModifier {
-    void SetEffectComponentOptionsImpl(Ark_NativePointer node)
+    void SetEffectComponentOptionsImpl(Ark_NativePointer node,
+                                       const Opt_EffectComponentOptions* options)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
         string out("setEffectComponentOptions(");
+        WriteToString(&out, options);
         out.append(") \n");
         appendGroupedLog(1, out);
     }

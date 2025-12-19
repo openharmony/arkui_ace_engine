@@ -593,6 +593,35 @@ void RosenRenderContext::CreateNodeByType(
     }
 }
 
+void RosenRenderContext::SetEffectLayer(const ContextParam& param)
+{
+    std::shared_ptr<Rosen::RSUIContext> rsContext;
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        auto pipeline = GetPipelineContext();
+        rsContext = GetRSUIContext(pipeline);
+        if (!rsContext) {
+            TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN, "rsnode create before rosenwindow");
+            rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
+            rsUIDirector_->Init(true, true);
+            rsContext = rsUIDirector_->GetRSUIContext();
+        }
+    }
+    if (param.type == RenderContext::ContextType::EFFECT) {
+        auto isTextureExportNodeEffect = ViewStackProcessor::GetInstance()->IsExportTexture();
+        rsNode_ = Rosen::RSEffectNode::Create(false, isTextureExportNodeEffect, rsContext);
+    } else if (param.type == RenderContext::ContextType::COMPOSITE_COMPONENT) {
+        auto isTextureExportNodeComponent = ViewStackProcessor::GetInstance()->IsExportTexture();
+        Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param.surfaceName.value_or(""),
+            .isTextureExportNode = isTextureExportNodeComponent };
+        rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true, rsContext);
+    }
+
+    if (rsNode_) {
+        SetSkipCheckInMultiInstance();
+        SetRSNode(rsNode_);
+    }
+}
+
 void RosenRenderContext::SetSkipCheckInMultiInstance()
 {
     if (SystemProperties::GetMultiInstanceEnabled() && rsNode_) {

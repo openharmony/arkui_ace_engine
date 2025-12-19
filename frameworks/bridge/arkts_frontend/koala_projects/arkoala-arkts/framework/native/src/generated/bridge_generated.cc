@@ -6918,11 +6918,19 @@ Ark_NativePointer impl_EffectComponent_construct(Ark_Int32 id, Ark_Int32 flags) 
         return GetNodeModifiers()->getEffectComponentModifier()->construct(id, flags);
 }
 KOALA_INTEROP_DIRECT_2(EffectComponent_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
-void impl_EffectComponentInterface_setEffectComponentOptions(Ark_NativePointer thisPtr) {
+void impl_EffectComponentInterface_setEffectComponentOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        GetNodeModifiers()->getEffectComponentModifier()->setEffectComponentOptions(self);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_EffectComponentOptions optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            optionsValueTempTmpBuf.value = EffectComponentOptions_serializer::read(thisDeserializer);
+        }
+        Opt_EffectComponentOptions optionsValueTemp = optionsValueTempTmpBuf;;
+        GetNodeModifiers()->getEffectComponentModifier()->setEffectComponentOptions(self, static_cast<Opt_EffectComponentOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V1(EffectComponentInterface_setEffectComponentOptions, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_V3(EffectComponentInterface_setEffectComponentOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_Ellipse_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getEllipseModifier()->construct(id, flags);
 }
