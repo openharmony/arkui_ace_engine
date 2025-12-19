@@ -660,6 +660,13 @@ void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     TextModelStatic::SetEnableHapticFeedback(frameNode, convValue);
 }
+void SetTextDirectionImpl(Ark_NativePointer node,
+                          const Opt_TextDirection* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelStatic::SetTextDirection(frameNode, Converter::OptConvertPtr<TextDirection>(value));
+}
 void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
                                        const Opt_Boolean* value)
 {
@@ -838,6 +845,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetIncludeFontPaddingImpl,
         TextAttributeModifier::SetFallbackLineSpacingImpl,
         TextAttributeModifier::SetSelectedDragPreviewStyleImpl,
+        TextAttributeModifier::SetTextDirectionImpl,
         TextAttributeModifier::SetFontImpl,
         TextAttributeModifier::SetFontWeightImpl,
         TextAttributeModifier::SetSelectionImpl,
