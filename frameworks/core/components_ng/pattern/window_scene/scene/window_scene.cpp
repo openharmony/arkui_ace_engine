@@ -855,10 +855,7 @@ void WindowScene::OnRemoveBlank()
 
 void WindowScene::OnAddSnapshot()
 {
-    int32_t imageFit = 0;
-    auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
-        session_->GetPersistentId(), imageFit);
-    auto uiTask = [weakThis = WeakClaim(this), isPersistentImageFit]() {
+    auto uiTask = [weakThis = WeakClaim(this)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         CHECK_NULL_VOID(self->session_);
@@ -870,7 +867,7 @@ void WindowScene::OnAddSnapshot()
                 self->session_->GetPersistentId(), host->GetId());
             return;
         }
-        if (isPersistentImageFit && self->session_->GetSnapshot() == nullptr) {
+        if (self->session_->GetSnapshot() == nullptr) {
             self->CreateSnapshotWindow();
         } else {
             self->CreateSnapshotWindow(self->session_->GetSnapshot());
@@ -890,19 +887,14 @@ void WindowScene::OnAddSnapshot()
 
 void WindowScene::OnRemoveSnapshot()
 {
-    int32_t imageFit = 0;
-    auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
-        session_->GetPersistentId(), imageFit);
-    auto uiTask = [weakThis = WeakClaim(this), isPersistentImageFit]() {
+    auto uiTask = [weakThis = WeakClaim(this)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         CHECK_NULL_VOID(self->session_);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         if (self->snapshotWindow_) {
-            if (isPersistentImageFit) {
-                self->SetSubSessionVisible();
-            }
+            self->SetSubSessionVisible();
             self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
             auto surfaceNode = self->session_->GetSurfaceNode();
             CHECK_NULL_VOID(surfaceNode);
