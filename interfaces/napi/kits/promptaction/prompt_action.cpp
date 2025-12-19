@@ -560,9 +560,17 @@ napi_value JSPromptOpenToast(napi_env env, napi_callback_info info)
     napi_create_promise(env, &deferred, &result);
     std::function<void(int32_t)> toastCallback = nullptr;
     toastCallback = [env, deferred](int32_t toastId) mutable {
+        napi_handle_scope scope = nullptr;
+        auto status = napi_open_handle_scope(env, &scope);
+        if ((status != napi_ok) || (scope == nullptr)) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG,
+                     "toastCallback failed to open the scope of the handle.");
+            return;
+        }
         napi_value napiToastId = nullptr;
         napi_create_int32(env, toastId, &napiToastId);
         napi_resolve_deferred(env, deferred, napiToastId);
+        napi_close_handle_scope(env, scope);
     };
     if (ShowToast(env, toastInfo, toastCallback)) {
         return result;
