@@ -3584,13 +3584,18 @@ RefPtr<FrameNode> OverlayManager::UpdateCustomDialogInner(
     dialogLayoutProp->UpdateDialogAlignment(dialogProps.alignment);
     dialogLayoutProp->UpdateDialogOffset(dialogProps.offset);
     dialogLayoutProp->UpdateAutoCancel(dialogProps.autoCancel);
-    auto dialogContext = dialogNode->GetRenderContext();
-    CHECK_NULL_RETURN(dialogContext, nullptr);
-    auto pipelineContext = dialogNode->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
-    CHECK_NULL_RETURN(dialogTheme, nullptr);
-    dialogContext->UpdateBackgroundColor(dialogProps.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(dialogPattern, nullptr);
+    auto maskNode = dialogPattern->GetMaskNode();
+    if (maskNode) {
+        auto pipelineContext = dialogNode->GetContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+        CHECK_NULL_RETURN(dialogTheme, nullptr);
+        auto maskContext = maskNode->GetRenderContext();
+        CHECK_NULL_RETURN(maskContext, nullptr);
+        maskContext->UpdateBackgroundColor(dialogProps.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+    }
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     return dialogNode;
 }

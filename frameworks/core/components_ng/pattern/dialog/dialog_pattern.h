@@ -368,6 +368,7 @@ public:
     {
         return extraMaskNode_;
     }
+    RefPtr<FrameNode> GetMaskNode();
 
 private:
     bool AvoidKeyboard() const override
@@ -439,7 +440,6 @@ private:
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
     void UpdateTitleAndContentColor();
     void UpdateMaskColor();
-    RefPtr<FrameNode> GetMaskNode();
     void UpdateDialogTextColor(const RefPtr<FrameNode>& textNode, const TextStyle& textStyle);
     void UpdateAlignmentAndOffset();
     void DumpBoolProperty();
