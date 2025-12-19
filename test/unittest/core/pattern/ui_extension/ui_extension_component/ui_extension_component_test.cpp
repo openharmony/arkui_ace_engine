@@ -332,7 +332,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternCallbackTest, TestSize.Le
     ASSERT_NE(pattern, nullptr);
 
     pattern->AttachToFrameNode(uiExtNode);
-    auto sessionWrapper = AceType::DynamicCast<SessionWrapperImpl>(pattern->sessionWrapper_);
+    auto sessionWrapper =
+        AceType::DynamicCast<SessionWrapperImpl>(pattern->sessionWrapper_);
     ASSERT_NE(sessionWrapper, nullptr);
     EXPECT_EQ(pattern->instanceId_, Container::CurrentId());
     EXPECT_EQ(pattern->instanceId_, sessionWrapper->instanceId_);
@@ -1646,7 +1647,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest010, TestSize.Level
     ASSERT_EQ(pattern->accessibilityChildTreeCallback_, nullptr);
     pattern->OnUeaAccessibilityEventAsync();
 
-    pattern->accessibilityChildTreeCallback_ = std::make_shared<UIExtensionAccessibilityChildTreeCallback>(pattern, 1);
+    pattern->accessibilityChildTreeCallback_ =
+        std::make_shared<UIExtensionAccessibilityChildTreeCallback>(pattern, 1);
     ASSERT_NE(pattern->accessibilityChildTreeCallback_, nullptr);
 
     auto frameNode = pattern->frameNode_.Upgrade();
