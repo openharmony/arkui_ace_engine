@@ -169,6 +169,61 @@ PersistenceV2.persistenceV2Impl_ = PersistenceV2Impl.instance();
 const Type = __Type__;
 
 /**
+ * When a custom component initialization is about to be completed, the function 
+ * decorated by the decorator will be executed.
+ */
+const ComponentInit = componentInitInternal;
+
+/**
+ * The function decorated by the decorator is executed after a new instance of the 
+ * custom component is created, before its build() function is executed.
+ */
+const ComponentAppear = componentAppearInternal;
+
+/**
+ * The function decorated by the decorator is executed after a new instance of the 
+ * custom component is built, after its build() function is executed.
+ */
+const ComponentBuilt = componentBuiltInternal;
+
+/**
+ * The function decorated by the decorator is executed when a custom component is 
+ * attached to the main tree.
+ */
+const ComponentAttach = componentAttachInternal;
+
+/**
+ * The function decorated by the decorator is executed when a custom component is 
+ * detached from the main tree.
+ */
+const ComponentDetach = componentDetachInternal;
+
+/**
+ * The function decorated by the decorator is invoked when a reusable custom component 
+ * is re-added to the node tree from the reuse cache to receive construction parameters
+ * of the component.
+ */
+const ComponentReuse = componentReuseInternal;
+
+/**
+ * The function decorated by the decorator is invoked from the native side function 
+ * 'CustomNodeBase::SetRecycleFunction' when the component is about to be recycled.
+ * It first calls the function in the application, and performs the necessary actions
+ * defined in the application before recycling.
+ * Then, it freezes the component to avoid performing UI updates when its in recycle 
+ * pool.
+ * Finally recursively traverses all subcomponents, calling the function on each 
+ * subcomponent that is about to be recycled, preparing them for recycling as well.
+ */
+const ComponentRecycle = componentRecycleInternal;
+
+/**
+ * The function decorated by the decorator is executed before the custom component 
+ * is about to be disappeared.
+ */
+const ComponentDisappear = componentDisappearInternal;
+
+/**
  * UIUtils is a state management tool class for operating the observed data.
  *
  * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -211,6 +266,19 @@ class UIUtils {
    */
   static getTarget(source) {
     return UIUtils.uiUtilsImpl_.getTarget(source);
+  }
+
+  /**
+   * The getLifecycle function gets the lifecycle instance of the class CustomComponent.
+   * 
+   * @param {T} source custom component instance
+   * @returns 
+   */
+  static getLifecycle(source) {
+    if (source && typeof source.__getLifecycle__Internal === 'function') {
+      return source.__getLifecycle__Internal();
+    }
+    return null;
   }
 
   /**
@@ -360,5 +428,13 @@ export default {
   AppStorageV2,
   PersistenceV2,
   Type,
-  UIUtils
+  UIUtils,
+  ComponentInit,
+  ComponentAppear,
+  ComponentBuilt,
+  ComponentAttach,
+  ComponentDetach,
+  ComponentReuse,
+  ComponentRecycle,
+  ComponentDisappear
 };

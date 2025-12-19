@@ -693,6 +693,14 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         recycleNode->ResetRecycle();
     };
 
+    auto triggerLifecycleFunc = [weak = AceType::WeakClaim(this)](int32_t eventId) -> bool {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_RETURN(jsView, false);
+        CHECK_NULL_RETURN(jsView->jsViewFunction_, false);
+        ContainerScope scope(jsView->GetInstanceId());
+        return jsView->jsViewFunction_->ExecuteTriggerLifecycle(eventId);
+    };
+
     auto setActiveFunc = [weak = AceType::WeakClaim(this)](bool active, bool isReuse = false) -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
@@ -766,6 +774,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         .getThisFunc = std::move(getThisFunc),
         .recycleFunc = std::move(recycleFunc),
         .reuseFunc = std::move(reuseFunc),
+        .triggerLifecycleFunc = std::move(triggerLifecycleFunc),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout() ||
                               jsViewFunction_->HasMeasureSize() || jsViewFunction_->HasPlaceChildren(),
         .isStatic = IsStatic(),
