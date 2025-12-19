@@ -727,8 +727,9 @@ void TextPickerPattern::OnModifyDone()
     }
     ClearFocus();
     OnColumnsBuilding();
-    FlushOptions();
+    // Calculating height before flushing options is because calculating shiftDistance depends on the height.
     CalculateHeight();
+    FlushOptions();
     SetCallBack();
     InitFocusEvent();
     InitDisabled();
