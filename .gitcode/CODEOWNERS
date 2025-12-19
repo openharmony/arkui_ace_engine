@@ -256,6 +256,7 @@ component_ext/arc_swiper/
 component_ext/BUILD.gn @arkui_architecture
 component_ext/ext_common/
 component_ext/movingphoto/ @arkuiadvancedcomponent
+component_ext/movingphoto_ani/ @arkuiadvancedcomponent
 
 [Examples]
 examples/ @arkuipopupwindow_all
