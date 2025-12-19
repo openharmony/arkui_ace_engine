@@ -72,6 +72,7 @@ struct BarItem;
 struct KeyboardOptions;
 struct NavDestinationTransition;
 struct NavigationBackgroundOptions;
+struct NavigationTextOptions;
 struct NavigationBarOptions;
 struct NavigationOptions;
 struct NavigationTitlebarOptions;
@@ -644,6 +645,7 @@ namespace Converter {
     template<> NG::NavToolbarItemStatus Convert(const Ark_ToolbarItemStatus& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src);
+    template<> NG::NavigationTextOptions Convert(const Ark_NavigationTitleOptions& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_NavigationToolbarOptions& src);
     template<> NG::NavigationBarOptions Convert(const Ark_NavigationTitleOptions& src);
     template<> NG::NavigationBarOptions Convert(const Ark_NavigationToolbarOptions& src);

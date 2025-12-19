@@ -19615,6 +19615,34 @@ void impl_TabsAttribute_setBarWidth(Ark_NativePointer thisPtr, KSerializerBuffer
         GetNodeModifiers()->getTabsModifier()->setBarWidth(self, static_cast<Opt_Length*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TabsAttribute_setBarWidth, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_TabsAttribute_setBarHeight0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Length valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int8 valueValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
+            Ark_Length valueValueTempTmpBuf_ = {};
+            valueValueTempTmpBuf_.selector = valueValueTempTmpBuf_UnionSelector;
+            if (valueValueTempTmpBuf_UnionSelector == 0) {
+                valueValueTempTmpBuf_.selector = 0;
+                valueValueTempTmpBuf_.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+            } else if (valueValueTempTmpBuf_UnionSelector == 1) {
+                valueValueTempTmpBuf_.selector = 1;
+                valueValueTempTmpBuf_.value1 = thisDeserializer.readFloat64();
+            } else if (valueValueTempTmpBuf_UnionSelector == 2) {
+                valueValueTempTmpBuf_.selector = 2;
+                valueValueTempTmpBuf_.value2 = Resource_serializer::read(thisDeserializer);
+            } else {
+                INTEROP_FATAL("One of the branches for valueValueTempTmpBuf_ has to be chosen through deserialisation.");
+            }
+            valueValueTempTmpBuf.value = static_cast<Ark_Length>(valueValueTempTmpBuf_);
+        }
+        Opt_Length valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getTabsModifier()->setBarHeight0(self, static_cast<Opt_Length*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(TabsAttribute_setBarHeight0, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TabsAttribute_setAnimationCurve(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -19951,7 +19979,7 @@ void impl_TabsAttribute_setBarMode(Ark_NativePointer thisPtr, KSerializerBuffer 
         GetNodeModifiers()->getTabsModifier()->setBarMode(self, static_cast<Opt_BarMode*>(&valueValueTemp), static_cast<Opt_ScrollableBarModeOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(TabsAttribute_setBarMode, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_TabsAttribute_setBarHeight(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_TabsAttribute_setBarHeight1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto heightValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -19983,9 +20011,9 @@ void impl_TabsAttribute_setBarHeight(Ark_NativePointer thisPtr, KSerializerBuffe
             noMinHeightLimitValueTempTmpBuf.value = thisDeserializer.readBoolean();
         }
         Opt_Boolean noMinHeightLimitValueTemp = noMinHeightLimitValueTempTmpBuf;;
-        GetNodeModifiers()->getTabsModifier()->setBarHeight(self, static_cast<Opt_Length*>(&heightValueTemp), static_cast<Opt_Boolean*>(&noMinHeightLimitValueTemp));
+        GetNodeModifiers()->getTabsModifier()->setBarHeight1(self, static_cast<Opt_Length*>(&heightValueTemp), static_cast<Opt_Boolean*>(&noMinHeightLimitValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(TabsAttribute_setBarHeight, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(TabsAttribute_setBarHeight1, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_TabsAttribute_setBarBackgroundBlurStyle1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

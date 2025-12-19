@@ -25385,6 +25385,8 @@ typedef struct GENERATED_ArkUITabsModifier {
                           const Opt_Boolean* value);
     void (*setBarWidth)(Ark_NativePointer node,
                         const Opt_Length* value);
+    void (*setBarHeight0)(Ark_NativePointer node,
+                         const Opt_Length* value);
     void (*setAnimationCurve)(Ark_NativePointer node,
                               const Opt_Union_Curve_ICurve* value);
     void (*setAnimationDuration)(Ark_NativePointer node,
@@ -25432,7 +25434,7 @@ typedef struct GENERATED_ArkUITabsModifier {
     void (*setBarMode)(Ark_NativePointer node,
                        const Opt_BarMode* value,
                        const Opt_ScrollableBarModeOptions* options);
-    void (*setBarHeight)(Ark_NativePointer node,
+    void (*setBarHeight1)(Ark_NativePointer node,
                          const Opt_Length* height,
                          const Opt_Boolean* noMinHeightLimit);
     void (*setBarBackgroundBlurStyle1)(Ark_NativePointer node,
