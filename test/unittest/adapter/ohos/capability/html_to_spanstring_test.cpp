@@ -708,13 +708,15 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert005, TestSize.Level1)
      */
     auto spanString = AceType::MakeRefPtr<SpanString>(u"");
 
-    // Convert to TLV format
+    /**
+     * tc.steps2: Convert to TLV format and check buff size.
+     */
     std::vector<uint8_t> buff;
     spanString->EncodeTlv(buff);
-    EXPECT_EQ(buff.size(), 16);
+    EXPECT_EQ(buff.size(), 19);
 
     /**
-     * @tc.steps2: Convert the TLV buffer to HTML.
+     * @tc.steps3: Convert the TLV buffer to HTML.
      * @tc.expected: The HTML string should match the result of directly converting the SpanString to HTML.
      */
     SpanToHtml toHtml;
@@ -723,7 +725,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert005, TestSize.Level1)
     EXPECT_EQ(htmlFromU8, htmlFromSpan);
 
     /**
-     * @tc.steps3: Convert the HTML back to SpanString and verify if it matches the original SpanString.
+     * @tc.steps4: Convert the HTML back to SpanString and verify if it matches the original SpanString.
      * @tc.expected: The SpanString obtained from the HTML should match the original SpanString.
      */
     HtmlToSpan toSpan;
@@ -731,7 +733,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert005, TestSize.Level1)
     EXPECT_EQ(IsSpanItemSame(spanFromHtml->GetSpanItems(), spanString->GetSpanItems()), true);
 
     /**
-     * @tc.steps4: Convert back to HTML and verify that it matches the initial HTML result.
+     * @tc.steps5: Convert back to HTML and verify that it matches the initial HTML result.
      * @tc.expected: The final HTML should match the HTML obtained earlier.
      */
     SpanToHtml toHtml1;

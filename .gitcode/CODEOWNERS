@@ -3541,6 +3541,7 @@ test/mock/core/animation/mock_animation_proxy.h @arkuiscroll
 test/mock/core/animation/mock_implicit_animation.h @arkuiscroll
 test/mock/core/animation/mock_implicit_animation.cpp @arkuiscroll
 test/unittest/adapter/ @arkui_framework_xnode
+test/unittest/adapter/ohos/capability/html_to_spanstring_test.cpp @huawei_g_five
 test/unittest/core/accessibility/ @ArkUI_ability_group
 test/unittest/core/animation/ @arkuicodepulse
 test/unittest/core/base/ @arkui_framework_xnode
