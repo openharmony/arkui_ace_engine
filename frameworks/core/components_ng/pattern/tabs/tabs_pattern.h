@@ -171,6 +171,7 @@ public:
         OnUpdateShowDivider();
     }
 
+    void OnColorConfigurationUpdate() override;
     void OnColorModeChange(uint32_t colorMode) override;
     void DumpInfo() override;
 
