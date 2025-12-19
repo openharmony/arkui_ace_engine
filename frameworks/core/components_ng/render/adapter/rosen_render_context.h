@@ -639,7 +639,7 @@ protected:
 
     void OnUseEffectUpdate(bool useEffect) override;
     void OnUseEffectTypeUpdate(EffectType effectType) override;
-    void OnUseUnionUpdate(bool useUnion) override;
+    void OnUseUnionEffectUpdate(bool useUnion) override;
     bool GetStatusByEffectTypeAndWindow() override;
     void OnUseShadowBatchingUpdate(bool useShadowBatching) override;
     void OnFreezeUpdate(bool isFreezed) override;

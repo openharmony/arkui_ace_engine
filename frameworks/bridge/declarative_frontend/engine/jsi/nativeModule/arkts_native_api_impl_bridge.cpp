@@ -7185,6 +7185,10 @@ void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetChainWeight));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetChainWeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetChainWeight));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setUseUnionEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetUseUnionEffect));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetUseUnionEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetUseUnionEffect));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 }
 

@@ -3158,7 +3158,7 @@ void RosenRenderContext::OnUseEffectTypeUpdate(EffectType effectType)
     OnUseEffectUpdate(useEffect);
 }
 
-void RosenRenderContext::OnUseUnionUpdate(bool useUnion)
+void RosenRenderContext::OnUseUnionEffectUpdate(bool useUnion)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetUseUnion(useUnion);

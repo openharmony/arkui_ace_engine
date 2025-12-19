@@ -672,6 +672,6 @@ const char CONTAINER_PICKER_ETS_TAG[] = "Picker";
 // UndefinedNode
 const char UNDEFINED_NODE_ETS_TAG[] = "";
 
-// UnionContainer
-const char UNION_CONTAINER_ETS_TAG[] = "UnionContainer";
+// UnionEffectContainer
+const char UNION_EFFECT_CONTAINER_ETS_TAG[] = "UnionEffectContainer";
 } // namespace OHOS::Ace::V2

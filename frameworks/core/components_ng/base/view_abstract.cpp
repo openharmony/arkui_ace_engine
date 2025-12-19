@@ -6923,7 +6923,7 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType
 
 void ViewAbstract::SetUseUnion(FrameNode* frameNode, bool useUnion)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(UseUnion, useUnion, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(UseUnionEffect, useUnion, frameNode);
 }
 
 void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)

@@ -142,7 +142,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_union_container.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_union_effect_container.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow.h"
@@ -606,7 +606,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSPinchRecognizer::JSBind(globalObj);
     JSRotationRecognizer::JSBind(globalObj);
     JSTouchRecognizer::JSBind(globalObj);
-    JSUnionContainer::JSBind(globalObj);
+    JSUnionEffectContainer::JSBind(globalObj);
 }
 
 void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)

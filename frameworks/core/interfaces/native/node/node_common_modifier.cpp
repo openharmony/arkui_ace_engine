@@ -9639,6 +9639,20 @@ void ResetSystemMaterial(ArkUINodeHandle node)
     ViewAbstract::SetSystemMaterial(frameNode, nullptr);
 }
 
+void SetUseUnionEffect(ArkUINodeHandle node, bool useUnion)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetUseUnion(frameNode, useUnion);
+}
+
+void ResetUseUnionEffect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetUseUnion(frameNode, false);
+}
+
 void SetFreeze(ArkUINodeHandle node, ArkUI_Bool freeze)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -10999,6 +11013,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .setMaterialFilter = SetMaterialFilter,
         .resetMaterialFilter = ResetMaterialFilter,
         .getIgnoreLayoutSafeAreaOpts = GetIgnoreLayoutSafeAreaOpts,
+        .setUseUnionEffect = SetUseUnionEffect,
+        .resetUseUnionEffect = ResetUseUnionEffect,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -3170,6 +3170,8 @@ struct ArkUICommonModifier {
     void (*setMaterialFilter)(ArkUINodeHandle node, void* filter);
     void (*resetMaterialFilter)(ArkUINodeHandle node);
     ArkUIIgnoreLayoutSafeAreaOpts (*getIgnoreLayoutSafeAreaOpts)(ArkUINodeHandle node);
+    void (*setUseUnionEffect)(ArkUINodeHandle node, bool useUnion);
+    void (*resetUseUnionEffect)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
