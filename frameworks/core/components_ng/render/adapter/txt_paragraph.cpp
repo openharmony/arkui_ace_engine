@@ -776,16 +776,24 @@ bool TxtParagraph::GetWordBoundary(int32_t offset, int32_t& start, int32_t& end)
 void TxtParagraph::HandleTextAlign(CaretMetricsF& result, TextAlign align)
 {
     auto width = GetMaxWidth();
+    const bool isRTL = paraStyle_.direction == TextDirection::RTL;
     float offsetX = 0.0f;
     switch (align) {
         case TextAlign::CENTER:
             offsetX = width * 0.5f;
             break;
+        case TextAlign::RIGHT:
         case TextAlign::END:
             offsetX = width;
             break;
+        case TextAlign::JUSTIFY:
+            offsetX = isRTL ? width : 0.0f;
+            break;
         case TextAlign::START:
+        case TextAlign::LEFT:
+            break;
         default:
+            TAG_LOGW(AceLogTag::ACE_TEXT, "Unknown TextAlign value: %{public}d", static_cast<int>(align));
             break;
     }
     result.offset.SetX(offsetX);
