@@ -15,7 +15,7 @@
  * 
  */
 
-enum CustomComponentLifecycleState {
+enum __CustomComponentLifecycleState__Internal {
     INIT = 0,
     APPEARED = 1,
     BUILT = 2,
@@ -35,34 +35,34 @@ enum LifeCycleEvent {
 }
 
 // the state transition table of node lifecycle.
-const transitionTable: { [key in CustomComponentLifecycleState]: { [key in LifeCycleEvent]?: CustomComponentLifecycleState } } = {
-    [CustomComponentLifecycleState.INIT]: {
-        [LifeCycleEvent.ON_APPEAR]: CustomComponentLifecycleState.APPEARED,
-        [LifeCycleEvent.ON_DISAPPEAR]: CustomComponentLifecycleState.DISAPPEARED  
+const transitionTable: { [key in __CustomComponentLifecycleState__Internal]: { [key in LifeCycleEvent]?: __CustomComponentLifecycleState__Internal } } = {
+    [__CustomComponentLifecycleState__Internal.INIT]: {
+        [LifeCycleEvent.ON_APPEAR]: __CustomComponentLifecycleState__Internal.APPEARED,
+        [LifeCycleEvent.ON_DISAPPEAR]: __CustomComponentLifecycleState__Internal.DISAPPEARED  
     },
-    [CustomComponentLifecycleState.APPEARED]: {
-        [LifeCycleEvent.ON_BUILD]: CustomComponentLifecycleState.BUILT
+    [__CustomComponentLifecycleState__Internal.APPEARED]: {
+        [LifeCycleEvent.ON_BUILD]: __CustomComponentLifecycleState__Internal.BUILT
     },
-    [CustomComponentLifecycleState.BUILT]: {
-        [LifeCycleEvent.ON_ATTACH]: CustomComponentLifecycleState.MOUNTED,
-        [LifeCycleEvent.ON_RECYCLE]: CustomComponentLifecycleState.RECYCLED,
-        [LifeCycleEvent.ON_DISAPPEAR]: CustomComponentLifecycleState.DISAPPEARED
+    [__CustomComponentLifecycleState__Internal.BUILT]: {
+        [LifeCycleEvent.ON_ATTACH]: __CustomComponentLifecycleState__Internal.MOUNTED,
+        [LifeCycleEvent.ON_RECYCLE]: __CustomComponentLifecycleState__Internal.RECYCLED,
+        [LifeCycleEvent.ON_DISAPPEAR]: __CustomComponentLifecycleState__Internal.DISAPPEARED
     },
-    [CustomComponentLifecycleState.MOUNTED]: {
-        [LifeCycleEvent.ON_DETACH]: CustomComponentLifecycleState.BUILT
+    [__CustomComponentLifecycleState__Internal.MOUNTED]: {
+        [LifeCycleEvent.ON_DETACH]: __CustomComponentLifecycleState__Internal.BUILT
     },
-    [CustomComponentLifecycleState.RECYCLED]: {
-        [LifeCycleEvent.ON_REUSE]: CustomComponentLifecycleState.BUILT,
-        [LifeCycleEvent.ON_DISAPPEAR]: CustomComponentLifecycleState.DISAPPEARED
+    [__CustomComponentLifecycleState__Internal.RECYCLED]: {
+        [LifeCycleEvent.ON_REUSE]: __CustomComponentLifecycleState__Internal.BUILT,
+        [LifeCycleEvent.ON_DISAPPEAR]: __CustomComponentLifecycleState__Internal.DISAPPEARED
     },
-    [CustomComponentLifecycleState.DISAPPEARED]: {
+    [__CustomComponentLifecycleState__Internal.DISAPPEARED]: {
     }
 }
 
 // the lifecycle class of custom node.
 class CustomComponentLifecycle {
     public __reusableUpdateParams__: Record<string, Object> = {};
-    private currentState_: CustomComponentLifecycleState = CustomComponentLifecycleState.INIT;
+    private currentState_: __CustomComponentLifecycleState__Internal = __CustomComponentLifecycleState__Internal.INIT;
     private owningView_: PUV2ViewBase;
     private observers_: Array<CustomComponentLifecycleObserver> = new Array<CustomComponentLifecycleObserver>();
     
@@ -70,7 +70,7 @@ class CustomComponentLifecycle {
         this.owningView_ = view;
     }
 
-    public getCurrentState(): CustomComponentLifecycleState {
+    public getCurrentState(): __CustomComponentLifecycleState__Internal {
         return this.currentState_;
     }
 
@@ -236,3 +236,116 @@ interface CustomComponentLifecycleObserver {
 
     aboutToRecycle?(): void;
 }
+
+function __componentInit__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const watchProp = Symbol.for('INIT_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentInitFunction = descriptor.value;
+  if (componentInitFunction && typeof componentInitFunction === 'function') {
+    if (!target[watchProp]) {
+      const componentInitFunctionArray: Array<Function> = new Array<Function>();
+      componentInitFunctionArray.push(componentInitFunction as Function);
+      target[watchProp] = componentInitFunctionArray;
+    } else {
+      target[watchProp].push(componentInitFunction as Function);
+    }
+  }
+}
+
+function __componentAppear__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const watchProp = Symbol.for('APPEAR_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentAppearFunction = descriptor.value;
+  if (componentAppearFunction && typeof componentAppearFunction === 'function') {
+    if (!target[watchProp]) {
+      const componentAppearFunctionArray: Array<Function> = new Array<Function>();
+      componentAppearFunctionArray.push(componentAppearFunction as Function);
+      target[watchProp] = componentAppearFunctionArray;
+    } else {
+      target[watchProp].push(componentAppearFunction as Function);
+    }
+  }
+}
+
+function __componentBuilt__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const watchProp = Symbol.for('BUILT_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentBuiltFunction = descriptor.value;
+  if (componentBuiltFunction && typeof componentBuiltFunction === 'function') {
+    if (!target[watchProp]) {
+      const componentBuiltFunctionArray: Array<Function> = new Array<Function>();
+      componentBuiltFunctionArray.push(componentBuiltFunction as Function);
+      target[watchProp] = componentBuiltFunctionArray;
+    } else {
+      target[watchProp].push(componentBuiltFunction as Function);
+    }
+  }
+}
+
+function __componentAttach__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const watchProp = Symbol.for('ATTACH_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentAttachFunction = descriptor.value;
+  if (componentAttachFunction && typeof componentAttachFunction === 'function') {
+    if (!target[watchProp]) {
+      const componentAttachFunctionArray: Array<Function> = new Array<Function>();
+      componentAttachFunctionArray.push(componentAttachFunction as Function);
+      target[watchProp] = componentAttachFunctionArray;
+    } else {
+      target[watchProp].push(componentAttachFunction as Function);
+    }
+  }
+}
+
+function __componentDetach__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const watchProp = Symbol.for('DETACH_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentDetachFunction = descriptor.value;
+  if (componentDetachFunction && typeof componentDetachFunction === 'function') {
+    if (!target[watchProp]) {
+      const componentDetachFunctionArray: Array<Function> = new Array<Function>();
+      componentDetachFunctionArray.push(componentDetachFunction as Function);
+      target[watchProp] = componentDetachFunctionArray;
+    } else {
+      target[watchProp].push(componentDetachFunction as Function);
+    }
+  }
+}
+
+function __componentReuse__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const watchProp = Symbol.for('REUSE_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentReuseFunction = descriptor.value;
+  if (componentReuseFunction && typeof componentReuseFunction === 'function') {
+    if (!target[watchProp]) {
+      const componentReuseFunctionArray: Array<Function> = new Array<Function>();
+      componentReuseFunctionArray.push(componentReuseFunction as Function);
+      target[watchProp] = componentReuseFunctionArray;
+    } else {
+      target[watchProp].push(componentReuseFunction as Function);
+    }
+  }
+}
+
+function __componentRecycle__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const watchProp = Symbol.for('RECYCLE_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentRecycleFunction = descriptor.value;
+  if (componentRecycleFunction && typeof componentRecycleFunction === 'function') {
+    if (!target[watchProp]) {
+      const componentRecycleFunctionArray: Array<Function> = new Array<Function>();
+      componentRecycleFunctionArray.push(componentRecycleFunction as Function);
+      target[watchProp] = componentRecycleFunctionArray;
+    } else {
+      target[watchProp].push(componentRecycleFunction as Function);
+    }
+  }
+}
+
+function __componentDisappear__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
+  const watchProp = Symbol.for('DISAPPEAR_INTERNAL_FUNCTION' + target.constructor.name);
+  const componentDisappearFunction = descriptor.value;
+  if (componentDisappearFunction && typeof componentDisappearFunction === 'function') {
+    if (!target[watchProp]) {
+      const componentDisappearFunctionArray: Array<Function> = new Array<Function>();
+      componentDisappearFunctionArray.push(componentDisappearFunction as Function);
+      target[watchProp] = componentDisappearFunctionArray;
+    } else {
+      target[watchProp].push(componentDisappearFunction as Function);
+    }
+  }
+}
+
