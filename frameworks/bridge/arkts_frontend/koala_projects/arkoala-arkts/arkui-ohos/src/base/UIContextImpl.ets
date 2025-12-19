@@ -1164,6 +1164,7 @@ export class CursorControllerImpl extends CursorController {
 export interface DetachedRootEntry {
     compute(): void;
     dispose(): void;
+    forceCompleteRerender(): void;
 }
 
 export class DetachedRootEntryImpl<T extends IncrementalNode> implements DetachedRootEntry {
@@ -1178,6 +1179,10 @@ export class DetachedRootEntryImpl<T extends IncrementalNode> implements Detache
 
     dispose(): void {
         this.entry.dispose();
+    }
+
+    forceCompleteRerender(): void {
+        this.entry.forceCompleteRerender();
     }
 }
 

@@ -29585,14 +29585,18 @@ typedef struct GENERATED_ArkUITextTimerControllerAccessor {
 
 typedef struct GENERATED_ArkUIThemeOpsAccessor {
     void (*sendThemeToNative)(const Array_ResourceColor* colorArray,
-                              Ark_Int32 elmtId);
+                              const Array_ResourceColor* darkColorArray,
+                              Ark_Int32 elmtId,
+                              Ark_Boolean darkSetStatus);
     void (*setDefaultTheme)(const Array_ResourceColor* colorArray,
                             Ark_Boolean isDark);
     void (*createAndBindTheme)(Ark_Int32 themeScopeId,
                                Ark_Int32 themeId,
                                const Array_ResourceColor* colorArray,
+                               const Array_ResourceColor* darkColorArray,
                                Ark_ThemeColorMode colorMode,
-                               const Callback_Void* onThemeScopeDestroy);
+                               const Callback_Void* onThemeScopeDestroy,
+                               Ark_Boolean darkSetStatus);
     void (*applyThemeScopeIdToNode)(Ark_NativePointer ptr,
                                     Ark_Int32 themeScopeId);
 } GENERATED_ArkUIThemeOpsAccessor;

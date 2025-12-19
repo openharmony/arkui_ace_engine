@@ -25,6 +25,7 @@ export function hookWithThemeOptions(receiver: ArkWithThemeComponent, options: W
     const colorMode = options?.colorMode ?? ThemeColorMode.SYSTEM;
     const cloneTheme = ArkThemeScopeManager.cloneCustomThemeWithExpand(options?.theme);
     const theme: ArkThemeBase = ArkThemeScopeManager.getInstance().makeTheme(cloneTheme, colorMode);
+    const darkSetStatus: boolean = !!cloneTheme?.darkColors;
     // bind theme to theme scope with elmtId
     theme.bindToScope(elmtId);
 
@@ -39,9 +40,9 @@ export function hookWithThemeOptions(receiver: ArkWithThemeComponent, options: W
     };
 
     // keep for backward compatibility
-    ArkThemeNativeHelper.sendThemeToNative(theme, elmtId);
+    ArkThemeNativeHelper.sendThemeToNative(theme, elmtId, darkSetStatus);
     // new approach to apply theme in native side
-    ArkThemeNativeHelper.createInternal(elmtId, theme.id, cloneTheme, colorMode, onThemeScopeDestroy);
+    ArkThemeNativeHelper.createInternal(elmtId, theme.id, cloneTheme, colorMode, onThemeScopeDestroy, darkSetStatus);
 
     ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, options ?? ({} as WithThemeOptions), theme);
 }

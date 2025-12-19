@@ -27,17 +27,19 @@ import { ThemeOps } from 'arkui/component/idlize';
 import { GlobalStateManager } from '@koalaui/runtime';
 
 export class ArkThemeNativeHelper {
-    static sendThemeToNative(theme: Theme, elmtId: int32): void {
-        const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme);
-        ThemeOps.sendThemeToNative(colorArray, elmtId);
+    static sendThemeToNative(theme: Theme, elmtId: int32, darkSetStatus: boolean): void {
+        const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme, false);
+        const darkColorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme, true);
+        ThemeOps.sendThemeToNative(colorArray, darkColorArray, elmtId, darkSetStatus);
     }
     static setDefaultTheme(theme: CustomTheme | undefined): void {
-        const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme);
+        const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme, false);
+        const darkColorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme, true);
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.LIGHT);
         ThemeOps.setDefaultTheme(colorArray, false);
 
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.DARK);
-        ThemeOps.setDefaultTheme(colorArray, true);
+        ThemeOps.setDefaultTheme(darkColorArray, true);
         ArkThemeScopeManager.getInstance().onExitLocalColorMode();
     }
     static createInternal(
@@ -45,27 +47,33 @@ export class ArkThemeNativeHelper {
         themeId: int32,
         theme: CustomTheme | undefined,
         colorMode: ThemeColorMode,
-        onThemeScopeDestroy: () => void
+        onThemeScopeDestroy: () => void,
+        darkSetStatus: boolean
     ) {
         // set local color mode if need
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
             ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
         }
-        // const thisSerializer : Serializer = Serializer.hold();
-        const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme);
-        ThemeOps.createAndBindTheme(themeScopeId, themeId, colorArray, colorMode, onThemeScopeDestroy);
+        const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme, false);
+        const darkColorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme, true);
+
+        ThemeOps.createAndBindTheme(themeScopeId, themeId, colorArray, darkColorArray, colorMode, onThemeScopeDestroy, darkSetStatus);
 
         // reset local color mode if need
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
             ArkThemeScopeManager.getInstance().onExitLocalColorMode();
         }
     }
-    public static convertThemeToColorArray(theme: Theme | CustomTheme | undefined): ResourceColor[] {
+    public static convertThemeToColorArray(theme: Theme | CustomTheme | undefined, isDark: boolean): ResourceColor[] {
         const srcTheme: Theme = { colors: new ArkColorsImpl() };
         if (theme instanceof Theme) {
-            srcTheme.colors = theme.colors;
+            srcTheme.colors = isDark? theme.darkColors : theme.colors;
         } else if (theme instanceof CustomTheme) {
-            ArkColorsImpl.assign(srcTheme.colors, (theme as CustomTheme).colors!);
+            if (isDark) {
+                ArkColorsImpl.assign(srcTheme.colors, (theme as CustomTheme).darkColors!);
+            } else {
+                ArkColorsImpl.assign(srcTheme.colors, (theme as CustomTheme).colors!);
+            }
         }
         return [
             srcTheme.colors.brand,

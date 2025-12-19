@@ -32,6 +32,7 @@ export class ArkThemeImpl extends ArkThemeBase {
             customTheme,
             colorMode,
             new ArkColorsImpl(customTheme ? customTheme.colors : undefined, baselineTheme.colors),
+            new ArkColorsImpl(customTheme ? customTheme.darkColors : undefined, baselineTheme.darkColors),
             new ArkShapesImpl(
                 customTheme ? (customTheme as CustomThemeInternal).shapes : undefined,
                 baselineTheme.shapes

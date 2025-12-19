@@ -6103,11 +6103,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextTimerController_reset(ptr: KPointer): void
     @ani.unsafe.Direct
-    native static _ThemeOps_sendThemeToNative(thisArray: KSerializerBuffer, thisLength: int32, elmtId: KInt): void
+    native static _ThemeOps_sendThemeToNative(thisArray: KSerializerBuffer, thisLength: int32, elmtId: KInt, darkSetStatus: KInt): void
     @ani.unsafe.Direct
     native static _ThemeOps_setDefaultTheme(thisArray: KSerializerBuffer, thisLength: int32, isDark: KInt): void
     @ani.unsafe.Direct
-    native static _ThemeOps_createAndBindTheme(themeScopeId: KInt, themeId: KInt, thisArray: KSerializerBuffer, thisLength: int32, colorMode: KInt): void
+    native static _ThemeOps_createAndBindTheme(themeScopeId: KInt, themeId: KInt, thisArray: KSerializerBuffer, thisLength: int32, colorMode: KInt, darkSetStatus: KInt): void
     @ani.unsafe.Direct
     native static _ThemeOps_applyThemeScopeIdToNode(ptr: KPointer, themeScopeId: KInt): void
     @ani.unsafe.Direct
