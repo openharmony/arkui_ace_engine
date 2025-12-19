@@ -1051,6 +1051,28 @@ void ParseArrayResultNumber(std::vector<float>& indexes, NG::OffsetF offset)
     indexes.emplace_back(offset.GetY());
 }
 
+Array_Float64 ConvertPositionWithWindow(Ark_FrameNode peer, const Ark_Vector2* position, bool fromWindow)
+{
+    std::vector<float> indexes;
+    ParseArrayFailNumber(indexes);
+    auto errValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    CHECK_NULL_RETURN(position, errValue);
+    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(currentNode, errValue);
+    auto isOnMainTree = currentNode->IsOnMainTree();
+    if (!isOnMainTree) {
+        indexes[0] = 2; // 2 means not on main tree and will pass to js
+        return Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    }
+    auto xFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(position->x));
+    auto yFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(position->y));
+    auto offset = currentNode->ConvertPositionToWindow({ xFloat, yFloat }, fromWindow);
+    ParseArrayResultNumber(indexes,
+        { PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) });
+    auto resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    return resultValue;
+}
+
 Array_Float64 ConvertPointImpl(Ark_FrameNode peer, Ark_FrameNode node, const Ark_Vector2* vector2)
 {
     std::vector<float> indexes;
@@ -1075,39 +1097,14 @@ Array_Float64 ConvertPointImpl(Ark_FrameNode peer, Ark_FrameNode node, const Ark
     return resultValue;
 }
 
-Array_Float64 ConvertPositionToWindowImpl(Ark_FrameNode peer,
-                                          const Ark_Vector2* positionByLocal)
+Array_Float64 ConvertPositionToWindowImpl(Ark_FrameNode peer, const Ark_Vector2* positionByLocal)
 {
-    std::vector<float> indexes;
-    ParseArrayFailNumber(indexes);
-    auto errValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
-    CHECK_NULL_RETURN(positionByLocal, errValue);
-    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
-    CHECK_NULL_RETURN(currentNode, errValue);
-    auto xFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByLocal->x));
-    auto yFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByLocal->y));
-    auto offset = currentNode->ConvertPositionToWindow({ xFloat, yFloat }, false);
-    ParseArrayResultNumber(indexes,
-        { PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) });
-    auto resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
-    return resultValue;
+    return ConvertPositionWithWindow(peer, positionByLocal, false);
 }
 
 Array_Float64 ConvertPositionFromWindowImpl(Ark_FrameNode peer, const Ark_Vector2* positionByWindow)
 {
-    std::vector<float> indexes;
-    ParseArrayFailNumber(indexes);
-    auto errValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
-    CHECK_NULL_RETURN(positionByWindow, errValue);
-    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
-    CHECK_NULL_RETURN(currentNode, errValue);
-    auto xFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByWindow->x));
-    auto yFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByWindow->y));
-    auto offset = currentNode->ConvertPositionToWindow({ xFloat, yFloat }, true);
-    ParseArrayResultNumber(indexes,
-        { PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) });
-    auto resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
-    return resultValue;
+    return ConvertPositionWithWindow(peer, positionByWindow, true);
 }
 
 Ark_Int32 AdoptChildImpl(Ark_FrameNode peer, Ark_FrameNode child)
