@@ -203,9 +203,9 @@ public:
 
     void ReportSelectedText();
 
-    const RefPtr<PageInfo> GetLastPageInfo();
+    const RefPtr<PageInfo> GetLastPageInfo() const;
 
-    std::string GetNavDestinationPageName(const RefPtr<PageInfo>& pageInfo);
+    std::string GetNavDestinationPageName(const RefPtr<PageInfo>& pageInfo) const;
 
     std::string GetCurrentPageName();
 
@@ -1218,8 +1218,9 @@ public:
 
     bool GetContainerControlButtonVisible() override;
 
-    std::string GetBundleName();
-    std::string GetModuleName();
+    std::string GetBundleName() const;
+    std::string GetModuleName() const;
+    std::string GetWindowName() const;
 
     void SaveTranslateManager(std::shared_ptr<UiTranslateManagerImpl> uiTranslateManager)
     {
@@ -1352,6 +1353,7 @@ public:
         isCustomNodeDeleteInTransition_ = isCustomNodeDeleteInTransition;
     }
     RefPtr<ContentChangeManager>& GetContentChangeManager();
+    void GetAppInfo(std::shared_ptr<JsonValue>& root) const;
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,

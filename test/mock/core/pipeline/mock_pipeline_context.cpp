@@ -192,12 +192,17 @@ const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimize
     return clickOptimizer_;
 }
 
-std::string PipelineContext::GetBundleName()
+std::string PipelineContext::GetBundleName() const
 {
     return "";
 }
 
-std::string PipelineContext::GetModuleName()
+std::string PipelineContext::GetModuleName() const
+{
+    return "";
+}
+
+std::string PipelineContext::GetWindowName() const
 {
     return "";
 }
@@ -1568,12 +1573,12 @@ std::string NG::PipelineContext::GetCurrentPageNameCallback()
     return "";
 }
 
-const RefPtr<NG::PageInfo> NG::PipelineContext::GetLastPageInfo()
+const RefPtr<NG::PageInfo> NG::PipelineContext::GetLastPageInfo() const
 {
     return nullptr;
 }
 
-std::string NG::PipelineContext::GetNavDestinationPageName(const RefPtr<NG::PageInfo>& pageInfo)
+std::string NG::PipelineContext::GetNavDestinationPageName(const RefPtr<NG::PageInfo>& pageInfo) const
 {
     return "";
 }
@@ -1625,6 +1630,8 @@ RefPtr<NG::ContentChangeManager>& NG::PipelineContext::GetContentChangeManager()
 {
     return contentChangeMgr_;
 }
+
+void NG::PipelineContext::GetAppInfo(std::shared_ptr<JsonValue>& root) const {}
 
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}

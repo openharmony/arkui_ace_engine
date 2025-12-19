@@ -3089,6 +3089,11 @@ bool UIContentImpl::ProcessBackPressed()
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
+    taskExecutor->PostTask(
+        []() {
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "backpressed");
+        },
+        TaskExecutor::TaskType::UI, "ArkUIReportBackPressedEvent");
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     if (pipeline) {
         auto uiExtMgr = pipeline->GetUIExtensionManager();
