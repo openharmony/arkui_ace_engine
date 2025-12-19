@@ -373,6 +373,12 @@ HWTEST_F(DataPanelTestNg, DataPanelStaticTest001, TestSize.Level0)
      * @tc.steps: step3. get value from dataPanelPaintProperty.
      * @tc.expected: step3. the value is the same with setting.
      */
+    dataPanel.SetMax(frameNode.GetRawPtr(), MAX);
+    dataPanel.SetValues(frameNode.GetRawPtr(), VALUES);
+    dataPanel.SetType(frameNode.GetRawPtr(), TYPE_CYCLE);
+    EXPECT_TRUE(dataPanelPaintProperty->HasMax());
+    EXPECT_TRUE(dataPanelPaintProperty->HasValues());
+    EXPECT_TRUE(dataPanelPaintProperty->HasDataPanelType());
     EXPECT_EQ(dataPanelPaintProperty->GetMaxValue(), MAX);
     EXPECT_EQ(dataPanelPaintProperty->GetValuesValue(), VALUES);
     EXPECT_EQ(dataPanelPaintProperty->GetDataPanelTypeValue(), TYPE_CYCLE);
