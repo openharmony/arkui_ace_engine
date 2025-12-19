@@ -2411,6 +2411,8 @@ HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventTest001, TestSize.L
     container->SetUIExtensionSubWindow(true);
     jsAccessibilityManager->AddToPageEventController(root);
     jsAccessibilityManager->UpdatePageMode(std::string(""));
+    jsAccessibilityManager->treeId_ = 1;
+
     /**
      * @tc.steps: step2. save pages when in UIExtensionWindow
      */
@@ -2455,6 +2457,7 @@ HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventTest002, TestSize.L
     container->SetUIExtensionSubWindow(true);
     jsAccessibilityManager->AddToPageEventController(root);
     jsAccessibilityManager->UpdatePageMode(std::string(""));
+    jsAccessibilityManager->treeId_ = 1;
 
     /**
      * @tc.steps: step2. save pages when in UIExtensionWindow
@@ -4052,6 +4055,98 @@ HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventForUEA001, TestSize
     jsAccessibilityManager->UpdatePageMode(std::string("SEMI_SILENT"));
     ret = jsAccessibilityManager->IsSendAccessibilityEventForUEA(accessibilityEvent, componentType, pageId);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IsSendAccessibilityEventForUEA002
+ * @tc.desc: Test func IsSendAccessibilityEventForUEA
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventForUEA002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct IsSendAccessibilityEventForUEA
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test func ReleaseCacheEvent
+     */
+    AccessibilityEvent accessibilityEvent;
+    std::string componentType = V2::STAGE_ETS_TAG;
+    int32_t pageId = 2;
+
+    jsAccessibilityManager->UpdatePageMode(std::string("PAGE_MODE"));
+    jsAccessibilityManager->treeId_ = -1;
+    auto ret = jsAccessibilityManager->IsSendAccessibilityEventForUEA(accessibilityEvent, componentType, pageId);
+    EXPECT_FALSE(ret);
+    jsAccessibilityManager->treeId_ = 1;
+    ret = jsAccessibilityManager->IsSendAccessibilityEventForUEA(accessibilityEvent, componentType, pageId);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ReleaseUIExtCacheEvent001
+ * @tc.desc: Test func ReleaseUIExtCacheEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, ReleaseUIExtCacheEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto container = Platform::AceContainer::GetContainer(context->GetInstanceId());
+    ASSERT_NE(container, nullptr);
+    container->isUIExtensionSubWindow_ = true;
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    /**
+     * @tc.steps: step2. test func ReleaseUIExtCacheEvent
+     */
+    AccessibilityEvent accessibilityEvent;
+    jsAccessibilityManager->eventQueue_.push(accessibilityEvent);
+    jsAccessibilityManager->UpdatePageMode(std::string("PAGE_MODE"));
+    jsAccessibilityManager->ReleaseUIExtCacheEvent();
+    EXPECT_TRUE(jsAccessibilityManager->eventQueue_.empty());
+}
+
+/**
+ * @tc.name: SetBelongTreeId001
+ * @tc.desc: Test func SetBelongTreeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, SetBelongTreeId001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    /**
+     * @tc.steps: step2. construct JsInteractionOperation
+     */
+    auto jsInteractionOperation = std::make_shared<Framework::JsAccessibilityManager::JsInteractionOperation>(1);
+    ASSERT_NE(jsInteractionOperation, nullptr);
+    jsInteractionOperation->SetHandler(jsAccessibilityManager);
+
+    /**
+     * @tc.steps: step3. test func SetBelongTreeId
+     */
+    AccessibilityEvent accessibilityEvent;
+    jsAccessibilityManager->eventQueue_.push(accessibilityEvent);
+    jsAccessibilityManager->UpdatePageMode(std::string("FULL_SILENT"));
+    jsInteractionOperation->SetBelongTreeId(1);
+    EXPECT_TRUE(jsAccessibilityManager->eventQueue_.empty());
 }
 
 /**

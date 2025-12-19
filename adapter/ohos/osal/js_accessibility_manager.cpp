@@ -3210,6 +3210,17 @@ void JsAccessibilityManager::ReleaseCacheEvent()
     }
 }
 
+void JsAccessibilityManager::ReleaseUIExtCacheEvent()
+{
+    auto pipeline = context_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto container = Platform::AceContainer::GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    CHECK_NE_VOID(container->IsUIExtensionWindow(), true);
+    CHECK_NE_VOID(pageMode_.has_value(), true);
+    ReleaseCacheEvent();
+}
+
 bool JsAccessibilityManager::IsSendAccessibilityEventForUEA(
     const AccessibilityEvent& accessibilityEvent, const std::string& componentType, const int32_t pageId)
 {
@@ -3219,7 +3230,7 @@ bool JsAccessibilityManager::IsSendAccessibilityEventForUEA(
     }
     const auto& pageMode = pageMode_.value();
     if (pageMode.empty()) {
-        if (treeId_ == -1) {
+        if (treeId_ <= 0) {
             cacheEventVec_.push_back(accessibilityEvent);
             return false;
         }
@@ -3228,7 +3239,7 @@ bool JsAccessibilityManager::IsSendAccessibilityEventForUEA(
     if (!CheckSendAccessibilityEventByPageMode(pageMode, componentType, pageId)) {
         return false;
     }
-    if (treeId_ == -1) {
+    if (treeId_ <= 0) {
         cacheEventVec_.push_back(accessibilityEvent);
         return false;
     }
@@ -3522,7 +3533,9 @@ void JsAccessibilityManager::RegisterUIExtGetPageModeCallback(RefPtr<NG::UIExten
         TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
             "host send pageMode to uea, pageMode: %{public}s.", pageMode.c_str());
         accessibilityManager->UpdatePageMode(pageMode);
-        accessibilityManager->ReleaseCacheEvent();
+        if (accessibilityManager->IsRegister() && accessibilityManager->GetTreeId() > 0) {
+            accessibilityManager->ReleaseCacheEvent();
+        }
         return 0;
     };
     uiExtManager->RegisterBusinessDataConsumeCallback(NG::UIContentBusinessCode::SEND_PAGE_MODE_TO_UEA, callback);
@@ -7837,13 +7850,16 @@ void JsAccessibilityManager::JsInteractionOperation::SetBelongTreeId(const int32
     jsAccessibilityManager->treeId_ = treeId;
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
-    jsAccessibilityManager->SendCacheAccessibilityEvent(context->GetInstanceId());
+    auto instanceId = context->GetInstanceId();
+    jsAccessibilityManager->SendCacheAccessibilityEvent(instanceId);
     context->GetTaskExecutor()->PostTask(
-        [weak = GetHandler(), treeId] {
+        [weak = GetHandler(), treeId, instanceId] {
             auto jsAccessibilityManager = weak.Upgrade();
             CHECK_NULL_VOID(jsAccessibilityManager);
+            ContainerScope scope(instanceId);
             ACE_SCOPED_TRACE("SetBelongTreeId");
             jsAccessibilityManager->NotifyChildTreeOnRegister(treeId);
+            jsAccessibilityManager->ReleaseUIExtCacheEvent();
         },
         TaskExecutor::TaskType::UI, "ArkUIAccessibilityClearCurrentFocus");
 }

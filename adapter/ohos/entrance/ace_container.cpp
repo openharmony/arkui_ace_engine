@@ -565,6 +565,7 @@ void AceContainer::Destroy()
     RegisterContainerHandler(nullptr);
     resRegister_.Reset();
     assetManager_.Reset();
+    UnRegisterUIExtDataConsumer();
 }
 
 void AceContainer::DestroyView()
