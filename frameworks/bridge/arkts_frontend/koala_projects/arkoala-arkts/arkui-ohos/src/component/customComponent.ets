@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { __context, StateManager } from '@koalaui/runtime';
+import { __context, StateManager, remember, scheduleCallback } from '@koalaui/runtime';
 import { int32 } from '@koalaui/common';
 import { WrappedBuilder, CustomBuilderT } from "./builder"
 import { NavigationRouterMap, NavDestinationBuilder } from "#handwritten"
@@ -35,6 +35,7 @@ import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 import { ArkThemeScopeManager } from '../theme/ArkThemeScopeManager';
+import { transferTypeName } from '../stateManagement/storage/persistenceV2';
 /** @custom_components_common_method_imports */
 
 export class ReuseObject {
@@ -272,7 +273,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 
     fireAboutToReuse(param?: RecordData): void {
-        this.aboutToReuse(param, this.initializers?.());
+        this.aboutToReuse(param, this._initializers?.());
     }
 
     fireAboutToRecycle(): void {
@@ -290,6 +291,8 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     aboutToReuse(param: RecordData, initializers?: T_Options): void {
         if (this.instance instanceof ReusableLifeCycle) {
             ArkUIAniModule._CustomNode_OnReuse(this.getPeer()!.peer.ptr);
+            this.instance.__unfreezeWhenReuse__Internal();
+            StateUpdateLoop.clearFreezeTaskWhenReuse(this.getUniqueId());
             const reusable = this.instance as ReusableLifeCycle;
             if (param) {
                 reusable.aboutToReuse(new ReuseObject(param))
@@ -305,17 +308,23 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             }
         } else if (this.instance instanceof ReusableV2LifeCycle) {
             ArkUIAniModule._CustomNode_OnReuse(this.getPeer()!.peer.ptr);
-            const reusable = this.instance as ReusableV2LifeCycle;
+            const reusable = this.instance as ReusableV2LifeCycle<T_Options>;
+            const initializers0 = (this._initializers as (() => T_Options) | undefined)?.() as T_Options | undefined;
+            reusable.resetStateVarsOnReuse(initializers0);
+            this.instance.__unfreezeWhenReuse__Internal();
             reusable.aboutToReuse();
         } else {
             throw new Error('not an custom component');
         }
     }
     aboutToRecycle(): void {
-        if (this.instance instanceof BaseCustomComponent<T_Options>) {
+        if (this.instance instanceof ReusableLifeCycle || this.instance instanceof ReusableV2LifeCycle) {
             ArkUIAniModule._CustomNode_OnRecycle(this.getPeer()!.peer.ptr);
             const component = this.instance as BaseCustomComponent<T_Options>;
-            component.aboutToRecycle()
+            ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                component.aboutToRecycle(); // aboutToRecycle can change variable
+            });
+            this.instance.__freezeWhenRecycle__Internal();
         } else {
             throw new Error('not an custom component');
         }
@@ -389,11 +398,17 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 
     onCleanup(): void {
-        this.aboutToDisappear();
+        scheduleCallback(() => {
+            this.aboutToDisappear(); // aboutToDisappear can change variable
+        });
     }
 
     onGlobalThemeChanged(theme: Theme): void {
         this.onWillApplyTheme(theme);
+    }
+
+    __getParentNode__Internal(): PeerNode | undefined {
+        return this.instance.__getParentNode__Internal();
     }
 }
 
@@ -523,29 +538,42 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
      aboutToReuse(params: ReuseObject): void {}
 }
 
-interface ReusableV2LifeCycle {
+interface ReusableV2LifeCycle<T_Options> {
+    resetStateVarsOnReuse(params?: T_Options): void
     aboutToReuse(): void;
 }
 
-export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options>, T_Options> extends BaseCustomComponent<T_Options> implements ReusableV2LifeCycle {
+export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options>, T_Options> extends BaseCustomComponent<T_Options> implements ReusableV2LifeCycle<T_Options> {
     /** @memo */
     static _invokeImpl<S extends CustomComponentV2<S, S_Options>, S_Options>(
         /** @memo */
         style: ((instance: S) => void) | undefined,
         factory: () => S,
         initializers?: () => S_Options,
-        reuseKey?: string,
+        reuseKey?: () => string,
         /** @memo */
         content?: () => void
     ): void {
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
+        const reuseKeyValue = remember(() => {
+            if (reuseKey) {
+                let key: string | undefined | null = reuseKey() as string | undefined | null; // this means reusekey should be only calculated once
+                if (!key) { // include '' empty string
+                    key = transferTypeName((Type.of(factory) as FunctionType).getResultType().toString());
+                }
+                return key as string;
+            }
+            return undefined;
+        });
         CustomDelegate._instantiate(
-            () => createInstance(uiContext, factory, initializers, style), content, initializers, reuseKey);
+            () => createInstance(uiContext, factory, initializers, style), content, initializers, reuseKeyValue);
     }
 
     aboutToReuse(): void {}
+
+    resetStateVarsOnReuse(params?: T_Options): void {}
 }
 
 export class EntryPoint {
