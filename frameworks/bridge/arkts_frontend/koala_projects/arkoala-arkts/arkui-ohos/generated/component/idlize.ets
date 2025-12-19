@@ -4695,7 +4695,7 @@ export class ThemeOps {
                 thisSerializer.writeInt8((0).toByte())
                 const colorArrayTmpElementForIdx0  = colorArrayTmpElement as Color
                 thisSerializer.writeInt32(colorArrayTmpElementForIdx0.getOrdinal())
-            } else if (colorArrayTmpElement instanceof number) {
+            } else if (colorArrayTmpElement instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const colorArrayTmpElementForIdx1  = colorArrayTmpElement as int32
                 thisSerializer.writeInt32(colorArrayTmpElementForIdx1)
@@ -4716,10 +4716,10 @@ export class ThemeOps {
                 thisSerializer.writeInt8((0).toByte())
                 const darkColorArrayTmpElementForIdx0  = darkColorArrayTmpElement as Color
                 thisSerializer.writeInt32(darkColorArrayTmpElementForIdx0.getOrdinal())
-            } else if (darkColorArrayTmpElement instanceof number) {
+            } else if (darkColorArrayTmpElement instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const darkColorArrayTmpElementForIdx1  = darkColorArrayTmpElement as number
-                thisSerializer.writeNumber(darkColorArrayTmpElementForIdx1)
+                const darkColorArrayTmpElementForIdx1  = darkColorArrayTmpElement as int32
+                thisSerializer.writeInt32(darkColorArrayTmpElementForIdx1)
             } else if (darkColorArrayTmpElement instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const darkColorArrayTmpElementForIdx2  = darkColorArrayTmpElement as string
@@ -4742,7 +4742,7 @@ export class ThemeOps {
                 thisSerializer.writeInt8((0).toByte())
                 const colorArrayTmpElementForIdx0  = colorArrayTmpElement as Color
                 thisSerializer.writeInt32(colorArrayTmpElementForIdx0.getOrdinal())
-            } else if (colorArrayTmpElement instanceof number) {
+            } else if (colorArrayTmpElement instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const colorArrayTmpElementForIdx1  = colorArrayTmpElement as int32
                 thisSerializer.writeInt32(colorArrayTmpElementForIdx1)
@@ -4770,7 +4770,7 @@ export class ThemeOps {
                 thisSerializer.writeInt8((0).toByte())
                 const colorArrayTmpElementForIdx0  = colorArrayTmpElement as Color
                 thisSerializer.writeInt32(colorArrayTmpElementForIdx0.getOrdinal())
-            } else if (colorArrayTmpElement instanceof number) {
+            } else if (colorArrayTmpElement instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
                 const colorArrayTmpElementForIdx1  = colorArrayTmpElement as int32
                 thisSerializer.writeInt32(colorArrayTmpElementForIdx1)
