@@ -172,38 +172,38 @@ const Type = __Type__;
  * When a custom component initialization is about to be completed, the function 
  * decorated by the decorator will be executed.
  */
-const ComponentInit = componentInitInternal;
+const ComponentInit = __componentInit__Internal;
 
 /**
  * The function decorated by the decorator is executed after a new instance of the 
  * custom component is created, before its build() function is executed.
  */
-const ComponentAppear = componentAppearInternal;
+const ComponentAppear = __componentAppear__Internal;
 
 /**
  * The function decorated by the decorator is executed after a new instance of the 
  * custom component is built, after its build() function is executed.
  */
-const ComponentBuilt = componentBuiltInternal;
+const ComponentBuilt = __componentBuilt__Internal;
 
 /**
  * The function decorated by the decorator is executed when a custom component is 
  * attached to the main tree.
  */
-const ComponentAttach = componentAttachInternal;
+const ComponentAttach = __componentAttach__Internal;
 
 /**
  * The function decorated by the decorator is executed when a custom component is 
  * detached from the main tree.
  */
-const ComponentDetach = componentDetachInternal;
+const ComponentDetach = __componentDetach__Internal;
 
 /**
  * The function decorated by the decorator is invoked when a reusable custom component 
  * is re-added to the node tree from the reuse cache to receive construction parameters
  * of the component.
  */
-const ComponentReuse = componentReuseInternal;
+const ComponentReuse = __componentReuse__Internal;
 
 /**
  * The function decorated by the decorator is invoked from the native side function 
@@ -215,13 +215,18 @@ const ComponentReuse = componentReuseInternal;
  * Finally recursively traverses all subcomponents, calling the function on each 
  * subcomponent that is about to be recycled, preparing them for recycling as well.
  */
-const ComponentRecycle = componentRecycleInternal;
+const ComponentRecycle = __componentRecycle__Internal;
 
 /**
  * The function decorated by the decorator is executed before the custom component 
  * is about to be disappeared.
  */
-const ComponentDisappear = componentDisappearInternal;
+const ComponentDisappear = __componentDisappear__Internal;
+
+/**
+ * Enum for Lifecycle State type.
+ */
+const CustomComponentLifecycleState = __CustomComponentLifecycleState__Internal;
 
 /**
  * UIUtils is a state management tool class for operating the observed data.
@@ -436,5 +441,6 @@ export default {
   ComponentDetach,
   ComponentReuse,
   ComponentRecycle,
-  ComponentDisappear
+  ComponentDisappear,
+  CustomComponentLifecycleState
 };
