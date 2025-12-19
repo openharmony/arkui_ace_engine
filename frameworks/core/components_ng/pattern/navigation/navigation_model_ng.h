@@ -187,6 +187,28 @@ public:
     static void SetEnableVisibilityLifecycleWithContentCover(FrameNode* frameNode, bool isEnable);
     static void SetBackButtonTitleResource(FrameNode* frameNode, std::string text,
         const RefPtr<ResourceObject>& resObj);
+    void UpdateDividerColor(const Color& color, const RefPtr<ResourceObject>& res) override;
+
+    void UpdateDividerStartMargin(const CalcDimension& start, const RefPtr<ResourceObject>& res) override;
+
+    void UpdateDividerEndMargin(const CalcDimension& end, const RefPtr<ResourceObject>& res) override;
+
+    void UpdateDividerVisibility(bool isShow) override;
+
+    void UpdateDefineColor(bool isDefined) override;
+
+    static void UpdateDividerVisibility(FrameNode* frameNode, bool isShow);
+
+    static void UpdateDividerColor(FrameNode* frameNode, const Color& color,
+        const RefPtr<ResourceObject>& colorRes);
+
+    static void UpdateDividerStartMargin(FrameNode* frameNode, const CalcDimension& start,
+        const RefPtr<ResourceObject>& startRes);
+
+    static void UpdateDividerEndMargin(FrameNode* frameNode, const CalcDimension& end,
+        const RefPtr<ResourceObject>& endRes);
+
+    static void ResetDividerStyle(FrameNode* frameNode);
 
 private:
     bool CreatePrimaryContentIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

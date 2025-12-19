@@ -26,6 +26,7 @@ constexpr int32_t DEFAULT_ID = INSTANCE_ID_UNDEFINED;
 #endif
 
 std::shared_mutex mutex_;
+thread_local std::set<int32_t> containerLocalSet_;
 std::set<int32_t> containerSet_;
 thread_local int32_t currentLocalId_(DEFAULT_ID);
 thread_local int32_t currentId_(DEFAULT_ID);
@@ -105,6 +106,11 @@ const std::set<int32_t> ContainerScope::GetAllUIContexts()
     return containerSet_;
 }
 
+const std::set<int32_t> ContainerScope::GetAllLocalContainer()
+{
+    return containerLocalSet_;
+}
+
 void ContainerScope::UpdateCurrent(int32_t id)
 {
     currentId_ = id;
@@ -128,12 +134,14 @@ uint32_t ContainerScope::ContainerCount()
 
 void ContainerScope::Add(int32_t id)
 {
+    containerLocalSet_.emplace(id);
     std::unique_lock<std::shared_mutex> lock(mutex_);
     containerSet_.emplace(id);
 }
 
 void ContainerScope::Remove(int32_t id)
 {
+    containerLocalSet_.erase(id);
     std::unique_lock<std::shared_mutex> lock(mutex_);
     containerSet_.erase(id);
 }

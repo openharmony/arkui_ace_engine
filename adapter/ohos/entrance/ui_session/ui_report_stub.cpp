@@ -19,6 +19,45 @@
 
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
 
+namespace {
+void AddArkUIImagesByIds(OHOS::MessageParcel& data,
+    std::unordered_map<int32_t, std::shared_ptr<OHOS::Media::PixelMap>>& componentImages)
+{
+    uint64_t componentImagesSize = data.ReadUint64();
+    for (uint64_t i = 0; i < componentImagesSize; ++i) {
+        std::shared_ptr<OHOS::Media::PixelMap> pixelMap = nullptr;
+        int32_t componentImageId = data.ReadInt32();
+        bool nextPixelMapIsAvailable = data.ReadBool();
+        if (nextPixelMapIsAvailable) {
+            pixelMap.reset(OHOS::Media::PixelMap::Unmarshalling(data));
+        }
+        componentImages.emplace(componentImageId, pixelMap);
+    }
+}
+
+void AddArkWebImagesByIds(OHOS::MessageParcel& data,
+    std::map<int32_t, std::map<int32_t, std::shared_ptr<OHOS::Media::PixelMap>>>& webImages)
+{
+    uint64_t webImagesAllMapSize = data.ReadUint64();
+    for (uint64_t i = 0; i < webImagesAllMapSize; ++i) {
+        int32_t webId = data.ReadInt32();
+        uint64_t imagesInOneWebSize = data.ReadUint64();
+        std::map<int32_t, std::shared_ptr<OHOS::Media::PixelMap>> imagesInOneWeb;
+        for (uint64_t j = 0; j < imagesInOneWebSize; ++j) {
+            std::shared_ptr<OHOS::Media::PixelMap> pixelMap = nullptr;
+            int32_t imageId = data.ReadInt32();
+            bool nextPixelMapIsAvailable = data.ReadBool();
+            if (nextPixelMapIsAvailable) {
+                pixelMap.reset(OHOS::Media::PixelMap::Unmarshalling(data));
+            }
+            imagesInOneWeb.emplace(imageId, pixelMap);
+        }
+        webImages.emplace(webId, std::move(imagesInOneWeb));
+    }
+}
+
+} // namespace
+
 namespace OHOS::Ace {
 int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
@@ -111,6 +150,22 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
                 result.push_back(value);
             }
             SendShowingImage(result);
+            break;
+        }
+        case SEND_ARKUI_IMAGES_BY_ID: {
+            std::unordered_map<int32_t, std::shared_ptr<OHOS::Media::PixelMap>> componentImages;
+            int32_t windowId = data.ReadInt32();
+            AddArkUIImagesByIds(data, componentImages);
+            int32_t arkUIErrorCode = data.ReadInt32();
+            SendArkUIImagesById(windowId, componentImages, static_cast<MultiImageQueryErrorCode>(arkUIErrorCode));
+            break;
+        }
+        case SEND_ARKWEB_IMAGES_BY_ID: {
+            std::map<int32_t, std::map<int32_t, std::shared_ptr<OHOS::Media::PixelMap>>> webImages;
+            int32_t windowId = data.ReadInt32();
+            AddArkWebImagesByIds(data, webImages);
+            int32_t arkWebErrorCode = data.ReadInt32();
+            SendArkWebImagesById(windowId, webImages, static_cast<MultiImageQueryErrorCode>(arkWebErrorCode));
             break;
         }
         case SEND_CURRENT_PAGE_NAME: {
@@ -413,10 +468,38 @@ void UiReportStub::RegisterGetShowingImageCallback(
     getShowingImageCallback_ = std::move(eventCallback);
 }
 
+void UiReportStub::RegisterGetImagesByIdCallback(
+    const std::function<void(int32_t, const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>&,
+        MultiImageQueryErrorCode)>& arkUIfinishCallback,
+    const std::function<void(int32_t,
+        const std::map<int32_t, std::map<int32_t, std::shared_ptr<Media::PixelMap>>>&,
+        MultiImageQueryErrorCode)>& arkWebfinishCallback)
+{
+    getImagesByIdArkUIFinishCallback_ = arkUIfinishCallback;
+    getImagesByIdArkWebFinishCallback_ = arkWebfinishCallback;
+}
+
 void UiReportStub::SendShowingImage(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps)
 {
     if (getShowingImageCallback_) {
         getShowingImageCallback_(maps);
+    }
+}
+
+void UiReportStub::SendArkUIImagesById(int32_t windowId,
+    const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>& componentImages,
+    MultiImageQueryErrorCode arkUIErrorCode)
+{
+    if (getImagesByIdArkUIFinishCallback_) {
+        getImagesByIdArkUIFinishCallback_(windowId, componentImages, arkUIErrorCode);
+    }
+}
+
+void UiReportStub::SendArkWebImagesById(int32_t windowId, const std::map<int32_t, std::map<int32_t,
+    std::shared_ptr<Media::PixelMap>>>& webImages, MultiImageQueryErrorCode arkWebErrorCode)
+{
+    if (getImagesByIdArkWebFinishCallback_) {
+        getImagesByIdArkWebFinishCallback_(windowId, webImages, arkWebErrorCode);
     }
 }
 

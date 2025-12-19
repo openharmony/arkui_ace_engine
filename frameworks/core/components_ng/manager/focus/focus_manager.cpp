@@ -536,12 +536,12 @@ void FocusManager::WindowFocus(bool isFocus)
 
 bool FocusManager::SetIsFocusActive(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive)
 {
-    SyncWindowsFocus(isFocusActive, reason, autoFocusInactive);
     if (!NeedChangeFocusAvtive(isFocusActive, reason, autoFocusInactive)) {
         return false;
     }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "focusActive turns:%{public}d, reason:%{public}d", isFocusActive, reason);
 
+    SyncWindowsFocus(isFocusActive, reason, autoFocusInactive);
     TriggerAllFocusActiveChangeCallback(isFocusActive);
 
     auto pipeline = pipeline_.Upgrade();

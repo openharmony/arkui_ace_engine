@@ -704,4 +704,124 @@ HWTEST_F(TextFieldPatternTestThree, PlaceholderResponseArea003, TestSize.Level0)
     EXPECT_TRUE(textLayoutProperty->GetIsTextMaxlinesFirstValue(false));
     EXPECT_EQ(textStylePlaceholder.GetMaxLines(), 1);
 }
+
+/**
+ * @tc.name: GetTextDirection001
+ * @tc.desc: Test GetTextDirection with INHERIT textDirection_
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, GetTextDirection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and layout algorithm
+     */
+    CreateTextField("", "");
+    auto layoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+
+    /**
+     * @tc.steps: step2. Get layout property and set layout direction
+     */
+    auto layoutProperty = pattern_->GetLayoutProperty<LayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+
+    /**
+     * @tc.steps: step3. Set textDirection_ to INHERIT
+     */
+    layoutAlgorithm->textDirection_ = TextDirection::INHERIT;
+
+    /**
+     * @tc.steps: step4. Call GetTextDirection
+     */
+    auto direction = layoutAlgorithm->GetTextDirection(layoutProperty);
+
+    /**
+     * @tc.expected: Return layout direction (RTL) when textDirection_ is INHERIT
+     */
+    EXPECT_EQ(direction, TextDirection::RTL);
+}
+
+/**
+ * @tc.name: GetTextDirection002
+ * @tc.desc: Test GetTextDirection with AUTO textDirection_ and valid paragraph_
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, GetTextDirection002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and layout algorithm
+     */
+    CreateTextField("", "");
+    auto layoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+
+    /**
+     * @tc.steps: step2. Get layout property
+     */
+    auto layoutProperty = pattern_->GetLayoutProperty<LayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::LTR;
+
+    /**
+     * @tc.steps: step3. Set textDirection_ to AUTO
+     */
+    layoutAlgorithm->textDirection_ = TextDirection::AUTO;
+
+    /**
+     * @tc.steps: step4. Create mock paragraph and set RTL direction
+     */
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ParagraphStyle paragraphStyle;
+    paragraphStyle.direction = TextDirection::RTL;
+
+    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(paragraphStyle));
+
+    /**
+     * @tc.steps: step5. Set paragraph_ in layout algorithm
+     */
+    layoutAlgorithm->paragraph_ = mockParagraph;
+
+    /**
+     * @tc.steps: step6. Call GetTextDirection
+     */
+    auto direction = layoutAlgorithm->GetTextDirection(layoutProperty);
+
+    /**
+     * @tc.expected: Return paragraph's direction (RTL) when textDirection_ is AUTO
+     */
+    EXPECT_EQ(direction, TextDirection::RTL);
+}
+
+/**
+ * @tc.name: GetTextDirection003
+ * @tc.desc: Test GetTextDirection with LTR layout direction
+ * @tc.type: FUNC
+ * @tc.require: AR000H0F7I
+ */
+HWTEST_F(TextFieldPatternTestThree, GetTextDirection003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and layout algorithm
+     */
+    CreateTextField("", "");
+    auto layoutAlgorithm = AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+
+    /**
+     * @tc.steps: step2. Get layout property and set LTR layout direction
+     */
+    auto layoutProperty = pattern_->GetLayoutProperty<LayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::LTR;
+
+    /**
+     * @tc.steps: step3. Set textDirection_ to INHERIT
+     */
+    layoutAlgorithm->textDirection_ = TextDirection::INHERIT;
+
+    /**
+     * @tc.steps: step4. Call GetTextDirection
+     */
+    auto direction = layoutAlgorithm->GetTextDirection(layoutProperty);
+
+    /**
+     * @tc.expected: Return LTR layout direction when textDirection_ is INHERIT
+     */
+    EXPECT_EQ(direction, TextDirection::LTR);
+}
 } // namespace OHOS::Ace::NG

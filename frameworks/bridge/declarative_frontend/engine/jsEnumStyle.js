@@ -4827,13 +4827,13 @@ class ImageAnalyzerController {
   }
 }
 
-var WebNavigationType;
+let WebNavigationType;
 (function (WebNavigationType) {
-  WebNavigationType[WebNavigationType['UNKNOWN'] = 0] = 'UNKNOWN';
-  WebNavigationType[WebNavigationType['MAIN_FRAME_NEW_ENTRY'] = 1] = 'MAIN_FRAME_NEW_ENTRY';
-  WebNavigationType[WebNavigationType['MAIN_FRAME_EXISTING_ENTRY'] = 2] = 'MAIN_FRAME_EXISTING_ENTRY';
-  WebNavigationType[WebNavigationType['NAVIGATION_TYPE_NEW_SUBFRAME'] = 4] = 'NAVIGATION_TYPE_NEW_SUBFRAME';
-  WebNavigationType[WebNavigationType['NAVIGATION_TYPE_AUTO_SUBFRAME'] = 5] = 'NAVIGATION_TYPE_AUTO_SUBFRAME';
+  WebNavigationType[WebNavigationType.UNKNOWN = 0] = 'UNKNOWN';
+  WebNavigationType[WebNavigationType.MAIN_FRAME_NEW_ENTRY = 1] = 'MAIN_FRAME_NEW_ENTRY';
+  WebNavigationType[WebNavigationType.MAIN_FRAME_EXISTING_ENTRY = 2] = 'MAIN_FRAME_EXISTING_ENTRY';
+  WebNavigationType[WebNavigationType.NAVIGATION_TYPE_NEW_SUBFRAME = 4] = 'NAVIGATION_TYPE_NEW_SUBFRAME';
+  WebNavigationType[WebNavigationType.NAVIGATION_TYPE_AUTO_SUBFRAME = 5] = 'NAVIGATION_TYPE_AUTO_SUBFRAME';
 })(WebNavigationType || (WebNavigationType = {}));
 
 let AxisModel;
@@ -4937,16 +4937,6 @@ let WebBypassVsyncCondition;
   WebBypassVsyncCondition[WebBypassVsyncCondition.NONE = 0] = 'NONE';
   WebBypassVsyncCondition[WebBypassVsyncCondition.SCROLLBY_FROM_ZERO_OFFSET = 1] = 'SCROLLBY_FROM_ZERO_OFFSET';
 })(WebBypassVsyncCondition || (WebBypassVsyncCondition = {}));
-
-let CommonState;
-(function (CommonState) {
-  CommonState[CommonState.UNINITIALIZED = 0] = 'UNINITIALIZED';
-  CommonState[CommonState.INITIALIZED = 1] = 'INITIALIZED';
-  CommonState[CommonState.APPEARING = 2] = 'APPEARING';
-  CommonState[CommonState.APPEARED = 3] = 'APPEARED';
-  CommonState[CommonState.DISAPPEARING = 4] = 'DISAPPEARING';
-  CommonState[CommonState.DISAPPEARED = 5] = 'DISAPPEARED';
-})(CommonState || (CommonState = {}));
 
 let EventQueryType;
 (function (EventQueryType) {

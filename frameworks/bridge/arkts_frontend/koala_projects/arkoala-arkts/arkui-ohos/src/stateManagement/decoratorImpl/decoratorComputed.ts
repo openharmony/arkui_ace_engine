@@ -80,6 +80,11 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
         this.owningComponent_ = owningView;
     }
 
+    resetOnReuse(): void {
+        ObserveSingleton.instance.clearDelayedComputedWhenReuse();
+        this.fireChange();
+    }
+
     private shouldAddRef(): boolean {
         return ObserveSingleton.instance.renderingComponent >= ObserveSingleton.RenderingComponentV2;
     }

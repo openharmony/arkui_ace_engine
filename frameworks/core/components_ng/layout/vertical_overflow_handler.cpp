@@ -22,6 +22,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double MAX_FLING_VELOCITY = 9000;
+constexpr double MAX_GAP_BETWEEN_CONTENT_AND_CHILD = 2.0f;
 } // namespace
 
 bool VerticalOverflowHandler::IsVerticalLayout() const
@@ -207,10 +208,13 @@ bool VerticalOverflowHandler::IsVerticalOverflow() const
     return GreatNotEqual(contentRect_.Top(), totalChildFrameRect_.Top()) ||
         LessNotEqual(contentRect_.Bottom(), totalChildFrameRect_.Bottom());
 }
-bool VerticalOverflowHandler::IsHorizontalOverflow() const
+
+bool VerticalOverflowHandler::IsOverflow() const
 {
-    return GreatNotEqual(contentRect_.Left(), totalChildFrameRect_.Left()) ||
-        LessNotEqual(contentRect_.Right(), totalChildFrameRect_.Right());
+    return GreatNotEqual(contentRect_.Top(), totalChildFrameRect_.Top() + MAX_GAP_BETWEEN_CONTENT_AND_CHILD) ||
+        LessNotEqual(contentRect_.Bottom(), totalChildFrameRect_.Bottom() - MAX_GAP_BETWEEN_CONTENT_AND_CHILD) ||
+        GreatNotEqual(contentRect_.Left(), totalChildFrameRect_.Left() + MAX_GAP_BETWEEN_CONTENT_AND_CHILD) ||
+        LessNotEqual(contentRect_.Right(), totalChildFrameRect_.Right() - MAX_GAP_BETWEEN_CONTENT_AND_CHILD);
 }
 
 void VerticalOverflowHandler::HandleContentOverflow()

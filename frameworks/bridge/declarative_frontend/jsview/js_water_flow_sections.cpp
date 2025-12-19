@@ -154,6 +154,7 @@ bool JSWaterFlowSections::ParseSectionOptions(
     auto onGetItemMainSizeByIndex = [execCtx = args.GetExecutionContext(),
                                         func = AceType::MakeRefPtr<JsFunction>(
                                             JSRef<JSObject>(), JSRef<JSFunc>::Cast(getSizeByIndex))](int32_t index) {
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
         JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
         auto result = func->ExecuteJS(1, &itemIndex);
         if (!result->IsNumber()) {

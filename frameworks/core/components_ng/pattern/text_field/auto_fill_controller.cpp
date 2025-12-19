@@ -197,7 +197,7 @@ void AutoFillController::PlayAutoFillTranslationAnimation(const AutoFillContentL
     float textFieldContentWidth = std::max(contentRect.Width(), 0.0f);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto isRTL = GetTextDirection(layoutProperty) == TextDirection::RTL;
     auto theme = textFieldPattern->GetTheme();
     CHECK_NULL_VOID(theme);
     auto iconSize = theme->GetAutoFillIconSize();
@@ -242,7 +242,7 @@ void AutoFillController::PlayAutoFillTextScrollAnimation()
     CHECK_NULL_VOID(textFieldPattern);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto isRTL = GetTextDirection(layoutProperty) == TextDirection::RTL;
     float autoFillParagraphWidth = std::max(autoFillParagraph_->GetLongestLine(), 0.0f);
     auto contentRect = textFieldPattern->GetTextContentRect();
     float textFieldContentWidth = std::max(contentRect.Width(), 0.0f);
@@ -349,7 +349,7 @@ bool AutoFillController::CreateAutoFillIcon()
     CHECK_NULL_RETURN(autoFillParagraph_, false);
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto isRTL = GetTextDirection(layoutProperty) == TextDirection::RTL;
     auto lineMetrics = autoFillParagraph_->GetLineMetrics(0);
     autoFillFirstCharOffset_ = lineMetrics.x;
     auto startOffset = autoFillFirstCharOffset_;
@@ -422,5 +422,22 @@ void AutoFillController::UpdateAnimationTextRect()
     auto contentRect = textFieldPattern->GetTextContentRect();
     animationTextRect_ = textRect;
     animationTextRect_.SetLeft(contentRect.GetX());
+}
+
+TextDirection AutoFillController::GetTextDirection(const RefPtr<LayoutProperty>& layoutProperty)
+{
+    CHECK_NULL_RETURN(layoutProperty, TextDirection::LTR);
+    auto direction = layoutProperty->GetNonAutoLayoutDirection();
+    auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutProperty);
+    CHECK_NULL_RETURN(textFieldLayoutProperty, direction);
+    auto textDirection = textFieldLayoutProperty->GetTextDirectionValue(TextDirection::INHERIT);
+    if (textDirection == TextDirection::INHERIT) {
+        return direction;
+    } else if (textDirection == TextDirection::AUTO) {
+        CHECK_NULL_RETURN(autoFillParagraph_, direction);
+        return autoFillParagraph_->GetParagraphStyle().direction;
+    } else {
+        return textDirection;
+    }
 }
 } // namespace OHOS::Ace::NG

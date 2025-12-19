@@ -13,29 +13,30 @@
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (r5, s5, t5, u5) {
-    var v5 = arguments.length, w5 = v5 < 3 ? s5 : u5 === null ? u5 = Object.getOwnPropertyDescriptor(s5, t5) : u5, x5;
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-        w5 = Reflect.decorate(r5, s5, t5, u5);
+        r = Reflect.decorate(decorators, target, key, desc);
     else
-        for (var y5 = r5.length - 1; y5 >= 0; y5--)
-            if (x5 = r5[y5])
-                w5 = (v5 < 3 ? x5(w5) : v5 > 3 ? x5(s5, t5, w5) : x5(s5, t5)) || w5;
-    return v5 > 3 && w5 && Object.defineProperty(s5, t5, w5), w5;
+        for (var i = decorators.length - 1; i >= 0; i--)
+            if (d = decorators[i])
+                r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 import { ImageGenerateState } from '../types/Declaration';
-
-const systemDateTime = requireNapi('systemDateTime');
+import { AIGenerateImpl } from "../utils/AIGenerateImpl";
+import { AIGenerateOptions } from '../utils/AIGenerateOptions';
+import systemDateTime from "@ohos.systemDateTime";
 
 export class GenerateProgress extends ViewV2 {
-    constructor(k5, l5, m5, n5 = -1, o5, p5) {
-        super(k5, n5, p5);
-        this.initParam("currentGenerateState", (l5 && "currentGenerateState" in l5) ? l5.currentGenerateState : undefined);
-        this.changeCurrentState = "changeCurrentState" in l5 ? l5.changeCurrentState : (q5) => { };
-        this.initParam("imageNumber", (l5 && "imageNumber" in l5) ? l5.imageNumber : 0);
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
+        this.initParam("currentGenerateState", (params && "currentGenerateState" in params) ? params.currentGenerateState : undefined);
+        this.changeCurrentState = "changeCurrentState" in params ? params.changeCurrentState : (state) => { };
+        this.imageNumber = 0;
         this.progressValue = 0;
         this.isGenerateSuccess = false;
         this.isGenerateTimeout = false;
@@ -49,61 +50,72 @@ export class GenerateProgress extends ViewV2 {
         this.canvasGenerateProgressChangeCallback = undefined;
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(i5) {
-        this.resetParam("currentGenerateState", (i5 && "currentGenerateState" in i5) ? i5.currentGenerateState : undefined);
-        this.changeCurrentState = "changeCurrentState" in i5 ? i5.changeCurrentState : (j5) => { };
-        this.resetParam("imageNumber", (i5 && "imageNumber" in i5) ? i5.imageNumber : 0);
+    resetStateVarsOnReuse(params) {
+        this.resetParam("currentGenerateState", (params && "currentGenerateState" in params) ? params.currentGenerateState : undefined);
+        this.changeCurrentState = "changeCurrentState" in params ? params.changeCurrentState : (state) => { };
+        this.imageNumber = 0;
         this.progressValue = 0;
         this.isGenerateSuccess = false;
         this.isGenerateTimeout = false;
         this.resetMonitorsOnReuse();
     }
-    currentGenerateStateChangeMonitor(h5) {
+    currentGenerateStateChangeMonitor(monitor) {
         if (this.isForeground &&
-            h5.value('currentGenerateState')?.now === ImageGenerateState.BEFORE_GENERATED) {
+            monitor.value('currentGenerateState')?.now === ImageGenerateState.BEFORE_GENERATED) {
             this.progressValue = this.total;
         }
     }
-    getEstimatedTime(f5) {
-        let g5 = [300, 300, 400, 500, 700];
-        if (f5 < g5.length) {
-            return g5[f5];
+    getEstimatedTime(imageNumber) {
+        let timeCntRet = [30, 30, 40, 50, 70];
+        if (imageNumber < timeCntRet.length) {
+            return timeCntRet[imageNumber];
         }
-        return 300;
+        return 30;
+    }
+    getUpdateProgressValue(currentValue, estimatedTime, currentCnt) {
+        let retVal = currentValue;
+        for (let i = 0; i < currentCnt; i++) {
+            if (retVal < 70) {
+                retVal += 35 / estimatedTime;
+            }
+            else if (retVal >= 70 && retVal < this.total) {
+                retVal += 15 / estimatedTime;
+            }
+            if (retVal >= this.total - 1) {
+                return this.total - 1;
+            }
+        }
+        return retVal;
     }
     aboutToAppear() {
+        this.imageNumber = AIGenerateOptions.getInstance().images?.length ?? 0;
         this.createApplicationListener();
         this.createTimer();
     }
     aboutToDisappear() {
         this.clearApplicationListener();
         this.clearTimer();
+        this.cancelImageGenerateTask();
     }
     createApplicationListener() {
-        let b5 = this;
+        let that = this;
         this.canvasGenerateProgressChangeCallback = {
             onApplicationForeground() {
-                let c5 = systemDateTime.getTime();
-                if (b5.isGenerateSuccess) {
-                    this.progressValue = b5.total;
+                let currentTimeStamp = systemDateTime.getTime();
+                if (that.isGenerateSuccess) {
+                    this.progressValue = that.total;
                 }
-                else if (b5.estimatedTime > 0) {
-                    let d5 = Math.floor((c5 - b5.goToBackGroundTimeStamp) / b5.estimatedTime);
-                    let e5 = b5.goToBackProgressValue + d5;
-                    if (e5 >= b5.total) {
-                        b5.progressValue = b5.total - 1;
-                    }
-                    else {
-                        b5.progressValue = e5;
-                    }
-                    b5.timerCnt += d5;
+                else if (that.estimatedTime > 0) {
+                    let timeDiff = Math.floor((currentTimeStamp - that.goToBackGroundTimeStamp) / 250);
+                    that.progressValue = that.getUpdateProgressValue(that.goToBackProgressValue, that.estimatedTime, timeDiff);
+                    that.timerCnt += timeDiff;
                 }
-                b5.isForeground = true;
+                that.isForeground = true;
             },
             onApplicationBackground() {
-                b5.goToBackGroundTimeStamp = systemDateTime.getTime();
-                b5.goToBackProgressValue = b5.progressValue;
-                b5.isForeground = false;
+                that.goToBackGroundTimeStamp = systemDateTime.getTime();
+                that.goToBackProgressValue = that.progressValue;
+                that.isForeground = false;
             }
         };
         this.getUIContext()?.getHostContext()?.getApplicationContext()
@@ -124,15 +136,15 @@ export class GenerateProgress extends ViewV2 {
                 if (this.progressValue == this.total) {
                     this.onSuccess();
                 }
-                else if (this.timerCnt >= 200) {
+                else if (this.timerCnt >= this.estimatedTime * 8) {
                     this.onTimeOut();
                 }
                 else if (this.progressValue < this.total - 1) {
-                    this.progressValue++;
+                    this.progressValue = this.getUpdateProgressValue(this.progressValue, this.estimatedTime, 1);
                 }
                 this.timerCnt++;
             }
-        }, this.estimatedTime);
+        }, 250);
     }
     clearTimer() {
         if (this.timerId >= 0) {
@@ -145,88 +157,101 @@ export class GenerateProgress extends ViewV2 {
         this.isGenerateSuccess = true;
         setTimeout(() => {
             this.changeCurrentState(ImageGenerateState.GENERATED);
-        }, 300);
+        }, 400);
     }
     onTimeOut() {
         this.clearTimer();
         this.clearApplicationListener();
         this.isGenerateTimeout = true;
         this.progressValue = 0;
+        this.cancelImageGenerateTask();
+    }
+    cancelImageGenerateTask() {
+        let generateInstance = AIGenerateImpl.getInstance();
+        generateInstance.cancelImageGenerateTask(generateInstance.getCurrentImageSessionId());
     }
     initialRender() {
-        this.observeComponentCreation2((z4, a5) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.width(150);
+            Column.width(160);
             Column.height(40);
+            Column.transition(TransitionEffect.OPACITY.animation({ duration: 500, curve: Curve.Ease }));
         }, Column);
-        this.observeComponentCreation2((x4, y4) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
             Stack.height('100%');
         }, Stack);
-        this.observeComponentCreation2((v4, w4) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
-            Stack.width(150);
+            Stack.width(160);
             Stack.height(40);
-            Stack.blur(20);
-            Stack.borderRadius(20);
+            Stack.blur(31);
+            Stack.borderRadius(31.11, RenderStrategy.OFFSCREEN);
             Stack.clip(true);
+            Stack.alignContent(Alignment.Start);
         }, Stack);
-        this.observeComponentCreation2((r4, s4) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
+            Stack.backgroundColor('#99FFFFFF');
+            Stack.width(160);
+            Stack.height(40);
+        }, Stack);
+        Stack.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
             Context.animation({
                 duration: this.progressValue == this.total ? 400 : 150,
                 curve: Curve.EaseOut,
                 playMode: PlayMode.Normal
             });
-            Stack.backgroundColor(Color.White);
-            Stack.width((100 - this.progressValue) * 1.5);
-            Stack.position({ right: 0 });
-            Stack.height(40);
+            Column.width(Math.round(this.progressValue * 1.6));
+            Column.height(40);
             Context.animation(null);
-        }, Stack);
+        }, Column);
+        Column.pop();
         Stack.pop();
-        Stack.pop();
-        this.observeComponentCreation2((p4, q4) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.justifyContent(FlexAlign.SpaceBetween);
             Row.width('100%');
             Row.height(22);
             Row.padding({
-                left: 12,
-                right: 12
+                left: 16,
+                right: 17
             });
         }, Row);
-        this.observeComponentCreation2((n4, o4) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
         }, Column);
-        this.observeComponentCreation2((l4, m4) => {
-            Text.create(this.isGenerateSuccess ? '已完成' : this.isGenerateTimeout ? `生成失败`
-                : `AI生成中  ${this.progressValue} %`);
-            Text.fontSize(14);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(this.isGenerateTimeout ? `生成失败`
+                : `AI生成中 ${Math.round(this.progressValue)}%`);
+            Text.fontSize(16);
             Text.fontFamily("HarmonyHeiTi");
+            Text.fontColor('#E6000000');
             Text.maxLines(1);
             Text.textOverflow({ overflow: TextOverflow.MARQUEE });
-            Text.width(100);
+            Text.width(this.isGenerateSuccess ? 120 : 104);
         }, Text);
         Text.pop();
         Column.pop();
-        this.observeComponentCreation2((j4, k4) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
         }, Column);
-        this.observeComponentCreation2((f4, g4) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (!this.isGenerateSuccess) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((h4, i4) => {
-                        Image.create({ "id": -1, "type": 20000, params: ['sys.media.ohos_ic_public_cancel'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Image.width(22);
-                        Image.height(22);
-                        Image.onClick(() => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        SymbolGlyph.create({ "id": -1, "type": 40000, params: ['sys.symbol.xmark'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        SymbolGlyph.fontSize(20);
+                        SymbolGlyph.onClick(() => {
                             if (!this.isGenerateSuccess) {
+                                this.cancelImageGenerateTask();
                                 this.changeCurrentState(ImageGenerateState.CONFIGURATION);
                             }
                         });
-                    }, Image);
+                    }, SymbolGlyph);
                 });
             }
             else {
@@ -240,15 +265,12 @@ export class GenerateProgress extends ViewV2 {
         Stack.pop();
         Column.pop();
     }
-    updateStateVars(e4) {
-        if (e4 === undefined) {
+    updateStateVars(params) {
+        if (params === undefined) {
             return;
         }
-        if ("currentGenerateState" in e4) {
-            this.updateParam("currentGenerateState", e4.currentGenerateState);
-        }
-        if ("imageNumber" in e4) {
-            this.updateParam("imageNumber", e4.imageNumber);
+        if ("currentGenerateState" in params) {
+            this.updateParam("currentGenerateState", params.currentGenerateState);
         }
     }
     rerender() {
@@ -262,7 +284,7 @@ __decorate([
     Event
 ], GenerateProgress.prototype, "changeCurrentState", void 0);
 __decorate([
-    Param
+    Local
 ], GenerateProgress.prototype, "imageNumber", void 0);
 __decorate([
     Local
@@ -277,26 +299,27 @@ __decorate([
     Monitor('currentGenerateState')
 ], GenerateProgress.prototype, "currentGenerateStateChangeMonitor", null);
 export class MinimizeButton extends ViewV2 {
-    constructor(y3, z3, a4, b4 = -1, c4, d4) {
-        super(y3, b4, d4);
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(x3) {
+    resetStateVarsOnReuse(params) {
     }
     initialRender() {
-        this.observeComponentCreation2((v3, w3) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild({ type: ButtonType.Circle });
-            Button.backgroundColor(Color.White);
+            Button.backgroundColor('#99FFFFFF');
             Button.width(40);
             Button.height(40);
             Button.margin({ left: 8 });
             Button.onClick(() => {
             });
         }, Button);
-        this.observeComponentCreation2((t3, u3) => {
-            SymbolGlyph.create({ "id": -1, "type": 40000, params: ['sys.symbol.smal_window_playback'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-            SymbolGlyph.fontSize(21.62);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            SymbolGlyph.create({ "id": 125832922, "type": 40000, params: ['sys.symbol.smal_window_playback'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            SymbolGlyph.fontSize(22);
             SymbolGlyph.fontWeight(400);
+            SymbolGlyph.fontColor(['#E6000000']);
         }, SymbolGlyph);
         Button.pop();
     }
@@ -305,71 +328,71 @@ export class MinimizeButton extends ViewV2 {
     }
 }
 export class GeneratingArea extends ViewV2 {
-    constructor(m3, n3, o3, p3 = -1, q3, r3) {
-        super(m3, p3, r3);
-        this.initParam("currentGenerateState", (n3 && "currentGenerateState" in n3) ? n3.currentGenerateState : undefined);
-        this.changeGenerateState = "changeGenerateState" in n3 ? n3.changeGenerateState : (s3) => { };
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
+        this.initParam("currentGenerateState", (params && "currentGenerateState" in params) ? params.currentGenerateState : undefined);
+        this.changeGenerateState = "changeGenerateState" in params ? params.changeGenerateState : (state) => { };
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(k3) {
-        this.resetParam("currentGenerateState", (k3 && "currentGenerateState" in k3) ? k3.currentGenerateState : undefined);
-        this.changeGenerateState = "changeGenerateState" in k3 ? k3.changeGenerateState : (l3) => { };
+    resetStateVarsOnReuse(params) {
+        this.resetParam("currentGenerateState", (params && "currentGenerateState" in params) ? params.currentGenerateState : undefined);
+        this.changeGenerateState = "changeGenerateState" in params ? params.changeGenerateState : (state) => { };
     }
     initialRender() {
-        this.observeComponentCreation2((i3, j3) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.width('100%');
         }, Column);
-        this.observeComponentCreation2((g3, h3) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
         }, Row);
         {
-            this.observeComponentCreation2((c3, d3) => {
-                if (d3) {
-                    let e3 = new GenerateProgress(this, {
+            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                if (isInitialRender) {
+                    let componentCall = new GenerateProgress(this, {
                         currentGenerateState: this.currentGenerateState,
-                        changeCurrentState: this.changeGenerateState
-                    }, undefined, c3, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasGenerate.ets", line: 219, col: 9 });
-                    ViewV2.create(e3);
-                    let f3 = () => {
+                        changeCurrentState: this.changeGenerateState,
+                    }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasGenerate.ets", line: 248, col: 9 });
+                    ViewV2.create(componentCall);
+                    let paramsLambda = () => {
                         return {
                             currentGenerateState: this.currentGenerateState,
                             changeCurrentState: this.changeGenerateState
                         };
                     };
-                    e3.paramsGenerator_ = f3;
+                    componentCall.paramsGenerator_ = paramsLambda;
                 }
                 else {
-                    this.updateStateVarsOfChildByElmtId(c3, {
+                    this.updateStateVarsOfChildByElmtId(elmtId, {
                         currentGenerateState: this.currentGenerateState
                     });
                 }
             }, { name: "GenerateProgress" });
         }
         {
-            this.observeComponentCreation2((y2, z2) => {
-                if (z2) {
-                    let a3 = new MinimizeButton(this, {}, undefined, y2, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasGenerate.ets", line: 223, col: 9 });
-                    ViewV2.create(a3);
-                    let b3 = () => {
+            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                if (isInitialRender) {
+                    let componentCall = new MinimizeButton(this, {}, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/CanvasGenerate.ets", line: 252, col: 9 });
+                    ViewV2.create(componentCall);
+                    let paramsLambda = () => {
                         return {};
                     };
-                    a3.paramsGenerator_ = b3;
+                    componentCall.paramsGenerator_ = paramsLambda;
                 }
                 else {
-                    this.updateStateVarsOfChildByElmtId(y2, {});
+                    this.updateStateVarsOfChildByElmtId(elmtId, {});
                 }
             }, { name: "MinimizeButton" });
         }
         Row.pop();
         Column.pop();
     }
-    updateStateVars(x2) {
-        if (x2 === undefined) {
+    updateStateVars(params) {
+        if (params === undefined) {
             return;
         }
-        if ("currentGenerateState" in x2) {
-            this.updateParam("currentGenerateState", x2.currentGenerateState);
+        if ("currentGenerateState" in params) {
+            this.updateParam("currentGenerateState", params.currentGenerateState);
         }
     }
     rerender() {

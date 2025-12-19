@@ -56,6 +56,7 @@
 #include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/text_field_manager.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/base/ui_node_gc.h"
@@ -841,9 +842,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     if (contentChangeMgr_) {
         contentChangeMgr_->OnVsyncStart();
     }
-    if (touchOptimizer_) {
-        touchOptimizer_->SetLastVsyncTimeStamp(nanoTimestamp);
-    }
     ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64 "][instanceID:%d]",
         nanoTimestamp, frameCount, instanceId_);
     window_->Lock();
@@ -852,6 +850,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     uint64_t vsyncPeriod = static_cast<uint64_t>(window_->GetVSyncPeriod());
+    if (touchOptimizer_) {
+        touchOptimizer_->SetLastVsyncTimeStamp(nanoTimestamp);
+        touchOptimizer_->SetVsyncPeriod(vsyncPeriod);
+    }
     uint64_t timeStamp = (nanoTimestamp > vsyncPeriod) ? (nanoTimestamp - vsyncPeriod + ONE_MS_IN_NS) : ONE_MS_IN_NS;
     resampleTimeStamp_ = (timeStamp > compensationValue_) ? (timeStamp - compensationValue_) : 0;
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -3379,9 +3381,7 @@ void PipelineContext::OnTouchEvent(
         }
         NotifyDragTouchEvent(scalePoint, node);
         hasIdleTasks_ = true;
-        if (touchOptimizer_ && window_) {
-            uint64_t vsyncPeriod = static_cast<uint64_t>(window_->GetVSyncPeriod());
-            touchOptimizer_->SetVsyncPeriod(vsyncPeriod);
+        if (touchOptimizer_) {
             TouchEvent pointWithReverseSignal = touchOptimizer_->SetPointReverseSignal(point);
             touchEvents_.push_back(pointWithReverseSignal);
             touchOptimizer_->SetHisAvgPointTimeStamp(touchEvents_.back().id, historyPointsById_);
@@ -5159,6 +5159,14 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
     renderContext->UpdateWindowBlur();
 }
 
+void PipelineContext::ClearInspectorOffScreenNodes()
+{
+    auto containerLocalSet = ContainerScope::GetAllLocalContainer();
+    if (static_cast<uint32_t>(containerLocalSet.size()) == 1 && *containerLocalSet.cbegin() == instanceId_) {
+        Inspector::ClearAllOffscreenNodes();
+    }
+}
+
 void PipelineContext::Destroy()
 {
     CHECK_RUN_ON(UI);
@@ -5212,6 +5220,7 @@ void PipelineContext::Destroy()
     uiExtensionManager_.Reset();
 #endif
     uiContextImpl_.Reset();
+    ClearInspectorOffScreenNodes();
     PipelineBase::Destroy();
 }
 
@@ -6981,6 +6990,11 @@ void PipelineContext::GetAllPixelMap()
     CHECK_NULL_VOID(pageNode);
     CHECK_NULL_VOID(uiTranslateManager_);
     uiTranslateManager_->GetAllPixelMap(pageNode);
+}
+
+std::shared_ptr<UiTranslateManagerImpl> PipelineContext::GetUiTranslateManagerImpl()
+{
+    return uiTranslateManager_;
 }
 
 void PipelineContext::SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)

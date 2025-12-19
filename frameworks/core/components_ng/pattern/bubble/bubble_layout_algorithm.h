@@ -232,7 +232,7 @@ private:
     void UpdateChildPosition(OffsetF& childOffset);
     void UpdateTouchRegion();
     void InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<BubbleLayoutProperty>& layoutProp);
-    void UpdateScrollHeight(LayoutWrapper* layoutWrapper, bool showInSubWindow);
+    void UpdateScrollHeight(LayoutWrapper* layoutWrapper);
     std::string MoveTo(double x, double y);
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
@@ -395,6 +395,8 @@ private:
     bool isGreatWrapperWidth_ = false;
     double foldCreaseTop_ = 0.0;
     double foldCreaseBottom_ = 0.0;
+    float popupMaxHeight_ = 0.0f;
+    float popupMaxWidth_ = 0.0f;
     bool isHalfFoldHover_ = false;
     bool doubleBorderEnable_ = false;
     bool expandDisplay_ = false;

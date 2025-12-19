@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethod, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod, ChildrenMainSize, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback } from "./component/common"
+import { CommonMethod, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod, ChildrenMainSize, EditModeOptions, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback } from "./component/common"
 import { BarState, Color, CrownSensitivity, EdgeEffect, Axis, ScrollSource } from "./component/enums"
 import { Resource } from "global.resource"
 import { extractors, AttributeModifier } from "#handwritten"
@@ -72,6 +72,8 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
     _supportEmptyBranchInLazyLoading_0_0value?: boolean | undefined
     _stackFromEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _stackFromEnd_0_0value?: boolean | undefined
+    _editModeOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _editModeOptions_0_0value?: EditModeOptions | undefined
     _onScrollIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onScrollIndex_0_0value?: ((start: int32,end: int32,center: int32) => void) | undefined
     _onScrollVisibleContentChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -405,6 +407,24 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 default: {
                     this._stackFromEnd_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setStackFromEndAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._editModeOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._editModeOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEditModeOptionsAttribute((this._editModeOptions_0_0value as EditModeOptions | undefined));
+                    this._editModeOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._editModeOptions_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._editModeOptions_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEditModeOptionsAttribute((undefined as EditModeOptions | undefined));
                 }
             }
         }
@@ -1129,6 +1149,19 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
+        if (modifier._editModeOptions_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._editModeOptions_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.editModeOptions(modifier._editModeOptions_0_0value);
+                    break;
+                }
+                default: {
+                    this.editModeOptions((undefined as EditModeOptions | undefined));
+                }
+            }
+        }
         if (modifier._onScrollIndex_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onScrollIndex_0_flag) {
@@ -1669,6 +1702,18 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         } else
         {
             this._stackFromEnd_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    editModeOptions(value: EditModeOptions | undefined): this {
+        if (((this._editModeOptions_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._editModeOptions_0_flag = AttributeUpdaterFlag.UPDATE
+            this._editModeOptions_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._editModeOptions_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

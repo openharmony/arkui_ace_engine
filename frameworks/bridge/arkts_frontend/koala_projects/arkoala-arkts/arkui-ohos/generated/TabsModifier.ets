@@ -97,7 +97,9 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
     _barMode_0_1value?: ScrollableBarModeOptions | undefined
     _barHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _barHeight_0_0value?: Length | undefined
-    _barHeight_0_1value?: boolean | undefined
+    _barHeight_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _barHeight_1_0value?: Length | undefined
+    _barHeight_1_1value?: boolean | undefined
     _barBackgroundBlurStyle_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _barBackgroundBlurStyle_1_0value?: BlurStyle | undefined
     _barBackgroundBlurStyle_1_1value?: BackgroundBlurStyleOptions | undefined
@@ -598,7 +600,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             switch (this._barHeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setBarHeightAttribute((this._barHeight_0_0value as Length | undefined), (this._barHeight_0_1value as boolean | undefined));
+                    peer.setBarHeight0Attribute((this._barHeight_0_0value as Length | undefined));
                     this._barHeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -608,7 +610,25 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
                 default: {
                     this._barHeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setBarHeightAttribute((undefined as Length | undefined), (undefined as boolean | undefined));
+                    peer.setBarHeight0Attribute((undefined as Length | undefined));
+                }
+            }
+        }
+        if (this._barHeight_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._barHeight_1_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setBarHeight1Attribute((this._barHeight_1_0value as Length | undefined), (this._barHeight_1_1value as boolean | undefined));
+                    this._barHeight_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._barHeight_1_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._barHeight_1_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setBarHeight1Attribute((undefined as Length | undefined), (undefined as boolean | undefined));
                 }
             }
         }
@@ -1008,7 +1028,20 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
             switch (modifier._barHeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.barHeight(modifier._barHeight_0_0value, modifier._barHeight_0_1value);
+                    this.barHeight(modifier._barHeight_0_0value);
+                    break;
+                }
+                default: {
+                    this.barHeight((undefined as Length | undefined));
+                }
+            }
+        }
+        if (modifier._barHeight_1_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._barHeight_1_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.barHeight(modifier._barHeight_1_0value, modifier._barHeight_1_1value);
                     break;
                 }
                 default: {
@@ -1341,15 +1374,26 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         }
         return this
     }
-    barHeight(height: Length | undefined, noMinHeightLimit: boolean | undefined): this {
-        if (((this._barHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._barHeight_0_1value) !== (noMinHeightLimit)))
+    barHeight(value: Length | undefined): this {
+        if (((this._barHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._barHeight_0_flag = AttributeUpdaterFlag.UPDATE
-            this._barHeight_0_0value = height
-            this._barHeight_0_1value = noMinHeightLimit
+            this._barHeight_0_0value = value
         } else
         {
             this._barHeight_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    barHeight(height: Length | undefined, noMinHeightLimit: boolean | undefined): this {
+        if (((this._barHeight_1_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._barHeight_1_1value) !== (noMinHeightLimit)))
+        {
+            this._barHeight_1_flag = AttributeUpdaterFlag.UPDATE
+            this._barHeight_1_0value = height
+            this._barHeight_1_1value = noMinHeightLimit
+        } else
+        {
+            this._barHeight_1_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

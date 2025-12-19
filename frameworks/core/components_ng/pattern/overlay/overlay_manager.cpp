@@ -5918,6 +5918,9 @@ void OverlayManager::UpdateSheetRender(
     if (sheetStyle.borderColor.has_value()) {
         sheetRenderContext->UpdateBorderColor(sheetStyle.borderColor.value());
     }
+    if (sheetStyle.radiusRenderStrategy.has_value()) {
+        sheetRenderContext->UpdateRenderStrategy(sheetStyle.radiusRenderStrategy.value());
+    }
     if (sheetStyle.shadow.has_value()) {
         sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
     } else if (sheetTheme->IsOuterBorderEnable()) {
@@ -9234,5 +9237,37 @@ void OverlayManager::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnDialogChangeEnd(keyNode);
+}
+
+void OverlayManager::UpdateImageGeneratorSheetKey(const RefPtr<UINode>& sheetNode, int32_t rootId)
+{
+    CHECK_NULL_VOID(sheetNode);
+    imageGeneratorSheetKey_ = SheetKey(true, sheetNode->GetId(), rootId);
+}
+
+bool OverlayManager::CloseImageGeneratorSheet()
+{
+    if (!imageGeneratorSheetKey_.has_value()) {
+        return false;
+    }
+    RefPtr<FrameNode> sheetNode = nullptr;
+    for (auto modal = modalList_.begin(); modal != modalList_.end(); modal++) {
+        auto modalNode = (*modal).Upgrade();
+        if (!modalNode || modalNode->GetTag() != V2::SHEET_PAGE_TAG) {
+            continue;
+        }
+        if (modalNode->GetId() == imageGeneratorSheetKey_.value().contentId) {
+            sheetNode = modalNode;
+            break;
+        }
+    }
+    CHECK_NULL_RETURN(sheetNode, false);
+    auto maskNode = AceType::DynamicCast<FrameNode>(sheetNode->GetParent());
+    if (maskNode) {
+        PlaySheetMaskTransition(maskNode, sheetNode, false);
+    }
+    PlaySheetTransition(sheetNode, false);
+    imageGeneratorSheetKey_.reset();
+    return true;
 }
 } // namespace OHOS::Ace::NG

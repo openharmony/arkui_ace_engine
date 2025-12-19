@@ -443,7 +443,9 @@ void DisposeTreeImpl(Ark_FrameNode peer)
     CHECK_NULL_VOID(frameNode);
     auto parent = frameNode->GetParent();
     if (parent && parent->GetTag() == "NodeContainer") {
-        auto pattern = AceType::DynamicCast<NodeContainerPattern>(parent);
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(parent);
+        CHECK_NULL_VOID(parentFrameNode);
+        auto pattern = AceType::DynamicCast<NodeContainerPattern>(parentFrameNode->GetPattern());
         CHECK_NULL_VOID(pattern);
         pattern->CleanChild();
     } else if (parent) {

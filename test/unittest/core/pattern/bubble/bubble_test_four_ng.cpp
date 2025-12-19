@@ -1244,9 +1244,9 @@ HWTEST_F(BubbleTestFourNg, UpdateScrollHeight, TestSize.Level1)
     ASSERT_NE(property, nullptr);
     property->UpdateEnableHoverMode(true);
     bool showInSubwindow = true;
-    layoutAlgorithm->UpdateScrollHeight(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    layoutAlgorithm->UpdateScrollHeight(AceType::RawPtr(layoutWrapper));
     showInSubwindow = false;
-    layoutAlgorithm->UpdateScrollHeight(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    layoutAlgorithm->UpdateScrollHeight(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(property->GetEnableHoverModeValue(false), true);
 }
 

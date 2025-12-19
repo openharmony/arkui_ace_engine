@@ -324,13 +324,13 @@ void BubbleLayoutAlgorithm::UpdateBubbleMaxSize(LayoutWrapper* layoutWrapper, bo
     auto childProp = child->GetLayoutProperty();
     CHECK_NULL_VOID(childProp);
     auto maxSize = GetPopupMaxWidthAndHeight(showInSubWindow, bubbleNode);
-    float popupMaxWidth = maxSize.Width();
-    float popupMaxHeight = maxSize.Height();
+    popupMaxWidth_ = maxSize.Width();
+    popupMaxHeight_ = maxSize.Height();
     if (useCustom_) {
-        childProp->UpdateCalcMaxSize(CalcSize(std::nullopt, NG::CalcLength(Dimension(popupMaxHeight))));
-    } else if (GreatNotEqual(popupMaxWidth, 0.0f) && GreatNotEqual(popupMaxHeight, 0.0f)) {
+        childProp->UpdateCalcMaxSize(CalcSize(std::nullopt, NG::CalcLength(Dimension(popupMaxHeight_))));
+    } else if (GreatNotEqual(popupMaxWidth_, 0.0f) && GreatNotEqual(popupMaxHeight_, 0.0f)) {
         childProp->UpdateCalcMaxSize(
-            CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
+            CalcSize(NG::CalcLength(Dimension(popupMaxWidth_)), NG::CalcLength(Dimension(popupMaxHeight_))));
     }
 }
 
@@ -474,6 +474,10 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(childProp);
     childProp->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     ResetTipsMaxLines(child, isTips_);
+    popupMaxHeight_ = std::min(popupMaxHeight_, childLayoutConstraint.maxSize.Height());
+    if (!useCustom_) {
+        UpdateScrollHeight(layoutWrapper);
+    }
     child->Measure(childLayoutConstraint);
     measureChildSizeAfter_ = child->GetGeometryNode()->GetFrameSize();
     if (isTips_) {
@@ -867,9 +871,6 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     maxColumns_ = popupTheme->GetMaxColumns();
     expandDisplay_ = DialogManager::GetInstance().IsPcOrFreeMultiWindow(layoutWrapper->GetHostNode());
     InitWrapperRect(layoutWrapper, layoutProp);
-    if (!useCustom_) {
-        UpdateScrollHeight(layoutWrapper, showInSubWindow);
-    }
 }
 
 void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow)
@@ -1010,32 +1011,21 @@ void BubbleLayoutAlgorithm::InitWrapperRect(
     }
 }
 
-void BubbleLayoutAlgorithm::UpdateScrollHeight(LayoutWrapper* layoutWrapper, bool showInSubWindow)
+void BubbleLayoutAlgorithm::UpdateScrollHeight(LayoutWrapper* layoutWrapper)
 {
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
-    auto layoutProp = bubbleNode->GetLayoutProperty<BubbleLayoutProperty>();
-    CHECK_NULL_VOID(layoutProp);
-    auto enableHoverMode = layoutProp->GetEnableHoverMode();
-    if (!enableHoverMode.value_or(false)) {
-        return;
-    }
-
-    const auto& children = layoutWrapper->GetAllChildrenWithBuild();
-    if (children.empty()) {
-        return;
-    }
-    auto childWrapper = children.front();
-    CHECK_NULL_VOID(childWrapper);
-    auto childMaxSize =
-        GetPopupMaxWidthAndHeight(showInSubWindow, childWrapper->GetHostNode());
-
     auto columnNode = AceType::DynamicCast<FrameNode>(bubbleNode->GetLastChild());
     CHECK_NULL_VOID(columnNode);
     auto lastColumnNode = AceType::DynamicCast<FrameNode>(columnNode->GetLastChild());
     CHECK_NULL_VOID(lastColumnNode);
     auto buttonRowNode = AceType::DynamicCast<FrameNode>(lastColumnNode->GetLastChild());
     CHECK_NULL_VOID(buttonRowNode);
+
+    auto columnProperty = lastColumnNode->GetLayoutProperty();
+    CHECK_NULL_VOID(columnProperty);
+    columnProperty->UpdateCalcMaxSize(
+        CalcSize(NG::CalcLength(Dimension(popupMaxWidth_)), NG::CalcLength(Dimension(popupMaxHeight_))));
 
     if (buttonRowNode->GetChildren().empty()) {
         return;
@@ -1047,18 +1037,11 @@ void BubbleLayoutAlgorithm::UpdateScrollHeight(LayoutWrapper* layoutWrapper, boo
         if (uinode->GetTag() == V2::SCROLL_ETS_TAG) {
             auto scrollNode = AceType::DynamicCast<FrameNode>(uinode);
             CHECK_NULL_VOID(scrollNode);
-            
             auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
             CHECK_NULL_VOID(scrollProps);
-            if (isHalfFoldHover_) {
-                scrollProps->UpdateCalcMaxSize(CalcSize(
-                    std::nullopt,
-                    CalcLength(Dimension(wrapperRect_.Height() - buttonRowSize_.Height()))));
-            } else {
-                scrollProps->UpdateCalcMaxSize(CalcSize(
-                    std::nullopt,
-                    CalcLength(Dimension(childMaxSize.Height() - buttonRowSize_.Height()))));
-            }
+            scrollProps->UpdateCalcMaxSize(CalcSize(
+                std::nullopt,
+                CalcLength(Dimension(popupMaxHeight_ - buttonRowSize_.Height()))));
             scrollNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     }

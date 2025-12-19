@@ -519,6 +519,20 @@ void SetAlignItemsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     GridModelStatic::SetAlignItems(frameNode, Converter::OptConvertPtr<GridItemAlignment>(value));
 }
+void SetEditModeOptionsImpl(Ark_NativePointer node,
+                            const Opt_EditModeOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    EditModeOptions options;
+    auto convValue = Converter::GetOptPtr(value);
+    if (convValue) {
+        auto enableGatherSelectedItemsAnimation =
+            Converter::OptConvert<bool>(convValue->enableGatherSelectedItemsAnimation);
+        options.enableGatherSelectedItemsAnimation = enableGatherSelectedItemsAnimation.value_or(false);
+    }
+    GridModelStatic::SetEditModeOptions(frameNode, options);
+}
 void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
                                const Opt_OnScrollFrameBeginCallback* value)
 {
@@ -656,6 +670,7 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
         GridAttributeModifier::SetEnableScrollInteractionImpl,
         GridAttributeModifier::SetFrictionImpl,
         GridAttributeModifier::SetAlignItemsImpl,
+        GridAttributeModifier::SetEditModeOptionsImpl,
         GridAttributeModifier::SetOnScrollFrameBeginImpl,
         GridAttributeModifier::SetOnWillScrollImpl,
         GridAttributeModifier::SetOnDidScrollImpl,

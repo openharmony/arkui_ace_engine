@@ -64,6 +64,7 @@ void RichEditorPaintMethod::UpdateContentOverlayModifier(PaintWrapper* paintWrap
     overlayMod->SetPrintOffset(richEditorPattern->GetTextRect().GetOffset());
     overlayMod->SetTextHeight(richEditorPattern->GetTextRect().Height());
     overlayMod->SetScrollOffset(richEditorPattern->GetScrollOffset());
+    overlayMod->SetSingleLine(richEditorPattern->isSingleLineMode_);
     SetPreviewTextDecoration(paintWrapper);
     if (!richEditorPattern->HasFocus()) {
         overlayMod->SetCaretVisible(false);

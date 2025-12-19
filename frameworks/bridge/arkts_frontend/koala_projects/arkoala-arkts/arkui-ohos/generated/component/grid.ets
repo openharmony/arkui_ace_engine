@@ -20,7 +20,7 @@ import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Scroller_serializer, OnScrollFrameBeginCallback, Scroller } from "./scroll"
 import { Resource_serializer } from "./../framework/resource"
-import { NestedScrollOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, NestedScrollOptions, OnWillScrollCallback, OnScrollCallback, CommonMethod, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { NestedScrollOptions_serializer, EditModeOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, NestedScrollOptions, EditModeOptions, OnWillScrollCallback, OnScrollCallback, CommonMethod, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -445,6 +445,19 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setAlignItems(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEditModeOptionsAttribute(value: EditModeOptions | undefined): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            EditModeOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_setEditModeOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOnScrollFrameBeginAttribute(value: OnScrollFrameBeginCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -617,6 +630,9 @@ export interface GridAttribute extends ScrollableCommonMethod {
     alignItems(value: GridItemAlignment | undefined): this {
         throw new Error("Unimplemented method alignItems")
     }
+    editModeOptions(value: EditModeOptions | undefined): this {
+        throw new Error("Unimplemented method editModeOptions")
+    }
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         throw new Error("Unimplemented method onScrollFrameBegin")
     }
@@ -664,6 +680,7 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     enableScrollInteraction_value?: boolean | undefined
     friction_value?: double | Resource | undefined
     alignItems_value?: GridItemAlignment | undefined
+    editModeOptions_value?: EditModeOptions | undefined
     onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
     onWillScroll_value?: OnWillScrollCallback | undefined
     onDidScroll_value?: OnScrollCallback | undefined
@@ -750,6 +767,9 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
         return this
     }
     alignItems(value: GridItemAlignment | undefined): this {
+        return this
+    }
+    editModeOptions(value: EditModeOptions | undefined): this {
         return this
     }
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
@@ -1001,6 +1021,14 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         if (this.checkPriority("alignItems")) {
             const value_casted = value as (GridItemAlignment | undefined)
             this.getPeer()?.setAlignItemsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public editModeOptions(value: EditModeOptions | undefined): this {
+        if (this.checkPriority("editModeOptions")) {
+            const value_casted = value as (EditModeOptions | undefined)
+            this.getPeer()?.setEditModeOptionsAttribute(value_casted)
             return this
         }
         return this

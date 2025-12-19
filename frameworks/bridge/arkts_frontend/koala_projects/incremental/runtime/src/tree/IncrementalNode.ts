@@ -156,6 +156,14 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
         return this._parent
     }
 
+    getCurrentNodeWhenReuse(): IncrementalNode | undefined {
+        return undefined;
+    }
+
+    getParentNodeWhenRecycle(nodeRef?: IncrementalNode): IncrementalNode | undefined {
+        return undefined;
+    }
+
     /**
      * @returns text representation of the node
      */

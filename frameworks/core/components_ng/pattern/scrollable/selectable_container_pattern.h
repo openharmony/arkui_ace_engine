@@ -31,7 +31,18 @@ public:
     SelectableContainerPattern() = default;
     ~SelectableContainerPattern() override = default;
     virtual std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() = 0;
-    virtual EditModeOptions GetEditModeOptions() const = 0;
+    void SetEditModeOptions(const EditModeOptions& editModeOptions)
+    {
+        editModeOptions_ = editModeOptions;
+    }
+
+    EditModeOptions GetEditModeOptions() const
+    {
+        return editModeOptions_;
+    }
+
+private:
+    EditModeOptions editModeOptions_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -2077,4 +2077,117 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_019, TestSize.Level1)
     pattern->HandleDragUpdate(FLOAT_260);
     EXPECT_EQ(pattern->realNavBarWidth_, 0.0);
 }
+
+/**
+ * @tc.name: NavigationEventHubTest001
+ * @tc.desc: Test Navigation EventHub
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, NavigationEventHubTest001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    navigationModel.SetNavigationStack();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    bool isSelected = true;
+    auto onChange = [&isSelected](bool select) { isSelected = select; };
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    ASSERT_NE(navigationEventHub, nullptr);
+    navigationEventHub->isVisible_ = true;
+    navigationEventHub->SetOnNavBarStateChange(std::move(onChange));
+    navigationEventHub->FireNavBarStateChangeEvent(false);
+    EXPECT_EQ(navigationEventHub->isVisible_, false);
+}
+
+/**
+ * @tc.name: NavigationEventHubTest002
+ * @tc.desc: Test Navigation EventHub
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, NavigationEventHubTest002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    navigationModel.SetNavigationStack();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    ASSERT_NE(navigationEventHub, nullptr);
+    navigationEventHub->isVisible_ = true;
+    navigationEventHub->SetOnNavBarStateChange(nullptr);
+    navigationEventHub->FireNavBarStateChangeEvent(false);
+    EXPECT_EQ(navigationEventHub->isVisible_, false);
+}
+
+/**
+ * @tc.name: NavigationEventHubTest003
+ * @tc.desc: Test Navigation EventHub
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, NavigationEventHubTest003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    navigationModel.SetNavigationStack();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    ASSERT_NE(navigationEventHub, nullptr);
+    navigationEventHub->isVisible_ = true;
+    navigationEventHub->FireNavBarStateChangeEvent(true);
+    EXPECT_EQ(navigationEventHub->isVisible_, true);
+}
+
+/**
+ * @tc.name: NavigationEventHubTest004
+ * @tc.desc: Test Navigation EventHub
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, NavigationEventHubTest004, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    navigationModel.SetNavigationStack();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    bool isSelected = true;
+    auto onChange = [&isSelected](bool select) { isSelected = select; };
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    ASSERT_NE(navigationEventHub, nullptr);
+    navigationEventHub->isVisible_ = false;
+    navigationEventHub->SetOnNavBarStateChange(std::move(onChange));
+    navigationEventHub->FireNavBarStateChangeEvent(true);
+    EXPECT_EQ(navigationEventHub->isVisible_, true);
+}
+
+/**
+ * @tc.name: NavigationEventHubTest005
+ * @tc.desc: Test Navigation EventHub
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestNg, NavigationEventHubTest005, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    navigationModel.SetNavigationStack();
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigationEventHub = AceType::DynamicCast<NavigationEventHub>(frameNode->GetEventHub<EventHub>());
+    ASSERT_NE(navigationEventHub, nullptr);
+    navigationEventHub->isVisible_ = false;
+    navigationEventHub->SetOnNavBarStateChange(nullptr);
+    navigationEventHub->FireNavBarStateChangeEvent(false);
+    EXPECT_EQ(navigationEventHub->isVisible_, false);
+}
 } // namespace OHOS::Ace::NG

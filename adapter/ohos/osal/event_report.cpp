@@ -84,6 +84,13 @@ constexpr char EVENT_KEY_DURATION_60[] = "DURATION_60";
 constexpr char EVENT_KEY_DURATION_72[] = "DURATION_72";
 constexpr char EVENT_KEY_DURATION_90[] = "DURATION_90";
 constexpr char EVENT_KEY_DURATION_120[] = "DURATION_120";
+constexpr char EVENT_KEY_TEXT_DRAW_CMD_LIST_ERROR[] = "TEXT_DRAW_CMD_LIST_ERROR";
+constexpr char EVENT_KEY_LONGEST_LINE_WITH_INDENT[] = "LONGEST_LINE_WITH_INDENT";
+constexpr char EVENT_KEY_MAX_INTRINSIC_WIDTH[] = "MAX_INTRINSIC_WIDTH";
+constexpr char EVENT_KEY_MAX_WIDTH[] = "MAX_WIDTH";
+constexpr char EVENT_KEY_HEIGHT[] = "HEIGHT";
+constexpr char EVENT_KEY_LINE_COUNT[] = "LINE_COUNT";
+constexpr char EVENT_KEY_PARAGRAPHS_SIZE[] = "PARAGRAPHS_SIZE";
 constexpr int32_t FRAME_60 = 60;
 constexpr int32_t FRAME_72 = 72;
 constexpr int32_t FRAME_90 = 90;
@@ -781,5 +788,20 @@ void EventReport::ReportWebBlanklessSnapshotTouchEvent(uint64_t startTime, const
         EVENT_KEY_APPEAR_TIMESTAMP, startTime,
         EVENT_KEY_TOUCH_EVENTS, touchInfo,
         EVENT_KEY_DISAPPEAR_TIMESTAMP, endTime);
+}
+
+void EventReport::ReportTextDrawCmdListErrorEvent(const TextErrorInfo& textInfo)
+{
+    auto packageName = Container::CurrentBundleName();
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_TEXT_DRAW_CMD_LIST_ERROR,
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        EVENT_KEY_BUNDLE_NAME, packageName,
+        EVENT_KEY_FRAME_NODE_ID, textInfo.frameNodeId,
+        EVENT_KEY_LONGEST_LINE_WITH_INDENT, textInfo.longestLineWithIndent,
+        EVENT_KEY_MAX_INTRINSIC_WIDTH, textInfo.maxIntrinsicWidth,
+        EVENT_KEY_MAX_WIDTH, textInfo.maxWidth,
+        EVENT_KEY_HEIGHT, textInfo.height,
+        EVENT_KEY_LINE_COUNT, textInfo.lineCount,
+        EVENT_KEY_PARAGRAPHS_SIZE, textInfo.paragraphsSize);
 }
 } // namespace OHOS::Ace

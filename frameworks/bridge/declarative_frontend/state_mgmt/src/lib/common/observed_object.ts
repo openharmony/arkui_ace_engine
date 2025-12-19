@@ -111,6 +111,7 @@ class SubscribableHandler {
   static readonly RAW_THIS = Symbol('_____raw_this');
   static readonly ENABLE_V2_COMPATIBLE = Symbol('_____enablev2_compatible');
   static readonly MAKE_V1_OBSERVED = Symbol('___makev1_observed__');
+  static readonly OWNING_PROPERTIES = Symbol('___owning_properties__');
 
   private owningProperties_?: Set<number>;
   private readCbFunc_?: PropertyReadCbFunc;
@@ -216,6 +217,8 @@ class SubscribableHandler {
             return target;
           case SubscribableHandler.COUNT_SUBSCRIBERS:
             return this.getOwningProperties() ? this.getOwningProperties()!.size : 0;
+          case SubscribableHandler.OWNING_PROPERTIES:
+            return this.getOwningProperties();
           case ObserveV2.SYMBOL_REFS:
           case ObserveV2.V2_DECO_META:
           case ObserveV2.SYMBOL_MAKE_OBSERVED:

@@ -142,6 +142,16 @@ public:
         std::function<void(const RefPtr<NG::NavigationStack>&)>&& setHomePathInfoCallback) {}
     virtual void SetEnableVisibilityLifecycleWithContentCover(bool isEnable) {}
 
+    virtual void UpdateDividerColor(const Color& color, const RefPtr<ResourceObject>& res) {}
+
+    virtual void UpdateDividerStartMargin(const CalcDimension& start, const RefPtr<ResourceObject>& res) {}
+
+    virtual void UpdateDividerEndMargin(const CalcDimension& end, const RefPtr<ResourceObject>& res) {}
+
+    virtual void UpdateDefineColor(bool isDefined) {}
+
+    virtual void UpdateDividerVisibility(bool isShow) {}
+
 private:
     static std::unique_ptr<NavigationModel> instance_;
     static std::mutex mutex_;

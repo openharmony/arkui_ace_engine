@@ -39,10 +39,11 @@ class AppStorageV2 {
    * @param { { new(...args: any): T } } type - The type of the stored value.
    * @param { string | StorageDefaultCreator<T> } [keyOrDefaultCreator] - The alias name of the key, or function generating the default value.
    * @param { StorageDefaultCreator<T> } [defaultCreator] - The function generating the default value.
+   * @param { StorageDefaultCreator<T> } [defaultSubCreator] - The function generating the default value for each collection item.
    * @returns { T } The value of the existed key or the default value.
    */
-  static connect(type, keyOrDefaultCreator, defaultCreator) {
-    return AppStorageV2.appStorageV2Impl_.connect(type, keyOrDefaultCreator, defaultCreator);
+  static connect(type, keyOrDefaultCreator, defaultCreator, defaultSubCreator) {
+    return AppStorageV2.appStorageV2Impl_.connect(type, keyOrDefaultCreator, defaultCreator, defaultSubCreator);
   }
 
   /**
@@ -94,10 +95,11 @@ class PersistenceV2 extends AppStorageV2 {
    * @param { { new(...args: any): T } } type - The type of the stored value.
    * @param { string | StorageDefaultCreator<T> } [keyOrDefaultCreator] - The alias name of the key, or function generating the default value.
    * @param { StorageDefaultCreator<T> } [defaultCreator] - The function generating the default value.
+   * @param { StorageDefaultCreator<T> } [defaultSubCreator] - The function generating the default value for each collection item.
    * @returns { T } The value of the existed key or the default value.
    */
-  static connect(type, keyOrDefaultCreator, defaultCreator) {
-    return PersistenceV2.persistenceV2Impl_.connect(type, keyOrDefaultCreator, defaultCreator);
+  static connect(type, keyOrDefaultCreator, defaultCreator, defaultSubCreator) {
+    return PersistenceV2.persistenceV2Impl_.connect(type, keyOrDefaultCreator, defaultCreator, defaultSubCreator);
   }
 
     /**
@@ -108,7 +110,8 @@ class PersistenceV2 extends AppStorageV2 {
    * use application path to store data in disk
    *
    * @template T - The original object.
-   * @param { { ConnectOptions<T extends Objects>: T } } connectOptions - Connect param.
+   * @template S - The type of items contained in the original object (collection).
+   * @param { ConnectOptions<T, S> } connectOptions - Connect param.
    * @returns { T } The value of the existed key or the default value.
    */
   static globalConnect(connectOptions) {
@@ -166,6 +169,66 @@ PersistenceV2.persistenceV2Impl_ = PersistenceV2Impl.instance();
 const Type = __Type__;
 
 /**
+ * When a custom component initialization is about to be completed, the function 
+ * decorated by the decorator will be executed.
+ */
+const ComponentInit = __componentInit__Internal;
+
+/**
+ * The function decorated by the decorator is executed after a new instance of the 
+ * custom component is created, before its build() function is executed.
+ */
+const ComponentAppear = __componentAppear__Internal;
+
+/**
+ * The function decorated by the decorator is executed after a new instance of the 
+ * custom component is built, after its build() function is executed.
+ */
+const ComponentBuilt = __componentBuilt__Internal;
+
+/**
+ * The function decorated by the decorator is executed when a custom component is 
+ * attached to the main tree.
+ */
+const ComponentAttach = __componentAttach__Internal;
+
+/**
+ * The function decorated by the decorator is executed when a custom component is 
+ * detached from the main tree.
+ */
+const ComponentDetach = __componentDetach__Internal;
+
+/**
+ * The function decorated by the decorator is invoked when a reusable custom component 
+ * is re-added to the node tree from the reuse cache to receive construction parameters
+ * of the component.
+ */
+const ComponentReuse = __componentReuse__Internal;
+
+/**
+ * The function decorated by the decorator is invoked from the native side function 
+ * 'CustomNodeBase::SetRecycleFunction' when the component is about to be recycled.
+ * It first calls the function in the application, and performs the necessary actions
+ * defined in the application before recycling.
+ * Then, it freezes the component to avoid performing UI updates when its in recycle 
+ * pool.
+ * Finally recursively traverses all subcomponents, calling the function on each 
+ * subcomponent that is about to be recycled, preparing them for recycling as well.
+ */
+const ComponentRecycle = __componentRecycle__Internal;
+
+/**
+ * The function decorated by the decorator is executed before the custom component 
+ * is about to be disappeared.
+ */
+const ComponentDisappear = __componentDisappear__Internal;
+
+/**
+ * Enum for Lifecycle State type.
+ */
+const CustomComponentLifecycleState = __CustomComponentLifecycleState__Internal;
+
+/**
  * UIUtils is a state management tool class for operating the observed data.
  *
  * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -174,6 +237,20 @@ const Type = __Type__;
  * @since 12
  */
 class UIUtils {
+  /**
+   * Determine whether the data object is observable and return the observation result.
+	 *
+   * @param { T } source - input source object data.
+   * @returns { ObservedResult } return result of whether a class is observable.
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @stagemodelonly
+   * @crossplatform
+   * @atomicservice
+   * @since 23 dynamic
+   */
+  static canBeObserved(source) {
+    return UIUtils.uiUtilsImpl_.canBeObserved(source);
+  }
   /**
    * Get raw object from the Object wrapped with Proxy added by statemanagement framework.
    * If input parameter is a regular Object without Proxy, return Object itself.
@@ -194,6 +271,19 @@ class UIUtils {
    */
   static getTarget(source) {
     return UIUtils.uiUtilsImpl_.getTarget(source);
+  }
+
+  /**
+   * The getLifecycle function gets the lifecycle instance of the class CustomComponent.
+   * 
+   * @param {T} source custom component instance
+   * @returns 
+   */
+  static getLifecycle(source) {
+    if (source && typeof source.__getLifecycle__Internal === 'function') {
+      return source.__getLifecycle__Internal();
+    }
+    return null;
   }
 
   /**
@@ -343,5 +433,14 @@ export default {
   AppStorageV2,
   PersistenceV2,
   Type,
-  UIUtils
+  UIUtils,
+  ComponentInit,
+  ComponentAppear,
+  ComponentBuilt,
+  ComponentAttach,
+  ComponentDetach,
+  ComponentReuse,
+  ComponentRecycle,
+  ComponentDisappear,
+  CustomComponentLifecycleState
 };

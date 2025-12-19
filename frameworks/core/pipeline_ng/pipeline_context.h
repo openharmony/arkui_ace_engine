@@ -1280,6 +1280,7 @@ public:
 
     void SetIsWindowSizeDragging(bool isDragging);
     void GetAllPixelMap();
+    std::shared_ptr<UiTranslateManagerImpl> GetUiTranslateManagerImpl();
     std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector();
     void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)
     {
@@ -1515,6 +1516,7 @@ private:
     void UpdateDVSyncTime(uint64_t nanoTimestamp, const std::string& abilityName, uint64_t vsyncPeriod);
     void NotifyCoastingAxisEventOnHide();
     void ResSchedReportAxisEvent(const AxisEvent& event) const;
+    void ClearInspectorOffScreenNodes();
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 

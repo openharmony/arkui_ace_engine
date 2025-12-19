@@ -427,6 +427,7 @@ public:
     void RegisterGetSpecifiedContentOffsetsCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void RegisterHighlightSpecifiedContentCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void RegisterSelectTextCallback(const WeakPtr<TaskExecutor>& taskExecutor);
+    void SetupGetImagesByIdCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& taskExecutor);
     void InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor>& taskExecutor);
     bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;

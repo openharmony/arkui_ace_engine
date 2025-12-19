@@ -642,6 +642,18 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RichEditorAttribute_setStopBackPress(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSingleLineAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setSingleLine(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setCompressLeadingPunctuationAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1128,6 +1140,9 @@ export interface RichEditorAttribute extends CommonMethod {
     stopBackPress(value: boolean | undefined): this {
         throw new Error("Unimplemented method stopBackPress")
     }
+    singleLine(value: boolean | undefined): this {
+        throw new Error("Unimplemented method singleLine")
+    }
     compressLeadingPunctuation(value: boolean | undefined): this {
         throw new Error("Unimplemented method compressLeadingPunctuation")
     }
@@ -1184,6 +1199,7 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     maxLines_value?: int32 | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
     stopBackPress_value?: boolean | undefined
+    singleLine_value?: boolean | undefined
     compressLeadingPunctuation_value?: boolean | undefined
     includeFontPadding_value?: boolean | undefined
     fallbackLineSpacing_value?: boolean | undefined
@@ -1280,6 +1296,9 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
         return this
     }
     stopBackPress(value: boolean | undefined): this {
+        return this
+    }
+    singleLine(value: boolean | undefined): this {
         return this
     }
     compressLeadingPunctuation(value: boolean | undefined): this {
@@ -1632,6 +1651,14 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("stopBackPress")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setStopBackPressAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public singleLine(value: boolean | undefined): this {
+        if (this.checkPriority("singleLine")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setSingleLineAttribute(value_casted)
             return this
         }
         return this

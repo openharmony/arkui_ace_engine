@@ -1818,6 +1818,8 @@ typedef struct WebKeyboardCallback WebKeyboardCallback;
 typedef struct Opt_WebKeyboardCallback Opt_WebKeyboardCallback;
 typedef struct WorkerEventListener WorkerEventListener;
 typedef struct Opt_WorkerEventListener Opt_WorkerEventListener;
+typedef struct Ark_AccessibilityActionOptions Ark_AccessibilityActionOptions;
+typedef struct Opt_AccessibilityActionOptions Opt_AccessibilityActionOptions;
 typedef struct Ark_AccessibilityOptions Ark_AccessibilityOptions;
 typedef struct Opt_AccessibilityOptions Opt_AccessibilityOptions;
 typedef struct Ark_AdsBlockedDetails Ark_AdsBlockedDetails;
@@ -2030,6 +2032,8 @@ typedef struct Ark_EdgeStyles Ark_EdgeStyles;
 typedef struct Opt_EdgeStyles Opt_EdgeStyles;
 typedef struct Ark_EditMenuOptions Ark_EditMenuOptions;
 typedef struct Opt_EditMenuOptions Opt_EditMenuOptions;
+typedef struct Ark_EditModeOptions Ark_EditModeOptions;
+typedef struct Opt_EditModeOptions Opt_EditModeOptions;
 typedef struct Ark_EllipseOptions Ark_EllipseOptions;
 typedef struct Opt_EllipseOptions Opt_EllipseOptions;
 typedef struct Ark_EmbedOptions Ark_EmbedOptions;
@@ -13663,6 +13667,14 @@ typedef struct Opt_WorkerEventListener {
     Ark_Tag tag;
     WorkerEventListener value;
 } Opt_WorkerEventListener;
+typedef struct Ark_AccessibilityActionOptions {
+    /* kind: Interface */
+    Opt_Int32 scrollStep;
+} Ark_AccessibilityActionOptions;
+typedef struct Opt_AccessibilityActionOptions {
+    Ark_Tag tag;
+    Ark_AccessibilityActionOptions value;
+} Opt_AccessibilityActionOptions;
 typedef struct Ark_AccessibilityOptions {
     /* kind: Interface */
     Opt_Boolean accessibilityPreferred;
@@ -14507,6 +14519,14 @@ typedef struct Opt_EditMenuOptions {
     Ark_Tag tag;
     Ark_EditMenuOptions value;
 } Opt_EditMenuOptions;
+typedef struct Ark_EditModeOptions {
+    /* kind: Interface */
+    Opt_Boolean enableGatherSelectedItemsAnimation;
+} Ark_EditModeOptions;
+typedef struct Opt_EditModeOptions {
+    Ark_Tag tag;
+    Ark_EditModeOptions value;
+} Opt_EditModeOptions;
 typedef struct Ark_EllipseOptions {
     /* kind: Interface */
     Opt_Union_String_F64 width;
@@ -23264,6 +23284,10 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                            const Opt_FocusDrawLevel* value);
     void (*setSystemMaterial)(Ark_NativePointer node,
                               const Opt_uiMaterial_Material* value);
+    void (*setAccessibilityStateDescription)(Ark_NativePointer node,
+                                             const Opt_Union_String_Resource* value);
+    void (*setAccessibilityActionOptions)(Ark_NativePointer node,
+                                          const Opt_AccessibilityActionOptions* value);
     void (*setExpandSafeArea)(Ark_NativePointer node,
                               const Opt_Array_SafeAreaType* types,
                               const Opt_Array_SafeAreaEdge* edges);
@@ -23721,6 +23745,8 @@ typedef struct GENERATED_ArkUIGridModifier {
                         const Opt_Union_F64_Resource* value);
     void (*setAlignItems)(Ark_NativePointer node,
                           const Opt_GridItemAlignment* value);
+    void (*setEditModeOptions)(Ark_NativePointer node,
+                               const Opt_EditModeOptions* value);
     void (*setOnScrollFrameBegin)(Ark_NativePointer node,
                                   const Opt_OnScrollFrameBeginCallback* value);
     void (*setOnWillScroll)(Ark_NativePointer node,
@@ -24005,6 +24031,8 @@ typedef struct GENERATED_ArkUIListModifier {
                                                const Opt_Boolean* value);
     void (*setStackFromEnd)(Ark_NativePointer node,
                             const Opt_Boolean* value);
+    void (*setEditModeOptions)(Ark_NativePointer node,
+                               const Opt_EditModeOptions* value);
     void (*setOnScrollIndex)(Ark_NativePointer node,
                              const Opt_Callback_I32_I32_I32_Void* value);
     void (*setOnScrollVisibleContentChange)(Ark_NativePointer node,
@@ -24571,6 +24599,8 @@ typedef struct GENERATED_ArkUIRichEditorModifier {
                                   const Opt_KeyboardAppearance* value);
     void (*setStopBackPress)(Ark_NativePointer node,
                              const Opt_Boolean* value);
+    void (*setSingleLine)(Ark_NativePointer node,
+                          const Opt_Boolean* value);
     void (*setCompressLeadingPunctuation)(Ark_NativePointer node,
                                           const Opt_Boolean* value);
     void (*setIncludeFontPadding)(Ark_NativePointer node,
@@ -25363,6 +25393,8 @@ typedef struct GENERATED_ArkUITabsModifier {
                           const Opt_Boolean* value);
     void (*setBarWidth)(Ark_NativePointer node,
                         const Opt_Length* value);
+    void (*setBarHeight0)(Ark_NativePointer node,
+                         const Opt_Length* value);
     void (*setAnimationCurve)(Ark_NativePointer node,
                               const Opt_Union_Curve_ICurve* value);
     void (*setAnimationDuration)(Ark_NativePointer node,
@@ -25410,7 +25442,7 @@ typedef struct GENERATED_ArkUITabsModifier {
     void (*setBarMode)(Ark_NativePointer node,
                        const Opt_BarMode* value,
                        const Opt_ScrollableBarModeOptions* options);
-    void (*setBarHeight)(Ark_NativePointer node,
+    void (*setBarHeight1)(Ark_NativePointer node,
                          const Opt_Length* height,
                          const Opt_Boolean* noMinHeightLimit);
     void (*setBarBackgroundBlurStyle1)(Ark_NativePointer node,

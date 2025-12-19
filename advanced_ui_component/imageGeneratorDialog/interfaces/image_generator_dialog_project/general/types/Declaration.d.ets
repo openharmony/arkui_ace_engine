@@ -13,10 +13,17 @@
  * limitations under the License.
  */
 
-import imageGeneration from '@ohos.arkui.intelligence.imageGeneration'
+import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
+export declare const LogTag: string;
 export declare enum CanvasMode {
     GENERAL_MODE = 0,
-    DOODLE_MODE = 1
+    DOODLE_MODE = 1,
+    DEFAULT = 0
+}
+export declare enum CanvasLayoutDirection {
+    HORIZONTAL = 0,
+    VERTICAL = 1,
+    DEFAULT = 0
 }
 export declare enum ImageGenerateState {
     CONFIGURATION = 0,

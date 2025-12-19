@@ -22,4 +22,8 @@ export class Constants {
    * Photo picker default placeholder
    */
   public static readonly NOT_SELECTED_NAME: string = 'notSelectedPic';
+  /**
+   * Min breakpoint when display as content cover
+   */
+  public static readonly CONTENT_COVER_DISPLAY_MIN_WIDTH: number = 600;
 }

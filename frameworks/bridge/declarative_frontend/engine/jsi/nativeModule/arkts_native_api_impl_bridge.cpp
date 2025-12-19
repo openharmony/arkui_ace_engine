@@ -1062,6 +1062,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetSelectedDragPreviewStyle));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedDragPreviewStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetSelectedDragPreviewStyle));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSingleLine"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetSingleLine));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSingleLine"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetSingleLine));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "richEditor"), richEditor);
 
     auto linearIndicator = panda::ObjectRef::New(vm);
@@ -3079,6 +3083,10 @@ void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetSystemBarStyle));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSystemBarStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetSystemBarStyle));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDividerStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetDivider));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDividerStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetDivider));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigation"), navigation);
 }
 

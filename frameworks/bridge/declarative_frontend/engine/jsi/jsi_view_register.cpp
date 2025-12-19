@@ -2241,8 +2241,12 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine, bool isCustomE
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomAppBar));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomWindowMask"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomWindowMask));
+    // for image generator dialog use below
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadImageGeneratorDialog"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadImageGeneratorDialog));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "onXIconClicked"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsOnXIconClicked));
+    // for image generator dialog use above
 
     BindingTarget cursorControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
     cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCursor"),

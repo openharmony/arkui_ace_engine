@@ -210,6 +210,18 @@ int32_t UIContentServiceStubImpl::GetCurrentImagesShowing(
     return NO_ERROR;
 }
 
+int32_t UIContentServiceStubImpl::GetImagesById(
+    const std::vector<int32_t>& arkUIIds,
+    const std::function<void(int32_t, const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>&,
+        MultiImageQueryErrorCode)>& arkUIfinishCallback,
+    const std::map<int32_t, std::vector<int32_t>>& arkWebs,
+    const std::function<void(int32_t, const std::map<int32_t, std::map<int32_t,
+        std::shared_ptr<Media::PixelMap>>>&, MultiImageQueryErrorCode)>& arkWebfinishCallback)
+{
+    UiSessionManager::GetInstance()->GetMultiImagesById(arkUIIds, arkWebs);
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceStubImpl::GetCurrentPageName(const EventCallback& eventCallback)
 {
     UiSessionManager::GetInstance()->GetCurrentPageName();

@@ -361,6 +361,20 @@ void SetStackFromEndImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<bool>(*value);
     ListModelStatic::SetStackFromEnd(frameNode, convValue);
 }
+void SetEditModeOptionsImpl(Ark_NativePointer node,
+                            const Opt_EditModeOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    EditModeOptions options;
+    auto convValue = Converter::GetOptPtr(value);
+    if (convValue) {
+        auto enableGatherSelectedItemsAnimation =
+            Converter::OptConvert<bool>(convValue->enableGatherSelectedItemsAnimation);
+        options.enableGatherSelectedItemsAnimation = enableGatherSelectedItemsAnimation.value_or(false);
+    }
+    ListModelStatic::SetEditModeOptions(frameNode, options);
+}
 void SetOnScrollIndexImpl(Ark_NativePointer node,
                           const Opt_Callback_I32_I32_I32_Void* value)
 {
@@ -638,6 +652,7 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::SetMaintainVisibleContentPositionImpl,
         ListAttributeModifier::SetSupportEmptyBranchInLazyLoadingImpl,
         ListAttributeModifier::SetStackFromEndImpl,
+        ListAttributeModifier::SetEditModeOptionsImpl,
         ListAttributeModifier::SetOnScrollIndexImpl,
         ListAttributeModifier::SetOnScrollVisibleContentChangeImpl,
         ListAttributeModifier::SetOnItemMoveImpl,

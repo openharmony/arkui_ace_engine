@@ -22,7 +22,7 @@ import { PeerNode } from "./PeerNode"
 import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, TouchEvent, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, LayoutSafeAreaType, LayoutSafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
 import { int32 } from "@koalaui/common"
 import { ModifierState } from "./CommonModifier"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, ResourceStr, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions } from "./component/units"
+import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, ResourceStr, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, AccessibilityOptions } from "./component/units"
 import { Resource } from "global.resource"
 import { HitTestMode, Color, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey } from "./component/enums"
 import { LengthMetrics, ColorMetrics } from "arkui.Graphics"
@@ -211,6 +211,8 @@ export class CommonMethodModifier implements CommonMethod {
     _onSizeChange_0_0value?: SizeChangeCallback | undefined
     _accessibilityFocusDrawLevel_0_0value?: FocusDrawLevel | undefined
     _systemMaterial_0_0value?: uiMaterial.Material | undefined
+    _accessibilityStateDescription_0_0value?: string | Resource | undefined
+    _accessibilityActionOptions_0_0value?: AccessibilityActionOptions | undefined
     _customProperty_0_0value?: string
     _customProperty_0_1value?: CustomProperty
     _expandSafeArea_0_0value?: Array<SafeAreaType> | undefined
@@ -3997,6 +3999,41 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[204] != 0) {
+            switch (flagArray[204] as int32) {
+                case 1: {
+                    peer.setAccessibilityStateDescriptionAttribute((this._accessibilityStateDescription_0_0value as string | Resource | undefined));
+                    flagArray[204] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[204] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[204] = 0;
+                    peer.setAccessibilityStateDescriptionAttribute((undefined as string | Resource | undefined));
+                }
+            }
+        }
+        if (flagArray[205] != 0)
+        {
+            switch (flagArray[205] as int32) {
+                case 1: {
+                    peer.setAccessibilityActionOptionsAttribute((this._accessibilityActionOptions_0_0value as AccessibilityActionOptions | undefined));
+                    flagArray[205] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[205] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[205] = 0;
+                    peer.setAccessibilityActionOptionsAttribute((undefined as AccessibilityActionOptions | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: CommonMethodModifier): void {
         this._state = modifier._state;
@@ -6678,6 +6715,32 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[204] != 0)
+        {
+            switch (flagArray[204] as int32) {
+                case 1:
+                case 3: {
+                    this.accessibilityStateDescription(modifier._accessibilityStateDescription_0_0value);
+                    break;
+                }
+                default: {
+                    this.accessibilityStateDescription((undefined as string | Resource | undefined));
+                }
+            }
+        }
+        if (flagArray[205] != 0)
+        {
+            switch (flagArray[205] as int32) {
+                case 1:
+                case 3: {
+                    this.accessibilityActionOptions(modifier._accessibilityActionOptions_0_0value);
+                    break;
+                }
+                default: {
+                    this.accessibilityActionOptions((undefined as AccessibilityActionOptions | undefined));
+                }
+            }
+        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true))
@@ -9021,6 +9084,30 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._flagArray[203] = 3
+        }
+        return this
+    }
+    accessibilityStateDescription(value: string | Resource | undefined): this {
+        if (((this._flagArray[204]) == (0)) || (true))
+        {
+            this._flagArray[204] = 1
+            this._accessibilityStateDescription_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[204] = 3
+        }
+        return this
+    }
+    accessibilityActionOptions(value: AccessibilityActionOptions | undefined): this {
+        if (((this._flagArray[205]) == (0)) || (true))
+        {
+            this._flagArray[205] = 1
+            this._accessibilityActionOptions_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[205] = 3
         }
         return this
     }

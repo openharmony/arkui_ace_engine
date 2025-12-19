@@ -217,6 +217,14 @@ export class ObserveSingleton implements IObserve {
         this.computedPropRefsDelayed_.clear();
     }
 
+    public clearDelayedComputedWhenReuse(): void {
+        this.computedPropRefsChanged_.clear();
+    }
+
+    public clearDelayedMonitorWhenReuse(): void {
+        this.monitorPathRefsDelayed_.clear();
+    }
+
     public unFreezeDelayedMonitorPaths(): void {
         this.monitorPathRefsDelayed_.forEach((weak) => {
             this.monitorPathRefsChanged_.add(weak);

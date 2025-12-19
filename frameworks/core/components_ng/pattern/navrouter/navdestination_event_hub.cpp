@@ -238,6 +238,10 @@ void NavDestinationEventHub::FireOnWillDisAppear()
 
 bool NavDestinationEventHub::FireOnBackPressedEvent()
 {
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
+    CHECK_NULL_RETURN(navDestination, false);
+    UiSessionManager::GetInstance()->OnRouterChange(navDestination->GetNavDestinationPathInfo(),
+        "onBackPressed");
     if (onBackPressedEvent_) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination backButton press is happening.");
         return onBackPressedEvent_();

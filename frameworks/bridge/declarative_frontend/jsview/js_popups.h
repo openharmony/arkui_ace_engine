@@ -50,6 +50,7 @@ public:
     static void ParseMenuOffsetParam(const JSRef<JSObject>& offsetObj, NG::MenuParam& menuParam);
     static void InitMenuParamColorMode(NG::MenuParam& menuParam);
     static void ParseMenuPreviewBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
+    static void SetSheetRenderStrategy(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
 private:
     static void ParseMenuOutlineColorObject(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam,
         NG::BorderColorProperty& outlineColor);

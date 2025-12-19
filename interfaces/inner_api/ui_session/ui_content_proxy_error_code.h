@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/components/camera/camera_component.h"
+#ifndef FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_ERROR_CODE_H
+#define FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_ERROR_CODE_H
 
-#include "core/components/camera/camera_element.h"
-#include "core/components/video/render_texture.h"
-
+#include <cstdint>
 namespace OHOS::Ace {
-
-RefPtr<RenderNode> CameraComponent::CreateRenderNode()
-{
-    return RenderTexture::Create();
-}
-
-RefPtr<Element> CameraComponent::CreateElement()
-{
-    return AceType::MakeRefPtr<CameraElement>();
-}
-
+enum class MultiImageQueryErrorCode : int32_t {
+    OK = 0,
+    TIMEOUT = 1,
+    INVALID_ID = 2,
+};
 } // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_ERROR_CODE_H

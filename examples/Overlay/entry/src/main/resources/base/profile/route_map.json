@@ -372,6 +372,11 @@
       "buildFunction": "PopupDoubleBorderBuilder"
     },
     {
+      "name": "PopupAccessibilityModel",
+      "pageSourceFile": "src/main/ets/pages/components/popup/PopupAccessibilityModel.ets",
+      "buildFunction": "PopupAccessibilityModelBuilder"
+    },
+    {
       "name": "MenuComplex",
       "pageSourceFile": "src/main/ets/pages/components/menu/MenuComplexTest.ets",
       "buildFunction": "MenuComplexBuilder"

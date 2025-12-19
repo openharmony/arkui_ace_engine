@@ -44,6 +44,7 @@ export struct PopupIndex {
     { name: 'PopupBigTest', path: 'PopupBigTest' },
     { name: 'AdvancedPopupTest', path: 'AdvancedPopupTest' },
     { name: 'PopupTest', path: 'PopupTest' },
+    { name: 'PopupAccessibilityModel', path: 'PopupAccessibilityModel' },
   ]
 
   build() {

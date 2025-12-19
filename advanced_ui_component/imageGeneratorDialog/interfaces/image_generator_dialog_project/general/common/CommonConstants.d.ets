@@ -22,4 +22,8 @@ export declare class Constants {
      * Photo picker default placeholder
      */
     static readonly NOT_SELECTED_NAME: string;
+    /**
+     * Min breakpoint when display as content cover
+     */
+    static readonly CONTENT_COVER_DISPLAY_MIN_WIDTH: number;
 }

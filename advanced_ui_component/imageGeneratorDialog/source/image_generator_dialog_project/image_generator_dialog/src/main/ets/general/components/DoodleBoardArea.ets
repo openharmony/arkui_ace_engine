@@ -14,6 +14,7 @@
  */
 import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
 import { Constants } from '../common/CommonConstants';
+import { CanvasLayoutDirection } from '../types/Declaration';
 import { ImageOperate } from './ImageOperate';
 
 @ComponentV2
@@ -21,6 +22,7 @@ export struct DoodleBoardArea {
   private static DEFAULT_COUNT: number = 4;
   @Param @Require imageInfoArr: Array<imageGeneration.ImageItem>;
   @Param @Require imageMatrixArr: number[][];
+  @Consumer('globalLayoutDirection') curLayoutDirection: CanvasLayoutDirection = CanvasLayoutDirection.DEFAULT;
 
   private invalidImageInfo(index: number): boolean {
     if (index < 0 || index >= DoodleBoardArea.DEFAULT_COUNT) {
@@ -152,13 +154,13 @@ export struct DoodleBoardArea {
           }, (item: imageGeneration.ImageItem, index: number) => '' + index + (item?.url ?? 'imageGeneration'))
         }
       }
-      .width(386)
-      .height(386)
+      .width(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 386 : 288)
+      .height(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 386 : 288)
       .borderRadius(24)
       .clip(true)
     }
-    .width(386)
-    .height(386)
+    .width(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 386 : 288)
+    .height(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 386 : 288)
     .borderRadius(24)
     .borderWidth(2)// todo: delete here
     .borderColor('#33000000')

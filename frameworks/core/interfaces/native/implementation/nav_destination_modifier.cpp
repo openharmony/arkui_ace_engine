@@ -430,7 +430,6 @@ void SetTitleImpl(Ark_NativePointer node,
     if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         titleOptions = Converter::OptConvert<NavigationTitlebarOptions>(options->value).value_or(titleOptions);
     }
-    NavDestinationModelStatic::SetTitlebarOptions(frameNode, std::move(titleOptions));
     NavigationTitleInfo info;
     if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
         info.hasMainTitle = true;
@@ -438,6 +437,7 @@ void SetTitleImpl(Ark_NativePointer node,
         info.title = "";
         info.subtitle = "";
         NavDestinationModelStatic::ParseCommonTitle(frameNode, info);
+        NavDestinationModelStatic::SetTitlebarOptions(frameNode, std::move(titleOptions));
         return;
     }
     auto selector = Converter::Convert<int32_t>(value->value.selector);
@@ -447,6 +447,7 @@ void SetTitleImpl(Ark_NativePointer node,
         info.hasMainTitle = true;
         info.hasSubTitle = false;
         NavDestinationModelStatic::ParseCommonTitle(frameNode, info);
+        NavDestinationModelStatic::SetTitlebarOptions(frameNode, std::move(titleOptions));
         return;
     }
     const int8_t customTitleSelector = 1;
@@ -459,6 +460,7 @@ void SetTitleImpl(Ark_NativePointer node,
                     NavDestinationModelStatic::SetCustomTitle(frameNode, uiNode);
                 },
                 node);
+        NavDestinationModelStatic::SetTitlebarOptions(frameNode, std::move(titleOptions));
         return;
     }
     const int8_t commonTitleSelector = 2;
@@ -495,6 +497,7 @@ void SetTitleImpl(Ark_NativePointer node,
                 [frameNode](
                     const RefPtr<UINode>& uiNode) { NavDestinationModelStatic::SetCustomTitle(frameNode, uiNode); },
                 node);
+        NavDestinationModelStatic::SetTitlebarOptions(frameNode, std::move(titleOptions));
         return;
     }
     const int8_t resourceType = 4;
@@ -504,6 +507,7 @@ void SetTitleImpl(Ark_NativePointer node,
         info.hasMainTitle = true;
         info.hasSubTitle = false;
         NavDestinationModelStatic::ParseCommonTitle(frameNode, info);
+        NavDestinationModelStatic::SetTitlebarOptions(frameNode, std::move(titleOptions));
         return;
     }
 }

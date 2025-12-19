@@ -17,9 +17,10 @@ import { FunctionAreaPlaceholder, StyleSelectBuilder, UserInteractiveTabBarBuild
 import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
 import { styleItem } from "./CanvasFramework"
 import { PhotoSelect } from "./PhotoSelect";
+import { CanvasLayoutDirection } from "../types/Declaration";
 
 @ComponentV2
-export struct LandscapeSelectFuncArea {
+export struct SelectFuncArea {
   @Param @Require styles?: Array<imageGeneration.ImageStyle>;
   private tabBarDefaultBgColor: ResourceColor = 'rgba(0,0,0,0.05)'
   @Local tabBarStyleBgColor: ResourceColor = this.tabBarDefaultBgColor
@@ -27,6 +28,9 @@ export struct LandscapeSelectFuncArea {
   @Param @Require imageInfoArr: Array<imageGeneration.ImageItem>;
   @Param @Require imageMatrixArr: number[][];
   @Provider('functionAreaSelectedIndex') selectedIndex: number = 0
+  @Event setImgCounts: (count: number) => void;
+  @Consumer('globalLayoutDirection') curLayoutDirection: CanvasLayoutDirection = CanvasLayoutDirection.DEFAULT;
+
   aboutToAppear(): void {
     for (let i = 0; this.styles && i < this.styles?.length; ++i) {
       this.styleItems.push({ name: this.styles[i].name, resourceAddr: this.styles[i].icon})
@@ -36,14 +40,18 @@ export struct LandscapeSelectFuncArea {
   build() {
     Tabs({ index: this.selectedIndex }) {
       TabContent() {
-        PhotoSelect({imageInfoArr: this.imageInfoArr, imageMatrixArr: this.imageMatrixArr })
+        PhotoSelect({
+          imageInfoArr: this.imageInfoArr,
+          imageMatrixArr: this.imageMatrixArr,
+          setImgCounts: this.setImgCounts
+        })
       }
       .tabBar(UserInteractiveTabBarBuilder(0, '图像', $r('sys.symbol.style')))
 
       TabContent() {
         StyleSelectBuilder(this.styleItems)
       }
-      .tabBar(UserInteractiveTabBarBuilder(1, '风格', $r('sys.meida.ohos_image_style')))
+      .tabBar(UserInteractiveTabBarBuilder(1, '风格', $r('sys.symbol.style')))
 
       TabContent() {
         FunctionAreaPlaceholder()
@@ -55,12 +63,12 @@ export struct LandscapeSelectFuncArea {
       }
       .tabBar(UserInteractiveTabBarBuilder(3, '清晰度', $r('sys.symbol.style')))
     }
-    .barHeight(284)
+    .barHeight(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 284 : undefined)
     .scrollable(false)
-    .vertical(true)
+    .vertical(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL)
     .barPosition(BarPosition.End)
-    .width(118)
-    .height(386)
+    .width(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 118 : 396)
+    .height(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 386 : 96)
     .onChange((index: number) => {
       this.selectedIndex = index
     })

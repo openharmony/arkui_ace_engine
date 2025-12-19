@@ -33,6 +33,7 @@ void BindingCustomFromJS(const JSRef<JSObject> object, const EcmaVM* vm, const R
                             const std::string& eventName, const std::string& param) {
             ContainerScope scope(id);
             CHECK_NULL_VOID(vm);
+            LocalScope localScope(vm);
             JSRef<JSVal> jsEventName = JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, eventName));
             JSRef<JSVal> jsParam = JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, param));
             JSRef<JSVal> paramArray[2] = { jsEventName, jsParam };
@@ -44,8 +45,10 @@ void BindingCustomFromJS(const JSRef<JSObject> object, const EcmaVM* vm, const R
     const JSRef<JSVal> setAppIcon = object->GetProperty("setAppIcon");
     if (setAppIcon->IsFunction()) {
         JSRef<JSFunc> jsSetAppIconFunc = JSRef<JSFunc>::Cast(setAppIcon);
-        auto callback = [obj = object, jsFunc = jsSetAppIconFunc, id](const RefPtr<PixelMap>& icon) {
+        auto callback = [obj = object, jsFunc = jsSetAppIconFunc, id, vm](const RefPtr<PixelMap>& icon) {
             ContainerScope scope(id);
+            CHECK_NULL_VOID(vm);
+            LocalScope localScope(vm);
             JSRef<JSVal> param = ConvertPixmap(icon);
             jsFunc->Call(obj, 1, &param);
         };

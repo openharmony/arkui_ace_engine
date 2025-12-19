@@ -18,16 +18,18 @@ import { AIGenerateCallBack } from '../types/Declaration';
 export declare class AIGenerateImpl {
     private stopTask;
     private sessionId;
+    private currentImageSessionId;
     private TextModal;
     private ImageModal;
     private static instance;
     static getInstance(): AIGenerateImpl;
-    setSelfTextGenerateModal(v17: imageGeneration.TextGenerationModel | undefined): void;
-    setSelfImageGenerateModal(u17: imageGeneration.ImageGenerationModel | undefined): void;
+    getCurrentImageSessionId(): number;
+    setSelfTextGenerateModal(modal: imageGeneration.TextGenerationModel | undefined): void;
+    setSelfImageGenerateModal(modal: imageGeneration.ImageGenerationModel | undefined): void;
     private delay;
-    TextAIGenerate(p17: AIGenerateCallBack): Promise<number>;
+    TextAIGenerate(callback: AIGenerateCallBack): Promise<number>;
     private mockPoolingTask;
-    ImageAIGenerate(d17: AIGenerateCallBack): Promise<number>;
-    cancelTextGenerateTask(c17: number): Promise<void>;
-    cancelImageGenerateTask(b17: number): Promise<void>;
+    ImageAIGenerate(callback: AIGenerateCallBack): Promise<number>;
+    cancelTextGenerateTask(sessionId: number): Promise<void>;
+    cancelImageGenerateTask(sessionId: number): Promise<void>;
 }

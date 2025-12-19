@@ -167,6 +167,10 @@ abstract class ViewPU extends PUV2ViewBase
     this.localStoragebackStore_ = instance;
   }
 
+  public getElementNameById(elmtId: number): string {
+    return this.updateFuncByElmtId.getElementNameById(elmtId);
+  }
+
   // FIXME
   // indicate if this is  V1 or a V2 component
   // V1 by default, changed to V2 by the first V2 decorated variable
@@ -335,7 +339,7 @@ abstract class ViewPU extends PUV2ViewBase
     return result;
   }
 
-  public getRecycleDump(): string {
+  public __getRecycleDump_internal(): string {
     return this.recycleManager_?.getDumpInfo();
   }
 
@@ -1032,6 +1036,8 @@ abstract class ViewPU extends PUV2ViewBase
         const params = param ? param : this.paramsGenerator_();
         this.updateStateVars(params);
         this.aboutToReuse(params);
+        this.__lifecycle__Internal.setParams(params as Record<string, Object>);
+        this.__lifecycle__Internal.handleEvent(LifeCycleEvent.ON_REUSE);
       }
     }, 'aboutToReuse', this.constructor.name);
 
@@ -1063,6 +1069,7 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`ViewPU ${this.debugInfo__()} aboutToRecycleInternal`);
     stateMgmtTrace.scopedTrace(() => {
       this.aboutToRecycle();
+      this.__lifecycle__Internal.handleEvent(LifeCycleEvent.ON_RECYCLE);
     }, 'aboutToRecycle', this.constructor.name);
     if (this.preventRecursiveRecycle_) {
       this.preventRecursiveRecycle_ = false;

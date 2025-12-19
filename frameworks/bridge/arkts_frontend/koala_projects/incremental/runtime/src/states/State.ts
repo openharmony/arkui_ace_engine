@@ -1173,7 +1173,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         if (once !== true && this.once) {
             throw new Error('prohibited to create scope(' + id.toString(16) + ') within the remember scope(' + this.id.toString(16) + ')')
         }
-        let reused = reuseKey ? this.nodeRef?.reuse(reuseKey, id) : undefined
+        let reused = reuseKey ? (reuseKey.endsWith('@Component') ? this.nodeRef?.getCurrentNodeWhenReuse() : this.nodeRef)?.reuse(reuseKey, id) : undefined
         const scope = reused ? reused as ScopeImpl<Value> : ScopeImpl.create<Value>(id, paramCount, compute, cleanup, reuseKey)
         scope.manager = manager
         if (reused) {
@@ -1382,7 +1382,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
 
     private recycleOrDispose(child: ManagedScope): void {
         const key = child.reuseKey
-        const node = this._nodeRef
+        const node = child.node?.getParentNodeWhenRecycle(this._nodeRef) ?? this._nodeRef;
         const recycled = key && node && !node.disposed && node.recycle(key, child, child.id)
         if (recycled) {
             // if parent node is also disposed, the recycled scopes would dispose in the ReusablePool
@@ -1419,7 +1419,9 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
             error = cause as Error
         }
         // dispose parent after its children to allow recycling a child tree
-        if (this.node) { this.node!.disposing = true }
+        if (this.node) {
+            this.node!.disposing = true
+        }
         for (let child = this.child; child; child = child!.next) {
             this.recycleOrDispose(child!!)
         }

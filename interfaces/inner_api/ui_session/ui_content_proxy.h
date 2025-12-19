@@ -70,6 +70,13 @@ public:
     virtual int32_t GetCurrentImagesShowing(
         const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& finishCallback)
         override;
+    virtual int32_t GetImagesById(
+        const std::vector<int32_t>& arkUIIds,
+        const std::function<void(int32_t, const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>&,
+            MultiImageQueryErrorCode)>& arkUIfinishCallback,
+        const std::map<int32_t, std::vector<int32_t>>& arkWebs,
+        const std::function<void(int32_t, const std::map<int32_t, std::map<int32_t,
+            std::shared_ptr<Media::PixelMap>>>&, MultiImageQueryErrorCode)>& arkWebfinishCallback) override;
     virtual int32_t GetVisibleInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback,
         ParamConfig config = ParamConfig()) override;
     virtual int32_t GetLatestHitTestNodeInfosForTouch(

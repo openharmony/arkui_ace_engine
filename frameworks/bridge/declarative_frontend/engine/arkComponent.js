@@ -10836,6 +10836,24 @@ class RichEditorFallbackLineSpacingModifier extends ModifierWithKey {
 }
 RichEditorFallbackLineSpacingModifier.identity = Symbol('richEditorFallbackLineSpacing');
 
+class RichEditorSingleLineModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetSingleLine(node);
+    }
+    else {
+      getUINativeModule().richEditor.setSingleLine(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RichEditorSingleLineModifier.identity = Symbol('richEditorSingleLine');
+
 class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -10941,6 +10959,7 @@ class ArkRichEditorComponent extends ArkComponent {
     arkValue.supportAvoidance = options?.supportAvoidance;
     modifierWithKey(this._modifiersWithKeys, RichEditorCustomKeyboardModifier.identity,
       RichEditorCustomKeyboardModifier, arkValue);
+    return this;
   }
   onEditingChange(callback) {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnEditingChangeModifier.identity, RichEditorOnEditingChangeModifier, callback);
@@ -11027,6 +11046,10 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   fallbackLineSpacing(enable) {
     modifierWithKey(this._modifiersWithKeys, RichEditorFallbackLineSpacingModifier.identity, RichEditorFallbackLineSpacingModifier, enable);
+    return this;
+  }
+  singleLine(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorSingleLineModifier.identity, RichEditorSingleLineModifier, value);
     return this;
   }
 }
@@ -12407,6 +12430,7 @@ class ArkSearchComponent extends ArkComponent {
     arkValue.supportAvoidance = options?.supportAvoidance;
     modifierWithKey(this._modifiersWithKeys, SearchCustomKeyboardModifier.identity,
       SearchCustomKeyboardModifier, arkValue);
+    return this;
   }
   showUnit(event) {
     throw new Error('Method not implemented.');
@@ -17202,6 +17226,7 @@ class ArkTextAreaComponent extends ArkComponent {
     arkValue.supportAvoidance = options?.supportAvoidance;
     modifierWithKey(this._modifiersWithKeys, TextAreaCustomKeyboardModifier.identity,
       TextAreaCustomKeyboardModifier, arkValue);
+    return this;
   }
   decoration(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaDecorationModifier.identity, TextAreaDecorationModifier, value);
@@ -19411,6 +19436,7 @@ class ArkTextInputComponent extends ArkComponent {
     arkValue.supportAvoidance = options?.supportAvoidance;
     modifierWithKey(this._modifiersWithKeys, TextInputCustomKeyboardModifier.identity,
       TextInputCustomKeyboardModifier, arkValue);
+    return this;
   }
   decoration(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputDecorationModifier.identity, TextInputDecorationModifier, value);
@@ -27197,6 +27223,28 @@ class NavDestinationSystemBarStyleModifier extends ModifierWithKey {
 }
 NavDestinationSystemBarStyleModifier.identity = Symbol('systemBarStyle');
 
+class NavigationDividerStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().navigation.resetDividerStyle(node);
+    } else {
+      getUINativeModule().navigation.setDividerStyle(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return (this.value.color !== this.stageValue.color) ||
+      (this.value.startMargin !== this.stageValue.startMargin) ||
+      (this.value.endMargin !== this.stageValue.endMargin);
+  }
+}
+
+NavigationDividerStyleModifier.identity = Symbol('DividerStyle');
+
 class NavDestinationOnShownModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -28330,6 +28378,11 @@ class ArkNavigationComponent extends ArkComponent {
 
   systemBarStyle(style) {
     modifierWithKey(this._modifiersWithKeys, NavigationSystemBarStyleModifier.identity, NavigationSystemBarStyleModifier, style);
+    return this;
+  }
+
+  divider(style) {
+    modifierWithKey(this._modifiersWithKeys, NavigationDividerStyleModifier.identitiy, NavigationDividerStyleModifier, style);
     return this;
   }
 }

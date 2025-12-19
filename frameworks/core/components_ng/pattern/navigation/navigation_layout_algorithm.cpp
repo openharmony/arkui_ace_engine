@@ -71,7 +71,14 @@ void MeasureDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNo
     auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(dividerWrapper);
     auto constraint = navigationLayoutProperty->CreateChildConstraint();
-    constraint.selfIdealSize = OptionalSizeF(dividerSize.Width(), dividerSize.Height());
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto marginStart = layoutProperty->GetDividerStartMargin().value_or(Dimension(0.0));
+    auto dividerStartMarginPx = marginStart.ConvertToPx();
+    auto marginEnd = layoutProperty->GetDividerEndMargin().value_or(Dimension(0.0f));
+    auto dividerEndMarginPx = marginEnd.ConvertToPx();
+    auto dividerHeight = dividerSize.Height() - dividerStartMarginPx - dividerEndMarginPx;
+    constraint.selfIdealSize = OptionalSizeF(dividerSize.Width(), dividerHeight);
     dividerWrapper->Measure(constraint);
 }
 
@@ -247,6 +254,8 @@ float LayoutDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNo
     const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
     dividerOffset.AddX(padding.left.value_or(0));
     dividerOffset.AddY(padding.top.value_or(0));
+    auto marginStart = navigationLayoutProperty->GetDividerStartMargin()->ConvertToPx();
+    dividerOffset.AddY(marginStart);
     geometryNode->SetMarginFrameOffset(dividerOffset);
     dividerWrapper->Layout();
     return geometryNode->GetFrameSize().Width();

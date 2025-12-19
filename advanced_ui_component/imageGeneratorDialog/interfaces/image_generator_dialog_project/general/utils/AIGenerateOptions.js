@@ -26,19 +26,19 @@ export class AIGenerateOptions {
     static getInstance() {
         return AIGenerateOptions.instance;
     }
-    setImages(f18) {
-        if (f18.length === 0) {
+    setImages(images) {
+        if (images.length === 0) {
             this.action = 1;
         }
         else {
             this.action = 0;
         }
-        console.info(TAG, `Update the number of images from ${this.images?.length} to ${f18.length}.`);
-        this.images = f18;
+        console.info(TAG, `Update the number of images from ${this.images?.length} to ${images.length}.`);
+        this.images = images;
     }
-    updateRelativeLayout(d18) {
-        if (d18) {
-            let e18 = {
+    updateRelativeLayout(layout) {
+        if (layout) {
+            let layout = {
                 image: undefined,
                 url: undefined,
                 rect: undefined,
@@ -46,32 +46,32 @@ export class AIGenerateOptions {
                 zIndex: 0,
                 isHandwrite: false
             };
-            this.layoutImage = e18;
+            this.layoutImage = layout;
         }
         else {
             this.layoutImage = undefined;
         }
     }
-    updateUserPrompt(c18) {
-        this.userPrompt = c18;
+    updateUserPrompt(prompt) {
+        this.userPrompt = prompt;
     }
-    updateShapePath(b18) {
-        this.shapePath = b18;
+    updateShapePath(shapePath) {
+        this.shapePath = shapePath;
     }
-    updateStyle(a18) {
-        this.style = a18;
+    updateStyle(style) {
+        this.style = style;
     }
-    updateResolution(z17) {
-        this.resolution = z17;
+    updateResolution(resolution) {
+        this.resolution = resolution;
     }
-    updateRatio(y17) {
-        this.ratio = y17;
+    updateRatio(ratio) {
+        this.ratio = ratio;
     }
-    updateType(x17) {
-        this.type = x17;
+    updateType(type) {
+        this.type = type;
     }
-    updateVersion(w17) {
-        this.version = w17;
+    updateVersion(version) {
+        this.version = version;
     }
 }
 AIGenerateOptions.instance = new AIGenerateOptions();

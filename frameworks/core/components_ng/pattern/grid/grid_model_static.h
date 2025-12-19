@@ -47,6 +47,7 @@ public:
     static void SetMinCount(FrameNode* frameNode, const std::optional<int32_t>& minCount);
     static void SetCellLength(FrameNode* frameNode, const std::optional<int32_t>& cellLength);
     static void SetEditable(FrameNode* frameNode, const std::optional<bool>& editMode);
+    static void SetEditModeOptions(FrameNode* frameNode, const EditModeOptions& editModeOptions);
     static void SetMultiSelectable(FrameNode* frameNode, bool multiSelectable);
     static void SetSupportAnimation(FrameNode* frameNode, bool supportAnimation);
     static EdgeEffect GetEdgeEffect(FrameNode* frameNode);

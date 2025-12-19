@@ -250,7 +250,8 @@
                         "header_files": [
                             "ui_content_service_interface.h",
                             "ui_content_proxy.h",
-                            "param_config.h"
+                            "param_config.h",
+                            "ui_content_proxy_error_code.h"
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ui_session:ui_session"

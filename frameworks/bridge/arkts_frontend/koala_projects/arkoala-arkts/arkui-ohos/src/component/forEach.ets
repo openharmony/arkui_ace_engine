@@ -18,7 +18,7 @@
 
 import { int32, hashCodeFromString } from '@koalaui/common'
 import { pointer } from '@koalaui/interop'
-import { memoEntry2, __context, NodeAttach, remember } from '@koalaui/runtime'
+import { memoEntry2, __context, __id, NodeAttach, remember } from '@koalaui/runtime'
 import { SyntaxItemPeer, ForEachNodePeer } from '../base/SyntaxNodeBase'
 import { DynamicNode, OnMoveHandler, ItemDragEventHandler, ForEachOps } from '#generated'
 import { PeerNode } from '../PeerNode'
@@ -83,6 +83,7 @@ function forEachAttach<T>(receiver: ArkForEachComponent<T>, manager: ForEachMana
     let duplicateIndex = new Array<int32>()
     let diffIndex = new Array<int32>()
     let key2Index = new Map<int32, int32>()
+    const forEachId = __id();
     /** @memo */
     const createAndUpdate = (): void => {
         const array: Array<T> = receiver.arr();
@@ -116,12 +117,13 @@ function forEachAttach<T>(receiver: ArkForEachComponent<T>, manager: ForEachMana
 
         /** @memo */
         const action = (e: T, idx: int32): void => {
+            const tag = newKeys[idx] + forEachId + '@ForEach'
             NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
                 receiver.itemGenerator(e, idx);
                 if (diffIndex.indexOf(idx) !== -1) {
                     manager.additionalChild.push(node.getPeerPtr())
                 }
-            }, 'for_each_item_' + newKeys[idx])
+            }, tag);
         }
         key2Index.forEach((idx: int32, key: int32) => {
             memoEntry2<T, int32, void>(__context(), key, action, array[idx], idx);

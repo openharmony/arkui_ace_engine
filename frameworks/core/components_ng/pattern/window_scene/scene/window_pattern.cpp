@@ -320,11 +320,7 @@ bool WindowPattern::CheckAndAddStartingWindowForPrelaunch()
 bool WindowPattern::AddPersistentImage(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
     const RefPtr<NG::FrameNode>& host)
 {
-    int32_t imageFit = 0;
-    if (Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
-        session_->GetPersistentId(), imageFit) == false) {
-        return false;
-    }
+    CHECK_EQUAL_RETURN(session_->IsPersistentImageFit(), false, false);
     CreateSnapshotWindow();
     AddChild(host, snapshotWindow_, snapshotWindowName_);
     surfaceNode->SetIsNotifyUIBufferAvailable(false);
@@ -647,7 +643,7 @@ void WindowPattern::CreateStartingWindow()
         sourceInfo = ImageSourceInfo(pixelMap);
         Rosen::SceneSessionManager::GetInstance().RemovePreLoadStartingWindowFromMap(sessionInfo);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "use preload pixelMap id:%{public}d", session_->GetPersistentId());
-    } else {
+    } else if (!session_->GetPreloadingStartingWindow()) {
         sourceInfo = ImageSourceInfo(startingWindowInfo.iconPathEarlyVersion_, sessionInfo.bundleName_,
             sessionInfo.moduleName_);
     }
@@ -684,11 +680,8 @@ void WindowPattern::UpdateSnapshotWindowProperty()
     }
     auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    int32_t persistentImageFit = 0;
-    auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
-        session_->GetPersistentId(), persistentImageFit);
-    auto imageFit = static_cast<ImageFit>(persistentImageFit);
-    if (isPersistentImageFit) {
+    auto imageFit = static_cast<ImageFit>(session_->GetPersistentImageFit());
+    if (session_->IsPersistentImageFit()) {
         // ImageFit type COVER_TOP_LEFT is not support for api interface
         imageLayoutProperty->UpdateImageFit(imageFit == ImageFit::COVER_TOP_LEFT ? ImageFit::MATRIX : imageFit);
     } else {
@@ -722,10 +715,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     session_->SetNeedSnapshot(false);
     isBlankForSnapshot_ = false;
 
-    int32_t imageFit = 0;
-    auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
-        session_->GetPersistentId(), imageFit);
-    if (IsSnapshotSizeChanged() && isPersistentImageFit == false) {
+    if (IsSnapshotSizeChanged() && !session_->IsPersistentImageFit()) {
         isBlankForSnapshot_ = true;
         CreateBlankWindow(snapshotWindow_);
         return;

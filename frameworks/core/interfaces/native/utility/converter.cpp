@@ -49,6 +49,7 @@
 #include "core/interfaces/native/implementation/rect_shape_peer.h"
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
+#include "core/interfaces/native/implementation/text_modifier_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -3725,7 +3726,24 @@ void AssignCast(std::optional<NavigationTitlebarOptions>& dst, const Ark_Navigat
     dst = NavigationTitlebarOptions();
     dst->bgOptions = Converter::Convert<NavigationBackgroundOptions>(value);
     dst->brOptions = Converter::Convert<NavigationBarOptions>(value);
+    dst->textOptions = Converter::Convert<NavigationTextOptions>(value);
     dst->enableHoverMode = Converter::OptConvert<bool>(value.enableHoverMode).value_or(false);
+}
+
+template<>
+NG::NavigationTextOptions Convert(const Ark_NavigationTitleOptions& src)
+{
+    NG::NavigationTextOptions textOptions;
+    if (src.mainTitleModifier.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        textOptions.mainTitleApplyFunc = src.mainTitleModifier.value->textApply;
+        PeerUtils::DestroyPeer(src.mainTitleModifier.value);
+    }
+
+    if (src.subTitleModifier.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        textOptions.subTitleApplyFunc = src.subTitleModifier.value->textApply;
+        PeerUtils::DestroyPeer(src.subTitleModifier.value);
+    }
+    return textOptions;
 }
 
 template<>

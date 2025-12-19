@@ -5307,9 +5307,6 @@ void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreate
             result = action(menuItem);
         }
         CHECK_NULL_RETURN(webPattern, result);
-        if (!result && webPattern->IsQuickMenuShow()) {
-            webPattern->webSelectOverlay_->HideMenu(true);
-        }
         return result;
     };
     if (onPrepareMenuCallback) {
@@ -9228,6 +9225,13 @@ void WebPattern::GetTranslateText(std::string extraData, std::function<void(std:
         g_translateTextData.needTranslate = true;
         webPattern->RunJsInit();
         }, TaskExecutor::TaskType::UI, "ArkUIWebGetTranslateText");
+}
+
+void WebPattern::GetImagesByIDs(const std::vector<int32_t>& imageIds, int32_t windowId,
+    const std::function<void(int32_t, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>&,
+    MultiImageQueryErrorCode)>& arkWebfinishCallback)
+{
+    return;
 }
 
 void WebPattern::SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids)

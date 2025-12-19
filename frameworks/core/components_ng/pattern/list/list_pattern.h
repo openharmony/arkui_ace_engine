@@ -499,16 +499,6 @@ public:
         return listSnapSpeed_;
     }
 
-    void SetEditModeOptions(EditModeOptions& editModeOptions)
-    {
-        editModeOptions_ = editModeOptions;
-    }
-
-    EditModeOptions GetEditModeOptions() const override
-    {
-        return editModeOptions_;
-    }
-
 protected:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -692,6 +682,7 @@ private:
 
     float listTotalHeight_ = 0.0f;
 
+    std::unordered_map<int32_t, int32_t> predictItemTimes_;
     std::map<int32_t, int32_t> lanesItemRange_;
     std::map<int32_t, uint32_t> noDividerItems_;
     int32_t lanes_ = 1;
@@ -727,9 +718,6 @@ private:
     int32_t draggingIndex_ = -1;
     bool heightEstimated_ = false;
     ScrollSnapAnimationSpeed listSnapSpeed_ = ScrollSnapAnimationSpeed::NORMAL;
-
-    EditModeOptions editModeOptions_;
-    std::unordered_map<int32_t, int32_t> predictItemTimes_;
 };
 } // namespace OHOS::Ace::NG
 

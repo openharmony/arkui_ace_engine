@@ -39,7 +39,9 @@ export interface IDecoratedV1Variable<T> extends IDecoratedVariable {
     registerWatchToSource(me: IDecoratedV1Variable<T>): WatchIdType;
 }
 
-export interface IDecoratedV2Variable extends IDecoratedVariable {}
+export interface IDecoratedV2Variable<T> extends IDecoratedVariable {
+    resetOnReuse(newValue: T): void;
+}
 
 export interface IDecoratedReadableVariable<T> {
     get(): T;
@@ -58,18 +60,18 @@ export interface IDecoratedUpdatableVariable<T> {
 
 export interface IStateDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
 
-export interface ILocalDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable {}
+export interface ILocalDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable<T> {}
 
 export interface IParamDecoratedVariable<T>
     extends IDecoratedImmutableVariable<T>,
         IDecoratedUpdatableVariable<T>,
-        IDecoratedV2Variable {}
+        IDecoratedV2Variable<T> {}
 
-export interface IParamOnceDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable {}
+export interface IParamOnceDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable<T> {}
 
-export interface IProviderDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable {}
+export interface IProviderDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable<T> {}
 
-export interface IConsumerDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable {}
+export interface IConsumerDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable<T> {}
 
 export interface IPropDecoratedVariable<T>
     extends IDecoratedMutableVariable<T>,
@@ -253,6 +255,7 @@ export interface ISubscribedWatches extends IWatchSubscriberRegister {
 
 export interface IComputedDecoratedVariable<T> extends IComputedDecoratorRef, IDecoratedImmutableVariable<T> {
     setOwner(owningView: IVariableOwner);
+    resetOnReuse(): void;
 }
 
 export interface IMonitor {
@@ -262,6 +265,7 @@ export interface IMonitor {
 
 export interface IMonitorDecoratedVariable {
     get path(): string[];
+    resetOnReuse(): void;
 }
 
 export interface IMonitorPathInfo {

@@ -828,6 +828,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/jsi_animator_model_ng_build_im
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_animator_model_ng_impl.cpp @arkuicodepulse
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_bindings.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_bindings.inl @arkui_statemgmt
+frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_app_bar_register.cpp @ArkUI_ability_group
+frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_modal_view_register.cpp @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_group_js_bridge.cpp @arkui_framework_xnode
@@ -1070,7 +1072,7 @@ frameworks/bridge/declarative_frontend/engine/js_object_template.inl @arkui_stat
 frameworks/bridge/declarative_frontend/engine/jsPrefetcher.js
 frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsShape.js
-frameworks/bridge/declarative_frontend/engine/jsStateManagement.js
+frameworks/bridge/declarative_frontend/engine/jsStateManagement.js @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/js_types.cpp @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/js_types.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsUIContext.js
@@ -3253,6 +3255,7 @@ frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h @arkui_f
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ArkUIEntry.ts @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/theme/ @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Graphics.ts @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Graphics.ets @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/NodeController.ts @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/resources.ts @arkui_framework_resource
 frameworks/bridge/arkts_frontend/koala_projects/inner_api/ @arkui_framework_resource

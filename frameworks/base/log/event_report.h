@@ -220,6 +220,16 @@ struct FRCSceneFpsInfo {
     int64_t duration_60 = 0;
 };
 
+struct TextErrorInfo {
+    int32_t frameNodeId;
+    float longestLineWithIndent;
+    float maxIntrinsicWidth;
+    float maxWidth;
+    float height;
+    uint64_t lineCount;
+    int32_t paragraphsSize;
+};
+
 class ACE_FORCE_EXPORT EventReport {
 public:
     static void SendEvent(const EventInfo& eventInfo);
@@ -275,6 +285,7 @@ public:
         const std::string& nodeType, ScrollableErrorType errorType, const std::string& subErrorType);
     static void ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType);
     static void ReportClipboardFailEvent(const std::string& errorType);
+    static void ReportTextDrawCmdListErrorEvent(const TextErrorInfo& textInfo);
     static void ReportReusedNodeSkipMeasureApp();
     static void ReportPageSlidInfo(NG::SlidInfo &slidInfo);
     static void SendDiffFrameRatesDuring(const std::string& scene, const FRCSceneFpsInfo& curFRCSceneFpsInfo_);

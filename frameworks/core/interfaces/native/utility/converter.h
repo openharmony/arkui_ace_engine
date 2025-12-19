@@ -28,6 +28,7 @@
 #include "core/components/web/web_property.h" // Unscoped enum types
 #include "core/components_ng/pattern/list/list_item_group_pattern.h" // Unscoped enum types
 #include "core/components_ng/pattern/slider/slider_model.h" // Inner types
+#include "core/components_ng/property/accessibility_property.h"
 
 #include "converter_union.h"
 #include "generated/converter_generated.h"
@@ -72,6 +73,7 @@ struct BarItem;
 struct KeyboardOptions;
 struct NavDestinationTransition;
 struct NavigationBackgroundOptions;
+struct NavigationTextOptions;
 struct NavigationBarOptions;
 struct NavigationOptions;
 struct NavigationTitlebarOptions;
@@ -644,6 +646,7 @@ namespace Converter {
     template<> NG::NavToolbarItemStatus Convert(const Ark_ToolbarItemStatus& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src);
+    template<> NG::NavigationTextOptions Convert(const Ark_NavigationTitleOptions& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_NavigationToolbarOptions& src);
     template<> NG::NavigationBarOptions Convert(const Ark_NavigationTitleOptions& src);
     template<> NG::NavigationBarOptions Convert(const Ark_NavigationToolbarOptions& src);
@@ -683,6 +686,7 @@ namespace Converter {
     template<> RectF Convert(const Ark_Frame& src);
     template<> RectHeightStyle Convert(const Ark_text_RectHeightStyle& src);
     template<> RectWidthStyle Convert(const Ark_text_RectWidthStyle& src);
+    template<> NG::AccessibilityActionOptions Convert(const Ark_AccessibilityActionOptions& src);
     template<> RefPtr<BasicShape> Convert(const Ark_CircleShape& src);
     template<> RefPtr<BasicShape> Convert(const Ark_EllipseShape& src);
     template<> RefPtr<BasicShape> Convert(const Ark_PathShape& src);
