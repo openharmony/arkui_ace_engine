@@ -1594,10 +1594,16 @@ HWTEST_F(RichEditorSelectOverlayTestNg, GetIsMidScene001, TestSize.Level0)
  */
 HWTEST_F(RichEditorSelectOverlayTestNg, IsHandlesShow001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. init richEditorPattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. test is handles show
+     */
     auto ret = richEditorPattern->IsHandlesShow();
     EXPECT_FALSE(ret);
 }

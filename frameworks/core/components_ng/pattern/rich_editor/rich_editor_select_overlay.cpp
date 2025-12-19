@@ -705,7 +705,7 @@ void RichEditorSelectOverlay::SwitchCaretState(std::shared_ptr<SelectOverlayInfo
 void RichEditorSelectOverlay::ResumeTwinkling()
 {
     auto pattern = GetPattern<RichEditorPattern>();
-    CHECK_NULL_VOID(pattern && pattern->IsEditing());
+    CHECK_NULL_VOID(pattern && pattern->IsEditing() && pattern->textSelector_.SelectNothing());
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "only show caret for edit state");
     pattern->isCursorAlwaysDisplayed_ = false;
     pattern->StartTwinkling();
