@@ -208,6 +208,7 @@ struct SheetStyle {
     std::optional<bool> placementOnTarget;
     std::optional<bool> showInSubWindow;
     std::optional<ModalTransition> modalTransition;
+    std::optional<RenderStrategy> radiusRenderStrategy;
 
     SheetStyle() = default;
     // constructor for image generator dialog
@@ -234,7 +235,8 @@ struct SheetStyle {
                 hoverModeArea == sheetStyle.hoverModeArea && radius == sheetStyle.radius &&
                 detentSelection == sheetStyle.detentSelection && sheetEffectEdge == sheetStyle.sheetEffectEdge &&
                 placement == sheetStyle.placement && placementOnTarget == sheetStyle.placementOnTarget &&
-                showInSubWindow == sheetStyle.showInSubWindow && modalTransition == sheetStyle.modalTransition);
+                showInSubWindow == sheetStyle.showInSubWindow && modalTransition == sheetStyle.modalTransition &&
+                radiusRenderStrategy == sheetStyle.radiusRenderStrategy);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
@@ -281,6 +283,8 @@ struct SheetStyle {
         placementOnTarget = sheetStyle.placementOnTarget.has_value() ?
             sheetStyle.placementOnTarget : placementOnTarget;
         modalTransition = sheetStyle.modalTransition.has_value() ? sheetStyle.modalTransition : modalTransition;
+        radiusRenderStrategy =
+            sheetStyle.radiusRenderStrategy.has_value() ? sheetStyle.radiusRenderStrategy : radiusRenderStrategy;
     }
 
     // Register the set/get method of the resource.
