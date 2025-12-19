@@ -222,7 +222,7 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (pattern->IsShowError()) {
         TextFieldLayoutAlgorithm::ErrorLayout(layoutWrapper);
     }
-    LayoutAutoFillIcon(layoutWrapper);
+    LayoutAutoFillIcon(layoutWrapper, unitNodeWidth);
 }
 
 void TextInputLayoutAlgorithm::UpdateContentPosition(const UpdateContentPositionParams &params,
@@ -379,7 +379,7 @@ void TextInputLayoutAlgorithm::MeasureAutoFillIcon(LayoutWrapper* layoutWrapper)
     autoFillIconSizeMeasure_ = iconGeometryNode->GetFrameSize();
 }
 
-void TextInputLayoutAlgorithm::LayoutAutoFillIcon(LayoutWrapper* layoutWrapper)
+void TextInputLayoutAlgorithm::LayoutAutoFillIcon(LayoutWrapper* layoutWrapper, float unitNodeWidth)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto frameNode = layoutWrapper->GetHostNode();
@@ -389,6 +389,7 @@ void TextInputLayoutAlgorithm::LayoutAutoFillIcon(LayoutWrapper* layoutWrapper)
     auto textFieldlayoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(textFieldlayoutProperty);
     auto isRTL = textFieldlayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto isTextRTL = GetTextDirection(textFieldlayoutProperty) == TextDirection::RTL;
     auto textFieldGeometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(textFieldGeometryNode);
     auto textFieldSize = textFieldGeometryNode->GetFrameSize();
@@ -410,7 +411,13 @@ void TextInputLayoutAlgorithm::LayoutAutoFillIcon(LayoutWrapper* layoutWrapper)
     auto padding = textFieldlayoutProperty->CreatePaddingAndBorder();
     auto leftOffset = padding.left.value_or(0.0f);
     auto rightOffset = padding.right.value_or(0.0f);
-    float iconHorizontalOffset = isRTL ? textFieldFrameWidth - iconFrameWidth - rightOffset : leftOffset;
+    float iconHorizontalOffset = 0.0f;
+    if (isTextRTL) {
+        auto baseOffset = textFieldFrameWidth - iconFrameWidth - rightOffset;
+        iconHorizontalOffset = isRTL ? baseOffset : baseOffset - unitNodeWidth;
+    } else {
+        iconHorizontalOffset = isRTL ? leftOffset + unitNodeWidth : leftOffset;
+    }
     // Vertically center-align text
     auto half = 2.0f;
     float iconVerticalOffset = textRect_.Top() + textRect_.Height() / half - autoFillIconSizeMeasure_.Height() / half;
@@ -436,6 +443,20 @@ void TextInputLayoutAlgorithm::MeasureCounterWithPolicy(LayoutWrapper* layoutWra
         auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
         auto counterWidth = frameSize.Width() - nonContentWidth;
         CounterNodeMeasure(counterWidth, layoutWrapper);
+    }
+}
+
+TextDirection TextInputLayoutAlgorithm::GetTextDirection(const RefPtr<LayoutProperty>& layoutProperty)
+{
+    CHECK_NULL_RETURN(layoutProperty, TextDirection::LTR);
+    auto direction = layoutProperty->GetNonAutoLayoutDirection();
+    if (textDirection_ == TextDirection::INHERIT) {
+        return direction;
+    } else if (textDirection_ == TextDirection::AUTO) {
+        CHECK_NULL_RETURN(paragraph_, direction);
+        return paragraph_->GetParagraphStyle().direction;
+    } else {
+        return textDirection_;
     }
 }
 } // namespace OHOS::Ace::NG

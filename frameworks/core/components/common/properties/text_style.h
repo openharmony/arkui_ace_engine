@@ -206,27 +206,9 @@ enum class TextFlipDirection {
     UP,
 };
 namespace StringUtils {
-inline std::string ToString(const TextFlipDirection& textFlipDirection)
-{
-    static const LinearEnumMapNode<TextFlipDirection, std::string> table[] = {
-        { TextFlipDirection::DOWN, "down" },
-        { TextFlipDirection::UP, "up" },
-    };
-    auto iter = BinarySearchFindIndex(table, ArraySize(table), textFlipDirection);
-    return iter != -1 ? table[iter].value : "";
-}
+std::string ToString(const TextFlipDirection& textFlipDirection);
 
-inline std::string ToString(const TextDirection& textDirection)
-{
-    static const LinearEnumMapNode<TextDirection, std::string> table[] = {
-        { TextDirection::LTR, "LTR" },
-        { TextDirection::RTL, "RTL" },
-        { TextDirection::INHERIT, "DEFAULT" },
-        { TextDirection::AUTO, "AUTO" },
-    };
-    auto iter = BinarySearchFindIndex(table, ArraySize(table), textDirection);
-    return iter != -1 ? table[iter].value : "";
-}
+std::string ToString(const TextDirection& textDirection);
 } // namespace StringUtils
 
 namespace StringUtils {
