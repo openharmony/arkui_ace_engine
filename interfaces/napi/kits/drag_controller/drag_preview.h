@@ -81,6 +81,7 @@ public:
         if (!dragPreview->hasAnimation_) {
             int32_t instanceId = Container::CurrentId();
             auto container = AceEngine::Get().GetContainer(instanceId);
+            CHECK_NULL_RETURN(container, nullptr);
             auto taskExecutor = container->GetTaskExecutor();
             taskExecutor->PostTask(
                 [previewStyle = dragPreview->previewStyle_]() {
@@ -128,6 +129,7 @@ public:
         napi_call_function(env, nullptr, argv[1], 0, nullptr, nullptr);
         int32_t instanceId = Container::CurrentId();
         auto container = AceEngine::Get().GetContainer(instanceId);
+        CHECK_NULL_RETURN(container, nullptr);
         auto taskExecutor = container->GetTaskExecutor();
         taskExecutor->PostTask(
             [previewStyle = dragPreview->previewStyle_, previewAnimation]() {
