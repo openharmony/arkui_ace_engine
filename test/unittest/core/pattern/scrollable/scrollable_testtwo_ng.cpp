@@ -17,7 +17,10 @@
 
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_static.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -736,5 +739,26 @@ HWTEST_F(ScrollableTestNg, GetEdgeEffectDumpInfo_Parameter004, TestSize.Level1)
     auto json = JsonUtil::Create(true);
     scrollablePattern->GetEdgeEffectDumpInfo(json);
     EXPECT_NE(json->GetString("edgeEffect"), "SPRING");
+}
+
+/**
+ * @tc.name: ScrollableModelStatic_SetEdgeEffect001
+ * @tc.desc: Test ScrollableModelStatic SetEdgeEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, ScrollableModelStatic_SetEdgeEffect001, TestSize.Level1)
+{
+    auto frameNodeList = FrameNode::GetOrCreateFrameNode(V2::LIST_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ListPattern>(); });
+    ASSERT_NE(frameNodeList, nullptr);
+    ScrollableModelStatic::SetEdgeEffect(AceType::RawPtr(frameNodeList), std::nullopt, false, EffectEdge::ALL);
+    auto listEffect = ScrollableModelNG::GetEdgeEffect(AceType::RawPtr(frameNodeList));
+    EXPECT_EQ(listEffect, 0);
+    auto frameNodeOther = FrameNode::GetOrCreateFrameNode(V2::SCROLL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+    ASSERT_NE(frameNodeOther, nullptr);
+    ScrollableModelStatic::SetEdgeEffect(AceType::RawPtr(frameNodeOther), std::nullopt, false, EffectEdge::ALL);
+    auto scrollEffect = ScrollableModelNG::GetEdgeEffect(AceType::RawPtr(frameNodeOther));
+    EXPECT_EQ(scrollEffect, 2);
 }
 } // namespace OHOS::Ace::NG

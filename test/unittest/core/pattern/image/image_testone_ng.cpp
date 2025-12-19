@@ -3091,4 +3091,33 @@ HWTEST_F(ImageTestOneNg, SetImageModelStaticDrawingColorFilter001, TestSize.Leve
     ImageModelStatic::SetDrawingColorFilter(frameNode, drawingColorFilter);
     EXPECT_EQ(imageRenderProperty->GetDrawingColorFilter().value(), drawingColorFilter);
 }
+
+/**
+ * @tc.name: ResetImageModelStaticDraggable001
+ * @tc.desc: test ResetDraggable
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, ResetImageModelStaticDraggable001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. set draggable to frameNode.
+     */
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    pipeline->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<ImageTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    pipeline->GetTheme<ImageTheme>()->draggable_ = false;
+    frameNode->draggable_ = true;
+    ImageModelStatic::ResetDraggable(frameNode);
+    EXPECT_FALSE(frameNode->draggable_);
+}
 } // namespace OHOS::Ace::NG
