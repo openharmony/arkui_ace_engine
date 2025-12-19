@@ -916,6 +916,9 @@ void SelectContentOverlayManager::ShowOptionMenu()
 {
     auto pattern = GetSelectMenuPattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
+    if (HandleMenuVisibilityChanged(true)) {
+        return;
+    }
     pattern->UpdateMenuIsShow(true);
 }
 
@@ -923,6 +926,9 @@ void SelectContentOverlayManager::HideOptionMenu(bool noAnimation, bool showSubM
 {
     auto pattern = GetSelectMenuPattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
+    if (HandleMenuVisibilityChanged(false)) {
+        return;
+    }
     pattern->UpdateMenuIsShow(false, noAnimation, showSubMenu);
 }
 
@@ -936,7 +942,18 @@ void SelectContentOverlayManager::ToggleOptionMenu()
     shareOverlayInfo_->menuInfo.isShowAIMenuOptionChanged = menuInfo.isShowAIMenuOptionChanged;
     shareOverlayInfo_->menuInfo.aiMenuOptionType = menuInfo.aiMenuOptionType;
     shareOverlayInfo_->menuInfo.isAskCeliaEnabled = menuInfo.isAskCeliaEnabled;
+    if (HandleMenuVisibilityChanged(!shareOverlayInfo_->menuInfo.menuIsShow)) {
+        return;
+    }
     pattern->UpdateMenuIsShow(!shareOverlayInfo_->menuInfo.menuIsShow);
+}
+
+bool SelectContentOverlayManager::HandleMenuVisibilityChanged(bool isVisible)
+{
+    CHECK_NULL_RETURN(selectOverlayHolder_, false);
+    auto callback = selectOverlayHolder_->GetCallback();
+    CHECK_NULL_RETURN(callback, false);
+    return callback->OnHandleBeforeMenuVisibiltyChanged(isVisible);
 }
 
 void SelectContentOverlayManager::DisableMenu()

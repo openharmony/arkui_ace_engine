@@ -574,13 +574,15 @@ void TextSelectController::MoveCaretToContentRect(
                 caretInfo_.index, boundaryAdjustment);
         }
     }
+    // textRect offset may be changed.
+    OffsetF caretMetricsOffset = caretMetrics.offset - textRect.GetOffset();
     if (moveContent) {
         MoveHandleToContentRect(caretRect, boundaryAdjustment);
     } else {
         AdjustHandleAtEdge(caretRect);
     }
     caretInfo_.rect = caretRect;
-    UpdateCaretOriginalRect(caretMetrics.offset);
+    UpdateCaretOriginalRect(caretMetricsOffset + textRect.GetOffset());
 }
 
 void TextSelectController::MoveCaretAnywhere(const Offset& touchOffset)

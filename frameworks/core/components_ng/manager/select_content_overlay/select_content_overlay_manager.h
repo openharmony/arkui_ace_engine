@@ -152,6 +152,7 @@ private:
     std::function<void(std::string)> MakeMenuCallbackWithInfo
         (OptionMenuActionId actionId, const SelectOverlayInfo& info);
     void HandleDirtyViewPort(RefPtr<SelectContentOverlayPattern>& menuPattern);
+    bool HandleMenuVisibilityChanged(bool isVisible);
 
     RefPtr<SelectOverlayHolder> selectOverlayHolder_;
     WeakPtr<FrameNode> selectOverlayNode_;
