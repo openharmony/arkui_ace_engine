@@ -73,9 +73,6 @@
 #include "frameworks/bridge/common/dom/dom_xcomponent.h"
 #endif
 #ifndef WEARABLE_PRODUCT
-#if defined(CAMERA_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
-#include "frameworks/bridge/common/dom/dom_camera.h"
-#endif
 #include "frameworks/bridge/common/dom/dom_menu.h"
 #include "frameworks/bridge/common/dom/dom_navigation_menu.h"
 #include "frameworks/bridge/common/dom/dom_option.h"
@@ -136,11 +133,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_ANIMATE_TRANSFORM, &DOMNodeCreator<DOMSvgAnimateTransform> },
         { DOM_NODE_TAG_BUTTON, &DOMNodeCreator<DOMButton> },
         { DOM_NODE_TAG_CALENDAR, &DOMNodeCreator<DomCalendar> },
-#ifndef WEARABLE_PRODUCT
-#if defined(CAMERA_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
-        { DOM_NODE_TAG_CAMERA, &DOMNodeCreator<DOMCamera> },
-#endif
-#endif
         { DOM_NODE_TAG_CANVAS, &DOMNodeCreator<DOMCanvas> },
         { DOM_NODE_TAG_CHART, &DOMNodeCreator<DOMChart> },
         { DOM_NODE_TAG_CIRCLE, &DOMNodeCreator<DOMSvgCircle> },

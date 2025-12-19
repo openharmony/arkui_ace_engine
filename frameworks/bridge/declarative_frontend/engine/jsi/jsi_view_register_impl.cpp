@@ -233,12 +233,6 @@
 #include "bridge/declarative_frontend/jsview/js_web_controller.h"
 #endif
 
-#ifndef WEARABLE_PRODUCT
-#if defined(CAMERA_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
-#include "bridge/declarative_frontend/jsview/js_camera.h"
-#endif
-#endif
-
 #if defined(WINDOW_SCENE_SUPPORTED)
 #include "bridge/declarative_frontend/jsview/js_embedded_component.h"
 #include "bridge/declarative_frontend/jsview/js_security_ui_extension.h"
@@ -699,9 +693,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "EffectComponent", JSEffectComponent::JSBind },
 #endif
 #ifndef WEARABLE_PRODUCT
-#if defined(CAMERA_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
-    { "Camera", JSCamera::JSBind },
-#endif
     { "Piece", JSPiece::JSBind },
     { "Rating", JSRating::JSBind },
 #if defined(PLAYER_FRAMEWORK_EXISTS)

@@ -615,7 +615,6 @@ template("declarative_js_engine") {
     if (defined(config.rich_components_support) &&
         config.rich_components_support) {
       sources += [
-        "jsview/js_camera.cpp",
         "jsview/js_piece.cpp",
         "jsview/js_rating.cpp",
         "jsview/models/rating_model_impl.cpp",
