@@ -4697,8 +4697,8 @@ export class ThemeOps {
                 thisSerializer.writeInt32(colorArrayTmpElementForIdx0.getOrdinal())
             } else if (colorArrayTmpElement instanceof number) {
                 thisSerializer.writeInt8((1).toByte())
-                const colorArrayTmpElementForIdx1  = colorArrayTmpElement as number
-                thisSerializer.writeNumber(colorArrayTmpElementForIdx1)
+                const colorArrayTmpElementForIdx1  = colorArrayTmpElement as int32
+                thisSerializer.writeInt32(colorArrayTmpElementForIdx1)
             } else if (colorArrayTmpElement instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const colorArrayTmpElementForIdx2  = colorArrayTmpElement as string
@@ -4744,8 +4744,8 @@ export class ThemeOps {
                 thisSerializer.writeInt32(colorArrayTmpElementForIdx0.getOrdinal())
             } else if (colorArrayTmpElement instanceof number) {
                 thisSerializer.writeInt8((1).toByte())
-                const colorArrayTmpElementForIdx1  = colorArrayTmpElement as number
-                thisSerializer.writeNumber(colorArrayTmpElementForIdx1)
+                const colorArrayTmpElementForIdx1  = colorArrayTmpElement as int32
+                thisSerializer.writeInt32(colorArrayTmpElementForIdx1)
             } else if (colorArrayTmpElement instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const colorArrayTmpElementForIdx2  = colorArrayTmpElement as string
@@ -4772,8 +4772,8 @@ export class ThemeOps {
                 thisSerializer.writeInt32(colorArrayTmpElementForIdx0.getOrdinal())
             } else if (colorArrayTmpElement instanceof number) {
                 thisSerializer.writeInt8((1).toByte())
-                const colorArrayTmpElementForIdx1  = colorArrayTmpElement as number
-                thisSerializer.writeNumber(colorArrayTmpElementForIdx1)
+                const colorArrayTmpElementForIdx1  = colorArrayTmpElement as int32
+                thisSerializer.writeInt32(colorArrayTmpElementForIdx1)
             } else if (colorArrayTmpElement instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const colorArrayTmpElementForIdx2  = colorArrayTmpElement as string
