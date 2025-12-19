@@ -173,6 +173,7 @@ public:
     }
 
     void SetRadioChecked(bool check);
+    void UpdateGroupManager();
     RefPtr<GroupManager> GetGroupManager();
 
     void SetIsUserSetUncheckBorderColor(bool isUserSet)
