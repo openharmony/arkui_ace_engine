@@ -952,7 +952,7 @@ void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, con
             }
             auto dialogPattern = node->GetPattern<DialogPattern>();
             dialogPattern->CallDialogDidAppearCallback();
-            overlayManager->ContentChangeReport(node);
+            overlayManager->ContentChangeReport(node, true);
         });
     auto ctx = node->GetRenderContext();
     option.SetFinishCallbackType(dialogPattern->GetOpenAnimation().has_value()
@@ -1029,7 +1029,7 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
             auto dialogPattern = node->GetPattern<DialogPattern>();
             CHECK_NULL_VOID(dialogPattern);
             dialogPattern->CallDialogDidDisappearCallback();
-            overlayManager->ContentChangeReport(node);
+            overlayManager->ContentChangeReport(node, false);
     });
     auto ctx = node->GetRenderContext();
     if (!ctx) {
@@ -1161,7 +1161,7 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, co
             }
             auto dialogPattern = node->GetPattern<DialogPattern>();
             dialogPattern->CallDialogDidAppearCallback();
-            overlayManager->ContentChangeReport(node);
+            overlayManager->ContentChangeReport(node, true);
         }
     );
 
@@ -1282,7 +1282,7 @@ void OverlayManager::CloseDialogMatchTransition(const RefPtr<FrameNode>& node)
                 CHECK_NULL_VOID(node);
                 auto dialogPattern = node->GetPattern<DialogPattern>();
                 dialogPattern->CallDialogDidDisappearCallback();
-                overlayManager->ContentChangeReport(node);
+                overlayManager->ContentChangeReport(node, false);
         });
     } else {
         auto id = Container::CurrentId();
@@ -1332,7 +1332,7 @@ void OverlayManager::OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK
     if (!menuWrapperPattern->IsHide()) {
         menuWrapperPattern->SetMenuStatus(MenuStatus::SHOW);
     }
-    ContentChangeReport(menu);
+    ContentChangeReport(menu, true);
 }
 
 void OverlayManager::SetPreviewFirstShow(const RefPtr<FrameNode>& menu)
@@ -1345,7 +1345,7 @@ void OverlayManager::SetPreviewFirstShow(const RefPtr<FrameNode>& menu)
     auto previewPattern = AceType::DynamicCast<MenuPreviewPattern>(previewChild->GetPattern());
     CHECK_NULL_VOID(previewPattern);
     previewPattern->SetFirstShow();
-    ContentChangeReport(menu);
+    ContentChangeReport(menu, true);
 }
 
 void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
@@ -1478,7 +1478,7 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     CHECK_NULL_VOID(overlayManager);
 
     overlayManager->SetContextMenuDragHideFinished(true);
-    overlayManager->ContentChangeReport(menu);
+    overlayManager->ContentChangeReport(menu, false);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_FINISHED);
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
@@ -3054,6 +3054,7 @@ void OverlayManager::DeleteMenu(int32_t targetId)
     EraseMenuInfo(targetId);
     SetIsMenuShow(false);
     PublishMenuStatus(false);
+    ContentChangeReport(node, false);
 }
 
 void OverlayManager::CleanMenuInSubWindowWithAnimation()
@@ -9222,7 +9223,7 @@ void OverlayManager::EraseMenuInfoFromWrapper(const RefPtr<FrameNode>& menuWrapp
     }
 }
 
-void OverlayManager::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
+void OverlayManager::ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool isShow)
 {
     auto pipeline = GetPipelineContext();
     CHECK_NULL_VOID(pipeline);
@@ -9233,6 +9234,6 @@ void OverlayManager::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
     }
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
-    mgr->OnDialogChangeEnd(keyNode);
+    mgr->OnDialogChangeEnd(keyNode, isShow);
 }
 } // namespace OHOS::Ace::NG

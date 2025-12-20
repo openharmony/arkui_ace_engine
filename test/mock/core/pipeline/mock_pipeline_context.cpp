@@ -1618,6 +1618,8 @@ const RefPtr<NG::PostEventManager>& NG::PipelineContext::GetPostEventManager()
     return postEventManager_;
 }
 
+void NG::PipelineContext::SetParentPipeline(const WeakPtr<PipelineBase>& weakPipeline) {}
+
 RefPtr<NG::ContentChangeManager>& NG::PipelineContext::GetContentChangeManager()
 {
     return contentChangeMgr_;

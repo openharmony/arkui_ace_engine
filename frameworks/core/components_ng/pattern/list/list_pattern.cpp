@@ -1742,6 +1742,7 @@ void ListPattern::ScrollTo(float position)
     SetIsOverScroll(GetCanStayOverScroll());
     MarkDirtyNodeSelf();
     isScrollEnd_ = true;
+    ContentChangeReport(GetHost());
 }
 
 void ListPattern::ResetScrollToIndexParams()
@@ -1775,6 +1776,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             jumpIndex_ = index;
             scrollAlign_ = align;
             jumpIndexInGroup_.reset();
+            ContentChangeReport(GetHost());
         }
         MarkDirtyNodeSelf();
     }

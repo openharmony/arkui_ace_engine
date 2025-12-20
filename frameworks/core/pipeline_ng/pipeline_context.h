@@ -1344,6 +1344,7 @@ public:
     {
         isCustomNodeDeleteInTransition_ = isCustomNodeDeleteInTransition;
     }
+    void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline) override;
     RefPtr<ContentChangeManager>& GetContentChangeManager();
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,

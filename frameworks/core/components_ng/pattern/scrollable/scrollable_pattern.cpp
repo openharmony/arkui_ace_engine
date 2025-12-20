@@ -1801,6 +1801,7 @@ void ScrollablePattern::ScrollTo(float position)
     SetAnimateCanOverScroll(GetCanStayOverScroll());
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
     SetIsOverScroll(GetCanStayOverScroll());
+    ContentChangeReport(GetHost());
 }
 
 void ScrollablePattern::AnimateTo(
@@ -4975,7 +4976,7 @@ void ScrollablePattern::OnSyncGeometryNode(const DirtySwapConfig& config)
     }
 }
 
-void ScrollablePattern::ContentChangeReport(RefPtr<FrameNode>& keyNode)
+void ScrollablePattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
