@@ -67,6 +67,10 @@ struct NavigateChangeInfo {
     std::string name; // the navigate page name
     bool isSplit; // Indicates page is split or not
 };
+
+struct UIExtOptions {
+    bool isSendBackground = false;
+};
 } // namespace Ace
 } // namespace OHOS
 
