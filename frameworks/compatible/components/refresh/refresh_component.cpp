@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,22 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_REFRESH_ROSEN_RENDER_REFRESH_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_REFRESH_ROSEN_RENDER_REFRESH_H
+#include "compatible/components/refresh/refresh_component.h"
 
-#include "core/components/refresh/render_refresh.h"
+#include "compatible/components/refresh/refresh_element.h"
+#include "compatible/components/refresh/render_refresh.h"
 
 namespace OHOS::Ace {
 
-class RosenRenderRefresh : public RenderRefresh {
-    DECLARE_ACE_TYPE(RosenRenderRefresh, RenderRefresh);
+RefPtr<Element> RefreshComponent::CreateElement()
+{
+    return AceType::MakeRefPtr<RefreshElement>();
+}
 
-public:
-    void Paint(RenderContext& context, const Offset& offset) override;
-
-private:
-};
+RefPtr<RenderNode> RefreshComponent::CreateRenderNode()
+{
+    return RenderRefresh::Create();
+}
 
 } // namespace OHOS::Ace
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_REFRESH_ROSEN_RENDER_REFRESH_H

@@ -43,7 +43,7 @@ struct MagicLayoutNode {
     RefPtr<RenderNode> node;
 };
 
-class ACE_EXPORT RenderFlex : public RenderNode {
+class ACE_FORCE_EXPORT RenderFlex : public RenderNode {
     DECLARE_ACE_TYPE(RenderFlex, RenderNode);
 
 public:

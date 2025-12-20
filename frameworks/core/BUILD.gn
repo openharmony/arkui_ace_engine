@@ -285,6 +285,9 @@ template("ace_core_source_set") {
       "drawable/drawable_descriptor_loader.cpp",
       "drawable/layered_drawable_descriptor.cpp",
       "drawable/pixel_map_drawable_descriptor.cpp",
+
+      # refresh
+      "components/refresh/render_refresh_target.cpp",
     ]
 
     if (platform == "ohos" || platform == "ohos_ng") {
@@ -404,7 +407,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/positioned:ace_core_components_positioned_$platform",
       "$ace_root/frameworks/core/components/progress:ace_core_components_progress_$platform",
       "$ace_root/frameworks/core/components/proxy:ace_core_components_proxy_$platform",
-      "$ace_root/frameworks/core/components/refresh:ace_core_components_refresh_$platform",
       "$ace_root/frameworks/core/components/relative_container:ace_core_components_relative_container_$platform",
       "$ace_root/frameworks/core/components/root:ace_core_components_root_$platform",
       "$ace_root/frameworks/core/components/scoring:ace_core_components_scoring_$platform",

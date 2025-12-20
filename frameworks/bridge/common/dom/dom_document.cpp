@@ -31,7 +31,6 @@
 #include "frameworks/bridge/common/dom/dom_navigation_bar.h"
 #include "frameworks/bridge/common/dom/dom_panel.h"
 #include "frameworks/bridge/common/dom/dom_progress.h"
-#include "frameworks/bridge/common/dom/dom_refresh.h"
 #ifdef WEB_SUPPORTED
 #include "frameworks/bridge/common/dom/dom_rich_text.h"
 #endif
@@ -123,7 +122,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_POPUP, &DOMNodeCreator<DOMPopup> },
 #endif
         { DOM_NODE_TAG_PROGRESS, &DOMNodeCreator<DOMProgress> },
-        { DOM_NODE_TAG_REFRESH, &DOMNodeCreator<DOMRefresh> },
 #ifdef WEB_SUPPORTED
         { DOM_NODE_TAG_RICH_TEXT, &DOMNodeCreator<DOMRichText> },
 #endif

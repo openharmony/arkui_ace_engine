@@ -32,6 +32,7 @@
 #include "compatible/components/svg/svg_loader.h"
 #include "compatible/components/qrcode/qrcode_loader.h"
 #include "compatible/components/rating/rating_loader.h"
+#include "compatible/components/refresh/refresh_loader.h"
 #include "frameworks/base/log/log_wrapper.h"
 
 #include "compatible/components/video/video_loader.h"
@@ -80,6 +81,7 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "linearGradient", []() -> ComponentLoader* { return new SvgGradientLoader(); } },
         { "radialGradient", []() -> ComponentLoader* { return new SvgGradientLoader(); } },
         { "stop", []() -> ComponentLoader* { return new SvgStopLoader(); } },
+        { "refresh", []() -> ComponentLoader* { return new RefreshLoader(); } },
         { "video", []() -> ComponentLoader* { return new VideoLoader(); } },
         { "qrcode", []() -> ComponentLoader* { return new QRCodeLoader(); } },
         { "picker", []() -> ComponentLoader* { return new PickerLoader(); } },

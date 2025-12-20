@@ -700,18 +700,6 @@ ACE_EXPORT extern const char DOM_TRACK_COLOR_OFF[];
 ACE_EXPORT extern const char DOM_TAB_BAR_MODE[];
 ACE_EXPORT extern const char DOM_TAB_CONTENT_SCROLLABLE[];
 
-// refresh attribute and style constants
-ACE_EXPORT extern const char DOM_REFRESH[];
-ACE_EXPORT extern const char DOM_REFRESH_OFFSET[];
-ACE_EXPORT extern const char DOM_REFRESH_REFRESHING[];
-ACE_EXPORT extern const char DOM_REFRESH_TYPE[];
-ACE_EXPORT extern const char DOM_REFRESH_LASTTIME[];
-ACE_EXPORT extern const char DOM_REFRESH_FRICTION[];
-ACE_EXPORT extern const char DOM_REFRESH_BACKGROUND_COLOR[];
-ACE_EXPORT extern const char DOM_REFRESH_PROGRESS_COLOR[];
-ACE_EXPORT extern const char DOM_REFRESH_EVENT_PULL_DOWN[];
-ACE_EXPORT extern const char DOM_REFRESH_TIME_OFFSET[];
-
 // marquee attribute and style constants
 ACE_EXPORT extern const char DOM_MARQUEE_LOOP[];
 ACE_EXPORT extern const char DOM_MARQUEE_SCROLL_AMOUNT[];

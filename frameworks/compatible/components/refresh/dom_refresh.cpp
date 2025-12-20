@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,14 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "frameworks/bridge/common/dom/dom_refresh.h"
+#include "frameworks/compatible/components/refresh/dom_refresh.h"
 
 #include "core/components/progress/progress_theme.h"
 #include "core/components/refresh/refresh_theme.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
+
+// refresh attribute and style constants
+const char DOM_REFRESH[] = "refresh";
+const char DOM_REFRESH_OFFSET[] = "offset";
+const char DOM_REFRESH_REFRESHING[] = "refreshing";
+const char DOM_REFRESH_TYPE[] = "type";
+const char DOM_REFRESH_LASTTIME[] = "lasttime";
+const char DOM_REFRESH_FRICTION[] = "friction";
+const char DOM_REFRESH_BACKGROUND_COLOR[] = "backgroundColor";
+const char DOM_REFRESH_PROGRESS_COLOR[] = "progressColor";
+const char DOM_REFRESH_EVENT_PULL_DOWN[] = "pulldown";
+const char DOM_REFRESH_TIME_OFFSET[] = "timeoffset";
 
 DOMRefresh::DOMRefresh(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {

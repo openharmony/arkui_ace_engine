@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_REFRESH_H
-#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_REFRESH_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_REFRESH_DOM_REFRESH_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_REFRESH_DOM_REFRESH_H
 
 #include "core/components/flex/flex_component.h"
-#include "core/components/refresh/refresh_component.h"
+#include "compatible/components/refresh/refresh_component.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
 
 namespace OHOS::Ace::Framework {
+
+// refresh attribute and style constants
+extern const char DOM_REFRESH[];
+extern const char DOM_REFRESH_OFFSET[];
+extern const char DOM_REFRESH_REFRESHING[];
+extern const char DOM_REFRESH_TYPE[];
+extern const char DOM_REFRESH_LASTTIME[];
+extern const char DOM_REFRESH_FRICTION[];
+extern const char DOM_REFRESH_BACKGROUND_COLOR[];
+extern const char DOM_REFRESH_PROGRESS_COLOR[];
+extern const char DOM_REFRESH_EVENT_PULL_DOWN[];
+extern const char DOM_REFRESH_TIME_OFFSET[];
 
 class DOMRefresh final : public DOMNode {
     DECLARE_ACE_TYPE(DOMRefresh, DOMNode);
@@ -59,4 +71,4 @@ private:
 
 } // namespace OHOS::Ace::Framework
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_REFRESH_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_REFRESH_DOM_REFRESH_H

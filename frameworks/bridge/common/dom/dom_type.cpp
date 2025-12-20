@@ -695,18 +695,6 @@ const char DOM_TRACK_COLOR_OFF[] = "trackColorOff";
 const char DOM_TAB_BAR_MODE[] = "mode";
 const char DOM_TAB_CONTENT_SCROLLABLE[] = "scrollable";
 
-// refresh attribute and style constants
-const char DOM_REFRESH[] = "refresh";
-const char DOM_REFRESH_OFFSET[] = "offset";
-const char DOM_REFRESH_REFRESHING[] = "refreshing";
-const char DOM_REFRESH_TYPE[] = "type";
-const char DOM_REFRESH_LASTTIME[] = "lasttime";
-const char DOM_REFRESH_FRICTION[] = "friction";
-const char DOM_REFRESH_BACKGROUND_COLOR[] = "backgroundColor";
-const char DOM_REFRESH_PROGRESS_COLOR[] = "progressColor";
-const char DOM_REFRESH_EVENT_PULL_DOWN[] = "pulldown";
-const char DOM_REFRESH_TIME_OFFSET[] = "timeoffset";
-
 // marquee attribute and style constants
 const char DOM_MARQUEE_LOOP[] = "loop";
 const char DOM_MARQUEE_SCROLL_AMOUNT[] = "scrollamount";

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,23 @@
  * limitations under the License.
  */
 
-#include "core/components/refresh/refresh_element.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_REFRESH_REFRESH_ELEMENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_REFRESH_REFRESH_ELEMENT_H
 
-#include "core/components/refresh/refresh_component.h"
+#include "core/pipeline/base/sole_child_element.h"
 
 namespace OHOS::Ace {
 
-void RefreshElement::PerformBuild()
-{
-    RefPtr<RefreshComponent> component = AceType::DynamicCast<RefreshComponent>(component_);
-    if (!component) {
-        LOGE("Component is null");
-        return;
-    }
-    SoleChildElement::PerformBuild();
-}
+class RefreshElement : public SoleChildElement {
+    DECLARE_ACE_TYPE(RefreshElement, SoleChildElement);
+
+public:
+    void PerformBuild() override;
+
+private:
+    RefPtr<Component> columnChild_;
+};
 
 } // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_REFRESH_REFRESH_ELEMENT_H
