@@ -3020,6 +3020,7 @@ void OverlayManager::DeleteMenu(int32_t targetId)
     }
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "delete menu enter");
     auto node = AceType::DynamicCast<FrameNode>(it->second);
+    CHECK_NULL_VOID(node);
     if (node->GetParent()) {
         auto id = Container::CurrentId();
         SubwindowManager::GetInstance()->ClearMenu();
