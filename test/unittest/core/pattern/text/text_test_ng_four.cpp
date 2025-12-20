@@ -1297,6 +1297,12 @@ HWTEST_F(TextTestNgFour, TextContentModifierB008, TestSize.Level1)
     textContentModifier->marqueeFocused_ = false;
     textContentModifier->marqueeHovered_ = false;
     EXPECT_EQ(isAllowTextRace, false);
+
+    textContentModifier->marqueeSet_ = true;
+    textContentModifier->marqueeOption_.start = true;
+    textContentModifier->marqueeOption_.loop = 1;
+    textContentModifier->marqueeCount_ = 2;
+    EXPECT_EQ(isAllowTextRace, false);
 }
 
 } // namespace OHOS::Ace::NG

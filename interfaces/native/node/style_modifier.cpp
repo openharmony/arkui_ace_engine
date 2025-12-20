@@ -13684,7 +13684,7 @@ int32_t SetTextMarqueeOptions(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     option->spacing.units = static_cast<int32_t>(DimensionUnit::VP);
 
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTextModifier()->setTextMarqueeOptions(node->uiNodeHandle,
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextMarqueeOptionsByNode(node->uiNodeHandle,
         option.get(), nullptr);
     return ERROR_CODE_NO_ERROR;
 }

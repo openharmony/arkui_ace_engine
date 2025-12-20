@@ -1728,6 +1728,39 @@ ArkUITextMarqueeOptions GetMarqueeOptions(ArkUINodeHandle node)
     return option;
 }
 
+void SetMarqueeOptionsByNode(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value,
+    void* spacingRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    TextMarqueeOptions marqueeOptions;
+    marqueeOptions.UpdateTextMarqueeStart(value->start);
+    marqueeOptions.UpdateTextMarqueeStep(GreatNotEqual(value->step, 0.0f) ?
+        Dimension(value->step, DimensionUnit::VP).ConvertToPx() : DEFAULT_MARQUEE_STEP_VALUE.ConvertToPx());
+    marqueeOptions.UpdateTextMarqueeLoop(value->loop);
+    marqueeOptions.UpdateTextMarqueeDirection(value->fromStart ?
+        MarqueeDirection::DEFAULT : MarqueeDirection::DEFAULT_REVERSE);
+    marqueeOptions.UpdateTextMarqueeDelay(value->delay);
+    marqueeOptions.UpdateTextMarqueeFadeout(value->fadeout);
+    marqueeOptions.UpdateTextMarqueeStartPolicy(static_cast<MarqueeStartPolicy>(value->marqueeStartPolicy));
+    marqueeOptions.UpdateTextMarqueeUpdatePolicy(static_cast<MarqueeUpdatePolicy>(value->marqueeUpdatePolicy));
+    CalcDimension spacing(value->spacing.value, static_cast<DimensionUnit>(value->spacing.units));
+    if (spacing.IsNegative()) {
+        spacing = DEFAULT_MARQUEE_SPACING_WIDTH;
+    }
+    marqueeOptions.UpdateTextMarqueeSpacing(spacing);
+
+    TextModelNG::SetMarqueeOptions(frameNode, marqueeOptions);
+    if (SystemProperties::ConfigChangePerform() && spacingRawPtr) {
+        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(spacingRawPtr));
+        CHECK_NULL_VOID(resObj);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->RegisterResource<CalcDimension>("MarqueeSpacing", resObj, spacing);
+    }
+}
+
 void SetOnMarqueeStateChange(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2853,6 +2886,7 @@ const ArkUITextModifier* GetTextModifier()
         .setTextMarqueeOptions = SetMarqueeOptions,
         .resetTextMarqueeOptions = ResetMarqueeOptions,
         .getTextMarqueeOptions = GetMarqueeOptions,
+        .setTextMarqueeOptionsByNode = SetMarqueeOptionsByNode,
         .setOnMarqueeStateChange = SetOnMarqueeStateChange,
         .resetOnMarqueeStateChange = ResetOnMarqueeStateChange,
         .getLineCount = GetLineCount,
