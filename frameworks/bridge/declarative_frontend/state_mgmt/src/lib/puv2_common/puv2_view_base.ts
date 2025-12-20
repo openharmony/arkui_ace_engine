@@ -152,10 +152,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public static create(view: PUV2ViewBase): void {
     return NativeViewPartialUpdate.create(view.nativeViewPartialUpdate);
   }
-  
-  public getElementNameById(elmntId: number): string {
-    return this.updateFuncByElmtId.getElementNameById(elmntId);
-  }
 
   static createRecycle(componentCall: object, isRecycling: boolean, reuseId: string, callback: () => void): void {
     return NativeViewPartialUpdate.createRecycle(componentCall, isRecycling, reuseId, callback);
