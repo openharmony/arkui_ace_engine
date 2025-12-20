@@ -14,6 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h"
+#include "base/log/ace_trace.h"
 
 namespace OHOS::Ace {
 constexpr int32_t ONCE_IPC_SEND_DATA_MAX_SIZE = 131072;
@@ -342,6 +343,7 @@ void UiSessionManagerOhos::WebTaskNumsChange(int32_t num)
 
 void UiSessionManagerOhos::ReportInspectorTreeValue(const std::string& data)
 {
+    ACE_SCOPED_TRACE("[UiSessionManagerOhos] ReportInspectorTreeValue");
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);

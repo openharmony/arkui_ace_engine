@@ -247,7 +247,7 @@ std::string PipelineContext::GetCurrentPageNameCallback()
     return GetNavDestinationPageName(pageInfo);
 }
 
-const RefPtr<PageInfo> PipelineContext::GetLastPageInfo()
+const RefPtr<PageInfo> PipelineContext::GetLastPageInfo() const
 {
     CHECK_NULL_RETURN(stageManager_, nullptr);
     RefPtr<FrameNode> pageNode = stageManager_->GetLastPage();
@@ -257,7 +257,7 @@ const RefPtr<PageInfo> PipelineContext::GetLastPageInfo()
     return pagePattern->GetPageInfo();
 }
 
-std::string PipelineContext::GetNavDestinationPageName(const RefPtr<PageInfo>& pageInfo)
+std::string PipelineContext::GetNavDestinationPageName(const RefPtr<PageInfo>& pageInfo) const
 {
     int32_t pageId = pageInfo->GetPageId();
     RefPtr<NavigationGroupNode> navigationNode = nullptr;
@@ -3867,6 +3867,16 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         }
         DumpLog::GetInstance().OutPutByCompress();
         LOGI("end collect simplify dump info");
+    } else if (params[0] == "-allInfoWithParamConfig") {
+        auto root = JsonUtil::CreateSharedPtrJson(true);
+        GetAppInfo(root);
+        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, { true, true, true, true });
+        DumpLog::GetInstance().Print(root->ToString());
+    } else if (params[0] == "-allInfoWithParamConfigWithoutWeb") {
+        auto root = JsonUtil::CreateSharedPtrJson(true);
+        GetAppInfo(root);
+        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, { true, true, true, false });
+        DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-visibleInfoHasTopNavNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         RefPtr<NG::FrameNode> topNavNode;
@@ -3885,10 +3895,12 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-visibleInfoHasNoTopNavNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
+        GetAppInfo(root);
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, { true, true, true });
         DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-infoOfRootNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
+        GetAppInfo(root);
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, { true, true, true });
         DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-resource") {
@@ -3912,6 +3924,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         DumpLog::GetInstance().OutPutDefault();
     } else if (params[0] == "-allInfoWithParamConfigTotal" && params.size() == SIMPLIFYTREE_WITH_PARAMCONFIG) {
         auto root = JsonUtil::CreateSharedPtrJson(true);
+        GetAppInfo(root);
         rootNode_->DumpSimplifyTreeWithParamConfig(
             0, root, params[1] == "1", { params[2] == "1", params[3] == "1", params[4] == "1" });
         DumpLog::GetInstance().Print(root->ToString());
@@ -6543,6 +6556,7 @@ void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(
         topNavNode->DumpSimplifyTreeWithParamConfig(0, topNavDestinationJson, true, config);
         childrenJson->Put(topNavDestinationJson);
     } else {
+        GetAppInfo(root);
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, config);
     }
 }
@@ -6580,6 +6594,7 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
                 pipelineContext->DumpSimplifyTreeJsonFromTopNavNode(root, topNavNode, config);
                 taskExecutor->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");
             } else {
+                pipelineContext->GetAppInfo(root);
                 rootNode->DumpSimplifyTreeWithParamConfig(0, root, false, config);
                 taskExecutor->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetInspectorTree");
             }
@@ -6943,18 +6958,24 @@ ScopedLayout::~ScopedLayout()
     pipeline_->SetIsLayouting(isLayouting_);
 }
 
-std::string PipelineContext::GetBundleName()
+std::string PipelineContext::GetBundleName() const
 {
     auto container = Container::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, "");
     return container->GetBundleName();
 }
 
-std::string PipelineContext::GetModuleName()
+std::string PipelineContext::GetModuleName() const
 {
     auto container = Container::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, "");
     return container->GetModuleName();
+}
+
+std::string PipelineContext::GetWindowName() const
+{
+    CHECK_NULL_RETURN(window_, "");
+    return window_->GetWindowName();
 }
 
 void PipelineContext::SetEnableSwipeBack(bool isEnable)
@@ -7277,5 +7298,19 @@ void PipelineContext::GetStateMgmtInfo(
     }
 
     UiSessionManager::GetInstance()->ReportGetStateMgmtInfo(resultsStateMgmtInfo);
+}
+
+void PipelineContext::GetAppInfo(std::shared_ptr<JsonValue>& root) const
+{
+    auto appInfo = JsonUtil::CreateSharedPtrJson();
+    appInfo->Put("BundleName", GetBundleName().c_str());
+    appInfo->Put("WindowID", static_cast<int32_t>(GetWindowId()));
+    appInfo->Put("WindowName", GetWindowName().c_str());
+    auto pageInfo = GetLastPageInfo();
+    auto url = pageInfo ? pageInfo->GetPageUrl() : "";
+    auto pageName = pageInfo ? GetNavDestinationPageName(pageInfo) : "";
+    appInfo->Put("CurrentPageUrl", url.c_str());
+    appInfo->Put("CurrentPageName", pageName.c_str());
+    root->Put("appInfo", std::move(appInfo));
 }
 } // namespace OHOS::Ace::NG
