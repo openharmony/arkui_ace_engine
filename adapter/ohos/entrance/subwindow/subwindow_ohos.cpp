@@ -584,6 +584,20 @@ void SubwindowOhos::ResizeWindow()
         window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
 }
 
+void SubwindowOhos::ResizeWindow(double width, double height)
+{
+    CHECK_NULL_VOID(window_);
+    auto ret = window_->Resize(width, height);
+    if (ret != Rosen::WMError::WM_OK) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window failed with errCode: %{public}d",
+            static_cast<int32_t>(ret));
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+        "SubwindowOhos window rect is resized to x: %{public}d, y: %{public}d, width: %{public}u, height: %{public}u",
+        window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
+}
+
 void SubwindowOhos::ResizeWindowForMenu()
 {
     CHECK_NULL_VOID(window_);
@@ -1437,7 +1451,7 @@ void SubwindowOhos::ResizeWindowForDialog(const DialogProperties& dialogProps)
         // keep consistent with the size and position of the parent window in first frame.
         CHECK_NULL_VOID(window_);
         window_->MoveTo(parentWindowRect.GetOffset().GetX(), parentWindowRect.GetOffset().GetY());
-        window_->Resize(parentWindowRect.Width(), parentWindowRect.Height());
+        ResizeWindow(parentWindowRect.Width(), parentWindowRect.Height());
         window_->SetFollowParentWindowLayoutEnabled(true);
     } else {
         ResizeWindow();
@@ -1833,13 +1847,39 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::fun
     ContainerScope scope(childContainerId_);
     if (parentContainer->IsSceneBoardWindow() || toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
         toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
-        ResizeWindow();
+        ResizeWindowForToast(toastInfo);
         ifNeedSetCurrentWindow_ = false;
         ShowWindow(false);
         CHECK_NULL_VOID(window_);
         window_->SetTouchable(false);
     }
     delegate->ShowToast(toastInfo, std::move(callback));
+}
+
+void SubwindowOhos::ResizeWindowForToast(const NG::ToastInfo& toastInfo)
+{
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentContainer);
+    auto pipeline = DynamicCast<NG::PipelineContext>(parentContainer->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(theme);
+    // for float window in landscape mode.
+    auto needFollowParentWindowLayout = toastInfo.showMode == NG::ToastShowMode::TOP_MOST &&
+                                        !parentContainer->IsSceneBoardWindow() &&
+                                        !(theme->GetExpandDisplay() || parentContainer->IsFreeMultiWindow()) &&
+                                        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE;
+    if (needFollowParentWindowLayout) {
+        Rect rect;
+        if (parentContainer->IsUIExtensionWindow()) {
+            rect = GetUIExtensionHostWindowRect();
+        } else {
+            rect = pipeline->GetDisplayWindowRectInfo();
+        }
+        ResizeWindow(rect.Width(), rect.Height());
+    } else {
+        ResizeWindow();
+    }
 }
 
 void SubwindowOhos::ShowToastForService(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
