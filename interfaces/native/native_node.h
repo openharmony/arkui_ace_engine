@@ -7846,7 +7846,7 @@ typedef enum {
      *
      * @since 23
      */
-    NODE_GRID_SUPPORT_EMPTY_BRANCH_IN_LAZY_LOADING = 1013014,
+    NODE_GRID_SUPPORT_EMPTY_BRANCH_IN_LAZY_LOADING = 1013015,
 
     /**
      * @brief Sets the style of the <b>GridItem</b> component.
