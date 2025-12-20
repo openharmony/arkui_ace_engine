@@ -1772,7 +1772,7 @@ HWTEST_F(NavDestinationModelTestNg, SetBackButtonIcon006, TestSize.Level1)
     std::string backButtonIconKey = "navDestination.backButtonIcon.icon";
     EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(backButtonIconKey), "");
     RefPtr<ResourceObject> backButtonIconResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
-    NavDestinationModelNG::SetBackButtonIcon(frameNode, noPixMap, pixMap, backButtonIconResObj);
+    NavDestinationModelNG::SetBackButtonIcon(frameNode, nullptr, noPixMap, pixMap, backButtonIconResObj);
 
     titleBarPattern->OnColorModeChange(1);
     std::string result;

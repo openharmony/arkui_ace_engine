@@ -26805,7 +26805,7 @@ class ArkNavDestinationComponent extends ArkComponent {
   }
   backButtonIcon(value, text) {
     let config = new ArkNavBackButton();
-    config.text = value;
+    config.icon = value;
     if (!isNull(text)) {
       config.text = text;
     }
