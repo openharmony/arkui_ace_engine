@@ -49,6 +49,10 @@ ProgressModel* ProgressModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+namespace {
+constexpr double DEFAULT_TOTAL_VALUE = 100.0;
+} // namespace
+
 void JSProgress::Create(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
@@ -56,22 +60,26 @@ void JSProgress::Create(const JSCallbackInfo& info)
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
 
-    auto value = 0;
+    double value = 0.0;
     auto jsValue = paramObject->GetProperty("value");
     if (jsValue->IsNumber()) {
         value = jsValue->ToNumber<double>();
+        if (std::isnan(value) || LessNotEqual(value, 0.0)) {
+            value = 0.0;
+        }
     }
 
-    auto total = 100;
+    double total = DEFAULT_TOTAL_VALUE;
     auto jsTotal = paramObject->GetProperty("total");
-    if (jsTotal->IsNumber() && jsTotal->ToNumber<int>() > 0) {
-        total = jsTotal->ToNumber<int>();
+    if (jsTotal->IsNumber()) {
+        total = jsTotal->ToNumber<double>();
+        if (std::isnan(total) || LessOrEqual(total, 0.0)) {
+            total = DEFAULT_TOTAL_VALUE;
+        }
     }
 
-    if (value > total) {
+    if (GreatNotEqual(value, total)) {
         value = total;
-    } else if (value < 0) {
-        value = 0;
     }
 
     auto jsStyle = paramObject->GetProperty("type");
@@ -125,8 +133,8 @@ void JSProgress::SetValue(double value)
     if (std::isnan(value)) {
         return;
     }
-    if (value < 0) {
-        value = 0;
+    if (LessNotEqual(value, 0.0)) {
+        value = 0.0;
     }
     ProgressModel::GetInstance()->SetValue(value);
 }
