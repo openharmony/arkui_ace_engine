@@ -3767,6 +3767,14 @@ void SetPadding(ArkUINodeHandle node, const struct ArkUISizeType* top, const str
     if (isLengthMetrics) {
         paddings.start = std::optional<CalcLength>(leftDimen);
         paddings.end = std::optional<CalcLength>(rightDimen);
+        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        if (isRightToLeft) {
+            paddings.left = paddings.end;
+            paddings.right = paddings.start;
+        } else {
+            paddings.left = paddings.start;
+            paddings.right = paddings.end;
+        }
     } else {
         paddings.left = std::optional<CalcLength>(leftDimen);
         paddings.right = std::optional<CalcLength>(rightDimen);

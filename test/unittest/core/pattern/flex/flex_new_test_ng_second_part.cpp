@@ -768,4 +768,47 @@ HWTEST_F(FlexNewTestNG, FlexSpace001, TestSize.Level0)
     EXPECT_EQ(model.GetFlexMainSpace(AceType::RawPtr(flexNode)), 10.0);
     EXPECT_EQ(model.GetFlexCrossSpace(AceType::RawPtr(flexNode)), 10.0);
 }
+
+/**
+ * @tc.name: LayoutMirror001
+ * @tc.desc: test layout mirror
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, LayoutMirror001, TestSize.Level0)
+{
+    RefPtr<FrameNode> flexInner;
+    auto flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        PaddingProperty paddingProperty {
+            .top = CalcLength(10),
+            .end = CalcLength(20),
+            .bottom = CalcLength(30),
+            .start = CalcLength(40)
+        };
+        ViewAbstract::SetPadding(paddingProperty);
+        flexInner = CreateFlexRow([this](FlexModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+        });
+    });
+    ASSERT_NE(flex, nullptr);
+
+    auto layoutProperty = flex->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto& paddingProp = layoutProperty->GetPaddingProperty();
+    ASSERT_NE(paddingProp, nullptr);
+    EXPECT_EQ(paddingProp->top, CalcLength(10));
+    EXPECT_EQ(paddingProp->right, std::nullopt);
+    EXPECT_EQ(paddingProp->bottom, CalcLength(30));
+    EXPECT_EQ(paddingProp->left, std::nullopt);
+    
+    flex->MarkModifyDone();
+
+    EXPECT_EQ(paddingProp->top, CalcLength(10));
+    EXPECT_EQ(paddingProp->right, CalcLength(20));
+    EXPECT_EQ(paddingProp->bottom, CalcLength(30));
+    EXPECT_EQ(paddingProp->left, CalcLength(40));
+}
 } // namespace OHOS::Ace::NG
