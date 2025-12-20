@@ -15,10 +15,65 @@
 
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 
+#include "bundle_mgr_interface.h"
+#include "extractor.h"
+#include "if_system_ability_manager.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
+
 #include "base/log/ace_trace.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr char BUNDLE_REQUEST_TAG[] = "@bundle:";
+constexpr char MERGE_ABC_PATH[] = "ets/modules.abc";
+constexpr char SPLIT_TAG = '/';
+constexpr size_t BUNDLE_START_POS = 8;
+constexpr size_t BUNDLE_AND_MODULE_SIZE = 2;
+
+bool GetHspModulePath(const std::string& hspBundleName, const std::string& hspModuleName, std::string& hspPath)
+{
+    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (!systemAbilityMgr) {
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "fail to request ex module buffer, SystemAbilityManager is none");
+        return false;
+    }
+    auto bundleMgr =
+        iface_cast<AppExecFwk::IBundleMgr>(systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID));
+    if (!bundleMgr) {
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "fail to request ex module buffer, SystemAbilityManager is none");
+        return false;
+    }
+
+    auto currentBundleName = Container::CurrentBundleName();
+    if (currentBundleName.empty()) {
+        // use hsp bundleName instead.
+        currentBundleName = hspBundleName;
+    }
+    std::vector<AppExecFwk::BaseSharedBundleInfo> baseSharedBundleInfos;
+    if (bundleMgr->GetBaseSharedBundleInfos(currentBundleName, baseSharedBundleInfos,
+        AppExecFwk::GetDependentBundleInfoFlag::GET_APP_SERVICE_HSP_BUNDLE_INFO) != 0) {
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "GetBaseSharedBundleInfos failed");
+        return false;
+    }
+    for (const auto& info : baseSharedBundleInfos) {
+        if ((info.bundleName == hspBundleName) && (info.moduleName == hspModuleName)) {
+            hspPath = info.hapPath;
+        }
+    }
+    if (hspPath.empty()) {
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "current %{private}s/%{private}s is not installed",
+            hspBundleName.c_str(), hspModuleName.c_str());
+        return false;
+    }
+    return true;
+}
+
+} // namespace
+
 bool HapAssetProviderImpl::Initialize(
     const std::string& hapPath, const std::vector<std::string>& assetBasePaths, bool useCache)
 {
@@ -156,4 +211,43 @@ bool HapAssetProviderImpl::GetFileInfo(const std::string& fileName, MediaFileInf
     fileInfo.lastModDate = fileInfoAbility.lastModDate;
     return true;
 }
+
+bool ReadHspModuleBuffer(const std::string& request, uint8_t** buffer, size_t* bufferSize)
+{
+    if (request.empty() || buffer == nullptr || bufferSize == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "fail to request ex module buffer, path is empty");
+        return false;
+    }
+    if (!StringUtils::StartWith(request, BUNDLE_REQUEST_TAG)) {
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "fail to request ex module buffer, path is not @bundle");
+        return false;
+    }
+    std::vector<std::string> paths;
+    StringUtils::StringSplitter(request.substr(BUNDLE_START_POS), SPLIT_TAG, paths);
+    if (paths.size() < BUNDLE_AND_MODULE_SIZE) {
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "fail to request ex module buffer, path is illegal");
+        return false;
+    }
+    auto hspBundleName = paths[0];
+    auto hspModuleName = paths[1];
+    std::string hspPath;
+    if (!GetHspModulePath(hspBundleName, hspModuleName, hspPath)) {
+        return false;
+    }
+    bool newCreate = false;
+    auto extractor = AbilityBase::ExtractorUtil::GetExtractor(hspPath, newCreate);
+    if (!extractor) {
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "fail to create extractor");
+        return false;
+    }
+    auto data = extractor->GetSafeData(MERGE_ABC_PATH);
+    if (!data) {
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "fail to get merge abc");
+        return false;
+    }
+    *buffer = data->GetDataPtr();
+    *bufferSize = data->GetDataLen();
+    return true;
+}
+
 } // namespace OHOS::Ace

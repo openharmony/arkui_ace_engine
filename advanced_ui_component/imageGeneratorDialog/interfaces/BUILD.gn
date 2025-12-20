@@ -13,8 +13,8 @@
 
 import("//build/config/components/ets_frontend/es2abc_config.gni")
 import("//build/ohos.gni")
+import("//build/templates/abc/ohos_abc.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 action("run_rollup") {
   script = "run_rollup.py"
@@ -24,36 +24,22 @@ action("run_rollup") {
   ]
 
   outputs = [
-    target_out_dir + "/summary.js"
+    target_out_dir + "/imagegeneratordialog.js"
   ]
 
   args = [
     rebase_path("//prebuilts/build-tools/common/js-framework/node_modules/rollup/dist/bin"),
     rebase_path("image_generator_dialog_project/general/components/Main.js"),
-    rebase_path(target_out_dir + "/summary.js")
+    rebase_path(target_out_dir + "/imagegeneratordialog.js")
   ]
 }
 
-es2abc_gen_abc("gen_imageGeneratorDialog_abc") {
-  src_js = rebase_path(target_out_dir + "/summary.js")
-  dst_file = rebase_path(target_out_dir + "/imageGeneratorDialog.abc")
-  in_puts = []
-  out_puts = [ target_out_dir + "/imageGeneratorDialog.abc" ]
-  extra_dependencies = [ ":run_rollup" ]
-  extra_args = [ "--module" ]
-}
-
-gen_obj("imageGeneratorDialog_abc") {
-  input = get_label_info(":gen_imageGeneratorDialog_abc", "target_out_dir") +
-          "/imageGeneratorDialog.abc"
-  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
-    output = target_out_dir + "/imageGeneratorDialog_abc.c"
-  } else {
-    output = target_out_dir + "/imageGeneratorDialog_abc.o"
-  }
-  snapshot_dep = [ ":gen_imageGeneratorDialog_abc" ]
-}
-
-source_set("imageGeneratorDialog") {
-  deps = [ ":gen_obj_src_imageGeneratorDialog_abc" ]
+ohos_abc("imageGeneratorDialog") {
+  sources = [ rebase_path(target_out_dir + "/imagegeneratordialog.js") ]
+  output_name = "imagegeneratordialog"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+  deps = [":run_rollup"]
 }

@@ -51,6 +51,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/module_buffer_reader.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -1960,6 +1961,7 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
     CapabilityRegistry::Register();
     ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
     XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
+    Framework::ModuleBufferReader::GetInstance().SetBufferReaderImpl(ReadHspModuleBuffer);
 
     auto task = [] {
         std::unordered_map<std::string, std::string> payload;
