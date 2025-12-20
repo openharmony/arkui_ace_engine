@@ -49,6 +49,7 @@ public:
     static void IsCoveredByBrother(
         const RefPtr<NG::FrameNode>& frameNode,
         bool& nodeAccessibilityVisible);
+    static bool IsNodeEnabled(const RefPtr<FrameNode>& node);
 };
 } // namespace OHOS::Ace::NG
 

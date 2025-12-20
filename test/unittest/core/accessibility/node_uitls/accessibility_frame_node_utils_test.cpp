@@ -309,4 +309,38 @@ HWTEST_F(AccessibilityFrameNodeUtilsTest, IsCoveredByBrother_001, TestSize.Level
 
     AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(backupScreenReadEnabled);
 }
+
+/**
+ * @tc.name: IsNodeEnabled001
+ * @tc.desc: check node is enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityFrameNodeUtilsTest, IsNodeEnabled001, TestSize.Level1)
+{
+    auto frameNode1 = FrameNode::CreateFrameNode("framenode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode1, nullptr);
+
+    auto eventHub = frameNode1->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto focusHub = frameNode1->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    eventHub->SetEnabled(false);
+    // step 1 origin enable false equals false
+    auto result = AccessibilityFrameNodeUtils::IsNodeEnabled(frameNode1);
+    EXPECT_EQ(result, false);
+    // step 2 origin enable true equals true
+    eventHub->SetEnabled(true);
+    result = AccessibilityFrameNodeUtils::IsNodeEnabled(frameNode1);
+    EXPECT_EQ(result, true);
+    // step 3 origin enable true， user disable true  equals false
+    eventHub->SetEnabled(true);
+    auto accessibilityProperty = frameNode1->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetUserDisabled(true);
+    result = AccessibilityFrameNodeUtils::IsNodeEnabled(frameNode1);
+    EXPECT_EQ(result, false);
+}
 } // namespace OHOS::Ace::NG
