@@ -97,6 +97,7 @@ void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src)
         case BindSheetDismissReason::TOUCH_OUTSIDE: dst = ARK_DISMISS_REASON_TOUCH_OUTSIDE; break;
         case BindSheetDismissReason::CLOSE_BUTTON: dst = ARK_DISMISS_REASON_CLOSE_BUTTON; break;
         case BindSheetDismissReason::SLIDE_DOWN: dst = ARK_DISMISS_REASON_SLIDE_DOWN; break;
+        case BindSheetDismissReason::SLIDE: dst = ARK_DISMISS_REASON_SLIDE; break;
         default: dst = static_cast<Ark_DismissReason>(-1);
             LOGE("Unexpected enum value in BindSheetDismissReason: %{public}d", src); break;
     }
@@ -725,6 +726,8 @@ void AssignArkValue(Ark_SheetType& dst, const SheetType& src)
         case SheetType::SHEET_BOTTOM: dst = ARK_SHEET_TYPE_BOTTOM; break;
         case SheetType::SHEET_CENTER: dst = ARK_SHEET_TYPE_CENTER; break;
         case SheetType::SHEET_POPUP: dst = ARK_SHEET_TYPE_POPUP; break;
+        case SheetType::SHEET_SIDE: dst = ARK_SHEET_TYPE_SIDE; break;
+        case SheetType::SHEET_CONTENT_COVER: dst = ARK_SHEET_TYPE_CONTENT_COVER; break;
         default: dst = static_cast<Ark_SheetType>(-1);
             LOGE("Unexpected enum value in SheetType: %{public}d", src);
     }

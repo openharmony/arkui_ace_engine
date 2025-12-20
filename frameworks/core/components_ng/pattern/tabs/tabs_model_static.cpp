@@ -432,6 +432,14 @@ void TabsModelStatic::SetTabBarHeight(FrameNode* frameNode, const std::optional<
     }
 }
 
+void TabsModelStatic::SetBarAdaptiveHeight(FrameNode* frameNode, bool barAdaptiveHeight)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabBarLayoutProperty = GetTabBarLayoutProperty(frameNode);
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabBarLayoutProperty->UpdateBarAdaptiveHeight(barAdaptiveHeight);
+}
+
 void TabsModelStatic::SetAnimationCurve(FrameNode* frameNode, const RefPtr<Curve>& curve)
 {
     CHECK_NULL_VOID(frameNode);
