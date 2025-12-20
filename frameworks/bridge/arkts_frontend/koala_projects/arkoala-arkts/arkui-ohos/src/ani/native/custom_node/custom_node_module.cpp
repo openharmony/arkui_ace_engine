@@ -21,6 +21,10 @@
 #include <memory>
  
 namespace OHOS::Ace::Ani {
+namespace {
+constexpr char ANI_SIZE_INNER_CLS[] = "@ohos.arkui.observer.uiObserver.SizeInner";
+}
+
 ani_object CreateInt(ani_env* env, ani_int value)
 {
     ani_class cls;
@@ -37,7 +41,34 @@ ani_object CreateInt(ani_env* env, ani_int value)
     }
     return rs;
 }
- 
+
+ani_object CreateSize(ani_env* env, ani_double width, ani_double height)
+{
+    ani_ref undefinedVal;
+    ani_status status;
+    if ((status = env->GetUndefined(&undefinedVal)) != ANI_OK) {
+        HILOGE("failed to get undefined value when create size, status:%{public}d", status);
+        return nullptr;
+    }
+    ani_object undefinedObj = static_cast<ani_object>(undefinedVal);
+    ani_class cls;
+    if ((status = env->FindClass(ANI_SIZE_INNER_CLS, &cls)) != ANI_OK) {
+        HILOGE("failed to find %{public}s class, status:%{public}d", ANI_SIZE_INNER_CLS, status);
+        return undefinedObj;
+    }
+    ani_method ctor;
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "dd:", &ctor)) != ANI_OK) {
+        HILOGE("failed to find constructor of %{public}s class, status:%{public}d", ANI_SIZE_INNER_CLS, status);
+        return undefinedObj;
+    }
+    ani_object obj = {};
+    if ((status = env->Object_New(cls, ctor, &obj, width, height)) != ANI_OK) {
+        HILOGE("failed to create %{public}s object, status:%{public}d", ANI_SIZE_INNER_CLS, status);
+        return undefinedObj;
+    }
+    return obj;
+}
+
 ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
                              ani_int id, ani_object obj)
 {
@@ -302,6 +333,12 @@ ani_object QueryNavDestinationInfo(ani_env* env, [[maybe_unused]] ani_object, an
     env->EnumItem_GetValue_Int(navModeItem, &navModeInt);
     ani_object mode_obj = CreateInt(env, navModeInt);
     env->Object_SetPropertyByName_Ref(res, "mode", mode_obj);
+
+    if (info.width.has_value() && info.height.has_value()) {
+        ani_object sizeObj = CreateSize(env, info.width.value(), info.height.value());
+        env->Object_SetPropertyByName_Ref(res, "size", sizeObj);
+    }
+
     return res;
 }
 
@@ -352,6 +389,12 @@ ani_object QueryNavDestinationInfo0(ani_env* env, [[maybe_unused]] ani_object, a
     env->EnumItem_GetValue_Int(navModeItem, &navModeInt);
     ani_object mode_obj = CreateInt(env, navModeInt);
     env->Object_SetPropertyByName_Ref(res, "mode", mode_obj);
+
+    if (info.width.has_value() && info.height.has_value()) {
+        ani_object sizeObj = CreateSize(env, info.width.value(), info.height.value());
+        env->Object_SetPropertyByName_Ref(res, "size", sizeObj);
+    }
+
     return res;
 }
 
@@ -399,6 +442,12 @@ ani_object QueryNavDestinationInfo1(ani_env* env, [[maybe_unused]] ani_object, a
     env->EnumItem_GetValue_Int(navModeItem, &navModeInt);
     ani_object mode_obj = CreateInt(env, navModeInt);
     env->Object_SetPropertyByName_Ref(res, "mode", mode_obj);
+
+    if (info.width.has_value() && info.height.has_value()) {
+        ani_object sizeObj = CreateSize(env, info.width.value(), info.height.value());
+        env->Object_SetPropertyByName_Ref(res, "size", sizeObj);
+    }
+
     return res;
 }
 
@@ -441,6 +490,12 @@ ani_object QueryRouterPageInfo1(ani_env* env, [[maybe_unused]] ani_object, ani_i
     ani_enum_item enumItem;
     env->Enum_GetEnumItemByIndex(routerPageState, info.state, &enumItem);
     env->Object_SetPropertyByName_Ref(res, "state", enumItem);
+
+    if (info.width.has_value() && info.height.has_value()) {
+        ani_object sizeObj = CreateSize(env, info.width.value(), info.height.value());
+        env->Object_SetPropertyByName_Ref(res, "size", sizeObj);
+    }
+
     return res;
 }
 
@@ -481,6 +536,11 @@ ani_object QueryRouterPageInfo(ani_env* env, [[maybe_unused]] ani_object, ani_lo
     ani_enum_item enumItem;
     env->Enum_GetEnumItemByIndex(routerPageState, info.state, &enumItem);
     env->Object_SetPropertyByName_Ref(res, "state", enumItem);
+
+    if (info.width.has_value() && info.height.has_value()) {
+        ani_object sizeObj = CreateSize(env, info.width.value(), info.height.value());
+        env->Object_SetPropertyByName_Ref(res, "size", sizeObj);
+    }
 
     return res;
 }

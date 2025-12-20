@@ -171,8 +171,12 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         return ArkUIAniModule._CustomNode_QueryRouterPageInfo(this.getPeer()!.peer.ptr);
     }
 
-    queryNavDestinationInfo(isInner:boolean): uiObserver.NavDestinationInfo {
-        return ArkUIAniModule._CustomNode_QueryNavDestinationInfo0(this.getPeer()!.peer.ptr, isInner);
+    queryNavDestinationInfo(isInner: boolean | undefined): uiObserver.NavDestinationInfo {
+        if (isInner == undefined) {
+            return ArkUIAniModule._CustomNode_QueryNavDestinationInfo(this.getPeer()!.peer.ptr);
+        } else {
+            return ArkUIAniModule._CustomNode_QueryNavDestinationInfo0(this.getPeer()!.peer.ptr, isInner);
+        }
     }
     queryNavDestinationInfo() : uiObserver.NavDestinationInfo {
         return ArkUIAniModule._CustomNode_QueryNavDestinationInfo(this.getPeer()!.peer.ptr);
