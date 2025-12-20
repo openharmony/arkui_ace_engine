@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-class BilateralSpringNode : public SimpleSpringNode {
+class ACE_FORCE_EXPORT BilateralSpringNode : public SimpleSpringNode {
     DECLARE_ACE_TYPE(BilateralSpringNode, SimpleSpringNode);
 
 public:

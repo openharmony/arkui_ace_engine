@@ -99,7 +99,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ElementProxy);
 };
 
-class ElementProxyHost : virtual public AceType {
+class ACE_FORCE_EXPORT ElementProxyHost : virtual public AceType {
     DECLARE_ACE_TYPE(ElementProxyHost, AceType);
 
 public:

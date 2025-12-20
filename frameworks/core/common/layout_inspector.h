@@ -36,7 +36,7 @@ typedef std::function<void(bool)> ProfilerStatusCallback;
 typedef std::function<void(FrameNodeInfo)> RsProfilerNodeMountCallback;
 using PixelMapPair = std::pair<uint64_t, std::shared_ptr<Media::PixelMap>>;
 
-class LayoutInspector {
+class ACE_FORCE_EXPORT LayoutInspector {
 public:
     ACE_FORCE_EXPORT static void SupportInspector();
     static void SetlayoutInspectorStatus(int32_t containerId);

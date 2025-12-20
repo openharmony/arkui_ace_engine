@@ -46,6 +46,11 @@ public:
     virtual ~ComponentLoader() = default;
 
     virtual RefPtr<Framework::DOMNode> CreateDomNode(int32_t nodeId, const std::string& nodeName) = 0;
+    virtual RefPtr<Framework::DOMNode> CreateDomNodeWithItemIndex(
+        int32_t nodeId, const std::string& nodeName, int32_t itemIndex)
+    {
+        return nullptr;
+    }
     virtual void* CreateModel() = 0;
     virtual RefPtr<V2::InspectorComposedElement> CreateInspectorElement(const std::string& id) = 0;
     virtual RefPtr<Declaration> CreateDeclaration()

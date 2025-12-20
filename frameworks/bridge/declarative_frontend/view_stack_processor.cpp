@@ -25,13 +25,14 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/form/form_component.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
+#include "core/components/list/list_compatible_modifier_helper.h"
 #include "core/components/remote_window/remote_window_component.h"
 #include "core/components/scoring/scoring_component.h"
 #include "compatible/components/text_field/text_field_component.h"
 #include "compatible/components/video/video_component_v2.h"
 #include "core/components/web/web_component.h"
 #include "core/components/xcomponent/xcomponent_component.h"
-#include "core/components_v2/list/list_item_component.h"
+#include "compatible/components/list_v2/list_item_component.h"
 #include "core/components_v2/water_flow/water_flow_item_component.h"
 
 namespace OHOS::Ace::Framework {
@@ -560,9 +561,12 @@ std::pair<RefPtr<Component>, RefPtr<Component>> ViewStackProcessor::WrapComponen
     }
     std::unordered_map<std::string, RefPtr<Component>> videoMap;
 
-    bool isItemComponent = AceType::InstanceOf<V2::ListItemComponent>(mainComponent) ||
-                           AceType::InstanceOf<GridLayoutItemComponent>(mainComponent) ||
-                           AceType::InstanceOf<V2::WaterFlowItemComponent>(mainComponent);
+    auto* modifier = ListCompatibleModifierHelper::GetListItemCompatibleModifier();
+    CHECK_NULL_RETURN(modifier, (std::pair<RefPtr<Component>, RefPtr<Component>>(nullptr, nullptr)));
+    bool isItemComponent =
+        (modifier->instanceOfV2ListItemComponent(mainComponent)) ||
+        AceType::InstanceOf<GridLayoutItemComponent>(mainComponent) ||
+        AceType::InstanceOf<V2::WaterFlowItemComponent>(mainComponent);
 
     RefPtr<Component> itemChildComponent;
 

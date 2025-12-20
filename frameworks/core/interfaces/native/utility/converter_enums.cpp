@@ -37,7 +37,7 @@
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "ui/view/components/tabs/tabs_data.h"
 

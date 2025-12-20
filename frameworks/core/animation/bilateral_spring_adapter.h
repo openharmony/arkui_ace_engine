@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-class BilateralSpringAdapter : public SimpleSpringAdapter {
+class ACE_FORCE_EXPORT BilateralSpringAdapter : public SimpleSpringAdapter {
     DECLARE_ACE_TYPE(BilateralSpringAdapter, SimpleSpringAdapter);
 
 public:

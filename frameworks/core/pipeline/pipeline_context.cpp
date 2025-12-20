@@ -43,6 +43,7 @@
 #include "core/components/dialog_modal/dialog_modal_component.h"
 #include "core/components/dialog_modal/dialog_modal_element.h"
 #include "core/components/focus_animation/render_focus_animation.h"
+#include "core/components/list/list_compatible_modifier_helper.h"
 #include "core/components/overlay/overlay_component.h"
 #include "core/components/root/render_root.h"
 #include "core/components/root/root_component.h"
@@ -54,7 +55,7 @@
 #include "core/components/stage/stage_component.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
-#include "core/components_v2/list/render_list.h"
+#include "compatible/components/list_v2/render_list.h"
 #include "core/pipeline/base/factories/flutter_render_factory.h"
 #include "core/common/dynamic_module_helper.h"
 #include "compatible/components/text_field/modifier/text_field_modifier.h"
@@ -3058,7 +3059,9 @@ void PipelineContext::ProcessDragEvent(
         if (targetDragDropNode && targetDragDropNode->GetOnDragMove()) {
             auto renderList = renderNode->FindChildNodeOfClass<V2::RenderList>(globalPoint, globalPoint);
             if (renderList) {
-                insertIndex_ = renderList->CalculateInsertIndex(renderList, info, selectedItemSize_);
+                auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+                CHECK_NULL_VOID(modifier);
+                insertIndex_ = modifier->calculateInsertIndex(renderList, info, selectedItemSize_);
             }
 
             if (insertIndex_ == static_cast<int32_t>(RenderNode::DEFAULT_INDEX)) {
@@ -3111,7 +3114,9 @@ void PipelineContext::ProcessDragEventEnd(
     if (targetDragDropNode && targetDragDropNode->GetOnDrop()) {
         auto renderList = renderNode->FindChildNodeOfClass<V2::RenderList>(globalPoint, globalPoint);
         if (renderList) {
-            insertIndex_ = renderList->CalculateInsertIndex(renderList, info, selectedItemSize_);
+            auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+            CHECK_NULL_VOID(modifier);
+            insertIndex_ = modifier->calculateInsertIndex(renderList, info, selectedItemSize_);
         }
 
         if (insertIndex_ == static_cast<int32_t>(RenderNode::DEFAULT_INDEX)) {

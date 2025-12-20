@@ -18,9 +18,10 @@
 #include "base/log/dump_log.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/ifelse/if_else_component.h"
+#include "core/components/list/list_compatible_modifier_helper.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
-#include "core/components_v2/list/list_item_component.h"
+#include "compatible/components/list_v2/list_item_component.h"
 #include "core/common/dynamic_module_helper.h"
 #include "compatible/components/tab_bar/modifier/tab_modifier_api.h"
 #include "frameworks/core//components_part_upd/foreach/foreach_component.h"
@@ -420,7 +421,9 @@ public:
             AddSelfToElementRegistry();
             realElmtId_ = ElementRegister::GetInstance()->MakeUniqueId();
 
-            auto listItemComponent = AceType::DynamicCast<V2::ListItemComponent>(component_);
+            auto* listItemModifier = ListCompatibleModifierHelper::GetListItemCompatibleModifier();
+            CHECK_NULL_VOID(listItemModifier);
+            auto listItemComponent = listItemModifier->getV2ListItemComponent(component_);
             if (listItemComponent->GetIsLazyCreating()) {
                 deepRenderignState_ = DeepRenderingState::shallowTree;
                 // continue later when GetElementByIndex is called
@@ -439,7 +442,9 @@ public:
 
     void GetDeepRenderComponent() override
     {
-        auto listItemComponent = AceType::DynamicCast<V2::ListItemComponent>(component_);
+        auto* listItemModifier = ListCompatibleModifierHelper::GetListItemCompatibleModifier();
+        CHECK_NULL_VOID(listItemModifier);
+        auto listItemComponent = listItemModifier->getV2ListItemComponent(component_);
         auto newComponent = listItemComponent->ExecDeepRender();
 
         ACE_DCHECK(newComponent != nullptr);
@@ -465,8 +470,10 @@ public:
 
         // release deeprender Component tree,
         // repalce component_ with a dummy
-        auto listItem = AceType::DynamicCast<V2::ListItemComponent>(component_);
-        auto placeholder = AceType::MakeRefPtr<V2::ListItemComponent>();
+        auto* listItemModifier = ListCompatibleModifierHelper::GetListItemCompatibleModifier();
+        CHECK_NULL_VOID(listItemModifier);
+        auto listItem = listItemModifier->getV2ListItemComponent(component_);
+        auto placeholder = listItemModifier->makeV2ListItemComponent();
         listItem->MoveDeepRenderFunc(placeholder);
         placeholder->SetElementId(listItem->GetElementId());
         component_ = std::move(placeholder);

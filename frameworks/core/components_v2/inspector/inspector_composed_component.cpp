@@ -38,9 +38,6 @@
 #include "core/components_v2/inspector/hyperlink_composed_element.h"
 #include "core/components_v2/inspector/image_composed_element.h"
 #include "core/components_v2/inspector/indexer_composed_element.h"
-#include "core/components_v2/inspector/list_composed_element.h"
-#include "core/components_v2/inspector/list_item_composed_element.h"
-#include "core/components_v2/inspector/list_item_group_composed_element.h"
 #include "core/components_v2/inspector/loading_progress_composed_element.h"
 #include "core/components_v2/inspector/menu_composed_element.h"
 #include "core/components_v2/inspector/navigation_composed_element.h"
@@ -108,11 +105,11 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) { return AceType::MakeRefPtr<V2::WaterFlowComposedElement>(id); } },
     { FLOW_ITEM_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::WaterFlowItemComposedElement>(id); } },
-    { LIST_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ListComposedElement>(id); } },
+    { LIST_COMPONENT_TAG, [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_LIST, id); } },
     { LIST_ITEM_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::ListItemComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_LIST_ITEM, id); } },
     { LIST_ITEM_GROUP_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::ListItemGroupComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_LIST_ITEM_GROUP, id); } },
     { NAVIGATOR_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigatorComposedElement>(id); } },
     { PANEL_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::PanelComposedElement>(id); } },

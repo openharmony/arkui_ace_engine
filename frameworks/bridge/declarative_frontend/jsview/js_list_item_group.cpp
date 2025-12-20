@@ -18,9 +18,9 @@
 #include "bridge/declarative_frontend/jsview/js_list_item.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_list_children_main_size.h"
-#include "bridge/declarative_frontend/jsview/models/list_item_group_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components_v2/list/list_item_group_component.h"
+#include "core/common/dynamic_module_helper.h"
+#include "compatible/components/list_v2/list_item_group_component.h"
 #include "core/components_ng/pattern/list/list_item_group_model.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 
@@ -40,7 +40,10 @@ ListItemGroupModel* ListItemGroupModel::GetInstance()
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::ListItemGroupModelNG());
             } else {
-                instance_.reset(new Framework::ListItemGroupModelImpl());
+                static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("list-item-group");
+                static ListItemGroupModel* instance =
+                    loader ? reinterpret_cast<ListItemGroupModel*>(loader->CreateModel()) : nullptr;
+                return instance;
             }
 #endif
         }

@@ -15,7 +15,8 @@
 
 #include "core/animation/card_transition_controller.h"
 
-#include "core/components/list/render_list.h"
+#include "compatible/components/list/render_list.h"
+#include "core/components/list/list_compatible_modifier_helper.h"
 #include "core/components/transform/transform_element.h"
 
 namespace OHOS::Ace {
@@ -229,14 +230,18 @@ void CardTransitionController::CreateCardListAnimation(const RefPtr<RenderNode>&
     heightAnimation->AddListener([listItemWeak](double value) {
         auto renderListItem = listItemWeak.Upgrade();
         if (renderListItem) {
-            renderListItem->RunCardTransitionAnimation(value);
+            auto* modifier = ListCompatibleModifierHelper::GetListItemCompatibleModifier();
+            CHECK_NULL_VOID(modifier);
+            modifier->runCardTransitionAnimation(renderListItem, value);
         }
     });
     controller_->AddInterpolator(heightAnimation);
     controller_->AddStopListener([listItemWeak] {
         auto renderListItem = listItemWeak.Upgrade();
         if (renderListItem) {
-            renderListItem->StopCardTransitionAnimation();
+            auto* modifier = ListCompatibleModifierHelper::GetListItemCompatibleModifier();
+            CHECK_NULL_VOID(modifier);
+            modifier->stopCardTransitionAnimation(renderListItem);
         }
     });
 }
@@ -349,7 +354,9 @@ RRect CardTransitionController::GetCardRect(const ComposeId& composeId) const
     if (!renderListItem) {
         return RRect();
     }
-    return renderListItem->GetRRect();
+    auto* modifier = ListCompatibleModifierHelper::GetListItemCompatibleModifier();
+    CHECK_NULL_RETURN(modifier, RRect());
+    return modifier->getRRect(renderListItem);
 }
 
 } // namespace OHOS::Ace
