@@ -19,7 +19,8 @@ import UIAbilityContext from 'application.UIAbilityContext';
 import transfer from '@ohos.transfer';
 import type { Callback } from '@ohos.base';
 import hilog from '@ohos.hilog'
- 
+import { Size } from '@ohos.arkui.node'
+
  export default namespace uiObserver {
     loadLibrary("observer_ani");
     export native function createUIObserver(id: number): UIObserver;
@@ -123,6 +124,15 @@ import hilog from '@ohos.hilog'
         public native offWillDraw(callback?: Callback<void>): void;
         public native onDidLayout(callback: Callback<void>): void;
         public native offDidLayout(callback?: Callback<void>): void;
+
+        public native onRouterPageSizeChange(callback: Callback<RouterPageInfo>): void;
+        public native offRouterPageSizeChange(callback?: Callback<RouterPageInfo>): void;
+        public native onNavDestinationSizeChange(callback: Callback<NavDestinationInfo>): void;
+        public native offNavDestinationSizeChange(callback?: Callback<NavDestinationInfo>): void;
+        public native onNavDestinationSizeChangeByUniqueId(
+            navigationUniqueId: int, callback: Callback<NavDestinationInfo>): void;
+        public native offNavDestinationSizeChangeByUniqueId(
+            navigationUniqueId: int, callback?: Callback<NavDestinationInfo>): void;
     }
 
     export interface NavigationInfo {
@@ -183,6 +193,15 @@ import hilog from '@ohos.hilog'
         ON_BACKPRESS = 100
     }
 
+    export class SizeInner implements Size {
+        width: number;
+        height: number;
+        constructor(width: number, height: number) {
+            this.width = width;
+            this.height = height;
+        }
+    }
+
     export interface NavDestinationInfo {
         navigationId: ResourceStr;
         name: ResourceStr;
@@ -192,6 +211,7 @@ import hilog from '@ohos.hilog'
         navDestinationId: string;
         uniqueId?: int;
         mode?: NavDestinationMode;
+        size?: Size;
     }
 
     export class NavDestinationInfoImpl implements NavDestinationInfo {
@@ -203,6 +223,7 @@ import hilog from '@ohos.hilog'
         navDestinationId: string;
         uniqueId?: int;
         mode?: NavDestinationMode;
+        size?: Size;
         static castToNavDestinationInfo(value: number): NavDestinationState {
             if (value === 0) {
                 return NavDestinationState.ON_SHOWN;
@@ -340,6 +361,7 @@ import hilog from '@ohos.hilog'
         path: string;
         state: RouterPageState;
         pageId: string;
+        size?: Size;
 
         static castToRouterPageState(value: number): RouterPageState {
             if (value === 0) {

@@ -116,7 +116,7 @@ public:
     };
     float BottomFinalPos(float viewHeight) const override
     {
-        float endOffset = viewHeight - GetContentHeight();
+        float endOffset = viewHeight - GetContentHeight() - contentEndOffset_;
         return Negative(endOffset) ? endOffset : contentStartOffset_;
     };
 

@@ -303,6 +303,9 @@ public:
     using RouterPageSizeChangeHandleFunc = void (*)(const RouterPageInfoNG&);
     using NavDestinationSizeChangeHandleFunc = void (*)(const NavDestinationInfo&);
     using NavDestinationSizeChangeByUniqueIdHandleFunc = void (*)(const NavDestinationInfo&);
+    using RouterPageSizeChangeHandleFuncForAni = std::function<void(const RouterPageInfoNG&)>;
+    using NavDestinationSizeChangeHandleFuncForAni = std::function<void(const NavDestinationInfo&)>;
+    using NavDestinationSizeChangeByUniqueIdHandleFuncForAni = std::function<void(const NavDestinationInfo&)>;
     NavDestinationSwitchHandleFunc GetHandleNavDestinationSwitchFunc();
     NavDestinationSwitchHandleFuncForAni GetHandleNavDestinationSwitchFuncForAni();
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
@@ -351,6 +354,10 @@ public:
     void SetRouterPageSizeChangeHandleFunc(RouterPageSizeChangeHandleFunc func);
     void SetNavDestinationSizeChangeHandleFunc(NavDestinationSizeChangeHandleFunc func);
     void SetNavDestinationSizeChangeByUniqueIdHandleFunc(NavDestinationSizeChangeByUniqueIdHandleFunc func);
+    void SetRouterPageSizeChangeHandleFuncForAni(RouterPageSizeChangeHandleFuncForAni&& func);
+    void SetNavDestinationSizeChangeHandleFuncForAni(NavDestinationSizeChangeHandleFuncForAni&& func);
+    void SetNavDestinationSizeChangeByUniqueIdHandleFuncForAni(
+        NavDestinationSizeChangeByUniqueIdHandleFuncForAni&& func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     NavigationHandleFuncForAni navigationHandleFuncForAni_ = nullptr;
@@ -388,6 +395,9 @@ private:
     RouterPageSizeChangeHandleFunc routerPageSizeChangeHandleFunc_ = nullptr;
     NavDestinationSizeChangeHandleFunc navDestinationSizeChangeHandleFunc_ = nullptr;
     NavDestinationSizeChangeByUniqueIdHandleFunc navDestinationSizeChangeByUniqueIdHandleFunc_ = nullptr;
+    RouterPageSizeChangeHandleFuncForAni routerPageSizeChangeHandleFuncForAni_;
+    NavDestinationSizeChangeHandleFuncForAni navDestinationSizeChangeHandleFuncForAni_;
+    NavDestinationSizeChangeByUniqueIdHandleFuncForAni navDestinationSizeChangeByUniqueIdHandleFuncForAni_;
 
     napi_value GetUIContextValue();
 };

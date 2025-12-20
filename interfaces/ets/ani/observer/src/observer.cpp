@@ -19,6 +19,7 @@
 
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -48,11 +49,39 @@ constexpr char TAB_CHANGE_PARAM_WITHID[] = "C{@ohos.arkui.observer.uiObserver.Ob
 constexpr char ANI_TABCONTENT_WITH_OPTIONS_CLS[] =
     "C{@ohos.arkui.observer.uiObserver.ObserverOptions}C{std.core.Function1}:";
 constexpr char ANI_TABCONTENT_CLS[] = "C{std.core.Function1}:";
+constexpr char ANI_SIZE_INNER_CLS[] = "@ohos.arkui.observer.uiObserver.SizeInner";
 } // namespace
 namespace OHOS::Ace {
 class UiObserver {
 public:
     explicit UiObserver(int32_t instanceId) : id_(instanceId) {}
+
+    static ani_object CreateSize(ani_env* env, ani_double width, ani_double height)
+    {
+        ani_ref undefinedVal;
+        ani_status status;
+        if ((status = env->GetUndefined(&undefinedVal)) != ANI_OK) {
+            LOGE("failed to get undefined value when create size, status:%{public}d", status);
+            return nullptr;
+        }
+        ani_object undefinedObj = static_cast<ani_object>(undefinedVal);
+        ani_class cls;
+        if ((status = env->FindClass(ANI_SIZE_INNER_CLS, &cls)) != ANI_OK) {
+            LOGE("failed to find %{public}s class, status:%{public}d", ANI_SIZE_INNER_CLS, status);
+            return undefinedObj;
+        }
+        ani_method ctor;
+        if ((status = env->Class_FindMethod(cls, "<ctor>", "dd:", &ctor)) != ANI_OK) {
+            LOGE("failed to find constructor of %{public}s class, status:%{public}d", ANI_SIZE_INNER_CLS, status);
+            return undefinedObj;
+        }
+        ani_object obj = {};
+        if ((status = env->Object_New(cls, ctor, &obj, width, height)) != ANI_OK) {
+            LOGE("failed to create %{public}s object, status:%{public}d", ANI_SIZE_INNER_CLS, status);
+            return undefinedObj;
+        }
+        return obj;
+    }
 
     static void CallJsFunction(ani_env* env, std::list<ani_ref>& cbList)
     {
@@ -1006,6 +1035,11 @@ public:
         ani_enum_item navModeItem;
         env->Enum_GetEnumItemByIndex(navMode, static_cast<ani_size>(info.mode), &navModeItem);
         env->Object_SetPropertyByName_Ref(res, "mode", navModeItem);
+
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE) && info.size.has_value()) {
+            ani_object sizeObj = CreateSize(env, info.size.value().Width(), info.size.value().Height());
+            env->Object_SetPropertyByName_Ref(res, "size", sizeObj);
+        }
     }
 
     void CreateTabContentUpdateInfo(ani_env* env, const NG::TabContentInfo& tabContentInfo, ani_object& res)
@@ -1073,6 +1107,12 @@ public:
         ani_ref uiContext;
         env->Class_CallStaticMethod_Ref(uiContextUtil, getUiContext, &uiContext, instanceId);
         env->Object_SetPropertyByName_Ref(res, "context", uiContext);
+
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE) &&
+            pageInfo.size.has_value()) {
+            ani_object sizeObj = CreateSize(env, pageInfo.size.value().Width(), pageInfo.size.value().Height());
+            env->Object_SetPropertyByName_Ref(res, "size", sizeObj);
+        }
     }
 
     static void CreateNavSwitchInfo(ani_env* env, const NG::NavDestinationSwitchInfo& switchInfo, ani_object& res)
@@ -1235,6 +1275,165 @@ public:
             holder.end());
     }
 
+    static void RegisterRouterPageSizeChangeCallback(ani_ref& cb)
+    {
+        if (std::find(routerPageSizeChangeListeners_.begin(), routerPageSizeChangeListeners_.end(), cb) !=
+            routerPageSizeChangeListeners_.end()) {
+            return;
+        }
+        routerPageSizeChangeListeners_.emplace_back(cb);
+    }
+
+    static void UnRegisterRouterPageSizeChangeCallback(ani_env* env, ani_ref& cb)
+    {
+        if (cb == nullptr) {
+            for (auto& callback : routerPageSizeChangeListeners_) {
+                env->GlobalReference_Delete(callback);
+            }
+            routerPageSizeChangeListeners_.clear();
+            return;
+        }
+
+        routerPageSizeChangeListeners_.erase(
+            std::remove_if(routerPageSizeChangeListeners_.begin(), routerPageSizeChangeListeners_.end(),
+                [env, cb](ani_ref cb1) {
+                    auto result = AniEqual(env, cb, cb1);
+                    if (result) {
+                        env->GlobalReference_Delete(cb1);
+                    }
+                    return result;
+                }),
+            routerPageSizeChangeListeners_.end());
+    }
+
+    static void RegisterNavDestinationSizeChangeCallback(ani_ref& cb)
+    {
+        if (std::find(unspecifiedNavDestinationSizeChangeListeners_.begin(),
+            unspecifiedNavDestinationSizeChangeListeners_.end(), cb) !=
+            unspecifiedNavDestinationSizeChangeListeners_.end()) {
+            return;
+        }
+        unspecifiedNavDestinationSizeChangeListeners_.emplace_back(cb);
+    }
+
+    static void UnRegisterNavDestinationSizeChangeCallback(ani_env* env, ani_ref& cb)
+    {
+        if (cb == nullptr) {
+            for (auto& callback : unspecifiedNavDestinationSizeChangeListeners_) {
+                env->GlobalReference_Delete(callback);
+            }
+            unspecifiedNavDestinationSizeChangeListeners_.clear();
+            return;
+        }
+
+        unspecifiedNavDestinationSizeChangeListeners_.erase(
+            std::remove_if(unspecifiedNavDestinationSizeChangeListeners_.begin(),
+                unspecifiedNavDestinationSizeChangeListeners_.end(),
+                [env, cb](ani_ref cb1) {
+                    auto result = AniEqual(env, cb, cb1);
+                    if (result) {
+                        env->GlobalReference_Delete(cb1);
+                    }
+                    return result;
+                }),
+            unspecifiedNavDestinationSizeChangeListeners_.end());
+    }
+
+    static void RegisterNavDestinationSizeChangeByUniqueIdCallback(ani_int uniqueId, ani_ref& cb)
+    {
+        auto iter = specifiedNavDestinationSizeChangeListeners_.find(uniqueId);
+        if (iter == specifiedNavDestinationSizeChangeListeners_.end()) {
+            specifiedNavDestinationSizeChangeListeners_.emplace(uniqueId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    static void UnRegisterNavDestinationSizeChangeByUniqueIdCallback(ani_env* env, ani_int uniqueId, ani_ref& cb)
+    {
+        auto iter = specifiedNavDestinationSizeChangeListeners_.find(uniqueId);
+        if (iter == specifiedNavDestinationSizeChangeListeners_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            for (auto& callback : holder) {
+                env->GlobalReference_Delete(callback);
+            }
+            holder.clear();
+            return;
+        }
+        holder.erase(
+            std::remove_if(holder.begin(), holder.end(),
+                [env, cb](ani_ref cb1) {
+                    auto result = AniEqual(env, cb, cb1);
+                    if (result) {
+                        env->GlobalReference_Delete(cb1);
+                    }
+                    return result;
+                }),
+            holder.end());
+    }
+
+    static void HandleRouterPageSizeChange(ani_env* env, const NG::RouterPageInfoNG& info)
+    {
+        if (routerPageSizeChangeListeners_.empty()) {
+            return;
+        }
+        ani_object res;
+        CreateRouterPageInfo(env, info, res);
+        std::vector<ani_ref> cbParam;
+        cbParam.emplace_back(res);
+        ani_ref fnReturnVal;
+        auto listeners = routerPageSizeChangeListeners_;
+        for (const auto& cb : listeners) {
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(cb), cbParam.size(), cbParam.data(), &fnReturnVal);
+        }
+    }
+
+    static void HandleNavDestinationSizeChange(ani_env* env, const NG::NavDestinationInfo& info)
+    {
+        if (unspecifiedNavDestinationSizeChangeListeners_.empty()) {
+            return;
+        }
+        auto unspecifiedHolder = unspecifiedNavDestinationSizeChangeListeners_;
+        std::vector<ani_ref> cbParam;
+        ani_ref fnRetrunVal;
+        ani_object res;
+        CreateNavigationInfo(env, info, res);
+        cbParam.emplace_back(res);
+        for (auto& cb : unspecifiedHolder) {
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(cb), cbParam.size(), cbParam.data(), &fnRetrunVal);
+        }
+    }
+
+    static void HandleNavDestinationSizeChangeByUniqueId(ani_env* env, const NG::NavDestinationInfo& info)
+    {
+        auto iter = specifiedNavDestinationSizeChangeListeners_.find(info.navigationUniqueId);
+        if (iter == specifiedNavDestinationSizeChangeListeners_.end()) {
+            return;
+        }
+        auto holder = iter->second;
+        if (holder.empty()) {
+            return;
+        }
+        std::vector<ani_ref> cbParam;
+        ani_ref fnRetrunVal;
+        ani_object res;
+        CreateNavigationInfo(env, info, res);
+        cbParam.emplace_back(res);
+        for (auto& cb : holder) {
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(cb), cbParam.size(), cbParam.data(), &fnRetrunVal);
+        }
+    }
+
 private:
     void SetLastIndexForTabContentInfo(ani_env* env, const NG::TabContentInfo& info, ani_class& cls, ani_object& res)
     {
@@ -1328,12 +1527,20 @@ private:
     bool hasSetTabChangeCallback_ = false;
     std::list<ani_ref> unspecifiedTabChangeListeners_;
     std::unordered_map<std::string, std::list<ani_ref>> specifiedTabChangeListeners_;
+
+    static std::list<ani_ref> routerPageSizeChangeListeners_;
+    static std::list<ani_ref> unspecifiedNavDestinationSizeChangeListeners_;
+    static std::unordered_map<int32_t, std::list<ani_ref>> specifiedNavDestinationSizeChangeListeners_;
 };
 
 std::list<ani_ref> UiObserver::unspecifiedNavigationListeners_;
 std::unordered_map<std::string, std::list<ani_ref>> UiObserver::specifiedCNavigationListeners_;
 std::unordered_map<int32_t, std::list<ani_ref>> UiObserver::specifiedRouterPageListeners_;
 std::unordered_map<int32_t, NavIdAndListenersMap> UiObserver::uiContextNavDesSwitchListeners_;
+
+std::list<ani_ref> UiObserver::routerPageSizeChangeListeners_;
+std::list<ani_ref> UiObserver::unspecifiedNavDestinationSizeChangeListeners_;
+std::unordered_map<int32_t, std::list<ani_ref>> UiObserver::specifiedNavDestinationSizeChangeListeners_;
 
 static UiObserver* Unwrapp(ani_env* env, ani_object object)
 {
@@ -2123,6 +2330,108 @@ static void OffScrollEventWithId([[maybe_unused]] ani_env* env, [[maybe_unused]]
     observer->UnRegisterScrollEventCallback(env, scrollId, fnObjGlobalRef);
 }
 
+static void OnRouterPageSizeChange([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_fn_object fnObj)
+{
+    if (fnObj == nullptr) {
+        LOGE("observer-ani callback is undefined.");
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    observer->RegisterRouterPageSizeChangeCallback(fnObjGlobalRef);
+}
+
+static void OffRouterPageSizeChange([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_fn_object fnObj)
+{
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+    observer->UnRegisterRouterPageSizeChangeCallback(env, fnObjGlobalRef);
+}
+
+static void OnNavDestinationSizeChange([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_fn_object fnObj)
+{
+    if (fnObj == nullptr) {
+        LOGE("observer-ani callback is undefined.");
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    observer->RegisterNavDestinationSizeChangeCallback(fnObjGlobalRef);
+}
+
+static void OffNavDestinationSizeChange([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_fn_object fnObj)
+{
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+    observer->UnRegisterNavDestinationSizeChangeCallback(env, fnObjGlobalRef);
+}
+
+static void OnNavDestinationSizeChangeByUniqueId([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_int navUniqueId, ani_fn_object fnObj)
+{
+    if (fnObj == nullptr) {
+        LOGE("observer-ani callback is undefined.");
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    observer->RegisterNavDestinationSizeChangeByUniqueIdCallback(navUniqueId, fnObjGlobalRef);
+}
+
+static void OffNavDestinationSizeChangeByUniqueId([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_int navUniqueId, ani_fn_object fnObj)
+{
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+    observer->UnRegisterNavDestinationSizeChangeByUniqueIdCallback(env, navUniqueId, fnObjGlobalRef);
+}
+
 static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
 {
     ani_class cls;
@@ -2199,6 +2508,23 @@ static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
         observer->HandleUIContextNavDestinationSwitch(env, info);
     };
     NG::UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFuncForAni(navDestinationSwitchCallback);
+
+    auto routerPageSizeChangeCallback = [observer, env](const NG::RouterPageInfoNG& info) {
+        observer->HandleRouterPageSizeChange(env, info);
+    };
+    NG::UIObserverHandler::GetInstance().SetRouterPageSizeChangeHandleFuncForAni(
+        std::move(routerPageSizeChangeCallback));
+    auto navDestinationSizeChangeCallback = [observer, env](const NG::NavDestinationInfo& info) {
+        observer->HandleNavDestinationSizeChange(env, info);
+    };
+    NG::UIObserverHandler::GetInstance().SetNavDestinationSizeChangeHandleFuncForAni(
+        std::move(navDestinationSizeChangeCallback));
+    auto navDestinationSizeChangeByUniqueIdCallback = [observer, env](const NG::NavDestinationInfo& info) {
+        observer->HandleNavDestinationSizeChangeByUniqueId(env, info);
+    };
+    NG::UIObserverHandler::GetInstance().SetNavDestinationSizeChangeByUniqueIdHandleFuncForAni(
+        std::move(navDestinationSizeChangeByUniqueIdCallback));
+
     ani_object context_object;
     if (ANI_OK != env->Object_New(cls, ctor, &context_object, reinterpret_cast<ani_long>(observer))) {
         LOGE("observer-ani Can not new object.");
@@ -2321,6 +2647,19 @@ bool ANI_ConstructorForAni(ani_env* env)
             "onScrollEvent", "C{std.core.Function1}:", reinterpret_cast<void *>(OHOS::Ace::OnScrollEventType)},
         ani_native_function{
             "offScrollEvent", "C{std.core.Function1}:", reinterpret_cast<void *>(OHOS::Ace::OffScrollEvent)},
+
+        ani_native_function { "onRouterPageSizeChange", "C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::OnRouterPageSizeChange) },
+        ani_native_function { "offRouterPageSizeChange", "C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::OffRouterPageSizeChange) },
+        ani_native_function { "onNavDestinationSizeChange", "C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::OnNavDestinationSizeChange) },
+        ani_native_function { "offNavDestinationSizeChange", "C{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::OffNavDestinationSizeChange) },
+        ani_native_function { "onNavDestinationSizeChangeByUniqueId", "iC{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::OnNavDestinationSizeChangeByUniqueId) },
+        ani_native_function { "offNavDestinationSizeChangeByUniqueId", "iC{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::OffNavDestinationSizeChangeByUniqueId) },
     };
     if (ANI_OK != env->Class_BindNativeMethods(clsObserver, methodsObserver.data(), methodsObserver.size())) {
         return false;

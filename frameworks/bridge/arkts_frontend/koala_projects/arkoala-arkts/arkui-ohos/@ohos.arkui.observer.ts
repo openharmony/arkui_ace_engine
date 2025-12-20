@@ -4,6 +4,7 @@ import { UIContext } from '@ohos/arkui/UIContext';
 import UIAbilityContext from 'application.UIAbilityContext';
 import { NavDestinationMode } from 'arkui/framework'
 import { int32 } from "@koalaui/common"
+import { Size } from 'arkui/Graphics'
 
 declare namespace uiObserver {
     export class DensityInfo {
@@ -67,8 +68,23 @@ declare namespace uiObserver {
 
         onDidLayout(callback: Callback_<void>): void;
         offDidLayout(callback?: Callback_<void>): void;
+
+        onRouterPageSizeChange(callback: Callback_<RouterPageInfo>): void;
+        offRouterPageSizeChange(callback?: Callback_<RouterPageInfo>): void;
+
+        onNavDestinationSizeChange(callback: Callback_<NavDestinationInfo>): void;
+        offNavDestinationSizeChange(callback?: Callback_<NavDestinationInfo>): void;
+
+        onNavDestinationSizeChangeByUniqueId(navigationUniqueId: int, callback: Callback_<NavDestinationInfo>): void;
+        offNavDestinationSizeChangeByUniqueId(navigationUniqueId: int, callback?: Callback_<NavDestinationInfo>): void;
     }
     export function createUIObserver(id: number): UIObserver;
+
+    export class SizeInner implements Size {
+        width: number;
+        height: number;
+        constructor(width: number, height: number);
+    }
 
     export enum NavDestinationState {
         ON_SHOWN = 0,
@@ -103,6 +119,7 @@ declare namespace uiObserver {
         path: string;
         state: RouterPageState;
         pageId: string;
+        size?: Size;
     }
 
     export interface NavDestinationInfo {
@@ -114,6 +131,7 @@ declare namespace uiObserver {
         navDestinationId: string;
         uniqueId?: int32;
         mode?: NavDestinationMode;
+        size?: Size;
     }
 
     export enum RouterPageState {

@@ -1538,7 +1538,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage056, TestSi
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_CALL(
-        *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), AddPrivilege())
+        *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), AddPrivilege(_, _))
         .WillRepeatedly(testing::Return(1));
     EXPECT_CALL(
         *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), GetShadowOffset(_))
@@ -1549,7 +1549,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage056, TestSi
     dragDropManager->RequestDragSummaryInfoAndPrivilege();
 
     EXPECT_CALL(
-        *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), AddPrivilege())
+        *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), AddPrivilege(_, _))
         .WillRepeatedly(testing::Return(0));
     EXPECT_CALL(
         *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), GetShadowOffset(_))

@@ -186,6 +186,8 @@ struct ArkUINavDestinationInfo {
     std::string navigationId;
     ani_size state;
     ani_size mode;
+    std::optional<ani_double> width;
+    std::optional<ani_double> height;
 };
 
 struct ArkUIRouterPageInfo {
@@ -194,6 +196,8 @@ struct ArkUIRouterPageInfo {
     std::string path;
     ani_size state;
     std::string pageId;
+    std::optional<ani_double> width;
+    std::optional<ani_double> height;
 };
 
 struct AniOverlayOptions {

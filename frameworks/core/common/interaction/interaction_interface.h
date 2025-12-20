@@ -63,7 +63,7 @@ public:
 
     virtual int32_t GetDragState(DragState& dragState) const = 0;
 
-    virtual int32_t AddPrivilege() = 0;
+    virtual int32_t AddPrivilege(const std::string& signature, const DragEventData& dragEventData) = 0;
 
     virtual int32_t EnterTextEditorArea(bool enable) = 0;
 

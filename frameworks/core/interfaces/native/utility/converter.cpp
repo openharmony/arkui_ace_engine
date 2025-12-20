@@ -2342,6 +2342,44 @@ bool ConvertFromString(const std::string& str, DimensionUnit unit, Dimension& di
     return true;
 }
 
+std::optional<Dimension> OptConvertFromArkResourceStr(const Ark_ResourceStr& src, DimensionUnit defaultUnit)
+{
+    std::optional<Dimension> dimension;
+    Converter::VisitUnion(src,
+        [&dimension, defaultUnit](const Ark_String& value) {
+            std::optional<std::string> optStr = Converter::OptConvert<std::string>(value);
+            if (optStr.has_value()) {
+                Dimension value;
+                auto result = ConvertFromString(optStr.value(), defaultUnit, value);
+                if (result) {
+                    dimension = value;
+                }
+            }
+        },
+        [&dimension, defaultUnit](const Ark_Resource& value) {
+            dimension = OptConvertFromArkResource(value, defaultUnit);
+        },
+        []() {});
+    return dimension;
+}
+
+std::optional<Dimension> OptConvertFromArkNumResStr(const Ark_Union_F64_ResourceStr& src, DimensionUnit defaultUnit)
+{
+    std::optional<Dimension> dimension;
+    Converter::VisitUnion(src,
+        [&dimension, defaultUnit](const Ark_Float64& value) {
+            std::optional<float> optValue = Converter::OptConvert<float>(value);
+            if (optValue.has_value()) {
+                dimension = Dimension(optValue.value(), defaultUnit);
+            }
+        },
+        [&dimension, defaultUnit](const Ark_ResourceStr& value) {
+            dimension = OptConvertFromArkResourceStr(value, defaultUnit);
+        },
+        []() {});
+    return dimension;
+}
+
 std::optional<Dimension> OptConvertFromArkResource(const Ark_Resource& src, DimensionUnit defaultUnit)
 {
     ResourceConverter converter(src);
@@ -2437,11 +2475,21 @@ std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, Dimensio
 {
     std::optional<Dimension> dimension = std::nullopt;
     Converter::VisitUnion(src,
-        [&dimension](const Ark_Float64& value) {
-            dimension = Converter::Convert<Dimension>(value);
+        [&dimension, defaultUnit](const Ark_Float64& value) {
+            std::optional<float> optValue = Converter::OptConvert<float>(value);
+            if (optValue.has_value()) {
+                dimension = Dimension(optValue.value(), defaultUnit);
+            }
         },
-        [&dimension](const Ark_String& value) {
-            dimension = Converter::Convert<Dimension>(value);
+        [&dimension, defaultUnit](const Ark_String& value) {
+            std::optional<std::string> optStr = Converter::OptConvert<std::string>(value);
+            if (optStr.has_value()) {
+                Dimension value;
+                auto result = ConvertFromString(optStr.value(), defaultUnit, value);
+                if (result) {
+                    dimension = value;
+                }
+            }
         },
         [&dimension, defaultUnit](const Ark_Resource& value) {
             dimension = OptConvertFromArkLengthResource(value, defaultUnit);

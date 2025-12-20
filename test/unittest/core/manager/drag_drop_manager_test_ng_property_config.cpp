@@ -2132,7 +2132,9 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest072, TestSize.Level1)
     /**
      * @tc.steps: step2. Invoke RequestDragSummaryInfoAndPrivilege
      */
-    int ret = InteractionInterface::GetInstance()->AddPrivilege();
+    string signature;
+    DragEventData dragEventData;
+    int ret = InteractionInterface::GetInstance()->AddPrivilege(signature, dragEventData);
     dragDropManager->RequestDragSummaryInfoAndPrivilege();
     EXPECT_FALSE(ret != 0);
     EXPECT_FALSE(SystemProperties::GetDebugEnabled());

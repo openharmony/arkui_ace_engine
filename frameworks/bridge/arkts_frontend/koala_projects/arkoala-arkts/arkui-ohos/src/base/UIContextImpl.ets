@@ -698,15 +698,6 @@ export class RouterImpl extends Router {
         return result;
     }
 
-    public registerNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface): void {
-        if (this.router_ === undefined) {
-            throw Error("router set in uiContext is empty");
-        }
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        this.router_!.registerNamedRouter(routerName, instance, param);
-        ArkUIAniModule._Common_Restore_InstanceId();
-    }
-
     public showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
         if (this.router_ === undefined) {
             throw Error("router set in uiContext is empty");
