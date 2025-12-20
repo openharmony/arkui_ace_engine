@@ -1393,6 +1393,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _NavigationAttribute_setEnableDragBar(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _NavigationAttribute_setDivider(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _NavigationAttribute_setEnableModeChangeAnimation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavigationAttribute_setBackButtonIcon(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void

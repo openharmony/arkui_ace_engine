@@ -3114,6 +3114,8 @@ typedef struct Ark_NavDestinationCustomTitle Ark_NavDestinationCustomTitle;
 typedef struct Opt_NavDestinationCustomTitle Opt_NavDestinationCustomTitle;
 typedef struct Ark_NavigationCustomTitle Ark_NavigationCustomTitle;
 typedef struct Opt_NavigationCustomTitle Opt_NavigationCustomTitle;
+typedef struct Ark_NavigationDividerStyle Ark_NavigationDividerStyle;
+typedef struct Opt_NavigationDividerStyle Opt_NavigationDividerStyle;
 typedef struct Ark_NavigationTitleOptions Ark_NavigationTitleOptions;
 typedef struct Opt_NavigationTitleOptions Opt_NavigationTitleOptions;
 typedef struct Ark_OffsetOptions Ark_OffsetOptions;
@@ -20033,6 +20035,16 @@ typedef struct Opt_NavigationCustomTitle {
     Ark_Tag tag;
     Ark_NavigationCustomTitle value;
 } Opt_NavigationCustomTitle;
+typedef struct Ark_NavigationDividerStyle {
+    /* kind: Interface */
+    Opt_ResourceColor color;
+    Opt_Length startMargin;
+    Opt_Length endMargin;
+} Ark_NavigationDividerStyle;
+typedef struct Opt_NavigationDividerStyle {
+    Ark_Tag tag;
+    Ark_NavigationDividerStyle value;
+} Opt_NavigationDividerStyle;
 typedef struct Ark_NavigationTitleOptions {
     /* kind: Interface */
     Opt_ResourceColor backgroundColor;
@@ -24290,6 +24302,8 @@ typedef struct GENERATED_ArkUINavigationModifier {
                            const Opt_Boolean* value);
     void (*setEnableDragBar)(Ark_NativePointer node,
                              const Opt_Boolean* value);
+    void (*setDivider)(Ark_NativePointer node,
+                       const Opt_NavigationDividerStyle* value);
     void (*setEnableModeChangeAnimation)(Ark_NativePointer node,
                                          const Opt_Boolean* value);
     void (*setBackButtonIcon)(Ark_NativePointer node,

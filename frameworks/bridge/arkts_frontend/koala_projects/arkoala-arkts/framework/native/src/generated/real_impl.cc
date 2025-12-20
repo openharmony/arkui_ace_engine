@@ -4190,6 +4190,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                               const Opt_Boolean* value)
     {
     }
+    void SetDividerImpl(Ark_NativePointer node,
+                        const Opt_NavigationDividerStyle* value)
+    {
+    }
     void SetEnableModeChangeAnimationImpl(Ark_NativePointer node,
                                           const Opt_Boolean* value)
     {
@@ -9496,6 +9500,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavigationAttributeModifier::SetSystemBarStyleImpl,
             NavigationAttributeModifier::SetRecoverableImpl,
             NavigationAttributeModifier::SetEnableDragBarImpl,
+            NavigationAttributeModifier::SetDividerImpl,
             NavigationAttributeModifier::SetEnableModeChangeAnimationImpl,
             NavigationAttributeModifier::SetBackButtonIcon1Impl,
             NavigationAttributeModifier::SetTitleImpl,

@@ -11585,6 +11585,19 @@ void impl_NavigationAttribute_setEnableDragBar(Ark_NativePointer thisPtr, KSeria
         GetNodeModifiers()->getNavigationModifier()->setEnableDragBar(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(NavigationAttribute_setEnableDragBar, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_NavigationAttribute_setDivider(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_NavigationDividerStyle valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = NavigationDividerStyle_serializer::read(thisDeserializer);
+        }
+        Opt_NavigationDividerStyle valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getNavigationModifier()->setDivider(self, static_cast<Opt_NavigationDividerStyle*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(NavigationAttribute_setDivider, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavigationAttribute_setEnableModeChangeAnimation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
