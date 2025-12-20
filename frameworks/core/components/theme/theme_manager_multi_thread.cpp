@@ -20,19 +20,19 @@
 namespace OHOS::Ace {
 RefPtr<Theme> ThemeManagerImpl::GetThemeMultiThread(ThemeType type)
 {
-    std::lock_guard<std::mutex> lock(themeMultiThreadMutex_);
+    std::lock_guard<std::recursive_mutex> lock(themeMultiThreadMutex_);
     return GetThemeNormal(type);
 }
 
 RefPtr<Theme> ThemeManagerImpl::GetThemeMultiThread(ThemeType type, int32_t themeScopeId)
 {
-    std::lock_guard<std::mutex> lock(themeMultiThreadMutex_);
+    std::lock_guard<std::recursive_mutex> lock(themeMultiThreadMutex_);
     return GetThemeNormal(type, themeScopeId);
 }
 
 void ThemeManagerImpl::LoadResourceThemesMultiThread()
 {
-    std::lock_guard<std::mutex> lock(themeMultiThreadMutex_);
+    std::lock_guard<std::recursive_mutex> lock(themeMultiThreadMutex_);
     LoadResourceThemesInner();
 }
 } // namespace OHOS::Ace
