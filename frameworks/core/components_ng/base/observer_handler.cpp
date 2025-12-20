@@ -332,18 +332,26 @@ void UIObserverHandler::NotifyRouterPageSizeChange(
     const RefPtr<PageInfo>& pageInfo, RouterPageState state, const std::optional<SizeF>& size)
 {
     CHECK_NULL_VOID(pageInfo);
-    CHECK_NULL_VOID(routerPageSizeChangeHandleFunc_);
+    if (!routerPageSizeChangeHandleFunc_ && !routerPageSizeChangeHandleFuncForAni_) {
+        return;
+    }
     int32_t index = pageInfo->GetPageIndex();
     std::string name = pageInfo->GetPageUrl();
     std::string path = pageInfo->GetPagePath();
     std::string pageId = std::to_string(pageInfo->GetPageId());
     RouterPageInfoNG routerPageInfo(index, name, path, state, pageId, size);
-    routerPageSizeChangeHandleFunc_(routerPageInfo);
+    if (routerPageSizeChangeHandleFunc_) {
+        routerPageSizeChangeHandleFunc_(routerPageInfo);
+    }
+    if (routerPageSizeChangeHandleFuncForAni_) {
+        routerPageSizeChangeHandleFuncForAni_(routerPageInfo);
+    }
 }
 
 void UIObserverHandler::NotifyNavDestinationSizeChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state)
 {
-    if (navDestinationSizeChangeHandleFunc_ == nullptr && navDestinationSizeChangeByUniqueIdHandleFunc_ == nullptr) {
+    if (!navDestinationSizeChangeHandleFunc_ && !navDestinationSizeChangeByUniqueIdHandleFunc_ &&
+        !navDestinationSizeChangeHandleFuncForAni_ && !navDestinationSizeChangeByUniqueIdHandleFuncForAni_) {
         return;
     }
     auto ref = weakPattern.Upgrade();
@@ -368,6 +376,12 @@ void UIObserverHandler::NotifyNavDestinationSizeChange(const WeakPtr<AceType>& w
     }
     if (navDestinationSizeChangeByUniqueIdHandleFunc_) {
         navDestinationSizeChangeByUniqueIdHandleFunc_(info);
+    }
+    if (navDestinationSizeChangeHandleFuncForAni_) {
+        navDestinationSizeChangeHandleFuncForAni_(info);
+    }
+    if (navDestinationSizeChangeByUniqueIdHandleFuncForAni_) {
+        navDestinationSizeChangeByUniqueIdHandleFuncForAni_(info);
     }
 }
 
@@ -791,6 +805,22 @@ void UIObserverHandler::SetNavDestinationSizeChangeByUniqueIdHandleFunc(
     NavDestinationSizeChangeByUniqueIdHandleFunc func)
 {
     navDestinationSizeChangeByUniqueIdHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetRouterPageSizeChangeHandleFuncForAni(RouterPageSizeChangeHandleFuncForAni&& func)
+{
+    routerPageSizeChangeHandleFuncForAni_ = std::move(func);
+}
+
+void UIObserverHandler::SetNavDestinationSizeChangeHandleFuncForAni(NavDestinationSizeChangeHandleFuncForAni&& func)
+{
+    navDestinationSizeChangeHandleFuncForAni_ = std::move(func);
+}
+
+void UIObserverHandler::SetNavDestinationSizeChangeByUniqueIdHandleFuncForAni(
+    NavDestinationSizeChangeByUniqueIdHandleFuncForAni&& func)
+{
+    navDestinationSizeChangeByUniqueIdHandleFuncForAni_ = std::move(func);
 }
 
 napi_value UIObserverHandler::GetUIContextValue()

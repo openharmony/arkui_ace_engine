@@ -50,7 +50,7 @@ export interface IExtendableComponent {
     getUniqueId(): int32;
     getPeerNode(): PeerNode | undefined;
     queryNavigationInfo(): uiObserver.NavigationInfo;
-    queryNavDestinationInfo(isInner: boolean): uiObserver.NavDestinationInfo;
+    queryNavDestinationInfo(isInner: boolean | undefined): uiObserver.NavDestinationInfo;
     queryNavDestinationInfo(): uiObserver.NavDestinationInfo
     queryRouterPageInfo(): uiObserver.RouterPageInfo;
     getDialogController(): promptAction.DialogController | undefined;
@@ -234,7 +234,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     queryRouterPageInfo(): uiObserver.RouterPageInfo {
         return this.delegate_!.queryRouterPageInfo();
     }
-    queryNavDestinationInfo(isInner: boolean): uiObserver.NavDestinationInfo {
+    queryNavDestinationInfo(isInner: boolean | undefined): uiObserver.NavDestinationInfo {
         return this.delegate_!.queryNavDestinationInfo(isInner);
     }
     queryNavDestinationInfo() : uiObserver.NavDestinationInfo {

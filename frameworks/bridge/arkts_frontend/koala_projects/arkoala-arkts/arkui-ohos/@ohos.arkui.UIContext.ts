@@ -770,9 +770,13 @@ export class UIContext {
         childScroller: Scroller): void {
         throw Error("unbindTabsFromNestedScrollable not implemented in UIContext!")
     }
-    
+
     public getPageInfoByUniqueId(id: int): PageInfo {
-        throw Error("getPageInfoByUniqueId not implemented in UIContext!")
+        throw Error("getPageInfoByUniqueId(int) not implemented in UIContext!")
+    }
+
+    public getPageInfoByUniqueId(id: number): PageInfo {
+        throw Error("getPageInfoByUniqueId(number) not implemented in UIContext!")
     }
 }
 export abstract class FrameCallback {
@@ -995,6 +999,44 @@ export class UIObserver {
     public offDidLayout(callback?: Callback<void>): void {
         if (this.observerImpl) {
             this.observerImpl!.offDidLayout(callback);
+        }
+    }
+
+    public onRouterPageSizeChange(callback: Callback<uiObserver.RouterPageInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onRouterPageSizeChange(callback);
+        }
+    }
+
+    public offRouterPageSizeChange(callback?: Callback<uiObserver.RouterPageInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offRouterPageSizeChange(callback);
+        }
+    }
+
+    public onNavDestinationSizeChange(callback: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationSizeChange(callback);
+        }
+    }
+
+    public offNavDestinationSizeChange(callback?: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationSizeChange(callback);
+        }
+    }
+
+    public onNavDestinationSizeChangeByUniqueId(
+        navigationUniqueId: int, callback: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationSizeChangeByUniqueId(navigationUniqueId, callback);
+        }
+    }
+
+    public offNavDestinationSizeChangeByUniqueId(
+        navigationUniqueId: int, callback?: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationSizeChangeByUniqueId(navigationUniqueId, callback);
         }
     }
 }
