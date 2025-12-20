@@ -58,7 +58,7 @@ public:
 
     MOCK_METHOD(int32_t, EnterTextEditorArea, (bool enable), (override));
 
-    MOCK_METHOD(int32_t, AddPrivilege, (), (override));
+    MOCK_METHOD(int32_t, AddPrivilege, (const std::string & signature, const DragEventData& dragEventData), (override));
 
     int32_t RegisterCoordinationListener(std::function<void()> dragOutCallback) override
     {

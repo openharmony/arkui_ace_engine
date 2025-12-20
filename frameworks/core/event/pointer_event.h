@@ -81,6 +81,8 @@ struct DragPointerEvent final : public PointerEvent {
     int32_t displayId = 0;
     int32_t sourceType = 0;
     int32_t originId = 0;
+    std::string signature;
+    DragEventData dragEventData;
 
     DragPointerEvent() = default;
     DragPointerEvent(float x, float y)
