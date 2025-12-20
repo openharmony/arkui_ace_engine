@@ -5163,6 +5163,15 @@ bool JSWeb::HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
         int32_t parentId = -1;
         auto controller = JSWebWindowNewHandler::PopController(handler->GetId(), &parentId);
         if (!controller.IsEmpty()) {
+            napi_env env = GetNapiEnv();
+            if (!env) {
+                return false;
+            }
+            napi_handle_scope scope = nullptr;
+            auto napi_status = napi_open_handle_scope(env, &scope);
+            if (napi_status != napi_ok) {
+                return false;
+            }
             auto getWebIdFunction = controller->GetProperty("innerGetWebId");
             if (getWebIdFunction->IsFunction()) {
                 auto func = JSRef<JSFunc>::Cast(getWebIdFunction);
@@ -5175,6 +5184,7 @@ bool JSWeb::HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
                 JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(parentId)) };
                 func->Call(controller, 1, argv);
             }
+            napi_close_handle_scope(env, scope);
         }
         return false;
     }
