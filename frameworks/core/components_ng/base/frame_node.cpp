@@ -522,8 +522,21 @@ void FrameNode::OnDelete()
     UINode::OnDelete();
 }
 
+void FrameNode::DetachRsNodeInAdoptedChildren()
+{
+    for (auto& adoptedChild : adoptedChildren_) {
+        CHECK_NULL_CONTINUE(adoptedChild);
+        adoptedChild->SetIsAdopted(false);
+        adoptedChild->SetAdoptParent(nullptr);
+        auto rsContext = adoptedChild->GetRenderContext();
+        CHECK_NULL_CONTINUE(rsContext);
+        rsContext->RemoveFromTree();
+    }
+}
+
 FrameNode::~FrameNode()
 {
+    DetachRsNodeInAdoptedChildren();
     ResetPredictNodes();
     for (const auto& destroyCallback : destroyCallbacksMap_) {
         if (destroyCallback.second) {

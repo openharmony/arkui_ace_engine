@@ -206,7 +206,6 @@ void DisposeNode(ArkUI_NodeHandle nativePtr)
     }
     // already check in entry point.
     const auto* impl = GetFullImpl();
-    impl->getNodeModifiers()->getNDKRenderNodeModifier()->detachRsNodeDuringDispose(nativePtr->uiNodeHandle);
     impl->getBasicAPI()->disposeNode(nativePtr->uiNodeHandle);
     DisposeNativeSource(nativePtr);
     g_nodeSet.erase(nativePtr);
