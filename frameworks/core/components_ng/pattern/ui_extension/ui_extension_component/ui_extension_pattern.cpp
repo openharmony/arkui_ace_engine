@@ -616,6 +616,7 @@ void UIExtensionPattern::OnConnect()
     bool isFocused = focusHub && focusHub->IsCurrentFocus();
     RegisterVisibleAreaChange();
     if (isFocusedBeforeCallback || !isFocusedAfterCallback) {
+        // If not focused before callback and get focused by callback, don't dispatch.
         DispatchFocusState(isFocused);
     }
     UpdateSessionViewportConfigFromContext();
