@@ -30,6 +30,7 @@ import { setUIDetachedRootCreator } from "./CallbackTransformer"
 import { enterForeignContext, leaveForeignContext } from "./base"
 import { checkEvents, registerApiEventHandler, wrapSystemCallback, KUint8ArrayPtr } from '@koalaui/interop'
 import { Routed } from "./base"
+import { RouterImpl } from "./base/Router"
 import router from "@ohos/router"
 import { UIContextImpl, ContextRecord, DetachedRootEntryManager, DetachedRootEntry } from "arkui/base/UIContextImpl"
 import { updateLazyItems } from "arkui/base/LazyForEachImpl"
@@ -210,6 +211,7 @@ export class Application {
     private moduleName: string = ""
     private startUrl: string = ""
     private startParam: string = ""
+    private startName: string = ""
     private instanceId: int32 = -1
     private plugin = false
     private withLog = false
@@ -217,13 +219,15 @@ export class Application {
     private rootPointer: KPointer = nullptr
     private static firstRegisterArkuiApiHandler: boolean = true
 
-    constructor(useNativeLog: boolean, moduleName: string, startUrl: string, startParam: string, userView: UserView | undefined, entryPoint: EntryPoint | undefined) {
+    constructor(useNativeLog: boolean, moduleName: string, startUrl: string, startParam: string, name: string,
+        userView: UserView | undefined, entryPoint: EntryPoint | undefined) {
         this.useNativeLog = useNativeLog
         this.moduleName = moduleName
         this.startUrl = startUrl
         this.startParam = startParam
         this.userView = userView
         this.entryPoint = entryPoint
+        this.startName = name
         setUIDetachedRootCreator(createUiDetachedRoot)
     }
 
@@ -237,6 +241,13 @@ export class Application {
         Routed(builder, moduleName, initUrl)
         let routerOption: router.RouterOptions = {url: initUrl}
         router.runPage(routerOption, builder)
+    }
+
+    static createMemoRootStateByName(initName: string, context: UIContextImpl) {
+        let routerImpl = new RouterImpl("")
+        router.setRouter(routerImpl)
+        let routerOptions: router.NamedRouterOptions = { name: initName }
+        context.getRouter().pushNamedRoute(routerOptions)
     }
 
     private trackFrame<T>(frame: () => T): T {
@@ -273,7 +284,7 @@ export class Application {
             this.manager!.contextData = uiData;
             this.manager!.isDebugMode = uiContext.isDebugMode_;
             this.manager!.setThreadChecker(() => UIContextUtil.checkCurrentThread());
-            if (this.startUrl == "__INTEROP__") {
+            if (this.startUrl == "__INTEROP__" && this.startName === "") {
                 return nullptr
             }
             @memo
@@ -282,6 +293,8 @@ export class Application {
                 builder = this.entryPoint!.entry
             } else if (this.userView) {
                 builder = this.userView!.getBuilder()
+            } else if (this.startName) {
+                builder = RouterImpl.getBuilderByName(this.startName)!.entry
             } else {
                 throw new Error("Invalid EntryPoint")
             }
@@ -294,7 +307,11 @@ export class Application {
                         this.manager!.frozen = frozen
                     })
                 } else {
-                    Application.createMemoRootState(this.manager!, builder, this.moduleName, this.startUrl)
+                    if (this.startName) {
+                        Application.createMemoRootStateByName(this.startName, this.uiContext!)
+                    } else {
+                        Application.createMemoRootState(this.manager!, builder, this.moduleName, this.startUrl)
+                    }
                     this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {})
                 }
                 InteropNativeModule._NativeLog(`ArkTS Application.start before computeRoot`)
@@ -558,8 +575,8 @@ export class Application {
         this.manager!.updateSnapshot();
     }
 
-    static createApplication(startUrl: string, startParams: string, useNativeLog: boolean, moduleName: string, userView: UserView | undefined, entryPoint: EntryPoint | undefined): Application {
-        if (!userView && !entryPoint && startUrl != "__INTEROP__") {
+    static createApplication(startUrl: string, startParams: string, startName: string, useNativeLog: boolean, moduleName: string, userView: UserView | undefined, entryPoint: EntryPoint | undefined): Application {
+        if (!userView && !entryPoint && startUrl != "__INTEROP__" && startName === "") {
             throw new Error(`Invalid EntryPoint`)
         }
         registerNativeModuleLibraryName("InteropNativeModule", "ArkoalaNative_ark.z")
@@ -575,7 +592,7 @@ export class Application {
             });
             Application.firstRegisterArkuiApiHandler = false
         }
-        return new Application(useNativeLog, moduleName, startUrl, startParams, userView, entryPoint)
+        return new Application(useNativeLog, moduleName, startUrl, startParams, startName, userView, entryPoint)
     }
 
     static createApplication(param: ApplicationConstructorParam): Application {
@@ -586,6 +603,7 @@ export class Application {
         return Application.createApplication(
             param.startUrl,
             param.startParams,
+            param.startName,
             param.useNativeLog,
             param.moduleName,
             param.userView,
@@ -614,6 +632,7 @@ function makeClickEvent(x: number, y: number): ClickEvent {
 class ApplicationConstructorParam {
     public startUrl: string;
     public startParams: string;
+    public startName: string;
     public useNativeLog: boolean;
     public moduleName: string;
     public userView: UserView | undefined;
@@ -622,6 +641,7 @@ class ApplicationConstructorParam {
     constructor(
         startUrl: string,
         startParams: string,
+        startName: string,
         useNativeLog: boolean,
         moduleName: string,
         userView: UserView | undefined,
@@ -630,6 +650,7 @@ class ApplicationConstructorParam {
     ) {
         this.startUrl = startUrl;
         this.startParams = startParams;
+        this.startName = startName;
         this.useNativeLog = useNativeLog;
         this.moduleName = moduleName;
         this.userView = userView;

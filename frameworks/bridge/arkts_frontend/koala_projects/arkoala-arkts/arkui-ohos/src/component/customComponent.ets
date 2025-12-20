@@ -29,6 +29,7 @@ import { Theme } from '@ohos.arkui.theme';
 import { LocalStorage, StateUpdateLoop } from '@ohos.arkui.stateManagement';
 import { PeerNode } from '../PeerNode';
 import { UIContext } from '@ohos/arkui/UIContext';
+import { RouterImpl } from 'arkui/base/Router';
 import promptAction from '@ohos/promptAction';
 import { RecordData } from "@ohos.base"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
@@ -588,9 +589,8 @@ export class EntryPoint {
     }
 
     public static RegisterNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface) {
-        let uiContext : UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-        const globalRouterImpl = uiContext.getRouter().getRouter();
-        globalRouterImpl.registerNamedRouter(routerName, instance, param);
+        InteropNativeModule._NativeLog(`AceRouter: register named router: ${routerName}`)
+        RouterImpl.registerNamedRouter(routerName, instance, param);
     }
 }
 

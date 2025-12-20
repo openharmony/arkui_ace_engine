@@ -214,8 +214,6 @@ export interface Router {
 
     getPreState(): ComputableState<IncrementalNode> | undefined;
 
-    registerNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface): void;
-
     runStartPage(options: router.RouterOptions, builder: UserViewBuilder): void
 
     showAlertBeforeBackPage(options: router.EnableAlertOptions): void
@@ -236,7 +234,7 @@ class MockEntryPoint extends EntryPoint {
     }
 }
 
-class RouterImpl implements Router {
+export class RouterImpl implements Router {
     private readonly moduleName: string
     // list of jsViewNode
     private peerNodeList = new Array<KPointer>
@@ -248,7 +246,7 @@ class RouterImpl implements Router {
     // list of container node to contain jsViewNode
     private rootState: Array<ComputableState<IncrementalNode>> = new Array<ComputableState<IncrementalNode>>()
     // map of namedRouter
-    private namedRouter: Map<string, NamedRouterInfo> = new Map<string, NamedRouterInfo>
+    private static namedRouter: Map<string, NamedRouterInfo> = new Map<string, NamedRouterInfo>
     private runtimeLinker: RuntimeLinker | undefined = undefined;
 
     constructor(moduleName: string) {
@@ -329,9 +327,9 @@ class RouterImpl implements Router {
         return true;
     }
 
-    registerNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface): void {
+    static registerNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface): void {
         let info: NamedRouterInfo = new NamedRouterInfo(param.pagePath, instance);
-        this.namedRouter.set(routerName, info);
+        RouterImpl.namedRouter.set(routerName, info);
     }
 
     UpdateVisiblePagePeerNode(node: PeerNode, index: int = -1): void {
@@ -459,7 +457,7 @@ class RouterImpl implements Router {
             return RouterExtender.pushNamedRoute(jsViewNodePtr!, pageOptions, pagePushTransitionCallback);
         }
         let className = options.name;
-        let entryInfo = this.namedRouter.get(className);
+        let entryInfo = RouterImpl.namedRouter.get(className);
         let entryObject = entryInfo?.entryPoint;
         if (entryObject) {
             let manager = GlobalStateManager.instance
@@ -540,7 +538,7 @@ class RouterImpl implements Router {
             return;
         }
         let className = options.name;
-        let entryInfo = this.namedRouter.get(className);
+        let entryInfo = RouterImpl.namedRouter.get(className);
         let entryObject = entryInfo?.entryPoint;
         if (entryObject) {
             let manager = GlobalStateManager.instance
@@ -703,7 +701,7 @@ class RouterImpl implements Router {
             return RouterExtender.replaceNamedRoute(jsViewNodePtr!, pageOptions, pagePushTransitionCallback);
         }
         let className = options.name;
-        let entryInfo = this.namedRouter.get(className);
+        let entryInfo = RouterImpl.namedRouter.get(className);
         let entryObject = entryInfo?.entryPoint;
         if (entryObject) {
             let manager = GlobalStateManager.instance
@@ -788,7 +786,7 @@ class RouterImpl implements Router {
             return;
         }
         let className = options.name;
-        let entryInfo = this.namedRouter.get(className);
+        let entryInfo = RouterImpl.namedRouter.get(className);
         let entryObject = entryInfo?.entryPoint;
         if (entryObject) {
             let manager = GlobalStateManager.instance
@@ -978,6 +976,10 @@ class RouterImpl implements Router {
 
     hideAlertBeforeBackPage(): void {
         RouterExtender.hideAlertBeforeBackPage();
+    }
+
+    static getBuilderByName(name: string): EntryPoint {
+        return RouterImpl.namedRouter.get(name)!.entryPoint;
     }
 }
 export function Routed(
