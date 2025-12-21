@@ -1253,7 +1253,7 @@ public:
         return isSubPipeline_;
     }
 
-    void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline)
+    virtual void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline)
     {
         parentPipeline_ = pipeline;
     }

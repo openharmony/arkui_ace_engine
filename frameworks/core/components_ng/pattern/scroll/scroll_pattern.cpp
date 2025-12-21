@@ -788,6 +788,7 @@ void ScrollPattern::ScrollTo(float position)
     SetAnimateCanOverScroll(GetCanStayOverScroll());
     JumpToPosition(-position - contentStartOffset_, SCROLL_FROM_JUMP);
     SetIsOverScroll(GetCanStayOverScroll());
+    ContentChangeReport(GetHost());
 }
 
 void ScrollPattern::DoJump(float position, int32_t source)

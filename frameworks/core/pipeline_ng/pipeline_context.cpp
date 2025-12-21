@@ -7271,6 +7271,16 @@ const std::shared_ptr<LoadCompleteManager>& PipelineContext::GetLoadCompleteMana
     return loadCompleteMgr_;
 }
 
+void PipelineContext::SetParentPipeline(const WeakPtr<PipelineBase>& weakPipeline)
+{
+    PipelineBase::SetParentPipeline(weakPipeline);
+    auto pipeline = weakPipeline.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto ngPipeline = DynamicCast<PipelineContext>(pipeline);
+    CHECK_NULL_VOID(ngPipeline);
+    contentChangeMgr_ = ngPipeline->GetContentChangeManager();
+}
+
 RefPtr<ContentChangeManager>& PipelineContext::GetContentChangeManager()
 {
     return contentChangeMgr_;

@@ -1352,6 +1352,7 @@ public:
     {
         isCustomNodeDeleteInTransition_ = isCustomNodeDeleteInTransition;
     }
+    void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline) override;
     RefPtr<ContentChangeManager>& GetContentChangeManager();
     void GetAppInfo(std::shared_ptr<JsonValue>& root) const;
 protected:

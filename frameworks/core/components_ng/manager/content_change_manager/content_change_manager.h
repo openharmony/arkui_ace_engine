@@ -43,7 +43,7 @@ public:
     void OnPageTransitionEnd(const RefPtr<FrameNode>& keyNode);
     void OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode);
     void OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor);
-    void OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode);
+    void OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow);
     void OnTextChangeEnd(const RectF& rect);
     void OnVsyncStart();
     void OnVsyncEnd(const RectF& rootRect);

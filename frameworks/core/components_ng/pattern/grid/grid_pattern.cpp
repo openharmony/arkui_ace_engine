@@ -872,6 +872,7 @@ void GridPattern::ScrollTo(float position)
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
     SetIsOverScroll(GetCanStayOverScroll());
     // AccessibilityEventType::SCROLL_END
+    ContentChangeReport(GetHost());
 }
 
 float GridPattern::EstimateHeight() const
@@ -1482,6 +1483,7 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             UpdateStartIndex(index, align);
+            ContentChangeReport(host);
         }
     }
     FireAndCleanScrollingListener();

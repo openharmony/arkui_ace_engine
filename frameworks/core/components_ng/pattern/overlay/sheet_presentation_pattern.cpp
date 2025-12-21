@@ -3815,7 +3815,7 @@ void SheetPresentationPattern::OnAppear()
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
-    mgr->OnDialogChangeEnd(GetHost());
+    mgr->OnDialogChangeEnd(GetHost(), true);
 }
 
 bool SheetPresentationPattern::IsNeedChangeScrollHeight(float height)
@@ -3864,7 +3864,7 @@ void SheetPresentationPattern::OnDisappear()
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
-    mgr->OnDialogChangeEnd(GetHost());
+    mgr->OnDialogChangeEnd(GetHost(), false);
 }
 
 void SheetPresentationPattern::OnFontScaleConfigurationUpdate()

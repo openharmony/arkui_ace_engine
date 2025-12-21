@@ -936,6 +936,8 @@ public:
     void ProcessScrollOverDrag(double velocity, bool isNestScroller);
 
     void SetCanOverScroll(bool val);
+    
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
 
 protected:
     void SuggestOpIncGroup(bool flag);
@@ -1185,7 +1187,6 @@ private:
     void SetOnHiddenChangeForParent();
     virtual void ResetForExtScroll() {};
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
-    void ContentChangeReport(RefPtr<FrameNode>& keyNode);
 
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;
