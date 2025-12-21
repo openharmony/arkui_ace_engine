@@ -191,6 +191,7 @@ public:
     // override SelectOverlayCallback end
     void DetectSelectedText(const std::string& text);
     void UpdateAISelectMenu(TextDataDetectType type, const std::string& content);
+    void UpdateTextSelectionHolderId();
     void UpdateSingleHandleVisible(bool isVisible);
     bool IsSingleHandle();
     void SetTouchHandleExistState(bool touchHandleExist);

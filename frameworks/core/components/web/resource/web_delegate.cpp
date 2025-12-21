@@ -9572,12 +9572,16 @@ void WebDelegate::OnTextSelectionChange(const std::string& selectionText, bool i
     CHECK_NULL_VOID(taskExecutor_);
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
-    if (lastSelectionText_ == selectionText && !isFromOverlay) {
+    bool selectionChanged = (lastSelectionText_ != selectionText);
+    if (!selectionChanged && !isFromOverlay) {
         return;
     }
     lastSelectionText_ = selectionText;
     if (webPattern->IsTextSelectionEnable()) {
         return;
+    }
+    if (!selectionText.empty() && selectionChanged) {
+        webPattern->UpdateTextSelectionHolderId();
     }
     taskExecutor_->PostTask(
         [weak = WeakClaim(this), selectionText]() {

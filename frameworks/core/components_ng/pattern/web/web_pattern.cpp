@@ -9519,6 +9519,18 @@ void WebPattern::ReportSelectedText(bool isRegister)
     }
 }
 
+void WebPattern::UpdateTextSelectionHolderId()
+{
+    if (!isFocus_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::UpdateTextSelectionHolderId not focus, do not update");
+        return;
+    }
+    if (!webSelectOverlay_) {
+        webSelectOverlay_ = AceType::MakeRefPtr<WebSelectOverlay>(WeakClaim(this));
+    }
+    webSelectOverlay_->UpdateTextSelectionHolderId();
+}
+
 std::pair<int32_t, RectF> WebPattern::GetScrollAreaInfoFromDocument(int32_t id)
 {
     CHECK_NULL_RETURN(webDomDocument_, std::make_pair(-1, RectF()));

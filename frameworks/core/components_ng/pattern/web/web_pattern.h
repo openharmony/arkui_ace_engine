@@ -994,6 +994,7 @@ public:
     RefPtr<WebAgentEventReporter> GetAgentEventReporter();
     // WebAgentEventReporter reference
     void ReportSelectedText(bool isRegister = false) override;
+    void UpdateTextSelectionHolderId();
     std::pair<int32_t, RectF> GetScrollAreaInfoFromDocument(int32_t id);
 
     // Data Detector funcs
