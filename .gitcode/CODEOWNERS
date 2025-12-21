@@ -39,6 +39,7 @@ adapter/ohos/capability/udmf/ @ArkUI_Event
 adapter/ohos/capability/window_connection_ng/ @arkuilayout1
 adapter/ohos/capability/window_connection/ @arkuilayout1
 adapter/ohos/capability/xcollie/ @arkui_framework_xnode
+adapter/ohos/entrance/ace_translate_manager.cpp @arkui_framework_xnode
 adapter/ohos/entrance/ace_ability.cpp @arkui_framework_xnode
 adapter/ohos/entrance/ace_ability.h @arkui_framework_xnode
 adapter/ohos/entrance/ace_application_info.cpp @arkui_framework_xnode
@@ -1867,6 +1868,7 @@ frameworks/core/animation/test/ @arkuicodepulse
 frameworks/core/BUILD.gn @arkui_architecture
 frameworks/core/common/ace_application_info.cpp @arkui_framework_xnode
 frameworks/core/common/ace_application_info.h @arkui_framework_xnode
+frameworks/core/common/ace_translate_manager.h @arkui_framework_xnode
 frameworks/core/common/ace_engine.cpp @arkui_framework_xnode
 frameworks/core/common/ace_engine_ext.cpp @arkui_framework_xnode
 frameworks/core/common/ace_engine_ext.h @arkui_framework_xnode

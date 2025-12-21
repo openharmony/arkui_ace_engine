@@ -3896,7 +3896,12 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-visibleInfoHasNoTopNavNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
-        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, { true, true, true });
+        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, { true, true, true, true });
+        DumpLog::GetInstance().Print(root->ToString());
+    } else if (params[0] == "-visibleInfoHasNoTopNavNodeWithoutWeb") {
+        auto root = JsonUtil::CreateSharedPtrJson(true);
+        GetAppInfo(root);
+        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, { true, true, true, false });
         DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-infoOfRootNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
