@@ -51,7 +51,7 @@ bool WaterFlowSegmentLayoutBase::IsSectionValid(const RefPtr<WaterFlowLayoutInfo
         std::string subErrorType = "Id = " + std::to_string(host->GetAccessibilityId()) +
                                     ", Sections number = " + std::to_string(childrenCnt) +
                                     ", LazyForEach/Repeat number =" + std::to_string(info->segmentTails_.back() + 1);
-        EventReport::ReportScrollableErrorEvent("WaterFlow", ScrollableErrorType::CHILDREN_COUNT_DISMATDH,
+        EventReport::ReportScrollableErrorEvent("WaterFlow", ScrollableErrorType::CHILDREN_COUNT_DISMATCH,
             subErrorType);
         info->SetReportedHostId(hostId);
         return false;

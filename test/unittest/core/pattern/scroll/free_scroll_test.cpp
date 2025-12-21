@@ -302,6 +302,24 @@ TEST_F(FreeScrollTest, EnableScroll001)
 }
 
 /**
+ * @tc.name: FreeScroll002
+ * @tc.desc: Test scroll enabled
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, EnableScroll002)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ WIDTH, HEIGHT * 2 });
+    CreateScrollDone();
+    EXPECT_TRUE(pattern_->scrollBar2d_->vertical_->canOverScrollWithDelta_ != nullptr);
+    EXPECT_TRUE(pattern_->scrollBar2d_->vertical_->reachBarEdgeOverScroll_ != nullptr);
+    EXPECT_TRUE(pattern_->scrollBar2d_->horizontal_->canOverScrollWithDelta_ != nullptr);
+    EXPECT_TRUE(pattern_->scrollBar2d_->horizontal_->reachBarEdgeOverScroll_ != nullptr);
+}
+
+/**
  * @tc.name: InitialOffset001
  * @tc.desc: Test Scroll with Axis::FREE
  * @tc.type: FUNC

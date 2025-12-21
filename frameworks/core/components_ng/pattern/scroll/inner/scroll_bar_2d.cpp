@@ -29,8 +29,8 @@ void ScrollBar2D::InitGestures(ScrollBar& bar, Axis axis)
     auto scrollCallback = [weak = WeakClaim(&pattern_), axis](double offset, int32_t source, bool isMouseWheelScroll) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        pattern->FreeScrollBy(axis == Axis::VERTICAL ? OffsetF { 0.0f, offset } : OffsetF { offset, 0.0f });
-        return true;
+        const OffsetF scrollOffset = axis == Axis::VERTICAL ? OffsetF { 0.0f, offset } : OffsetF { offset, 0.0f };
+        return pattern->FreeScrollBy(scrollOffset, true);
     };
     bar.SetScrollPositionCallback(std::move(scrollCallback));
     auto scrollEnd = [weak = WeakClaim(&pattern_)]() {
@@ -39,6 +39,19 @@ void ScrollBar2D::InitGestures(ScrollBar& bar, Axis axis)
         pattern->OnScrollEndCallback();
     };
     bar.SetScrollEndCallback(std::move(scrollEnd));
+    auto overScrollWithDelta = [weak = WeakClaim(&pattern_), axis](double delta) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        return pattern->FreeOverScrollWithDelta(axis, delta);
+    };
+    bar.SetCanOverScrollWithDeltaFunc(overScrollWithDelta);
+    auto reachBarEdgeOverScroll = [weak = WeakClaim(&pattern_), axis](double velocity) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        OffsetF velocity2D = axis == Axis::VERTICAL ?  OffsetF { 0.0f, velocity } : OffsetF { velocity, 0.0f };
+        pattern->ProcessFreeScrollOverDrag(velocity2D);
+    };
+    bar.SetReachBarEdgeOverScroll(reachBarEdgeOverScroll);
 
     auto gestureHub = pattern_.GetGestureHub();
     CHECK_NULL_VOID(gestureHub);

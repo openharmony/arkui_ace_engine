@@ -410,7 +410,7 @@ public:
     {
         return {};
     }
-    virtual bool FreeScrollBy(const OffsetF& delta)
+    virtual bool FreeScrollBy(const OffsetF& delta, bool canOverScroll = false)
     {
         return false;
     }
