@@ -2898,6 +2898,17 @@ void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
     WebModelStatic::SetEnableImageAnalyzer(frameNode, convValue.value_or(true));
 #endif // WEB_SUPPORTED
 }
+
+void SetEnableAutoFillImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    WebModelStatic::SetEnableAutoFill(frameNode, convValue.value_or(true));
+#endif // WEB_SUPPORTED
+}
 void SetOnMicrophoneCaptureStateChangeImpl(Ark_NativePointer node,
                                            const Opt_OnMicrophoneCaptureStateChangeCallback* value)
 {
@@ -3083,6 +3094,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
         WebAttributeModifier::SetOnTextSelectionChangeImpl,
         WebAttributeModifier::SetEnableImageAnalyzerImpl,
+        WebAttributeModifier::SetEnableAutoFillImpl,
         WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
         WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,

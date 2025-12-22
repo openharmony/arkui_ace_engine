@@ -934,10 +934,14 @@ typedef struct WrappedBuilderPeer* Ark_WrappedBuilder;
 typedef struct Opt_WrappedBuilder Opt_WrappedBuilder;
 typedef struct Array_AbilityInfo Array_AbilityInfo;
 typedef struct Opt_Array_AbilityInfo Opt_Array_AbilityInfo;
+typedef struct Array_AcceptableFileType Array_AcceptableFileType;
+typedef struct Opt_Array_AcceptableFileType Opt_Array_AcceptableFileType;
 typedef struct Array_AlertDialogButtonOptions Array_AlertDialogButtonOptions;
 typedef struct Opt_Array_AlertDialogButtonOptions Opt_Array_AlertDialogButtonOptions;
 typedef struct Array_Animation Array_Animation;
 typedef struct Opt_Array_Animation Opt_Array_Animation;
+typedef struct Array_Array_AcceptableFileType Array_Array_AcceptableFileType;
+typedef struct Opt_Array_Array_AcceptableFileType Opt_Array_Array_AcceptableFileType;
 typedef struct Array_AnimationPropertyType Array_AnimationPropertyType;
 typedef struct Opt_Array_AnimationPropertyType Opt_Array_AnimationPropertyType;
 typedef struct Array_Array_String Array_Array_String;
@@ -1814,6 +1818,8 @@ typedef struct WorkerEventListener WorkerEventListener;
 typedef struct Opt_WorkerEventListener Opt_WorkerEventListener;
 typedef struct Ark_AccessibilityActionOptions Ark_AccessibilityActionOptions;
 typedef struct Opt_AccessibilityActionOptions Opt_AccessibilityActionOptions;
+typedef struct Ark_AcceptableFileType Ark_AcceptableFileType;
+typedef struct Opt_AcceptableFileType Opt_AcceptableFileType;
 typedef struct Ark_AccessibilityOptions Ark_AccessibilityOptions;
 typedef struct Opt_AccessibilityOptions Opt_AccessibilityOptions;
 typedef struct Ark_AdsBlockedDetails Ark_AdsBlockedDetails;
@@ -9399,6 +9405,15 @@ typedef struct Opt_Array_AbilityInfo {
     Ark_Tag tag;
     Array_AbilityInfo value;
 } Opt_Array_AbilityInfo;
+typedef struct Array_AcceptableFileType {
+    /* kind: ContainerType */
+    Ark_AcceptableFileType* array;
+    Ark_Int32 length;
+} Array_AcceptableFileType;
+typedef struct Opt_Array_AcceptableFileType {
+    Ark_Tag tag;
+    Array_AcceptableFileType value;
+} Opt_Array_AcceptableFileType;
 typedef struct Array_AlertDialogButtonOptions {
     /* kind: ContainerType */
     Ark_AlertDialogButtonOptions* array;
@@ -9417,6 +9432,15 @@ typedef struct Opt_Array_Animation {
     Ark_Tag tag;
     Array_Animation value;
 } Opt_Array_Animation;
+typedef struct Array_Array_AcceptableFileType {
+    /* kind: ContainerType */
+    Array_AcceptableFileType* array;
+    Ark_Int32 length;
+} Array_Array_AcceptableFileType;
+typedef struct Opt_Array_Array_AcceptableFileType {
+    Ark_Tag tag;
+    Array_Array_AcceptableFileType value;
+} Opt_Array_Array_AcceptableFileType;
 typedef struct Array_AnimationPropertyType {
     /* kind: ContainerType */
     Ark_AnimationPropertyType* array;
@@ -13717,6 +13741,15 @@ typedef struct Opt_AccessibilityActionOptions {
     Ark_Tag tag;
     Ark_AccessibilityActionOptions value;
 } Opt_AccessibilityActionOptions;
+typedef struct Ark_AcceptableFileType {
+    /* kind: Interface */
+    Ark_String mimeType;
+    Array_String acceptableType;
+} Ark_AcceptableFileType;
+typedef struct Opt_AcceptableFileType {
+    Ark_Tag tag;
+    Ark_AcceptableFileType value;
+} Opt_AcceptableFileType;
 typedef struct Ark_AccessibilityOptions {
     /* kind: Interface */
     Opt_Boolean accessibilityPreferred;
@@ -26463,6 +26496,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                      const Opt_TextSelectionChangeCallback* value);
     void (*setEnableImageAnalyzer)(Ark_NativePointer node,
                                    const Opt_Boolean* value);
+    void (*setEnableAutoFill)(Ark_NativePointer node,
+                              const Opt_Boolean* value);
     void (*setOnMicrophoneCaptureStateChange)(Ark_NativePointer node,
                                               const Opt_OnMicrophoneCaptureStateChangeCallback* value);
     void (*setOnCameraCaptureStateChange)(Ark_NativePointer node,
@@ -27494,6 +27529,11 @@ typedef struct GENERATED_ArkUIFileSelectorParamAccessor {
     Array_String (*getAcceptType)(Ark_FileSelectorParam peer);
     Ark_Boolean (*isCapture)(Ark_FileSelectorParam peer);
     Array_String (*getMimeTypes)(Ark_FileSelectorParam peer);
+    Ark_String (*getSuggestedName)(Ark_FileSelectorParam peer);
+    Ark_String (*getDefaultPath)(Ark_FileSelectorParam peer);
+    Array_String (*getDescriptions)(Ark_FileSelectorParam peer);
+    Ark_Boolean (*isAcceptAllOptionExcluded)(Ark_FileSelectorParam peer);
+    Array_Array_AcceptableFileType (*getAcceptableFileTypes)(Ark_FileSelectorParam peer);
 } GENERATED_ArkUIFileSelectorParamAccessor;
 
 typedef struct GENERATED_ArkUIFileSelectorResultAccessor {

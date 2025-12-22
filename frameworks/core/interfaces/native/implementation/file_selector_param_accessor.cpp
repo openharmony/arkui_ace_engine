@@ -63,6 +63,62 @@ Array_String GetMimeTypesImpl(Ark_FileSelectorParam peer)
     auto mimeTypes = peer->handler->GetMimeType();
     return Converter::ArkValue<Array_String>(mimeTypes, Converter::FC);
 }
+Ark_String GetSuggestedNameImpl(Ark_FileSelectorParam peer)
+{
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->handler->GetDefaultFileName();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
+}
+Ark_String GetDefaultPathImpl(Ark_FileSelectorParam peer)
+{
+    std::string result = "";
+    CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->handler->GetDefaultPath();
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
+}
+Array_String GetDescriptionsImpl(Ark_FileSelectorParam peer)
+{
+    CHECK_NULL_RETURN(peer && peer->handler, {});
+    auto descriptions = peer->handler->GetDescriptions();
+    return Converter::ArkValue<Array_String>(descriptions, Converter::FC);
+}
+Ark_Boolean IsAcceptAllOptionExcludedImpl(Ark_FileSelectorParam peer)
+{
+    CHECK_NULL_RETURN(peer && peer->handler, false);
+    return Converter::ArkValue<Ark_Boolean>(peer->handler->IsAcceptAllOptionExcluded());
+}
+Array_Array_AcceptableFileType GetAcceptableFileTypesImpl(Ark_FileSelectorParam peer)
+{
+    CHECK_NULL_RETURN(peer && peer->handler, {});
+    using AcceptableFileType = OHOS::Ace::AcceptFileType;
+    using TypeList = std::vector<AcceptableFileType>;
+    using TypeLists = std::vector<TypeList>;
+    auto accepts = peer->handler->GetAccepts();
+    auto ctx = Converter::FC;
+    auto convertType = [ctx](const AcceptableFileType& t) -> Ark_AcceptableFileType {
+        return {
+            .mimeType = Converter::ArkValue<Ark_String>(t.mimeType, ctx),
+            .acceptableType = Converter::ArkValue<Array_String>(t.acceptType, ctx),
+        };
+    };
+    auto convertTypeList = [&convertType](const TypeList& src) {
+        std::vector<Ark_AcceptableFileType> arkTypeList(src.size());
+        std::transform(src.begin(), src.end(), arkTypeList.begin(), [&convertType](const AcceptableFileType& src) {
+            return convertType(src);
+        });
+        return arkTypeList;
+    };
+    auto convertTypeLists = [&convertTypeList](const TypeLists& src) {
+        std::vector<std::vector<Ark_AcceptableFileType>> arkTypeLists(src.size());
+        std::transform(src.begin(), src.end(), arkTypeLists.begin(), [&convertTypeList](const TypeList& src) {
+            return convertTypeList(src);
+        });
+        return arkTypeLists;
+    };
+    auto acceptableFileTypes = convertTypeLists(accepts);
+    return Converter::ArkValue<Array_Array_AcceptableFileType>(acceptableFileTypes, Converter::FC);
+}
 } // FileSelectorParamAccessor
 const GENERATED_ArkUIFileSelectorParamAccessor* GetFileSelectorParamAccessor()
 {
@@ -75,6 +131,11 @@ const GENERATED_ArkUIFileSelectorParamAccessor* GetFileSelectorParamAccessor()
         FileSelectorParamAccessor::GetAcceptTypeImpl,
         FileSelectorParamAccessor::IsCaptureImpl,
         FileSelectorParamAccessor::GetMimeTypesImpl,
+        FileSelectorParamAccessor::GetSuggestedNameImpl,
+        FileSelectorParamAccessor::GetDefaultPathImpl,
+        FileSelectorParamAccessor::GetDescriptionsImpl,
+        FileSelectorParamAccessor::IsAcceptAllOptionExcludedImpl,
+        FileSelectorParamAccessor::GetAcceptableFileTypesImpl,
     };
     return &FileSelectorParamAccessorImpl;
 }

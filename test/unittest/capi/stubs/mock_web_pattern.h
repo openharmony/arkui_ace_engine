@@ -105,6 +105,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableSelectedDataDetector, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ZoomControlAccess, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, GestureFocusMode, GestureFocusMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableAutoFill, bool);
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
@@ -254,6 +255,7 @@ private:
     void OnBackToTopUpdate(bool isBackToTop) {}
     void OnEnableSelectedDataDetectorUpdate(bool enable) {}
     void OnZoomControlAccessUpdate(bool zoomControlAccess) {}
+    void OnEnableAutoFillUpdate(bool enable) {}
     void OnGestureFocusModeUpdate(GestureFocusMode mode) {}
     void OnEnableImageAnalyzerUpdate(bool isEnabled) {}
 
