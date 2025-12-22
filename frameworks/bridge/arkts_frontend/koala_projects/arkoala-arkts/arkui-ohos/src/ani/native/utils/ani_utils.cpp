@@ -334,7 +334,7 @@ bool AniUtils::GetBigIntValue(ani_env* env, ani_object object, int64_t& longValu
     CHECK_NULL_RETURN(env, false);
     auto status = ANI_OK;
     ani_long value;
-    if ((status = env->Object_CallMethodByName_Long(object, "unboxed", ":l", &value)) != ANI_OK) {
+    if ((status = env->Object_CallMethodByName_Long(object, "toLong", ":l", &value)) != ANI_OK) {
         return false;
     }
     longValue = value;
@@ -368,7 +368,7 @@ bool AniUtils::GetOptionalDouble(ani_env* env, ani_ref value, double& result)
         return false;
     }
     ani_double aniResult;
-    if (env->Object_CallMethodByName_Double(static_cast<ani_object>(value), "unboxed", ":d", &aniResult) != ANI_OK) {
+    if (env->Object_CallMethodByName_Double(static_cast<ani_object>(value), "toDouble", ":d", &aniResult) != ANI_OK) {
         return false;
     }
     result = static_cast<double>(aniResult);

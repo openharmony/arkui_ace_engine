@@ -44,17 +44,17 @@ export class Size_serializer {
 export class ColorMetrics_serializer {
     public static write(buffer: SerializerBase, value: ColorMetrics): void {
         let valueSerializer : SerializerBase = buffer
-        const valueHolderForRed_  = value.red_
+        const valueHolderForRed_  = value.red
         valueSerializer.writeInt32(valueHolderForRed_)
-        const valueHolderForGreen_  = value.green_
+        const valueHolderForGreen_  = value.green
         valueSerializer.writeInt32(valueHolderForGreen_)
-        const valueHolderForBlue_  = value.blue_
+        const valueHolderForBlue_  = value.blue
         valueSerializer.writeInt32(valueHolderForBlue_)
-        const valueHolderForAlpha_  = value.alpha_
+        const valueHolderForAlpha_  = value.alpha
         valueSerializer.writeInt32(valueHolderForAlpha_)
-        const valueHolderForColorSpace_  = value.colorSpace_
+        const valueHolderForColorSpace_  = value.getColorSpace()
         valueSerializer.writeInt32(valueHolderForColorSpace_.valueOf())
-        const valueHolderForResourceId_  = value.resourceId_
+        const valueHolderForResourceId_  = value.getResourceId()
         valueSerializer.writeInt32(valueHolderForResourceId_)
     }
     public static read(buffer: DeserializerBase): ColorMetrics {
@@ -65,7 +65,8 @@ export class ColorMetrics_serializer {
         const alpha_TmpResult : int32 = valueDeserializer.readInt32()
         const colorSpace_TmpResult : ColorSpace = ColorSpace.fromValue(valueDeserializer.readInt32())
         const resourceId_TmpResult : int32 = valueDeserializer.readInt32()
-        let value : ColorMetrics = ({red_: red_TmpResult, green_: green_TmpResult, blue_: blue_TmpResult, alpha_: alpha_TmpResult, colorSpace_: colorSpace_TmpResult, resourceId_: resourceId_TmpResult} as ColorMetrics)
+        let value : ColorMetrics = new ColorMetrics(red_TmpResult,green_TmpResult, blue_TmpResult, alpha_TmpResult)
+        value.setResourceId(resourceId_TmpResult)
         return value
     }
 }

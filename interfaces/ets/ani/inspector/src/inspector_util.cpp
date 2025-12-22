@@ -20,7 +20,7 @@ namespace OHOS::Ace {
 void AniThrow(ani_env *env, const std::string &errMsg, int32_t errorCode)
 {
     ani_class errCls;
-    if (ANI_OK != env->FindClass("L@ohos/base/BusinessError", &errCls)) {
+    if (ANI_OK != env->FindClass("@ohos.base.BusinessError", &errCls)) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "FindClass BusinessError failed.");
         return;
     }

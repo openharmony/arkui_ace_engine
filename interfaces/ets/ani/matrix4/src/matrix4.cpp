@@ -39,9 +39,9 @@ namespace {
 ani_class g_matrix4Class[2] = { nullptr };
 enum class MatrixClassName : int32_t {
     TRANSIT_INNER = 0, // "@ohos.matrix4.matrix4.Matrix4TransitInner"
-    ESCOMPAT = 1,      // "escompat.Array"
+    ESCOMPAT = 1,      // "std.core.Array"
 };
-const char* g_matrixClassName[2] = { "@ohos.matrix4.matrix4.Matrix4TransitInner", "escompat.Array" };
+const char* g_matrixClassName[2] = { "@ohos.matrix4.matrix4.Matrix4TransitInner", "std.core.Array" };
 ani_class GetOrCreateMatrix4Class(ani_env* env, MatrixClassName matrixClassName)
 
 {
@@ -100,7 +100,7 @@ ani_method GetOrCreateToIntMethod(ani_env* env)
     }
 
     ani_method result;
-    if (ANI_OK != env->Class_FindMethod(intClass, "unboxed", nullptr, &result)) {
+    if (ANI_OK != env->Class_FindMethod(intClass, "toInt", nullptr, &result)) {
         return nullptr;
     }
 
@@ -137,7 +137,7 @@ ani_method GetOrCreateArrayGetMethod(ani_env* env)
     }
 
     ani_class arrayClass;
-    if (env->FindClass("escompat.Array", &arrayClass) != ANI_OK) {
+    if (env->FindClass("std.core.Array", &arrayClass) != ANI_OK) {
         return nullptr;
     }
 
@@ -230,7 +230,7 @@ Matrix4 ConvertToMatrixArray([[maybe_unused]] ani_env* env, [[maybe_unused]] ani
             }
             ani_double unboxedDouble {};
             if (env->Object_CallMethodByName_Double(
-                reinterpret_cast<ani_object>(value), "unboxed", ":d", &unboxedDouble) != ANI_OK) {
+                reinterpret_cast<ani_object>(value), "toDouble", ":d", &unboxedDouble) != ANI_OK) {
                 return result;
             }
             auto ret = static_cast<double>(unboxedDouble);

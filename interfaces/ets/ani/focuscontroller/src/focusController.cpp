@@ -30,7 +30,7 @@ static void AniThrow(ani_env* env, const std::string& errMsg, int32_t errorCode)
 {
     CHECK_NULL_VOID(env);
     ani_class errCls;
-    if (ANI_OK != env->FindClass("L@ohos/base/BusinessError", &errCls)) {
+    if (ANI_OK != env->FindClass("@ohos.base.BusinessError", &errCls)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "FindClass BusinessError failed.");
         return;
     }
@@ -92,7 +92,7 @@ static bool GetBooleanValue(ani_env* env, ani_object object, bool& value)
         return false;
     }
     ani_boolean aniValue;
-    if (ANI_OK != env->Object_CallMethodByName_Boolean(object, "unboxed", ":z", &aniValue)) {
+    if (ANI_OK != env->Object_CallMethodByName_Boolean(object, "toBoolean", ":z", &aniValue)) {
         return false;
     }
     value = static_cast<bool>(aniValue);

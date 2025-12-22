@@ -1124,13 +1124,13 @@ void ParseOverlayOptions(ani_env* env, ani_object options, AniOverlayOptions& op
         ani_ref x;
         if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "x", &x)) {
             ani_double param_value;
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(x), "unboxed", ":d", &param_value);
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(x), "toDouble", ":d", &param_value);
             opt.x = static_cast<float>(param_value);
         }
         ani_ref y;
         if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "y", &y)) {
             ani_double param_value;
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(y), "unboxed", ":d", &param_value);
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(y), "toDouble", ":d", &param_value);
             opt.y = static_cast<float>(param_value);
         }
     }
@@ -1779,13 +1779,24 @@ void SetTouchEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, 
 
 ani_array ResolveUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
 {
-    ani_array_int resultArray = nullptr;
+    ani_array resultArray = nullptr;
     const auto* modifier = GetNodeAniModifier();
     CHECK_NULL_RETURN(modifier, resultArray);
     std::vector<int32_t> instance;
     modifier->getCommonAniModifier()->resolveUIContext(instance);
-    env->Array_New_Int(instance.size(), &resultArray);
-    auto status = env->Array_SetRegion_Int(resultArray, 0, instance.size(), instance.data());
+    ani_ref undefined {};
+    auto status = env->GetUndefined(&undefined);
+    auto arraySize = instance.size();
+    env->Array_New(arraySize, undefined, &resultArray);
+    ani_class intCls {};
+    ani_method intCtor {};
+    status = env->FindClass("std.core.Int", &intCls);
+    status = env->Class_FindMethod(intCls, "<ctor>","i:", &intCtor);
+    ani_object result {};
+    for (int i = 0; i < arraySize; ++i) {
+        status = env->Object_New(intCls, intCtor, &result, ani_int(instance[i]));
+        status = env->Array_Set(resultArray, i, result);
+    }
     return resultArray;
 }
 } // namespace OHOS::Ace::Ani

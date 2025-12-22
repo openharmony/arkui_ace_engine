@@ -128,7 +128,7 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
     content?: () => void
 ): [() => void, number] {
     const instantiateImpl = /** @memo */ (): void => {
-        BaseCustomComponent._invokeImpl(undefined, factory, options, undefined, content);
+        BaseCustomComponent._invokeImpl<T, T_Options>(undefined, factory, options, undefined, content);
     };
 
     const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
@@ -355,16 +355,18 @@ export function registerCreateStaticObservedCallback(): void {
     registerCallback.invoke(makeObservedcallback);
 }
 
+abstract class DummyBaseCustom extends BaseCustomComponent<undefined> {}
+
 export function registerCompatibleStaticComponentCallback(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerCompatibleStaticComponentCallback');
-    registerCallback.invoke(compatibleStaticComponent);
+    registerCallback.invoke(compatibleStaticComponent<DummyBaseCustom, undefined>);
 }
 
 export function registerMakeBuilderParameterStaticProxy(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerMakeBuilderParameterStaticProxy');
-    registerCallback.invoke(makeBuilderParameterStaticProxy);
+    registerCallback.invoke(makeBuilderParameterStaticProxy<Object>);
 }
 
 export function registerTransferCompatibleBuilderCallback(): void {
@@ -1034,7 +1036,7 @@ function transferCompatibleDynamicBuilder(builder: (...args: FixedArray<Any>) =>
 export function registerCreateCompatibleStaticState(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerCreateCompatibleStaticState');
-    registerCallback.invoke(createCompatibleStaticState);
+    registerCallback.invoke(createCompatibleStaticState<undefined>);
 }
 
 function createCompatibleStaticState<T>(dynamicValue: Object): ProvideDecoratedVariable<T> {

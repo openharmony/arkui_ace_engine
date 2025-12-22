@@ -10,7 +10,7 @@ declare namespace uiObserver {
     export class DensityInfo {
         density: double;
     }
-    type Callback<T,V = void> = (data: T) => V
+    type Callback_<T,V = void> = (data: T) => V
       
     export class UIObserver {
         on(type: string, callback: object): void;
@@ -19,64 +19,64 @@ declare namespace uiObserver {
         on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
         off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
 
-        onScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
-        offScrollEvent(options: ObserverOptions, callback: Callback<ScrollEventInfo>): void;
-        onScrollEvent(callback: Callback<ScrollEventInfo>): void;
-        offScrollEvent(callback: Callback<ScrollEventInfo>): void;
+        onScrollEvent(options: ObserverOptions, callback: Callback_<ScrollEventInfo>): void;
+        offScrollEvent(options: ObserverOptions, callback: Callback_<ScrollEventInfo>): void;
+        onScrollEvent(callback: Callback_<ScrollEventInfo>): void;
+        offScrollEvent(callback: Callback_<ScrollEventInfo>): void;
 
-        onNavDestinationUpdate(callback: Callback<NavDestinationInfo>): void;
+        onNavDestinationUpdate(callback: Callback_<NavDestinationInfo>): void;
 
-        offNavDestinationUpdate(callback?: Callback<NavDestinationInfo>): void;
+        offNavDestinationUpdate(callback?: Callback_<NavDestinationInfo>): void;
         onNavDestinationUpdate(
             options: NavDestinationSwitchObserverOptions,
-            callback: Callback<NavDestinationInfo>
+            callback: Callback_<NavDestinationInfo>
         ): void;
         offNavDestinationUpdate(
             options: NavDestinationSwitchObserverOptions,
-            callback?: Callback<NavDestinationInfo>
+            callback?: Callback_<NavDestinationInfo>
         ): void;
 
-        onRouterPageUpdate(callback: Callback<RouterPageInfo>): void;
-        offRouterPageUpdate(callback?: Callback<RouterPageInfo>): void;
+        onRouterPageUpdate(callback: Callback_<RouterPageInfo>): void;
+        offRouterPageUpdate(callback?: Callback_<RouterPageInfo>): void;
 
-        onNavDestinationSwitch(callback: Callback<NavDestinationSwitchInfo>): void;
-        offNavDestinationSwitch(callback?: Callback<NavDestinationSwitchInfo>): void;
+        onNavDestinationSwitch(callback: Callback_<NavDestinationSwitchInfo>): void;
+        offNavDestinationSwitch(callback?: Callback_<NavDestinationSwitchInfo>): void;
         onNavDestinationSwitch(
             observerOptions: NavDestinationSwitchObserverOptions,
-            callback: Callback<NavDestinationSwitchInfo>
+            callback: Callback_<NavDestinationSwitchInfo>
           ): void;
         offNavDestinationSwitch(
             observerOptions: NavDestinationSwitchObserverOptions,
-            callback?: Callback<NavDestinationSwitchInfo>
+            callback?: Callback_<NavDestinationSwitchInfo>
           ): void;
 
-        onTabChange(callback: Callback<TabContentInfo>): void;
-        offTabChange(callback?: Callback<TabContentInfo>): void;
-        onTabChange(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
-        offTabChange(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
+        onTabChange(callback: Callback_<TabContentInfo>): void;
+        offTabChange(callback?: Callback_<TabContentInfo>): void;
+        onTabChange(options: ObserverOptions, callback: Callback_<TabContentInfo>): void;
+        offTabChange(options: ObserverOptions, callback?: Callback_<TabContentInfo>): void;
 
-        onTabContentUpdate(callback: Callback<TabContentInfo>): void;
-        offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
-        onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
-        offTabContentUpdate(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
+        onTabContentUpdate(callback: Callback_<TabContentInfo>): void;
+        offTabContentUpdate(callback?: Callback_<TabContentInfo>): void;
+        onTabContentUpdate(options: ObserverOptions, callback: Callback_<TabContentInfo>): void;
+        offTabContentUpdate(options: ObserverOptions, callback?: Callback_<TabContentInfo>): void;
 
-        onDensityUpdate(callback: Callback<DensityInfo>): void;
-        offDensityUpdate(callback?: Callback<DensityInfo>): void;
+        onDensityUpdate(callback: Callback_<DensityInfo>): void;
+        offDensityUpdate(callback?: Callback_<DensityInfo>): void;
 
-        onWillDraw(callback: Callback<void>): void;
-        offWillDraw(callback?: Callback<void>): void;
+        onWillDraw(callback: Callback_<void>): void;
+        offWillDraw(callback?: Callback_<void>): void;
 
-        onDidLayout(callback: Callback<void>): void;
-        offDidLayout(callback?: Callback<void>): void;
+        onDidLayout(callback: Callback_<void>): void;
+        offDidLayout(callback?: Callback_<void>): void;
 
-        onRouterPageSizeChange(callback: Callback<RouterPageInfo>): void;
-        offRouterPageSizeChange(callback?: Callback<RouterPageInfo>): void;
+        onRouterPageSizeChange(callback: Callback_<RouterPageInfo>): void;
+        offRouterPageSizeChange(callback?: Callback_<RouterPageInfo>): void;
 
-        onNavDestinationSizeChange(callback: Callback<NavDestinationInfo>): void;
-        offNavDestinationSizeChange(callback?: Callback<NavDestinationInfo>): void;
+        onNavDestinationSizeChange(callback: Callback_<NavDestinationInfo>): void;
+        offNavDestinationSizeChange(callback?: Callback_<NavDestinationInfo>): void;
 
-        onNavDestinationSizeChangeByUniqueId(navigationUniqueId: int, callback: Callback<NavDestinationInfo>): void;
-        offNavDestinationSizeChangeByUniqueId(navigationUniqueId: int, callback?: Callback<NavDestinationInfo>): void;
+        onNavDestinationSizeChangeByUniqueId(navigationUniqueId: int, callback: Callback_<NavDestinationInfo>): void;
+        offNavDestinationSizeChangeByUniqueId(navigationUniqueId: int, callback?: Callback_<NavDestinationInfo>): void;
     }
     export function createUIObserver(id: number): UIObserver;
 

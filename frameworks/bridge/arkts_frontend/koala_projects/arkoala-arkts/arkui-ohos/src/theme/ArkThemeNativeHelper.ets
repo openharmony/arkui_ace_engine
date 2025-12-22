@@ -65,7 +65,7 @@ export class ArkThemeNativeHelper {
         }
     }
     public static convertThemeToColorArray(theme: Theme | CustomTheme | undefined, isDark: boolean): ResourceColor[] {
-        const srcTheme: Theme = { colors: new ArkColorsImpl() };
+        const srcTheme: Theme = { colors: new ArkColorsImpl(), darkColors: new ArkColorsImpl()};
         if (theme instanceof Theme) {
             srcTheme.colors = isDark? theme.darkColors : theme.colors;
         } else if (theme instanceof CustomTheme) {

@@ -258,7 +258,7 @@ import { ArkPasteButtonComponent, PasteButtonAttribute } from "./../../component
 import { ArkSaveButtonComponent, SaveButtonAttribute } from "./../../component/saveButton"
 import { ArkSecurityComponentMethodComponent, SecurityComponentMethod } from "./../../component/securityComponent"
 import { default as image } from "@ohos.multimedia.image"
-import { DrawableDescriptor } from "../../framework/ohos.arkui.drawableDescriptor"
+import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
 import { ImageAIOptions, DataPanelOptions, GaugeOptions, PatternLockController, TextTimerOptions, TextClockOptions } from "../../framework"
 import { ArkUIAniModule } from 'arkui.ani';
 import { KPointer } from '@koalaui/interop';

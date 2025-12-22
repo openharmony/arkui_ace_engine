@@ -16,7 +16,6 @@
 import { IObserve, OBSERVE } from '../decorator';
 import { IObservedObject, RenderIdType } from '../decorator';
 import { IBindingSource, ITrackedDecoratorRef } from './mutableStateMeta';
-import { TypeChecker } from '#components';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { NullableObject } from './types';
 import { StateManagerImpl } from '@koalaui/runtime';

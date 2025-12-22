@@ -1006,7 +1006,7 @@ bool ArktsFrontend::GetStateByUrlFromDynamicExtender(const std::string& url, std
     }
     ani_static_method getStateByUrlFromDynamicMethod;
     const char* methodName = "getStateByUrlFromDynamic";
-    const char* methodMangling = "iC{std.core.String}:C{escompat.Array}";
+    const char* methodMangling = "iC{std.core.String}:C{std.core.Array}";
     if ((status = env->Class_FindStaticMethod(
         routerUtilCls, methodName, methodMangling, &getStateByUrlFromDynamicMethod)) != ANI_OK) {
         LOGE("AceRouter Cannot find method: %{public}s, status:%{public}d", methodName, status);

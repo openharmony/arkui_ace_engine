@@ -19,8 +19,6 @@
 */
 import { IMutableStateMeta } from '../decorator';
 import { IBackingValue } from './iBackingValue';
-import { TypeChecker } from '#components';
-import { StateMgmtTool } from '#stateMgmtTool';
 import { STATE_MGMT_FACTORY } from '../decorator';
 import { ObserveSingleton } from './observeSingleton';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';

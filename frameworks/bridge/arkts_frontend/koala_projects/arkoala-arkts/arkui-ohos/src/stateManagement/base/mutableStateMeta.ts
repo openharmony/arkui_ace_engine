@@ -21,6 +21,7 @@ import { ObserveSingleton } from './observeSingleton';
 import { RenderIdType } from '../decorator';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { StateUpdateLoop } from './stateUpdateLoop';
+import { StateTracker } from '../tests/lib/stateTracker';
 import { StateMgmtDFX } from '../tools/stateMgmtDFX';
 
 class MutableStateMetaBase {
@@ -42,6 +43,32 @@ export interface ITrackedDecoratorRef {
     weakThis: WeakRef<ITrackedDecoratorRef>;
     reverseBindings: Set<WeakRef<IBindingSource>>;
     clearReverseBindings(): void;
+}
+
+// TrackedMutableStateMeta class used by unit test framework only
+export class TrackedMutableStateMeta extends MutableStateMeta {
+    constructor(info: string, metaDependency?: MutableState<int32>) {
+        super(info, metaDependency);
+    }
+
+    public addRef(): void {
+        if (
+            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingMonitor ||
+            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingComputed ||
+            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingPersistentStorage
+        ) {
+        } else {
+            StateTracker.increaseRefCnt();
+        }
+        super.addRef();
+    }
+
+    public fireChange(): void {
+        if (this.shouldFireChange()) {
+            StateTracker.increaseFireChangeCnt();
+        }
+        super.fireChange();
+    }
 }
 
 /**
