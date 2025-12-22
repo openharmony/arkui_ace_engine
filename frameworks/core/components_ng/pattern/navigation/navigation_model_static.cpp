@@ -994,4 +994,9 @@ void NavigationModelStatic::SetEnableToolBarAdaptation(FrameNode* frameNode, boo
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, EnableToolBarAdaptation, enable, frameNode);
 }
+
+void NavigationModelStatic::UpdateDefineColor(FrameNode* frameNode, bool isDefined)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DefinedDividerColor, isDefined, frameNode);
+}
 } // namespace OHOS::Ace::NG

@@ -18,6 +18,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/navigation_model_static.h"
+#include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
@@ -650,6 +651,29 @@ void SetIgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
     }
     NavigationModelStatic::SetIgnoreLayoutSafeArea(frameNode, opts);
 }
+
+void SetDividerImpl(Ark_NativePointer node, const Opt_NavigationDividerStyle* style)
+{
+    CHECK_NULL_VOID(style);
+    auto frameNode = reinterpret_cast<NavigationGroupNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (style->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        NavigationModelNG::UpdateDividerVisibility(frameNode, false);
+        return;
+    }
+    NavigationModelNG::UpdateDividerVisibility(frameNode, true);
+    auto color = Converter::OptConvert<Color>(style->value.color);
+    if (color.has_value()) {
+        NavigationModelStatic::UpdateDefineColor(frameNode, true);
+        NavigationModelNG::UpdateDividerColor(frameNode, color.value_or(Color()), nullptr);
+    } else {
+        NavigationModelStatic::UpdateDefineColor(frameNode, false);
+    }
+    auto startMargin = Converter::OptConvert<CalcDimension>(style->value.startMargin).value_or(Dimension(0.0f));
+    NavigationModelNG::UpdateDividerStartMargin(frameNode, startMargin, nullptr);
+    auto endMargin = Converter::OptConvert<CalcDimension>(style->value.endMargin).value_or(Dimension(0.0f));
+    NavigationModelNG::UpdateDividerEndMargin(frameNode, endMargin, nullptr);
+}
 } // namespace NavigationAttributeModifier
 
 const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
@@ -675,6 +699,7 @@ const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
         NavigationAttributeModifier::SetSystemBarStyleImpl,
         NavigationAttributeModifier::SetRecoverableImpl,
         NavigationAttributeModifier::SetEnableDragBarImpl,
+        NavigationAttributeModifier::SetDividerImpl,
         NavigationAttributeModifier::SetEnableModeChangeAnimationImpl,
         NavigationAttributeModifier::SetBackButtonIconImpl,
         NavigationAttributeModifier::SetTitleImpl,
