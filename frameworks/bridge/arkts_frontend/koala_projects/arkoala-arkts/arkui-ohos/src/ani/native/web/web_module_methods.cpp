@@ -285,6 +285,11 @@ static int32_t GetJavaScriptProxyProperty(ani_env* env, ani_object object, JavaS
 static void GetJavaScriptProxyFunc(ani_env* env, ani_vm* vm, ani_object object, ani_long node)
 {
     const auto* modifier = GetNodeAniModifier();
+
+    if (!modifier || !modifier->getWebAniModifier() || !env || !object) {
+        return;
+    }
+
     JavaScriptProxyProperyRef properyRef = { 0 };
     if (GetJavaScriptProxyProperty(env, object, properyRef) != 0) {
         return;
