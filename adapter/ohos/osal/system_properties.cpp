@@ -932,7 +932,7 @@ void SystemProperties::InitDeviceInfo(
     debugAutoUIEnabled_ = system::GetParameter(ENABLE_DEBUG_AUTOUI_KEY, "false") == "true";
     debugOffsetLogEnabled_ = system::GetParameter(ENABLE_DEBUG_OFFSET_LOG_KEY, "false") == "true";
     downloadByNetworkEnabled_ = system::GetParameter(ENABLE_DOWNLOAD_BY_NETSTACK_KEY, "true") == "true";
-    recycleImageEnabled_ = system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "true") == "true";
+    recycleImageEnabled_ = system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "false") == "true";
     animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
     pageTransitionFrzEnabled_ = system::GetBoolParameter("const.arkui.pagetransitionfreeze", false);
     forcibleLandscapeEnabled_ = system::GetBoolParameter("const.settings.forcible_landscape_enable", false);

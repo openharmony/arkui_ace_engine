@@ -17,6 +17,7 @@
 #include "core/components_ng/base/frame_node.h"
 
 #include "core/components_ng/base/node_render_status_monitor.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
@@ -706,6 +707,7 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node, bool needRem
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
         node->ProcessOffscreenTask();
+        node->ProcessOffscreenResource();
         node->MarkModifyDone();
         node->UpdateLayoutPropertyFlag();
         bool isActive = node->IsActive();
@@ -2754,6 +2756,7 @@ void FrameNode::RebuildRenderContextTree()
     if (pipeline && !pipeline->CheckThreadSafe()) {
         LOGW("RebuildRenderContextTree doesn't run on UI thread!");
     }
+    auto oldFrameChildren = std::move(frameChildren_);
     frameChildren_.clear();
     std::list<RefPtr<FrameNode>> children;
     // generate full children list, including disappear children.
@@ -2770,6 +2773,11 @@ void FrameNode::RebuildRenderContextTree()
     for (const auto& child : children) {
         frameChildren_.emplace(child);
     }
+
+    // Notify AttachToRenderTree / DetachFromRenderTree.
+    ProcessRenderTreeDiff(children, oldFrameChildren);
+    oldFrameChildren.clear();
+
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
     if (isDeleteRsNode_) {
@@ -2780,6 +2788,87 @@ void FrameNode::RebuildRenderContextTree()
         }
     }
     needSyncRenderTree_ = false;
+}
+
+void FrameNode::ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChildren,
+    const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& oldChildren)
+{
+    std::unordered_set<FrameNode*> oldChildrenSet;
+    for (const auto& item : oldChildren) {
+        auto child = item.Upgrade();
+        if (child) {
+            oldChildrenSet.emplace(AceType::RawPtr(child));
+        }
+    }
+    bool isOnMainTree = renderContext_->IsOnRenderTree();
+    for (const auto& item: newChildren) {
+        auto* childPtr = AceType::RawPtr(item);
+        if (oldChildrenSet.find(childPtr) == oldChildrenSet.end()) {
+            item->AttachToRenderTree(isOnMainTree);
+        } else {
+            oldChildrenSet.erase(childPtr);
+        }
+    }
+
+    for (auto* item : oldChildrenSet) {
+        item->DetachFromRenderTree(isOnMainTree);
+    }
+}
+
+void FrameNode::DetachFromRenderTree(bool isOnMainTree, bool recursive)
+{
+    if (!isOnMainTree) {
+        return;
+    }
+    auto currentState = renderContext_->IsOnRenderTree();
+    if (!currentState) {
+        return;
+    }
+    if (recursive) {
+        for (const auto& item : frameChildren_) {
+            auto child = item.Upgrade();
+            if (child) {
+                child->DetachFromRenderTree(isOnMainTree);
+            }
+        }
+    }
+    OnDetachFromMainRenderTree();
+}
+
+void FrameNode::AttachToRenderTree(bool isOnMainTree, bool recursive)
+{
+    if (!isOnMainTree) {
+        return;
+    }
+    auto currentState = renderContext_->IsOnRenderTree();
+    if (currentState) {
+        return;
+    }
+    OnAttachToMainRenderTree();
+    if (recursive) {
+        for (const auto& item : frameChildren_) {
+            auto child = item.Upgrade();
+            if (child) {
+                child->AttachToRenderTree(isOnMainTree);
+            }
+        }
+    }
+}
+
+void FrameNode::OnDetachFromMainRenderTree()
+{
+    pattern_->OnDetachFromMainRenderTree();
+}
+
+void FrameNode::OnAttachToMainRenderTree()
+{
+    pattern_->OnAttachToMainRenderTree();
+}
+
+void FrameNode::OnOffscreenProcessResource()
+{
+    UINode::OnOffscreenProcessResource();
+    pattern_->OnOffscreenProcessResource();
 }
 
 void FrameNode::MarkModifyDone()

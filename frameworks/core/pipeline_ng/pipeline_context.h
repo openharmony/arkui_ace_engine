@@ -1238,6 +1238,14 @@ public:
     }
 
     void SetEnableSwipeBack(bool isEnable) override;
+    void SetIsRecycleInvisibleImageMemory(bool isEnable) override
+    {
+        isRecycledInvisibleImageMemory_ = isEnable;
+    }
+    std::optional<bool> GetIsRecycleInvisibleImageMemory() const override
+    {
+        return isRecycledInvisibleImageMemory_;
+    }
 
     Offset GetHostParentOffsetToWindow() const
     {
@@ -1722,6 +1730,7 @@ private:
     std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
     std::shared_ptr<ResSchedClickOptimizer> clickOptimizer_;
     RefPtr<ContentChangeManager> contentChangeMgr_;
+    std::optional<bool> isRecycledInvisibleImageMemory_ = std::nullopt;
 };
 
 /**

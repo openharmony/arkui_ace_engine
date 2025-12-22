@@ -1839,6 +1839,10 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_SetImageRawDataCacheSize(value, this.instanceId_);
     }
 
+    public recycleInvisibleImageMemory(value: boolean): void {
+        ArkUIAniModule._Common_setIsRecycleInvisibleImageMemory(value ? 1 : 0, this.instanceId_);
+    }
+
     public requireDynamicSyncScene(id: string): Array<DynamicSyncScene> {
         const id_casted = id as (string);
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);

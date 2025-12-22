@@ -834,6 +834,12 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
     }
 
+    recycleInvisibleImageMemory(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().common.recycleInvisibleImageMemory(value, this.instanceId_);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
     getCursorController() {
         if (this.cursorController_ == null) {
             this.cursorController_ = new CursorController(this.instanceId_);

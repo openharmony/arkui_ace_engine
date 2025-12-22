@@ -1111,6 +1111,14 @@ void UINode::ProcessOffscreenTask(bool recursive)
     }
 }
 
+void UINode::ProcessOffscreenResource()
+{
+    OnOffscreenProcessResource();
+    for (const auto& child : GetChildren()) {
+        child->ProcessOffscreenResource();
+    }
+}
+
 void UINode::MovePosition(int32_t slot)
 {
     auto parentNode = parent_.Upgrade();
