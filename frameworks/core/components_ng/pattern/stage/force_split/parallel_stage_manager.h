@@ -120,7 +120,7 @@ private:
 
     void FirePageHideOnPushPage(RouterPageType newPageType, const RefPtr<FrameNode>& lastPage,
         const RefPtr<FrameNode>& topRelatedOrPhPage, const RefPtr<FrameNode>& prePrimaryPage,
-        PageTransitionType hideTransitionType);
+        PageTransitionType hideTransitionType, bool newPageIsFullScreenPage);
     void FirePageShowOnPushPage(const RefPtr<FrameNode>& newTopPage,
         const RefPtr<ParallelPagePattern>& newTopPattern, PageTransitionType showTransitionType);
     bool PushPageInSplitMode(

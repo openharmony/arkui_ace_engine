@@ -147,7 +147,7 @@ RefPtr<FrameNode> ParallelStageManager::GetLastPrimaryPage()
 
 void ParallelStageManager::FirePageHideOnPushPage(
     RouterPageType newPageType, const RefPtr<FrameNode>& lastPage, const RefPtr<FrameNode>& topRelatedOrPhPage,
-    const RefPtr<FrameNode>& prePrimaryPage, PageTransitionType hideTransitionType)
+    const RefPtr<FrameNode>& prePrimaryPage, PageTransitionType hideTransitionType, bool newPageIsFullScreenPage)
 {
     auto lastPagePattern = lastPage->GetPattern<ParallelPagePattern>();
     CHECK_NULL_VOID(lastPagePattern);
@@ -160,7 +160,7 @@ void ParallelStageManager::FirePageHideOnPushPage(
          * push/replace: [ PrimaryA | empty ]  ->  [ PrimaryA | SecondaryB ]
          *  The last page(PrimaryA) does not need to trigger the onPageHide lifecycle.
          */
-        if (lastPage != prePrimaryPage) {
+        if (lastPage != prePrimaryPage || newPageIsFullScreenPage) {
             FireParallelPageHide(lastPage, hideTransitionType);
         }
         if (!isNewPageReplacing_) {
@@ -289,6 +289,11 @@ bool ParallelStageManager::PushPageInSplitMode(const RefPtr<FrameNode>& newPageN
     auto pipeline = stageNode_->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto newTopPattern = newPageNode->GetPattern<ParallelPagePattern>();
+    CHECK_NULL_RETURN(newTopPattern, false);
+    auto newPageInfo = newTopPattern->GetPageInfo();
+    auto forceSplitMgr = pipeline->GetForceSplitManager();
+    bool newPageIsFullScreenPage = newPageInfo && forceSplitMgr ?
+        forceSplitMgr->IsFullScreenPage(newPageInfo->GetPageUrl()) : false;
     auto stagePattern = stageNode_->GetPattern<ParallelStagePattern>();
     CHECK_NULL_RETURN(stagePattern, false);
     auto prePrimaryPage = stagePattern->GetPrimaryPage();
@@ -312,8 +317,8 @@ bool ParallelStageManager::PushPageInSplitMode(const RefPtr<FrameNode>& newPageN
     if (!IsEmptyInSplitMode() && needHideLast) {
         hidePageNode = lastPage;
         if (!isNewLifecycle) {
-            FirePageHideOnPushPage(
-                newTopPattern->GetPageType(), lastPage, topRelatedOrPhPage, prePrimaryPage, hideTransitionType);
+            FirePageHideOnPushPage(newTopPattern->GetPageType(), lastPage, topRelatedOrPhPage,
+                prePrimaryPage, hideTransitionType, newPageIsFullScreenPage);
         }
     }
 
@@ -332,8 +337,8 @@ bool ParallelStageManager::PushPageInSplitMode(const RefPtr<FrameNode>& newPageN
 
     // fire new lifecycle
     if (hidePageNode && needHideLast && isNewLifecycle) {
-        FirePageHideOnPushPage(
-            newTopPattern->GetPageType(), lastPage, topRelatedOrPhPage, prePrimaryPage, hideTransitionType);
+        FirePageHideOnPushPage(newTopPattern->GetPageType(), lastPage, topRelatedOrPhPage,
+            prePrimaryPage, hideTransitionType, newPageIsFullScreenPage);
     }
     stageNode_->RebuildRenderContextTree();
 

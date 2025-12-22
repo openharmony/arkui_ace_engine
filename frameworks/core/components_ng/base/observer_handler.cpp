@@ -348,7 +348,8 @@ void UIObserverHandler::NotifyRouterPageSizeChange(
     }
 }
 
-void UIObserverHandler::NotifyNavDestinationSizeChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state)
+void UIObserverHandler::NotifyNavDestinationSizeChange(
+    const WeakPtr<AceType>& weakPattern, NavDestinationState state, const std::optional<SizeF>& size)
 {
     if (!navDestinationSizeChangeHandleFunc_ && !navDestinationSizeChangeByUniqueIdHandleFunc_ &&
         !navDestinationSizeChangeHandleFuncForAni_ && !navDestinationSizeChangeByUniqueIdHandleFuncForAni_) {
@@ -370,7 +371,7 @@ void UIObserverHandler::NotifyNavDestinationSizeChange(const WeakPtr<AceType>& w
     scope = pathInfo->Scope();
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
         pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId,
-        GetNavigationUniqueId(pattern), pattern->GetCurrentNavDestinationSize());
+        GetNavigationUniqueId(pattern), size);
     if (navDestinationSizeChangeHandleFunc_) {
         navDestinationSizeChangeHandleFunc_(info);
     }
