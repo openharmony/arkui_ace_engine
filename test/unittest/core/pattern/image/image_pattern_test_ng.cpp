@@ -2353,6 +2353,33 @@ HWTEST_F(ImagePatternTestNg, MaskUrl002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: RecycleImageData006
+ * @tc.desc: RecycleImageData006
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, RecycleImageData006, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    ImageInfoConfig imageInfoConfig;
+    image.Create(imageInfoConfig);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. set isShow false and call RecycleImageData.
+     * @tc.expected: Returned value is true.
+     */
+    imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    EXPECT_FALSE(imagePattern->RecycleImageData());
+}
+
+/**
  * @tc.name: ClearReloadFlagsAfterLoad001
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC

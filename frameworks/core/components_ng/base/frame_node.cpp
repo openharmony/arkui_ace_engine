@@ -548,7 +548,7 @@ FrameNode::~FrameNode()
         removeCustomProperties_();
         removeCustomProperties_ = nullptr;
     }
-
+    CleanRenderTreeLifeCycle();
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
         OnDetachFromMainTree(false, GetContextWithCheck());
@@ -997,6 +997,8 @@ void FrameNode::DumpCommonInfo()
                             : "NA"));
     }
     DumpLog::GetInstance().AddDesc(std::string("IsOnMaintree: ").append(std::to_string(IsOnMainTree())));
+    DumpLog::GetInstance().AddDesc(
+        std::string("IsPendingOnMainRenderTree: ").append(IsPendingOnMainRenderTree() ? "true" : "false"));
     if (!NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
         DumpLog::GetInstance().AddDesc(
             std::string("zIndex: ").append(std::to_string(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))));
@@ -2793,6 +2795,10 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChildren,
     const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& oldChildren)
 {
+    if (!renderContext_) {
+        return;
+    }
+    ACE_LAYOUT_SCOPED_TRACE("ProcessRenderTreeDiff");
     std::unordered_set<FrameNode*> oldChildrenSet;
     for (const auto& item : oldChildren) {
         auto child = item.Upgrade();
@@ -2815,15 +2821,20 @@ void FrameNode::ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChi
     }
 }
 
+// Cleans up the render tree lifecycle by detaching the node if it is still in a pending attached state.
+void FrameNode::CleanRenderTreeLifeCycle()
+{
+    if (isPendingState_) {
+        DetachFromRenderTree(true, true);
+    }
+}
+
 void FrameNode::DetachFromRenderTree(bool isOnMainTree, bool recursive)
 {
-    if (!isOnMainTree) {
+    if (!isOnMainTree || !isPendingState_) {
         return;
     }
-    auto currentState = renderContext_->IsOnRenderTree();
-    if (!currentState) {
-        return;
-    }
+    isPendingState_ = false;
     if (recursive) {
         for (const auto& item : frameChildren_) {
             auto child = item.Upgrade();
@@ -2837,13 +2848,10 @@ void FrameNode::DetachFromRenderTree(bool isOnMainTree, bool recursive)
 
 void FrameNode::AttachToRenderTree(bool isOnMainTree, bool recursive)
 {
-    if (!isOnMainTree) {
+    if (!isOnMainTree || isPendingState_) {
         return;
     }
-    auto currentState = renderContext_->IsOnRenderTree();
-    if (currentState) {
-        return;
-    }
+    isPendingState_ = true;
     OnAttachToMainRenderTree();
     if (recursive) {
         for (const auto& item : frameChildren_) {
@@ -2857,18 +2865,24 @@ void FrameNode::AttachToRenderTree(bool isOnMainTree, bool recursive)
 
 void FrameNode::OnDetachFromMainRenderTree()
 {
-    pattern_->OnDetachFromMainRenderTree();
+    if (pattern_) {
+        pattern_->OnDetachFromMainRenderTree();
+    }
 }
 
 void FrameNode::OnAttachToMainRenderTree()
 {
-    pattern_->OnAttachToMainRenderTree();
+    if (pattern_) {
+        pattern_->OnAttachToMainRenderTree();
+    }
 }
 
 void FrameNode::OnOffscreenProcessResource()
 {
     UINode::OnOffscreenProcessResource();
-    pattern_->OnOffscreenProcessResource();
+    if (pattern_) {
+        pattern_->OnOffscreenProcessResource();
+    }
 }
 
 void FrameNode::MarkModifyDone()

@@ -1496,6 +1496,10 @@ public:
 
     void OnContentChangeRegister(const ContentChangeConfig& config);
     void OnContentChangeUnregister();
+    bool IsPendingOnMainRenderTree() const
+    {
+        return isPendingState_;
+    }
 
 protected:
     void DumpInfo() override;
@@ -1542,6 +1546,7 @@ private:
     bool RemoveImmediately() const override;
     void ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChildren,
         const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& oldChildren);
+    void CleanRenderTreeLifeCycle();
     void DetachFromRenderTree(bool isOnMainTree, bool recursive = true);
     void AttachToRenderTree(bool isOnMainTree, bool recursive = true);
     void OnDetachFromMainRenderTree();
@@ -1788,6 +1793,8 @@ private:
     bool hasPositionZ_ = false;
     bool hasBindTips_ = false;
     bool isAncestorScrollable_ = false;
+    // Marks whether this FrameNode has been attached to the main RenderTree and is awaiting a matching detach.
+    bool isPendingState_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

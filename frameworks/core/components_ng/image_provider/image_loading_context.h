@@ -171,7 +171,7 @@ public:
         src_.SetSupportSvg2(enable);
     }
 
-    bool IsNetworkImageCached() const;
+    bool IsNetworkImageSafeToRecycle() const;
 
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \

@@ -610,6 +610,7 @@ ani_double Px2lpx(ani_double value, ani_int instanceId)
 void SetIsRecycleInvisibleImageMemory(ani_boolean isRecycle, ani_int instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId);
     auto context = container->GetPipelineContext();
     CHECK_NULL_VOID(context);

@@ -129,16 +129,19 @@ void ImageLoadingContext::SetOnProgressCallback(
     onProgressCallback_ = onProgress;
 }
 
-bool ImageLoadingContext::IsNetworkImageCached() const
+bool ImageLoadingContext::IsNetworkImageSafeToRecycle() const
 {
     const auto& sourceInfo = GetSourceInfo();
 
     if (sourceInfo.GetSrcType() != SrcType::NETWORK) {
+        return true;
+    }
+
+    if (!SystemProperties::GetDownloadByNetworkEnabled()) {
         return false;
     }
 
-    return SystemProperties::GetDownloadByNetworkEnabled() &&
-           DownloadManager::GetInstance()->IsContains(sourceInfo.GetSrc());
+    return DownloadManager::GetInstance()->IsContains(sourceInfo.GetSrc());
 }
 
 void ImageLoadingContext::OnDataLoading()

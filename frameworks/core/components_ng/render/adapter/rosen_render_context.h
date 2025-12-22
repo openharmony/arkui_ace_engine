@@ -542,6 +542,9 @@ public:
 
     bool IsOnRenderTree() override
     {
+        if (!rsNode_) {
+            return false;
+        }
         return rsNode_->GetIsOnTheTree();
     }
 
