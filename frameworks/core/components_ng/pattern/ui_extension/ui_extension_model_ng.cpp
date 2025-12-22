@@ -29,6 +29,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, cons
     std::function<void(int32_t, const std::string&, const std::string&)>&& onError)
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ACE_UINODE_TRACE(nodeId);
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId);
     auto frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(
         V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });

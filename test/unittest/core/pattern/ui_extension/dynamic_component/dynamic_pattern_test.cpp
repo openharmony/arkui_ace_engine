@@ -1056,7 +1056,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest028, TestSize.Level1)
      */
     auto dynamicPattern = CreateDynamicComponent();
     EXPECT_NE(dynamicPattern, nullptr);
- 
+
     /**
      * @tc.steps: step2. call HandleTouchEvent.
      * @tc.expected: test HandleTouchEvent with different pointerEvent.
@@ -1065,16 +1065,16 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest028, TestSize.Level1)
     pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE);
     auto ret = dynamicPattern->HandleTouchEvent(pointerEvent);
     EXPECT_FALSE(ret);
- 
+
     pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP);
     ret = dynamicPattern->HandleTouchEvent(pointerEvent);
     EXPECT_FALSE(ret);
- 
+
     pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_UP);
     ret = dynamicPattern->HandleTouchEvent(pointerEvent);
     EXPECT_FALSE(ret);
 }
- 
+
 /**
  * @tc.name: DynamicPatternTest029
  * @tc.desc: Test DynamicPattern HandleMouseEvent
@@ -1087,7 +1087,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest029, TestSize.Level1)
      */
     auto dynamicPattern = CreateDynamicComponent();
     EXPECT_NE(dynamicPattern, nullptr);
- 
+
     /**
      * @tc.steps: step2. call HandleMouseEvent.
      * @tc.expected: test HandleTouchEvent with different action.
@@ -1098,20 +1098,20 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest029, TestSize.Level1)
     mouseInfo.SetPointerEvent(pointerEvent);
     dynamicPattern->HandleMouseEvent(mouseInfo);
     EXPECT_FALSE(dynamicPattern->lastPointerEvent_);
- 
+
     mouseInfo.SetSourceDevice(SourceType::MOUSE);
     mouseInfo.SetPullAction(MouseAction::PULL_MOVE);
     dynamicPattern->HandleMouseEvent(mouseInfo);
     EXPECT_FALSE(dynamicPattern->lastPointerEvent_);
- 
+
     mouseInfo.SetPullAction(MouseAction::PULL_UP);
     dynamicPattern->HandleMouseEvent(mouseInfo);
     EXPECT_FALSE(dynamicPattern->lastPointerEvent_);
- 
+
     mouseInfo.SetPullAction(MouseAction::PRESS);
     dynamicPattern->HandleMouseEvent(mouseInfo);
     EXPECT_TRUE(dynamicPattern->lastPointerEvent_);
- 
+
     mouseInfo.SetPullAction(MouseAction::RELEASE);
     dynamicPattern->HandleMouseEvent(mouseInfo);
     EXPECT_TRUE(dynamicPattern->lastPointerEvent_);

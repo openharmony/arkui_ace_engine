@@ -244,6 +244,7 @@ void XComponentPattern::RegisterTransformHintCallback(PipelineContext* context)
 
 void XComponentPattern::Initialize()
 {
+    ACE_UINODE_TRACE(GetHost());
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
         InitSurface();
         InitEvent();
@@ -314,6 +315,7 @@ void XComponentPattern::OnDetachFromMainTree()
 
 void XComponentPattern::InitializeRenderContext(bool isThreadSafeNode)
 {
+    ACE_UINODE_TRACE(GetHost());
     renderContextForSurface_ = RenderContext::Create();
 #ifdef RENDER_EXTRACT_SUPPORTED
     auto contextType = type_ == XComponentType::TEXTURE ? RenderContext::ContextType::HARDWARE_TEXTURE
@@ -1372,6 +1374,7 @@ void XComponentPattern::FireExternalEvent(
     RefPtr<NG::PipelineContext> context, const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     CHECK_NULL_VOID(context);
+    ACE_UINODE_TRACE(GetHost());
 #ifdef NG_BUILD
     auto frontEnd = AceType::DynamicCast<DeclarativeFrontendNG>(context->GetFrontend());
 #else

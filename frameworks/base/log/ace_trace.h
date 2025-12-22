@@ -91,6 +91,9 @@
 
 #define ACE_COUNT_TRACE(count, fmt, ...) AceCountTraceWidthArgs(count, fmt, ##__VA_ARGS__)
 
+#define ACE_UINODE_TRACE(uiNode) UINodeTracer ACE_UNIQUE_VAR { uiNode }
+#define ACE_CONTAINER_TRACE(container...) ContainerTracer ACE_UNIQUE_VAR { container }
+
 namespace OHOS::Ace {
 bool ACE_EXPORT AceAsyncTraceEnable();
 void ACE_EXPORT AceTraceBegin(const char* name);
@@ -103,6 +106,7 @@ void ACE_EXPORT AceTraceEnd();
 void ACE_EXPORT AceAsyncTraceEnd(int32_t taskId, const char* name, bool isAnimationTrace = false);
 void ACE_EXPORT AceCountTrace(const char *key, int32_t count);
 void ACE_EXPORT AceCountTraceWidthArgs(int32_t count, const char* format, ...);
+void ACE_EXPORT AceSetResTraceId(uint32_t traceType, uint64_t traceId, uint32_t* pOldTraceType, uint64_t* pOldTraceId);
 
 // for commercial trace
 void ACE_EXPORT AceTraceBeginCommercial(const char* name);
@@ -154,6 +158,48 @@ private:
     static std::atomic<std::int32_t> id_;
 };
 
+enum class ResTraceType : uint32_t {
+    UINode,
+    Container,
+};
+
+class ACE_FORCE_EXPORT ResTracer {
+public:
+    ResTracer(uint32_t traceType, uint64_t traceId);
+    ~ResTracer();
+    ResTracer(const ResTracer&) = delete;
+    ResTracer& operator=(const ResTracer&) = delete;
+private:
+    uint32_t traceType_ = 0;
+    uint64_t traceId_ = 0;
+};
+
+class Container;
+class ACE_FORCE_EXPORT ContainerTracer final : ResTracer {
+public:
+    explicit ContainerTracer(int32_t containerId)
+        : ResTracer(static_cast<uint32_t>(ResTraceType::Container), containerId)
+    {}
+    template<typename T>
+    ContainerTracer(const WeakPtr<T>& container) : ContainerTracer(container.Upgrade()) {}
+    template<typename T>
+    ContainerTracer(const RefPtr<T>& container) : ContainerTracer(AceType::RawPtr(container)) {}
+    ContainerTracer(const Container* container);
+    ContainerTracer();
+};
+
+namespace NG {
+class UINode;
+}
+class ACE_FORCE_EXPORT UINodeTracer final : ResTracer {
+public:
+    explicit UINodeTracer(int32_t nodeId) : ResTracer(static_cast<uint32_t>(ResTraceType::UINode), nodeId) {}
+    template<typename T>
+    UINodeTracer(const WeakPtr<T>& uiNode) : UINodeTracer(uiNode.Upgrade()) {}
+    template<typename T>
+    UINodeTracer(const RefPtr<T>& uiNode) : UINodeTracer(AceType::RawPtr(uiNode)) {}
+    UINodeTracer(const NG::UINode* uiNode);
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_ACE_TRACE_H
