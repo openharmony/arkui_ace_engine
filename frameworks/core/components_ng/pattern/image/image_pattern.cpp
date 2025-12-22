@@ -2182,6 +2182,23 @@ void ImagePattern::OnIconConfigurationUpdate()
     OnConfigurationUpdate();
 }
 
+bool ImagePattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    isFullyInitializedFromTheme_ = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(imageLayoutProperty, false);
+    if (imageLayoutProperty->GetImageSourceInfo().has_value()) {
+        auto src = imageLayoutProperty->GetImageSourceInfo().value();
+        src.UpdateLocalColorMode(host->GetLocalColorMode());
+        imageLayoutProperty->UpdateImageSourceInfo(src);
+        LoadImageDataIfNeed();
+        return true;
+    }
+    return false;
+}
+
 void ImagePattern::OnConfigurationUpdate()
 {
     isFullyInitializedFromTheme_ = false;

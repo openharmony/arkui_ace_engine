@@ -2951,7 +2951,6 @@ HWTEST_F(ImagePatternTestNg, ImagePatternLoadImageDataIfNeed001, TestSize.Level0
 HWTEST_F(ImagePatternTestNg, TestImageSourceInfoGetSrcType001, TestSize.Level0)
 {
     auto frameNode = CreateImageNode("", "", nullptr);
-    ;
     ASSERT_NE(frameNode, nullptr);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
@@ -2993,5 +2992,24 @@ HWTEST_F(ImagePatternTestNg, RecycleImageData005, TestSize.Level0)
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
     EXPECT_FALSE(imagePattern->RecycleImageData());
+}
+
+/**
+ * @tc.name: ImagePatternOnThemeScopeUpdate001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ImagePatternOnThemeScopeUpdate001, TestSize.Level0)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->isFullyInitializedFromTheme_ = true;
+    int32_t themeScopedId = 1;
+    auto result = imagePattern->OnThemeScopeUpdate(themeScopedId);
+    ASSERT_FALSE(imagePattern->isFullyInitializedFromTheme_);
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG

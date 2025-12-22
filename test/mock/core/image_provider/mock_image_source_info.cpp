@@ -338,6 +338,8 @@ void ImageSourceInfo::SetModuleName(const std::string& moduleName)
 
 void ImageSourceInfo::GenerateCacheKey() {}
 
+void ImageSourceInfo::UpdateLocalColorMode(ColorMode localColorMode) {}
+
 ImageSourceInfo ImageSourceInfo::CreateImageSourceInfoWithHost(const RefPtr<NG::FrameNode>& host)
 {
     ImageSourceInfo imageSourceInfo;

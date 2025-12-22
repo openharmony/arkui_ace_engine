@@ -124,6 +124,9 @@ public:
     {
         return localColorMode_;
     }
+    
+    void UpdateLocalColorMode(ColorMode localColorMode);
+
     bool IsFromReset()
     {
         return isFromReset_;
