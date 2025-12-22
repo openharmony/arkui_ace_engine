@@ -1814,8 +1814,8 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
                 TAG_LOGE(AceLogTag::ACE_FORM, "null data");
                 return false;
             }
-            extractor->SetAutoCloseFd(true);
             data->SetAutoReleaseMem(true);
+            extractor->SetAutoCloseFd(true);
             if (arkRuntime->IsStaticOrInvalidFile(data->GetDataPtr(), data->GetDataLen())) {
                 return false;
             }
