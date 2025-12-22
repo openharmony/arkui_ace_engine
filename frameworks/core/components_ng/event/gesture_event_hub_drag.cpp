@@ -764,34 +764,35 @@ void GestureEventHub::HideMenu()
     imageContext->UpdateOpacity(0.0f);
 }
 
-void CalcPreviewPaintRect(const RefPtr<FrameNode> menuWrapperNode, PreparedInfoForDrag& data)
+void CalcOriginPreviewOffsetDependsOnNode(PreparedInfoForDrag& data, const RefPtr<FrameNode>& frameNode)
 {
-    data.originPreviewRect = data.dragPreviewRect;
-    CHECK_NULL_VOID(menuWrapperNode);
-    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(frameNode);
+    auto paintRectCenter = DragDropFuncWrapper::GetPaintRectCenterToScreen(frameNode);
+    auto offset = paintRectCenter
+        - OffsetF(data.dragPreviewRect.Width() / HALF_PIXELMAP, data.dragPreviewRect.Height() / HALF_PIXELMAP);
+    data.originPreviewRect =
+        RectF(offset.GetX(), offset.GetY(), data.dragPreviewRect.Width(), data.dragPreviewRect.Height());
+}
+
+void CalcOriginPreviewRectDependsOnHoverImage(
+    PreparedInfoForDrag& data, const RefPtr<MenuWrapperPattern>& menuWrapperPattern,
+    const RefPtr<PipelineContext>& pipeline)
+{
     CHECK_NULL_VOID(menuWrapperPattern);
+    auto animationInfo = menuWrapperPattern->GetPreviewMenuAnimationInfo();
     auto menuPreview = menuWrapperPattern->GetPreview();
-    CHECK_NULL_VOID(menuPreview);
-    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    auto previewBorderRadiusValue = menuTheme->GetPreviewBorderRadius();
-    data.borderRadius = BorderRadiusProperty(previewBorderRadiusValue);
     auto menuNode = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto isShowHoverImage = menuPattern->GetIsShowHoverImage();
-    data.menuPreviewNode = menuPreview;
-    data.originPreviewRect = DragDropFuncWrapper::GetPaintRectToScreen(menuPreview);
-    CHECK_EQUAL_VOID(isShowHoverImage, false);
-    auto animationInfo = menuWrapperPattern->GetPreviewMenuAnimationInfo();
     auto previewPattern = menuPreview->GetPattern<MenuPreviewPattern>();
     CHECK_NULL_VOID(previewPattern);
     auto rate = animationInfo.clipRate;
     auto scaleBefore = menuPattern->GetPreviewBeforeAnimationScale();
     auto scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
     auto previewBeforeAnimationScale =
         LessNotEqual(scaleBefore, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleBefore;
     auto previewAfterAnimationScale =
@@ -799,7 +800,6 @@ void CalcPreviewPaintRect(const RefPtr<FrameNode> menuWrapperNode, PreparedInfoF
     auto previewScale = rate * (previewAfterAnimationScale - previewBeforeAnimationScale) + previewBeforeAnimationScale;
     if (!GreatNotEqual(rate, 0.0f)) {
         data.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
-        data.originPreviewRect = data.dragPreviewRect;
         return;
     }
     auto clipStartWidth = previewPattern->GetHoverImageAfterScaleWidth() * previewScale;
@@ -816,6 +816,49 @@ void CalcPreviewPaintRect(const RefPtr<FrameNode> menuWrapperNode, PreparedInfoF
     data.borderRadius = animationInfo.borderRadius;
 }
 
+void CalcPreviewPaintRect(
+    const RefPtr<FrameNode> menuWrapperNode, PreparedInfoForDrag& data, const RefPtr<FrameNode>& frameNode)
+{
+    data.originPreviewRect = data.dragPreviewRect;
+    CHECK_NULL_VOID(frameNode);
+    auto dragNodePipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(dragNodePipeline);
+    auto overlayManager = dragNodePipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto dragPreviewNode = overlayManager->GetPixelMapContentNode();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    if (!menuWrapperNode && !dragPreviewNode) {
+        CalcOriginPreviewOffsetDependsOnNode(data, frameNode);
+        return;
+    }
+    if (!menuWrapperNode && dragPreviewNode) {
+        CalcOriginPreviewOffsetDependsOnNode(data, dragPreviewNode);
+        return;
+    }
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto menuPreview = menuWrapperPattern->GetPreview();
+    if (!menuPreview) {
+        CalcOriginPreviewOffsetDependsOnNode(data, frameNode);
+        return;
+    }
+
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto previewBorderRadiusValue = menuTheme->GetPreviewBorderRadius();
+    data.borderRadius = BorderRadiusProperty(previewBorderRadiusValue);
+    auto menuNode = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto isShowHoverImage = menuPattern->GetIsShowHoverImage();
+    data.menuPreviewNode = menuPreview;
+    data.originPreviewRect = DragDropFuncWrapper::GetPaintRectToScreen(menuPreview);
+    CHECK_EQUAL_VOID(isShowHoverImage, false);
+    CalcOriginPreviewRectDependsOnHoverImage(data, menuWrapperPattern, pipeline);
+}
+
 void GestureEventHub::PrepareDragStartInfo(
     RefPtr<PipelineContext>& pipeline, PreparedInfoForDrag& data, const RefPtr<FrameNode> frameNode)
 {
@@ -823,7 +866,7 @@ void GestureEventHub::PrepareDragStartInfo(
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     auto menuWrapperNode = dragDropManager->GetMenuWrapperNode();
-    CalcPreviewPaintRect(menuWrapperNode, data);
+    CalcPreviewPaintRect(menuWrapperNode, data, frameNode);
     auto relativeContainerNode =
         FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
