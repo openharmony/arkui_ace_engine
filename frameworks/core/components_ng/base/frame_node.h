@@ -1540,6 +1540,13 @@ private:
 
     bool OnRemoveFromParent(bool allowTransition) override;
     bool RemoveImmediately() const override;
+    void ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChildren,
+        const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& oldChildren);
+    void DetachFromRenderTree(bool isOnMainTree, bool recursive = true);
+    void AttachToRenderTree(bool isOnMainTree, bool recursive = true);
+    void OnDetachFromMainRenderTree();
+    void OnAttachToMainRenderTree();
+    void OnOffscreenProcessResource() override;
 
     bool IsPaintRectWithTransformValid();
 

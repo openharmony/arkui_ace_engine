@@ -4710,9 +4710,10 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     std::unordered_map<Rosen::RSNode::SharedPtr, bool> childNodeMap;
     auto nowRSNodes = GetChildrenRSNodes(childNodesNew, childNodeMap);
     std::vector<Rosen::RSNode::SharedPtr> childNodes;
-    for (auto child : rsNode_->GetChildren()) {
-        if (child.lock()) {
-            childNodes.emplace_back(child.lock());
+    for (auto&& child : rsNode_->GetChildren()) {
+        auto childSptr = child.lock();
+        if (childSptr) {
+            childNodes.emplace_back(childSptr);
         }
     }
     if (nowRSNodes == childNodes) {
@@ -4724,11 +4725,12 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     }
     // save a copy of previous children because for loop will delete child
     auto preChildNodes = rsNode_->GetChildren();
-    for (auto node : preChildNodes) {
-        if (node.lock() == nullptr) {
+    for (auto&& node : preChildNodes) {
+        auto nodePtr = node.lock();
+        if (nodePtr == nullptr) {
             continue;
         }
-        auto iter = childNodeMap.find(node.lock());
+        auto iter = childNodeMap.find(nodePtr);
         if (iter == childNodeMap.end()) {
             rsNode_->RemoveChildByNodeSelf(node);
         } else {
@@ -4737,15 +4739,16 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     }
     for (size_t index = 0; index != nowRSNodes.size(); ++index) {
         auto node = rsNode_->GetChildByIndex(index);
-        if (node != nowRSNodes[index]) {
-            auto iter = childNodeMap.find(nowRSNodes[index]);
+        const auto& newNode = nowRSNodes[index];
+        if (node != newNode) {
+            auto iter = childNodeMap.find(newNode);
             if (iter == childNodeMap.end()) {
                 continue;
             }
             if (iter->second) {
-                rsNode_->MoveChild(nowRSNodes[index], index);
+                rsNode_->MoveChild(newNode, index);
             } else {
-                rsNode_->AddChild(nowRSNodes[index], index);
+                rsNode_->AddChild(newNode, index);
             }
         }
     }

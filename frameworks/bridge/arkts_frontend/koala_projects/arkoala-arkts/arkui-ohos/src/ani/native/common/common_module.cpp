@@ -1200,6 +1200,16 @@ ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instan
     return modifier->getCommonAniModifier()->px2lpx(value, instanceId);
 }
 
+void SetIsRecycleInvisibleImageMemory(
+    ani_env* env, ani_object obj, ani_boolean isRecycle, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setIsRecycleInvisibleImageMemory(isRecycle, instanceId);
+}
+
 ani_string getWindowName(ani_env* env, ani_object obj, ani_int instanceId)
 {
     const auto* modifier = GetNodeAniModifier();

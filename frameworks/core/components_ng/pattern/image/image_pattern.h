@@ -123,7 +123,6 @@ public:
     bool RecycleImageData();
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
-    void OnWindowShow() override;
     void OnVisibleChange(bool isVisible) override;
     void OnRecycle() override;
     void OnReuse() override;
@@ -347,10 +346,14 @@ public:
         return supportSvg2_;
     }
 
+    void OnAttachToMainRenderTree() override;
+    void OnOffscreenProcessResource() override;
+    bool GetIsRecycleInvisibleImageMemory() const;
+
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
-    bool isShow_ = true;
+    bool isRecycledImage_ = false;
     RefPtr<ImageOverlayModifier> overlayMod_;
     RefPtr<ImageContentModifier> contentMod_;
 

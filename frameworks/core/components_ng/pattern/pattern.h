@@ -876,6 +876,9 @@ public:
     {
         return nullptr;
     }
+    virtual void OnDetachFromMainRenderTree() {}
+    virtual void OnAttachToMainRenderTree() {}
+    virtual void OnOffscreenProcessResource() {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

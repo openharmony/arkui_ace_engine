@@ -74,6 +74,8 @@ ani_double Fp2px(ani_env* env, ani_object obj, ani_double value, ani_int instanc
 ani_double Px2fp(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);
 ani_double Lpx2px(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);
 ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);
+void SetIsRecycleInvisibleImageMemory(
+    ani_env* env, ani_object obj, ani_boolean isRecycle, ani_int instanceId);
 ani_string getWindowName(ani_env* env, ani_object obj, ani_int instanceId);
 ani_int getWindowId(ani_env* env, ani_object obj, ani_int instanceId);
 ani_int getWindowWidthBreakpoint(ani_env* env, ani_object obj);

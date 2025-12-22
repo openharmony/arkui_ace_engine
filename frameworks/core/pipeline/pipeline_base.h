@@ -1595,6 +1595,11 @@ public:
     virtual void SetTouchAccelarate(bool isEnable) {}
     virtual void SetTouchPassThrough(bool isEnable) {}
     virtual void SetEnableSwipeBack(bool isEnable) {}
+    virtual void SetIsRecycleInvisibleImageMemory(bool isEnable) {}
+    virtual std::optional<bool> GetIsRecycleInvisibleImageMemory() const
+    {
+        return std::nullopt;
+    }
     virtual void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
 
     bool IsSystmColorChange()

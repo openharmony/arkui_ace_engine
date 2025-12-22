@@ -753,6 +753,10 @@ export class UIContext {
         throw Error("closeBindSheet not implemented in UIContext!")
     }
 
+    public recycleInvisibleImageMemory(enabled: boolean): void {
+        throw Error("recycleInvisibleImageMemory not implemented in UIContext!")
+    }
+
     public bindTabsToScrollable(tabsController: TabsController, scroller: Scroller): void {
         throw Error("bindTabsToScrollable not implemented in UIContext!")
     }

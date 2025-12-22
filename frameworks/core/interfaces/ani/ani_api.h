@@ -578,6 +578,7 @@ struct ArkUIAniCommonModifier {
     void (*setImageCacheCount)(ani_int value, ani_int instanceId);
     void (*setImageRawDataCacheSize)(ani_int value, ani_int instanceId);
     void (*applyThemeScopeId)(ani_env* env, ani_long ptr, ani_int themeScopeId);
+    void (*setIsRecycleInvisibleImageMemory)(ani_boolean isRecycle, ani_int instanceId);
     void (*getBaseEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
     void (*getKeyEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
     ani_boolean (*setClickEventPreventDefault)(ani_long nativePtr);

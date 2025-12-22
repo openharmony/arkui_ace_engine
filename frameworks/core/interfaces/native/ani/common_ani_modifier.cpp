@@ -607,6 +607,15 @@ ani_double Px2lpx(ani_double value, ani_int instanceId)
     return value / windowConfig.designWidthScale;
 }
 
+void SetIsRecycleInvisibleImageMemory(ani_boolean isRecycle, ani_int instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    ContainerScope scope(instanceId);
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    context->SetIsRecycleInvisibleImageMemory(isRecycle);
+}
+
 std::optional<std::string> GetWindowName(ani_int instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -1088,6 +1097,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .lpx2px = OHOS::Ace::NG::Lpx2px,
         .px2lpx = OHOS::Ace::NG::Px2lpx,
         .getWindowName = OHOS::Ace::NG::GetWindowName,
+        .setIsRecycleInvisibleImageMemory = OHOS::Ace::NG::SetIsRecycleInvisibleImageMemory,
         .getWindowId = OHOS::Ace::NG::GetWindowId,
         .getWindowHeightBreakpoint = OHOS::Ace::NG::GetWindowHeightBreakpoint,
         .getWindowWidthBreakpoint = OHOS::Ace::NG::GetWindowWidthBreakpoint,

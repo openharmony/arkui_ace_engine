@@ -171,6 +171,8 @@ public:
         src_.SetSupportSvg2(enable);
     }
 
+    bool IsNetworkImageCached() const;
+
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
     void Set##loadResult##NotifyTask(loadResult##NotifyTask&& loadResult##NotifyTask) \
