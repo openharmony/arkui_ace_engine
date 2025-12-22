@@ -15,6 +15,7 @@
 
 import { ExpectedFrameRateRange } from './arkui.component.common'
 import { FillMode, PlayMode } from './arkui.component.enums'
+export { FillMode, PlayMode } from './arkui.component.enums'
 
 export class SimpleAnimatorOptions {
 

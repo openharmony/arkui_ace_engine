@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 import {
-  Resource, ResourceColor, FontWeight, ResourceStr, SymbolGlyphModifier, ShadowOptions, Component, Builder, Padding,
+  Resource, ResourceColor, FontWeight, ResourceStr, ShadowOptions, Component, Builder, Padding,
   LocalizedPadding, LocalizedMargin, EditableTextOnChangeCallback, Callback, UIContext, Row, Text, SymbolGlyph,
   SymbolEffectStrategy, SymbolEffect, Image, ImageFit, TextOverflow, TouchEvent, TouchType, List, LazyForEach, ListItem,
-  DragItemInfo, Alignment, DragEvent, IDataSource, DataChangeListener, Visibility, GestureModifier, ClassCastError,
+  DragItemInfo, Alignment, DragEvent, IDataSource, DataChangeListener, Visibility, GestureModifier,
   CustomDialogController, UIGestureEvent, LongPressGestureHandler, Margin, ShadowStyle, Stack, Column, Divider,
   LineCapStyle, TextInput, EnterKeyType, Blank, FlexAlign, ResponseType, MouseEvent, MouseButton, Placement, Area,
-  HoverEvent, CustomPopupOptions, CommonMethod, BorderStyle, Type, OnSubmitCallback, OnDragEventCallback, $r,
+  HoverEvent, CustomPopupOptions, CommonMethod, BorderStyle, OnSubmitCallback, OnDragEventCallback, $r,
   BuilderParam, Color
 } from '@ohos.arkui.component';
+import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 
 import {
   State, AppStorage, Observed, Watch, StorageLink, Provide, Consume, ObjectLink

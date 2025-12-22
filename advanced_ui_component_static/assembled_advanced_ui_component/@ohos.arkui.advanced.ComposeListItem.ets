@@ -15,13 +15,14 @@
 
 import {
   Builder, Text, Column, Component, Row, Button, SymbolGlyph, Image, Radio, Checkbox, Toggle, Stack, Flex,
-  Length, FlexDirection, Resource, ResourceStr, ResourceColor, ShadowStyle, SymbolGlyphModifier, FlexAlign,
+  Length, FlexDirection, Resource, ResourceStr, ResourceColor, ShadowStyle, FlexAlign,
   HorizontalAlign, SizeOptions, FontWeight, SymbolEffect, ScaleOptions, BorderStyle, LocalizedPadding, Padding,
   FlexOptions, MarqueeStartPolicy, ButtonType, Color, HitTestMode, ItemAlign, ToggleType, HoverEffect, TextOverflow,
   ImageFit, SymbolEffectStrategy, $r, LocalizedMargin, Margin, ButtonStyleMode, ButtonRole, ButtonAttribute,
   ColumnOptions, ButtonOptions, OnCheckboxChangeCallback, FlexSpaceOptions, RowOptions, ClickEvent, MeasureResult,
-  HoverEvent, SizeChangeCallback, CommonMethod, ShadowOptions,ClassCastError
+  HoverEvent, SizeChangeCallback, CommonMethod, ShadowOptions
 } from '@ohos.arkui.component'
+import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import { State, PropRef, Watch, Link } from '@ohos.arkui.stateManagement'
 import { Theme } from '@ohos.arkui.theme';
 import hilog from '@ohos.hilog'

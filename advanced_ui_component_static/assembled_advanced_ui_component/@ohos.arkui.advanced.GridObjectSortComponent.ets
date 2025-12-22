@@ -40,15 +40,16 @@ import {
 
 import {
   Builder, Entry, Text, Column, Component,  Row, Button, SymbolGlyph, Image, Radio, Checkbox, Stack, Flex,
-  Length, FlexDirection, Resource, ResourceStr, ResourceColor, ShadowStyle, SymbolGlyphModifier, FlexAlign,
+  Length, FlexDirection, Resource, ResourceStr, ResourceColor, ShadowStyle, FlexAlign,
   HorizontalAlign, SizeOptions, FontWeight, SymbolEffect, ScaleOptions, BorderStyle, LocalizedPadding, Padding,
   FlexOptions, MarqueeStartPolicy, ButtonType, Color, HitTestMode, ItemAlign, HoverEffect, TextOverflow, ImageFit,
-  SymbolEffectStrategy, LocalizedMargin, Margin, ButtonStyleMode, ButtonRole, ButtonAttribute, ClassCastError,
+  SymbolEffectStrategy, LocalizedMargin, Margin, ButtonStyleMode, ButtonRole, ButtonAttribute,
   ColumnOptions, ButtonOptions, OnCheckboxChangeCallback, FlexSpaceOptions, RowOptions, ClickEvent, HoverEvent,
   ItemDragInfo, Visibility, Area, Scroll, TouchType, GestureEvent, LongPressGesture, TouchEvent, ClickEffectLevel,
   GridItem, Grid, ForEach, TransitionType, VerticalAlign, TextAlign, Alignment, Position, ICurve, AnimateParam,
   TranslateOptions, $r, TransitionEffect
 } from '@ohos.arkui.component'
+import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import { State, Observed, Watch, Link, PropRef } from '@ohos.arkui.stateManagement'
 
 //  declaring Constants

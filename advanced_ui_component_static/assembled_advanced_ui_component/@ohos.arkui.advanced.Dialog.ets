@@ -25,7 +25,7 @@ import {
   LocalizedMargin, Margin, ClickEvent, ScrollState, OnCheckboxChangeCallback, $r, PopupStateChangeParam,
   ScrollOnScrollCallback, SizeChangeCallback, applyStyles, CustomDialog, ButtonOptions as ButtonParam, CustomLayout,
   WithTheme, RelativeContainer, BaseGestureEvent, GestureRecognizer, ScrollBar, GestureControl, VerticalAlign,
-  GestureJudgeResult, LocalizedAlignRuleOptions, HorizontalAlign, Visibility, ClassCastError
+  GestureJudgeResult, LocalizedAlignRuleOptions, HorizontalAlign, Visibility
 } from '@ohos.arkui.component';
 import { State, Link, Observed, PropRef } from '@ohos.arkui.stateManagement';
 import { BusinessError, Callback } from '@ohos.base';

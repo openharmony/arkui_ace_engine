@@ -19,7 +19,7 @@ import {
   ShadowStyle, $r, Builder, BuilderParam, CustomBuilder, RichEditorSelection, RichEditorTextSpanResult, Column, ForEach,
   ConstraintSizeOptions, SizeResult, MeasureResult, SymbolEffect, Area, GeometryInfo, Component, Length, Menu,
   RichEditorTextStyle, FontStyle, FontWeight, TextDecorationType, Flex, Visibility, Scroll, FlexWrap, MenuItemGroup,
-  OutlineOptions, Padding, ClickEvent, SymbolGlyph, Image, ButtonType, SymbolEffectStrategy, ClassCastError,
+  OutlineOptions, Padding, ClickEvent, SymbolGlyph, Image, ButtonType, SymbolEffectStrategy,
   RichEditorTextStyleResult
 } from '@ohos.arkui.component';
 import { State, Observed, PropRef, Watch, StorageLink } from '@ohos.arkui.stateManagement';
@@ -28,7 +28,7 @@ import pasteboard from '@ohos.pasteboard'
 import { BusinessError, RecordData } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import common from '@ohos.app.ability.common';
-import { SymbolGlyphModifier } from '@kit.ArkUI';
+import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 
 const WITHOUT_BUILDER = -2
 const MAX_FONT_STANDARD = 1.0

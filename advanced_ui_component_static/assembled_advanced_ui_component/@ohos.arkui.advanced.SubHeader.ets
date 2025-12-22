@@ -15,13 +15,15 @@
 
 import {
   Layoutable, Measurable, ResourceStr, Length, SelectOption, ResourceColor, FontWeight, SymbolEffectStrategy, Resource,
-  SymbolRenderingStrategy, Alignment, AttributeModifier, RowAttribute, Component, TextModifier, BuilderParam, Column,
+  SymbolRenderingStrategy, Alignment, AttributeModifier, RowAttribute, Component, BuilderParam, Column,
   LocalizedMargin, LocalizedPadding, applyStyles, KeyEvent, Flex, Builder, Button, Row, GeometryInfo, SizeResult, $r,
   ConstraintSizeOptions, TextAttribute, CommonMethod, Rectangle, TextOverflow, KeyType, ClickEvent, TouchEvent, Margin,
   TouchType, HorizontalAlign, FlexDirection, ItemAlign, ButtonOptions, HoverEffect, FlexAlign, VerticalAlign, Image,
   SymbolGlyph, Text, Select, Stack, ForEach, LoadingProgress, Padding, MeasureResult, ButtonType, ButtonStyleMode,
   CustomLayout, AccessibilityRoleType
 } from '@ohos.arkui.component';
+import { TextModifier } from '@ohos.arkui.modifier'
+
 import { PropRef, State, Provide, Consume } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos.arkui.UIContext';
 import { Theme } from '@ohos.arkui.theme';
