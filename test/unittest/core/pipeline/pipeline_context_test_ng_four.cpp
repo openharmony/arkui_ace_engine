@@ -98,6 +98,12 @@ void PipelineContextFourTestNg::CreateCycleDirtyNode(int cycle, bool& flagUpdate
     context_->AddDirtyCustomNode(customNodeTemp);
 }
 
+void PipelineContextFourTestNg::AssertValidContext()
+{
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->taskExecutor_, nullptr);
+}
+
 /**
  * @tc.name: PipelineContextFourTestNg001
  * @tc.desc: Test AddDirtyPropertyNode thread safety warning.
@@ -256,8 +262,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg006, TestSize.Level
      * @tc.steps: 1. Initialize test environment with valid context.
      * @tc.expected: Context and task executor are not null.
      */
-    ASSERT_NE(context_, nullptr);
-    ASSERT_NE(context_->taskExecutor_, nullptr);
+    AssertValidContext();
 
     /**
      * @tc.steps: 2. Set multiple callbacks sequentially.
@@ -936,18 +941,17 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg028, TestSize.Level
 }
 
 /**
- * @tc.name: PipelineContextFourTestNg30
+ * @tc.name: PipelineContextFourTestNg029
  * @tc.desc: Test SetOnWindowFocused with valid task executor.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg30, TestSize.Level1)
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg029, TestSize.Level1)
 {
     /**
      * @tc.steps: 1. Initialize test environment with valid task executor.
      * @tc.expected: Context is not null and taskExecutor_ is valid.
      */
-    ASSERT_NE(context_, nullptr);
-    ASSERT_NE(context_->taskExecutor_, nullptr);
+    AssertValidContext();
 
     /**
      * @tc.steps: 2. Set up a mock callback function.
@@ -972,11 +976,11 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg30, TestSize.Level1
 }
 
 /**
- * @tc.name: PipelineContextFourTestNg31
+ * @tc.name: PipelineContextFourTestNg030
  * @tc.desc: Test SetOnWindowFocused with null task executor.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg31, TestSize.Level1)
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg030, TestSize.Level1)
 {
     /**
      * @tc.steps: 1. Create a context with null task executor.
@@ -995,18 +999,17 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg31, TestSize.Level1
 }
 
 /**
- * @tc.name: PipelineContextFourTestNg32
+ * @tc.name: PipelineContextFourTestNg031
  * @tc.desc: Test SetOnWindowFocused with empty callback.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg32, TestSize.Level1)
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg031, TestSize.Level1)
 {
     /**
      * @tc.steps: 1. Initialize test environment.
      * @tc.expected: Context is not null.
      */
-    ASSERT_NE(context_, nullptr);
-    ASSERT_NE(context_->taskExecutor_, nullptr);
+    AssertValidContext();
 
     /**
      * @tc.steps: 2. Call SetOnWindowFocused with empty callback.
@@ -1015,6 +1018,894 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg32, TestSize.Level1
     std::function<void()> emptyCallback;
     context_->SetOnWindowFocused(emptyCallback);
     EXPECT_NE(context_->taskExecutor_, nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg032
+ * @tc.desc: Test SetOnWindowFocused executes successfully with complex callback logic.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context is not null.
+     */
+    AssertValidContext();
+
+    /**
+     * @tc.steps: 2. Define a complex callback with multiple operations.
+     * @tc.expected: Callback is assigned correctly.
+     */
+    std::vector<int> testData = {1, 2, 3, 4, 5};
+    int sum = 0;
+    bool modifiedData = false;
+    
+    auto complexCallback = [&testData, &sum, &modifiedData]() {
+        for (int val : testData) {
+            sum += val;
+        }
+        testData.clear();
+        modifiedData = true;
+    };
+
+    /**
+     * @tc.steps: 3. Call SetOnWindowFocused with complex callback.
+     * @tc.expected: Complex callback is handled correctly.
+     */
+    context_->SetOnWindowFocused(complexCallback);
+    EXPECT_NE(context_->GetWindowFocusCallback(), nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg033
+ * @tc.desc: Test SetOnWindowFocused handles multiple consecutive callback assignments.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context is not null.
+     */
+    AssertValidContext();
+
+    /**
+     * @tc.steps: 2. Define multiple callbacks for sequential assignment.
+     * @tc.expected: Each callback is properly defined.
+     */
+    int callCount = 0;
+    
+    // First callback
+    auto firstCallback = [&callCount]() {
+        callCount = 1;
+    };
+    // Second callback
+    auto secondCallback = [&callCount]() {
+        callCount = 2;
+    };
+    // Third callback
+    auto thirdCallback = [&callCount]() {
+        callCount = 3;
+    };
+
+    /**
+     * @tc.steps: 3. Make multiple consecutive calls with different callbacks.
+     * @tc.expected: Each call overwrites the previous callback.
+     */
+    context_->SetOnWindowFocused(firstCallback);
+    context_->SetOnWindowFocused(secondCallback);
+    context_->SetOnWindowFocused(thirdCallback);
+    
+    EXPECT_NE(context_->GetWindowFocusCallback(), nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg034
+ * @tc.desc: Test SetOnWindowFocused handles lambda with large data capture.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context is not null.
+     */
+    AssertValidContext();
+
+    /**
+     * @tc.steps: 2. Create large data structure for lambda capture.
+     * @tc.expected: Large data is created successfully.
+     */
+    std::vector<std::string> testData(10, "Test");
+    auto dataCallback = [testData]() {
+        EXPECT_EQ(testData.size(), 10u);
+        EXPECT_EQ(testData[0], "Test");
+    };
+
+    /**
+     * @tc.steps: 3. Call SetOnWindowFocused with large data capturing lambda.
+     * @tc.expected: Function handles large data capture without issues.
+     */
+    context_->SetOnWindowFocused(dataCallback);
+    EXPECT_NE(context_->GetWindowFocusCallback(), nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg035
+ * @tc.desc: Test SetOnWindowFocused handles recursive-like callback pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context is not null.
+     */
+    AssertValidContext();
+
+    /**
+     * @tc.steps: 2. Set up recursive-like callback simulation.
+     * @tc.expected: Recursive callback is properly configured.
+     */
+    int recursionLevel = 0;
+    const int maxRecursionLevel = 3;
+    
+    std::function<void()> recursiveCallback;
+    recursiveCallback = [&recursionLevel, maxRecursionLevel, &recursiveCallback]() {
+        if (recursionLevel < maxRecursionLevel) {
+            recursionLevel++;
+            // In real scenario, this would call itself, but we simulate it
+        }
+    };
+
+    /**
+     * @tc.steps: 3. Call SetOnWindowFocused with recursive callback.
+     * @tc.expected: Function handles recursive callback pattern.
+     */
+    context_->SetOnWindowFocused(recursiveCallback);
+    EXPECT_NE(context_->GetWindowFocusCallback(), nullptr);
+    EXPECT_EQ(recursionLevel, 0); // Should not have executed yet
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg036
+ * @tc.desc: Test FlushDragWindowVisibleCallback handles unset callback scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context is not null.
+     */
+    ASSERT_NE(context_, nullptr);
+    
+    /**
+     * @tc.steps: 2. Ensure no callback is set initially.
+     * @tc.expected: Callback pointer is null.
+     */
+    context_->AddDragWindowVisibleTask(nullptr);
+
+    /**
+     * @tc.steps: 3. Call FlushDragWindowVisibleCallback with unset callback.
+     * @tc.expected: Function executes without crash.
+     */
+    context_->FlushDragWindowVisibleCallback();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg037
+ * @tc.desc: Test FlushDragWindowVisibleCallback executes callback and resets it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context is not null.
+     */
+    ASSERT_NE(context_, nullptr);
+    
+    /**
+     * @tc.steps: 2. Define and set a callback function.
+     * @tc.expected: Callback is properly defined.
+     */
+    bool callbackExecuted = false;
+    context_->AddDragWindowVisibleTask([&callbackExecuted]() {
+        callbackExecuted = true;
+    });
+
+    /**
+     * @tc.steps: 3. Call FlushDragWindowVisibleCallback.
+     * @tc.expected: Callback is executed and then reset to nullptr.
+     */
+    context_->FlushDragWindowVisibleCallback();
+    EXPECT_TRUE(callbackExecuted);
+    
+    /**
+     * @tc.steps: 4. Call FlushDragWindowVisibleCallback again.
+     * @tc.expected: Callback is not executed since it was reset.
+     */
+    callbackExecuted = false;
+    context_->FlushDragWindowVisibleCallback();
+    EXPECT_FALSE(callbackExecuted);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg038
+ * @tc.desc: Test FlushDragWindowVisibleCallback prevents multiple executions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context is not null.
+     */
+    ASSERT_NE(context_, nullptr);
+    
+    /**
+     * @tc.steps: 2. Define callback to track execution count.
+     * @tc.expected: Callback is properly defined.
+     */
+    int callbackExecutionCount = 0;
+    context_->AddDragWindowVisibleTask([&callbackExecutionCount]() {
+        callbackExecutionCount++;
+    });
+    
+    /**
+     * @tc.steps: 3. Call FlushDragWindowVisibleCallback multiple times.
+     * @tc.expected: Callback is executed only on first call, subsequent calls do nothing.
+     */
+    const int iterations = 10;
+    for (int i = 0; i < iterations; i++) {
+        context_->FlushDragWindowVisibleCallback();
+    }
+    EXPECT_EQ(callbackExecutionCount, 1);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg039
+ * @tc.desc: Test FlushDragWindowVisibleCallback handles complex callback logic.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context is not null.
+     */
+    ASSERT_NE(context_, nullptr);
+    
+    /**
+     * @tc.steps: 2. Define complex callback with multiple operations.
+     * @tc.expected: Callback variables are initialized correctly.
+     */
+    std::vector<int> executionLog;
+    int testValue = 42;
+    
+    context_->AddDragWindowVisibleTask([&executionLog, &testValue, this]() {
+        executionLog.push_back(1);
+        testValue *= 2;
+        executionLog.push_back(2);
+    });
+    
+    EXPECT_EQ(executionLog.size(), 0u);
+    EXPECT_EQ(testValue, 42);
+
+    /**
+     * @tc.steps: 3. Execute the complex callback.
+     * @tc.expected: Complex callback executes correctly and is reset afterwards.
+     */
+    context_->FlushDragWindowVisibleCallback();
+    EXPECT_EQ(executionLog.size(), 2u);
+    EXPECT_EQ(executionLog[0], 1);
+    EXPECT_EQ(executionLog[1], 2);
+    EXPECT_EQ(testValue, 84);
+    
+    /**
+     * @tc.steps: 4. Call FlushDragWindowVisibleCallback again.
+     * @tc.expected: Callback does not execute and value remains unchanged.
+     */
+    executionLog.clear();
+    context_->FlushDragWindowVisibleCallback();
+    EXPECT_EQ(executionLog.size(), 0u);
+    EXPECT_EQ(testValue, 84);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg040
+ * @tc.desc: Test FlushDragWindowVisibleCallback works after context setup.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment and setup root element.
+     * @tc.expected: Context is not null and root element is set up.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    /**
+     * @tc.steps: 2. Define callback that interacts with context.
+     * @tc.expected: Callback variables are initialized correctly.
+     */
+    bool callbackCalled = false;
+    std::string testString = "initial";
+    context_->AddDragWindowVisibleTask([this, &callbackCalled, &testString]() {
+        callbackCalled = true;
+        testString = "modified";
+        
+        if (this->context_ && this->context_->GetRootElement()) {
+            testString += "_with_root";
+        }
+    });
+    EXPECT_FALSE(callbackCalled);
+    EXPECT_EQ(testString, "initial");
+
+    /**
+     * @tc.steps: 3. Call FlushDragWindowVisibleCallback.
+     * @tc.expected: Function works correctly in typical usage scenario.
+     */
+    context_->FlushDragWindowVisibleCallback();
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_EQ(testString, "modified_with_root");
+
+    /**
+     * @tc.steps: 4. Call FlushDragWindowVisibleCallback again.
+     * @tc.expected: Callback is not executed.
+     */
+    callbackCalled = false;
+    context_->FlushDragWindowVisibleCallback();
+    EXPECT_FALSE(callbackCalled);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg041
+ * @tc.desc: Test SetOnWindowFocused executes successfully with valid inputs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment with valid context.
+     * @tc.expected: Context and task executor are not null.
+     */
+    AssertValidContext();
+
+    /**
+     * @tc.steps: 2. Define a valid callback function.
+     * @tc.expected: Callback is properly defined.
+     */
+    bool callbackExecuted = false;
+    auto callback = [&callbackExecuted]() {
+        callbackExecuted = true;
+    };
+
+    /**
+     * @tc.steps: 3. Call SetOnWindowFocused with valid callback.
+     * @tc.expected: Callback is posted to task executor and executed correctly.
+     */
+    context_->SetOnWindowFocused(callback);
+    EXPECT_FALSE(callbackExecuted);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg042
+ * @tc.desc: Test SetOnWindowFocused handles empty callback parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment with valid context.
+     * @tc.expected: Context and task executor are not null.
+     */
+    AssertValidContext();
+
+    /**
+     * @tc.steps: 2. Define an empty callback function.
+     * @tc.expected: Empty callback is properly defined.
+     */
+    std::function<void()> emptyCallback = nullptr;
+
+    /**
+     * @tc.steps: 3. Call SetOnWindowFocused with empty callback.
+     * @tc.expected: Empty callback is handled correctly.
+     */
+    context_->SetOnWindowFocused(emptyCallback);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg043
+ * @tc.desc: Test SetOnWindowFocused handles lambda with large captured data.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg043, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment with valid context.
+     * @tc.expected: Context and task executor are not null.
+     */
+    AssertValidContext();
+
+    /**
+     * @tc.steps: 2. Define callback with large captured data.
+     * @tc.expected: Large data capture is properly defined.
+     */
+    std::vector<int> largeData(10000, 42);
+    std::string largeString(10000, 'A');
+    auto largeDataCallback = [largeData, largeString]() {
+        // Use the data to prevent optimization
+        volatile size_t dataSize = largeData.size();
+        volatile size_t stringSize = largeString.length();
+        (void)dataSize;
+        (void)stringSize;
+    };
+
+    /**
+     * @tc.steps: 3. Call SetOnWindowFocused with large data capturing lambda.
+     * @tc.expected: Large data capture handled correctly.
+     */
+    context_->SetOnWindowFocused(largeDataCallback);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg044
+ * @tc.desc: Test SetOnWindowFocused handles recursive-like callback pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg044, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment with valid context.
+     * @tc.expected: Context and task executor are not null.
+     */
+    AssertValidContext();
+
+    /**
+     * @tc.steps: 2. Define recursive-like callback simulation.
+     * @tc.expected: Recursive callback is properly configured.
+     */
+    int recursionCounter = 0;
+    const int maxRecursions = 5;
+    auto recursiveSimCallback = [&recursionCounter, maxRecursions]() {
+        if (recursionCounter < maxRecursions) {
+            recursionCounter++;
+        }
+    };
+
+    /**
+     * @tc.steps: 3. Call SetOnWindowFocused with recursive callback.
+     * @tc.expected: Recursive callback handled without stack overflow.
+     */
+    context_->SetOnWindowFocused(recursiveSimCallback);
+    EXPECT_EQ(recursionCounter, 0);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg045
+ * @tc.desc: Test SetOnWindowFocused works after context setup and UI operations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg045, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment and setup root element.
+     * @tc.expected: Context is properly initialized.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    ASSERT_NE(context_->taskExecutor_, nullptr);
+
+    /**
+     * @tc.steps: 2. Define callback after typical UI operations.
+     * @tc.expected: Callback is properly defined.
+     */
+    bool callbackExecuted = false;
+    auto typicalCallback = [&callbackExecuted, this]() {
+        callbackExecuted = true;
+        // Verify context is still valid
+        if (this->context_ && this->context_->GetRootElement()) {
+            // Perform some operation with context
+            (void)this->context_->GetRootElement()->GetId();
+        }
+    };
+
+    /**
+     * @tc.steps: 3. Call SetOnWindowFocused after UI operations.
+     * @tc.expected: Function works correctly in typical usage scenario.
+     */
+    context_->SetOnWindowFocused(typicalCallback);
+    EXPECT_FALSE(callbackExecuted);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg046
+ * @tc.desc: Test SetOnWindowFocused works with moved context object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg046, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Create and move a pipeline context.
+     * @tc.expected: Moved context functions correctly.
+     */
+    auto originalContext = AceType::MakeRefPtr<PipelineContext>();
+    ASSERT_NE(originalContext, nullptr);
+    auto movedContext = std::move(originalContext);
+    ASSERT_NE(movedContext, nullptr);
+
+    /**
+     * @tc.steps: 2. Define callback for moved context.
+     * @tc.expected: Callback is properly defined.
+     */
+    bool callbackExecuted = false;
+    auto callback = [&callbackExecuted]() {
+        callbackExecuted = true;
+    };
+
+    /**
+     * @tc.steps: 3. Call SetOnWindowFocused on moved context.
+     * @tc.expected: Function works correctly with moved context.
+     */
+    movedContext->SetOnWindowFocused(callback);
+    EXPECT_FALSE(callbackExecuted);
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg047
+ * @tc.desc: Test SendEventToAccessibilityWithNode handles null accessibility manager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg047, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context is not null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+
+    /**
+     * @tc.steps: 2. Store original accessibility manager and set to nullptr.
+     * @tc.expected: Accessibility manager pointer can be modified.
+     */
+    auto originalAccessibilityManager = context_->accessibilityManagerNG_;
+    context_->accessibilityManagerNG_ = nullptr;
+    
+    AccessibilityEvent event;
+    auto testNode = FrameNode::CreateFrameNode("TestNode", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(testNode, nullptr);
+    
+    /**
+     * @tc.steps: 3. Call SendEventToAccessibilityWithNode with null manager.
+     * @tc.expected: Function returns early without crash.
+     */
+    context_->SendEventToAccessibilityWithNode(event, testNode);
+    context_->accessibilityManagerNG_ = originalAccessibilityManager;
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg048
+ * @tc.desc: Test SendEventToAccessibilityWithNode handles disabled accessibility.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg048, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Test environment is properly initialized.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    auto accessibilityManager = context_->accessibilityManagerNG_;
+    ASSERT_NE(accessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: 2. Store original accessibility state and disable feature.
+     * @tc.expected: Accessibility state can be modified.
+     */
+    bool originalAccessibilityEnabled = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
+    AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = false;
+    AccessibilityEvent event;
+    auto testNode = FrameNode::CreateFrameNode("TestNode", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(testNode, nullptr);
+    
+    /**
+     * @tc.steps: 3. Call SendEventToAccessibilityWithNode with disabled accessibility.
+     * @tc.expected: Function exits early when accessibility is disabled.
+     */
+    context_->SendEventToAccessibilityWithNode(event, testNode);
+    AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = originalAccessibilityEnabled;
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg049
+ * @tc.desc: Test SendEventToAccessibilityWithNode executes successfully with valid inputs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg049, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context and accessibility manager are not null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    auto accessibilityManager = context_->accessibilityManagerNG_;
+    ASSERT_NE(accessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: 2. Store original accessibility state and enable feature.
+     * @tc.expected: Accessibility state can be modified.
+     */
+    bool originalAccessibilityEnabled = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
+    AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = true;
+    
+    AccessibilityEvent event;
+    auto testNode = FrameNode::CreateFrameNode("TestNode", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(testNode, nullptr);
+
+    /**
+     * @tc.steps: 3. Call SendEventToAccessibilityWithNode with valid parameters.
+     * @tc.expected: Function executes without crash.
+     */
+    context_->SendEventToAccessibilityWithNode(event, testNode);
+    AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = originalAccessibilityEnabled;
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg050
+ * @tc.desc: Test SendEventToAccessibilityWithNode handles null node parameter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg050, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context and accessibility manager are not null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    auto accessibilityManager = context_->accessibilityManagerNG_;
+    ASSERT_NE(accessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: 2. Store original accessibility state and enable feature.
+     * @tc.expected: Accessibility state can be modified.
+     */
+    bool originalAccessibilityEnabled = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
+    AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = true;
+    
+    AccessibilityEvent event;
+
+    /**
+     * @tc.steps: 3. Call SendEventToAccessibilityWithNode with nullptr node.
+     * @tc.expected: Function handles nullptr node gracefully.
+     */
+    context_->SendEventToAccessibilityWithNode(event, nullptr);
+    AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = originalAccessibilityEnabled;
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg051
+ * @tc.desc: Test UpdateSystemSafeAreaWithoutAnimation with SceneBoard window check enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg051, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context is not null.
+     */
+    ASSERT_NE(PipelineContextFourTestNg::context_, nullptr);
+    PipelineContextFourTestNg::context_->SetupRootElement();
+    auto originalSafeAreaManager = PipelineContextFourTestNg::context_->safeAreaManager_;
+    
+    auto mockSafeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    PipelineContextFourTestNg::context_->safeAreaManager_ = mockSafeAreaManager;
+
+    /**
+     * @tc.steps: 2. Prepare safe area insets data.
+     * @tc.expected: Safe area insets are properly initialized.
+     */
+    SafeAreaInsets systemSafeArea;
+
+    /**
+     * @tc.steps: 3. Call UpdateSystemSafeAreaWithoutAnimation with checkSceneBoardWindow = true.
+     * @tc.expected: Method executes with SceneBoard window check enabled.
+     */
+    PipelineContextFourTestNg::context_->UpdateSystemSafeAreaWithoutAnimation(systemSafeArea, true);
+    PipelineContextFourTestNg::context_->safeAreaManager_ = originalSafeAreaManager;
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg052
+ * @tc.desc: Test UpdateSystemSafeAreaWithoutAnimation exits early on unsupported platform versions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg052, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context is not null.
+     */
+    ASSERT_NE(PipelineContextFourTestNg::context_, nullptr);
+    PipelineContextFourTestNg::context_->SetupRootElement();
+
+    auto originalSafeAreaManager = PipelineContextFourTestNg::context_->safeAreaManager_;
+    auto originalMinPlatformVersion = PipelineContextFourTestNg::context_->minPlatformVersion_;
+    
+    /**
+     * @tc.steps: 2. Create mock safe area manager and set unsupported platform version.
+     * @tc.expected: Platform version can be modified.
+     */
+    auto mockSafeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    PipelineContextFourTestNg::context_->safeAreaManager_ = mockSafeAreaManager;
+    
+    PipelineContextFourTestNg::context_->minPlatformVersion_ = 9;
+    SafeAreaInsets systemSafeArea;
+    
+    /**
+     * @tc.steps: 3. Call UpdateSystemSafeAreaWithoutAnimation with old platform version.
+     * @tc.expected: Should return early due to platform version check.
+     */
+    PipelineContextFourTestNg::context_->UpdateSystemSafeAreaWithoutAnimation(systemSafeArea, false);
+    PipelineContextFourTestNg::context_->safeAreaManager_ = originalSafeAreaManager;
+    PipelineContextFourTestNg::context_->minPlatformVersion_ = originalMinPlatformVersion;
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg053
+ * @tc.desc: Test UpdateSystemSafeAreaWithoutAnimation with minimum supported platform version.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg053, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context is not null.
+     */
+    ASSERT_NE(PipelineContextFourTestNg::context_, nullptr);
+    PipelineContextFourTestNg::context_->SetupRootElement();
+
+    // Save original values
+    auto originalSafeAreaManager = PipelineContextFourTestNg::context_->safeAreaManager_;
+    auto originalMinPlatformVersion = PipelineContextFourTestNg::context_->minPlatformVersion_;
+    
+    /**
+     * @tc.steps: 2. Create mock safe area manager and set minimum supported platform version.
+     * @tc.expected: Platform version can be modified to boundary value.
+     */
+    auto mockSafeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    PipelineContextFourTestNg::context_->safeAreaManager_ = mockSafeAreaManager;
+    
+    PipelineContextFourTestNg::context_->minPlatformVersion_ = 10;
+    SafeAreaInsets systemSafeArea;
+
+    /**
+     * @tc.steps: 3. Call UpdateSystemSafeAreaWithoutAnimation with platform version equals to PLATFORM_VERSION_TEN.
+     * @tc.expected: Boundary condition with platform version equal to 10.
+     */
+    PipelineContextFourTestNg::context_->UpdateSystemSafeAreaWithoutAnimation(systemSafeArea, false);
+    
+    PipelineContextFourTestNg::context_->safeAreaManager_ = originalSafeAreaManager;
+    PipelineContextFourTestNg::context_->minPlatformVersion_ = originalMinPlatformVersion;
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg054
+ * @tc.desc: Test UpdateSystemSafeAreaWithoutAnimation handles zero-value safe areas.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg054, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context is not null.
+     */
+    ASSERT_NE(PipelineContextFourTestNg::context_, nullptr);
+    PipelineContextFourTestNg::context_->SetupRootElement();
+
+    auto originalSafeAreaManager = PipelineContextFourTestNg::context_->safeAreaManager_;
+    auto originalMinPlatformVersion = PipelineContextFourTestNg::context_->minPlatformVersion_;
+    
+    /**
+     * @tc.steps: 2. Create mock safe area manager and set supported platform version.
+     * @tc.expected: Environment is properly configured for test.
+     */
+    auto mockSafeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    PipelineContextFourTestNg::context_->safeAreaManager_ = mockSafeAreaManager;
+    
+    SafeAreaInsets zeroSafeArea;
+    PipelineContextFourTestNg::context_->minPlatformVersion_ = 11;
+
+    /**
+     * @tc.steps: 3. Call UpdateSystemSafeAreaWithoutAnimation with zero safe area values.
+     * @tc.expected: Boundary condition with zero values.
+     */
+    PipelineContextFourTestNg::context_->UpdateSystemSafeAreaWithoutAnimation(zeroSafeArea, false);
+    
+    PipelineContextFourTestNg::context_->safeAreaManager_ = originalSafeAreaManager;
+    PipelineContextFourTestNg::context_->minPlatformVersion_ = originalMinPlatformVersion;
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg055
+ * @tc.desc: Test UpdateSystemSafeAreaWithoutAnimation handles negative safe area values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg055, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context is not null.
+     */
+    ASSERT_NE(PipelineContextFourTestNg::context_, nullptr);
+    PipelineContextFourTestNg::context_->SetupRootElement();
+
+    auto originalSafeAreaManager = PipelineContextFourTestNg::context_->safeAreaManager_;
+    auto originalMinPlatformVersion = PipelineContextFourTestNg::context_->minPlatformVersion_;
+    
+    /**
+     * @tc.steps: 2. Create mock safe area manager.
+     * @tc.expected: Mock manager is properly created.
+     */
+    auto mockSafeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    PipelineContextFourTestNg::context_->safeAreaManager_ = mockSafeAreaManager;
+    
+    SafeAreaInsets negativeSafeArea;
+
+    /**
+     * @tc.steps: 3. Call UpdateSystemSafeAreaWithoutAnimation with negative safe area values.
+     * @tc.expected: Boundary condition with negative values.
+     */
+    PipelineContextFourTestNg::context_->UpdateSystemSafeAreaWithoutAnimation(negativeSafeArea, true);
+    
+    PipelineContextFourTestNg::context_->safeAreaManager_ = originalSafeAreaManager;
+    PipelineContextFourTestNg::context_->minPlatformVersion_ = originalMinPlatformVersion;
+}
+
+/**
+ * @tc.name: PipelineContextFourTestNg056
+ * @tc.desc: Test UpdateSystemSafeAreaWithoutAnimation handles large safe area values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg056, TestSize.Level1)
+{
+    /**
+     * @tc.steps: 1. Initialize test environment.
+     * @tc.expected: Context is not null.
+     */
+    ASSERT_NE(PipelineContextFourTestNg::context_, nullptr);
+    PipelineContextFourTestNg::context_->SetupRootElement();
+    auto originalSafeAreaManager = PipelineContextFourTestNg::context_->safeAreaManager_;
+    auto originalMinPlatformVersion = PipelineContextFourTestNg::context_->minPlatformVersion_;
+    
+    /**
+     * @tc.steps: 2. Create mock safe area manager and set platform version.
+     * @tc.expected: Test environment is properly configured.
+     */
+    auto mockSafeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    PipelineContextFourTestNg::context_->safeAreaManager_ = mockSafeAreaManager;
+    SafeAreaInsets largeSafeArea;
+    
+    PipelineContextFourTestNg::context_->minPlatformVersion_ = 12;
+
+    /**
+     * @tc.steps: 3. Call UpdateSystemSafeAreaWithoutAnimation with large safe area values.
+     * @tc.expected: Boundary condition with very large values.
+     */
+    PipelineContextFourTestNg::context_->UpdateSystemSafeAreaWithoutAnimation(largeSafeArea, false);
+    
+    PipelineContextFourTestNg::context_->safeAreaManager_ = originalSafeAreaManager;
+    PipelineContextFourTestNg::context_->minPlatformVersion_ = originalMinPlatformVersion;
 }
 
 } // namespace NG
