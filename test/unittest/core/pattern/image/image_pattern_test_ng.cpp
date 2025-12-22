@@ -2946,4 +2946,22 @@ HWTEST_F(ImagePatternTestNg, ImagePatternLoadImageDataIfNeed001, TestSize.Level0
     ASSERT_NE(geometryNode, nullptr);
     imagePattern->LoadImageDataIfNeed();
 }
+
+/**
+ * @tc.name: TestImageSourceInfoGetSrcType001
+ * @tc.desc: Verify srcType is correctly mapped from ImageSourceInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, TestImageSourceInfoGetSrcType001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ;
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    ImageSourceInfo info("http://example.com/test.png");
+    auto imageDfxConfig = imagePattern->CreateImageDfxConfig(info);
+    EXPECT_EQ(imageDfxConfig.srcType_, static_cast<int32_t>(info.GetSrcType()));
+}
 } // namespace OHOS::Ace::NG
