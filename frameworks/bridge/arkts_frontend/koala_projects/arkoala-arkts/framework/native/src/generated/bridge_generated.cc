@@ -32534,7 +32534,7 @@ KOALA_INTEROP_DIRECT_V3(LazyBuild_SetTabContentLazyBuilder, Ark_NativePointer, K
 void impl_LazyForEachOps_NotifyChange(Ark_NativePointer node, Ark_Int32 startIndex, Ark_Int32 endIndex, Ark_Int32 count) {
         GetAccessors()->getLazyForEachOpsAccessor()->NotifyChange(node, startIndex, endIndex, count);
 }
-KOALA_INTEROP_DIRECT_V4(LazyForEachOps_NotifyChange, Ark_NativePointer, Ark_Int32, Ark_Int32, Ark_Int32)
+KOALA_INTEROP_V4(LazyForEachOps_NotifyChange, Ark_NativePointer, Ark_Int32, Ark_Int32, Ark_Int32)
 void impl_LazyForEachOps_Sync(Ark_NativePointer node, Ark_Int32 totalCount, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Callback_CreateItem creatorValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_CreateItem)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_CreateItem))))};;
