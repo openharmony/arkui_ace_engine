@@ -966,13 +966,17 @@ export class TextPickerOptions_serializer {
                         const valueHolderForRangeForIdx4TmpElement : TextCascadePickerRangeContent = valueHolderForRangeForIdx4[valueHolderForRangeForIdx4CounterI]
                         TextCascadePickerRangeContent_serializer.write(valueSerializer, valueHolderForRangeForIdx4TmpElement)
                     }
-                } else if (valueHolderForRange instanceof Array) {
-                    if (valueHolderForRange.length == 0) {
+// instructive change start
+                } else if (valueHolderForRangeElem instanceof Array) {
+                    if (valueHolderForRangeElem.length == 0) {
+// instructive change end
                         valueSerializer.writeInt8((1).toByte())
                         valueSerializer.writeInt32(0)
                     } else {
-                        const valueHolderForRangeElem  = valueHolderForRange[0]
-                        if (valueHolderForRangeElem instanceof string) {
+// instructive change start
+                        const valueHolderForRangeElem2  = valueHolderForRangeElem[0]
+                        if (valueHolderForRangeElem2 instanceof string) {
+// instructive change end
                             valueSerializer.writeInt8((1).toByte())
                             const valueHolderForRangeForIdx1  = valueHolderForRange as Array<Array<string>>
                             valueSerializer.writeInt32((valueHolderForRangeForIdx1.length).toInt())
@@ -1453,13 +1457,17 @@ export class TextPickerDialogOptions_serializer {
                         const valueHolderForRangeForIdx4TmpElement : TextCascadePickerRangeContent = valueHolderForRangeForIdx4[valueHolderForRangeForIdx4CounterI]
                         TextCascadePickerRangeContent_serializer.write(valueSerializer, valueHolderForRangeForIdx4TmpElement)
                     }
-                } else if (valueHolderForRange instanceof Array) {
-                    if (valueHolderForRange.length == 0) {
+// instructive change start
+                } else if (valueHolderForRangeElem instanceof Array) {
+                    if (valueHolderForRangeElem.length == 0) {
+// instructive change end
                         valueSerializer.writeInt8((1).toByte())
                         valueSerializer.writeInt32(0)
                     } else {
-                        const valueHolderForRangeElem  = valueHolderForRange[0]
-                        if (valueHolderForRangeElem instanceof string) {
+// instructive change start
+                        const valueHolderForRangeElem2  = valueHolderForRangeElem[0]
+                        if (valueHolderForRangeElem2 instanceof string) {
+// instructive change end
                             valueSerializer.writeInt8((1).toByte())
                             const valueHolderForRangeForIdx1  = valueHolderForRange as Array<Array<string>>
                             valueSerializer.writeInt32((valueHolderForRangeForIdx1.length).toInt())
