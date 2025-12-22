@@ -1164,4 +1164,97 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateParagraphByCustomSpanTest002, TestSize.Le
     EXPECT_EQ(customSpanPlaceholder.customSpanIndex, 10);
 }
 
+/**
+ * @tc.name: AddSymbolSpanToParagraphTest001
+ * @tc.desc: Test AddSymbolSpanToParagraph when useParagraphCache_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, AddSymbolSpanToParagraphTest001, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create RichEditorPattern and get layout algorithm
+     */
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create RichEditorLayoutAlgorithm with useParagraphCache_ = false
+     */
+    auto layoutAlgorithm =
+        AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    // Set useParagraphCache_ to false
+    layoutAlgorithm->useParagraphCache_ = false;
+
+    /**
+     * @tc.steps: step3. Prepare test parameters
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = u"symbol content";
+    int32_t spanTextLength = 5;
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<TextPattern>());
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+
+    /**
+     * @tc.steps: step4. Call AddSymbolSpanToParagraph method
+     * @tc.expected: When useParagraphCache_ is false, should call base class method
+     */
+    layoutAlgorithm->AddSymbolSpanToParagraph(spanItem, spanTextLength, frameNode, paragraph);
+
+    /**
+     * @tc.expected: spanTextLength should be increased by the content length
+     */
+    EXPECT_EQ(spanTextLength, 7);
+}
+
+/**
+ * @tc.name: AddSymbolSpanToParagraphTest002
+ * @tc.desc: Test AddSymbolSpanToParagraph when useParagraphCache_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, AddSymbolSpanToParagraphTest002, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create RichEditorPattern and get layout algorithm
+     */
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create RichEditorLayoutAlgorithm with useParagraphCache_ = true
+     */
+    auto layoutAlgorithm =
+        AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    // Set useParagraphCache_ to true
+    layoutAlgorithm->useParagraphCache_ = true;
+
+    /**
+     * @tc.steps: step3. Prepare test parameters
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = u"symbol content";
+    int32_t spanTextLength = 5;
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<TextPattern>());
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+
+    /**
+     * @tc.steps: step4. Call AddSymbolSpanToParagraph method
+     * @tc.expected: When useParagraphCache_ is true, should execute override logic
+     *               spanTextLength should be increased by content length
+     */
+    layoutAlgorithm->AddSymbolSpanToParagraph(spanItem, spanTextLength, frameNode, paragraph);
+
+    /**
+     * @tc.expected: spanTextLength should be increased by the content length (15 characters)
+     */
+    EXPECT_EQ(spanTextLength, 19);
+}
+
 } // namespace OHOS::Ace::NG
