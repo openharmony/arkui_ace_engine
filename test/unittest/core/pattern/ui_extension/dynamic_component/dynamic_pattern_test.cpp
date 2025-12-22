@@ -473,12 +473,13 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest011, TestSize.Level1)
 
     /**
      * @tc.steps: step2. test WrapExtensionAbilityId.
-     * @tc.expected: expect result is 202.
+     * @tc.expected: expect result is 302.
      */
-    int64_t extensionOffset = 200;
+    dynamicPattern->uiExtensionId_ = 3;
+    int64_t extensionOffset = 100;
     int64_t abilityId = 2;
     auto result0 = dynamicPattern->WrapExtensionAbilityId(extensionOffset, abilityId);
-    EXPECT_EQ(result0, 202);
+    EXPECT_EQ(result0, 302);
 
     /**
      * @tc.steps: step3. test GetAccessibilitySessionAdapter.
