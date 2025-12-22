@@ -83,7 +83,7 @@ ArkUI_LayoutConstraint* OH_ArkUI_NodeCustomEvent_GetLayoutConstraintInMeasure(Ar
 
 ArkUI_IntOffset OH_ArkUI_NodeCustomEvent_GetPositionInLayout(ArkUI_NodeCustomEvent* event)
 {
-    ArkUI_IntOffset intOffset;
+    ArkUI_IntOffset intOffset = {.x = 0, .y = 0};
     CHECK_NULL_RETURN(event, intOffset);
     intOffset.x = event->event->data[NUM_0];
     intOffset.y = event->event->data[NUM_1];
