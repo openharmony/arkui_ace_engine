@@ -475,7 +475,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest011, TestSize.Level1)
      * @tc.steps: step2. test WrapExtensionAbilityId.
      * @tc.expected: expect result is 202.
      */
-    int64_t extensionOffset = 100;
+    int64_t extensionOffset = 200;
     int64_t abilityId = 2;
     auto result0 = dynamicPattern->WrapExtensionAbilityId(extensionOffset, abilityId);
     EXPECT_EQ(result0, 202);
