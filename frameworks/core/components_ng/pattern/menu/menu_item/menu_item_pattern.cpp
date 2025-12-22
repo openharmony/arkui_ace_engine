@@ -290,7 +290,8 @@ void MenuItemPattern::UpdateLeftRow(RefPtr<FrameNode>& leftRow)
 {
     CHECK_NULL_VOID(leftRow);
     auto selectTheme = GetCurrentSelectTheme();
-    if (!selectTheme || !selectTheme->IsTV()) {
+    // The selected icon of default menu is displayed at the start, needs to be added in the left row.
+    if (selectTheme && selectTheme->GetMenuSelectedIconAlign() == HorizontalAlign::START) {
         AddSelectIcon(leftRow);
     }
     UpdateIcon(leftRow, true);
@@ -313,7 +314,8 @@ void MenuItemPattern::UpdateRightRow(RefPtr<FrameNode>& rightRow)
     UpdateIcon(rightRow, false);
     AddExpandIcon(rightRow);
     auto selectTheme = GetCurrentSelectTheme();
-    if (selectTheme && selectTheme->IsTV()) {
+    // The selected icon position configured at the end. Now tv is shown at the end.
+    if (selectTheme && selectTheme->GetMenuSelectedIconAlign() == HorizontalAlign::END) {
         AddSelectIcon(rightRow);
     }
 }
@@ -2012,7 +2014,7 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
     renderContext->SetVisible(isSelected_);
 
     auto selectTheme = GetCurrentSelectTheme();
-    if (selectTheme && selectTheme->IsTV()) {
+    if (selectTheme && selectTheme->GetMenuSelectedIconAlign() == HorizontalAlign::END) {
         // The select icon is displayed at the end of the row on TV.
         selectIcon_->MountToParent(row);
     } else {

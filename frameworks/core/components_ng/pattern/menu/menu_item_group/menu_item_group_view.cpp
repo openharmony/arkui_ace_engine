@@ -129,12 +129,7 @@ void MenuItemGroupView::SetHeader(const std::string& headerStr)
     CHECK_NULL_VOID(theme);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         layoutProps->UpdateFontSize(theme->GetMenuItemGroupTitleTextFontSize());
-        if (theme->IsTV()) {
-            // The menu title font weight on TV needs to be medium.
-            layoutProps->UpdateFontWeight(FontWeight::MEDIUM);
-        } else {
-            layoutProps->UpdateFontWeight(FontWeight::BOLD);
-        }
+        layoutProps->UpdateFontWeight(theme->GetMenuHeaderFontWeight());
         layoutProps->UpdateTextColor(theme->GetMenuTextColor());
     } else {
         layoutProps->UpdateFontSize(theme->GetMenuFontSize());

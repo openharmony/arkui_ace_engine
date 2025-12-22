@@ -894,6 +894,18 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern004, TestSize.Level1)
     ASSERT_NE(layoutProps2, nullptr);
     EXPECT_EQ(layoutProps2->GetFontWeight(), FontWeight::BOLD);
 
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    selectTheme->menuHeaderFontWeight_ = FontWeight::MEDIUM;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
+        return selectTheme;
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    menuItemGroupView.SetHeader(headerStr);
+    ASSERT_NE(menuItemPattern->headerContent_, nullptr);
+    auto layoutProps3 = menuItemPattern->headerContent_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProps3, nullptr);
+    EXPECT_EQ(layoutProps3->GetFontWeight(), FontWeight::MEDIUM);
+
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
