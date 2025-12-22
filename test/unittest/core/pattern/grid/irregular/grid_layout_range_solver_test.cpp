@@ -127,6 +127,48 @@ HWTEST_F(GridLayoutRangeTest, CheckMultiRow001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LayoutRangeSolver::CheckMultiRow002
+ * @tc.desc: Test LayoutRangeSolver::CheckMultiRow
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, CheckMultiRow002, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = {
+        1, // [1 x 2]
+        2, // [1 x 0]
+        3, // [1 x -1]
+    };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 1) {
+            return { .rows = 2, .columns = 1 };
+        }
+        if (index == 2) {
+            return { .rows = 1, .columns =0 };
+        }
+        return { .rows = 1, .columns = -1 };
+    };
+
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    CreateDone();
+
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 2 }, { 2, 5 } } },  // 0 | 2 | 5
+        { 1, { { 0, 1 }, { 1, 3 }, { 2, 6 } } },  // 1 | 3 | 6
+        { 2, { { 0, -1 }, { 1, 4 }, { 2, 7 } } }, // 1 | 4 | 7
+    };
+
+    GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
+    EXPECT_EQ(solver.CheckMultiRow(0), std::make_pair(0, 0));
+    EXPECT_EQ(solver.CheckMultiRow(1), std::make_pair(1, 1));
+}
+
+/**
  * @tc.name: LayoutRangeSolver::SolveBackward001
  * @tc.desc: Test LayoutRangeSolver::SolveBackward
  * @tc.type: FUNC
