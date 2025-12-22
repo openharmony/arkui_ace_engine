@@ -579,6 +579,12 @@ void OpenPopupImpl(Ark_VMContext vmContext,
         ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
         return;
     }
+    auto context = frameNode->GetContext();
+    if (!context) {
+        ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    ContainerScope scope(context->GetInstanceId());
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     CHECK_NULL_VOID(popupParam);
     popupParam = Converter::Convert<RefPtr<PopupParam>>(options->value);
@@ -611,6 +617,12 @@ void UpdatePopupImpl(Ark_VMContext vmContext,
         ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
         return;
     }
+    auto context = frameNode->GetContext();
+    if (!context) {
+        ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    ContainerScope scope(context->GetInstanceId());
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     auto oldParam = AceType::MakeRefPtr<PopupParam>();
     auto result = ViewAbstractModelStatic::GetPopupParam(oldParam, frameNode);
@@ -656,6 +668,12 @@ void ClosePopupImpl(Ark_VMContext vmContext,
         ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
         return;
     }
+    auto context = frameNode->GetContext();
+    if (!context) {
+        ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    ContainerScope scope(context->GetInstanceId());
     auto result = ViewAbstractModelStatic::ClosePopup(frameNode);
     if (result == ERROR_CODE_INTERNAL_ERROR) {
         result = ERROR_CODE_NO_ERROR;
@@ -675,6 +693,12 @@ void OpenMenuImpl(Ark_VMContext vmContext,
         ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
         return;
     }
+    auto context = frameNode->GetContext();
+    if (!context) {
+        ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    ContainerScope scope(context->GetInstanceId());
     MenuParam menuParam = Converter::Convert<MenuParam>(options->value);
     g_bindMenuOptionsParamCallbacks(options->value, menuParam, AceType::WeakClaim(frameNode.GetRawPtr()));
     auto pipelineContext = frameNode->GetContext();
@@ -755,6 +779,12 @@ void CloseMenuImpl(Ark_VMContext vmContext,
         ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
         return;
     }
+    auto context = frameNode->GetContext();
+    if (!context) {
+        ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    ContainerScope scope(context->GetInstanceId());
     auto result = ViewAbstractModelStatic::CloseMenu(frameNode);
     if (result == ERROR_CODE_INTERNAL_ERROR) {
         result = ERROR_CODE_NO_ERROR;
