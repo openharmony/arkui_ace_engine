@@ -2398,6 +2398,12 @@ std::tuple<int32_t, int32_t, int32_t, int32_t> ListLayoutAlgorithm::LayoutCached
     int32_t endIndex = GetEndIndex();
     int32_t cachedForward = 0;
     int32_t cachedBackward = 0;
+    bool forceCache = false;
+    int32_t minCacheCount = cacheCount;
+    auto prop = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    if (prop) {
+        minCacheCount = prop->GetMinCacheCount();
+    }
     if (startIndex == endIndex && itemPosition_.begin()->second.isGroup) {
         auto wrapper = GetChildByIndex(layoutWrapper, startIndex);
         auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, cacheCount, cacheCount, startIndex, false);
@@ -2405,7 +2411,9 @@ std::tuple<int32_t, int32_t, int32_t, int32_t> ListLayoutAlgorithm::LayoutCached
             (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount)) {
             int32_t forwardCached = res.forwardCacheMax > 0 ? cachedForward : -1;
             int32_t backwardCached = res.backwardCacheMax > 0 ? cachedBackward : -1;
-            predictList.emplace_back(PredictLayoutItem { startIndex, forwardCached, backwardCached });
+            forceCache = (forwardCached != -1 && forwardCached < minCacheCount) ||
+                         (backwardCached != -1 && backwardCached < minCacheCount);
+            predictList.emplace_back(PredictLayoutItem { startIndex, forwardCached, backwardCached, forceCache });
         }
         cachedForward += res.forwardCacheMax;
         cachedBackward += res.backwardCacheMax;
@@ -2414,7 +2422,8 @@ std::tuple<int32_t, int32_t, int32_t, int32_t> ListLayoutAlgorithm::LayoutCached
             auto wrapper = GetChildByIndex(layoutWrapper, endIndex);
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, cacheCount, -1, endIndex, false);
             if (res.forwardCachedCount < res.forwardCacheMax && res.forwardCachedCount < cacheCount) {
-                predictList.emplace_back(PredictLayoutItem { endIndex, cachedForward, -1 });
+                forceCache = cachedForward < minCacheCount;
+                predictList.emplace_back(PredictLayoutItem { endIndex, cachedForward, -1, forceCache });
             }
             cachedForward += res.forwardCacheMax;
         }
@@ -2422,7 +2431,8 @@ std::tuple<int32_t, int32_t, int32_t, int32_t> ListLayoutAlgorithm::LayoutCached
             auto wrapper = GetChildByIndex(layoutWrapper, startIndex);
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, -1, cacheCount, startIndex, false);
             if (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount) {
-                predictList.emplace_back(PredictLayoutItem { startIndex, -1, cachedBackward });
+                forceCache = cachedBackward < minCacheCount;
+                predictList.emplace_back(PredictLayoutItem { startIndex, -1, cachedBackward, forceCache });
             }
             cachedBackward += res.backwardCacheMax;
         }

@@ -1951,6 +1951,32 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, TestGroupCacheRange, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestGroupCacheRangeInBusy
+ * @tc.desc: Test group cached node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, TestGroupCacheRangeInBusy, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(1);
+    CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    CreateItemsInLazyForEach(10, 100.0f, nullptr); /* 10: item count */
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. SetCacheRange
+     * @tc.expected: 1 ListItem cached.
+     */
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushUITasks(frameNode_);
+    ASSERT_NE(listPattern->GetPredictLayoutParamV2(), std::nullopt);
+    auto param = listPattern->GetPredictLayoutParamV2().value();
+    for (auto it : param.items) {
+        EXPECT_EQ(it.forceCache, true);
+    }
+}
+
+/**
  * @tc.name: TestGroupCacheSyncGeometry
  * @tc.desc: ListItemGroup in cache need sync geometry.
  * @tc.type: FUNC
