@@ -1958,6 +1958,8 @@ void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src)
         case ARK_HIT_TEST_MODE_BLOCK: dst = HitTestMode::HTMBLOCK; break;
         case ARK_HIT_TEST_MODE_TRANSPARENT: dst = HitTestMode::HTMTRANSPARENT; break;
         case ARK_HIT_TEST_MODE_NONE: dst = HitTestMode::HTMNONE; break;
+        case ARK_HIT_TEST_MODE_BLOCK_HIERARCHY: dst = HitTestMode::HTMBLOCK_HIERARCHY; break;
+        case ARK_HIT_TEST_MODE_BLOCK_DESCENDANTS: dst = HitTestMode::HTMBLOCK_DESCENDANTS; break;
         default: {
             LOGE("Unexpected enum value in Ark_HitTestMode: %{public}d", src);
         }
