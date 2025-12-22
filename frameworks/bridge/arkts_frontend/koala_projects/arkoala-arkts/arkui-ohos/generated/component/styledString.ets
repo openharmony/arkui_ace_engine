@@ -434,7 +434,10 @@ export class ImageAttachment implements MaterializedBase {
     }
     private getValue_serialize(): PixelMap {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getValue(this.peer!.ptr)
-        throw new Error('Object deserialization is not implemented.')
+        // instructive change start
+        const obj : image.PixelMap = extractors.fromImagePixelMapPtr(retval)
+        return obj
+        // instructive change end
     }
     private getSize_serialize(): SizeOptions | undefined {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getSize(this.peer!.ptr)
