@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/i18n/localization.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -78,11 +77,6 @@ bool NavDestinationModelNG::ParseCommonTitle(
             // update main title
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
             textLayoutProperty->UpdateMaxLines(hasSubTitle ? 1 : TITLEBAR_MAX_LINES);
-            std::string titleString = NavigationTitleUtil::GetTitleString(titleBarNode, false);
-            if (titleString != title) {
-                UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
-                    "NavDestination.title");
-            }
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 textLayoutProperty->UpdateHeightAdaptivePolicy(hasSubTitle ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
                     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
@@ -94,8 +88,6 @@ bool NavDestinationModelNG::ParseCommonTitle(
             mainTitle = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             auto textLayoutProperty = mainTitle->GetLayoutProperty<TextLayoutProperty>();
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
-                "NavDestination.title");
             textLayoutProperty->UpdateContent(title);
             titleBarPattern->SetNeedResetMainTitleProperty(true);
             titleBarNode->SetTitle(mainTitle);
@@ -510,16 +502,6 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
 
 void NavDestinationModelNG::SetHideTitleBar(bool hideTitleBar, bool animated)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    CHECK_NULL_VOID(navDestinationGroupNode);
-    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
-    CHECK_NULL_VOID(navDestinationLayoutProperty);
-    if (!navDestinationLayoutProperty->HasHideTitleBar() ||
-        (navDestinationLayoutProperty->GetHideTitleBar() != hideTitleBar)) {
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
-            "NavDestination.hideTitleBar");
-    }
     ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, HideTitleBar, hideTitleBar);
     ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, IsAnimatedTitleBar, animated);
 }
@@ -602,22 +584,6 @@ void NavDestinationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<N
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (symbolApply != nullptr) {
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
-            "NavDestination.backButtonIcon");
-    }
-    if (titleBarLayoutProperty->HasImageSource()) {
-        if (titleBarLayoutProperty->GetImageSourceValue().GetSrc() != src ||
-            titleBarLayoutProperty->GetImageSourceValue().GetBundleName() != nameList[0]) {
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
-                "NavDestination.backButtonIcon");
-        }
-    } else {
-        if (src != "") {
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
-                "NavDestination.backButtonIcon");
-        }
-    }
     ImageSourceInfo imageSourceInfo(src, nameList[0], nameList[1]);
     titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
     titleBarLayoutProperty->UpdateNoPixMap(imageOption.noPixMap);
@@ -842,8 +808,6 @@ void NavDestinationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
         // do nothing
         return;
     }
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
-        "NavDestination.title");
     // update custom title
     titleBarNode->RemoveChild(currentTitle);
     titleBarNode->SetTitle(customTitle);
@@ -1034,15 +998,6 @@ RefPtr<AceType> NavDestinationModelNG::CreateEmpty()
 
 void NavDestinationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated)
 {
-    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    CHECK_NULL_VOID(navDestinationGroupNode);
-    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
-    CHECK_NULL_VOID(navDestinationLayoutProperty);
-    if (!navDestinationLayoutProperty->HasHideTitleBar() ||
-        (navDestinationLayoutProperty->GetHideTitleBar() != hideTitleBar)) {
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
-            "NavDestination.hideTitleBar");
-    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, HideTitleBar, hideTitleBar, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, IsAnimatedTitleBar, animated, frameNode);
 }
@@ -1090,17 +1045,6 @@ void NavDestinationModelNG::SetBackButtonIcon(
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->HasImageSource()) {
-        if (titleBarLayoutProperty->GetImageSourceValue().GetSrc() != src) {
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
-                "NavDestination.backButtonIcon");
-        }
-    } else {
-        if (src != "") {
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
-                "NavDestination.backButtonIcon");
-        }
-    }
     ImageSourceInfo imageSourceInfo(src);
     titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
     titleBarLayoutProperty->UpdateNoPixMap(noPixMap);
@@ -1496,11 +1440,6 @@ void NavDestinationModelNG::ParseCommonTitle(FrameNode* frameNode, const NG::Nav
     navDestinationNode->UpdatePrevTitleIsCustom(false);
 
     auto theme = NavigationGetTheme();
-    std::string titleString = NavigationTitleUtil::GetTitleString(titleBarNode, false);
-    if (titleString != titleInfo.title) {
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
-            "NavDestination.title");
-    }
     // create or update main title
     NavigationTitleUtil::CreateOrUpdateDestinationMainTitle(titleBarNode, titleInfo);
 
@@ -1911,8 +1850,6 @@ void NavDestinationModelNG::SetCustomTitle(FrameNode* frameNode, const RefPtr<Ac
         // do nothing
         return;
     }
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event",
-        "NavDestination.title");
     // update custom title
     titleBarNode->RemoveChild(currentTitle);
     titleBarNode->SetTitle(customTitle);
