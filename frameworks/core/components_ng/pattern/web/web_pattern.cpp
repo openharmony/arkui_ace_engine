@@ -4609,7 +4609,7 @@ void WebPattern::RegisterWebDomNativeInterface()
                 pattern->webDomDocument_->UpdateScrollInfoFromJsonString(param[WEB_NATIVE_PARAM_INDEX]);
             },
         },
-        false, "", false);
+        true, "", false);
 }
 
 void WebPattern::RecordWebEvent(bool isInit)
