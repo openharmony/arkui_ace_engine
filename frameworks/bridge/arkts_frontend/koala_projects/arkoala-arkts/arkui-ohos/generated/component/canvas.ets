@@ -476,7 +476,9 @@ export class OffscreenCanvas implements MaterializedBase {
         return
     }
     getContext(contextType: string, options: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
-        throw new Error('Improve')
+        // instructive change start
+        return hookGetContext(this, contextType, options)
+        // instructive change end
     }
     private transferToImageBitmap_serialize(): ImageBitmap | undefined {
         const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_transferToImageBitmap(this.peer!.ptr)
