@@ -46,9 +46,9 @@ public:
      * @brief Allow other modules to modify offset. Calling this function automatically stops scroll animations.
      */
     void SetOffset(OffsetF newPos, bool allowOverScroll = false);
-    inline void UpdateOffset(const OffsetF& delta)
+    inline void UpdateOffset(const OffsetF& delta, bool canOverScroll = false)
     {
-        SetOffset(offset_->Get() + delta);
+        SetOffset(offset_->Get() + delta, canOverScroll);
     }
 
     void OnLayoutFinished(const OffsetF& adjustedOffset, const SizeF& scrollableArea);
@@ -65,6 +65,15 @@ public:
     void ScrollTo(OffsetF finalPos, const std::optional<float>& velocity,
         std::optional<int32_t> duration = std::nullopt, RefPtr<Curve> curve = nullptr, bool allowOverScroll = false);
 
+    /**
+     * @brief clamp position to be within the scrollable area.
+     */
+    OffsetF ClampPosition(const OffsetF& finalPos) const;
+
+    /**
+     * @brief Start the scroll animation if possible with the given velocity and offset_.
+     */
+    void Fling(const OffsetF& velocity);
 private:
     void InitializePanRecognizer();
     void InitializeTouchEvent();
@@ -81,17 +90,8 @@ private:
      */
     void HandleOffsetUpdate(const OffsetF& currentValue);
 
-    /**
-     * @brief Start the scroll animation if possible with the given velocity and offset_.
-     */
-    void Fling(const OffsetF& velocity);
     void StopScrollAnimation();
     void HandleAnimationEnd();
-
-    /**
-     * @brief clamp position to be within the scrollable area.
-     */
-    OffsetF ClampPosition(const OffsetF& finalPos) const;
 
     /**
      * @brief Check if the new offset would reach any edges. If so, fire corresponding user callbacks.

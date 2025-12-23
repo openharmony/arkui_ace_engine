@@ -101,6 +101,10 @@ public:
 
     bool OnScrollCallback(float offset, int32_t source) override;
 
+    bool FreeOverScrollWithDelta(Axis axis, double delta);
+
+    void ProcessFreeScrollOverDrag(const OffsetF velocity);
+
     void OnScrollEndCallback() override;
 
     double GetCurrentPosition() const
@@ -490,7 +494,7 @@ public:
     }
 
     Offset GetFreeScrollOffset() const final;
-    bool FreeScrollBy(const OffsetF& delta) final;
+    bool FreeScrollBy(const OffsetF& delta, bool canOverScroll = false) final;
     bool FreeScrollPage(bool reverse, bool smooth) final;
     bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, std::optional<float> velocity) final;
     void FreeScrollTo(const ScrollControllerBase::ScrollToParam& param) final;

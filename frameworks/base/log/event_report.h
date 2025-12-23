@@ -161,7 +161,7 @@ enum class ScrollableErrorType {
     STOP_ANIMATION_TIMEOUT,
     PRELOAD_ERROR,
     START_SPRING_MOTION_ERROR,
-    CHILDREN_COUNT_DISMATDH,
+    CHILDREN_COUNT_DISMATCH,
 };
 
 struct EventInfo {
