@@ -53,7 +53,11 @@ void FfiOHOSAceFrameworkButtonCreateWithChildAndOptions(ButtonOptions buttonOpti
     CreateWithPara params;
     params.parseSuccess = true;
     params.optionSetFirst = true;
-    params.type = static_cast<ButtonType>(buttonOptions.shape);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        params.type = BUTTON_TYPES[buttonOptions.shape];
+    } else {
+        params.type = static_cast<ButtonType>(buttonOptions.shape);
+    }
     params.stateEffect = buttonOptions.stateEffect;
     params.buttonStyleMode = static_cast<ButtonStyleMode>(buttonOptions.buttonStyle);
     params.controlSize = static_cast<ControlSize>(buttonOptions.controlSize);
@@ -69,7 +73,11 @@ void FfiOHOSAceFrameworkButtonCreateWithButtonOptions(ButtonOptions buttonOption
     params.parseSuccess = true;
     params.optionSetFirst = true;
     params.label = "";
-    params.type = static_cast<ButtonType>(buttonOptions.shape);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        params.type = BUTTON_TYPES[buttonOptions.shape];
+    } else {
+        params.type = static_cast<ButtonType>(buttonOptions.shape);
+    }
     params.stateEffect = buttonOptions.stateEffect;
     params.buttonStyleMode = static_cast<ButtonStyleMode>(buttonOptions.buttonStyle);
     params.controlSize = static_cast<ControlSize>(buttonOptions.controlSize);
@@ -109,7 +117,11 @@ void FfiOHOSAceFrameworkButtonCreateWithLabelAndOptions(const char* label, Butto
     params.label = label;
     params.parseSuccess = true;
     params.optionSetFirst = true;
-    params.type = static_cast<ButtonType>(buttonOptions.shape);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        params.type = BUTTON_TYPES[buttonOptions.shape];
+    } else {
+        params.type = static_cast<ButtonType>(buttonOptions.shape);
+    }
     params.stateEffect = buttonOptions.stateEffect;
     params.buttonStyleMode = static_cast<ButtonStyleMode>(buttonOptions.buttonStyle);
     params.controlSize = static_cast<ControlSize>(buttonOptions.controlSize);
