@@ -28,22 +28,22 @@ struct FontMetrics {
         BOUNDS_INVALID_FLAG               = 1 << 4,
     };
  
-    uint32_t fFlags;
-    float fTop;
-    float fAscent;
-    float fDescent;
-    float fBottom;
-    float fLeading;
-    float fAvgCharWidth;
-    float fMaxCharWidth;
-    float fXMin;
-    float fXMax;
-    float fXHeight;
-    float fCapHeight;
-    float fUnderlineThickness;
-    float fUnderlinePosition;
-    float fStrikeoutThickness;
-    float fStrikeoutPosition;
+    uint32_t fFlags = 0;
+    float fTop = 0.0f;
+    float fAscent = 0.0f;
+    float fDescent = 0.0f;
+    float fBottom = 0.0f;
+    float fLeading = 0.0f;
+    float fAvgCharWidth = 0.0f;
+    float fMaxCharWidth = 0.0f;
+    float fXMin = 0.0f;
+    float fXMax = 0.0f;
+    float fXHeight = 0.0f;
+    float fCapHeight = 0.0f;
+    float fUnderlineThickness = 0.0f;
+    float fUnderlinePosition = 0.0f;
+    float fStrikeoutThickness = 0.0f;
+    float fStrikeoutPosition = 0.0f;
 };
  
 class RunMetrics {
@@ -54,38 +54,38 @@ public:
  
 struct TextLineMetrics {
     /** Text ascender height */
-    double ascender;
+    double ascender = 0.0;
     /** Tex descender height */
-    double descender;
+    double descender = 0.0;
     /** The height of a capital letter */
-    double capHeight;
+    double capHeight = 0.0;
     /** The height of a lowercase letter */
-    double xHeight;
+    double xHeight = 0.0;
     /** Text width */
-    double width;
+    double width = 0.0;
     /** Line height */
-    double height;
+    double height = 0.0;
     /**
      * The distance from the left end of the text to the left end of the container,
      * aligned to 0, is the width of the container minus the width of the line of text
      */
-    double x;
+    double x = 0.0;
     /**
      * The height from the top of the text to the top of the container, the first line is 0,
      *  and the second line is the height of the first line
      */
-    double y;
+    double y = 0.0;
     /** Start Index */
-    size_t startIndex;
+    size_t startIndex = 0;
     /** End Index */
-    size_t endIndex;
+    size_t endIndex = 0;
  
     FontMetrics firstCharMetrics;
  
     /** The y position of the baseline for this line from the top of the paragraph */
-    double baseline;
+    double baseline = 0.0;
     /** Zero indexed line number */
-    size_t lineNumber;
+    size_t lineNumber = 0;
  
     std::map<size_t, RunMetrics> runMetrics;
 };
