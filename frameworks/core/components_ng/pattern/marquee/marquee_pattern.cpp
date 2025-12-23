@@ -393,7 +393,7 @@ float MarqueePattern::GetTextOffset()
     return offsetX;
 }
 
-void MarqueePattern::OnVisibleChange(bool isVisible)
+void MarqueePattern::OnVisibleAreaChange(bool isVisible)
 {
     if (isVisible) {
         CHECK_NULL_VOID(!playStatus_);
@@ -695,7 +695,7 @@ void MarqueePattern::ProcessVisibleAreaCallback()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->OnVisibleChange(visible);
+        pattern->OnVisibleAreaChange(visible);
     };
     std::vector<double> ratioList = { 0.0 };
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
