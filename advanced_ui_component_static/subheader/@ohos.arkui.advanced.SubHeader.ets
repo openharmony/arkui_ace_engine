@@ -129,7 +129,7 @@ class SubHeaderTheme {
   public rightIconColor: ResourceColor = $r('sys.color.icon_primary');
 }
 
-function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): this {
+function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle) {
   this.fontSize(`${getResourceValue('sys.float.Subtitle_S')}fp`);
   this.fontColor(fontStyle?.fontColor ?? $r('sys.color.font_secondary'));
   this.fontWeight(fontStyle?.fontWeight);
@@ -139,7 +139,7 @@ function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): this {
   return this;
 }
 
-function primaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): this {
+function primaryTitleStyles(this: TextAttribute, fontStyle: FontStyle) {
   this.fontSize(`${getResourceValue('sys.float.subheader_title_font_size')}fp`);
   this.fontColor(fontStyle?.fontColor ?? $r('sys.color.font_primary'));
   this.fontWeight(fontStyle?.fontWeight);

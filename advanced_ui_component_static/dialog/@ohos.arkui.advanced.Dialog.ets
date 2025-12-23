@@ -1758,7 +1758,7 @@ struct CustomDialogContentComponent {
 }
 
 function setButtonProperties(this: ButtonAttribute, buttonOptions: ButtonOptions, isHasDefaultFocus: boolean,
-  isAllFocusFalse: boolean, controller?: CustomDialogController): this {
+  isAllFocusFalse: boolean, controller?: CustomDialogController) {
   this.onKeyEvent((event: KeyEvent) => {
     if (!event) {
       return false;
