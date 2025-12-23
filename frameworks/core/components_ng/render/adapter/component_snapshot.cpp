@@ -38,8 +38,30 @@ public:
     ~CustomizedCallback() override = default;
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
     {
-        // Note: This method is not used because RSSurfaceCaptureConfig.needErrorCode is set to true.
-        // Use OnSurfaceCaptureWithErrorCode instead.
+        if (callback_ == nullptr) {
+            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! The callback_ is null");
+            auto node = node_.Upgrade();
+            CHECK_NULL_VOID(node);
+            Inspector::RemoveOffscreenNode(node);
+            return;
+        }
+        if (!pixelMap) {
+            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! The pixelmap returned by the system is null");
+            callback_(nullptr, ERROR_CODE_INTERNAL_ERROR, [node = node_]() {
+                auto frameNode = node.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                Inspector::RemoveOffscreenNode(frameNode);
+            });
+        } else {
+            TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                "ComponentSnapshot successful! pixelMap.width=%{public}d pixelMap.height=%{public}d",
+                pixelMap->GetWidth(), pixelMap->GetHeight());
+            callback_(pixelMap, ERROR_CODE_NO_ERROR, [node = node_]() {
+                auto frameNode = node.Upgrade();
+                CHECK_NULL_VOID(frameNode);
+                Inspector::RemoveOffscreenNode(frameNode);
+            });
+        }
     }
 
     void OnSurfaceCaptureWithErrorCode(std::shared_ptr<Media::PixelMap> pixelMap,
@@ -52,74 +74,39 @@ public:
             Inspector::RemoveOffscreenNode(node);
             return;
         }
-
-        auto removeNode = [node = node_]() {
-            auto frameNode = node.Upgrade();
-            CHECK_NULL_VOID(frameNode);
-            Inspector::RemoveOffscreenNode(frameNode);
-        };
-
         switch (captureErrorCode) {
-            case Rosen::CaptureError::CAPTURE_NO_PERMISSION:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "No permission to capture the surface.");
-                callback_(nullptr, ERROR_CODE_INTERNAL_ERROR, removeNode);
-                break;
-            case Rosen::CaptureError::CAPTURE_NO_NODE:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The specified node to capture does not exist.");
-                callback_(nullptr, ERROR_CODE_INTERNAL_ERROR, removeNode);
-                break;
-            case Rosen::CaptureError::CAPTURE_CONFIG_WRONG:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The capture configuration is invalid.");
-                callback_(nullptr, ERROR_CODE_INTERNAL_ERROR, removeNode);
-                break;
-            case Rosen::CaptureError::CAPTURE_PIXELMAP_NULL:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The capture pixelmap is null.");
-                callback_(nullptr, ERROR_CODE_INTERNAL_ERROR, removeNode);
-                break;
-            case Rosen::CaptureError::CAPTURE_PIXELMAP_COPY_ERROR:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Failed to copy pixel data to pixelmap.");
-                callback_(nullptr, ERROR_CODE_INTERNAL_ERROR, removeNode);
-                break;
-            case Rosen::CaptureError::CAPTURE_NULL_FAIL:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The capture handle is null.");
-                callback_(nullptr, ERROR_CODE_INTERNAL_ERROR, removeNode);
-                break;
-            case Rosen::CaptureError::HDR_SET_FAIL:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Failed to set HDR parameters.");
-                callback_(nullptr, ERROR_CODE_INTERNAL_ERROR, removeNode);
-                break;
-
             case Rosen::CaptureError::AUTO_NOT_SUPPORT:
                 TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The isAuto parameter of the color space or dynamic range "
                                                             "mode is set to true for offscreen node snapshot.");
-                callback_(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED, removeNode);
+                callback_(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED, [node = node_]() {
+                    auto frameNode = node.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    Inspector::RemoveOffscreenNode(frameNode);
+                });
                 break;
 
             case Rosen::CaptureError::COLOR_SPACE_NOT_SUPPORT:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The provided color space is not supported.");
-                callback_(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED, removeNode);
-                break;
-            case Rosen::CaptureError::DYNAMIC_RANGE_NOT_SUPPORT:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The provided dynamic range mode is not supported.");
-                callback_(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED, removeNode);
+                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                    "The provided color space is not supported.");
+                callback_(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED, [node = node_]() {
+                    auto frameNode = node.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    Inspector::RemoveOffscreenNode(frameNode);
+                });
                 break;
 
-            case Rosen::CaptureError::CAPTURE_OK:
-                if (!pixelMap) {
-                    TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-                        "Internal error! The pixelmap returned by the system is null");
-                    callback_(nullptr, ERROR_CODE_INTERNAL_ERROR, removeNode);
-                } else {
-                    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-                        "ComponentSnapshot successful! pixelMap.width=%{public}d pixelMap.height=%{public}d",
-                        pixelMap->GetWidth(), pixelMap->GetHeight());
-                    callback_(pixelMap, ERROR_CODE_NO_ERROR, removeNode);
-                }
+            case Rosen::CaptureError::DYNAMIC_RANGE_NOT_SUPPORT:
+                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                    "The provided dynamic range mode is not supported.");
+                callback_(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED, [node = node_]() {
+                    auto frameNode = node.Upgrade();
+                    CHECK_NULL_VOID(frameNode);
+                    Inspector::RemoveOffscreenNode(frameNode);
+                });
                 break;
 
             default:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Unknown capture error.");
-                callback_(nullptr, ERROR_CODE_INTERNAL_ERROR, removeNode);
+                OnSurfaceCapture(pixelMap);
                 break;
         }
     }
@@ -155,46 +142,25 @@ public:
     ~SyncCustomizedCallback() override = default;
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
     {
-        // Note: This method is not used because RSSurfaceCaptureConfig.needErrorCode is set to true.
-        // Use OnSurfaceCaptureWithErrorCode instead.
+        if (!pixelMap) {
+            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshotSync Internal error! "
+                "The pixelmap returned by the system is null");
+            pixelMap_ = nullptr;
+        } else {
+            TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                "ComponentSnapshotSync successful! pixelMap.width=%{public}d pixelMap.height=%{public}d",
+                pixelMap->GetWidth(), pixelMap->GetHeight());
+            pixelMap_ = pixelMap;
+        }
+        std::unique_lock<std::mutex> lock(mutex_);
+        cv_.notify_all();
     }
 
     void OnSurfaceCaptureWithErrorCode(std::shared_ptr<Media::PixelMap> pixelMap,
         std::shared_ptr<Media::PixelMap> pixelMapHDR, Rosen::CaptureError captureErrorCode) override
     {
         errorCode_ = ERROR_CODE_NO_ERROR;
-        pixelMap_ = nullptr;
-
         switch (captureErrorCode) {
-            case Rosen::CaptureError::CAPTURE_NO_PERMISSION:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "No permission to capture the surface.");
-                errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                break;
-            case Rosen::CaptureError::CAPTURE_NO_NODE:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The specified node to capture does not exist.");
-                errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                break;
-            case Rosen::CaptureError::CAPTURE_CONFIG_WRONG:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The capture configuration is invalid.");
-                errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                break;
-            case Rosen::CaptureError::CAPTURE_PIXELMAP_NULL:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The capture pixelmap is null.");
-                errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                break;
-            case Rosen::CaptureError::CAPTURE_PIXELMAP_COPY_ERROR:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Failed to copy pixel data to pixelmap.");
-                errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                break;
-            case Rosen::CaptureError::CAPTURE_NULL_FAIL:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The capture handle is null.");
-                errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                break;
-            case Rosen::CaptureError::HDR_SET_FAIL:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Failed to set HDR parameters.");
-                errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                break;
-
             case Rosen::CaptureError::AUTO_NOT_SUPPORT:
                 TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The isAuto parameter of the color space or dynamic range "
                                                             "mode is set to true for offscreen node snapshot.");
@@ -202,35 +168,21 @@ public:
                 break;
 
             case Rosen::CaptureError::COLOR_SPACE_NOT_SUPPORT:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The provided color space is not supported.");
-                errorCode_ = ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED;
-                break;
-            case Rosen::CaptureError::DYNAMIC_RANGE_NOT_SUPPORT:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "The provided dynamic range mode is not supported.");
+                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                    "The provided color space is not supported.");
                 errorCode_ = ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED;
                 break;
 
-            case Rosen::CaptureError::CAPTURE_OK:
-                if (!pixelMap) {
-                    TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshotSync Internal error! "
-                                                                "The pixelmap returned by the system is null");
-                    errorCode_ = ERROR_CODE_INTERNAL_ERROR;
-                } else {
-                    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-                        "ComponentSnapshotSync successful! pixelMap.width=%{public}d pixelMap.height=%{public}d",
-                        pixelMap->GetWidth(), pixelMap->GetHeight());
-                    pixelMap_ = pixelMap;
-                }
+            case Rosen::CaptureError::DYNAMIC_RANGE_NOT_SUPPORT:
+                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                    "The provided dynamic range mode is not supported.");
+                errorCode_ = ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED;
                 break;
 
             default:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Unknown capture error.");
-                errorCode_ = ERROR_CODE_INTERNAL_ERROR;
+                OnSurfaceCapture(pixelMap);
                 break;
         }
-
-        std::unique_lock<std::mutex> lock(mutex_);
-        cv_.notify_all();
     }
 
     void OnSurfaceCaptureHDR(std::shared_ptr<Media::PixelMap> pixelMap,
@@ -882,12 +834,7 @@ std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
     }
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     auto syncCallback = std::make_shared<SyncCustomizedCallback>();
-    SnapshotOptions options = param.options;
-    Rosen::RSSurfaceCaptureConfig rsConfig;
-    options.scale = 1.f;
-    options.waitUntilRenderFinished = true;
-    ConvertSnapshotOptionsToRSConfig(options, rsConfig);
-    rsInterface.TakeSurfaceCaptureForUIWithConfig(rsNode, syncCallback, rsConfig);
+    rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback, 1.f, 1.f, true);
     auto pair = syncCallback->GetPixelMap(CREATE_SNAPSHOT_TIMEOUT_DURATION);
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "CreateSync, root size=%{public}s Id=" SEC_PLD(%{public}d) " depth=%{public}d Tag=%{public}s code:%{public}d "

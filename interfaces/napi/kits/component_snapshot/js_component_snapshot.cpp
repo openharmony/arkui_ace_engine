@@ -449,40 +449,6 @@ void JsComponentSnapshot::ParseDynamicRangeMode(napi_value* dynamicRangeModeObje
     }
 }
 
-static void HandleSyncSnapshotResult(
-    napi_env env, const std::pair<int32_t, std::shared_ptr<Media::PixelMap>>& pair, napi_value& result)
-{
-    switch (pair.first) {
-        case ERROR_CODE_NO_ERROR:
-#ifdef PIXEL_MAP_SUPPORTED
-            result = Media::PixelMapNapi::CreatePixelMap(env, pair.second);
-#endif
-            break;
-        case ERROR_CODE_INTERNAL_ERROR:
-            napi_get_null(env, &result);
-            NapiThrow(env, "Internal error!", ERROR_CODE_INTERNAL_ERROR);
-            break;
-        case ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT:
-            napi_get_null(env, &result);
-            NapiThrow(env, "ComponentSnapshot timeout!", ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT);
-            break;
-        case ERROR_CODE_PARAM_INVALID:
-            napi_get_null(env, &result);
-            NapiThrow(env, "Snapshot region is invalid or out of range!", ERROR_CODE_PARAM_INVALID);
-            break;
-        case ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED:
-            napi_get_null(env, &result);
-            NapiThrow(env, "Unsupported color space or dynamic range mode in snapshot options!",
-                ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED);
-            break;
-        case ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED:
-            napi_get_null(env, &result);
-            NapiThrow(env, "isAuto(true) is not supported for offscreen node snapshots!",
-                ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED);
-            break;
-    }
-}
-
 static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
 {
     napi_escapable_handle_scope scope = nullptr;
@@ -555,7 +521,7 @@ static napi_value JSSnapshotFromBuilder(napi_env env, napi_callback_info info)
     // not support auto mode for colorMode and dynamicRangeMode
     if (param.options.colorSpaceModeOptions.isAuto || param.options.dynamicRangeModeOptions.isAuto) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "isAuto(true) is not supported for offscreen node snapshots.");
+            "The provided color space or dynamic range mode is not supported.");
         auto callback = helper.CreateCallback(&result);
         callback(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED, nullptr);
         napi_close_escapable_handle_scope(env, scope);
@@ -603,7 +569,37 @@ static napi_value JSSnapshotGetSync(napi_env env, napi_callback_info info)
     helper.ParseParamForGet(options);
 
     auto pair = delegate->GetSyncSnapshot(componentId,  options);
-    HandleSyncSnapshotResult(env, pair, result);
+    
+    switch (pair.first) {
+        case ERROR_CODE_NO_ERROR :
+#ifdef PIXEL_MAP_SUPPORTED
+            result = Media::PixelMapNapi::CreatePixelMap(env, pair.second);
+#endif
+            break;
+        case ERROR_CODE_INTERNAL_ERROR :
+            napi_get_null(env, &result);
+            NapiThrow(env, "Internal error!", ERROR_CODE_INTERNAL_ERROR);
+            break;
+        case ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT :
+            napi_get_null(env, &result);
+            NapiThrow(env, "ComponentSnapshot timeout!", ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT);
+            break;
+        case ERROR_CODE_PARAM_INVALID :
+            napi_get_null(env, &result);
+            NapiThrow(env, "Snapshot region is invalid or out of range!", ERROR_CODE_PARAM_INVALID);
+            break;
+        case ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED:
+            napi_get_null(env, &result);
+            NapiThrow(env, "Snapshot color space or dynamic range mode is not supported!",
+                ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED);
+            break;
+        case ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED:
+            napi_get_null(env, &result);
+            NapiThrow(env,
+                "The isAuto parameter of the Snapshot is not supported! ",
+                ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED);
+            break;
+    }
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
     return result;
@@ -685,7 +681,37 @@ static napi_value JSSnapshotGetSyncWithUniqueId(napi_env env, napi_callback_info
     helper.ParseParamForGet(options);
 
     auto pair = delegate->GetSyncSnapshotByUniqueId(uniqueId,  options);
-    HandleSyncSnapshotResult(env, pair, result);
+    
+    switch (pair.first) {
+        case ERROR_CODE_NO_ERROR :
+#ifdef PIXEL_MAP_SUPPORTED
+            result = Media::PixelMapNapi::CreatePixelMap(env, pair.second);
+#endif
+            break;
+        case ERROR_CODE_INTERNAL_ERROR :
+            napi_get_null(env, &result);
+            NapiThrow(env, "Internal error!", ERROR_CODE_INTERNAL_ERROR);
+            break;
+        case ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT :
+            napi_get_null(env, &result);
+            NapiThrow(env, "ComponentSnapshot timeout!", ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT);
+            break;
+        case ERROR_CODE_PARAM_INVALID :
+            napi_get_null(env, &result);
+            NapiThrow(env, "Snapshot region is invalid or out of range!", ERROR_CODE_PARAM_INVALID);
+            break;
+        case ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED:
+            napi_get_null(env, &result);
+            NapiThrow(env, "Snapshot color space or dynamic range mode is not supported!",
+                ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED);
+            break;
+        case ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED:
+            napi_get_null(env, &result);
+            NapiThrow(env,
+                "The isAuto parameter of the Snapshot is not supported! ",
+                ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED);
+            break;
+    }
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
     return result;
@@ -741,7 +767,7 @@ static napi_value JSSnapshotFromComponent(napi_env env, napi_callback_info info)
     // not support auto mode for colorMode and dynamicRangeMode
     if (param.options.colorSpaceModeOptions.isAuto || param.options.dynamicRangeModeOptions.isAuto) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "isAuto(true) is not supported for offscreen node snapshots.");
+            "The provided color space or dynamic range mode is not supported.");
         auto callback = helper.CreateCallback(&result);
         callback(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED, nullptr);
         napi_close_escapable_handle_scope(env, scope);
