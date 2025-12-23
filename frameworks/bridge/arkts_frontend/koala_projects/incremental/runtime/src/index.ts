@@ -153,10 +153,10 @@ export {
     ControlledScope,
     createStateManager,
     Equivalent,
+    IncrementalScopeEx,
     InternalScope,
     MutableState,
     StateManager,
-    StateManagerImpl,
     ValueTracker,
 } from './states/State'
 

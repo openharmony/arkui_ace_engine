@@ -57,7 +57,7 @@ export const StateManagerLocal = new WorkerLocalValue<StateManager | undefined>(
  * applications.
  */
 export interface StateManager extends StateContext {
-    readonly currentScopeId: KoalaCallsiteKey | undefined
+    currentScope: IncrementalScopeEx | undefined
     contextData: object | undefined
     isDebugMode: boolean
     _isNeedCreate: boolean
@@ -191,6 +191,13 @@ export interface InternalScope<Value> extends IncrementalScope<Value> {
     paramEx<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): ReadableState<V>
 }
 
+export interface IncrementalScopeEx {
+    readonly id: KoalaCallsiteKey
+    readonly parent: IncrementalScopeEx | undefined
+    readonly nodeRef: IncrementalNode | undefined
+    forceCompleteRerender(): void
+}
+
 /**
  * The interface represents a user-controlled scope,
  * that can be used outside of the incremental update.
@@ -215,8 +222,7 @@ interface ManagedState extends Disposable, Dependent {
     updateStateSnapshot(changes?: Changes): void
 }
 
-interface ManagedScope extends Disposable, Dependent, Dependency, ReadonlyTreeNode {
-    forceCompleteRerender(): void
+interface ManagedScope extends IncrementalScopeEx, Disposable, Dependent, Dependency, ReadonlyTreeNode {
     readonly id: KoalaCallsiteKey
     readonly disabledStateUpdates: boolean
     readonly node: IncrementalNode | undefined
@@ -598,7 +604,7 @@ class ParameterImpl<Value> implements Dependent, MutableState<Value> {
     }
 }
 
-export class StateManagerImpl implements StateManager {
+class StateManagerImpl implements StateManager {
     private stateCreating: string | undefined = undefined
     private readonly statesNamed: Map<string, Disposable> = new Map<string, Disposable>()
     private readonly statesCreated: Set<ManagedState> = new Set<ManagedState>()
@@ -618,8 +624,12 @@ export class StateManagerImpl implements StateManager {
     private parentManager: StateManagerImpl | undefined = undefined
     _isNeedCreate: boolean
 
-    get currentScopeId(): KoalaCallsiteKey | undefined {
-        return this.current?.id
+    get currentScope(): IncrementalScopeEx | undefined {
+        return this.current
+    }
+
+    set currentScope(scope: IncrementalScopeEx | undefined) {
+        this.current = scope instanceof ScopeImpl ? scope : undefined
     }
 
     reset(): void {
@@ -706,7 +716,6 @@ export class StateManagerImpl implements StateManager {
         return this.updatableNodeEx(node, update, cleanup)
     }
 
-    
     updatableNodeEx<Node extends IncrementalNode>(node: Node, update: (context: StateContextBase) => void, cleanup?: () => void): ComputableState<Node> {
         const scope = ScopeImpl.create<Node>(0, 0, (): Node => {
             update(this)
@@ -747,8 +756,14 @@ export class StateManagerImpl implements StateManager {
     }
 
     callCallbacks(): void {
-        this.callbacks.setMarker()
-        this.callbacks.callCallbacks()
+        const local = StateManagerLocal.get()
+        try {
+            StateManagerLocal.set(this)
+            this.callbacks.setMarker()
+            this.callbacks.callCallbacks()
+        } finally {
+            StateManagerLocal.set(local)
+        }
     }
 
     private isGlobal(global?: boolean): boolean {
