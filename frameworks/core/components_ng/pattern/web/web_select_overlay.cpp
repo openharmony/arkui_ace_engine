@@ -97,6 +97,9 @@ bool WebSelectOverlay::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuPar
     auto host = pattern->GetHost();
     CHECK_NULL_RETURN(host, false);
     StartListenSelectOverlayParentScroll(host);
+    auto delegate = pattern->delegate_;
+    CHECK_NULL_RETURN(delegate, false);
+    delegate->OnTextSelectionChange(delegate->GetLastSelectionText(), true);
     ProcessOverlay({ .animation = true });
     SetTouchHandleExistState(true);
     return true;
@@ -1121,9 +1124,6 @@ void WebSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reaso
     }
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
-    auto delegate = pattern->delegate_;
-    CHECK_NULL_VOID(delegate);
-    delegate->OnTextSelectionChange(delegate->GetLastSelectionText(), true);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     aiMenuType_ = TextDataDetectType::INVALID;

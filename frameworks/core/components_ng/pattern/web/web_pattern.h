@@ -1029,6 +1029,10 @@ public:
     {
         return isTextSelectionEnable_;
     }
+    void SetTextSelectionEnable(bool textSelectionEnable)
+    {
+        isTextSelectionEnable_ = textSelectionEnable;
+    }
 protected:
     void ModifyWebSrc(const std::string& webSrc)
     {

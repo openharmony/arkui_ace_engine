@@ -2127,6 +2127,31 @@ HWTEST_F(WebPatternTestNg, WebOnMouseEvent_005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WebOnMouseEvent_006
+ * @tc.desc: WebOnMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, WebOnMouseEvent_006, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->delegate_ = nullptr;
+    MouseInfo info;
+    webPattern->WebOnMouseEvent(info);
+    webPattern->SetTextSelectionEnable(true);
+    EXPECT_EQ(webPattern->IsTextSelectionEnable(), true);
+#endif
+}
+
+/**
  * @tc.name: ResetDragAction_001
  * @tc.desc: ResetDragAction.
  * @tc.type: FUNC

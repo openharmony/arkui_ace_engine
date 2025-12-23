@@ -9542,9 +9542,6 @@ void WebDelegate::OnTextSelectionChange(const std::string& selectionText, bool i
         return;
     }
     lastSelectionText_ = selectionText;
-    if (webPattern->IsShowHandle() && !isFromOverlay) {
-        return;
-    }
     if (webPattern->IsTextSelectionEnable()) {
         return;
     }
