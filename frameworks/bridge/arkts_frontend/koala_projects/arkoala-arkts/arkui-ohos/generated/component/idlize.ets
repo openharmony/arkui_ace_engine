@@ -1568,6 +1568,12 @@ export class FrameNodeExtender {
         const returnResult : Vector2 = Vector2_serializer.read(retvalDeserializer)
         return returnResult
     }
+    static getGlobalPositionOnDisplay_serialize(peer: FrameNode): Vector2 {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getGlobalPositionOnDisplay(extractors.toFrameNodePtr(peer))
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : Vector2 = Vector2_serializer.read(retvalDeserializer)
+        return returnResult
+    }
     static getPositionToWindowWithTransform_serialize(peer: FrameNode): Vector2 {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getPositionToWindowWithTransform(extractors.toFrameNodePtr(peer))
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
@@ -1585,6 +1591,10 @@ export class FrameNodeExtender {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const returnResult : Vector2 = Vector2_serializer.read(retvalDeserializer)
         return returnResult
+    }
+    public static getGlobalPositionOnDisplay(peer: FrameNode): Vector2 {
+        const peer_casted = peer as (FrameNode)
+        return FrameNodeExtender.getGlobalPositionOnDisplay_serialize(peer_casted)
     }
     static getUserConfigBorderWidth_serialize(peer: FrameNode): NodeEdgesLengthMetrics {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getUserConfigBorderWidth(extractors.toFrameNodePtr(peer))

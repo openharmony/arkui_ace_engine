@@ -48,6 +48,8 @@ class ClickEventImpl implements ClickEvent {
     public x: double;
     public y: double;
     public hand?: InteractionHand;
+    public globalDisplayX?: double | undefined;
+    public globalDisplayY?: double | undefined;
     public preventDefault() { };
     public target: EventTarget = new EventTargetImpl();
     public timestamp: int64;
