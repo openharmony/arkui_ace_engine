@@ -356,8 +356,7 @@ HWTEST_F(DataPanelTestNg, DataPanelStaticTest001, TestSize.Level0)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     DataPanelModelStatic dataPanel;
-    dataPanel.CreateFrameNode(nodeId);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto frameNode = dataPanel.CreateFrameNode(nodeId);
     EXPECT_NE(frameNode, nullptr);
 
     /**
