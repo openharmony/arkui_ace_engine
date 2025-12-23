@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
@@ -149,6 +151,7 @@ void SwiperEventHub::FireAnimationEndEvent(int32_t index, const AnimationCallbac
         index, info.currentOffset.has_value(), info.currentOffset.value_or(0.0), info.isForceStop,
         aniStartCalledCount_, swiperId_);
     ACE_SCOPED_TRACE("Swiper FireAnimationEndEvent, index: %d, id: %d", index, swiperId_);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Swiper.onAnimationEnd");
     if (!animationEndEvents_.empty()) {
         std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
             [index, info](const AnimationEndEventPtr& animationEndEvent) {
@@ -175,6 +178,7 @@ void SwiperEventHub::FireAnimationEndOnForceEvent(int32_t index, const Animation
         };
         return;
     }
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Swiper.onAnimationEnd");
     if (animationEndEvents_.empty()) {
         --aniStartCalledCount_;
         return;
@@ -220,6 +224,7 @@ void SwiperEventHub::FireSelectedEvent(int32_t index)
 
 void SwiperEventHub::FireJSChangeEvent(int32_t preIndex, int32_t index)
 {
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Swiper.onChange");
     auto frameNode = GetFrameNode();
     ACE_SCOPED_TRACE("Swiper FireChangeEvent, id: %d, preIndex: %d, index: %d", frameNode ? frameNode->GetId() : -1,
         preIndex, index);
