@@ -660,10 +660,12 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     Color fontColor;
     RefPtr<ResourceObject> colorObject;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    bool isTheme = false;
     if (ArkTSUtils::ParseJsColorAlpha(vm, fourArg, fontColor, colorObject, nodeInfo)) {
         value.fontColor = static_cast<int32_t>(fontColor.GetValue());
     } else {
         value.fontColor = static_cast<int32_t>(theme->GetSearchButtonTextColor().GetValue());
+        isTheme = true;
     }
     
     ArkUIImageIconRes searchButtonObj;
@@ -672,12 +674,13 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     searchButtonObj.srcObj = AceType::RawPtr(srcObject);
     if (fiveArg->IsBoolean()) {
         value.autoDisable = fiveArg->ToBoolean(vm)->Value();
-        GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(nativeNode, &value, &searchButtonObj);
+        GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(nativeNode, &value,
+            &searchButtonObj, isTheme);
     } else {
         GetArkUINodeModifiers()->getSearchModifier()->resetSearchSearchButton(nativeNode);
     }
 
-    GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(nativeNode, &value, &searchButtonObj);
+    GetArkUINodeModifiers()->getSearchModifier()->setSearchSearchButton(nativeNode, &value, &searchButtonObj, isTheme);
     return panda::JSValueRef::Undefined(vm);
 }
 
