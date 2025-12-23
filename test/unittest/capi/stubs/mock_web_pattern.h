@@ -32,6 +32,7 @@ public:
     using SetWebDetachCallback = std::function<void(int32_t)>;
     using OnControllerAttachedCallback = std::function<void()>;
     using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
     ~WebPattern() override;
 
@@ -160,6 +161,7 @@ public:
     }
 
     void SetSetWebDetachCallback(SetWebDetachCallback&& callback) {}
+    void SetPermissionClipboardCallback(PermissionClipboardCallback&& Callback) {}
     void SetEmulateTouchFromMouseEvent(bool emulateTouchFromMouseEvent) {}
     void UpdateDataDetectorConfig(const TextDetectConfig& config) {}
     void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback) {}

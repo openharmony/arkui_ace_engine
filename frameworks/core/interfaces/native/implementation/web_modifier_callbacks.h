@@ -87,6 +87,8 @@ std::string OnOverrideErrorPage(
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void DefaultPermissionClipboard(const std::function<void(void*, std::function<void()>)>& callback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnScreenCaptureRequest(const CallbackHelper<Callback_OnScreenCaptureRequestEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 bool OnContextMenuShow(const CallbackHelper<Callback_OnContextMenuShowEvent_Boolean>& arkCallback,

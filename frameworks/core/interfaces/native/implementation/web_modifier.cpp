@@ -270,6 +270,12 @@ void SetWebOptionsImpl(Ark_NativePointer node,
             WebAttributeModifier::DefaultOnShowFileSelector(std::move(callback), weakNode, instanceId, info);
         };
         WebModelStatic::SetDefaultFileSelectorShow(frameNode, std::move(fileSelectorShowFromUserCallback));
+        auto requestPermissionsFromUserCallback = [callback = std::move(controller->defaultPermissionClipboardFunc),
+                                                      weakNode = AceType::WeakClaim(frameNode),
+                                                      instanceId = Container::CurrentId()](const BaseEventInfo* info) {
+            WebAttributeModifier::DefaultPermissionClipboard(std::move(callback), weakNode, instanceId, info);
+        };
+        WebModelStatic::SetPermissionClipboard(frameNode, std::move(requestPermissionsFromUserCallback));
         /* This controller is only used to pass the hook function for initializing the webviewController.
          * After passing, the corresponding memory needs to be released.
          */

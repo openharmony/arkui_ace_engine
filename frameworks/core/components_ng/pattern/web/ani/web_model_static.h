@@ -149,6 +149,8 @@ public:
         FrameNode* frameNode, std::function<std::string(const BaseEventInfo* info)>&& callback);
     static void SetPermissionRequestEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
+    static void SetPermissionClipboard(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetScreenCaptureRequestEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnContextMenuShow(
