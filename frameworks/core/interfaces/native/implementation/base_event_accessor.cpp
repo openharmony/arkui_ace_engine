@@ -84,7 +84,7 @@ void SetTimestampImpl(Ark_BaseEvent peer,
 }
 Ark_SourceType GetSourceImpl(Ark_BaseEvent peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), static_cast<Ark_SourceType>(-1));
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN);
     auto value = peer->GetBaseInfo()->GetSourceDevice();
     return Converter::ArkValue<Ark_SourceType>(value);
 }
