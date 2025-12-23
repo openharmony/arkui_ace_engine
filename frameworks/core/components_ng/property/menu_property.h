@@ -136,6 +136,7 @@ struct MenuParam {
     std::optional<Dimension> minKeyboardAvoidDistance;
     bool isDarkMode = false;
     bool isWithTheme = false;
+    bool reuse = true;
     struct resourceUpdater {
         RefPtr<ResourceObject> resObj;
         std::function<void(const RefPtr<ResourceObject>&, MenuParam&)> updateFunc;

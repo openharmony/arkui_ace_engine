@@ -558,6 +558,7 @@ static void BindContextMenuWithRightClick(const RefPtr<FrameNode>& targetNode, s
                 [builder = builderF, weakTarget, menuParam, info]() mutable {
                     auto targetNode = weakTarget.Upgrade();
                     CHECK_NULL_VOID(targetNode);
+                    menuParam.reuse = !info.GetIsRightButtonEventFromDoulbeTap();
                     NG::OffsetF menuPosition { info.GetGlobalLocation().GetX()
                         + menuParam.positionOffset.GetX(),
                         info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
