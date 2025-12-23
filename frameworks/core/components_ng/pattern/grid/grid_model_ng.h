@@ -172,6 +172,10 @@ public:
     static void ResetItemFillPolicy(FrameNode* frameNode);
     static int32_t GetItemFillPolicy(FrameNode* frameNode);
     static void SetOnGridItemDragStart(FrameNode* frameNode, ItemDragStartFunc&& value);
+    static void SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment,
+        std::optional<float> extraOffset = std::nullopt);
+    static void SetScrollToIndexMultiThread(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment,
+        std::optional<float> extraOffset = std::nullopt);
     static void SetSupportLazyLoadingEmptyBranch(FrameNode* frameNode, bool enable);
     static bool GetSupportLazyLoadingEmptyBranch(FrameNode* frameNode);
 private:

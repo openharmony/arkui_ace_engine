@@ -4359,6 +4359,8 @@ struct ArkUIGridModifier {
     void (*resetItemFillPolicy)(ArkUINodeHandle node);
     void (*setItemFillPolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
     ArkUI_Int32 (*getItemFillPolicy)(ArkUINodeHandle node);
+    void (*setScrollToIndex)(
+        ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment, ArkUI_Float32 options);
     void (*setSupportLazyLoadingEmptyBranch)(ArkUINodeHandle node, ArkUI_Bool support);
     ArkUI_Bool (*getSupportLazyLoadingEmptyBranch)(ArkUINodeHandle node);
 };
@@ -6061,7 +6063,8 @@ struct ArkUIWaterFlowModifier {
     ArkUI_Float32 (*getItemMaxHeight)(ArkUINodeHandle node, ArkUI_Int32 unit);
     ArkUI_Int32 (*getWaterFlowEnableScrollInteraction)(ArkUINodeHandle node);
     ArkUI_Float32 (*getWaterFlowFriction)(ArkUINodeHandle node);
-    void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment);
+    void (*setScrollToIndex)(
+        ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment, ArkUI_Float32 options);
     void (*setWaterflowFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
     void (*resetWaterflowFooter)(ArkUINodeHandle node);
     ArkUINodeHandle (*getScrollController)(ArkUINodeHandle node);
