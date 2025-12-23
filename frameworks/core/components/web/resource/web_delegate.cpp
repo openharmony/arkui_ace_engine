@@ -36,6 +36,7 @@
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/pattern/web/web_agent_event_reporter.h"
 #include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
@@ -3103,6 +3104,11 @@ void WebDelegate::InitWebViewWithWindow()
             findListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutFindCallback(findListenerImpl);
 
+            // set agentClientImpl
+            auto agentClientImpl = std::make_shared<WebAgentClientImpl>();
+            agentClientImpl->SetWebDelegate(weak);
+            delegate->nweb_->SetNWebAgentHandler(agentClientImpl);
+
             auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(Container::CurrentId());
             spanstringConvertHtmlImpl->SetWebDelegate(weak);
             delegate->nweb_->PutSpanstringConvertHtmlCallback(spanstringConvertHtmlImpl);
@@ -3606,6 +3612,10 @@ void WebDelegate::InitWebViewWithSurface()
             downloadListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->SetNWebHandler(nweb_handler);
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
+            // set aiClientImpl
+            auto agentClientImpl = std::make_shared<WebAgentClientImpl>();
+            agentClientImpl->SetWebDelegate(weak);
+            delegate->nweb_->SetNWebAgentHandler(agentClientImpl);
 #ifdef OHOS_STANDARD_SYSTEM
             auto screenLockCallback = std::make_shared<NWebScreenLockCallbackImpl>(context);
             delegate->nweb_->RegisterScreenLockFunction(Container::CurrentId(), screenLockCallback);
@@ -4021,6 +4031,14 @@ void WebDelegate::UpdateCacheMode(const WebCacheMode& mode)
 std::shared_ptr<OHOS::NWeb::NWeb> WebDelegate::GetNweb()
 {
     return nweb_;
+}
+
+std::shared_ptr<OHOS::NWeb::NWebAgentManager> WebDelegate::GetNWebAgentManager()
+{
+    if (!nweb_) {
+        return nullptr;
+    }
+    return nweb_->GetAgentManager();
 }
 
 bool WebDelegate::GetForceDarkMode()
@@ -8801,6 +8819,15 @@ std::vector<int8_t> WebDelegate::GetWordSelection(const std::string& text, int8_
     return webPattern->GetWordSelection(text, offset);
 }
 
+void WebDelegate::ReportEventJson(const std::string& jsonString)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto reporter = webPattern->GetAgentEventReporter();
+    CHECK_NULL_VOID(reporter);
+    reporter->AddEvent(jsonString);
+}
+
 void WebDelegate::NotifyForNextTouchEvent()
 {
     ACE_DCHECK(nweb_ != nullptr);
@@ -9558,6 +9585,7 @@ void WebDelegate::OnTextSelectionChange(const std::string& selectionText, bool i
             CHECK_NULL_VOID(delegate);
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
+            webPattern->ReportSelectedText();
             auto webEventHub = webPattern->GetWebEventHub();
             CHECK_NULL_VOID(webEventHub);
             webEventHub->FireOnTextSelectionChangeEvent(std::make_shared<TextSelectionChangedEvent>(selectionText));

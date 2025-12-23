@@ -28,6 +28,7 @@ const std::string STATUS_TRUE = "true";
 static std::string g_setComponentType = "";
 const std::string STATUS_FALSE = "false";
 std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> g_customAccessibilityNode = nullptr;
+std::shared_ptr<NWeb::NWebAgentManager> g_nwebAgentManager = nullptr;
 std::map<std::string, std::string> htmlElementToSurfaceMap = { { "existhtmlElementId", "existSurfaceId" },
     { "existhtmlElementIdOther", "existSurfaceIdOther" } };
 std::map<std::string, std::string> surfaceToHtmlElementMap = { { "existSurfaceId", "existhtmlElementId" },
@@ -1355,6 +1356,12 @@ std::string WebDelegate::GetWebInfoType()
 }
 void WebDelegate::SetSurfaceId(const std::string& surfaceId) {}
 void WebDelegate::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked) {}
+
+std::shared_ptr<OHOS::NWeb::NWebAgentManager> WebDelegate::GetNWebAgentManager()
+{
+    return g_nwebAgentManager;
+}
+
 std::string WebDelegate::SpanstringConvertHtml(const std::vector<uint8_t>& content)
 {
     return "";

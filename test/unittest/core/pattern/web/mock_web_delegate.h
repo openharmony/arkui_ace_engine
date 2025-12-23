@@ -21,6 +21,7 @@
 
 namespace OHOS::NWeb {
 class NWebAccessibilityNodeInfo;
+class NWebAgentManager;
 }
 namespace OHOS::Ace {
 void SetReturnStatus(const std::string& status);
