@@ -29779,6 +29779,10 @@ void impl_ContentTransitionEffect_setOPACITY(Ark_NativePointer OPACITY) {
         GetAccessors()->getContentTransitionEffectAccessor()->setOPACITY(static_cast<Ark_ContentTransitionEffect>(OPACITY));
 }
 KOALA_INTEROP_DIRECT_V1(ContentTransitionEffect_setOPACITY, Ark_NativePointer)
+void impl_ContextMenu_close() {
+        GetAccessors()->getContextMenuAccessor()->close();
+}
+KOALA_INTEROP_DIRECT_V0(ContextMenu_close)
 Ark_NativePointer impl_ControllerHandler_construct() {
         return GetAccessors()->getControllerHandlerAccessor()->construct();
 }
