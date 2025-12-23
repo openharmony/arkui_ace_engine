@@ -216,7 +216,12 @@ HWTEST_F(BaseEventAccessorTest, GetSourceTest, TestSize.Level1)
         { SourceType::NONE, Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN },
         { SourceType::MOUSE, Ark_SourceType::ARK_SOURCE_TYPE_MOUSE },
         { SourceType::TOUCH, Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN },
-        { SourceType::TOUCH_PAD, static_cast<Ark_SourceType>(-1) }
+        { SourceType::TOUCH_PAD, Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN },
+        { SourceType::KEYBOARD, Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN },
+        { SourceType::JOYSTICK, Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN },
+        { SourceType::CROWN, Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN },
+        { static_cast<SourceType>(-1), Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN },
+        { static_cast<SourceType>(INT_MAX), Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN }
     };
 
     for (auto& [input, expected] : TEST_PLAN) {
@@ -226,7 +231,7 @@ HWTEST_F(BaseEventAccessorTest, GetSourceTest, TestSize.Level1)
     }
 
     auto source = accessor_->getSource(nullptr);
-    EXPECT_EQ(source, static_cast<Ark_SourceType>(-1));
+    EXPECT_EQ(source, Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN);
 }
 
 /**
