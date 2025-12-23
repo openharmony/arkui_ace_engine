@@ -319,6 +319,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_water_flow_bridge.cpp",
       "nativeModule/arkts_utils.cpp",
       "nativeModule/ui_context_helper.cpp",
+      "utils/jsi_module_loader.cpp",
     ]
 
     if (defined(config.web_components_support) &&

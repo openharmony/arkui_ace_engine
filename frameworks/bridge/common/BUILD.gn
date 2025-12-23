@@ -112,6 +112,7 @@ template("bridge_common") {
 
       # utils
       "utils/engine_helper.cpp",
+      "utils/module_buffer_reader.cpp",
       "utils/source_map.cpp",
       "utils/transform_convertor.cpp",
       "utils/utils.cpp",
@@ -202,6 +203,7 @@ template("bridge_common_ng") {
       "../js_frontend/frontend_delegate.cpp",
       "../js_frontend/js_ace_page.cpp",
       "utils/engine_helper.cpp",
+      "utils/module_buffer_reader.cpp",
       "utils/source_map.cpp",
       "utils/utils.cpp",
     ]

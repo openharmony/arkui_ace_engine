@@ -117,7 +117,7 @@ static napi_value JSShowGeneratorDialog(napi_env env, napi_callback_info info)
     }
     // parse uiContext finish
     napi_value options = argc == 2 ? argv[1] : nullptr;
-    if (!Framework::ImageGeneratorDialogView::ExecuteImageGeneratorDialogAbc(-1)) {
+    if (!Framework::ImageGeneratorDialogView::ExecuteImageGeneratorDialogAbc(instanceId)) {
         return CreatePromise(env, ERROR_CODE_INTERNAL_ERROR, INTERNAL_ERROR_MSG);
     }
     int32_t errorCode = CallImageGeneratorCreator(env, options);
@@ -132,9 +132,8 @@ static napi_value JSShowGeneratorDialog(napi_env env, napi_callback_info info)
     }
     if (Framework::ImageGeneratorDialogView::Create(instanceId)) {
         return CreatePromise(env, ERROR_CODE_NO_ERROR, "");
-    } else {
-        return CreatePromise(env, ERROR_CODE_INTERNAL_ERROR, INTERNAL_ERROR_MSG);
     }
+    return CreatePromise(env, ERROR_CODE_INTERNAL_ERROR, INTERNAL_ERROR_MSG);
 }
 
 static napi_value Export(napi_env env, napi_value exports)

@@ -18,6 +18,7 @@ ohos_unittest("bridge_utils_test") {
   module_out_path = bridge_test_output_path
   sources = [
     "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
+    "$ace_root/frameworks/bridge/common/utils/module_buffer_reader.cpp",
     "$ace_root/frameworks/bridge/common/utils/transform_convertor.cpp",
     "$ace_root/frameworks/bridge/common/utils/utils.cpp",
     "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",

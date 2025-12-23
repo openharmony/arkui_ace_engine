@@ -543,6 +543,8 @@ frameworks/bridge/common/manifest/ @arkui_framework_xnode
 frameworks/bridge/common/media_query/ @arkuilayout1
 frameworks/bridge/common/plugin_adapter/ @ArkUI_ability_group
 frameworks/bridge/common/utils/ @arkui_framework_xnode
+frameworks/bridge/common/utils/module_buffer_reader.h @arkui_framework_resource
+frameworks/bridge/common/utils/module_buffer_reader.cpp @arkui_framework_resource
 frameworks/bridge/declarative_frontend/ark_breakpoint/ @arkui_framework_resource
 frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/ark_component/src/ArkAlphabetIndexer.ts @arkuicodepulse
@@ -1068,6 +1070,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_searcher.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_searcher.h @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_loader.cpp @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_loader.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/js_object_template.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/js_object_template.inl @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsPrefetcher.js
