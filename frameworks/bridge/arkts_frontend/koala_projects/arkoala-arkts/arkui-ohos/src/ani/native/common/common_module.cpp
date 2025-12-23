@@ -145,7 +145,7 @@ ani_object CreateSizeObject(ani_env* env, const NG::DrawingContext& context)
 {
     ani_status status;
     ani_class sizeClass;
-    if ((status = env->FindClass("@arkui.Graphics.SizeInternal", &sizeClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.Graphics.SizeInternal", &sizeClass)) != ANI_OK) {
         HILOGE("FindClass Size failed, %{public}d", status);
         return nullptr;
     }
@@ -172,7 +172,7 @@ ani_object CreateSizeInPixelObject(ani_env* env, const NG::DrawingContext& conte
 {
     ani_status status;
     ani_class sizeInPixelClass;
-    if ((status = env->FindClass("@arkui.Graphics.SizeInternal", &sizeInPixelClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.Graphics.SizeInternal", &sizeInPixelClass)) != ANI_OK) {
         HILOGE("FindClass Size failed, %{public}d", status);
         return nullptr;
     }
@@ -199,7 +199,7 @@ ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context)
 
     // DrawContext object
     ani_class drawContextClass;
-    if ((status = env->FindClass("@arkui.Graphics.DrawContext", &drawContextClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.Graphics.DrawContext", &drawContextClass)) != ANI_OK) {
         HILOGE("FindClass DrawContext failed, %{public}d", status);
         return nullptr;
     }
@@ -309,7 +309,7 @@ std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawBehindFu
             return;
         }
         env->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_fn_object>(object), "drawBehind", "C{@arkui.Graphics.DrawContext}:", drawingContext);
+            reinterpret_cast<ani_fn_object>(object), "drawBehind", "C{arkui.Graphics.DrawContext}:", drawingContext);
         if (attachCurrentThreadStatus == ANI_OK) {
             vm->DetachCurrentThread();
         }
@@ -331,7 +331,7 @@ std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawContentF
             return;
         }
         env->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_fn_object>(object), "drawContent", "C{@arkui.Graphics.DrawContext}:", drawingContext);
+            reinterpret_cast<ani_fn_object>(object), "drawContent", "C{arkui.Graphics.DrawContext}:", drawingContext);
         if (attachCurrentThreadStatus == ANI_OK) {
             vm->DetachCurrentThread();
         }
@@ -353,7 +353,7 @@ std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawFrontFun
             return;
         }
         env->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_fn_object>(object), "drawFront", "C{@arkui.Graphics.DrawContext}:", drawingContext);
+            reinterpret_cast<ani_fn_object>(object), "drawFront", "C{arkui.Graphics.DrawContext}:", drawingContext);
         if (attachCurrentThreadStatus == ANI_OK) {
             vm->DetachCurrentThread();
         }
@@ -375,7 +375,7 @@ std::function<void(NG::DrawingContext& drawingContext)> ConvertFnObjDrawForeGrou
             return;
         }
         env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawForeground",
-            "C{@arkui.Graphics.DrawContext}:", drawingContext);
+            "C{arkui.Graphics.DrawContext}:", drawingContext);
         if (attachCurrentThreadStatus == ANI_OK) {
             vm->DetachCurrentThread();
         }
