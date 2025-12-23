@@ -2607,6 +2607,7 @@ frameworks/core/components_ng/pattern/scroll_bar/ @arkuiscroll
 frameworks/core/components_ng/pattern/scroll/ @arkuiscroll
 frameworks/core/components_ng/pattern/search/ @huawei_g_five
 frameworks/core/components_ng/pattern/security_component/ @harylee
+frameworks/core/components_ng/pattern/select_content_overlay/ @huawei_g_five
 frameworks/core/components_ng/pattern/select_overlay/ @huawei_g_five
 frameworks/core/components_ng/pattern/select/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/shape/ @arkuieco3
