@@ -1315,6 +1315,13 @@ class Router {
         return result;
     }
 
+    getStackSize() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result = this.ohos_router.getStackSize();
+        __JSScopeUtil__.restoreInstanceId();
+        return result;
+    }
+
     getState() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let state = this.ohos_router.getState();
