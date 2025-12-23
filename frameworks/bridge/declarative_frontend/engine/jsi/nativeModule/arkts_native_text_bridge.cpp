@@ -2067,7 +2067,7 @@ ArkUINativeModuleValue TextBridge::SetMarqueeOptions(ArkUIRuntimeCallInfo* runti
     CalcDimension marqueeSpacing;
     RefPtr<ResourceObject> spacingResObj;
     bool spacingParseResult = marqueeSpacingArg->IsNull() || marqueeSpacingArg->IsUndefined() ? false:
-        ArkTSUtils::ParseJsDimensionVp(vm, marqueeSpacingArg, marqueeSpacing, spacingResObj);
+        ArkTSUtils::ParseJsLengthMetrics(vm, marqueeSpacingArg, marqueeSpacing, spacingResObj);
     textMarqueeOptions->spacing.value = marqueeSpacing.Value();
     textMarqueeOptions->spacing.units = static_cast<int32_t>(marqueeSpacing.Unit());
 
