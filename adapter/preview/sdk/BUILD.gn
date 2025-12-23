@@ -110,6 +110,7 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend:statemanagement",
       "$ace_root/frameworks/bridge/declarative_frontend:uicontext",
       "$ace_root/frameworks/bridge/declarative_frontend:x_node",
+      ":copy_component_model_abc_library",
     ]
     out_path = get_label_info(
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
@@ -126,6 +127,26 @@ if (is_ohos_standard_system) {
     outputs = [ target_out_dir +
                 "/previewer/common/bin/module/arkui/{{source_file_part}}" ]
     module_source_dir = target_out_dir + "/previewer/common/bin/module/arkui"
+    module_install_name = ""
+  }
+
+  ohos_copy("copy_component_model_abc_library") {
+    deps = [
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:hyperlink",
+    ]
+    out_path = get_label_info(
+            "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
+            "root_out_dir")
+    sources = [
+      "${out_path}/arkui/ace_engine/arkhyperlink.abc",
+    ]
+
+    # Output path description: 
+    # "previewer/common/bin/module" is equivalent to the basic path of globalThis.requireNapi().
+    # globalThis.requireNapi("arkui.components").
+    outputs = [ target_out_dir +
+                "/previewer/common/bin/module/arkui/components/{{source_file_part}}" ]
+    module_source_dir = target_out_dir + "/previewer/common/bin/module/arkui/components"
     module_install_name = ""
   }
 

@@ -212,7 +212,7 @@ void AssignCast(std::optional<ButtonStyleMode>& dst, const Ark_ButtonStyleMode& 
 }
 
 template<>
-void AssignCast(std::optional<Color>& dst, const enum Ark_Color& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const enum Ark_Color& src)
 {
     switch (src) {
         case ARK_COLOR_WHITE: dst = Color(0xffffffff); break; // White

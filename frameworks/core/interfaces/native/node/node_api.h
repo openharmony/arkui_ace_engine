@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-const struct ArkUINodeModifiers* GetArkUINodeModifiers(void);
+ACE_FORCE_EXPORT const struct ArkUINodeModifiers* GetArkUINodeModifiers(void);
 
 // use internal, not for export.
 const struct ArkUIFullNodeAPI* GetArkUIFullNodeAPI(void);

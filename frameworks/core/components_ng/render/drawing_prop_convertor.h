@@ -24,7 +24,7 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
-RSPoint ToRSPoint(const NG::PointF& point);
+ACE_FORCE_EXPORT RSPoint ToRSPoint(const NG::PointF& point);
 RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
 ACE_FORCE_EXPORT RSColor ToRSColor(const Color& color);
 ACE_FORCE_EXPORT RSColor ToRSColor(const LinearColor& color);

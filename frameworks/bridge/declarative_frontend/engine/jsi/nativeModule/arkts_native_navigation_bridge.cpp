@@ -16,6 +16,10 @@
 
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+
+#include "base/log/ace_scoring_log.h"
+#include "core/components/navigation_bar/navigation_container_component.h"
+
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"

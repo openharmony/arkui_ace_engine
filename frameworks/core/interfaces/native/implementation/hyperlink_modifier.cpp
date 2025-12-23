@@ -13,54 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
-#include "core/components_ng/pattern/hyperlink/hyperlink_model_static.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "core/common/dynamic_module_helper.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace HyperlinkModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
-{
-    auto frameNode = HyperlinkModelStatic::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-} // HyperlinkModifier
-namespace HyperlinkInterfaceModifier {
-void SetHyperlinkOptionsImpl(Ark_NativePointer node,
-                             const Opt_Union_String_Resource* address,
-                             const Opt_Union_String_Resource* content)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(address);
-    auto convAddress = Converter::OptConvert<std::string>(*address);
-    auto convContent = Converter::OptConvertPtr<std::string>(content);
-    HyperlinkModelStatic::SetTextStyle(frameNode, convAddress.value_or(""), convContent);
-}
-} // HyperlinkInterfaceModifier
-namespace HyperlinkAttributeModifier {
-void SetColorImpl(Ark_NativePointer node,
-                  const Opt_Union_Color_I32_String_Resource* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Color>(value);
-    HyperlinkModelStatic::SetColor(frameNode, convValue);
-}
-} // HyperlinkAttributeModifier
 const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier()
 {
-    static const GENERATED_ArkUIHyperlinkModifier ArkUIHyperlinkModifierImpl {
-        HyperlinkModifier::ConstructImpl,
-        HyperlinkInterfaceModifier::SetHyperlinkOptionsImpl,
-        HyperlinkAttributeModifier::SetColorImpl,
-    };
-    return &ArkUIHyperlinkModifierImpl;
+    auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("hyperlink");
+    CHECK_NULL_RETURN(module, nullptr);
+    return reinterpret_cast<const GENERATED_ArkUIHyperlinkModifier*>(module->GetStaticModifier());
 }
-
 }

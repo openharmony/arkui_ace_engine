@@ -20,7 +20,7 @@
 #include "core/components_ng/pattern/hyperlink/hyperlink_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT HyperlinkModelNG : public HyperlinkModel {
+class ACE_FORCE_EXPORT HyperlinkModelNG : public HyperlinkModel {
 public:
     void Create(const std::string& address, const std::string& content) override;
     void Pop() override {};

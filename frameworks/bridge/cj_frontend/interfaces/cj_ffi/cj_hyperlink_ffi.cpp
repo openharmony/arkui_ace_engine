@@ -16,18 +16,31 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_hyperlink_ffi.h"
 
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/pattern/hyperlink/hyperlink_model.h"
+#include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
+
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 
 using namespace OHOS::Ace;
+
+NG::HyperlinkModelNG* GetHyperlinkModel()
+{
+    auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("hyperlink");
+    if (module == nullptr) {
+        LOGF("Cannot find hyperlink dynamic module");
+        abort();
+    }
+    return reinterpret_cast<NG::HyperlinkModelNG*>(module->GetModel());
+}
 
 extern "C" {
 void FfiOHOSAceFrameworkHyperlinkCreate(const char* address, const char* content)
 {
-    HyperlinkModel::GetInstance()->Create(address, content);
+    GetHyperlinkModel()->Create(address, content);
 }
 void FfiOHOSAceFrameworkHyperlinkColor(uint32_t color)
 {
-    HyperlinkModel::GetInstance()->SetColor(Color(color));
+    GetHyperlinkModel()->SetColor(Color(color));
 }
 void FfiOHOSAceFrameworkHyperlinkPop()
 {

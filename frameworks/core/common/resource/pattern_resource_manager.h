@@ -69,7 +69,7 @@ private:
     VariantValue value_;
 };
 
-class PatternResourceManager final : public AceType {
+class ACE_FORCE_EXPORT PatternResourceManager final : public AceType {
     DECLARE_ACE_TYPE(PatternResourceManager, AceType);
 
 public:

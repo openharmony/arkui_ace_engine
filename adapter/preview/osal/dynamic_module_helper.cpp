@@ -20,19 +20,6 @@
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
-namespace {
-#ifdef WINDOWS_PLATFORM
-#ifdef UNICODE
-const std::wstring COMPATIABLE_LIB = L"libace_compatible_components.dll";
-#else
-const std::string COMPATIABLE_LIB = "libace_compatible_components.dll";
-#endif
-#elif MAC_PLATFORM
-const std::string COMPATIABLE_LIB = "libace_compatible_components.dylib";
-#else
-const std::string COMPATIABLE_LIB = "libace_compatible_components.z.so";
-#endif
-} // namespace
 DynamicModuleHelper& DynamicModuleHelper::GetInstance()
 {
     static DynamicModuleHelper instance;
@@ -70,10 +57,7 @@ void* DynamicModuleHelper::CreateCanvasBridge(CanvasBridgeParams& params)
     return canvasBridgeLoaderFunc_(params);
 }
 
-DynamicModuleHelper::DynamicModuleHelper()
-{
-    DynamicLoadLibrary();
-}
+DynamicModuleHelper::DynamicModuleHelper() {}
 
 DynamicModuleHelper::~DynamicModuleHelper()
 {
@@ -82,12 +66,6 @@ DynamicModuleHelper::~DynamicModuleHelper()
 
 bool DynamicModuleHelper::DynamicLoadLibrary()
 {
-    if (!compatibleLibLoaded_) {
-        compatibleLibHandle_ = LOADLIB(COMPATIABLE_LIB.c_str());
-        CHECK_NULL_RETURN(compatibleLibHandle_, false);
-        LOGI("Load compatible lib success.");
-        compatibleLibLoaded_ = true;
-    }
     return true;
 }
 
@@ -108,6 +86,30 @@ void* DynamicModuleHelper::LoadSymbol(const char* symName)
 #else
     return LOADSYM(compatibleLibHandle_, symName);
 #endif
+}
+
+DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
+{
+    auto iter = moduleMap_.find(name);
+    if (iter != moduleMap_.end()) {
+        return iter->second.get();
+    } else {
+#ifdef WINDOWS_PLATFORM
+        std::wstring nameW = std::wstring(name.begin(), name.end());
+        auto libName = DYNAMIC_MODULE_LIB_PREFIX + nameW + DYNAMIC_MODULE_LIB_POSTFIX;
+#else
+        auto libName = DYNAMIC_MODULE_LIB_PREFIX + name + DYNAMIC_MODULE_LIB_POSTFIX;
+#endif
+        LIBHANDLE handle = LOADLIB(libName.c_str());
+        CHECK_NULL_RETURN(handle, nullptr);
+        auto* createSym =  reinterpret_cast<DynamicModuleCreateFunc>(LOADSYM(handle, DYNAMIC_MODULE_CREATE.c_str()));
+        CHECK_NULL_RETURN(createSym, nullptr);
+        DynamicModule* module = createSym();
+        CHECK_NULL_RETURN(module, nullptr);
+        LOGI("First load %{public}s nativeModule finish", name.c_str());
+        moduleMap_.emplace(name, std::unique_ptr<DynamicModule>(module));
+        return module;
+    }
 }
 
 } // namespace OHOS::Ace

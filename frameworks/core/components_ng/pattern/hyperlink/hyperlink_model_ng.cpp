@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
 
 namespace OHOS::Ace::NG {
+
 void HyperlinkModelNG::Create(const std::string& address, const std::string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();

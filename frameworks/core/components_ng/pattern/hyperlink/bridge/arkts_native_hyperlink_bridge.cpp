@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_hyperlink_bridge.h"
+#include "core/components_ng/pattern/hyperlink/bridge/arkts_native_hyperlink_bridge.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -22,6 +25,33 @@ constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 } // namespace
+
+void HyperlinkBridge::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object, EcmaVM *vm) {
+    LOGE("Start RegisterHyperlinkAttributes nativeModule");
+
+    const char* functionNames[] = {
+        "create",
+        "setColor", "resetColor",
+        "setDraggable", "resetDraggable",
+        "setResponseRegion", "resetResponseRegion"
+    };
+
+    Local<JSValueRef> functionValues[] = {
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::CreateHyperlink),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::SetColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::ResetColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::SetDraggable),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::ResetDraggable),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::SetResponseRegion),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::ResetResponseRegion),
+    };
+
+    auto hyperlink = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, functionValues);
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "hyperlink"), hyperlink);
+
+    LOGE("Finish RegisterHyperlinkAttributes nativeModule");
+}
+
 ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -112,4 +142,23 @@ ArkUINativeModuleValue HyperlinkBridge::ResetResponseRegion(ArkUIRuntimeCallInfo
     GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkResponseRegion(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue HyperlinkBridge::CreateHyperlink(ArkUIRuntimeCallInfo* runtimeCallInfo) {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsString(vm), panda::JSValueRef::Undefined(vm));
+    std::string address = firstArg->ToString(vm)->ToString(vm);
+
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(secondArg->IsString(vm), panda::JSValueRef::Undefined(vm));
+    std::string content = secondArg->ToString(vm)->ToString(vm);
+
+    static HyperlinkModelNG model;
+    model.Create(address, content);
+    
+    return panda::JSValueRef::Undefined(vm);
+}
+
 } // namespace OHOS::Ace::NG

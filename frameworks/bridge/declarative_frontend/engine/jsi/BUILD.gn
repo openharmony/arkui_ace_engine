@@ -249,7 +249,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_grid_col_bridge.cpp",
       "nativeModule/arkts_native_grid_item_bridge.cpp",
       "nativeModule/arkts_native_grid_row_bridge.cpp",
-      "nativeModule/arkts_native_hyperlink_bridge.cpp",
       "nativeModule/arkts_native_image_animator_bridge.cpp",
       "nativeModule/arkts_native_image_bridge.cpp",
       "nativeModule/arkts_native_image_span_bridge.cpp",

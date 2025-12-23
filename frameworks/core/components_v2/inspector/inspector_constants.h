@@ -405,7 +405,7 @@ ACE_EXPORT extern const char MODAL_PAGE_TAG[];
 
 // hyperlink
 ACE_EXPORT extern const char HYPERLINK_COMPONENT_TAG[];
-ACE_EXPORT extern const char HYPERLINK_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char HYPERLINK_ETS_TAG[];
 
 // stepper
 ACE_EXPORT extern const char STEPPER_COMPONENT_TAG[];
@@ -616,7 +616,7 @@ ACE_EXPORT extern const char SELECT_OVERLAY_ETS_TAG[];
 
 // Symbol
 ACE_EXPORT extern const char SYMBOL_COMPONENT_TAG[];
-ACE_EXPORT extern const char SYMBOL_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char SYMBOL_ETS_TAG[];
 
 // IsolatedComponent
 ACE_EXPORT extern const char ISOLATED_COMPONENT_TAG[];

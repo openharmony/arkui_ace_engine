@@ -14,6 +14,35 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
+component_modules = [ "hyperlink" ]
+component_modules_libs = []
+
+foreach(module, component_modules) {
+  sub_name = string_replace(module, "_", "")
+  module_name = "arkui_$sub_name"
+  ohos_shared_library(module_name) {
+    deps = []
+    if (is_ohos) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_ohos" ]
+    } else if (use_mingw_win) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_windows" ]
+    } else if (use_mac) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_mac" ]
+    } else if (use_linux) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_linux" ]
+    }
+        
+    deps += [
+      "$ace_root/build:libace_compatible",
+      "$ace_root/frameworks/core:ace_container_scope"
+    ]
+
+    part_name = ace_engine_part
+    subsystem_name = ace_engine_subsystem
+  }
+  component_modules_libs += [ ":$module_name" ]
+}
+
 # Install packages
 group("ace_packages") {
   # core library for Ability Cross-platform Environment(ACE) JS
@@ -41,4 +70,5 @@ group("ace_packages") {
   if (is_asan) {
     deps -= [ "$ace_root/build:libace" ]
   }
+  deps += component_modules_libs
 }

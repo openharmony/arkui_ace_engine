@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_HYPERLINK_BRIDGE_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_HYPERLINK_BRIDGE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HYPERLINK_BRIDGE_ARKTS_NATIVE_HYPERLINK_BRDIGE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HYPERLINK_BRIDGE_ARKTS_NATIVE_HYPERLINK_BRDIGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 
 namespace OHOS::Ace::NG {
 class HyperlinkBridge {
 public:
+    static void RegisterHyperlinkAttributes(Local<panda::ObjectRef> object, EcmaVM *vm);
+    static ArkUINativeModuleValue CreateHyperlink(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetDraggable(ArkUIRuntimeCallInfo* runtimeCallInfo);

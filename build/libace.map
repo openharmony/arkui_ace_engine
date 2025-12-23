@@ -41,6 +41,7 @@
       GetArkUIFullNodeAPI;
       GetArkUIAniModifiers;
       GetArkUIDrawableDescriptor;
+      GetArkUINodeModifiers;
 
       OHOS::Ace::AceApplicationInfo::*;
       OHOS::Ace::AceScopedTrace::*;
@@ -118,6 +119,7 @@
       OHOS::Ace::NG::ContainerModalView::*;
       OHOS::Ace::NG::BuildTitleNodeForCj*;
       OHOS::Ace::NG::AddControlButtonsForCj*;
+      OHOS::Ace::DynamicModuleHelper::*;
       OHOS::Ace::PixelMap::*;
       OHOS::Ace::MeasureUtil::*;
       OHOS::Ace::ViewPartialUpdateModel::*;
@@ -148,7 +150,8 @@
       OHOS::Ace::GridModel::*;
       OHOS::Ace::GridItemModel::*;
       OHOS::Ace::GridRowModel::*;
-      OHOS::Ace::HyperlinkModel::*;
+      OHOS::Ace::NG::HyperlinkModelNG::*;
+      OHOS::Ace::NG::HyperlinkModelStatic::CreateFrameNode*;
       OHOS::Ace::IfElseModel::*;
       OHOS::Ace::ImageAnimatorModel::*;
       OHOS::Ace::ImageModel::*;
@@ -339,6 +342,7 @@
       OHOS::Ace::ImageAnalyzerMgr::UpdateConfig*;
       OHOS::Ace::ImageAnalyzerMgr::Release*;
       OHOS::Ace::ImageAnalyzerMgr::UpdateOverlayStatus*;
+      OHOS::Ace::ResourceParseUtils::*;
       "OHOS::Ace::NG::GeometryNode::SetMarginFrameOffset(OHOS::Ace::NG::OffsetT<float> const&)";
       "OHOS::Ace::NG::GeometryNode::GetFrameRect(bool) const";
       OHOS::Ace::NG::GeometryNode::*;
@@ -354,6 +358,28 @@
       OHOS::Ace::NG::SecurityUIExtensionProxy::*;
       OHOS::Ace::NG::DynamicModelStatic::*;
       OHOS::Ace::NG::DynamicParam::*;
+      OHOS::Ace::NG::MinusPaddingToSize*;
+      OHOS::Ace::ToRSPoint*;
+      OHOS::Ace::NG::GeometryNode::*;
+      OHOS::Ace::NG::ModifierAdapter::*;
+      OHOS::Ace::NG::TextLayoutAlgorithm::*;
+      OHOS::Ace::NG::ImagePainter::DrawImage*;
+      OHOS::Ace::NG::Modifier::*;
+      OHOS::Ace::NG::ArkTSUtils::*;
+      OHOS::Ace::NG::TextPattern::*;
+      OHOS::Ace::NG::HyperlinkPattern::*;
+      OHOS::Ace::NG::ViewAbstractModelStatic::*;
+      OHOS::Ace::NG::SelectOverlayClient::*;
+      OHOS::Ace::NG::TextLayoutProperty::*;
+      OHOS::Ace::V2::HYPERLINK_ETS_TAG;
+      OHOS::Ace::V2::SYMBOL_ETS_TAG;
+      OHOS::Ace::NG::InputEventActuator::*;
+      OHOS::Ace::NG::GetHyperlinkDynamicModifier;
+      OHOS::Ace::NG::GetCJUIHyperlinkModifier;
+      OHOS::Ace::NG::TextAccessibilityProperty::*;
+
+      OHOS::Ace::PipelineBase::*;
+      OHOS::Ace::FontManager::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
@@ -404,6 +430,13 @@
       vtable?for?OHOS::Ace::NG::PasteButtonModelNG;
       vtable?for?OHOS::Ace::NG::SecurityComponentModelNG;
       vtable?for?OHOS::Ace::NG::Pattern;
+      vtable?for?OHOS::Ace::NG::HyperlinkModelNG;
+      vtable?for?OHOS::Ace::NG::HyperlinkModelStatic;
+      vtable?for?OHOS::Ace::NG::HyperlinkPattern;
+      vtable?for?OHOS::Ace::NG::TextLayoutProperty;
+      vtable?for?OHOS::Ace::NG::TextAccessibilityProperty;
+      virtual?thunk?to?OHOS::Ace::NG::TextPattern::*;
+      non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::*;
 
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;
@@ -438,6 +471,8 @@
       VTT?for?OHOS::Ace::LayeredDrawableDescriptor;
       VTT?for?OHOS::Ace::PixelMapDrawableDescriptor;
       VTT?for?OHOS::Ace::AnimatedDrawableDescriptor;
+      VTT?for?OHOS::Ace::NG::TextLayoutProperty;
+      VTT?for?OHOS::Ace::NG::TextAccessibilityProperty;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
@@ -539,6 +574,16 @@
       OHOS::Ace::UiMaterialTheme::*;
       OHOS::Ace::MaterialUtils::*;
       OHOS::Ace::UiMaterial::*;
+      OHOS::Ace::PatternResourceManager::AddResource*;
+      OHOS::Ace::PatternResourceManager::ParsePropertyValue*;
+      OHOS::Ace::PatternResourceManager::*;
+
+      OHOS::Ace::NG::Validator::*;
+      OHOS::Ace::NG::Converter::ResourceConverter::*;
+      OHOS::Ace::NG::CommonViewModelNG::CreateFrameNode*;
+      *OHOS::Ace::NG::Converter::Convert*;
+      *OHOS::Ace::NG::Converter::AssignCast*;
+      *OHOS::Ace::NG::Converter::AssignArkValue*;
 
       OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
       "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";

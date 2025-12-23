@@ -250,6 +250,7 @@ template("declarative_js_engine") {
       ":windowsizelayoutbreakpoint",
       ":x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
+      "ark_component/components:module_group",
     ]
 
     if (!is_arkui_x) {
@@ -363,7 +364,6 @@ template("declarative_js_engine") {
       "jsview/js_grid_container.cpp",
       "jsview/js_grid_item.cpp",
       "jsview/js_grid_row.cpp",
-      "jsview/js_hyperlink.cpp",
       "jsview/js_if_else.cpp",
       "jsview/js_image.cpp",
       "jsview/js_image_animator.cpp",
@@ -841,6 +841,7 @@ template("declarative_js_engine_ng") {
       ":windowsizelayoutbreakpoint",
       ":x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
+      "ark_component/components:module_group",
     ]
 
     if (!is_arkui_x) {
@@ -960,7 +961,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_grid_container.cpp",
       "jsview/js_grid_item.cpp",
       "jsview/js_grid_row.cpp",
-      "jsview/js_hyperlink.cpp",
       "jsview/js_if_else.cpp",
       "jsview/js_image.cpp",
       "jsview/js_image_animator.cpp",

@@ -22,9 +22,6 @@
 #include "compatible/components/component_loader.h"
 
 namespace OHOS::Ace {
-namespace {
-const std::string COMPATIABLE_LIB = "libace_compatible_components.z.so";
-} // namespace
 DynamicModuleHelper& DynamicModuleHelper::GetInstance()
 {
     static DynamicModuleHelper instance;
@@ -40,6 +37,27 @@ std::unique_ptr<ComponentLoader> DynamicModuleHelper::GetLoaderByName(const char
     CHECK_NULL_RETURN(componentLoaderFunc_, nullptr);
     return std::unique_ptr<ComponentLoader>(componentLoaderFunc_(name));
 }
+
+DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
+{
+    auto iter = moduleMap_.find(name);
+    if (iter != moduleMap_.end()) {
+        return iter->second.get();
+    } else {
+        auto libName = DYNAMIC_MODULE_LIB_PREFIX + name + DYNAMIC_MODULE_LIB_POSTFIX;
+        auto* handle = dlopen(libName.c_str(), RTLD_LAZY);
+        LOGI("First load %{public}s nativeModule start", name.c_str());
+        CHECK_NULL_RETURN(handle, nullptr);
+        auto* createSym =  reinterpret_cast<DynamicModuleCreateFunc>(dlsym(handle, DYNAMIC_MODULE_CREATE.c_str()));
+        CHECK_NULL_RETURN(createSym, nullptr);
+        DynamicModule* module = createSym();
+        CHECK_NULL_RETURN(module, nullptr);
+        LOGI("First load %{public}s nativeModule finish", name.c_str());
+        moduleMap_.emplace(name, std::unique_ptr<DynamicModule>(module));
+        return module;
+    }
+}
+
 
 void* DynamicModuleHelper::CreateCanvasRenderingContextModel(bool isOffscreen)
 {
@@ -85,7 +103,7 @@ bool DynamicModuleHelper::DynamicLoadLibrary()
 
 void DynamicModuleHelper::CloseLibrary()
 {
-    if (dlclose(compatibleLibHandle_) != 0) {
+    if (compatibleLibLoaded_ && dlclose(compatibleLibHandle_) != 0) {
         return;
     }
     compatibleLibHandle_ = nullptr;

@@ -457,10 +457,55 @@ class GridRowModifier extends ArkGridRowComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class HyperlinkModifier extends ArkHyperlinkComponent {
+class LazyArkHyperlinkComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkHyperlinkComponent.module === undefined) {
+      LazyArkHyperlinkComponent.module = globalThis.requireNapi('arkui.components.arkhyperlink');
+    }
+    this.lazyComponent = LazyArkHyperlinkComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  setColor(color) {
+    this.lazyComponent.setColor(color);
+    return this;
+  }
+
+  resetColor() {
+    this.lazyComponent.resetColor();
+    return this;
+  }
+
+  setDraggable(draggable) {
+    this.lazyComponent.setDraggable(draggable);
+    return this;
+  }
+
+  resetDraggable() {
+    this.lazyComponent.resetDraggable();
+    return this;
+  }
+
+  setResponseRegion(region) {
+    this.lazyComponent.setResponseRegion(region);
+    return this;
+  }
+
+  resetResponseRegion() {
+    this.lazyComponent.resetResponseRegion();
+    return this;
+  }
+}
+class HyperlinkModifier extends LazyArkHyperlinkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
