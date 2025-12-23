@@ -5108,3 +5108,20 @@ let ThreatType;
   ThreatType[ThreatType.THREAT_NONE = 4] = 'THREAT_NONE';
   ThreatType[ThreatType.THREAT_UNPROCESSED = 5] = 'THREAT_UNPROCESSED';
 })(ThreatType || (ThreatType = {}));
+
+let ConsoleMessageSource
+(function (ConsoleMessageSource) {
+  ConsoleMessageSource[ConsoleMessageSource.XML = 0] = 'XML';
+  ConsoleMessageSource[ConsoleMessageSource.JAVASCRIPT = 1] = 'JAVASCRIPT';
+  ConsoleMessageSource[ConsoleMessageSource.NETWORK = 2] = 'NETWORK';
+  ConsoleMessageSource[ConsoleMessageSource.CONSOLE_API = 3] = 'CONSOLE_API';
+  ConsoleMessageSource[ConsoleMessageSource.STORAGE = 4] = 'STORAGE';
+  ConsoleMessageSource[ConsoleMessageSource.RENDERING = 5] = 'RENDERING';
+  ConsoleMessageSource[ConsoleMessageSource.SECURITY = 6] = 'SECURITY';
+  ConsoleMessageSource[ConsoleMessageSource.OTHER = 7] = 'OTHER';
+  ConsoleMessageSource[ConsoleMessageSource.DEPRECATION = 8] = 'DEPRECATION';
+  ConsoleMessageSource[ConsoleMessageSource.WORKER = 9] = 'WORKER';
+  ConsoleMessageSource[ConsoleMessageSource.VIOLATION = 10] = 'VIOLATION';
+  ConsoleMessageSource[ConsoleMessageSource.INTERVENTION = 11] = 'INTERVENTION';
+  ConsoleMessageSource[ConsoleMessageSource.RECOMMENDATION = 12] = 'RECOMMENDATION';
+})(ConsoleMessageSource || (ConsoleMessageSource = {}));
