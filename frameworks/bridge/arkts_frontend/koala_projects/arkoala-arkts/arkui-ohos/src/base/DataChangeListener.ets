@@ -37,13 +37,16 @@ export class InternalListener implements DataChangeListener {
      * Notify the change of data to backend
      * @return the index of the first changed item
      */
-    flush(nodePtr: pointer): int32 {
+    flush(nodePtr: pointer, activeStart?: int32): int32 {
         if (this.startIndex === Number.POSITIVE_INFINITY.toInt()) {
             return Number.POSITIVE_INFINITY.toInt() // none affected
         }
+        // notify the container about the start index of change in visble range
+        const notifyChangeStart = this.changeCount < 0 ? 0 : (activeStart ?? this.startIndex)
+        // send the change to backend and tell the container to layout
         LazyForEachOps.NotifyChange(
             nodePtr,
-            this.startIndex,
+            notifyChangeStart,
             this.endIndex,
             this.changeCount
         )
