@@ -30,7 +30,7 @@ public:
 
 /**
  * @tc.name: TextPattern001
- * @tc.desc: Test TextPattern UpdateCaretRect.
+ * @tc.desc: Test TextPattern UpdateCaretRect
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern001, TestSize.Level1)
@@ -49,7 +49,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern001, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern002
- * @tc.desc: Test TextPattern CheckSelectAreaVisible.
+ * @tc.desc: Test TextPattern CheckSelectAreaVisible
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern002, TestSize.Level1)
@@ -3089,7 +3089,7 @@ HWTEST_F(TextFieldPatternTest, AdjustAutoScrollOffset, TestSize.Level1)
 
 /**
  * @tc.name: TextFieldPatternTestMultiThread
- * @tc.desc: Test OnAttachToFrameNodeMultiThread.
+ * @tc.desc: Test OnAttachToFrameNodeMultiThread
  */
 HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread, TestSize.Level1)
 {
@@ -3104,7 +3104,7 @@ HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread, TestSize.Level1)
 
 /**
  * @tc.name: TextFieldPatternTestMultiThread2
- * @tc.desc: Test OnAttachToFrameNodeMultiThread.
+ * @tc.desc: Test OnAttachToFrameNodeMultiThread
  */
 HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread2, TestSize.Level1)
 {
@@ -3119,7 +3119,7 @@ HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread2, TestSize.Level1
 
 /**
  * @tc.name: TextFieldPatternTestMultiThread3
- * @tc.desc: Test OnAttachToFrameNodeMultiThread.
+ * @tc.desc: Test OnAttachToFrameNodeMultiThread
  */
 HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread3, TestSize.Level1)
 {
@@ -3134,7 +3134,7 @@ HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread3, TestSize.Level1
 
 /**
  * @tc.name: TextInputResponseAreaGetChildOffset
- * @tc.desc: test TextInputResponseArea GetChildOffset method.
+ * @tc.desc: test TextInputResponseArea GetChildOffset method
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextInputResponseAreaGetChildOffset, TestSize.Level0)
