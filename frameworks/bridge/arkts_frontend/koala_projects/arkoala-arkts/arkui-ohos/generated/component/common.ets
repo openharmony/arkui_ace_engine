@@ -13272,10 +13272,10 @@ export class PopupBorderLinearGradient_serializer {
                     valueSerializer.writeInt8((0).toByte())
                     const valueHolderForColorsTmpElement_0TmpValueForIdx0  = valueHolderForColorsTmpElement_0TmpValue as Color
                     valueSerializer.writeInt32(valueHolderForColorsTmpElement_0TmpValueForIdx0.getOrdinal())
-                } else if (valueHolderForColorsTmpElement_0TmpValue instanceof number) {
+                } else if (valueHolderForColorsTmpElement_0TmpValue instanceof int32) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForColorsTmpElement_0TmpValueForIdx1  = valueHolderForColorsTmpElement_0TmpValue as number
-                    valueSerializer.writeNumber(valueHolderForColorsTmpElement_0TmpValueForIdx1)
+                    const valueHolderForColorsTmpElement_0TmpValueForIdx1  = valueHolderForColorsTmpElement_0TmpValue as int32
+                    valueSerializer.writeInt32(valueHolderForColorsTmpElement_0TmpValueForIdx1)
                 } else if (valueHolderForColorsTmpElement_0TmpValue instanceof string) {
                     valueSerializer.writeInt8((2).toByte())
                     const valueHolderForColorsTmpElement_0TmpValueForIdx2  = valueHolderForColorsTmpElement_0TmpValue as string
@@ -13311,7 +13311,7 @@ export class PopupBorderLinearGradient_serializer {
                 if (colorsTmpBufTempBufValue0TempBuf_UnionSelector == (0).toChar()) {
                     colorsTmpBufTempBufValue0TempBuf_ = Color.values()[valueDeserializer.readInt32()]
                 } else if (colorsTmpBufTempBufValue0TempBuf_UnionSelector == (1).toChar()) {
-                    colorsTmpBufTempBufValue0TempBuf = valueDeserializer.readInt32()
+                    colorsTmpBufTempBufValue0TempBuf_ = valueDeserializer.readInt32()
                 } else if (colorsTmpBufTempBufValue0TempBuf_UnionSelector == (2).toChar()) {
                     colorsTmpBufTempBufValue0TempBuf_ = (valueDeserializer.readString() as string)
                 } else if (colorsTmpBufTempBufValue0TempBuf_UnionSelector == (3).toChar()) {

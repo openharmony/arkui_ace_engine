@@ -1770,10 +1770,10 @@ export class EdgeOutlineWidths_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTopTmpValueForIdx0  = valueHolderForTopTmpValue as string
                 valueSerializer.writeString(valueHolderForTopTmpValueForIdx0)
-            } else if (valueHolderForTopTmpValue instanceof int32) {
+            } else if (valueHolderForTopTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForTopTmpValueForIdx1  = valueHolderForTopTmpValue as int32
-                valueSerializer.writeInt32(valueHolderForTopTmpValueForIdx1)
+                const valueHolderForTopTmpValueForIdx1  = valueHolderForTopTmpValue as number
+                valueSerializer.writeNumber(valueHolderForTopTmpValueForIdx1)
             } else if (valueHolderForTopTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForTopTmpValueForIdx2  = valueHolderForTopTmpValue as Resource
