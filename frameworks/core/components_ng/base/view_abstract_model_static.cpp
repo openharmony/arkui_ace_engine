@@ -466,7 +466,8 @@ void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& tar
     targetNode->PushDestroyCallbackWithTag(destructor, KEY_CONTEXT_MENU);
 }
 
-void ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(FrameNode* targetNode, const NG::MenuParam& menuParam)
+void ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(const RefPtr<FrameNode>& targetNode,
+    const NG::MenuParam& menuParam)
 {
     CHECK_NULL_VOID(targetNode);
 
