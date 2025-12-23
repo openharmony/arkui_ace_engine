@@ -388,7 +388,7 @@ TEST_F(ScrollZoomTest, CollectScrollableTouchTarget001)
     TouchTestResult res;
     ResponseLinkResult link;
     auto scrollHandler = pattern_->GetScrollableEvent();
-    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link, 1);
+    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link, 1, 1);
     EXPECT_EQ(link.size(), 2); /* 2: result count */
     EXPECT_EQ(res.size(), 1);
     EXPECT_EQ(*res.begin(), pattern_->gestureGroup_);

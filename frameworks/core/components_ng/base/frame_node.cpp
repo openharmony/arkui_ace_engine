@@ -3576,7 +3576,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         // combine into exclusive recognizer group.
         auto gestureHub = GetOrCreateGestureEventHub();
         if (gestureHub) {
-            gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result, touchId);
+            gestureHub->CombineIntoExclusiveRecognizer(
+                globalPoint, localPoint, result, touchId, touchRestrict.touchEvent.originalId);
         }
     }
 

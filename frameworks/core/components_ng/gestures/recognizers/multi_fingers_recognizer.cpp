@@ -206,4 +206,13 @@ std::string MultiFingersRecognizer::DumpGestureInfo() const
     infoStr.append("]");
     return infoStr;
 }
+
+int32_t MultiFingersRecognizer::GetOriginalTouchPointsSize() const
+{
+    std::set<int32_t> originalIds;
+    for (const auto& point : touchPoints_) {
+        originalIds.insert(point.second.originalId);
+    }
+    return static_cast<int32_t>(originalIds.size());
+}
 } // namespace OHOS::Ace::NG

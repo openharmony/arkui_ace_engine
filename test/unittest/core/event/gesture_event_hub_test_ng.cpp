@@ -392,7 +392,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest006, TestSize.Level1)
      * @tc.expected: result is empty
      */
     TouchTestResult result;
-    gestureEventHub->CombineIntoExclusiveRecognizer(GLOBAL_POINT, LOCAL_POINT, result, TOUCH_ID);
+    gestureEventHub->CombineIntoExclusiveRecognizer(GLOBAL_POINT, LOCAL_POINT, result, TOUCH_ID, TOUCH_ID);
     auto size = static_cast<int32_t>(result.size());
     EXPECT_EQ(size, 0);
 
@@ -422,7 +422,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest006, TestSize.Level1)
      * @tc.expected: result'size is 2. One is touchEventActuator, the other is a exclusiveRecognizer created by
      *               longPressRecognizer and clickRecognizer
      */
-    gestureEventHub->CombineIntoExclusiveRecognizer(GLOBAL_POINT, LOCAL_POINT, result, TOUCH_ID);
+    gestureEventHub->CombineIntoExclusiveRecognizer(GLOBAL_POINT, LOCAL_POINT, result, TOUCH_ID, TOUCH_ID);
     size = static_cast<int32_t>(result.size());
     EXPECT_EQ(size, 2);
 
@@ -434,7 +434,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest006, TestSize.Level1)
     TouchTestResult result2;
     result2.emplace_back(touchEventActuator);
     result2.emplace_back(longPressRecognizer);
-    gestureEventHub->CombineIntoExclusiveRecognizer(GLOBAL_POINT, LOCAL_POINT, result2, TOUCH_ID);
+    gestureEventHub->CombineIntoExclusiveRecognizer(GLOBAL_POINT, LOCAL_POINT, result2, TOUCH_ID, TOUCH_ID);
     size = static_cast<int32_t>(result2.size());
     EXPECT_EQ(size, 2);
 }

@@ -633,7 +633,9 @@ HWTEST_F(ParallelRecognizerTestNg, ParallelRecognizerTest005, TestSize.Level1)
      * @tc.expected: step3. clickRecognizer state set ready.
      */
     clickRecognizerPtr->touchPoints_[0] = {};
+    clickRecognizerPtr->touchPoints_[0].originalId = 0;
     clickRecognizerPtr->touchPoints_[1] = {};
+    clickRecognizerPtr->touchPoints_[1].originalId = 1;
     clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     parallelRecognizer->CleanRecognizerState();
     EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);

@@ -3301,7 +3301,7 @@ void PipelineContext::OnTouchEvent(
             auto recognizer = rebirth.CreateRecognizer();
             if (recognizer) {
                 recognizer->SetInnerFlag(true);
-                recognizer->BeginReferee(scalePoint.id, true);
+                recognizer->BeginReferee(scalePoint.id, scalePoint.originalId, true);
                 std::list<RefPtr<NGGestureRecognizer>> combined;
                 combined.emplace_back(recognizer);
                 for (auto iter = touchTestResults[point.id].begin();
@@ -3315,7 +3315,7 @@ void PipelineContext::OnTouchEvent(
                 }
                 auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(combined));
                 exclusiveRecognizer->AttachFrameNode(node);
-                exclusiveRecognizer->BeginReferee(scalePoint.id);
+                exclusiveRecognizer->BeginReferee(scalePoint.id, scalePoint.originalId);
                 touchTestResults[point.id].emplace_back(exclusiveRecognizer);
                 eventManager_->touchTestResults_ = touchTestResults;
                 eventManager_->SetInnerFlag(true);
