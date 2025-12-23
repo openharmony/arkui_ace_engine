@@ -393,11 +393,6 @@ public:
         onWillInsertValueEvent_ = std::move(func);
     }
 
-    bool HasOnWillInsertValueEvent()
-    {
-        return onWillInsertValueEvent_ ? true : false;
-    }
-
     bool FireOnWillInsertValueEvent(const InsertValueInfo& info)
     {
         if (onWillInsertValueEvent_) {
