@@ -35,7 +35,7 @@ enum class ProgressType {
     CAPSULE = 9,
 };
 
-class ACE_EXPORT ProgressComponent : public RenderComponent {
+class ACE_FORCE_EXPORT ProgressComponent : public RenderComponent {
     DECLARE_ACE_TYPE(ProgressComponent, RenderComponent);
 
 public:

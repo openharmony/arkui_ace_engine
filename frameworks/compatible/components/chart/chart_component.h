@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHART_CHART_COMPONENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHART_CHART_COMPONENT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_CHART_CHART_COMPONENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_CHART_CHART_COMPONENT_H
 
 #include <vector>
 
 #include "base/geometry/point.h"
-#include "core/components/chart/chart_element.h"
+#include "compatible/components/chart/chart_element.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/placement.h"
 #include "core/pipeline/base/component.h"
@@ -635,4 +635,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHART_CHART_COMPONENT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_CHART_CHART_COMPONENT_H

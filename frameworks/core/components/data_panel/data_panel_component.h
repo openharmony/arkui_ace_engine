@@ -18,7 +18,7 @@
 
 #include <vector>
 
-#include "core/components/chart/chart_component.h"
+#include "compatible/components/chart/chart_component.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/pipeline/base/render_component.h"
@@ -217,7 +217,7 @@ private:
     bool autoScale_ = false;
 };
 
-class ProgressDataPanelComponent : public DataPanelComponent {
+class ACE_FORCE_EXPORT ProgressDataPanelComponent : public DataPanelComponent {
     DECLARE_ACE_TYPE(ProgressDataPanelComponent, DataPanelComponent);
 
 public:
@@ -287,7 +287,7 @@ private:
     bool isLoading_ = false;
 };
 
-class ACE_EXPORT PercentageDataPanelComponent : public DataPanelComponent {
+class ACE_FORCE_EXPORT PercentageDataPanelComponent : public DataPanelComponent {
     DECLARE_ACE_TYPE(PercentageDataPanelComponent, DataPanelComponent);
 
 public:

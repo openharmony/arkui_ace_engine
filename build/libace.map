@@ -111,6 +111,8 @@
       "OHOS::Ace::NG::LayoutProperty::~LayoutProperty()";
       OHOS::Ace::NG::Modifier::*;
       OHOS::Ace::NG::ModifierAdapter::*;
+      "OHOS::Ace::ColorFactory::GetInstance()";
+      OHOS::Ace::ColorFactory::GetColorTuple*;
 
       OHOS::Ace::ColumnModel::*;
       OHOS::Ace::FlexModel::*;
@@ -641,9 +643,10 @@
       VTT?for?OHOS::Ace::PaddingComponent;
       VTT?for?OHOS::Ace::RawRecognizer;
       VTT?for?OHOS::Ace::RenderCheckable;
-      
       VTT?for?OHOS::Ace::ColumnSplitComponent;
       VTT?for?OHOS::Ace::RowSplitComponent;
+      VTT?for?OHOS::Ace::ProgressDataPanelComponent;
+      VTT?for?OHOS::Ace::PercentageDataPanelComponent;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
@@ -839,6 +842,8 @@
       vtable?for?OHOS::Ace::ImageComponent;
       vtable?for?OHOS::Ace::PaddingComponent;
       vtable?for?OHOS::Ace::RawRecognizer;
+      vtable?for?OHOS::Ace::ProgressDataPanelComponent;
+      vtable?for?OHOS::Ace::PercentageDataPanelComponent;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
@@ -1060,12 +1065,20 @@
       OHOS::Ace::Declaration::*;
       OHOS::Ace::Edge::NONE;
       OHOS::Ace::FontManager::RemoveVariationNode*;
+      OHOS::Ace::FontManager::RegisterCallback*;
       OHOS::Ace::FontManager::AddVariationNode*;
       OHOS::Ace::DebugBoundaryPainter::*;
       OHOS::Ace::Edge::IsValid*;
       OHOS::Ace::Edge::GetLayoutSizeInPx*;
       OHOS::Ace::RosenRenderContext::*;
       OHOS::Ace::TouchEventTarget::SetCoordinateOffset*;
+      OHOS::Ace::AccessibilityNode::PutChartValue*;
+      "OHOS::Ace::RosenFontCollection::GetInstance()";
+      OHOS::Ace::DOM_BACKGROUND_COLOR;
+      OHOS::Ace::DOM_EFFECTS_ON;
+      OHOS::Ace::DOM_METHOD_APPEND;
+      OHOS::Ace::DOM_TEXT_FONT_FAMILY;
+      OHOS::Ace::DOM_TEXT_FONT_SIZE;
       OHOS::Ace::DOM_CLICK;
       OHOS::Ace::DOM_CATCH_BUBBLE_CLICK;
       OHOS::Ace::ScreenSystemManager::GetInstance*;

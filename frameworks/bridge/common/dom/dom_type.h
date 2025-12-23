@@ -127,7 +127,7 @@ ACE_EXPORT extern const char DOM_MARGIN_LEFT[];
 ACE_EXPORT extern const char DOM_MARGIN_START[];
 ACE_EXPORT extern const char DOM_MARGIN_END[];
 ACE_EXPORT extern const char DOM_LAYOUT_IN_BOX[];
-ACE_EXPORT extern const char DOM_BACKGROUND_COLOR[];
+ACE_FORCE_EXPORT extern const char DOM_BACKGROUND_COLOR[];
 ACE_EXPORT extern const char DOM_BACKGROUND_IMAGE[];
 ACE_FORCE_EXPORT extern const char DOM_FADE_COLOR[];
 ACE_EXPORT extern const char DOM_BOX_SHADOW_H[];
@@ -602,18 +602,8 @@ ACE_EXPORT extern const char DOM_DIRECTION[];
 ACE_EXPORT extern const char DOM_START_TO_END[];
 
 // chart attribute and style constants
-ACE_EXPORT extern const char DOM_CHART_TYPE[];
-ACE_EXPORT extern const char DOM_CHART_TYPE_BAR[];
-ACE_EXPORT extern const char DOM_CHART_TYPE_LINE[];
-ACE_EXPORT extern const char DOM_CHART_TYPE_GAUGE[];
-ACE_EXPORT extern const char DOM_CHART_TYPE_PROGRESS[];
-ACE_EXPORT extern const char DOM_CHART_TYPE_LOADING[];
-ACE_EXPORT extern const char DOM_CHART_TYPE_RAINBOW[];
-ACE_EXPORT extern const char DOM_COLORS_ARRAY[];
-ACE_EXPORT extern const char DOM_WEIGHTS_ARRAY[];
-ACE_EXPORT extern const char DOM_EFFECTS_ON[];
-ACE_EXPORT extern const char DOM_AUTO_SCALE[];
-ACE_EXPORT extern const char DOM_CHART_ANIMATION_DURATION[];
+ACE_FORCE_EXPORT extern const char DOM_EFFECTS_ON[];
+ACE_FORCE_EXPORT extern const char DOM_METHOD_APPEND[];
 
 // slider attribute and style constants
 ACE_EXPORT extern const char DOM_MIN[];

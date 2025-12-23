@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components/chart/render_chart.h"
+#include "compatible/components/chart/render_chart.h"
 
 #include "core/common/font_manager.h"
 

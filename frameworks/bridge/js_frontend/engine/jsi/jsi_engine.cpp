@@ -447,7 +447,7 @@ void SetDomStyle(
             std::string valStr = value->ToString(runtime);
             styles.emplace_back(keyStr, valStr);
         } else if (value->IsArray(runtime)) {
-            if (strcmp(keyStr.c_str(), DOM_TEXT_FONT_FAMILY) == 0) {
+            if (strcmp(keyStr.c_str(), OHOS::Ace::DOM_TEXT_FONT_FAMILY) == 0) {
                 // Deal with special case such as fontFamily, suppose all the keys in the array are the same.
                 std::string familyStyle;
                 GetStyleFamilyValue(runtime, value, familyStyle);

@@ -21,6 +21,7 @@
 
 #include "compatible/components/badge/badge_loader.h"
 #include "compatible/components/canvas/canvas_loader.h"
+#include "compatible/components/chart/chart_loader.h"
 #include "compatible/components/clock/clock_loader.h"
 #include "compatible/components/grid_column/grid_col_loader.h"
 #include "compatible/components/grid_container/grid_container_loader.h"
@@ -67,6 +68,7 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
     static std::unordered_map<std::string, std::function<ComponentLoader*()>> sLoaderMap = {
         { "badge", []() -> ComponentLoader* { return new BadgeLoader(); } },
         { "clock", []() -> ComponentLoader* { return new ClockLoader(); } },
+        { "chart", []() -> ComponentLoader* { return new ChartLoader(); } },
         { "grid-col", []() -> ComponentLoader* { return new GridColLoader(); } },
         { "grid-container", []() -> ComponentLoader* { return new GridContainerLoader(); } },
         { "grid-row", []() -> ComponentLoader* { return new GridRowLoader(); } },

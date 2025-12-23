@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHART_ROSEN_RENDER_CHART_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHART_ROSEN_RENDER_CHART_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_CHART_ROSEN_RENDER_CHART_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_CHART_ROSEN_RENDER_CHART_H
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPaint.h"
@@ -25,7 +25,7 @@
 
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
-#include "core/components/chart/render_chart.h"
+#include "compatible/components/chart/render_chart.h"
 
 namespace OHOS::Ace {
 
@@ -141,4 +141,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHART_ROSEN_RENDER_CHART_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_CHART_ROSEN_RENDER_CHART_H

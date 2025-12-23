@@ -358,7 +358,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/bubble:ace_core_components_bubble_$platform",
       "$ace_root/frameworks/core/components/button:ace_core_components_button_$platform",
       "$ace_root/frameworks/core/components/calendar:ace_core_components_calendar_$platform",
-      "$ace_root/frameworks/core/components/chart:ace_core_components_chart_$platform",
       "$ace_root/frameworks/core/components/checkable:ace_core_components_checkable_$platform",
       "$ace_root/frameworks/core/components/clip:ace_core_components_clip_$platform",
       "$ace_root/frameworks/core/components/common:ace_core_components_common_$platform",
