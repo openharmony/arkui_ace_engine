@@ -44,6 +44,11 @@ public:
         contentOffset_ = offset;
     }
 
+    void SetPaddingOffset(const OffsetF& offset)
+    {
+        paddingOffset_ = offset;
+    }
+
 private:
     void PaintDebugBoundary(RSCanvas& canvas, const OffsetF& offset) const;
     void PaintDebugMargin(RSCanvas& canvas, const OffsetF& offset) const;
@@ -52,6 +57,7 @@ private:
     SizeF contentSize_;
     SizeF frameMarginSize_;
     OffsetF contentOffset_;
+    OffsetF paddingOffset_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DEBUG_BOUNDARY_PAINTER_H
