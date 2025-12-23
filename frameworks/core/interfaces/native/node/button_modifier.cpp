@@ -17,6 +17,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/common/layout/common_text_constants.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "frameworks/core/components/button/button_theme.h"
@@ -54,7 +55,6 @@ const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverf
 const std::vector<Ace::FontStyle> FONT_STYLES = { Ace::FontStyle::NORMAL, Ace::FontStyle::ITALIC };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
-const std::vector<TextAlign> TEXT_ALIGN = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
 const std::string NONE_FONT_FAMILY = "NoneFontFamily";
 const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
@@ -410,8 +410,8 @@ void SetButtonValueParameters(const int32_t* valueArray, const size_t dataCount,
         buttonParameters.fontStyle = FONT_STYLES[result];
     }
     if (SetButtonValue(valueArray, INDEX_VALUE_TEXT_ALIGN_4, dataCount, result) && result >= 0 &&
-        result < static_cast<int32_t>(TEXT_ALIGN.size())) {
-        buttonParameters.textAlign = TEXT_ALIGN[result];
+        result < static_cast<int32_t>(TEXT_ALIGNS.size())) {
+        buttonParameters.textAlign = TEXT_ALIGNS[result];
     }
 }
 
