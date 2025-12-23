@@ -430,7 +430,8 @@ public:
     void SetupGetImagesByIdCallback(const WeakPtr<TaskExecutor>& taskExecutor);
     void InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& taskExecutor);
     void InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor>& taskExecutor);
-    bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;
+    bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data,
+        uint8_t subSystemId, const UIExtOptions& options = UIExtOptions()) override;
     bool SendUIExtProprtyByPersistentId(uint32_t code, const AAFwk::Want& data,
         const std::unordered_set<int32_t>& persistentIds, uint8_t subSystemId) override;
     void EnableContainerModalCustomGesture(bool enable) override;

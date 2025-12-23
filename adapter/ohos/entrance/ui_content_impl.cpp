@@ -6061,7 +6061,8 @@ void UIContentImpl::InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor
     UiSessionManager::GetInstance()->SaveForSendCommandFunction(sendCommand);
 }
 
-bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
+bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data,
+    uint8_t subSystemId, const UIExtOptions& options)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
@@ -6071,13 +6072,13 @@ bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uin
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     taskExecutor->PostTask(
-        [instanceId = instanceId_, code, data, subSystemId]() {
+        [instanceId = instanceId_, code, data, subSystemId, options]() {
             auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
             CHECK_NULL_VOID(context);
             auto uiExtManager = context->GetUIExtensionManager();
             CHECK_NULL_VOID(uiExtManager);
             uiExtManager->UpdateWMSUIExtProperty(static_cast<Ace::NG::UIContentBusinessCode>(code),
-                data, static_cast<Ace::NG::RSSubsystemId>(subSystemId));
+                data, static_cast<Ace::NG::RSSubsystemId>(subSystemId), options);
         }, TaskExecutor::TaskType::UI, "ArkUISendUIExtProprty");
     return true;
 }

@@ -140,7 +140,8 @@ public:
         UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback);
     void TransferAccessibilityRectInfo(bool isForce = false);
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
-    void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
+    void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data,
+        RSSubsystemId subSystemId, const UIExtOptions& options = UIExtOptions());
 
     bool GetIsTransferringCaller()
     {

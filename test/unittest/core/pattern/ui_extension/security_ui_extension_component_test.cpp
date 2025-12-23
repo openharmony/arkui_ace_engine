@@ -1403,6 +1403,9 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentTestNg0
     AAFwk::Want data;
     RSSubsystemId id = RSSubsystemId::ARKUI_UIEXT;
     pattern->UpdateWMSUIExtProperty(code, data, id);
+    auto options = UIExtOptions();
+    options.isSendBackground = true;
+    pattern->UpdateWMSUIExtProperty(code, data, id, options);
     pattern->state_ = SecurityUIExtensionPattern::AbilityState::FOREGROUND;
     pattern->UpdateWMSUIExtProperty(code, data, id);
 #endif

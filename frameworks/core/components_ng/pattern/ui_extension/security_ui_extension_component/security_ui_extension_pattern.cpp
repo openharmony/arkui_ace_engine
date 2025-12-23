@@ -1168,10 +1168,10 @@ void SecurityUIExtensionPattern::TransferAccessibilityRectInfo(bool isForce)
     SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, data, BusinessDataSendType::ASYNC);
 }
 
-void SecurityUIExtensionPattern::UpdateWMSUIExtProperty(
-    UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId)
+void SecurityUIExtensionPattern::UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data,
+    RSSubsystemId subSystemId, const UIExtOptions& options)
 {
-    if (state_ != AbilityState::FOREGROUND) {
+    if (state_ != AbilityState::FOREGROUND && !options.isSendBackground) {
         UIEXT_LOGI("SecUEC UpdateWMSUIExtProperty state=%{public}s.", ToString(state_));
         return;
     }
