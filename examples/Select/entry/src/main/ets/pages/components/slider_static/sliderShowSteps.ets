@@ -28,13 +28,13 @@ export function SliderShowStepsStaticBuilder(name: string, param: Object) {
 }
 @Entry
 @Component
-struct SliderShowSteps {
+struct SliderShowStepsStatic {
   @State optionMaps:Map<number, SliderStepItemAccessibility> = new Map<number, SliderStepItemAccessibility>();
 
   aboutToAppear(){
     this.optionMaps.set(1, {text : '123123'})
     this.optionMaps.set(2, {text : 'Slider无障碍文本'})
-    this.optionMaps.set(3, {text : $r('app.string.app_name')})
+    this.optionMaps.set(3, {text : $r('app.string.EntryAbility_desc')})
     this.optionMaps.set(4, {text : '!@#$%^&*()'})
   }
   build() {
