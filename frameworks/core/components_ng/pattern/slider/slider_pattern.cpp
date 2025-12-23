@@ -1093,7 +1093,10 @@ void SliderPattern::HandleTouchDown(const Offset& location, SourceType sourceTyp
             UpdateValueByLocalLocation(location);
         }
     } else if (sliderInteractionMode_ == SliderModelNG::SliderInteraction::SLIDE_AND_CLICK_UP) {
+        allowDragEvents_ = true;
         lastTouchLocation_ = location;
+    } else if (sliderInteractionMode_ == SliderModelNG::SliderInteraction::SLIDE_ONLY) {
+        allowDragEvents_ = AtPanArea(location, sourceType);
     }
     if (showTips_) {
         bubbleFlag_ = true;
@@ -1116,7 +1119,6 @@ void SliderPattern::HandleTouchUp(const Offset& location, SourceType sourceType)
 {
     if (sliderInteractionMode_ == SliderModelNG::SliderInteraction::SLIDE_AND_CLICK_UP &&
         lastTouchLocation_.has_value() && NeedFireClickEvent(lastTouchLocation_.value(), location)) {
-        allowDragEvents_ = true;
         if (!AtPanArea(location, sourceType)) {
             UpdateValueByLocalLocation(location);
         }
@@ -1125,6 +1127,7 @@ void SliderPattern::HandleTouchUp(const Offset& location, SourceType sourceType)
     } else {
         UpdateToValidValue();
     }
+    allowDragEvents_ = true;
     if (bubbleFlag_ && !isFocusActive_) {
         bubbleFlag_ = false;
     }
@@ -1162,8 +1165,6 @@ void SliderPattern::HandlingGestureStart(const GestureEvent& info)
 {
     eventSourceDevice_ = info.GetSourceDevice();
     eventLocalLocation_ = info.GetLocalLocation();
-    allowDragEvents_ = (sliderInteractionMode_ != SliderModelNG::SliderInteraction::SLIDE_ONLY ||
-                        AtPanArea(eventLocalLocation_, eventSourceDevice_));
     if (info.GetInputEventType() != InputEventType::AXIS) {
         minResponseStartValue_ = value_;
         isMinResponseExceedFlag_ = false;
