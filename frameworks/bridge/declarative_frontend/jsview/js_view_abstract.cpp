@@ -5287,9 +5287,8 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args)
     if (ParseJsColor(args, borderColor, borderColorResObj)) {
         if (SystemProperties::ConfigChangePerform() && borderColorResObj) {
             ViewAbstractModel::GetInstance()->SetBorderColor(borderColorResObj);
-        } else {
-            ViewAbstractModel::GetInstance()->SetBorderColor(borderColor);
         }
+        ViewAbstractModel::GetInstance()->SetBorderColor(borderColor);
     } else if (args->IsObject()) {
         CommonColor commonColor;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
