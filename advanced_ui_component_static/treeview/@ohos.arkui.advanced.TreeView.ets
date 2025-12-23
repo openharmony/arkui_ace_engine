@@ -4970,8 +4970,7 @@ export struct TreeViewInner {
             .width('100%')
             .height(this.item.getNodeHeight())
             .padding({ start: LengthMetrics.vp(this.item.getNodeLeftPadding()) } as LocalizedPadding)
-
-            // .bindContextMenu(this.builder, ResponseType.RightClick)
+            .bindContextMenu(this.builder, ResponseType.RightClick)
           }.focusable(true)
         }
         .opacity(this.listNodeDataSource.getListItemOpacity(this.item))
@@ -5007,13 +5006,13 @@ export struct TreeViewInner {
           event.stopPropagation();
         })
         .padding({ top: LengthMetrics.vp(0), bottom: LengthMetrics.vp(0) } as LocalizedPadding)
-        // .bindPopup(this.item.getPopUpInfo().popUpIsShow as boolean, {
-        //   builder: this.popupBuilder,
-        //   placement: Placement.BottomLeft,
-        //   popupColor: this.propColor(this.item),
-        //   autoCancel: true,
-        //   enableArrow: this.item.getPopUpInfo().popUpEnableArrow,
-        // } as CustomPopupOptions)
+        .bindPopup(this.item.getPopUpInfo().popUpIsShow as boolean, {
+            builder: this.popupBuilder,
+            placement: Placement.BottomLeft,
+            popupColor: this.propColor(this.item),
+            autoCancel: true,
+            enableArrow: this.item.getPopUpInfo().popUpEnableArrow,
+          } as CustomPopupOptions)
         .onAreaChange((oldValue: Area, newValue: Area) => {
           let columnWidthNum: number = Number.parseInt(newValue.width.toString());
           this.columnWidth = columnWidthNum;
