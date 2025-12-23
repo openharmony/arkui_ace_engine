@@ -17,8 +17,7 @@
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/window_scene_model.h"
-#elif defined(ARKUI_CAPI_UNITTEST)
-#include "test/unittest/capi/stubs/mock_window_scene_model.h"
+#else
 #endif
 
 #include "core/interfaces/native/utility/converter.h"
@@ -29,13 +28,6 @@ namespace WindowSceneModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-// #if defined(WINDOW_SCENE_SUPPORTED) || defined(ARKUI_CAPI_UNITTEST)
-//     auto frameNode = WindowSceneModel::CreateNode(id);
-//     if (frameNode) {
-//         frameNode->IncRefCount();
-//         return AceType::RawPtr(frameNode);
-//     }
-// #endif
     return {};
 }
 } // WindowSceneModifier
@@ -45,8 +37,6 @@ void SetWindowSceneOptionsImpl(Ark_NativePointer node,
 {
     CHECK_NULL_VOID(persistentId);
 #if defined(WINDOW_SCENE_SUPPORTED) || defined(ARKUI_CAPI_UNITTEST)
-    auto persistId = Converter::Convert<int32_t>(*persistentId);
-    WindowSceneModel::Create(persistId);
 #endif
 }
 } // WindowSceneInterfaceModifier
@@ -65,7 +55,6 @@ void SetAttractionEffectImpl(Ark_NativePointer node,
     effect.destinationX = x.value_or(effect.destinationX);
     effect.destinationY = y.value_or(effect.destinationY);
 #if defined(WINDOW_SCENE_SUPPORTED) || defined(ARKUI_CAPI_UNITTEST)
-    WindowSceneModel::SetAttractionEffect(effect);
 #endif
 }
 } // WindowSceneAttributeModifier

@@ -3073,6 +3073,8 @@ frameworks/core/interfaces/native/node/web_modifier.h @arkweb-committer-group
 frameworks/core/interfaces/native/implementation/base_event_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/axis_event_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/form_component_modifier.cpp @form_framework
+frameworks/core/interfaces/native/implementation/screen_modifier.cpp @window_scene
+frameworks/core/interfaces/native/implementation/window_scene_modifier.cpp @window_scene
 interfaces/native/BUILD.gn @arkui_architecture
 interfaces/native/drag_and_drop.h @ArkUI_Event
 interfaces/native/drawable_descriptor.h @arkui001
