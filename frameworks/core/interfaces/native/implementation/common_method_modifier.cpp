@@ -273,6 +273,25 @@ void ParseSweepGradientCenter(NG::Gradient& gradient, const Ark_Tuple_Length_Len
         }
     }
 }
+bool InitPixStretchEffect(Dimension& left, Dimension& right, Dimension& top, Dimension& bottom)
+{
+    bool illegalInput = false;
+    if (left.Unit() == DimensionUnit::PERCENT || right.Unit() == DimensionUnit::PERCENT ||
+        top.Unit() == DimensionUnit::PERCENT || bottom.Unit() == DimensionUnit::PERCENT) {
+        if ((NearEqual(left.Value(), 0.0) || left.Unit() == DimensionUnit::PERCENT) &&
+            (NearEqual(top.Value(), 0.0) || top.Unit() == DimensionUnit::PERCENT) &&
+            (NearEqual(right.Value(), 0.0) || right.Unit() == DimensionUnit::PERCENT) &&
+            (NearEqual(bottom.Value(), 0.0) || bottom.Unit() == DimensionUnit::PERCENT)) {
+            left.SetUnit(DimensionUnit::PERCENT);
+            top.SetUnit(DimensionUnit::PERCENT);
+            right.SetUnit(DimensionUnit::PERCENT);
+            bottom.SetUnit(DimensionUnit::PERCENT);
+        } else {
+            illegalInput = true;
+        }
+    }
+    return illegalInput;
+}
 } // namespace
 
 struct EdgesParamOptions {
@@ -3635,7 +3654,12 @@ void SetGrayscaleImpl(Ark_NativePointer node,
         ViewAbstractModelStatic::SetGrayScale(frameNode, 0.0_vp);
         return;
     }
-    Validator::ValidateNonNegative(convValue);
+    if (LessNotEqual(convValue->Value(), 0.0)) {
+        convValue->SetValue(0.0);
+    }
+    if (GreatNotEqual(convValue->Value(), 1.0)) {
+        convValue->SetValue(1.0);
+    }
     ViewAbstractModelStatic::SetGrayScale(frameNode, convValue);
 }
 void SetColorBlendImpl(Ark_NativePointer node,
@@ -4697,7 +4721,7 @@ void SetSphericalEffectImpl(Ark_NativePointer node,
             convValue = minValue;
         }
     }
-    Validator::ValidateByRange(convValue, minValue, maxValue);
+    convValue = std::clamp(convValue.value(), minValue, maxValue);
     ViewAbstractModelStatic::SetSphericalEffect(frameNode, convValue);
 }
 void SetLightUpEffectImpl(Ark_NativePointer node,
@@ -4722,7 +4746,22 @@ void SetPixelStretchEffectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<PixStretchEffectOption>(value);
+    bool illegal = false;
     if (!convValue.has_value()) {
+        illegal = true;
+    } else {
+        auto& left = convValue->left;
+        auto& right = convValue->right;
+        auto& top = convValue->top;
+        auto& bottom = convValue->bottom;
+        illegal = InitPixStretchEffect(left, right, top, bottom);
+        if (!illegal &&
+            !(left.IsNonNegative() && top.IsNonNegative() && right.IsNonNegative() && bottom.IsNonNegative()) &&
+            !(left.IsNonPositive() && top.IsNonPositive() && right.IsNonPositive() && bottom.IsNonPositive())) {
+            illegal = true;
+        }
+    }
+    if (illegal) {
         PixStretchEffectOption option;
         option.ResetValue();
         ViewAbstractModelStatic::SetPixelStretchEffect(frameNode, option);
