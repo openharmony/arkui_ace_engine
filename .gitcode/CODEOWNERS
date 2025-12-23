@@ -744,7 +744,7 @@ frameworks/bridge/declarative_frontend/ark_theme/ @arkui_framework_resource
 frameworks/bridge/declarative_frontend/BUILD.gn @arkui_architecture
 frameworks/bridge/declarative_frontend/declarative_frontend.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/declarative_frontend.h @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/engine/arkComponent.js
+frameworks/bridge/declarative_frontend/engine/arkComponent.js @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/arkModifier.js
 frameworks/bridge/declarative_frontend/engine/arkThemeControl.js @arkui_framework_resource
 frameworks/bridge/declarative_frontend/engine/arkTheme.js @arkui_framework_resource
