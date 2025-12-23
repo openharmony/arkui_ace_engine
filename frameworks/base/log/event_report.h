@@ -79,6 +79,7 @@ enum class ComponentExcepType {
     LIST_ITEM_ERR,
     MARQUEE_ERR,
     NAVIGATION_BAR_ERR,
+    FILE_IMAGE_LOADER_ERR,
 };
 
 // EXCEPTION_COMPONENT
