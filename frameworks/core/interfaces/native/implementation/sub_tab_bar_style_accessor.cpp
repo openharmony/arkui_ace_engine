@@ -54,6 +54,7 @@ Ark_SubTabBarStyle IndicatorImpl(Ark_SubTabBarStyle peer,
 {
     CHECK_NULL_RETURN(peer, peer);
     peer->indicator = Converter::OptConvertPtr<IndicatorStyle>(style);
+    peer->IncRefCount();
     return peer;
 }
 Ark_SubTabBarStyle SelectedModeImpl(Ark_SubTabBarStyle peer,
@@ -61,6 +62,7 @@ Ark_SubTabBarStyle SelectedModeImpl(Ark_SubTabBarStyle peer,
 {
     CHECK_NULL_RETURN(peer, peer);
     peer->selectedMode = Converter::OptConvert<SelectedMode>(value);
+    peer->IncRefCount();
     return peer;
 }
 Ark_SubTabBarStyle BoardImpl(Ark_SubTabBarStyle peer,
@@ -68,6 +70,7 @@ Ark_SubTabBarStyle BoardImpl(Ark_SubTabBarStyle peer,
 {
     CHECK_NULL_RETURN(peer, peer);
     peer->board = Converter::OptConvertPtr<BoardStyle>(value);
+    peer->IncRefCount();
     return peer;
 }
 Ark_SubTabBarStyle LabelStyleImpl(Ark_SubTabBarStyle peer,
@@ -75,6 +78,7 @@ Ark_SubTabBarStyle LabelStyleImpl(Ark_SubTabBarStyle peer,
 {
     CHECK_NULL_RETURN(peer, peer);
     peer->labelStyle = Converter::OptConvertPtr<LabelStyle>(style);
+    peer->IncRefCount();
     return peer;
 }
 Ark_SubTabBarStyle Padding0Impl(Ark_SubTabBarStyle peer,
@@ -94,6 +98,7 @@ Ark_SubTabBarStyle Padding0Impl(Ark_SubTabBarStyle peer,
     );
     Validator::ValidatePaddingProperty(optPadding);
     peer->padding = optPadding;
+    peer->IncRefCount();
     return peer;
 }
 Ark_SubTabBarStyle Padding1Impl(Ark_SubTabBarStyle peer,
@@ -105,6 +110,7 @@ Ark_SubTabBarStyle Padding1Impl(Ark_SubTabBarStyle peer,
     Validator::ValidatePaddingProperty(optPadding);
     peer->padding = optPadding;
     peer->useLocalizedPadding = useLocalizedPadding;
+    peer->IncRefCount();
     return peer;
 }
 Ark_SubTabBarStyle IdImpl(Ark_SubTabBarStyle peer,
@@ -112,6 +118,7 @@ Ark_SubTabBarStyle IdImpl(Ark_SubTabBarStyle peer,
 {
     CHECK_NULL_RETURN(peer, peer);
     peer->id = Converter::OptConvertPtr<std::string>(value);
+    peer->IncRefCount();
     return peer;
 }
 } // SubTabBarStyleAccessor

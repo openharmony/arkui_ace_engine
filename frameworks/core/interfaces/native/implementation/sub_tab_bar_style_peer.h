@@ -17,11 +17,12 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_SUB_TAB_BAR_STYLE_PEER_IMPL_H
 
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/components_ng/property/measure_property.h"
 
-struct SubTabBarStylePeer final {
+struct SubTabBarStylePeer final : public OHOS::Ace::Referenced {
     std::optional<std::string> content = std::nullopt;
     std::optional<OHOS::Ace::IndicatorStyle> indicator = std::nullopt;
     std::optional<OHOS::Ace::SelectedMode> selectedMode = std::nullopt;
@@ -30,7 +31,6 @@ struct SubTabBarStylePeer final {
     std::optional<OHOS::Ace::NG::PaddingProperty> padding = std::nullopt;
     bool useLocalizedPadding = false;
     std::optional<std::string> id = std::nullopt;
-protected:
     SubTabBarStylePeer() = default;
     ~SubTabBarStylePeer() = default;
     friend OHOS::Ace::NG::PeerUtils;

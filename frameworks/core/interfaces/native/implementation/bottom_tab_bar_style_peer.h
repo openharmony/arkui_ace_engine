@@ -17,11 +17,12 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_BOTTOM_TAB_BAR_STYLE_PEER_IMPL_H
 
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/components_ng/property/measure_property.h"
 
-struct BottomTabBarStylePeer final {
+struct BottomTabBarStylePeer final : public OHOS::Ace::Referenced {
     std::optional<std::string> text = std::nullopt;
     std::optional<std::string> icon = std::nullopt;
     std::optional<OHOS::Ace::LabelStyle> labelStyle = std::nullopt;
@@ -32,9 +33,8 @@ struct BottomTabBarStylePeer final {
     std::optional<bool> symmetricExtensible = std::nullopt;
     std::optional<std::string> id = std::nullopt;
     std::optional<OHOS::Ace::IconStyle> iconStyle = std::nullopt;
-protected:
     BottomTabBarStylePeer() = default;
-    ~BottomTabBarStylePeer() = default;
+    ~BottomTabBarStylePeer() override = default;
     friend OHOS::Ace::NG::PeerUtils;
 };
 
