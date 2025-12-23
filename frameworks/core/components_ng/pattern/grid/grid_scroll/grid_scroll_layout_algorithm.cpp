@@ -1239,6 +1239,17 @@ inline void UpdateStartIndexByStartLine(GridLayoutInfo& info_)
 }
 } // namespace
 
+bool GridScrollLayoutAlgorithm::IsNextExistLineHeightZero(const int32_t currentLine) const
+{
+    const int32_t nextLine = currentLine + 1;
+    const auto gridIt = info_.gridMatrix_.find(nextLine);
+    const auto heightIt = info_.lineHeightMap_.find(nextLine);
+    if (gridIt == info_.gridMatrix_.end() || heightIt == info_.lineHeightMap_.end()) {
+        return false;
+    }
+    return NearZero(heightIt->second);
+}
+
 bool GridScrollLayoutAlgorithm::MeasureExistingLine(
     int32_t line, float& mainLength, int32_t& endIdx, bool isScrollableSpringMotionRunning)
 {
@@ -1304,7 +1315,8 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(pattern, runOutOfRecord);
     auto isScrollableSpringMotionRunning = pattern->IsScrollableSpringMotionRunning();
-    while (LessNotEqual(mainLength, mainSize)) {
+    while (LessNotEqual(mainLength, mainSize) ||
+                (NearEqual(mainLength, mainSize) && IsNextExistLineHeightZero(currentMainLineIndex_))) {
         if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex, isScrollableSpringMotionRunning)) {
             runOutOfRecord = true;
             break;
