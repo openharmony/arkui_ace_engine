@@ -28,7 +28,7 @@ import { ArkColorsImpl } from './ArkColorsImpl';
 import { ArkCustomComponent } from 'arkui/ArkCustomComponent';
 import { ArkThemeWhiteList } from './ArkThemeWhiteList';
 import { ArkCommonMethodComponent } from 'arkui/component/common';
-import { GlobalStateManager, StateManagerImpl } from "@koalaui/runtime";
+import { GlobalStateManager } from "@koalaui/runtime";
 import { findPeerNode } from "arkui/PeerNode";
 import { KPointer } from '@koalaui/interop';
 import { ThemeOps } from 'arkui/component/idlize';
@@ -503,8 +503,8 @@ export class ArkThemeScopeManager {
         scope.componentsInScope()?.forEach((item) => this.notifyScopeThemeChanged(item, theme, scope.isColorModeChanged()));
 
         if (scope.isColorModeChanged()) {
-            const stateManager = GlobalStateManager.instance as StateManagerImpl;
-            const memoScope = stateManager.current?.parent;
+            const stateManager = GlobalStateManager.instance;
+            const memoScope = stateManager.currentScope?.parent;
             memoScope?.forceCompleteRerender();
         }
     }
@@ -545,8 +545,8 @@ export class ArkThemeScopeManager {
     }
 
     public applyParentThemeScopeId(component: ArkCommonMethodComponent): void {
-        const stateManager = GlobalStateManager.instance as StateManagerImpl;
-        const scope = stateManager.current;
+        const stateManager = GlobalStateManager.instance;
+        const scope = stateManager.currentScope;
         const parentRef = scope?.parent?.nodeRef;
         const parentPeer = parentRef ? findPeerNode(parentRef) : undefined;
         if (parentPeer && parentPeer.peer && component.getPeer()) {
