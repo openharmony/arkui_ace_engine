@@ -2107,7 +2107,9 @@ const __creatorMap__ = new Map([
         }],
     ['Rating', (context) => {
             return new TypedFrameNode(context, 'Rating', (node, type) => {
-                return new ArkRatingComponent(node, type);
+                getUINativeModule().loadNativeModule('Rating');
+                let module = globalThis.requireNapi('arkui.components.arkrating');
+                return module.createComponent(node, type);
             });
         }],
     ['Slider', (context) => {

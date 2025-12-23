@@ -189,7 +189,6 @@
 
 #ifndef WEARABLE_PRODUCT
 #include "bridge/declarative_frontend/jsview/js_piece.h"
-#include "bridge/declarative_frontend/jsview/js_rating.h"
 #if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_video.h"
@@ -507,7 +506,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "QRCode", JSQRCode::JSBind },
 #endif
     { "Piece", JSPiece::JSBind },
-    { "Rating", JSRating::JSBind },
     { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
     { "Marquee", JSMarquee::JSBind },
@@ -690,7 +688,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #ifndef WEARABLE_PRODUCT
     { "Piece", JSPiece::JSBind },
-    { "Rating", JSRating::JSBind },
 #if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
     { "Video", JSVideo::JSBind },

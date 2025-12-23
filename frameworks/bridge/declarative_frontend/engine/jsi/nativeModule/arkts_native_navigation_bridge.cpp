@@ -14,6 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_utils.h"
@@ -21,6 +22,7 @@
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_utils.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "core/components/navigation_bar/navigation_container_component.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"

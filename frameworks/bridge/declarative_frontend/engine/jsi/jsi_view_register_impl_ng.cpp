@@ -104,7 +104,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_recycle_view.h"
@@ -441,7 +440,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSIsolatedComponent::JSBind(globalObj);
 #endif
 #endif
-    JSRating::JSBind(globalObj);
     JSGrid::JSBind(globalObj);
     JSGridItem::JSBind(globalObj);
     JSSwiper::JSBind(globalObj);

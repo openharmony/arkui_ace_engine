@@ -276,7 +276,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_polyline_bridge.cpp",
       "nativeModule/arkts_native_progress_bridge.cpp",
       "nativeModule/arkts_native_radio_bridge.cpp",
-      "nativeModule/arkts_native_rating_bridge.cpp",
       "nativeModule/arkts_native_rect_bridge.cpp",
       "nativeModule/arkts_native_refresh_bridge.cpp",
       "nativeModule/arkts_native_relative_container_bridge.cpp",

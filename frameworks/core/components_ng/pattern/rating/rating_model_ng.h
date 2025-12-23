@@ -34,7 +34,7 @@ public:
 };
 using RatingMakeCallback =
     std::function<RefPtr<FrameNode>(const RatingConfiguration& ratingConfiguration)>;
-class ACE_EXPORT RatingModelNG : public OHOS::Ace::RatingModel {
+class ACE_FORCE_EXPORT RatingModelNG : public OHOS::Ace::RatingModel {
 public:
     void Create(double rating = .0, bool indicator = false) override;
     void SetRatingScore(double value) override;
@@ -48,6 +48,9 @@ public:
     void SetOnChangeEvent(RatingChangeEvent&& onChangeEvent) override;
     void CreateWithMediaResourceObj(const RefPtr<ResourceObject>& resObj, const RatingUriType ratingUriType) override;
     
+    static void CreateRating(double rating = .0, bool indicator = false);
+    static void SetRatingScoreStatic(double value);
+    static void SetIndicatorStatic(bool value);
     static void CreateWithMediaResourceObj(
         FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, const RatingUriType ratingUriType);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -60,6 +63,7 @@ public:
     static void SetChangeValue(FrameNode* frameNode, double value);
     static void SetRatingOptions(FrameNode* frameNode, double rating = .0, bool indicator = false);
     static void SetOnChange(FrameNode* frameNode, RatingChangeEvent&& onChange);
+    static void SetOnChangeEvent(FrameNode* frameNode, RatingChangeEvent&& onChangeEvent);
 
 private:
     static std::string StringTypeToStr(const RatingUriType ratingUriType);

@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 

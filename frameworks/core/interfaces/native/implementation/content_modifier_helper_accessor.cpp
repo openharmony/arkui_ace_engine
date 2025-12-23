@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
+#include "core/components_ng/pattern/rating/bridge/rating_content_modifier_helper.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_model_static.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
@@ -272,42 +273,33 @@ void ResetContentModifierRadioImpl(Ark_NativePointer node)
     CHECK_NULL_VOID(frameNode);
     RadioModelNG::SetBuilderFunc(frameNode, nullptr);
 }
+const GENERATED_ArkUIRatingContentModifier* GetRatingContentModifier()
+{
+    static const GENERATED_ArkUIRatingContentModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Rating");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier =
+            reinterpret_cast<const GENERATED_ArkUIRatingContentModifier*>(
+                module->GetCustomModifier("contentModifier"));
+    }
+    return cachedModifier;
+}
 void ContentModifierRatingImpl(Ark_NativePointer node,
                                const Ark_Object* contentModifier,
                                const RatingModifierBuilder* builder)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
-    auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
-    RatingConfiguration config) -> RefPtr<FrameNode> {
-        Ark_ContentModifier contentModifier = (*objectKeeper).get();
-        Ark_RatingConfiguration arkConfig;
-        arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.contentModifier = contentModifier;
-        arkConfig.rating = Converter::ArkValue<Ark_Float64>(config.rating_);
-        arkConfig.indicator = Converter::ArkValue<Ark_Boolean>(config.isIndicator_);
-        arkConfig.stars = Converter::ArkValue<Ark_Int32>(config.starNum_);
-        arkConfig.stepSize = Converter::ArkValue<Ark_Float64>(config.stepSize_);
-        auto handler = [frameNode](Ark_Float64 retValue) {
-            RatingModelStatic::TriggerChange(frameNode, Converter::Convert<double>(retValue));
-        };
-        auto triggerCallback = CallbackKeeper::Claim<Callback_F64_Void>(handler);
-        arkConfig.triggerChange = triggerCallback.ArkValue();
-        auto boxNode = CommonViewModelNG::CreateFrameNode(ViewStackProcessor::GetInstance()->ClaimNodeId());
-        arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            boxNode->AddChild(uiNode);
-            boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
-            }, node, arkConfig);
-        return boxNode;
-    };
-    RatingModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+    CHECK_NULL_VOID(node);
+    auto modifier = GetRatingContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->contentModifierRatingImpl(node, contentModifier, builder);
 }
 void ResetContentModifierRatingImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    RatingModelNG::SetBuilderFunc(frameNode, nullptr);
+    CHECK_NULL_VOID(node);
+    auto modifier = GetRatingContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->resetContentModifierRatingImpl(node);
 }
 void ContentModifierMenuItemImpl(Ark_NativePointer node,
                                  const Ark_Object* contentModifier,

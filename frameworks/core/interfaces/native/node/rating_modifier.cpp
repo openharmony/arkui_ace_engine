@@ -13,173 +13,32 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/rating_modifier.h"
-#include "core/components_ng/pattern/rating/rating_model_ng.h"
 
+#include "core/common/dynamic_module_helper.h"
+#include "ui/base/utils/utils.h"
 namespace OHOS::Ace::NG {
-constexpr int32_t STARS_DEFAULT = 5;
-constexpr double STEPS_DEFAULT = 0.5;
-void SetStars(ArkUINodeHandle node, int32_t value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    RatingModelNG::SetStars(frameNode, value);
-}
-
-void SetRatingStepSize(ArkUINodeHandle node, ArkUI_Float32 value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    RatingModelNG::SetStepSize(frameNode, value);
-}
-void SetStarStyle(ArkUINodeHandle node,
-    const char* backgroundUri, const char* foregroundUri, const char* secondaryUri)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::string backgroundUriStr = backgroundUri;
-    if (backgroundUriStr.empty()) {
-        RatingModelNG::SetBackgroundSrc(frameNode, "", true);
-    } else {
-        RatingModelNG::SetBackgroundSrc(frameNode, backgroundUriStr, false);
-    }
-
-    std::string foregroundUriStr = foregroundUri;
-    if (foregroundUriStr.empty()) {
-        RatingModelNG::SetForegroundSrc(frameNode, "", true);
-    } else {
-        RatingModelNG::SetForegroundSrc(frameNode, foregroundUriStr, false);
-    }
-
-    std::string secondaryUriStr = secondaryUri;
-    if (!secondaryUriStr.empty()) {
-        RatingModelNG::SetSecondarySrc(frameNode, secondaryUriStr, false);
-    } else if (!backgroundUriStr.empty()) {
-        RatingModelNG::SetSecondarySrc(frameNode, backgroundUriStr, false);
-    } else {
-        RatingModelNG::SetSecondarySrc(frameNode, "", true);
-    }
-}
-
-void SetStarStylePtr(ArkUINodeHandle node, const char* backgroundUri,
-    const char* foregroundUri, const char* secondaryUri, const ArkUIRatingStyleStruct& resObj)
-{
-    CHECK_NULL_VOID(node);
-    SetStarStyle(node, backgroundUri, foregroundUri, secondaryUri);
-    if (SystemProperties::ConfigChangePerform()) {
-        auto* frameNode = reinterpret_cast<FrameNode*>(node);
-        CHECK_NULL_VOID(frameNode);
-        if (resObj.backgroundResObj) {
-            auto* backgroundObj = reinterpret_cast<ResourceObject*>(resObj.backgroundResObj);
-            auto backgroundResObjPtr = AceType::Claim(backgroundObj);
-            RatingModelNG::CreateWithMediaResourceObj(frameNode, backgroundResObjPtr, RatingUriType::BACKGROUND_URI);
-        } else {
-            RatingModelNG::CreateWithMediaResourceObj(frameNode, nullptr, RatingUriType::BACKGROUND_URI);
-        }
-
-        if (resObj.foregroundResObj) {
-            auto* foregroundObj = reinterpret_cast<ResourceObject*>(resObj.foregroundResObj);
-            auto foregroundResObjPtr = AceType::Claim(foregroundObj);
-            RatingModelNG::CreateWithMediaResourceObj(frameNode, foregroundResObjPtr, RatingUriType::FOREGROUND_URI);
-        } else {
-            RatingModelNG::CreateWithMediaResourceObj(frameNode, nullptr, RatingUriType::FOREGROUND_URI);
-        }
-
-        if (resObj.secondaryResObj) {
-            auto* secondaryObj = reinterpret_cast<ResourceObject*>(resObj.secondaryResObj);
-            auto secondaryResObjPtr = AceType::Claim(secondaryObj);
-            RatingModelNG::CreateWithMediaResourceObj(frameNode, secondaryResObjPtr, RatingUriType::SECONDARY_URI);
-        } else {
-            RatingModelNG::CreateWithMediaResourceObj(frameNode, nullptr, RatingUriType::SECONDARY_URI);
-        }
-    }
-}
-
-void SetOnChange(ArkUINodeHandle node, void* callback)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (callback) {
-        auto onChange = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
-        RatingModelNG::SetOnChange(frameNode, std::move(*onChange));
-    } else {
-        RatingModelNG::SetOnChange(frameNode, nullptr);
-    }
-}
-
-void ResetStars(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    RatingModelNG::SetStars(frameNode, STARS_DEFAULT);
-}
-
-void ResetRatingStepSize(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    RatingModelNG::SetStepSize(frameNode, STEPS_DEFAULT);
-}
-
-void ResetStarStyle(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    RatingModelNG::SetBackgroundSrc(frameNode, "", true);
-    RatingModelNG::SetForegroundSrc(frameNode, "", true);
-    RatingModelNG::SetSecondarySrc(frameNode, "", true);
-    if (SystemProperties::ConfigChangePerform()) {
-        RatingModelNG::CreateWithMediaResourceObj(frameNode, nullptr, RatingUriType::BACKGROUND_URI);
-        RatingModelNG::CreateWithMediaResourceObj(frameNode, nullptr, RatingUriType::FOREGROUND_URI);
-        RatingModelNG::CreateWithMediaResourceObj(frameNode, nullptr, RatingUriType::SECONDARY_URI);
-    }
-}
-
-void SetRatingOptions(ArkUINodeHandle node, ArkUI_Float64 rating, ArkUI_Bool indicator)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    RatingModelNG::SetRatingOptions(frameNode, rating, static_cast<bool>(indicator));
-}
-void ResetOnChange(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    RatingModelNG::SetOnChange(frameNode, nullptr);
-}
 
 namespace NodeModifier {
 const ArkUIRatingModifier* GetRatingModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUIRatingModifier modifier = {
-        .setStars = SetStars,
-        .setRatingStepSize = SetRatingStepSize,
-        .setStarStyle = SetStarStyle,
-        .setOnChange = SetOnChange,
-        .resetStars = ResetStars,
-        .resetRatingStepSize = ResetRatingStepSize,
-        .resetStarStyle = ResetStarStyle,
-        .setRatingOptions = SetRatingOptions,
-        .resetOnChange = ResetOnChange,
-        .setStarStylePtr = SetStarStylePtr,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-    return &modifier;
+    static const ArkUIRatingModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Rating");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIRatingModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
 }
 
 const CJUIRatingModifier* GetCJUIRatingModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const CJUIRatingModifier modifier = {
-        .setStars = SetStars,
-        .setRatingStepSize = SetRatingStepSize,
-        .setStarStyle = SetStarStyle,
-        .resetStars = ResetStars,
-        .resetRatingStepSize = ResetRatingStepSize,
-        .resetStarStyle = ResetStarStyle,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-    return &modifier;
+    static const CJUIRatingModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Rating");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const CJUIRatingModifier*>(module->GetCjModifier());
+    }
+    return cachedModifier;
 }
-}
-}
+} // namespace NodeModifier
+} // namespace OHOS::Ace::NG

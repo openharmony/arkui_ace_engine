@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT RatingComponent : public RenderComponent {
+class ACE_FORCE_EXPORT RatingComponent : public RenderComponent {
     DECLARE_ACE_TYPE(RatingComponent, RenderComponent);
 
 public:

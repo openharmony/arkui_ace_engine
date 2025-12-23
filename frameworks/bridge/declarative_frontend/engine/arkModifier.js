@@ -297,7 +297,6 @@ class LazyArkCheckboxComponent extends ArkComponent {
       LazyArkCheckboxComponent.module = globalThis.requireNapi('arkui.components.arkcheckbox');
     }
     this.lazyComponent = LazyArkCheckboxComponent.module.createComponent(nativePtr, classType);
-    console.log('LazyArkCheckboxComponent lazyload nativeModule');
   }
   setMap() {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
@@ -383,7 +382,6 @@ class LazyArkCheckboxGroupComponent extends ArkComponent {
       LazyArkCheckboxGroupComponent.module = globalThis.requireNapi('arkui.components.arkcheckboxgroup');
     }
     this.lazyComponent = LazyArkCheckboxGroupComponent.module.createComponent(nativePtr, classType);
-    console.log('LazyArkCheckboxGroupComponent lazyload nativeModule');
   }
   setMap() {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
@@ -916,10 +914,46 @@ class RadioModifier extends ArkRadioComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class RatingModifier extends ArkRatingComponent {
+
+class LazyArkRatingComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkRatingComponent.module === undefined) {
+      LazyArkRatingComponent.module = globalThis.requireNapi('arkui.components.arkrating');
+    }
+    this.lazyComponent = LazyArkRatingComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  stars(value) {
+    this.lazyComponent.stars(value);
+    return this;
+  }
+  stepSize(angle) {
+    this.lazyComponent.stepSize(angle);
+    return this;
+  }
+  starStyle(angle) {
+    this.lazyComponent.starStyle(angle);
+    return this;
+  }
+  onChange(angle) {
+    this.lazyComponent.onChange(angle);
+    return this;
+  }
+  contentModifier(value) {
+    this.lazyComponent.contentModifier(value);
+    return this;
+  }
+}
+
+class RatingModifier extends LazyArkRatingComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

@@ -6580,6 +6580,9 @@ struct ArkUIRatingModifier {
     void (*resetOnChange)(ArkUINodeHandle node);
     void (*setStarStylePtr)(ArkUINodeHandle node, ArkUI_CharPtr backgroundUri,
         ArkUI_CharPtr foregroundUri, ArkUI_CharPtr secondaryUri, const ArkUIRatingStyleStruct& resObj);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
+    void (*createRating)(ArkUI_Float64 rating, ArkUI_Bool indicator);
+    void (*setOnChangeEvent)(void* callback);
 };
 
 struct ArkUIRowSplitModifier {

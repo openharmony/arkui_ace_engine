@@ -66,7 +66,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_input_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_radio_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rating_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_split_bridge.h"
@@ -502,7 +501,8 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
     static const std::unordered_set<std::string> loadModuleName = {
         {"Gauge" },
         {"Checkbox"},
-        {"CheckboxGroup"} };
+        {"CheckboxGroup"},
+        {"Rating"} };
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
@@ -2076,7 +2076,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterSelectAttributes(object, vm);
     RegisterRadioAttributes(object, vm);
     RegisterSliderAttributes(object, vm);
-    RegisterRatingAttributes(object, vm);
     RegisterTimepickerAttributes(object, vm);
     RegisterTextpickerAttributes(object, vm);
     RegisterThemeAttributes(object, vm);
@@ -2264,32 +2263,6 @@ void ArkUINativeModule::RegisterTimepickerAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TimepickerBridge::SetDigitalCrownSensitivity));
     timepicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDigitalCrownSensitivity"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TimepickerBridge::ResetDigitalCrownSensitivity));
-}
-
-void ArkUINativeModule::RegisterRatingAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
-{
-    auto rating = panda::ObjectRef::New(vm);
-    rating->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStars"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RatingBridge::SetStars));
-    rating->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStars"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RatingBridge::ResetStars));
-    rating->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStepSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RatingBridge::SetRatingStepSize));
-    rating->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStepSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RatingBridge::ResetRatingStepSize));
-    rating->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStarStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RatingBridge::SetStarStyle));
-    rating->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStarStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RatingBridge::ResetStarStyle));
-    rating->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RatingBridge::SetContentModifierBuilder));
-    rating->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRatingOptions"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RatingBridge::SetRatingOptions));
-    rating->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RatingBridge::SetOnChange));
-    rating->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RatingBridge::ResetOnChange));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "rating"), rating);
 }
 
 void ArkUINativeModule::RegisterSliderAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
@@ -6258,7 +6231,6 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     RegisterProgressAttributes(object, vm);
     RegisterQRCodeAttributes(object, vm);
     RegisterRadioAttributes(object, vm);
-    RegisterRatingAttributes(object, vm);
     RegisterRectAttributes(object, vm);
     RegisterRelativeContainerAttributes(object, vm);
     RegisterScrollableAttributes(object, vm);

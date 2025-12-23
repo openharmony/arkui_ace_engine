@@ -178,7 +178,6 @@
       OHOS::Ace::ProgressModel::*;
       OHOS::Ace::QRCodeModel::*;
       OHOS::Ace::RadioModel::*;
-      OHOS::Ace::RatingModel::*;
       OHOS::Ace::RectModel::*;
       OHOS::Ace::RefreshModel::*;
       OHOS::Ace::RelativeContainerModel::*;
@@ -422,6 +421,15 @@
       "OHOS::Ace::CheckableComponent::CreateRenderNode()";
       "SendArkUISyncEvent";
       OHOS::Ace::NG::ViewAbstractModelNG::RegisterEdgeMarginsResObj*;
+      OHOS::Ace::IconTheme::*;
+      OHOS::Ace::NG::FloatToDouble*;
+      "OHOS::Ace::Framework::ViewStackProcessor::ClaimElementId(OHOS::Ace::RefPtr<OHOS::Ace::Component> const&)";
+      "OHOS::Ace::Framework::ViewStackProcessor::Push(OHOS::Ace::RefPtr<OHOS::Ace::Component> const&, bool)";
+      "OHOS::Ace::Framework::ViewStackProcessor::GetBoxComponent()";
+      "OHOS::Ace::Framework::ViewStackProcessor::GetMainComponent()";
+      OHOS::Ace::RatingComponent::*;
+      "OHOS::Ace::Component::Component()";
+      "OHOS::Ace::NG::CreateProxyNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
@@ -484,6 +492,8 @@
       vtable?for?OHOS::Ace::Player;
       vtable?for?OHOS::Ace::Resource;
       vtable?for?OHOS::Ace::Texture;
+      vtable?for?OHOS::Ace::NG::RatingModelNG;
+      vtable?for?OHOS::Ace::RatingComponent;
 
       VTT?for?OHOS::Ace::Player;
       VTT?for?OHOS::Ace::Texture;
@@ -528,6 +538,7 @@
       VTT?for?OHOS::Ace::AnimatedDrawableDescriptor;
       VTT?for?OHOS::Ace::FocusNode*;
       VTT?for?OHOS::Ace::CheckableComponent;
+      VTT?for?OHOS::Ace::RatingComponent;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
