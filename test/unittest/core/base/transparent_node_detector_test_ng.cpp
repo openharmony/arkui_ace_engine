@@ -100,7 +100,8 @@ HWTEST_F(TransparentNodeDetectorTestNg, TransparentNodeDetectorTestNg001, TestSi
     auto layoutProperty = navDestinationNode4->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-    EXPECT_TRUE(TransparentNodeDetector::GetInstance().CheckWindowTransparent(root, containerId, isNavigation));
+    EXPECT_FALSE(TransparentNodeDetector::GetInstance().CheckWindowTransparent(root, containerId,
+        0, 0, 0, isNavigation));
 }
 
 /**
@@ -137,7 +138,8 @@ HWTEST_F(TransparentNodeDetectorTestNg, TransparentNodeDetectorTestNg002, TestSi
     auto layoutProperty = columnNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-    EXPECT_TRUE(TransparentNodeDetector::GetInstance().CheckWindowTransparent(root, containerId, isNavigation));
+    EXPECT_TRUE(TransparentNodeDetector::GetInstance().CheckWindowTransparent(root, containerId,
+        0, 0, 0, isNavigation));
 }
 
 /**
@@ -174,7 +176,8 @@ HWTEST_F(TransparentNodeDetectorTestNg, TransparentNodeDetectorTestNg003, TestSi
     auto layoutProperty = columnNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    EXPECT_FALSE(TransparentNodeDetector::GetInstance().CheckWindowTransparent(root, containerId, isNavigation));
+    EXPECT_FALSE(TransparentNodeDetector::GetInstance().CheckWindowTransparent(root, containerId,
+        0, 0, 0, isNavigation));
 }
 
 /**
@@ -227,6 +230,7 @@ HWTEST_F(TransparentNodeDetectorTestNg, TransparentNodeDetectorTestNg004, TestSi
     auto layoutProperty = navDestinationNode4->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    EXPECT_FALSE(TransparentNodeDetector::GetInstance().CheckWindowTransparent(root, containerId, isNavigation));
+    EXPECT_FALSE(TransparentNodeDetector::GetInstance().CheckWindowTransparent(root, containerId,
+        0, 0, 0, isNavigation));
 }
 } // namespace OHOS::Ace::NG
