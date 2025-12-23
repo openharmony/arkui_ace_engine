@@ -40,13 +40,13 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { DecorationStyleInterface, DecorationStyleInterface_serializer, StyledString_serializer, StyledString, StyledStringInternal, MutableStyledString_serializer, MutableStyledString, MutableStyledStringInternal } from "./styledString"
 import { TextBackgroundStyle, TextBackgroundStyle_serializer } from "./span"
+import { LengthMetrics, ColorMetrics } from "arkui.Graphics"
 import { default as image } from "@ohos.multimedia.image"
 import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./symbolglyph"
 import { GestureEvent, GestureEvent_serializer } from "./gesture"
-import { ColorMetrics } from "arkui.Graphics"
 import { RichEditorModifier } from "./../RichEditorModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ColorMetrics_serializer } from "./../Graphics"
+import { ColorMetrics_serializer, LengthMetrics_serializer } from "./../Graphics"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { CustomNodeBuilder } from "./idlize"
 export class RichEditorBaseControllerInternal {
@@ -832,6 +832,8 @@ export interface RichEditorTextStyle {
     halfLeading?: boolean;
     fontFeature?: string;
     textBackgroundStyle?: TextBackgroundStyle;
+    strokeWidth?: LengthMetrics;
+    strokeColor?: ResourceColor;
 }
 export interface LeadingMarginPlaceholder {
     pixelMap: image.PixelMap;
@@ -912,6 +914,8 @@ export interface RichEditorTextStyleResult {
     halfLeading?: boolean;
     fontFeature?: string;
     textBackgroundStyle?: TextBackgroundStyle;
+    strokeWidth?: double;
+    strokeColor?: ResourceColor;
 }
 export interface RichEditorParagraphResult {
     style: RichEditorParagraphStyle;
@@ -3494,6 +3498,38 @@ export class RichEditorTextStyle_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForStrokeWidth  = value.strokeWidth
+        if (valueHolderForStrokeWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStrokeWidthTmpValue  = valueHolderForStrokeWidth!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForStrokeColor  = value.strokeColor
+        if (valueHolderForStrokeColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStrokeColorTmpValue  = valueHolderForStrokeColor!
+            if (valueHolderForStrokeColorTmpValue instanceof Color) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForStrokeColorTmpValueForIdx0  = valueHolderForStrokeColorTmpValue as Color
+                valueSerializer.writeInt32(valueHolderForStrokeColorTmpValueForIdx0.getOrdinal())
+            } else if (valueHolderForStrokeColorTmpValue instanceof int32) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForStrokeColorTmpValueForIdx1  = valueHolderForStrokeColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForStrokeColorTmpValueForIdx1)
+            } else if (valueHolderForStrokeColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForStrokeColorTmpValueForIdx2  = valueHolderForStrokeColorTmpValue as string
+                valueSerializer.writeString(valueHolderForStrokeColorTmpValueForIdx2)
+            } else if (valueHolderForStrokeColorTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForStrokeColorTmpValueForIdx3  = valueHolderForStrokeColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForStrokeColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): RichEditorTextStyle {
         let valueDeserializer : DeserializerBase = buffer
@@ -3647,7 +3683,32 @@ export class RichEditorTextStyle_serializer {
             textBackgroundStyleTmpBuf = TextBackgroundStyle_serializer.read(valueDeserializer)
         }
         const textBackgroundStyleTmpResult : TextBackgroundStyle | undefined = textBackgroundStyleTmpBuf
-        let value : RichEditorTextStyle = ({fontColor: fontColorTmpResult, fontSize: fontSizeTmpResult, fontStyle: fontStyleTmpResult, fontWeight: fontWeightTmpResult, fontFamily: fontFamilyTmpResult, decoration: decorationTmpResult, textShadow: textShadowTmpResult, letterSpacing: letterSpacingTmpResult, lineHeight: lineHeightTmpResult, halfLeading: halfLeadingTmpResult, fontFeature: fontFeatureTmpResult, textBackgroundStyle: textBackgroundStyleTmpResult} as RichEditorTextStyle)
+        const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let strokeWidthTmpBuf : LengthMetrics | undefined = undefined
+        if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            strokeWidthTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const strokeWidthTmpResult : LengthMetrics | undefined = strokeWidthTmpBuf
+        const strokeColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let strokeColorTmpBuf : ResourceColor | undefined = undefined
+        if ((strokeColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const strokeColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let strokeColorTmpBuf_ : Color | int32 | string | Resource | undefined
+            if (strokeColorTmpBuf_UnionSelector == (0).toChar()) {
+                strokeColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
+            } else if (strokeColorTmpBuf_UnionSelector == (1).toChar()) {
+                strokeColorTmpBuf_ = valueDeserializer.readInt32()
+            } else if (strokeColorTmpBuf_UnionSelector == (2).toChar()) {
+                strokeColorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (strokeColorTmpBuf_UnionSelector == (3).toChar()) {
+                strokeColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for strokeColorTmpBuf_ has to be chosen through deserialisation.")
+            }
+            strokeColorTmpBuf = (strokeColorTmpBuf_ as Color | int32 | string | Resource)
+        }
+        const strokeColorTmpResult : ResourceColor | undefined = strokeColorTmpBuf
+        let value : RichEditorTextStyle = ({fontColor: fontColorTmpResult, fontSize: fontSizeTmpResult, fontStyle: fontStyleTmpResult, fontWeight: fontWeightTmpResult, fontFamily: fontFamilyTmpResult, decoration: decorationTmpResult, textShadow: textShadowTmpResult, letterSpacing: letterSpacingTmpResult, lineHeight: lineHeightTmpResult, halfLeading: halfLeadingTmpResult, fontFeature: fontFeatureTmpResult, textBackgroundStyle: textBackgroundStyleTmpResult, strokeWidth: strokeWidthTmpResult, strokeColor: strokeColorTmpResult} as RichEditorTextStyle)
         return value
     }
 }
@@ -3734,6 +3795,38 @@ export class RichEditorTextStyleResult_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForStrokeWidth  = value.strokeWidth
+        if (valueHolderForStrokeWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStrokeWidthTmpValue  = valueHolderForStrokeWidth!
+            valueSerializer.writeFloat64(valueHolderForStrokeWidthTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForStrokeColor  = value.strokeColor
+        if (valueHolderForStrokeColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStrokeColorTmpValue  = valueHolderForStrokeColor!
+            if (valueHolderForStrokeColorTmpValue instanceof Color) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForStrokeColorTmpValueForIdx0  = valueHolderForStrokeColorTmpValue as Color
+                valueSerializer.writeInt32(valueHolderForStrokeColorTmpValueForIdx0.getOrdinal())
+            } else if (valueHolderForStrokeColorTmpValue instanceof int32) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForStrokeColorTmpValueForIdx1  = valueHolderForStrokeColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForStrokeColorTmpValueForIdx1)
+            } else if (valueHolderForStrokeColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForStrokeColorTmpValueForIdx2  = valueHolderForStrokeColorTmpValue as string
+                valueSerializer.writeString(valueHolderForStrokeColorTmpValueForIdx2)
+            } else if (valueHolderForStrokeColorTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForStrokeColorTmpValueForIdx3  = valueHolderForStrokeColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForStrokeColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): RichEditorTextStyleResult {
         let valueDeserializer : DeserializerBase = buffer
@@ -3797,7 +3890,32 @@ export class RichEditorTextStyleResult_serializer {
             textBackgroundStyleTmpBuf = TextBackgroundStyle_serializer.read(valueDeserializer)
         }
         const textBackgroundStyleTmpResult : TextBackgroundStyle | undefined = textBackgroundStyleTmpBuf
-        let value : RichEditorTextStyleResult = ({fontColor: fontColorTmpResult, fontSize: fontSizeTmpResult, fontStyle: fontStyleTmpResult, fontWeight: fontWeightTmpResult, fontFamily: fontFamilyTmpResult, decoration: decorationTmpResult, textShadow: textShadowTmpResult, letterSpacing: letterSpacingTmpResult, lineHeight: lineHeightTmpResult, halfLeading: halfLeadingTmpResult, fontFeature: fontFeatureTmpResult, textBackgroundStyle: textBackgroundStyleTmpResult} as RichEditorTextStyleResult)
+        const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let strokeWidthTmpBuf : double | undefined = undefined
+        if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            strokeWidthTmpBuf = valueDeserializer.readFloat64()
+        }
+        const strokeWidthTmpResult : double | undefined = strokeWidthTmpBuf
+        const strokeColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let strokeColorTmpBuf : ResourceColor | undefined = undefined
+        if ((strokeColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const strokeColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let strokeColorTmpBuf_ : Color | int32 | string | Resource | undefined
+            if (strokeColorTmpBuf_UnionSelector == (0).toChar()) {
+                strokeColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
+            } else if (strokeColorTmpBuf_UnionSelector == (1).toChar()) {
+                strokeColorTmpBuf_ = valueDeserializer.readInt32()
+            } else if (strokeColorTmpBuf_UnionSelector == (2).toChar()) {
+                strokeColorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (strokeColorTmpBuf_UnionSelector == (3).toChar()) {
+                strokeColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for strokeColorTmpBuf_ has to be chosen through deserialisation.")
+            }
+            strokeColorTmpBuf = (strokeColorTmpBuf_ as Color | int32 | string | Resource)
+        }
+        const strokeColorTmpResult : ResourceColor | undefined = strokeColorTmpBuf
+        let value : RichEditorTextStyleResult = ({fontColor: fontColorTmpResult, fontSize: fontSizeTmpResult, fontStyle: fontStyleTmpResult, fontWeight: fontWeightTmpResult, fontFamily: fontFamilyTmpResult, decoration: decorationTmpResult, textShadow: textShadowTmpResult, letterSpacing: letterSpacingTmpResult, lineHeight: lineHeightTmpResult, halfLeading: halfLeadingTmpResult, fontFeature: fontFeatureTmpResult, textBackgroundStyle: textBackgroundStyleTmpResult, strokeWidth: strokeWidthTmpResult, strokeColor: strokeColorTmpResult} as RichEditorTextStyleResult)
         return value
     }
 }

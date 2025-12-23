@@ -69,6 +69,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_styled_string_test_ng.cpp",
     "rich_editor_styled_undo_test_ng.cpp",
     "rich_editor_text_cal_test_ng.cpp",
+    "rich_editor_text_style_test_ng.cpp",
     "rich_editor_theme_test_ng.cpp",
     "rich_editor_touch_test_ng.cpp",
     "rich_editor_typing_style_test.cpp",

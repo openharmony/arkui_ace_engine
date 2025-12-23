@@ -83,7 +83,7 @@ public:
     static Local<JSValueRef> JsKeepEditableState(panda::JsiRuntimeCallInfo* info);
     static std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args);
     static std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr);
-    static CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj);
+    static CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj, bool validateNonNegative = true);
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void SetEnableKeyboardOnFocus(const JSCallbackInfo& info);
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
@@ -197,11 +197,17 @@ protected:
     bool isStyledStringMode_ = false;
     static JSRef<JSObject> CreateTypingStyleResult(const struct UpdateSpanStyle& typingStyle);
     static JSRef<JSObject> CreateJsDecorationObj(const struct UpdateSpanStyle& typingStyle);
+    void ParseJsFontFamilyTextStyle(
+        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     void ParseTextDecoration(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     void ParseTextShadow(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     void ParseTextBackgroundStyle(
+        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
+    void ParseJsStrokeWidthTextStyle(
+        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
+    void ParseJsStrokeColorTextStyle(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     void ParseTextUrlStyle(const JSRef<JSObject>& styleObject, std::optional<std::u16string>& urlAddressOpt);
     JSRef<JSObject> JSObjectCast(JSRef<JSVal> jsValue);
