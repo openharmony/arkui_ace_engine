@@ -26,6 +26,7 @@
 #include "sys/types.h"
 #include "unistd.h"
 
+#include "base/log/event_report.h"
 #include "base/image/file_uri_helper.h"
 #include "base/image/image_source.h"
 #include "base/thread/background_task_executor.h"
@@ -380,6 +381,7 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& im
             "read data failed, readSize = %{public}d, fileSize = %{public}d, realPath = %{private}s",
             static_cast<int32_t>(readSize), static_cast<int32_t>(fileSize), realPath);
         errorInfo = { ImageErrorCode::GET_IMAGE_FILE_READ_DATA_FAILED, "read data failed." };
+        EventReport::SendComponentException(ComponentExcepType::FILE_IMAGE_LOADER_ERR);
         return nullptr;
     }
     // Create RSData from the read data.
