@@ -119,10 +119,10 @@ export class ArkRectPeer extends ArkCommonShapeMethodPeer {
                     thisSerializer.writeInt8((0).toByte())
                     const valueTmpValueForIdx0ForIdx0  = valueTmpValueForIdx0 as string
                     thisSerializer.writeString(valueTmpValueForIdx0ForIdx0)
-                } else if (valueTmpValueForIdx0 instanceof number) {
+                } else if (valueTmpValueForIdx0 instanceof double) {
                     thisSerializer.writeInt8((1).toByte())
-                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as number
-                    thisSerializer.writeNumber(valueTmpValueForIdx0ForIdx1)
+                    const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as double
+                    thisSerializer.writeFloat64(valueTmpValueForIdx0ForIdx1)
                 } else if (valueTmpValueForIdx0 instanceof Resource) {
                     thisSerializer.writeInt8((2).toByte())
                     const valueTmpValueForIdx0ForIdx2  = valueTmpValueForIdx0 as Resource
@@ -139,10 +139,10 @@ export class ArkRectPeer extends ArkCommonShapeMethodPeer {
                         thisSerializer.writeInt8((0).toByte())
                         const valueTmpValueForIdx1TmpElement_0ForIdx0  = valueTmpValueForIdx1TmpElement_0 as string
                         thisSerializer.writeString(valueTmpValueForIdx1TmpElement_0ForIdx0)
-                    } else if (valueTmpValueForIdx1TmpElement_0 instanceof number) {
+                    } else if (valueTmpValueForIdx1TmpElement_0 instanceof double) {
                         thisSerializer.writeInt8((1).toByte())
-                        const valueTmpValueForIdx1TmpElement_0ForIdx1  = valueTmpValueForIdx1TmpElement_0 as number
-                        thisSerializer.writeNumber(valueTmpValueForIdx1TmpElement_0ForIdx1)
+                        const valueTmpValueForIdx1TmpElement_0ForIdx1  = valueTmpValueForIdx1TmpElement_0 as double
+                        thisSerializer.writeFloat64(valueTmpValueForIdx1TmpElement_0ForIdx1)
                     } else if (valueTmpValueForIdx1TmpElement_0 instanceof Resource) {
                         thisSerializer.writeInt8((2).toByte())
                         const valueTmpValueForIdx1TmpElement_0ForIdx2  = valueTmpValueForIdx1TmpElement_0 as Resource
@@ -153,10 +153,10 @@ export class ArkRectPeer extends ArkCommonShapeMethodPeer {
                         thisSerializer.writeInt8((0).toByte())
                         const valueTmpValueForIdx1TmpElement_1ForIdx0  = valueTmpValueForIdx1TmpElement_1 as string
                         thisSerializer.writeString(valueTmpValueForIdx1TmpElement_1ForIdx0)
-                    } else if (valueTmpValueForIdx1TmpElement_1 instanceof number) {
+                    } else if (valueTmpValueForIdx1TmpElement_1 instanceof double) {
                         thisSerializer.writeInt8((1).toByte())
-                        const valueTmpValueForIdx1TmpElement_1ForIdx1  = valueTmpValueForIdx1TmpElement_1 as number
-                        thisSerializer.writeNumber(valueTmpValueForIdx1TmpElement_1ForIdx1)
+                        const valueTmpValueForIdx1TmpElement_1ForIdx1  = valueTmpValueForIdx1TmpElement_1 as double
+                        thisSerializer.writeFloat64(valueTmpValueForIdx1TmpElement_1ForIdx1)
                     } else if (valueTmpValueForIdx1TmpElement_1 instanceof Resource) {
                         thisSerializer.writeInt8((2).toByte())
                         const valueTmpValueForIdx1TmpElement_1ForIdx2  = valueTmpValueForIdx1TmpElement_1 as Resource
@@ -478,10 +478,10 @@ export class RectOptions_serializer {
                     valueSerializer.writeInt8((0).toByte())
                     const valueHolderForRadiusTmpValueForIdx0ForIdx0  = valueHolderForRadiusTmpValueForIdx0 as string
                     valueSerializer.writeString(valueHolderForRadiusTmpValueForIdx0ForIdx0)
-                } else if (valueHolderForRadiusTmpValueForIdx0 instanceof number) {
+                } else if (valueHolderForRadiusTmpValueForIdx0 instanceof double) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForRadiusTmpValueForIdx0ForIdx1  = valueHolderForRadiusTmpValueForIdx0 as number
-                    valueSerializer.writeNumber(valueHolderForRadiusTmpValueForIdx0ForIdx1)
+                    const valueHolderForRadiusTmpValueForIdx0ForIdx1  = valueHolderForRadiusTmpValueForIdx0 as double
+                    valueSerializer.writeFloat64(valueHolderForRadiusTmpValueForIdx0ForIdx1)
                 } else if (valueHolderForRadiusTmpValueForIdx0 instanceof Resource) {
                     valueSerializer.writeInt8((2).toByte())
                     const valueHolderForRadiusTmpValueForIdx0ForIdx2  = valueHolderForRadiusTmpValueForIdx0 as Resource
@@ -498,10 +498,10 @@ export class RectOptions_serializer {
                         valueSerializer.writeInt8((0).toByte())
                         const valueHolderForRadiusTmpValueForIdx1TmpElement_0ForIdx0  = valueHolderForRadiusTmpValueForIdx1TmpElement_0 as string
                         valueSerializer.writeString(valueHolderForRadiusTmpValueForIdx1TmpElement_0ForIdx0)
-                    } else if (valueHolderForRadiusTmpValueForIdx1TmpElement_0 instanceof number) {
+                    } else if (valueHolderForRadiusTmpValueForIdx1TmpElement_0 instanceof double) {
                         valueSerializer.writeInt8((1).toByte())
-                        const valueHolderForRadiusTmpValueForIdx1TmpElement_0ForIdx1  = valueHolderForRadiusTmpValueForIdx1TmpElement_0 as number
-                        valueSerializer.writeNumber(valueHolderForRadiusTmpValueForIdx1TmpElement_0ForIdx1)
+                        const valueHolderForRadiusTmpValueForIdx1TmpElement_0ForIdx1  = valueHolderForRadiusTmpValueForIdx1TmpElement_0 as double
+                        valueSerializer.writeFloat64(valueHolderForRadiusTmpValueForIdx1TmpElement_0ForIdx1)
                     } else if (valueHolderForRadiusTmpValueForIdx1TmpElement_0 instanceof Resource) {
                         valueSerializer.writeInt8((2).toByte())
                         const valueHolderForRadiusTmpValueForIdx1TmpElement_0ForIdx2  = valueHolderForRadiusTmpValueForIdx1TmpElement_0 as Resource
@@ -512,10 +512,10 @@ export class RectOptions_serializer {
                         valueSerializer.writeInt8((0).toByte())
                         const valueHolderForRadiusTmpValueForIdx1TmpElement_1ForIdx0  = valueHolderForRadiusTmpValueForIdx1TmpElement_1 as string
                         valueSerializer.writeString(valueHolderForRadiusTmpValueForIdx1TmpElement_1ForIdx0)
-                    } else if (valueHolderForRadiusTmpValueForIdx1TmpElement_1 instanceof number) {
+                    } else if (valueHolderForRadiusTmpValueForIdx1TmpElement_1 instanceof double) {
                         valueSerializer.writeInt8((1).toByte())
-                        const valueHolderForRadiusTmpValueForIdx1TmpElement_1ForIdx1  = valueHolderForRadiusTmpValueForIdx1TmpElement_1 as number
-                        valueSerializer.writeNumber(valueHolderForRadiusTmpValueForIdx1TmpElement_1ForIdx1)
+                        const valueHolderForRadiusTmpValueForIdx1TmpElement_1ForIdx1  = valueHolderForRadiusTmpValueForIdx1TmpElement_1 as double
+                        valueSerializer.writeFloat64(valueHolderForRadiusTmpValueForIdx1TmpElement_1ForIdx1)
                     } else if (valueHolderForRadiusTmpValueForIdx1TmpElement_1 instanceof Resource) {
                         valueSerializer.writeInt8((2).toByte())
                         const valueHolderForRadiusTmpValueForIdx1TmpElement_1ForIdx2  = valueHolderForRadiusTmpValueForIdx1TmpElement_1 as Resource
