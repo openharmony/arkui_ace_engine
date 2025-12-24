@@ -23,6 +23,8 @@ class ImageGeneratorDialogView {
 public:
     static bool Create(int32_t instanceId);
     static bool ExecuteImageGeneratorDialogAbc(int32_t instanceId);
+    static void MinimizeDialog(int32_t instanceId, int32_t uniqueId);
+    static void RecoverDialog(int32_t instanceId, int32_t uniqueId);
 };
 } // namespace OHOS::Ace::Framework
 
