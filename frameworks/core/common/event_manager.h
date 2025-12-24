@@ -85,6 +85,7 @@ struct MarkProcessedEventInfo {
 
 struct NodeGeneralInfo {
     int32_t nodeId = -1;
+    std::string tag = "";
 };
 struct HitNodeInfos {
     int32_t pointerId = -1;
