@@ -30,6 +30,7 @@ constexpr int32_t DEFAULT_IGD_MASK_COLOR = 0X33182431;
 constexpr char SHEET_PAGE_TAG[] = "SheetPage";
 
 const Dimension DIMENSION_ONE_HUNDRED_PERCENT = Dimension(1, DimensionUnit::PERCENT);
+const Dimension DIMENSION_MINIMIZE_SHEET_SIZE = 125.0_vp;
 const NG::SheetStyle GENERATOR_STYLE = NG::SheetStyle({ .height = DIMENSION_ONE_HUNDRED_PERCENT }, false, std::nullopt,
     Color::TRANSPARENT, Color(DEFAULT_IGD_MASK_COLOR), DIMENSION_ONE_HUNDRED_PERCENT);
 } // namespace
@@ -123,5 +124,76 @@ bool ImageGeneratorDialogView::Create(int32_t instanceId)
     overlayManager->UpdateImageGeneratorSheetKey(sheetNode, root->GetId());
     TAG_LOGI(AceLogTag::ACE_SIDEBAR, "create canvas success");
     return true;
+}
+
+RefPtr<NG::FrameNode> GetImageGenerateSheetNode(int32_t uniqueId)
+{
+    auto uiNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::UINode>(uniqueId);
+    CHECK_NULL_RETURN(uiNode, nullptr);
+    RefPtr<NG::UINode> parent = uiNode->GetParent();
+    while (parent) {
+        if (parent->GetTag() == SHEET_PAGE_TAG) {
+            break;
+        }
+        parent = parent->GetParent();
+    }
+    return AceType::DynamicCast<NG::FrameNode>(parent);
+}
+
+void ImageGeneratorDialogView::MinimizeDialog(int32_t instanceId, int32_t uniqueId)
+{
+    if (instanceId < 0 || uniqueId < 0) {
+        return;
+    }
+    RefPtr<NG::PipelineContext> pipeline = NG::PipelineContext::GetContextByContainerId(instanceId);
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto sheetNode = GetImageGenerateSheetNode(uniqueId);
+    CHECK_NULL_VOID(sheetNode);
+    NG::SheetStyle style;
+    style.sheetType = NG::SheetType::SHEET_MINIMIZE;
+    style.sheetHeight.height = DIMENSION_MINIMIZE_SHEET_SIZE;
+    style.width = DIMENSION_MINIMIZE_SHEET_SIZE;
+    style.interactive = true;
+    style.instanceId = instanceId;
+    auto shouldDismiss = [weakOverlayMgr = WeakPtr(overlayManager)](int32_t reason) {
+        if (reason == static_cast<int32_t>(NG::BindSheetDismissReason::BACK_PRESSED) ||
+            reason == static_cast<int32_t>(NG::BindSheetDismissReason::SLIDE_DOWN)) {
+                auto overlayManager = weakOverlayMgr.Upgrade();
+                if (overlayManager) {
+                    overlayManager->DismissSheet();
+                }
+            }
+    };
+    auto emptySpringBack = []() {};
+    overlayManager->UpdateImageGeneratorSheetScale(
+        sheetNode, style, pipeline->GetRootElement()->GetId(), std::move(shouldDismiss), std::move(emptySpringBack));
+}
+
+void ImageGeneratorDialogView::RecoverDialog(int32_t instanceId, int32_t uniqueId)
+{
+    if (instanceId < 0 || uniqueId < 0) {
+        return;
+    }
+    RefPtr<NG::PipelineContext> pipeline = NG::PipelineContext::GetContextByContainerId(instanceId);
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto sheetNode = GetImageGenerateSheetNode(uniqueId);
+    CHECK_NULL_VOID(sheetNode);
+    auto shouldDismiss = [weakOverlayMgr = WeakPtr(overlayManager)](int32_t reason) {
+        if (reason == static_cast<int32_t>(NG::BindSheetDismissReason::BACK_PRESSED) ||
+            reason == static_cast<int32_t>(NG::BindSheetDismissReason::SLIDE_DOWN)) {
+                auto overlayManager = weakOverlayMgr.Upgrade();
+                if (overlayManager) {
+                    overlayManager->DismissSheet();
+                }
+            }
+    };
+    auto emptySpringBack = []() {};
+    NG::SheetStyle style = GENERATOR_STYLE;
+    overlayManager->UpdateImageGeneratorSheetScale(
+        sheetNode, style, pipeline->GetRootElement()->GetId(), std::move(shouldDismiss), std::move(emptySpringBack));
 }
 } // namespace OHOS::Ace::Framework

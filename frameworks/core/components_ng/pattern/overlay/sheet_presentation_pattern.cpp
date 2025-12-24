@@ -44,6 +44,8 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/sheet/minimize/sheet_minimize_object.h"
+#include "core/components_ng/pattern/sheet/minimize/sheet_presentation_minimize_layout_algorithm.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -1964,6 +1966,9 @@ SheetType SheetPresentationPattern::GetSheetTypeFromSheetManager() const
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
     auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_MINIMIZE) {
+        return SheetType::SHEET_MINIMIZE;
+    }
     if (sheetStyle.instanceId.has_value()) {
         return GetSheetType();
     }
@@ -2023,6 +2028,9 @@ SheetType SheetPresentationPattern::GetSheetType() const
     }
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_SIDE) {
         return SheetType::SHEET_SIDE;
+    }
+    if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_MINIMIZE) {
+        return SheetType::SHEET_MINIMIZE;
     }
     if (sheetThemeType_ == "auto") {
         GetSheetTypeWithAuto(sheetType);
@@ -4015,6 +4023,8 @@ void SheetPresentationPattern::InitSheetObject()
         sheetObject_ = AceType::MakeRefPtr<SheetSideObject>(sheetType_);
     } else if (sheetType_ == SheetType::SHEET_CONTENT_COVER) {
         sheetObject_ = AceType::MakeRefPtr<SheetContentCoverObject>(sheetType_);
+    } else if (sheetType_ == SheetType::SHEET_MINIMIZE) {
+        sheetObject_ = AceType::MakeRefPtr<SheetMinimizeObject>(sheetType_);
     } else {
         sheetObject_ = AceType::MakeRefPtr<SheetObject>(sheetType_);
     }
@@ -4057,6 +4067,8 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType newType)
         sheetObject = AceType::MakeRefPtr<SheetSideObject>(newType);
     } else if (newType == SheetType::SHEET_CONTENT_COVER) {
         sheetObject = AceType::MakeRefPtr<SheetContentCoverObject>(newType);
+    } else if (newType == SheetType::SHEET_MINIMIZE) {
+        sheetObject = AceType::MakeRefPtr<SheetMinimizeObject>(newType);
     } else {
         sheetObject = AceType::MakeRefPtr<SheetObject>(newType);
     }
@@ -4692,5 +4704,20 @@ bool SheetPresentationPattern::IsPcOrPadFreeMultiWindowMode() const
     DeviceType deviceType = SystemProperties::GetDeviceType();
     TAG_LOGD(AceLogTag::ACE_SHEET, "IsPCMode: %{public}d", SystemProperties::IsPCMode());
     return deviceType == DeviceType::TWO_IN_ONE || SystemProperties::IsPCMode();
+}
+
+RefPtr<LayoutAlgorithm> SheetPresentationPattern::CreateLayoutAlgorithm()
+{
+    auto sheetType = sheetType_;
+    if (sheetType == SheetType::SHEET_SIDE) {
+        return MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();
+    }
+    if (sheetType == SheetType::SHEET_CONTENT_COVER) {
+        return MakeRefPtr<SheetContentCoverLayoutAlgorithm>();
+    }
+    if (sheetType == SheetType::SHEET_MINIMIZE) {
+        return MakeRefPtr<SheetPresentationMinimizeLayoutAlgorithm>();
+    }
+    return MakeRefPtr<SheetPresentationLayoutAlgorithm>(sheetType, sheetPopupInfo_);
 }
 } // namespace OHOS::Ace::NG
