@@ -156,7 +156,6 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreviewOption options)
     previewOptions.isNumber = options.isNumber;
     previewOptions.isDefaultShadowEnabled = options.isDefaultShadowEnabled;
     previewOptions.isDefaultRadiusEnabled = options.isDefaultRadiusEnabled;
-    previewOptions.isDragPreviewEnabled = options.isDragPreviewEnabled;
     previewOptions.isDefaultDragItemGrayEffectEnabled = options.isDefaultDragItemGrayEffectEnabled;
     previewOptions.enableEdgeAutoScroll = options.enableEdgeAutoScroll;
     previewOptions.enableHapticFeedback = options.enableHapticFeedback;

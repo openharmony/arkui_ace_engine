@@ -571,7 +571,6 @@ void ParseDragInteractionOptions(ani_env* env, ArkUIDragPreviewOption& previewOp
     SetPropertyValueByName(env, dragInteractionOptions, "defaultAnimationBeforeLifting",
         previewOptions.defaultAnimationBeforeLifting);
     SetPropertyValueByName(env, dragInteractionOptions, "enableHapticFeedback", previewOptions.enableHapticFeedback);
-    SetPropertyValueByName(env, dragInteractionOptions, "isDragPreviewEnabled", previewOptions.isDragPreviewEnabled);
     SetPropertyValueByName(env, dragInteractionOptions, "enableEdgeAutoScroll", previewOptions.enableEdgeAutoScroll);
     SetPropertyValueByName(env, dragInteractionOptions, "isLiftingDisabled", previewOptions.isLiftingDisabled);
 }
