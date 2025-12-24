@@ -1100,13 +1100,20 @@ void JsBindFormViews(
     }
 }
 
-void JsBindFormViewsForJsXNode(BindingTarget globalObj)
+void JsBindFormViewsForJsXNode(BindingTarget globalObj, bool isFull)
 {
     JSScopeUtil::JSBind(globalObj);
     JSBaseNode::JSBind(globalObj);
     JSContentSlot::JSBind(globalObj);
     JSNodeContent::JSBind(globalObj);
     JSNodeContainer::JSBind(globalObj);
+    if (isFull) {
+        JSIndicator::JSBind(globalObj);
+        JSSwiperController::JSBind(globalObj);
+        JSTextClockController::JSBind(globalObj);
+        JSTextTimerController::JSBind(globalObj);
+        JSIndicatorController::JSBind(globalObj);
+    }
 }
 
 void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSupported)

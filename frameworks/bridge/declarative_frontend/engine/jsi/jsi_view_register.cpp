@@ -2106,7 +2106,7 @@ void JsRegisterFormJsXNodeFull(BindingTarget globalObj, bool isLiteSetRegistered
     }
     auto arkUINativeModule = arkUINativeModuleRef->ToObject(vm);
     NG::ArkUINativeModule::RegisterArkUINativeModuleFormFull(arkUINativeModule, vm, isLiteSetRegistered);
-    JsBindFormViewsForJsXNode(globalObj);
+    JsBindFormViewsForJsXNode(globalObj, true);
     TAG_LOGI(AceLogTag::ACE_FORM, "Form model loading JsXNode module Full successfully.");
 }
 #endif
