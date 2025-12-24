@@ -1181,8 +1181,7 @@ bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::
     std::string bundle(bundleName);
     std::string module(moduleName);
     std::vector<OHOS::AppExecFwk::FormInfo> formInfos;
-    std::vector<OHOS::AppExecFwk::FormInfo> templateFormInfos;
-    auto result = OHOS::AppExecFwk::FormMgr::GetInstance().OriginGetFormsInfoByModule(bundle, module, formInfos);
+    auto result = OHOS::AppExecFwk::FormMgr::GetInstance().GetFullFormsInfoByModule(bundle, module, formInfos);
     if (result != 0) {
         LOGW("Query FormInfo failed.");
         return false;
