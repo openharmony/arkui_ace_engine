@@ -270,7 +270,8 @@ public:
     void NotifyTextChangeEvent(const TextChangeEventInfo& info);
     void NotifyRouterPageSizeChange(const RefPtr<PageInfo>& pageInfo,
         RouterPageState state, const std::optional<SizeF>& size);
-    void NotifyNavDestinationSizeChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
+    void NotifyNavDestinationSizeChange(const WeakPtr<AceType>& weakPattern,
+        NavDestinationState state, const std::optional<SizeF>& size);
     void NotifySwiperContentUpdate(const SwiperContentInfo& info);
     bool IsSwiperContentObserverEmpty();
     void NotifyWinSizeLayoutBreakpointChangeFunc(int32_t instanceId, const WindowSizeBreakpoint& info);
