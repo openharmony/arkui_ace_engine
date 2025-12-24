@@ -75,7 +75,7 @@ import { InteropNativeModule } from '@koalaui/interop';
 import { LocalStorage } from '../stateManagement/storage/localStorage';
 import { Router as RouterExt } from 'arkui/base';
 import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, AnimationExtender,
-    DialogExtender, IUIContext } from '../framework';
+    DialogExtender, IUIContext, ContextMenu } from '../framework';
 import { EntryPoint, NavInterface } from "../component/customComponent"
 import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
 import { IUIContext, SystemOps } from 'arkui/component/idlize';
@@ -222,9 +222,9 @@ class ContextMenuControllerImpl extends ContextMenuController {
     }
 
     public close(): void {
-        // ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // ContextMenu.close();
-        // ArkUIAniModule._Common_Restore_InstanceId();
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ContextMenu.close();
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 }
 
