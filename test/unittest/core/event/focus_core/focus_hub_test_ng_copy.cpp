@@ -1002,4 +1002,4 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0022, TestSize.Level1)
     focusHub->SetFocusType(FocusType::DISABLE);
     EXPECT_FALSE(focusHub->IsFocusableByTab());
 }
-} // namespace OHOS::Ace::NG 
+} // namespace OHOS::Ace::NG
