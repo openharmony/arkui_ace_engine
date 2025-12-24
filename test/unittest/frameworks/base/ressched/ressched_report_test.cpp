@@ -92,4 +92,20 @@ HWTEST_F(ResSchedReportTest, ResSchedReportTest003, TestSize.Level1)
         EXPECT_NE(LoadNotifyAppSceneFunc(), nullptr);
     }
 }
+
+/**
+ * @tc.name: ResSchedReportTest004
+ * @tc.desc: test load function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResSchedReportTest, ResSchedReportTest004, TestSize.Level1)
+{
+    if (ResSchedReport::GetInstance().reportSyncEventFunc_) {
+        std::unordered_map<std::string, std::string> payload;
+        std::unordered_map<std::string, std::string> reply;
+        payload["bundleName"] = "test";
+        ResSchedReport::GetInstance().AppVsyncEnableScene(payload, reply);
+        EXPECT_EQ(reply.count("result"), 1);
+    }
+}
 } // namespace OHOS::Ace
