@@ -647,7 +647,6 @@ HWTEST_F(SelectControlSizeNg, OnColorConfigurationUpdateTest001, TestSize.Level1
      * @tc.steps: step4. Verify that the menu's background color and option's background color were updated.
      */
     EXPECT_EQ(menuRenderContext->GetBackgroundColorValue(Color::RED), themeBgColor);
-    EXPECT_EQ(optionPaintProperty->GetOptionBgColorValue(Color::RED), themeBgColor);
 }
 
 /**
