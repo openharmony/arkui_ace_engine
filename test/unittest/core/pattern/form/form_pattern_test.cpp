@@ -545,15 +545,15 @@ HWTEST_F(FormPatternTest, FormPatternTest_014, TestSize.Level1)
     bool ret = pattern->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
     EXPECT_NE(pattern->formManagerBridge_, nullptr);
     EXPECT_EQ(ret, true);
- 
+
     ret = pattern->OnAccessibilityChildTreeDeregister();
     EXPECT_NE(pattern->formManagerBridge_, nullptr);
     EXPECT_EQ(ret, true);
- 
+
     pattern->formManagerBridge_ = nullptr;
     ret = pattern->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
     EXPECT_EQ(ret, false);
- 
+
     ret = pattern->OnAccessibilityChildTreeDeregister();
     EXPECT_EQ(ret, false);
 }
