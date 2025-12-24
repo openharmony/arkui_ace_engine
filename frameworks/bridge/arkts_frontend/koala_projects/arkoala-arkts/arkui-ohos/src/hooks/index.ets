@@ -225,6 +225,9 @@ export function hookStateStyleImpl(
     if (value?.pressed) {
         curState |= UI_STATE_PRESSED;
     }
+    if (value?.clicked) {
+        curState |= UI_STATE_PRESSED;
+    }
     if (value?.focused) {
         curState |= UI_STATE_FOCUSED;
     }
