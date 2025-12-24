@@ -1020,19 +1020,25 @@ void FormManagerDelegate::SetColorMode(int32_t colorMode)
     formRendererDispatcher->SetColorMode(colorMode);
 }
 
-void FormManagerDelegate::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+bool FormManagerDelegate::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
 {
     std::lock_guard<std::mutex> lock(accessibilityChildTreeRegisterMutex_);
     auto formRendererDispatcher = GetFormRendererDispatcher();
-    CHECK_NULL_VOID(formRendererDispatcher);
+    if (!formRendererDispatcher) {
+        return false;
+    }
     formRendererDispatcher->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    return true;
 }
 
-void FormManagerDelegate::OnAccessibilityChildTreeDeregister()
+bool FormManagerDelegate::OnAccessibilityChildTreeDeregister()
 {
     auto formRendererDispatcher = GetFormRendererDispatcher();
-    CHECK_NULL_VOID(formRendererDispatcher);
+    if (!formRendererDispatcher) {
+        return false;
+    }
     formRendererDispatcher->OnAccessibilityChildTreeDeregister();
+    return true;
 }
 
 void FormManagerDelegate::OnAccessibilityDumpChildInfo(
