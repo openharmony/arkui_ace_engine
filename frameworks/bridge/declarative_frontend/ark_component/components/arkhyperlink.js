@@ -90,34 +90,19 @@ class JSHyperlink extends JSViewAbstract {
     }
   }
 
-  static setColor(color) {
+  static color(color) {
     let node = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().hyperlink.setColor(node, color);
+    getUINativeModule().hyperlink.color(node, color);
   }
 
-  static resetColor() {
+  static draggable(draggable) {
     let node = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().hyperlink.resetColor(node);
+    getUINativeModule().hyperlink.draggable(node, draggable);
   }
 
-  static setDraggable(draggable) {
+  static responseRegion() {
     let node = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().hyperlink.setDraggable(node, draggable);
-  }
-
-  static resetDraggable() {
-    let node = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().hyperlink.resetDraggable(node);
-  }
-
-  static setResponseRegion(region) {
-    let node = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().hyperlink.setResponseRegion(node, region);
-  }
-
-  static resetResponseRegion() {
-    let node = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().hyperlink.resetResponseRegion(node);
+    getUINativeModule().hyperlink.responseRegion(node);
   }
 }
 
