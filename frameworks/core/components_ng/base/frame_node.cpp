@@ -3663,13 +3663,15 @@ void FrameNode::ParseRegionAndAdd(const CalcDimensionRect& region, const ScalePr
     auto y = ParseDimensionToPx(region.GetY(), scaleProperty, rect.Height());
     auto width = ParseDimensionToPx(region.GetWidth(), scaleProperty, rect.Width());
     auto height = ParseDimensionToPx(region.GetHeight(), scaleProperty, rect.Height());
-    if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
+    if (!x.has_value() || !y.has_value()) {
         responseRegionResult.emplace_back(rect);
         return;
     }
-    if (width.value() < 0.0 || height.value() < 0.0) {
-        responseRegionResult.emplace_back(rect);
-        return;
+    if (!width.has_value() || LessOrEqual(width.value(), 0.0)) {
+        width = rect.Width();
+    }
+    if (!height.has_value() || LessOrEqual(height.value(), 0.0)) {
+        height = rect.Height();
     }
     RectF regionFloat(
         rect.GetOffset().GetX() + x.value(), rect.GetOffset().GetY() + y.value(), width.value(), height.value());
