@@ -1085,30 +1085,6 @@ const char DOM_BADGE_TEXT_FONT_SIZE[] = "textSize";
 const char DOM_BADGE_TEXT_COLOR[] = "textColor";
 
 // grid container/row/columns
-const char DOM_GRID_CONTAINER_COLUMNS[] = "columns";
-const char DOM_GRID_CONTAINER_GUTTER_WIDTH[] = "gutterwidth";
-const char DOM_GRID_CONTAINER_SIZE_TYPE[] = "sizetype";
-const char DOM_GRID_CONTAINER_GUTTER[] = "gutter";
-const char DOM_GRID_CONTAINER_TEMPLATE[] = "gridtemplate";
-const char DOM_GRID_TEMPLATE_TYPE_NORMAL[] = "normal";
-const char DOM_GRID_TEMPLATE_TYPE_GRID[] = "grid";
-const char DOM_GRID_CONTAINER_GET_COLUMNS[] = "getColumns";
-const char DOM_GRID_CONTAINER_GET_COLUMN_WIDTH[] = "getColumnWidth";
-const char DOM_GRID_CONTAINER_GET_GUTTER_WIDTH[] = "getGutterWidth";
-const char DOM_GRID_CONTAINER_GET_SIZE_TYPE[] = "getSizeType";
-const char DOM_GRID_COLUMN_SPAN[] = "span";
-const char DOM_GRID_COLUMN_OFFSET[] = "offset";
-const char DOM_GRID_COLUMN_TYPE[] = "columntype";
-const char DOM_GRID_SIZE_TYPE_XS[] = "xs";
-const char DOM_GRID_SIZE_TYPE_SM[] = "sm";
-const char DOM_GRID_SIZE_TYPE_MD[] = "md";
-const char DOM_GRID_SIZE_TYPE_LG[] = "lg";
-
-const char DOM_COLUMN_TYPE_NONE[] = "none";
-const char DOM_COLUMN_TYPE_BUBBLE[] = "bubble";
-const char DOM_COLUMN_TYPE_BUTTON[] = "button";
-const char DOM_COLUMN_TYPE_CARD[] = "card";
-const char DOM_COLUMN_TYPE_CONTENT[] = "content";
 
 const char DOM_CLICK_EFFECT[] = "clickEffect";
 const char DOM_SPRING_EFFECT[] = "springeffect";

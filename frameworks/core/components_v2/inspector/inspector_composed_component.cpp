@@ -34,11 +34,8 @@
 #include "core/components_v2/inspector/divider_composed_element.h"
 #include "core/components_v2/inspector/flex_composed_element.h"
 #include "core/components_v2/inspector/gauge_composed_element.h"
-#include "core/components_v2/inspector/grid_col_composed_element.h"
 #include "core/components_v2/inspector/grid_composed_element.h"
-#include "core/components_v2/inspector/grid_container_composed_element.h"
 #include "core/components_v2/inspector/grid_item_composed_element.h"
-#include "core/components_v2/inspector/grid_row_composed_element.h"
 #include "core/components_v2/inspector/hyperlink_composed_element.h"
 #include "core/components_v2/inspector/image_animator_composed_element.h"
 #include "core/components_v2/inspector/image_composed_element.h"
@@ -161,7 +158,7 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { CALENDAR_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::CalendarComposedElement>(id); } },
     { BADGE_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(BADGE_COMPONENT_TAG, id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_BADGE, id); } },
     { SEARCH_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SearchComposedElement>(id); } },
     { FORM_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { PLUGIN_COMPONENT_TAG,
@@ -194,11 +191,11 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { RADIO_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::RadioComposedElement>(id); } },
     { GAUGE_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::GaugeComposedElement>(id); } },
     { GRIDCONTAINER_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::GridContainerComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_GRID_CONTAINER, id); } },
     { GRID_COL_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::GridColComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_GRID_COLUMN, id); } },
     { GRID_ROW_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::GridRowComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_GRID_ROW, id); } },
     { MENU_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::MenuComposedElement>(id); } },
     { TEXTAREA_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::TextareaComposedElement>(id); } },
@@ -208,7 +205,7 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) { return AceType::MakeRefPtr<V2::TextTimerComposedElement>(id); } },
     { SELECT_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SelectComposedElement>(id); } },
     { MARQUEE_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(MARQUEE_COMPONENT_TAG, id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_MARQUEE, id); } },
     { TEXTCLOCK_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::TextClockComposedElement>(id); } },
     { TEXT_PICKER_COMPONENT_TAG,

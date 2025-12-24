@@ -16,10 +16,6 @@ import(
 
 build_component("grid_layout_v2") {
   sources = [
-    "grid_col_component.cpp",
     "grid_container_utils.cpp",
-    "grid_row_component.cpp",
-    "render_grid_col.cpp",
-    "render_grid_row.cpp",
   ]
 }
