@@ -1508,7 +1508,54 @@ HWTEST_F(EventManagerTestNg, AddHitTestInfoRecord001, TestSize.Level1)
     EXPECT_EQ(static_cast<int32_t>(eventManager->touchHitTestInfos_.size()), 0);
     eventManager->AddHitTestInfoRecord(node1);
     EXPECT_EQ(static_cast<int32_t>(eventManager->touchHitTestInfos_.size()), 1);
+    EXPECT_EQ(static_cast<int32_t>(eventManager->touchHitTestInfos_[0].hitNodeInfos.size()), 1);
     eventManager->AddHitTestInfoRecord(node2);
-    EXPECT_EQ(static_cast<int32_t>(eventManager->touchHitTestInfos_.size()), 2);
+    EXPECT_EQ(static_cast<int32_t>(eventManager->touchHitTestInfos_.size()), 1);
+    EXPECT_EQ(static_cast<int32_t>(eventManager->touchHitTestInfos_[0].hitNodeInfos.size()), 2);
+}
+
+/**
+ * @tc.name: AddHitTestInfoRecord
+ * @tc.desc: Test AddHitTestInfoRecord.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddHitTestInfoRecord002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    auto node1 = FrameNode::GetOrCreateFrameNode("node1", 1001, nullptr);
+    ASSERT_NE(node1, nullptr);
+    auto node2 = FrameNode::GetOrCreateFrameNode("node2", 1002, nullptr);
+    ASSERT_NE(node2, nullptr);
+    /**
+     * @tc.steps: step2. set hitTestRecordInfo_.
+     */
+    HitTestRecordInfo info;
+    info.isRealTouch = true;
+    info.screenX = 0.0f;
+    info.screenY = 0.0f;
+    info.fingerId = 0;
+    info.type = TouchType::DOWN;
+    eventManager->hitTestRecordInfo_ = info;
+    /**
+     * @tc.steps: step3. AddHitTestInfoRecord.
+     * @tc.expected: size is correct.
+     */
+    eventManager->AddHitTestInfoRecord(nullptr);
+    EXPECT_EQ(static_cast<int32_t>(eventManager->touchHitTestInfos_.size()), 0);
+    eventManager->AddHitTestInfoRecord(node1);
+    EXPECT_EQ(static_cast<int32_t>(eventManager->touchHitTestInfos_.size()), 1);
+    EXPECT_EQ(static_cast<int32_t>(eventManager->touchHitTestInfos_[0].hitNodeInfos.size()), 1);
+    eventManager->AddHitTestInfoRecord(node2);
+    EXPECT_EQ(static_cast<int32_t>(eventManager->touchHitTestInfos_.size()), 1);
+    EXPECT_EQ(static_cast<int32_t>(eventManager->touchHitTestInfos_[0].hitNodeInfos.size()), 2);
+    auto json = eventManager->GetLastHitTestNodeInfosForTouch(false);
+    EXPECT_NE(static_cast<int32_t>(json.size()), 0);
+    json = eventManager->GetLastHitTestNodeInfosForTouch(true);
+    EXPECT_NE(static_cast<int32_t>(json.size()), 0);
 }
 } // namespace OHOS::Ace::NG

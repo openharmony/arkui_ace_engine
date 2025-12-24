@@ -2834,6 +2834,7 @@ std::string EventManager::GetLastHitTestNodeInfosForTouch(bool isTopMost)
             for (const auto& info: hitInfo.second.hitNodeInfos) {
                 std::unique_ptr<JsonValue> id = JsonUtil::Create(true);
                 id->Put("id", info.nodeId);
+                id->Put("tag", info.tag.c_str());
                 hitNodeInfos->Put(id);
             }
         }
@@ -2864,10 +2865,10 @@ void EventManager::AddHitTestInfoRecord(const RefPtr<NG::FrameNode>& frameNode)
         nodeInfos.positionX = (*hitTestRecordInfo_).screenX;
         nodeInfos.positionY = (*hitTestRecordInfo_).screenY;
         nodeInfos.timeStamp = static_cast<uint64_t>((*hitTestRecordInfo_).timeStamp.time_since_epoch().count());
-        nodeInfos.hitNodeInfos = { { frameNode->GetId() } };
+        nodeInfos.hitNodeInfos = { { frameNode->GetId(), frameNode->GetTag() } };
         touchHitTestInfos_[fingerId] = nodeInfos;
     } else {
-        NodeGeneralInfo nodeGeneralInfo = { frameNode->GetId() };
+        NodeGeneralInfo nodeGeneralInfo = { frameNode->GetId(), frameNode->GetTag() };
         touchHitTestInfos_[fingerId].hitNodeInfos.emplace_back(nodeGeneralInfo);
     }
 }
