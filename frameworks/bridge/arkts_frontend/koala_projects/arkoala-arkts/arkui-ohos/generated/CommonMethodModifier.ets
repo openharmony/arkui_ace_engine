@@ -5623,9 +5623,15 @@ export class CommonMethodModifier implements CommonMethod {
             switch (flagArray[158]) {
                 case 1:
                 case 3: {
+                    // instructive change start
+                    this.backgroundImage(modifier._backgroundImage_1_0value, (modifier._backgroundImage_1_1value as BackgroundImageOptions));
+                    // instructive change end
                     break;
                 }
                 default: {
+                    // instructive change start
+                    this.backgroundImage(undefined as arkui_component_units_ResourceStr | PixelMap | undefined)
+                    // instructive change end
                 }
             }
         }
@@ -5633,9 +5639,15 @@ export class CommonMethodModifier implements CommonMethod {
             switch (flagArray[159]) {
                 case 1:
                 case 3: {
+                    // instructive change start
+                    this.backgroundImage(modifier._backgroundImage_2_0value, (modifier._backgroundImage_2_1value as ImageRepeat));
+                    // instructive change end
                     break;
                 }
                 default: {
+                    // instructive change start
+                    this.backgroundImage(undefined as arkui_component_units_ResourceStr | PixelMap | undefined)
+                    // instructive change end
                 }
             }
         }
@@ -5843,9 +5855,15 @@ export class CommonMethodModifier implements CommonMethod {
             switch (flagArray[177]) {
                 case 1:
                 case 3: {
+                    // instructive change start
+                    this.onDrop(modifier._onDrop_1_0value, (modifier._onDrop_1_1value as DropOptions));
+                    // instructive change end
                     break;
                 }
                 default: {
+                    // instructive change start
+                    this.onDrop(modifier._onDrop_1_0value);
+                    // instructive change end
                 }
             }
         }
