@@ -3522,4 +3522,34 @@ HWTEST_F(FrameNodeTestNg, AttachContext010, TestSize.Level1)
     SystemProperties::multiInstanceEnabled_ = false;
     EXPECT_EQ(node->context_, AceType::RawPtr(context));
 }
+
+/**
+ * @tc.name: AttachContextMultiInstanceEnable001
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, AttachContextMultiInstanceEnable001, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto node = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+    auto res = SystemProperties::GetMultiInstanceEnabled();
+    SystemProperties::SetMultiInstanceEnabled(false);
+    node->isDeleteRsNode_ = false;
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    node->renderContext_ = mockRenderContext;
+    node->AttachContext(AceType::RawPtr(context));
+    EXPECT_EQ(node->context_, AceType::RawPtr(context));
+
+    SystemProperties::SetMultiInstanceEnabled(true);
+    node->isDeleteRsNode_ = false;
+    node->renderContext_ = mockRenderContext;
+    node->AttachContext(AceType::RawPtr(context));
+    EXPECT_EQ(node->context_, AceType::RawPtr(context));
+
+    node->DetachContext(true);
+    EXPECT_EQ(node->context_, nullptr);
+    SystemProperties::SetMultiInstanceEnabled(res);
+}
 } // namespace OHOS::Ace::NG
