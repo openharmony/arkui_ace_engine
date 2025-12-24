@@ -25,7 +25,7 @@ export function SelectOptionTextModifierStaticBuilder(name: string, param: Objec
 
 @Entry
 @Component
-struct SelectOptionTextModifier {
+struct SelectOptionTextModifierStatic {
   @State text: string = 'TTTTTTTTTT'.repeat(3);
   @State index: Int = 2;
   optionTextModifier: TextModifier = new TextModifier();

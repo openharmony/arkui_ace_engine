@@ -125,8 +125,8 @@ struct SelectShowInSubWindowStatic {
           .value('false')
           .arrowPosition(this.arrowPosition)
           .showInSubWindow(false)
-        Select([{ value: 'A very long option text that should be truncated nicely A very long option
-          text that should be truncated nicely' }])
+        Select([{ value: 'A very long option text that should be truncated nicely'
+          .repeat(300) }])
           .selected(this.index)
           .value('undefined')
           .arrowPosition(this.arrowPosition)

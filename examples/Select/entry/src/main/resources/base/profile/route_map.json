@@ -126,7 +126,7 @@
       "buildFunction": "SelectTextModifierBuilder"
     },
     {
-      "name": "SelectSelectedOptionTextModifierStatic",
+      "name": "SelectTextModifierStatic",
       "pageSourceFile": "src/main/ets/pages/components/select_static/selectTextModifier.ets",
       "buildFunction": "SelectTextModifierStaticBuilder"
     },

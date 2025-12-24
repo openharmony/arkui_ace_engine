@@ -19,6 +19,18 @@
     {
       "name": "Color_purple",
       "value": "#FF6C0D94"
+    },
+    {
+      "name": "blue",
+      "value": "#ADD8E6"
+    },
+    {
+      "name": "green",
+      "value": "#87F787"
+    },
+    {
+      "name": "color",
+      "value": "#6495ed"
     }
   ]
 }
