@@ -1234,29 +1234,46 @@ void TimePickerRowPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& butt
 
 void TimePickerRowPattern::OnLanguageConfigurationUpdate()
 {
+    // Keep high-level steps terse: update locale state, handle AM/PM reorder, then update dialog buttons.
     FlushAmPmFormatString();
     UpdateLanguageAndAmPmTimeOrder();
-    if (!GetHour24()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto children = host->GetChildren();
-        auto iter = children.begin();
-        CHECK_NULL_VOID(*iter);
-        auto amPmNode = *iter;
-        CHECK_NULL_VOID(amPmNode);
-        if (amPmTimeOrder_ == "01" && isAmPmTimeOrderUpdate_) {
-            // if hasSecond_ is true, then amPmNode should be moved from slot 0 to 3, otherwise from slot 0 to 2
-            hasSecond_ ? amPmNode->MovePosition(3) : amPmNode->MovePosition(2);
-        } else if (amPmTimeOrder_ == "10" && isAmPmTimeOrderUpdate_) {
-            // if hasSecond_ is true, then amPmNode should be moved from slot 3 to 0, otherwise form slot 2 to 0
-            hasSecond_ ? std::advance(iter, 3) : std::advance(iter, 2);
-            amPmNode = *iter;
-            CHECK_NULL_VOID(amPmNode);
-            amPmNode->MovePosition(0);
-        }
-        UpdateNodePositionForUg();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    HandleAmPmReorder();
+    UpdateDialogButtons();
+}
+
+void TimePickerRowPattern::HandleAmPmReorder()
+{
+    if (GetHour24()) {
+        return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    CHECK_EQUAL_VOID(children.empty(), true);
+    auto iter = children.begin();
+    CHECK_NULL_VOID(*iter);
+    auto amPmNode = *iter;
+    CHECK_NULL_VOID(amPmNode);
+    if (amPmTimeOrder_ == "01" && isAmPmTimeOrderUpdate_) {
+        // if hasSecond_ is true, then amPmNode should be moved from slot 0 to 3, otherwise from slot 0 to 2
+        amPmNode->MovePosition(hasSecond_ ? AMPM_FORWARD_WITHSECOND : AMPM_FORWARD_WITHOUTSECOND);
+    } else if (amPmTimeOrder_ == "10" && isAmPmTimeOrderUpdate_) {
+        // if hasSecond_ is true, then amPmNode should be moved from a later slot to 0, otherwise from slot 2 to 0
+        const size_t childrenCount = children.size();
+        const size_t targetIndex = hasSecond_ ? AMPM_FORWARD_WITHSECOND : AMPM_FORWARD_WITHOUTSECOND;
+        if (childrenCount > targetIndex) {
+            auto targetIter = std::next(children.begin(), static_cast<std::ptrdiff_t>(targetIndex));
+            auto candidate = *targetIter;
+            CHECK_NULL_VOID(candidate);
+            candidate->MovePosition(0);
+        }
+    }
+    UpdateNodePositionForUg();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TimePickerRowPattern::UpdateDialogButtons()
+{
     auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
     CHECK_NULL_VOID(buttonConfirmNode);
     auto confirmNode = AceType::DynamicCast<FrameNode>(buttonConfirmNode->GetFirstChild());
