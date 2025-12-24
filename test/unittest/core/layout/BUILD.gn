@@ -92,6 +92,13 @@ ace_unittest("vertical_overflow_handler_horizontal_test_ng") {
   sources = [ "vertical_overflow_handler_horizontal_test_ng.cpp" ]
 }
 
+ace_unittest("pixel_round_test_ng") {
+  type = "new"
+  module_name = "Component-Layout"
+  module_output = "layout"
+  sources = ["pixel_round_test_ng.cpp" ]
+}
+
 group("core_layout_unittest") {
   testonly = true
   deps = [
@@ -108,5 +115,6 @@ group("core_layout_unittest") {
     "box:box_layout_algorithm_test_ng",
     "safe_area:safeArea_test_expandSafeArea_ng",
     "safe_area:ignore_layout_safe_area_test_ng",
+    ":pixel_round_test_ng", 
   ]
 }

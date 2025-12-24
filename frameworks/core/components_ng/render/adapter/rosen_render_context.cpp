@@ -3814,7 +3814,10 @@ float RosenRenderContext::OnePixelValueRounding(float value)
 float RosenRenderContext::OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor)
 {
     float fractials = fmod(value, 1.0f);
-    if (fractials < 0.0f) {
+    if (NearEqual(fractials, 0.0f)) {
+        return value;
+    }
+    if (LessNotEqual(fractials, 0.0f)) {
         ++fractials;
     }
     if (forceCeil) {
