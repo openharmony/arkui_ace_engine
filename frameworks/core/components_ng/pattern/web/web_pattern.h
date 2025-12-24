@@ -1037,6 +1037,7 @@ public:
     {
         return isTextSelectionEnable_;
     }
+    void NotifyOverlayRotation();
 protected:
     void ModifyWebSrc(const std::string& webSrc)
     {
