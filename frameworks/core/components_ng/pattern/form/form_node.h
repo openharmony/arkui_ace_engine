@@ -57,7 +57,7 @@ public:
 
     bool OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId);
 
-    bool OnAccessibilityChildTreeDeregister();
+    void OnAccessibilityChildTreeDeregister();
 
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
 

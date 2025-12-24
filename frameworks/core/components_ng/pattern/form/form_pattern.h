@@ -181,7 +181,7 @@ public:
 
     bool OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
 
-    bool OnAccessibilityChildTreeDeregister();
+    void OnAccessibilityChildTreeDeregister();
 
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
 

@@ -112,10 +112,7 @@ bool FormManagerDelegate::OnAccessibilityChildTreeRegister(
     return true;
 }
 
-bool FormManagerDelegate::OnAccessibilityChildTreeDeregister()
-{
-    return true;
-}
+bool FormManagerDelegate::OnAccessibilityChildTreeDeregister() {}
 
 void FormManagerDelegate::OnAccessibilityDumpChildInfo(
     const std::vector<std::string>& params, std::vector<std::string>& info) {}

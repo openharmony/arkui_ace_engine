@@ -537,14 +537,14 @@ bool FormPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t tr
     return formManagerBridge_->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
 }
 
-bool FormPattern::OnAccessibilityChildTreeDeregister()
+void FormPattern::OnAccessibilityChildTreeDeregister()
 {
     TAG_LOGD(AceLogTag::ACE_FORM, "call.");
     if (formManagerBridge_ == nullptr) {
         TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
-        return false;
+        return;
     }
-    return formManagerBridge_->OnAccessibilityChildTreeDeregister();
+    formManagerBridge_->OnAccessibilityChildTreeDeregister();
 }
 
 void FormPattern::OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info)

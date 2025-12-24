@@ -1031,14 +1031,11 @@ bool FormManagerDelegate::OnAccessibilityChildTreeRegister(uint32_t windowId, in
     return true;
 }
 
-bool FormManagerDelegate::OnAccessibilityChildTreeDeregister()
+void FormManagerDelegate::OnAccessibilityChildTreeDeregister()
 {
     auto formRendererDispatcher = GetFormRendererDispatcher();
-    if (!formRendererDispatcher) {
-        return false;
-    }
+    CHECK_NULL_VOID(formRendererDispatcher);
     formRendererDispatcher->OnAccessibilityChildTreeDeregister();
-    return true;
 }
 
 void FormManagerDelegate::OnAccessibilityDumpChildInfo(

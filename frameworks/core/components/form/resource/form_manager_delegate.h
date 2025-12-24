@@ -151,7 +151,7 @@ public:
     void OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
         int32_t eventType, int64_t timeMs);
     bool OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
-    bool OnAccessibilityChildTreeDeregister();
+    void OnAccessibilityChildTreeDeregister();
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
     bool CheckFormBundleForbidden(const std::string& bundleName);
     void NotifyFormDump(const std::vector<std::string>& params, std::vector<std::string>& info);
