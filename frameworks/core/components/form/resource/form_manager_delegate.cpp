@@ -1182,24 +1182,12 @@ bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::
     std::string module(moduleName);
     std::vector<OHOS::AppExecFwk::FormInfo> formInfos;
     std::vector<OHOS::AppExecFwk::FormInfo> templateFormInfos;
-    auto result = OHOS::AppExecFwk::FormMgr::GetInstance().GetFormsInfoByModule(bundle, module, formInfos);
+    auto result = OHOS::AppExecFwk::FormMgr::GetInstance().OriginGetFormsInfoByModule(bundle, module, formInfos);
     if (result != 0) {
         LOGW("Query FormInfo failed.");
         return false;
     }
     for (const auto &item : formInfos) {
-        if (cardName == item.name) {
-            formInfo = item;
-            return true;
-        }
-    }
-
-    result = OHOS::AppExecFwk::FormMgr::GetInstance().GetTemplateFormsInfoByModule(bundle, module, templateFormInfos);
-    if (result != 0) {
-        LOGW("Query TemplateFormInfo failed.");
-        return false;
-    }
-    for (const auto &item : templateFormInfos) {
         if (cardName == item.name) {
             formInfo = item;
             return true;
