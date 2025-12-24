@@ -50,7 +50,7 @@ void HyperlinkBridge::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object
     LOGE("Start RegisterHyperlinkAttributes nativeModule");
 
     const char* functionNames[] = {
-        "create", "color", "draggable", "responseRegion"
+        "create", "pop", "color", "draggable", "responseRegion"
     };
 
     Local<JSValueRef> functionValues[] = {
@@ -163,6 +163,21 @@ ArkUINativeModuleValue HyperlinkBridge::CreateHyperlink(ArkUIRuntimeCallInfo* ru
         pattern->UnRegisterResource("Content");
     }
                 
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue HyperlinkBridge::Pop() {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSHyperlink][pop]", &JSHyperlink::Pop);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        ViewStackModel::GetInstance()->PopContainer();
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    HyperlinkModel::GetInstance()->Pop();
     return panda::JSValueRef::Undefined(vm);
 }
 
