@@ -22489,7 +22489,7 @@ typedef struct Ark_TextPickerDialogOptions {
     Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable value;
     Opt_Union_I32_Array_I32_Bindable_Bindable selected;
     Opt_Array_LengthMetrics columnWidths;
-    Opt_Union_Number_String defaultPickerItemHeight;
+    Opt_Union_F64_String defaultPickerItemHeight;
     Opt_Boolean canLoop;
     Opt_PickerTextStyle disappearTextStyle;
     Opt_PickerTextStyle textStyle;
