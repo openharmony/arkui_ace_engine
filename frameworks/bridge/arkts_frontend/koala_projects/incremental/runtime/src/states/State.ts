@@ -629,7 +629,14 @@ class StateManagerImpl implements StateManager {
     }
 
     set currentScope(scope: IncrementalScopeEx | undefined) {
-        this.current = scope instanceof ScopeImpl ? scope : undefined
+        if (scope === undefined) {
+            this.current = undefined
+        }
+        else if (scope instanceof ScopeImpl) {
+            this.current = scope
+        } else {
+            throw new Error('Wrong use of Internal API: unexpected implementation of IncrementalScopeEx')
+        }
     }
 
     reset(): void {
