@@ -53,8 +53,8 @@ void appendGroupedLog(int index, const char* str) {
 
 const char* getGroupedLog(int index) {
     if (index < static_cast<int>(groupedLogs.size())) {
-        const char* result = groupedLogs[index]->log.c_str();
-        return result;
+        return groupedLogs[index]->log.c_str();
+        
     }
     return "";
 }
