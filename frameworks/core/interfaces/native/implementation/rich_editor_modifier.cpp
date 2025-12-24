@@ -85,6 +85,8 @@ void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstract
         ? Converter::ArkValue<Opt_String>(UnParseFontFeatureSetting(fontFeatures), ctx)
         : Converter::ArkValue<Opt_String>(Ark_Empty(), ctx);
     dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(textStyle.textBackgroundStyle, ctx);
+    dst.strokeWidth = ArkValue<Opt_Float64>(textStyle.strokeWidth);
+    dst.strokeColor = ArkUnion<Opt_ResourceColor, Ark_String>(textStyle.strokeColor, ctx);
 }
 
 void AssignArkValue(Ark_RichEditorUrlStyle& dst, const std::u16string& src, ConvContext *ctx)

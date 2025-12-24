@@ -110,6 +110,7 @@ constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
 constexpr uint32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
 constexpr uint32_t RICH_EDITOR_TWINKLING_INTERVAL_MS_DEBUG = 3000;
 constexpr float DOUBLE_CLICK_INTERVAL_MS = 300.0f;
+constexpr double DEFAULT_STROKE_WIDTH = 0.0;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
 constexpr float DEFAILT_OPACITY = 0.2f;
 constexpr int64_t COLOR_OPAQUE = 255;
@@ -1451,6 +1452,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
     spanItem->SetTextStyle(textStyle);
     spanItem->useThemeFontColor = options.useThemeFontColor;
     spanItem->useThemeDecorationColor = options.useThemeDecorationColor;
+    spanItem->strokeColorFollowFontColor = options.strokeColorFollowFontColor;
     UpdateSpanNode(spanNode, options);
     AddSpanItem(spanItem, offset);
     if (!options.style.has_value()) {
@@ -1494,9 +1496,12 @@ void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpan
         spanNode->UpdateLineHeight(textStyle.GetLineHeight());
         spanNode->UpdateLetterSpacing(textStyle.GetLetterSpacing());
         spanNode->UpdateFontFeature(textStyle.GetFontFeatures());
+        spanNode->UpdateStrokeWidth(textStyle.GetStrokeWidth());
+        spanNode->UpdateStrokeColor(textStyle.GetStrokeColor());
         UpdateTextBackgroundStyle(spanNode, textStyle.GetTextBackgroundStyle());
         StyleManager::AddTextColorResource(spanNode, textStyle);
         StyleManager::AddTextDecorationColorResource(spanNode, textStyle);
+        StyleManager::UpdateStrokeColorResource(spanNode, textStyle);
     }
     UpdateUrlStyle(spanNode, options.urlAddress);
 }
@@ -1992,8 +1997,11 @@ void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<S
     COPY_SPAN_STYLE_IF_PRESENT(source, target, LetterSpacing);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, FontFeature);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextShadow);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, StrokeWidth);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, StrokeColor);
     target->GetSpanItem()->useThemeFontColor = source->GetSpanItem()->useThemeFontColor;
     target->GetSpanItem()->useThemeDecorationColor = source->GetSpanItem()->useThemeDecorationColor;
+    target->GetSpanItem()->strokeColorFollowFontColor = source->GetSpanItem()->strokeColorFollowFontColor;
     UpdateTextBackgroundStyle(target, source->GetTextBackgroundStyle());
     target->CopyResource(source);
 }
@@ -2382,6 +2390,17 @@ void RichEditorPattern::UpdateFontFeatureTextStyle(
     }
 }
 
+void RichEditorPattern::UpdateStrokeColor(
+    RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle& updateSpanStyle, TextStyle& textStyle)
+{
+    if (!updateSpanStyle.updateStrokeColor.has_value()) {
+        return;
+    }
+    spanNode->UpdateStrokeColor(textStyle.GetStrokeColor());
+    spanNode->GetSpanItem()->strokeColorFollowFontColor = false;
+    StyleManager::UpdateStrokeColorResource(spanNode, textStyle);
+}
+
 void RichEditorPattern::UpdateTextStyle(
     RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle)
 {
@@ -2423,6 +2442,14 @@ void RichEditorPattern::UpdateTextStyle(
         UpdateTextBackgroundStyle(spanNode, textStyle.GetTextBackgroundStyle());
     }
     UpdateUrlStyle(spanNode, updateSpanStyle.updateUrlAddress);
+    if (updateSpanStyle.updateStrokeWidth.has_value()) {
+       spanNode->UpdateStrokeWidth(textStyle.GetStrokeWidth());
+    }
+    UpdateStrokeColor(spanNode, updateSpanStyle, textStyle);
+    if (updateSpanStyle.updateTextColor.has_value()
+        && spanNode->GetStrokeWidthValue(Dimension()).Value() != DEFAULT_STROKE_WIDTH) {
+        spanNode->GetSpanItem()->needReLayout = true;
+    }
 
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
@@ -4740,6 +4767,8 @@ TextStyleResult RichEditorPattern::GetTextStyleBySpanItem(const RefPtr<SpanItem>
         textStyle.lineThicknessScale = static_cast<float>(spanItem->fontStyle->GetLineThicknessScale().value_or(1.0f));
         textStyle.fontFeature = spanItem->fontStyle->GetFontFeature().value_or(ParseFontFeatureSettings("\"pnum\" 1"));
         textStyle.letterSpacing = spanItem->fontStyle->GetLetterSpacing().value_or(Dimension()).ConvertToFp();
+        textStyle.strokeWidth = spanItem->fontStyle->GetStrokeWidth().value_or(Dimension()).ConvertToVp();
+        textStyle.strokeColor = spanItem->fontStyle->GetStrokeColor().value_or(style.GetTextColor()).ColorToString();
     }
     CopyTextLineStyleToTextStyleResult(spanItem, textStyle);
     textStyle.textBackgroundStyle = spanItem->backgroundStyle;
@@ -5712,6 +5741,8 @@ void RichEditorPattern::OnCommonColorChange()
         CHECK_NULL_CONTINUE(spanItem);
         auto& textColor = spanItem->urlOnRelease ? themeUrlSpanColor : themeTextColor;
         IF_TRUE(spanItem->useThemeFontColor, spanNode->UpdateTextColorWithoutCheck(textColor));
+        IF_TRUE(spanItem->useThemeFontColor && spanItem->strokeColorFollowFontColor,
+            spanNode->UpdateStrokeColor(textColor));
         IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColorWithoutCheck(themeTextDecColor));
         spanNode->ReloadResources();
     }
@@ -6513,6 +6544,10 @@ TextStyle RichEditorPattern::CreateTextStyleByTypingStyle()
     IF_TRUE(updateSpanStyle.updateTextDecorationStyle, ret.SetTextDecorationStyle(textStyle.GetTextDecorationStyle()));
     IF_TRUE(updateSpanStyle.updateLineThicknessScale, ret.SetLineThicknessScale(textStyle.GetLineThicknessScale()));
     IF_TRUE(updateSpanStyle.updateTextBackgroundStyle, ret.SetTextBackgroundStyle(textStyle.GetTextBackgroundStyle()));
+    IF_TRUE(updateSpanStyle.updateStrokeWidth, ret.SetStrokeWidth(textStyle.GetStrokeWidth()));
+    IF_TRUE(updateSpanStyle.updateStrokeColor, ret.SetStrokeColor(textStyle.GetStrokeColor()));
+    IF_TRUE(updateSpanStyle.strokeColorFollowFontColor && updateSpanStyle.updateTextColor,
+        ret.SetStrokeColor(textStyle.GetStrokeColor()));
     ret.CopyResource(textStyle);
     return ret;
 }
@@ -6528,6 +6563,7 @@ void RichEditorPattern::InsertDiffStyleValueInSpan(
     options.style = CreateTextStyleByTypingStyle();
     options.useThemeFontColor = typingStyle_->useThemeFontColor;
     options.useThemeDecorationColor = typingStyle_->useThemeDecorationColor;
+    options.strokeColorFollowFontColor = typingStyle_->strokeColorFollowFontColor;
     options.optionSource = OptionSource::IME_INSERT;
     bool useTypingParaStyle = styleManager_->UseTypingParaStyle(spans_, caretPosition_);
     IF_TRUE(useTypingParaStyle, options.paraStyle = styleManager_->GetTypingParagraphStyle());
@@ -6587,6 +6623,10 @@ void RichEditorPattern::CreateTextSpanNode(
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
         spanItem->useThemeFontColor = typingStyle_->useThemeFontColor;
         spanItem->useThemeDecorationColor = typingStyle_->useThemeDecorationColor;
+        spanItem->strokeColorFollowFontColor = typingStyle_->strokeColorFollowFontColor;
+        if (typingStyle_->strokeColorFollowFontColor && typingStyle_->updateTextColor.has_value()) {
+            typingStyle_->updateStrokeColor = typingTextStyle_.value().GetTextColor();
+        }
         UpdateTextStyle(spanNode, typingStyle_.value(), typingTextStyle_.value());
         auto spanItem = spanNode->GetSpanItem();
         spanItem->SetTextStyle(typingTextStyle_);
@@ -11813,6 +11853,8 @@ void RichEditorPattern::SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo,
     textStyleResult.letterSpacing = textStyle.GetLetterSpacing().ConvertToVp();
     textStyleResult.textShadows = textStyle.GetTextShadows();
     textStyleResult.textBackgroundStyle = textStyle.GetTextBackgroundStyle();
+    textStyleResult.strokeWidth = textStyle.GetStrokeWidth().ConvertToVp();
+    textStyleResult.strokeColor = textStyle.GetStrokeColor().ColorToString();
     retInfo.SetTextStyle(textStyleResult);
     retInfo.SetLineHeight(textStyle.GetLineHeight().ConvertToVp());
     retInfo.SetHalfLeading(textStyle.GetHalfLeading());

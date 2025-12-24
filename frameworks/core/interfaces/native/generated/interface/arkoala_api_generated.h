@@ -22390,6 +22390,8 @@ typedef struct Ark_RichEditorTextStyle {
     Opt_Boolean halfLeading;
     Opt_String fontFeature;
     Opt_TextBackgroundStyle textBackgroundStyle;
+    Opt_LengthMetrics strokeWidth;
+    Opt_ResourceColor strokeColor;
 } Ark_RichEditorTextStyle;
 typedef struct Opt_RichEditorTextStyle {
     Ark_Tag tag;
@@ -22409,6 +22411,8 @@ typedef struct Ark_RichEditorTextStyleResult {
     Opt_Boolean halfLeading;
     Opt_String fontFeature;
     Opt_TextBackgroundStyle textBackgroundStyle;
+    Opt_Float64 strokeWidth;
+    Opt_ResourceColor strokeColor;
 } Ark_RichEditorTextStyleResult;
 typedef struct Opt_RichEditorTextStyleResult {
     Ark_Tag tag;
