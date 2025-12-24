@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_RATING_RATING_ELEMENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_RATING_RATING_ELEMENT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_RATING_RATING_ELEMENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_RATING_RATING_ELEMENT_H
 
+#include "compatible/components/rating/render_rating.h"
 #include "core/components/focus_animation/render_focus_animation.h"
-#include "core/components/rating/render_rating.h"
 #include "core/pipeline/base/render_element.h"
 
 namespace OHOS::Ace {
@@ -67,4 +67,4 @@ public:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_RATING_RATING_ELEMENT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_RATING_RATING_ELEMENT_H

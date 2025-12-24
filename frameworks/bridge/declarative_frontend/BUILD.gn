@@ -613,7 +613,6 @@ template("declarative_js_engine") {
       sources += [
         "jsview/js_piece.cpp",
         "jsview/js_rating.cpp",
-        "jsview/models/rating_model_impl.cpp",
       ]
       if (defined(config.video_components_support) &&
           config.video_components_support) {

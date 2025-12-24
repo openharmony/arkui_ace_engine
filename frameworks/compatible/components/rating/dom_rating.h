@@ -12,14 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_RATING_DOM_RATING_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_RATING_DOM_RATING_H
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_RATING_H
-#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_RATING_H
-
-#include "core/components/rating/rating_component.h"
+#include "compatible/components/rating/rating_component.h"
+#include "frameworks/bridge/common/dom/dom_configs.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
 
 namespace OHOS::Ace::Framework {
+
+extern const char DOM_STAR_NUM[];
+extern const char DOM_RATING_SCORE[];
+extern const char DOM_RATING_STEP[];
+extern const char DOM_RATING_INDICATOR[];
+extern const char DOM_BACKGROUND_SRC[];
+extern const char DOM_FOREGROUND_SRC[];
+extern const char DOM_SECONDARY_SRC[];
+extern const char DOM_RTL_FLIP[];
 
 class DOMRating final : public DOMNode {
     DECLARE_ACE_TYPE(DOMRating, DOMNode);
@@ -57,4 +66,4 @@ private:
 
 } // namespace OHOS::Ace::Framework
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_RATING_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_RATING_DOM_RATING_H

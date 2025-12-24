@@ -57,7 +57,6 @@ build_component("inspector_v2") {
     "picker_text_dialog_composed_element.cpp",
     "progress_composed_element.cpp",
     "radio_composed_element.cpp",
-    "rating_composed_element.cpp",
     "refresh_composed_element.cpp",
     "relative_container_composed_element.cpp",
     "row_composed_element.cpp",

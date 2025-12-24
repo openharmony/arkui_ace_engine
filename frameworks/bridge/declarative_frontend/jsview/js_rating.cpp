@@ -14,9 +14,9 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
-
 #include "base/log/ace_scoring_log.h"
-#include "bridge/declarative_frontend/jsview/models/rating_model_impl.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components/rating/rating_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 
@@ -32,8 +32,9 @@ RatingModel* RatingModel::GetInstance()
         static NG::RatingModelNG instance;
         return &instance;
     } else {
-        static Framework::RatingModelImpl instance;
-        return &instance;
+        static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("rating");
+        static RatingModel* instance = loader ? reinterpret_cast<RatingModel*>(loader->CreateModel()) : nullptr;
+        return instance;
     }
 #endif
 }

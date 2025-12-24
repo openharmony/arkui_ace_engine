@@ -744,16 +744,6 @@ ACE_EXPORT extern const char DOM_REFRESH_PROGRESS_COLOR[];
 ACE_EXPORT extern const char DOM_REFRESH_EVENT_PULL_DOWN[];
 ACE_EXPORT extern const char DOM_REFRESH_TIME_OFFSET[];
 
-// rating attribute and style constants
-ACE_EXPORT extern const char DOM_STAR_NUM[];
-ACE_EXPORT extern const char DOM_RATING_SCORE[];
-ACE_EXPORT extern const char DOM_RATING_STEP[];
-ACE_EXPORT extern const char DOM_RATING_INDICATOR[];
-ACE_EXPORT extern const char DOM_BACKGROUND_SRC[];
-ACE_EXPORT extern const char DOM_FOREGROUND_SRC[];
-ACE_EXPORT extern const char DOM_SECONDARY_SRC[];
-ACE_EXPORT extern const char DOM_RTL_FLIP[];
-
 // marquee attribute and style constants
 ACE_EXPORT extern const char DOM_MARQUEE_LOOP[];
 ACE_EXPORT extern const char DOM_MARQUEE_SCROLL_AMOUNT[];
@@ -790,7 +780,7 @@ ACE_EXPORT extern const char DOM_NAVIGATION_BAR_EVENT_START_CLICK[];
 ACE_EXPORT extern const char DOM_NAVIGATION_BAR_EVENT_END_CLICK[];
 
 // common event list
-ACE_EXPORT extern const char DOM_CHANGE[];
+ACE_FORCE_EXPORT extern const char DOM_CHANGE[];
 ACE_EXPORT extern const char DOM_TOUCH_START[];
 ACE_EXPORT extern const char DOM_TOUCH_MOVE[];
 ACE_EXPORT extern const char DOM_TOUCH_CANCEL[];

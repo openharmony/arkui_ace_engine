@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components/rating/render_rating.h"
+#include "compatible/components/rating/render_rating.h"
 
-#include "core/components/rating/rating_component.h"
+#include "compatible/components/rating/rating_component.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
+
+namespace {
+const double DEFAULT_RATING_HORIZONTAL_PADDING = 0.0;
+const double DEFAULT_RATING_VERTICAL_PADDING = 0.0;
+} // namespace
 
 void RenderRating::Update(const RefPtr<Component>& component)
 {
