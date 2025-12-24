@@ -27267,6 +27267,10 @@ typedef struct GENERATED_ArkUIContentTransitionEffectAccessor {
     void (*setOPACITY)(Ark_ContentTransitionEffect OPACITY);
 } GENERATED_ArkUIContentTransitionEffectAccessor;
 
+typedef struct GENERATED_ArkUIContextMenuAccessor {
+    void (*close)();
+} GENERATED_ArkUIContextMenuAccessor;
+
 typedef struct GENERATED_ArkUIControllerHandlerAccessor {
     void (*destroyPeer)(Ark_ControllerHandler peer);
     Ark_ControllerHandler (*construct)();
@@ -30127,6 +30131,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIConsoleMessageAccessor* (*getConsoleMessageAccessor)();
     const GENERATED_ArkUIContentModifierHelperAccessor* (*getContentModifierHelperAccessor)();
     const GENERATED_ArkUIContentTransitionEffectAccessor* (*getContentTransitionEffectAccessor)();
+    const GENERATED_ArkUIContextMenuAccessor* (*getContextMenuAccessor)();
     const GENERATED_ArkUIControllerHandlerAccessor* (*getControllerHandlerAccessor)();
     const GENERATED_ArkUICopyEventAccessor* (*getCopyEventAccessor)();
     const GENERATED_ArkUICustomDialogControllerAccessor* (*getCustomDialogControllerAccessor)();

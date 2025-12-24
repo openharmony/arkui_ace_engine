@@ -12877,6 +12877,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // ContentTransitionEffectAccessor
+
+    namespace ContextMenuAccessor {
+    void CloseImpl()
+    {
+    }
+    } // ContextMenuAccessor
     namespace ControllerHandlerAccessor {
     void DestroyPeerImpl(Ark_ControllerHandler peer)
     {
@@ -20181,6 +20187,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct ContentTransitionEffectPeer {
         virtual ~ContentTransitionEffectPeer() = default;
     };
+    const GENERATED_ArkUIContextMenuAccessor* GetContextMenuAccessor()
+    {
+        static const GENERATED_ArkUIContextMenuAccessor ContextMenuAccessorImpl {
+            ContextMenuAccessor::CloseImpl,
+        };
+        return &ContextMenuAccessorImpl;
+    }
     const GENERATED_ArkUIControllerHandlerAccessor* GetControllerHandlerAccessor()
     {
         static const GENERATED_ArkUIControllerHandlerAccessor ControllerHandlerAccessorImpl {
@@ -23172,6 +23185,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetConsoleMessageAccessor,
             GetContentModifierHelperAccessor,
             GetContentTransitionEffectAccessor,
+            GetContextMenuAccessor,
             GetControllerHandlerAccessor,
             GetCopyEventAccessor,
             GetCustomDialogControllerAccessor,

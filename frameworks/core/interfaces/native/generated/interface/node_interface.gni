@@ -70,6 +70,7 @@ generated_sources = [
   "implementation/container_span_modifier.cpp",
   "implementation/content_modifier_helper_accessor.cpp",
   "implementation/content_transition_effect_accessor.cpp",
+  "implementation/context_menu_accessor.cpp",
   "implementation/controller_handler_accessor.cpp",
   "implementation/copy_event_accessor.cpp",
   "implementation/counter_modifier.cpp",

@@ -1279,6 +1279,15 @@ export class ContentModifierHelper {
         return
     }
 }
+export class ContextMenu {
+    static close_serialize(): void {
+        ArkUIGeneratedNativeModule._ContextMenu_close()
+    }
+    public static close(): void {
+        ContextMenu.close_serialize()
+        return
+    }
+}
 export class CustomDialogControllerExtenderInternal {
     public static fromPtr(ptr: KPointer): CustomDialogControllerExtender {
         return new CustomDialogControllerExtender(false, ptr)

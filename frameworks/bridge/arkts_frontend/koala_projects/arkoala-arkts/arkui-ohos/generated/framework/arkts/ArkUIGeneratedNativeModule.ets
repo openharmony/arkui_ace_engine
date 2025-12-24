@@ -3976,6 +3976,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ContentTransitionEffect_setOPACITY(OPACITY: KPointer): void
     @ani.unsafe.Direct
+    native static _ContextMenu_close(): void
+    @ani.unsafe.Direct
     native static _ControllerHandler_construct(): KPointer
     @ani.unsafe.Direct
     native static _ControllerHandler_getFinalizer(): KPointer
