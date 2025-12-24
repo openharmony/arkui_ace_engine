@@ -36,24 +36,6 @@ std::string StatisticEventReporter::ConvertToEventName(StatisticEventType eventT
             return "FA_APP_START";
         case StatisticEventType::CALL_SET_CACHE_RANGE:
             return "CALL_SET_CACHE_RANGE";
-        case StatisticEventType::TEXT_INPUT_ONWILLINSERT:
-            return "TEXT_INPUT_ONWILLINSERT";
-        case StatisticEventType::TEXT_INPUT_ONDIDINSERT:
-            return "TEXT_INPUT_ONDIDINSERT";
-        case StatisticEventType::TEXT_INPUT_ONWILLDELETE:
-            return "TEXT_INPUT_ONWILLDELETE";
-        case StatisticEventType::TEXT_INPUT_ONDIDDELETE:
-            return "TEXT_INPUT_ONDIDDELETE";
-        case StatisticEventType::TEXT_AREA_ONWILLINSERT:
-            return "TEXT_AREA_ONWILLINSERT";
-        case StatisticEventType::TEXT_AREA_ONDIDINSERT:
-            return "TEXT_AREA_ONDIDINSERT";
-        case StatisticEventType::TEXT_AREA_ONWILLDELETE:
-            return "TEXT_AREA_ONWILLDELETE";
-        case StatisticEventType::TEXT_AREA_ONDIDDELETE:
-            return "TEXT_AREA_ONDIDDELETE";
-        case StatisticEventType::SEARCH_ONWILLINSERT:
-            return "SEARCH_ONWILLINSERT";
         case StatisticEventType::SEARCH_ONDIDINSERT:
             return "SEARCH_ONDIDINSERT";
         case StatisticEventType::SEARCH_ONWILLDELETE:

@@ -406,7 +406,6 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc093, TestSize.Level1)
      * @tc.steps: step2. Check the return value when no event is set
      * @tc.expected: return value is false
      */
-    EXPECT_TRUE(!eventHub_->HasOnWillInsertValueEvent());
     EXPECT_TRUE(!eventHub_->HasOnDidInsertValueEvent());
     EXPECT_TRUE(!eventHub_->HasOnWillDeleteValueEvent());
     EXPECT_TRUE(!eventHub_->HasOnDidDeleteValueEvent());
@@ -414,15 +413,6 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc093, TestSize.Level1)
     /**
      * @tc.steps: step3. set event
      */
-    int32_t willInsertOffset = 0;
-    std::string willInsertValue = "";
-    auto onWillInsertChange = [&willInsertOffset, &willInsertValue](const InsertValueInfo& info) {
-        willInsertOffset = info.insertOffset;
-        willInsertValue = StringUtils::Str16ToStr8(info.insertValue);
-        return true;
-    };
-    eventHub_->SetOnWillInsertValueEvent(std::move(onWillInsertChange));
-
     TextDeleteDirection direction = TextDeleteDirection::BACKWARD;
     int32_t willDeleteOffset = 0;
     std::string willDeleteValue = "";
@@ -458,7 +448,6 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc093, TestSize.Level1)
      * @tc.steps: step4. Check the return value
      * @tc.expected: return value is true
      */
-    EXPECT_TRUE(eventHub_->HasOnWillInsertValueEvent());
     EXPECT_TRUE(eventHub_->HasOnDidInsertValueEvent());
     EXPECT_TRUE(eventHub_->HasOnWillDeleteValueEvent());
     EXPECT_TRUE(eventHub_->HasOnDidDeleteValueEvent());

@@ -5479,27 +5479,6 @@ bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     return updateFlag;
 }
 
-void TextFieldPattern::reportOnWillInsertEvent()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto statisticEventReporter = pipeline->GetStatisticEventReporter();
-    CHECK_NULL_VOID(statisticEventReporter);
-    if (eventHub->HasOnWillInsertValueEvent()) {
-        if (host->GetHostTag() == V2::TEXTINPUT_ETS_TAG) {
-            statisticEventReporter->SendEvent(StatisticEventType::TEXT_INPUT_ONWILLINSERT);
-        } else if (host->GetHostTag() == V2::TEXTAREA_ETS_TAG) {
-            statisticEventReporter->SendEvent(StatisticEventType::TEXT_AREA_ONWILLINSERT);
-        } else if (host->GetHostTag() == V2::SEARCH_Field_ETS_TAG){
-            statisticEventReporter->SendEvent(StatisticEventType::SEARCH_ONWILLINSERT);
-        }
-    }
-}
-
 bool TextFieldPattern::BeforeIMEInsertValue(const std::u16string& insertValue, int32_t offset)
 {
     auto host = GetHost();
@@ -5509,7 +5488,6 @@ bool TextFieldPattern::BeforeIMEInsertValue(const std::u16string& insertValue, i
     InsertValueInfo insertValueInfo;
     insertValueInfo.insertOffset = offset;
     insertValueInfo.insertValue = insertValue;
-    reportOnWillInsertEvent();
     return eventHub->FireOnWillInsertValueEvent(insertValueInfo);
 }
 
@@ -5523,14 +5501,8 @@ void TextFieldPattern::reportOnDidInsertEvent()
     CHECK_NULL_VOID(pipeline);
     auto statisticEventReporter = pipeline->GetStatisticEventReporter();
     CHECK_NULL_VOID(statisticEventReporter);
-    if (eventHub->HasOnDidInsertValueEvent()) {
-        if (host->GetHostTag() == V2::TEXTINPUT_ETS_TAG) {
-            statisticEventReporter->SendEvent(StatisticEventType::TEXT_INPUT_ONDIDINSERT);
-        } else if (host->GetHostTag() == V2::TEXTAREA_ETS_TAG) {
-            statisticEventReporter->SendEvent(StatisticEventType::TEXT_AREA_ONDIDINSERT);
-        } else if (host->GetHostTag() == V2::SEARCH_Field_ETS_TAG){
+    if (eventHub->HasOnDidInsertValueEvent() && host->GetHostTag() == V2::SEARCH_Field_ETS_TAG){
             statisticEventReporter->SendEvent(StatisticEventType::SEARCH_ONDIDINSERT);
-        }
     }
 }
 
@@ -7043,14 +7015,8 @@ void TextFieldPattern::reportOnWillDeleteEvent()
     CHECK_NULL_VOID(pipeline);
     auto statisticEventReporter = pipeline->GetStatisticEventReporter();
     CHECK_NULL_VOID(statisticEventReporter);
-    if (eventHub->HasOnWillDeleteValueEvent()) {
-        if (host->GetHostTag() == V2::TEXTINPUT_ETS_TAG) {
-            statisticEventReporter->SendEvent(StatisticEventType::TEXT_INPUT_ONWILLDELETE);
-        } else if (host->GetHostTag() == V2::TEXTAREA_ETS_TAG) {
-            statisticEventReporter->SendEvent(StatisticEventType::TEXT_AREA_ONWILLDELETE);
-        } else if (host->GetHostTag() == V2::SEARCH_Field_ETS_TAG){
+    if (eventHub->HasOnWillDeleteValueEvent() && host->GetHostTag() == V2::SEARCH_Field_ETS_TAG){
             statisticEventReporter->SendEvent(StatisticEventType::SEARCH_ONWILLDELETE);
-        }
     }
 }
 
@@ -7079,14 +7045,8 @@ void TextFieldPattern::reportOnDidDeleteEvent()
     CHECK_NULL_VOID(pipeline);
     auto statisticEventReporter = pipeline->GetStatisticEventReporter();
     CHECK_NULL_VOID(statisticEventReporter);
-    if (eventHub->HasOnDidDeleteValueEvent()) {
-        if (host->GetHostTag() == V2::TEXTINPUT_ETS_TAG) {
-            statisticEventReporter->SendEvent(StatisticEventType::TEXT_INPUT_ONDIDDELETE);
-        } else if (host->GetHostTag() == V2::TEXTAREA_ETS_TAG) {
-            statisticEventReporter->SendEvent(StatisticEventType::TEXT_AREA_ONDIDDELETE);
-        } else if (host->GetHostTag() == V2::SEARCH_Field_ETS_TAG){
+    if (eventHub->HasOnDidDeleteValueEvent() && host->GetHostTag() == V2::SEARCH_Field_ETS_TAG){
             statisticEventReporter->SendEvent(StatisticEventType::SEARCH_ONDIDDELETE);
-        }
     }
 }
 
