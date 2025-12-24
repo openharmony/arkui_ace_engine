@@ -1885,10 +1885,9 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
     }
     public setNavigationOptions(pathInfos?: NavPathStack): this {
         if (this.checkPriority('setNavigationOptions')) {
-            const pathInfos_casted = pathInfos as (NavPathStack | undefined)
-            this.getPeer()?.setNavigationOptionsAttribute(pathInfos_casted)
-            this.applyOptionsFinish('NavigationAttribute');
-            return this
+            // instructive change start
+            hookSetNavigationOptions(this, pathInfos)
+            // instructive change end
         }
         return this
     }
