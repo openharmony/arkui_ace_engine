@@ -58,8 +58,7 @@ constexpr int32_t TAB_BAR_Z_INDEX = 3;
 constexpr int32_t EFFECT_Z_INDEX = 1;
 } // namespace
 
-void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& /*tabController*/,
-    const RefPtr<SwiperController>& swiperController)
+void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<SwiperController>& swiperController)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();

@@ -36,7 +36,7 @@ namespace OHOS::Ace {
 constexpr int32_t MAX_GESTURE_SIZE = 3;
 constexpr int32_t DEFAULT_INDEX_VALUE = -1;
 
-class ACE_EXPORT RenderBox : public RenderBoxBase, public DragDropEvent {
+class ACE_FORCE_EXPORT RenderBox : public RenderBoxBase, public DragDropEvent {
     DECLARE_ACE_TYPE(RenderBox, RenderBoxBase, DragDropEvent);
 
 public:

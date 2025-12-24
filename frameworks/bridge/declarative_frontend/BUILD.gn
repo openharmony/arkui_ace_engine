@@ -551,8 +551,6 @@ template("declarative_js_engine") {
       "jsview/models/stepper_item_model_impl.cpp",
       "jsview/models/stepper_model_impl.cpp",
       "jsview/models/swiper_model_impl.cpp",
-      "jsview/models/tab_content_model_impl.cpp",
-      "jsview/models/tabs_model_impl.cpp",
       "jsview/models/text_clock_model_impl.cpp",
       "jsview/models/text_field_model_impl.cpp",
       "jsview/models/text_model_impl.cpp",

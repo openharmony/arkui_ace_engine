@@ -22,6 +22,8 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/common/dynamic_module_helper.h"
+#include "compatible/components/tab_bar/modifier/tab_modifier_api.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -51,11 +53,23 @@ namespace {
 
 int32_t g_tabControllerId = 0;
 
+const ArkUIInnerTabsModifier* GetTabsInnerModifier()
+{
+    static const ArkUIInnerTabsModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("tabs");
+        CHECK_NULL_RETURN(loader, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIInnerTabsModifier*>(loader->GetCustomModifier());
+    }
+    return cachedModifier;
+}
 } // namespace
 
 TabsController::TabsController() : FFIData()
 {
-    controller_ = TabController::GetController(++g_tabControllerId);
+    if (auto modifier = GetTabsInnerModifier()) {
+        controller_ = modifier->getController(++g_tabControllerId);
+    }
     swiperController_ = AceType::MakeRefPtr<NG::TabsControllerNG>();
     LOGI("Native TabsController constructed: %{public}" PRId64, GetID());
 }
@@ -76,7 +90,9 @@ void TabsController::ChangeIndex(int32_t index)
         swiperController_->SwipeTo(index);
     }
     if (controller_) {
-        controller_->SetIndexByController(index, false);
+        if (auto modifier = GetTabsInnerModifier()) {
+            modifier->setIndexByController(controller_, index, false);
+        }
     }
 }
 
@@ -114,13 +130,23 @@ void FfiOHOSAceFrameworkTabsCreate(int32_t barPosition, int64_t controllerId, in
     if (nativeTabsController == nullptr) {
         return;
     }
-    RefPtr<TabController> tabController;
+    RefPtr<AceType> tabController;
     RefPtr<SwiperController> swiperController;
 
     tabController = nativeTabsController->GetController();
     swiperController = nativeTabsController->GetSwiperController();
-    tabController->SetInitialIndex(index);
-    TabsModel::GetInstance()->Create(BAR_POSITIONS[barPosition], index, tabController, swiperController);
+    if (auto modifier = GetTabsInnerModifier()) {
+        modifier->setInitialIndex(tabController, index);
+    }
+#ifdef NG_BUILD
+    TabsModel::GetInstance()->Create(BAR_POSITIONS[barPosition], index, swiperController);
+#else
+    if (Container::IsCurrentUseNewPipeline()) {
+        TabsModel::GetInstance()->Create(BAR_POSITIONS[barPosition], index, swiperController);
+    } else {
+        TabsModel::GetInstance()->Create(BAR_POSITIONS[barPosition], tabController);
+    }
+#endif
 }
 
 void FfiOHOSAceFrameworkTabsPop()

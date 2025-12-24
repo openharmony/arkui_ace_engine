@@ -29,7 +29,7 @@
 
 namespace OHOS::Ace {
 
-class RenderBoxBase : public RenderNode {
+class ACE_FORCE_EXPORT RenderBoxBase : public RenderNode {
     DECLARE_ACE_TYPE(RenderBoxBase, RenderNode);
 
 public:

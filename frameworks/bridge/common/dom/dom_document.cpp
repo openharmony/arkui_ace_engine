@@ -17,6 +17,7 @@
 
 #include "base/log/event_report.h"
 #include "compatible/components/component_loader.h"
+#include "compatible/components/tab_bar/modifier/tab_modifier_api.h"
 #include "core/common/dynamic_module_helper.h"
 #include "frameworks/bridge/common/dom/dom_button.h"
 #include "frameworks/bridge/common/dom/dom_calendar.h"
@@ -51,8 +52,6 @@
 #include "frameworks/bridge/common/dom/dom_piece.h"
 #include "frameworks/bridge/common/dom/dom_popup.h"
 #include "frameworks/bridge/common/dom/dom_select.h"
-#include "frameworks/bridge/common/dom/dom_tab_bar.h"
-#include "frameworks/bridge/common/dom/dom_tab_content.h"
 #include "frameworks/bridge/common/dom/dom_tool_bar.h"
 #if !defined(PREVIEW)
 #ifdef WEB_SUPPORTED
@@ -85,6 +84,16 @@ RefPtr<DOMNode> DOMListItemCreator(NodeId nodeId, const std::string& tag, int32_
     return AceType::MakeRefPtr<T>(nodeId, tag, itemIndex);
 }
 
+const ArkUIInnerTabBarModifier* GetTabBarInnerModifier()
+{
+    static const ArkUIInnerTabBarModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("tab-bar");
+        CHECK_NULL_RETURN(loader, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIInnerTabBarModifier*>(loader->GetCustomModifier());
+    }
+    return cachedModifier;
+}
 } // namespace
 
 DOMDocument::~DOMDocument()
@@ -137,11 +146,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
 #endif
         { DOM_NODE_TAG_SWIPER, &DOMNodeCreator<DOMSwiper> },
         { DOM_NODE_TAG_SWITCH, &DOMNodeCreator<DOMSwitch> },
-#ifndef WEARABLE_PRODUCT
-        { DOM_NODE_TAG_TAB_BAR, &DOMNodeCreator<DOMTabBar> },
-        { DOM_NODE_TAG_TAB_CONTENT, &DOMNodeCreator<DOMTabContent> },
-        { DOM_NODE_TAG_TABS, &DOMNodeCreator<DOMTabs> },
-#endif
         { DOM_NODE_TAG_TEXT, &DOMNodeCreator<DOMText> },
         { DOM_NODE_TAG_TEXTAREA, &DOMNodeCreator<DOMTextarea> },
         { DOM_NODE_TAG_TOGGLE, &DOMNodeCreator<DOMToggle> },
@@ -346,10 +350,10 @@ void DOMDocument::HandleComponentPostBinding()
                     // DOMMenu bind node with ID node
                     menuNode->BindIdNode(idNode);
                 }
-            } else if (AceType::InstanceOf<DOMTabBar>(targetNode)) {
-                auto tabBarNode = AceType::DynamicCast<DOMTabBar>(targetNode);
-                // DOMTabBar in navigation bar bind tabs with ID node
-                tabBarNode->BindToTabs(idNode);
+            } else {
+                if (auto modifier = GetTabBarInnerModifier()) {
+                    modifier->bindToTabs(targetNode, idNode);
+                }
 #endif
             }
             ++iterId;
