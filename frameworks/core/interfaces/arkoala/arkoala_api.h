@@ -6320,6 +6320,7 @@ struct ArkUIHyperlinkModifier {
     void (*setHyperlinkResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetHyperlinkResponseRegion)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createHyperlinkFrameNode)(ArkUI_Int32 nodeId);
 };
 
 struct ArkUIAlphabetIndexerModifier {

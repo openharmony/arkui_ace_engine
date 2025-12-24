@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/native/node/hyperlink_modifier.h"
+
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -742,10 +744,10 @@ void* createGridContainerNode(ArkUI_Int32 nodeId)
 
 void* createHyperlinkNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = HyperlinkModelStatic::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto hyperlinkModifier = NodeModifier::GetHyperlinkModifier();
+    CHECK_NULL_RETURN(hyperlinkModifier, nullptr);
+
+    return hyperlinkModifier->createHyperlinkFrameNode(nodeId);
 }
 
 void* createLineNode(ArkUI_Int32 nodeId)

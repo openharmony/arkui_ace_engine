@@ -20,6 +20,7 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/cjui/cjui_api.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/pattern/hyperlink/hyperlink_model_static.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -111,6 +112,14 @@ void ResetHyperlinkResponseRegion(ArkUINodeHandle node)
     HyperlinkModelNG::SetResponseRegion(frameNode, region, false);
 }
 
+ArkUINodeHandle CreateHyperlinkFrameNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = HyperlinkModelStatic::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+}
+
 const ArkUIHyperlinkModifier* GetHyperlinkDynamicModifier()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -121,6 +130,7 @@ const ArkUIHyperlinkModifier* GetHyperlinkDynamicModifier()
         .resetHyperlinkDraggable = ResetHyperlinkDraggable,
         .setHyperlinkResponseRegion = SetHyperlinkResponseRegion,
         .resetHyperlinkResponseRegion = ResetHyperlinkResponseRegion,
+        .createHyperlinkFrameNode = CreateHyperlinkFrameNode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -151,7 +151,7 @@
       OHOS::Ace::GridItemModel::*;
       OHOS::Ace::GridRowModel::*;
       OHOS::Ace::NG::HyperlinkModelNG::*;
-      OHOS::Ace::NG::HyperlinkModelStatic::CreateFrameNode*;
+      OHOS::Ace::NG::HyperlinkModelStatic::*;
       OHOS::Ace::IfElseModel::*;
       OHOS::Ace::ImageAnimatorModel::*;
       OHOS::Ace::ImageModel::*;
