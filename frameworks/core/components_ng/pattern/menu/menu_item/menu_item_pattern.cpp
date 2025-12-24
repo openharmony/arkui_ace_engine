@@ -3455,11 +3455,7 @@ void MenuItemPattern::ApplyOptionThemeStyles()
     SetFontWeight(selectTheme->GetMenuFontWeight());
     SetBorderColor(GetBorderColor());
     SetBorderWidth(GetBorderWidth());
-    if (IsSelectOption() && showDefaultSelectedIcon_ && !selectTheme->GetMenuBlendBgColor()) {
-        SetBgColor(Color::TRANSPARENT);
-        return;
-    }
-    SetBgColor(selectTheme->GetBackgroundColor());
+    SetBgColor(Color::TRANSPARENT);
 }
 
 RefPtr<SelectTheme> MenuItemPattern::GetCurrentSelectTheme()

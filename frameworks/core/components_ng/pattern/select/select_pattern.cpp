@@ -2049,16 +2049,12 @@ void SelectPattern::OnColorConfigurationUpdate()
         renderContext->UpdateBackBlurStyle(renderContext->GetBackBlurStyle());
     } else {
         renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
-        if (!SystemProperties::ConfigChangePerform()) {
-            SetOptionBgColor(selectTheme->GetBackgroundColor());
-        }
     }
 
     UpdateMenuChildColorConfiguration(menuNode, pipeline->GetConfigurationChange());
     auto optionNode = menuPattern->GetOptions();
     for (auto child : optionNode) {
         auto optionsPattern = child->GetPattern<MenuItemPattern>();
-        optionsPattern->SetFontColor(selectTheme->GetFontColor());
         auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
         if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
             optionsPattern->UpdateCheckMarkColor(selectTheme->GetCheckMarkColor());
