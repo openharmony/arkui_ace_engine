@@ -1655,12 +1655,39 @@ export class UIContextImpl extends UIContext {
         }
         return ret;
     }
+
+    private handleBreakpointError(ret: int32, type: string) {
+        if (ret === -1) {
+            console.error("some error occurred while initializing the ANI environment, return default value: ${type}.");
+        }
+        if (ret === -2) {
+            console.error("failed to retrieve the current container, return default value: ${type}.");
+        }
+        if (ret === -3) {
+            console.error("failed to retrieve the current window, return default value: ${type}.");
+        }
+    }
+
     public getWindowWidthBreakpoint(): WidthBreakpoint {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let ret = ArkUIAniModule._Common_getWindowWidthBreakpoint();
+        if (ret < 0) {
+            this.handleBreakpointError(ret, "WidthBreakpoint.WIDTH_XS");
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return WidthBreakpoint.WIDTH_XS;
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
         return ret as WidthBreakpoint;
     }
     public getWindowHeightBreakpoint(): HeightBreakpoint {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let ret = ArkUIAniModule._Common_getWindowHeightBreakpoint();
+        if (ret < 0) {
+            this.handleBreakpointError(ret, "HeightBreakpoint.HEIGHT_SM");
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return HeightBreakpoint.HEIGHT_SM;
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
         return ret as HeightBreakpoint;
     }
     public vp2px(value: double): double {
