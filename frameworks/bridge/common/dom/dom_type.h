@@ -987,12 +987,7 @@ ACE_EXPORT extern const char DOM_TOGGLE_TEXT_COLOR[];
 ACE_EXPORT extern const char DOM_TOGGLE_HEIGHT[];
 ACE_EXPORT extern const char DOM_TOGGLE_WIDTH[];
 
-// clock constants
-// clock style
-ACE_EXPORT extern const char DOM_DIGIT_FONT_FAMILY[];
 // clock attr
-ACE_EXPORT extern const char DOM_HOURS_WEST[];
-ACE_EXPORT extern const char DOM_CLOCK_CONFIG[];
 ACE_EXPORT extern const char DOM_DIGIT_COLOR[];
 ACE_EXPORT extern const char DOM_DIGIT_COLOR_NIGHT[];
 ACE_EXPORT extern const char DOM_CLOCK_FACE_SOURCE[];
@@ -1003,7 +998,6 @@ ACE_EXPORT extern const char DOM_MINUTE_HAND_SOURCE[];
 ACE_EXPORT extern const char DOM_MINUTE_HAND_SOURCE_NIGHT[];
 ACE_EXPORT extern const char DOM_SECOND_HAND_SOURCE[];
 ACE_EXPORT extern const char DOM_SECOND_HAND_SOURCE_NIGHT[];
-ACE_EXPORT extern const char DOM_SHOW_DIGIT[];
 ACE_EXPORT extern const char DOM_DIGIT_RADIUS_RATIO[];
 ACE_EXPORT extern const char DOM_DIGIT_SIZE_RATIO[];
 

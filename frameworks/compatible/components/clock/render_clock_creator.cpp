@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CLOCK_CLOCK_ELEMENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CLOCK_CLOCK_ELEMENT_H
-
-#include "core/pipeline/base/render_element.h"
+#include "rosen_render_clock.h"
 
 namespace OHOS::Ace {
+RefPtr<RenderNode> RenderClock::Create()
+{
+    return AceType::MakeRefPtr<RosenRenderClock>();
+}
 
-class ClockElement : public RenderElement {
-    DECLARE_ACE_TYPE(ClockElement, RenderElement);
-
-public:
-    ClockElement() = default;
-    ~ClockElement() override = default;
-};
+RefPtr<RenderNode> RenderClockHand::Create()
+{
+    return AceType::MakeRefPtr<RosenRenderClockHand>();
+}
 } // namespace OHOS::Ace
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CLOCK_CLOCK_ELEMENT_H

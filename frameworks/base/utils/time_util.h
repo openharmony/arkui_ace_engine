@@ -57,9 +57,9 @@ struct TimeOfNow final {
 
 bool IsHoursWestValid(int32_t& hoursWest);
 
-TimeOfNow GetTimeOfNow(int32_t hoursWest = INT_MAX);
+ACE_FORCE_EXPORT TimeOfNow GetTimeOfNow(int32_t hoursWest = INT_MAX);
 
-bool IsDayTime(const TimeOfNow& timeOfNow);
+ACE_FORCE_EXPORT bool IsDayTime(const TimeOfNow& timeOfNow);
 
 struct TimeOfZone final {
     explicit TimeOfZone(int32_t hoursWest = DEFAULT_HOURS_WEST) : hoursWest_(hoursWest) {}

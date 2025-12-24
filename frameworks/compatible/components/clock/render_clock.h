@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CLOCK_RENDER_CLOCK_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CLOCK_RENDER_CLOCK_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_CLOCK_RENDER_CLOCK_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_CLOCK_RENDER_CLOCK_H
 
 #include "base/utils/time_util.h"
-#include "core/components/declaration/clock/clock_declaration.h"
+#include "compatible/components/clock/clock_declaration.h"
 #include "core/components/image/render_image.h"
 #include "core/components/text/render_text.h"
 #include "core/components/text/text_component.h"
@@ -154,4 +154,4 @@ protected:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CLOCK_RENDER_CLOCK_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_CLOCK_RENDER_CLOCK_H

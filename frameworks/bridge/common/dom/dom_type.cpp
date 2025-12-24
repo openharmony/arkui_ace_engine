@@ -982,12 +982,7 @@ const char DOM_TOGGLE_TEXT_COLOR[] = "textColor";
 const char DOM_TOGGLE_HEIGHT[] = "height";
 const char DOM_TOGGLE_WIDTH[] = "width";
 
-// clock constants
-// clock style
-const char DOM_DIGIT_FONT_FAMILY[] = "fontFamily";
 // clock attr
-const char DOM_HOURS_WEST[] = "hourswest";
-const char DOM_CLOCK_CONFIG[] = "clockconfig";
 const char DOM_DIGIT_COLOR[] = "digitColor";
 const char DOM_DIGIT_COLOR_NIGHT[] = "digitColorNight";
 const char DOM_DIGIT_RADIUS_RATIO[] = "digitRadiusRatio";
@@ -1000,7 +995,6 @@ const char DOM_MINUTE_HAND_SOURCE[] = "minuteHand";
 const char DOM_MINUTE_HAND_SOURCE_NIGHT[] = "minuteHandNight";
 const char DOM_SECOND_HAND_SOURCE[] = "secondHand";
 const char DOM_SECOND_HAND_SOURCE_NIGHT[] = "secondHandNight";
-const char DOM_SHOW_DIGIT[] = "showdigit";
 
 // piece constants
 const char DOM_PIECE_CONTENT[] = "content";

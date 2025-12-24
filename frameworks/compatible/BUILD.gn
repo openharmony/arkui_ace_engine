@@ -296,6 +296,14 @@ ohos_source_set("ace_compatible_source") {
     "components/video/video_element.cpp",
     "components/video/video_loader.cpp",
     "components/video/video_model_impl.cpp",
+
+    "components/clock/clock_component.cpp",
+    "components/clock/clock_declaration.cpp",
+    "components/clock/dom_clock.cpp",
+    "components/clock/render_clock.cpp",
+    "components/clock/render_clock_creator.cpp",
+    "components/clock/rosen_render_clock.cpp",
+    "components/clock/clock_loader.cpp",
   ]
 
   if (qrcodegen_support) {

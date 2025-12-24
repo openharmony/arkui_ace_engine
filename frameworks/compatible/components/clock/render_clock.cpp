@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components/clock/render_clock.h"
+#include "compatible/components/clock/render_clock.h"
 
 #include "base/i18n/localization.h"
-#include "core/components/clock/clock_component.h"
+#include "compatible/components/clock/clock_component.h"
 #include "core/components/image/image_component.h"
 #include "core/event/ace_event_helper.h"
 
