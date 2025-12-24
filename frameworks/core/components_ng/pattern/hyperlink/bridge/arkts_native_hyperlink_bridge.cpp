@@ -19,6 +19,26 @@
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
+namespace OHOS::Ace {
+
+HyperlinkModel* HyperlinkModel::GetInstance()
+{
+#ifdef NG_BUILD
+    static NG::HyperlinkModelNG instance;
+    return &instance;
+#else
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::HyperlinkModelNG instance;
+        return &instance;
+    } else {
+        static Framework::HyperlinkModelImpl instance;
+        return &instance;
+    }
+#endif
+}
+
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int NUM_0 = 0;
@@ -108,17 +128,41 @@ ArkUINativeModuleValue HyperlinkBridge::CreateHyperlink(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
 
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(firstArg->IsString(vm), panda::JSValueRef::Undefined(vm));
-    std::string address = firstArg->ToString(vm)->ToString(vm);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondArg->IsString(vm), panda::JSValueRef::Undefined(vm));
-    std::string content = secondArg->ToString(vm)->ToString(vm);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    std::string address{};
+    RefPtr<ResourceObject> addressResObj{};
+    auto addressRet = ArkTSUtils::ParseJsString(vm, firstArg, address, addressResObj);
 
-    static HyperlinkModelNG model;
-    model.Create(address, content);
-    
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    std::string content{};
+    RefPtr<ResourceObject> contentResObj{};
+    auto contentRet = runtimeCallInfo->GetArgsNumber() == 2
+                        ? ArkTSUtils::ParseJsString(vm, firstArg, address, contentResObj)
+                        : false;
+
+    HyperlinkModel::GetInstance()->Create(address, content);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm))
+
+    if (addressRet && SystemProperties::ConfigChangePerform() && addressResObj) {
+        pattern->RegisterResource<std::string>("Address", addressResObj, address);
+    } else {
+        pattern->UnRegisterResource("Address");
+    }
+
+    if (contentRet && SystemProperties::ConfigChangePerform() && contentResObj) {
+        pattern->RegisterResource<std::string>("Content", contentResObj, content);
+    } else {
+        pattern->UnRegisterResource("Content");
+    }
+                
     return panda::JSValueRef::Undefined(vm);
 }
 
