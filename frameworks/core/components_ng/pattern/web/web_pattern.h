@@ -993,6 +993,8 @@ public:
     void InitSelectDataDetector();
     void InitAIDetectResult();
     void CloseDataDetectorMenu();
+    void HighlightSpecifiedContent(
+        const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) override;
 
     void SetAILinkMenuShow(bool isAILinkMenuShow)
     {
