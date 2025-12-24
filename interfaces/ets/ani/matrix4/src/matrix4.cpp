@@ -142,7 +142,7 @@ ani_method GetOrCreateArrayGetMethod(ani_env* env)
     }
 
     ani_method result;
-    if (ANI_OK != env->Class_FindMethod(arrayClass, "$_get", "i:C{std.core.Object}", &result)) {
+    if (ANI_OK != env->Class_FindMethod(arrayClass, "$_get", "i:Y", &result)) {
         return nullptr;
     }
 

@@ -20,13 +20,13 @@ import { int32 } from '@koalaui/common';
 import { __context, __id, GlobalStateManager, IncrementalNode, memoEntry, memoEntry1, mutableState, MutableState, NodeAttach } from '@koalaui/runtime';
 import { StateContext } from 'arkui.incremental.runtime.state';
 import { ExtendableComponent } from './extendableComponent';
-import { 
-    StateDecoratedVariable, 
-    ProvideDecoratedVariable, 
+import {
+    StateDecoratedVariable,
+    ProvideDecoratedVariable,
     PropDecoratedVariable,
     PropRefDecoratedVariable,
-    LinkDecoratedVariable, 
-    ConsumeDecoratedVariable, 
+    LinkDecoratedVariable,
+    ConsumeDecoratedVariable,
     InteropWatchFunc,
     uiUtils,
     IObservedObject,
@@ -134,7 +134,7 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
     const manager = GlobalStateManager.instance;
 
     ArkThemeScopeManager.getInstance().applyColorModeFromThemeScope();
-    
+
     const node = manager.updatableNode(new IncrementalNode(), (context: StateContext) => {
         ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
         let r = OBSERVE.renderingComponent;
@@ -159,7 +159,7 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
         () => {
             ArkThemeScopeManager.getInstance().executeReload(node);
             (staticComponent as CustomDelegate<T, T_Options>).__updateStruct(options ? options() : undefined);
-            }, 
+            },
             peerNode.getPeerPtr() as number,
         ];
 }
@@ -318,13 +318,13 @@ export function isDynamicObject<T>(value: T): boolean {
 export function getRawObject<T>(value: T): T {
     const global = ESValue.getGlobal();
     const getRawObjectForInterop = global.getProperty('getRawObjectForInterop');
-    return getRawObjectForInterop.invoke(ESValue.wrap(value)).unwrap()! as Object as T;
+    return getRawObjectForInterop.invoke(ESValue.wrap(value)).unwrap() as T;
 }
 
 export function getObservedObject<T>(value: T): T {
     const global = ESValue.getGlobal();
     const createObservedObject = global.getProperty('createObservedObject');
-    return createObservedObject.invoke(ESValue.wrap(value)).unwrap()! as Object as T;
+    return createObservedObject.invoke(ESValue.wrap(value)).unwrap() as T;
 }
 
 export function registerCreateWatchFuncCallback(): void {
@@ -410,17 +410,17 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
                 break;
             case 3:
                 createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc3');
-                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], 
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
                     args[1], args[2]);
                 break;
             case 4:
                 createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc4');
-                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], 
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
                     args[1], args[2], args[3]);
                 break;
             case 5:
                 createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc5');
-                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], 
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
                     args[1], args[2], args[3], args[4]);
                 break;
             case 6:
@@ -638,7 +638,7 @@ function parseInfoFromJsonElement(infoElement: jsonx.JsonElement): NavPathInfo |
     let paramObj: Object | undefined = infoElement.tryGetElement('param');
     let isEntry: boolean | undefined = infoElement.tryGetBoolean('isEntry');
     return new NavPathInfo(name, paramObj, undefined, isEntry);
-} 
+}
 
 function parseNumberArrayFromJson(jsonArray: string): Array<int32> {
     let array = new Array<int32>();
@@ -1001,7 +1001,7 @@ function transferCompatibleDynamicBuilder(builder: (...args: FixedArray<Any>) =>
     return (
         /** @memo */
         (...args: FixedArray<Any>) => {
-            let argsESValue: FixedArray<ESValueOrUndefined> = new ESValueOrUndefined[args.length]; 
+            let argsESValue: FixedArray<ESValueOrUndefined> = new ESValueOrUndefined[args.length];
             for (let i = 0; i < args.length; i++) {
                 if (args[i] instanceof ESValue) {
                     argsESValue[i] = args[i] as ESValue;
@@ -1067,7 +1067,7 @@ export function enableCompatibleObservedV2ForStatic<T>(
     let recordStaticState = (value: MutableState<int32>) => {
         value.value
     }
-    let updateStaticState = (value: MutableState<int32>) => {   
+    let updateStaticState = (value: MutableState<int32>) => {
         value.value++
         ESValue.getGlobal().getProperty('runPendingJobs').invoke();
     }

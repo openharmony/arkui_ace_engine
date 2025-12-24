@@ -497,7 +497,7 @@ bool ParseDragMixParam(ani_env* env, ArkUIDragControllerAsync& asyncCtx, ani_obj
         for (int32_t i = 0; i < builderArrayLengthInt; i++) {
             ani_ref itemRef;
             if ((status = env->Object_CallMethodByName_Ref(static_cast<ani_object>(builderObj), "$_get",
-                "i:C{std.core.Object}", &itemRef, (ani_int)i)) != ANI_OK) {
+                "i:Y", &itemRef, (ani_int)i)) != ANI_OK) {
                 HILOGE("AceDrag, get builder node from array fail. status = %{public}d", status);
                 isParseSucess = false;
                 break;
@@ -518,7 +518,7 @@ bool ParseDragMixParam(ani_env* env, ArkUIDragControllerAsync& asyncCtx, ani_obj
         for (int32_t i = 0; i < dragItemInfoArrayLengthInt; i++) {
             ani_ref itemRef;
             if ((status = env->Object_CallMethodByName_Ref(
-                dragItemInfo, "$_get", "i:C{std.core.Object}", &itemRef, (ani_int)i)) != ANI_OK) {
+                dragItemInfo, "$_get", "i:Y", &itemRef, (ani_int)i)) != ANI_OK) {
                 HILOGE("AceDrag, get dragItemInfo from array fail. status = %{public}d", status);
                 isParseSucess = false;
                 break;
@@ -701,7 +701,7 @@ bool CheckAndParseSecondParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx,
     } else {
         asyncCtx.touchPoint = SharedPointerWrapper(nullptr);
     }
-    
+
     if (!ParsePreviewOptions(env, asyncCtx, static_cast<ani_object>(previewOptionsAni))) {
         HILOGE("AceDrag, parse previewOptions failed.");
         return false;
