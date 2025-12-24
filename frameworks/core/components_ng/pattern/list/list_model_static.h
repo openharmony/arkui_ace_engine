@@ -51,6 +51,11 @@ public:
     static void SetCachedCount(FrameNode* frameNode, const std::optional<int32_t>& cachedCount);
     static void SetCachedCount(
         FrameNode* frameNode, const std::optional<int32_t>& count, const std::optional<bool>& show);
+    static void SetCacheRange(FrameNode* frameNode, NG::CacheRange cacheRange, bool show);
+    static void SetItemFillPolicy(FrameNode* frameNode, PresetFillType fillType);
+    static void SetFocusWrapMode(FrameNode* frameNode, FocusWrapMode focusWrapMode);
+    static void SetSyncLoad(FrameNode* frameNode, bool enabled);
+    static void SetScrollSnapAnimationSpeed(FrameNode* frameNode, ScrollSnapAnimationSpeed speed);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);

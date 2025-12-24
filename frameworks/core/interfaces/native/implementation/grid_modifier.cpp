@@ -167,16 +167,29 @@ void SetGridOptionsImpl(Ark_NativePointer node,
 } // GridInterfaceModifier
 namespace GridAttributeModifier {
 void SetColumnsTemplateImpl(Ark_NativePointer node,
-                            const Opt_String* value)
+                            const Opt_Union_String_ItemFillPolicy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<std::string>(value);
-    if (!convValue) {
-        GridModelStatic::SetColumnsTemplate(frameNode, std::nullopt);
-        return;
-    }
-    GridModelStatic::SetColumnsTemplate(frameNode, *convValue);
+    Converter::VisitUnionPtr(
+        value,
+        [frameNode](const Ark_String& value0) {
+            auto convValue = Converter::OptConvert<std::string>(value0);
+            if (!convValue) {
+                GridModelStatic::SetColumnsTemplate(frameNode, std::nullopt);
+                return;
+            }
+            GridModelStatic::SetColumnsTemplate(frameNode, *convValue);
+        },
+        [frameNode](const Ark_ItemFillPolicy& value1) {
+            auto result = Converter::OptConvert<PresetFillType>(value1).value_or(PresetFillType::BREAKPOINT_DEFAULT);
+            if (static_cast<int32_t>(result) < static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT) ||
+                static_cast<int32_t>(result) > static_cast<int32_t>(PresetFillType::BREAKPOINT_SM2MD3LG5)) {
+                result = PresetFillType::BREAKPOINT_DEFAULT;
+            }
+            GridModelStatic::SetItemFillPolicy(frameNode, result);
+        },
+        [frameNode]() { GridModelStatic::SetColumnsTemplate(frameNode, std::nullopt); });
 }
 void SetRowsTemplateImpl(Ark_NativePointer node,
                          const Opt_String* value)
@@ -223,7 +236,7 @@ void SetScrollBarWidthImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetScrollBarWidth(frameNode, convValue);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
-                           const Opt_Union_Color_I32_String* value)
+                           const Opt_Union_Color_I32_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -543,6 +556,27 @@ void SetEditModeOptionsImpl(Ark_NativePointer node,
     }
     GridModelStatic::SetEditModeOptions(frameNode, options);
 }
+void SetFocusWrapModeImpl(Ark_NativePointer node,
+                          const Opt_FocusWrapMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<FocusWrapMode>(value);
+    auto focusWrapMode = static_cast<int32_t>(convValue.value_or(FocusWrapMode::DEFAULT));
+    if (focusWrapMode < static_cast<int32_t>(FocusWrapMode::DEFAULT) ||
+        focusWrapMode > static_cast<int32_t>(FocusWrapMode::WRAP_WITH_ARROW)) {
+        focusWrapMode = static_cast<int32_t>(FocusWrapMode::DEFAULT);
+    }
+    GridModelStatic::SetFocusWrapMode(frameNode, static_cast<FocusWrapMode>(focusWrapMode));
+}
+void SetSyncLoadImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    GridModelStatic::SetSyncLoad(frameNode, convValue.value_or(true));
+}
 void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
                                const Opt_OnScrollFrameBeginCallback* value)
 {
@@ -681,6 +715,8 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
         GridAttributeModifier::SetFrictionImpl,
         GridAttributeModifier::SetAlignItemsImpl,
         GridAttributeModifier::SetEditModeOptionsImpl,
+        GridAttributeModifier::SetFocusWrapModeImpl,
+        GridAttributeModifier::SetSyncLoadImpl,
         GridAttributeModifier::SetOnScrollFrameBeginImpl,
         GridAttributeModifier::SetOnWillScrollImpl,
         GridAttributeModifier::SetOnDidScrollImpl,

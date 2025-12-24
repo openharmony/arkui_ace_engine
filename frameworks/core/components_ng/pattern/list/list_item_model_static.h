@@ -43,6 +43,8 @@ public:
         std::function<void()>&& endAction, OnOffsetChangeFunc&& onOffsetChangeFunc,
         const std::optional<V2::SwipeEdgeEffect>& edgeEffect);
     static void SetAutoScale(FrameNode* frameNode, const std::optional<bool>& autoScale);
+    static void ExpandSwipeAction(const NG::FrameNode* listItem, ListItemSwipeActionDirection direction);
+    static void CollapseSwipeAction(const NG::FrameNode* listItem);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_ITEM_MODEL_STATIC_H

@@ -101,12 +101,25 @@ void SetWaterFlowOptionsImpl(Ark_NativePointer node,
 } // WaterFlowInterfaceModifier
 namespace WaterFlowAttributeModifier {
 void SetColumnsTemplateImpl(Ark_NativePointer node,
-                            const Opt_String* value)
+                            const Opt_Union_String_ItemFillPolicy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<std::string>(value);
-    WaterFlowModelStatic::SetColumnsTemplate(frameNode, convValue);
+    Converter::VisitUnionPtr(
+        value,
+        [frameNode](const Ark_String& value0) {
+            auto convValue = Converter::OptConvert<std::string>(value0);
+            WaterFlowModelStatic::SetColumnsTemplate(frameNode, convValue);
+        },
+        [frameNode](const Ark_ItemFillPolicy& value1) {
+            auto result = Converter::OptConvert<PresetFillType>(value1).value_or(PresetFillType::BREAKPOINT_DEFAULT);
+            if (static_cast<int32_t>(result) < static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT) ||
+                static_cast<int32_t>(result) > static_cast<int32_t>(PresetFillType::BREAKPOINT_SM2MD3LG5)) {
+                result = PresetFillType::BREAKPOINT_DEFAULT;
+            }
+            WaterFlowModelStatic::SetItemFillPolicy(frameNode, result);
+        },
+        [frameNode]() { WaterFlowModelStatic::SetColumnsTemplate(frameNode, std::nullopt); });
 }
 void SetItemConstraintSizeImpl(Ark_NativePointer node,
                                const Opt_ConstraintSizeOptions* value)
@@ -176,6 +189,14 @@ void SetCachedCount0Impl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<int32_t>(value);
     Validator::ValidateNonNegative(convValue);
     WaterFlowModelStatic::SetCachedCount(frameNode, convValue);
+}
+void SetSyncLoadImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    WaterFlowModelStatic::SetSyncLoad(frameNode, convValue.value_or(true));
 }
 void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
                                const Opt_OnScrollFrameBeginCallback* value)
@@ -283,6 +304,7 @@ const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()
         WaterFlowAttributeModifier::SetRowsGapImpl,
         WaterFlowAttributeModifier::SetLayoutDirectionImpl,
         WaterFlowAttributeModifier::SetCachedCount0Impl,
+        WaterFlowAttributeModifier::SetSyncLoadImpl,
         WaterFlowAttributeModifier::SetOnScrollFrameBeginImpl,
         WaterFlowAttributeModifier::SetOnScrollIndexImpl,
         WaterFlowAttributeModifier::SetOnWillScrollImpl,

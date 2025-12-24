@@ -16,12 +16,12 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AccessibilityHoverEvent_serializer, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, TouchEvent_serializer, DragItemInfo_serializer, PopupStateChangeParam_serializer, AccessibilityActionInterceptCallback, AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, AccessibilityFocusCallback, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, DragEvent, FocusAxisEvent, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, TouchEvent, DragItemInfo, GestureRecognizerJudgeBeginCallback, HoverCallback, ModifierKeyStateGetter, OnDragEventCallback, OnItemDragStartCallback, OnMoveHandler, OnScrollCallback, OnWillScrollCallback, PopupStateChangeCallback, PopupStateChangeParam, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, TransitionFinishCallback, VisibleAreaChangeCallback } from "./../../component/common"
+import { AccessibilityHoverEvent_serializer, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, TouchEvent_serializer, DragItemInfo_serializer, PopupStateChangeParam_serializer, AccessibilityActionInterceptCallback, AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, AccessibilityFocusCallback, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, DragEvent, FocusAxisEvent, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, TouchEvent, DragItemInfo, GestureRecognizerJudgeBeginCallback, HoverCallback, ModifierKeyStateGetter, OnDidStopDraggingCallback, OnDragEventCallback, OnItemDragStartCallback, OnMoveHandler, OnScrollCallback, OnWillScrollCallback, OnWillStopDraggingCallback, PopupStateChangeCallback, PopupStateChangeParam, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, TransitionFinishCallback, VisibleAreaChangeCallback } from "./../../component/common"
 import { image_PixelMap_serializer } from "./../ohos.multimedia.image"
 import { ButtonConfiguration_serializer, ButtonConfiguration, ButtonTriggerClickCallback } from "./../../component/button"
 import { Area_serializer, ConstraintSizeOptions_serializer, SizeOptions_serializer, Area, ConstraintSizeOptions, Length, ResourceStr, SizeOptions, VoidCallback } from "./../../component/units"
 import { TextMenuItem_serializer, DeleteValue_serializer, EditableTextChangeValue_serializer, InsertValue_serializer, StyledStringChangeValue_serializer, TextRange_serializer, PreviewText_serializer, TextChangeOptions_serializer, TextMenuItem, DeleteValue, EditableTextChangeValue, InsertValue, StyledStringChangeValue, TextRange, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, OnCreateMenuCallback, OnDidChangeCallback, OnMenuItemClickCallback } from "./../../component/textCommon"
-import { ComputedBarAttribute_serializer, ComputedBarAttribute } from "./../../component/grid"
+import { ComputedBarAttribute_serializer, ComputedBarAttribute, OnGridScrollIndexCallback } from "./../../component/grid"
 import { CopyEvent_serializer, CutEvent_serializer, RichEditorChangeValue_serializer, RichEditorDeleteValue_serializer, RichEditorInsertValue_serializer, RichEditorRange_serializer, RichEditorSelection_serializer, RichEditorTextSpanResult_serializer, PasteEvent_serializer, CopyEvent, CutEvent, RichEditorChangeValue, RichEditorDeleteValue, RichEditorInsertValue, RichEditorRange, RichEditorSelection, RichEditorTextSpanResult, PasteEvent, MenuCallback, MenuOnAppearCallback, OnHoverCallback, PasteEventCallback, SubmitCallback } from "./../../component/richEditor"
 import { CustomSpanMeasureInfo_serializer, CustomSpanMetrics_serializer, CustomSpanDrawInfo_serializer, StyledString_serializer, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, StyledString, UserDataSpan, StyledStringMarshallCallback, StyledStringUnmarshallCallback } from "./../../component/styledString"
 import { DismissDialogAction_serializer, DismissDialogAction } from "./../../component/actionSheet"
@@ -32,7 +32,7 @@ import { GestureEvent_serializer, GestureInfo_serializer, BaseGestureEvent_seria
 import { NativeEmbedDataInfo_serializer, NativeEmbedTouchInfo_serializer, OnAlertEvent_serializer, OnAudioStateChangedEvent_serializer, OnBeforeUnloadEvent_serializer, OnClientAuthenticationEvent_serializer, OnConfirmEvent_serializer, OnConsoleEvent_serializer, OnContextMenuShowEvent_serializer, OnDataResubmittedEvent_serializer, OnDownloadStartEvent_serializer, OnErrorReceiveEvent_serializer, OnFaviconReceivedEvent_serializer, OnFirstContentfulPaintEvent_serializer, OnGeolocationShowEvent_serializer, OnHttpAuthRequestEvent_serializer, OnHttpErrorReceiveEvent_serializer, OnInterceptRequestEvent_serializer, WebResourceResponse_serializer, OnLoadFinishedEvent_serializer, OnLoadInterceptEvent_serializer, OnLoadStartedEvent_serializer, OnOverScrollEvent_serializer, OnPageBeginEvent_serializer, OnPageEndEvent_serializer, OnPageVisibleEvent_serializer, OnPdfLoadEvent_serializer, OnPdfScrollEvent_serializer, OnPermissionRequestEvent_serializer, OnProgressChangeEvent_serializer, OnPromptEvent_serializer, OnRefreshAccessedHistoryEvent_serializer, OnRenderExitedEvent_serializer, OnResourceLoadEvent_serializer, OnScaleChangeEvent_serializer, OnScreenCaptureRequestEvent_serializer, OnScrollEvent_serializer, OnSearchResultReceiveEvent_serializer, OnShowFileSelectorEvent_serializer, OnSslErrorEventReceiveEvent_serializer, OnTitleReceiveEvent_serializer, OnTouchIconUrlReceivedEvent_serializer, OnWindowNewEvent_serializer, OnWindowNewExtEvent_serializer, WebKeyboardOptions_serializer, NativeEmbedMouseInfo_serializer, AdsBlockedDetails_serializer, CameraCaptureStateChangeInfo_serializer, BlankScreenDetectionEventInfo_serializer, FirstMeaningfulPaint_serializer, FirstScreenPaint_serializer, FullScreenEnterEvent_serializer, IntelligentTrackingPreventionDetails_serializer, LargestContentfulPaint_serializer, MicrophoneCaptureStateChangeInfo_serializer, NativeEmbedParamDataInfo_serializer, NativeEmbedVisibilityInfo_serializer, LoadCommittedDetails_serializer, WebResourceRequest_serializer, RenderProcessNotRespondingData_serializer, SslErrorEvent_serializer, WebKeyboardCallbackInfo_serializer, NativeEmbedDataInfo, NativeEmbedTouchInfo, OnAlertEvent, OnAudioStateChangedEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnConsoleEvent, OnContextMenuShowEvent, OnDataResubmittedEvent, OnDownloadStartEvent, OnErrorReceiveEvent, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, WebResourceResponse, OnLoadFinishedEvent, OnLoadInterceptEvent, OnLoadStartedEvent, OnOverScrollEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPdfLoadEvent, OnPdfScrollEvent, OnPermissionRequestEvent, OnProgressChangeEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnResourceLoadEvent, OnScaleChangeEvent, OnScreenCaptureRequestEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OnSslErrorEventReceiveEvent, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, OnWindowNewExtEvent, WebKeyboardOptions, MouseInfoCallback, NativeEmbedMouseInfo, OnAdsBlockedCallback, AdsBlockedDetails, OnCameraCaptureStateChangeCallback, CameraCaptureStateChangeInfo, OnContextMenuHideCallback, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnFirstScreenPaintCallback, FirstScreenPaint, OnFullScreenEnterCallback, FullScreenEnterEvent, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnMicrophoneCaptureStateChangeCallback, MicrophoneCaptureStateChangeInfo, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnOverrideErrorPageCallback, OnOverrideUrlLoadingCallback, WebResourceRequest, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, ThreatType, OnSslErrorEventCallback, SslErrorEvent, OnViewportFitChangedCallback, ViewportFit, TextSelectionChangeCallback, WebKeyboardCallback, WebKeyboardCallbackInfo } from "./../../component/web"
 import { NavDestinationContext_serializer, NavDestinationTransition_serializer, NavDestinationActiveReason, NavDestinationContext, NavDestinationTransition, NavDestinationTransitionDelegate, VisibilityChangeReason } from "./../../component/navDestination"
 import { NavigationTransitionProxy_serializer, NavigationAnimatedTransition_serializer, PopInfo_serializer, NavContentInfo_serializer, NavigationMode, NavigationTitleMode, NavigationTransitionProxy, NavigationAnimatedTransition, PopInfo, InterceptionModeCallback, InterceptionShowCallback, NavBar, NavigationOperation, NavContentInfo, UpdateTransitionCallback } from "./../../component/navigation"
-import { OnScrollFrameBeginHandlerResult_serializer, OffsetResult_serializer, OnScrollFrameBeginHandlerResult, OffsetResult, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback } from "./../../component/scroll"
+import { OnScrollFrameBeginHandlerResult_serializer, OffsetResult_serializer, OnScrollFrameBeginHandlerResult, OffsetResult, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnDidZoomCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback } from "./../../component/scroll"
 import { TabContentAnimatedTransition_serializer, TabContentTransitionProxy_serializer, TabsAnimationEvent_serializer, TabContentAnimatedTransition, TabContentTransitionProxy, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentDidScrollCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../../component/tabs"
 import { SurfaceRect_serializer, NativeXComponentPointer, SurfaceRect } from "./../../component/xcomponent"
 import { SwiperContentTransitionProxy_serializer, SwiperContentWillScrollResult_serializer, SwiperAnimationEvent_serializer, SwiperContentTransitionProxy, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult, OnSwiperAnimationEndCallback, SwiperAnimationEvent, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback } from "./../../component/swiper"
@@ -51,7 +51,7 @@ import { LoadingProgressConfiguration_serializer, LoadingProgressConfiguration }
 import { MenuItemConfiguration_serializer, MenuItemConfiguration, OnSelectCallback } from "./../../component/select"
 import { CheckBoxGroupConfiguration_serializer, CheckboxGroupResult_serializer, CheckBoxGroupConfiguration, OnCheckboxGroupChangeCallback, CheckboxGroupResult } from "./../../component/checkboxgroup"
 import { OnFoldStatusChangeInfo_serializer, HoverEventParam_serializer, OnFoldStatusChangeCallback, OnFoldStatusChangeInfo, OnHoverStatusChangeCallback, HoverEventParam } from "./../../component/folderStack"
-import { VisibleListContentInfo_serializer, ScrollState, OnScrollVisibleContentChangeCallback, VisibleListContentInfo } from "./../../component/list"
+import { VisibleListContentInfo_serializer, OnListScrollIndexCallback, ScrollState, OnScrollVisibleContentChangeCallback, VisibleListContentInfo } from "./../../component/list"
 import { SubmitEvent_serializer, OnContentScrollCallback, OnPasteCallback, OnSubmitCallback, EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback } from "./../../component/textInput"
 import { PluginErrorData_serializer, RecordData, PluginErrorCallback, PluginErrorData } from "./../../component/pluginComponent"
 import { ProgressConfiguration_serializer, ProgressConfiguration } from "./../../component/progress"
@@ -75,7 +75,7 @@ import { RefreshStatus } from "./../../component/refresh"
 import { SwipeActionState } from "./../../component/listItem"
 import { Resource } from "global.resource"
 import { AsyncCallback, ErrorCallback, BusinessError } from "@ohos.base"
-import { GetItemMainSizeByIndex } from "./../../component/waterFlow"
+import { GetItemMainSizeByIndex, OnWaterFlowScrollIndexCallback } from "./../../component/waterFlow"
 import { OnAlphabetIndexerPopupSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerSelectCallback } from "./../../component/alphabetIndexer"
 import { OnLinearIndicatorChangeCallback } from "./../../component/linearindicator"
 import { OnPickerCallback } from "./../../component/picker"
@@ -2569,6 +2569,12 @@ export function deserializeAndCallOnDidChangeCallback(thisDeserializer: Deserial
     let rangeAfter : TextRange = TextRange_serializer.read(thisDeserializer)
     _call(rangeBefore, rangeAfter)
 }
+export function deserializeAndCallOnDidStopDraggingCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnDidStopDraggingCallback)
+    let willFling : boolean = thisDeserializer.readBoolean()
+    _call(willFling)
+}
 export function deserializeAndCallOnDragEventCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnDragEventCallback)
@@ -2604,6 +2610,13 @@ export function deserializeAndCallOnFullScreenEnterCallback(thisDeserializer: De
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnFullScreenEnterCallback)
     let event : FullScreenEnterEvent = FullScreenEnterEvent_serializer.read(thisDeserializer)
     _call(event)
+}
+export function deserializeAndCallOnGridScrollIndexCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnGridScrollIndexCallback)
+    let first : int32 = thisDeserializer.readInt32()
+    let last : int32 = thisDeserializer.readInt32()
+    _call(first, last)
 }
 export function deserializeAndCallOnHoverCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2663,6 +2676,14 @@ export function deserializeAndCallOnLinearIndicatorChangeCallback(thisDeserializ
     let index : number = (thisDeserializer.readNumber() as number)
     let progress : number = (thisDeserializer.readNumber() as number)
     _call(index, progress)
+}
+export function deserializeAndCallOnListScrollIndexCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnListScrollIndexCallback)
+    let start : int32 = thisDeserializer.readInt32()
+    let end : int32 = thisDeserializer.readInt32()
+    let center : int32 = thisDeserializer.readInt32()
+    _call(start, end, center)
 }
 export function deserializeAndCallOnMenuItemClickCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2987,6 +3008,13 @@ export function deserializeAndCallOnViewportFitChangedCallback(thisDeserializer:
     let viewportFit : ViewportFit = ViewportFit.fromValue(thisDeserializer.readInt32())
     _call(viewportFit)
 }
+export function deserializeAndCallOnWaterFlowScrollIndexCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnWaterFlowScrollIndexCallback)
+    let first : int32 = thisDeserializer.readInt32()
+    let last : int32 = thisDeserializer.readInt32()
+    _call(first, last)
+}
 export function deserializeAndCallOnWillScrollCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnWillScrollCallback)
@@ -3014,6 +3042,12 @@ export function deserializeAndCallOnWillScrollCallback(thisDeserializer: Deseria
     }
     const _callResult  = _call(scrollOffset, scrollState, scrollSource)
     continuationResult(_callResult)
+}
+export function deserializeAndCallOnWillStopDraggingCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnWillStopDraggingCallback)
+    let velocity : double = thisDeserializer.readFloat64()
+    _call(velocity)
 }
 export function deserializeAndCallPageMapBuilder(thisDeserializer: DeserializerBase): void {
     // const _resourceId : int32 = thisDeserializer.readInt32()
@@ -3188,6 +3222,12 @@ export function deserializeAndCallSaveButtonCallback(thisDeserializer: Deseriali
     }
     let error : BusinessError | undefined = errorTmpBuf
     _call(event, result, error)
+}
+export function deserializeAndCallScrollOnDidZoomCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ScrollOnDidZoomCallback)
+    let scale : double = thisDeserializer.readFloat64()
+    _call(scale)
 }
 export function deserializeAndCallScrollOnScrollCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -3946,17 +3986,20 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_OnCreateMenuCallback: return deserializeAndCallOnCreateMenuCallback(thisDeserializer);
         case CallbackKind.Kind_OnDetectBlankScreenCallback: return deserializeAndCallOnDetectBlankScreenCallback(thisDeserializer);
         case CallbackKind.Kind_OnDidChangeCallback: return deserializeAndCallOnDidChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnDidStopDraggingCallback: return deserializeAndCallOnDidStopDraggingCallback(thisDeserializer);
         case CallbackKind.Kind_OnDragEventCallback: return deserializeAndCallOnDragEventCallback(thisDeserializer);
         case CallbackKind.Kind_OnFirstMeaningfulPaintCallback: return deserializeAndCallOnFirstMeaningfulPaintCallback(thisDeserializer);
         case CallbackKind.Kind_OnFirstScreenPaintCallback: return deserializeAndCallOnFirstScreenPaintCallback(thisDeserializer);
         case CallbackKind.Kind_OnFoldStatusChangeCallback: return deserializeAndCallOnFoldStatusChangeCallback(thisDeserializer);
         case CallbackKind.Kind_OnFullScreenEnterCallback: return deserializeAndCallOnFullScreenEnterCallback(thisDeserializer);
+        case CallbackKind.Kind_OnGridScrollIndexCallback: return deserializeAndCallOnGridScrollIndexCallback(thisDeserializer);
         case CallbackKind.Kind_OnHoverCallback: return deserializeAndCallOnHoverCallback(thisDeserializer);
         case CallbackKind.Kind_OnHoverStatusChangeCallback: return deserializeAndCallOnHoverStatusChangeCallback(thisDeserializer);
         case CallbackKind.Kind_OnIntelligentTrackingPreventionCallback: return deserializeAndCallOnIntelligentTrackingPreventionCallback(thisDeserializer);
         case CallbackKind.Kind_OnItemDragStartCallback: return deserializeAndCallOnItemDragStartCallback(thisDeserializer);
         case CallbackKind.Kind_OnLargestContentfulPaintCallback: return deserializeAndCallOnLargestContentfulPaintCallback(thisDeserializer);
         case CallbackKind.Kind_OnLinearIndicatorChangeCallback: return deserializeAndCallOnLinearIndicatorChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnListScrollIndexCallback: return deserializeAndCallOnListScrollIndexCallback(thisDeserializer);
         case CallbackKind.Kind_OnMenuItemClickCallback: return deserializeAndCallOnMenuItemClickCallback(thisDeserializer);
         case CallbackKind.Kind_OnMicrophoneCaptureStateChangeCallback: return deserializeAndCallOnMicrophoneCaptureStateChangeCallback(thisDeserializer);
         case CallbackKind.Kind_OnMoveHandler: return deserializeAndCallOnMoveHandler(thisDeserializer);
@@ -3991,7 +4034,9 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_OnTextSelectionChangeCallback: return deserializeAndCallOnTextSelectionChangeCallback(thisDeserializer);
         case CallbackKind.Kind_OnTimePickerChangeCallback: return deserializeAndCallOnTimePickerChangeCallback(thisDeserializer);
         case CallbackKind.Kind_OnViewportFitChangedCallback: return deserializeAndCallOnViewportFitChangedCallback(thisDeserializer);
+        case CallbackKind.Kind_OnWaterFlowScrollIndexCallback: return deserializeAndCallOnWaterFlowScrollIndexCallback(thisDeserializer);
         case CallbackKind.Kind_OnWillScrollCallback: return deserializeAndCallOnWillScrollCallback(thisDeserializer);
+        case CallbackKind.Kind_OnWillStopDraggingCallback: return deserializeAndCallOnWillStopDraggingCallback(thisDeserializer);
         case CallbackKind.Kind_PageMapBuilder: return deserializeAndCallPageMapBuilder(thisDeserializer);
         case CallbackKind.Kind_PageTransitionCallback: return deserializeAndCallPageTransitionCallback(thisDeserializer);
         case CallbackKind.Kind_PasteButtonCallback: return deserializeAndCallPasteButtonCallback(thisDeserializer);
@@ -4007,6 +4052,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_ReuseIdCallback: return deserializeAndCallReuseIdCallback(thisDeserializer);
         case CallbackKind.Kind_RouterFinishCallback: return deserializeAndCallRouterFinishCallback(thisDeserializer);
         case CallbackKind.Kind_SaveButtonCallback: return deserializeAndCallSaveButtonCallback(thisDeserializer);
+        case CallbackKind.Kind_ScrollOnDidZoomCallback: return deserializeAndCallScrollOnDidZoomCallback(thisDeserializer);
         case CallbackKind.Kind_ScrollOnScrollCallback: return deserializeAndCallScrollOnScrollCallback(thisDeserializer);
         case CallbackKind.Kind_ScrollOnWillScrollCallback: return deserializeAndCallScrollOnWillScrollCallback(thisDeserializer);
         case CallbackKind.Kind_SearchSubmitCallback: return deserializeAndCallSearchSubmitCallback(thisDeserializer);

@@ -44,6 +44,11 @@ public:
     static void SetInitialOffset(FrameNode* frameNode, const std::optional<OffsetT<CalcDimension>>& offset);
     static void SetEdgeEffect(FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect,
         const std::optional<bool>& alwaysEnabled, EffectEdge edge = EffectEdge::ALL);
+    static void SetMaxZoomScale(FrameNode* frameNode, float scale);
+    static void SetMinZoomScale(FrameNode* frameNode, float scale);
+    static void SetZoomScale(FrameNode* frameNode, const std::optional<float>& scale);
+    static void SetZoomScaleChangeEvent(FrameNode* frameNode, std::function<void(float)>&& event);
+    static void SetEnableBouncesZoom(FrameNode* frameNode, bool enable);
 
     static void SetOnScroll(FrameNode* frameNode, NG::ScrollEvent&& event);
     static void SetOnWillScroll(FrameNode* frameNode, NG::ScrollEventWithReturn&& event);
@@ -53,6 +58,9 @@ public:
     static void SetOnScrollEnd(FrameNode* frameNode, ScrollEndEvent&& event);
     static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& event);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& event);
+    static void SetOnDidZoom(FrameNode* frameNode, std::function<void(float)>&& event);
+    static void SetOnZoomStart(FrameNode* frameNode, std::function<void()>&& event);
+    static void SetOnZoomStop(FrameNode* frameNode, std::function<void()>&& event);
 };
 
 } // namespace OHOS::Ace::NG

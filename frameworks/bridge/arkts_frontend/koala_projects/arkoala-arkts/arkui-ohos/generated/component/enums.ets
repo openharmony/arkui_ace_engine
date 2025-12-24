@@ -780,3 +780,12 @@ export enum AxisType {
     HORIZONTAL_AXIS = 1,
     PINCH_AXIS = 2
 }
+export enum FocusWrapMode {
+    DEFAULT = 0,
+    WRAP_WITH_ARROW = 1
+}
+export enum PresetFillType {
+    BREAKPOINT_DEFAULT = 0,
+    BREAKPOINT_SM1MD2LG3 = 1,
+    BREAKPOINT_SM2MD3LG5 = 2
+}
