@@ -353,6 +353,7 @@ ArkUINativeModuleValue CheckboxBridge::SetContentModifierBuilder(ArkUIRuntimeCal
         [vm, frameNode, obj = std::move(obj), containerId = Container::CurrentId()](
             CheckBoxConfiguration config) -> RefPtr<FrameNode> {
             ContainerScope scope(containerId);
+            LocalScope pandaScope(vm);
             auto context = ArkTSUtils::GetContext(vm);
             CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
             const char* keysOfCheckbox[] = { "name", "selected", "enabled", "triggerChange"};
@@ -364,7 +365,6 @@ ArkUINativeModuleValue CheckboxBridge::SetContentModifierBuilder(ArkUIRuntimeCal
             checkbox->SetNativePointerFieldCount(vm, 1);
             checkbox->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
             panda::Local<panda::JSValueRef> params[2] = { context, checkbox };
-            LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));

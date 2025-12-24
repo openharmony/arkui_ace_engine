@@ -845,13 +845,13 @@ ArkUINativeModuleValue SelectBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
         [vm, frameNode, obj = std::move(obj), containerId = Container::CurrentId()](
             MenuItemConfiguration config) -> RefPtr<FrameNode> {
             ContainerScope scope(containerId);
+            LocalScope pandaScope(vm);
             auto context = ArkTSUtils::GetContext(vm);
             CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
             auto select = ConstructSelect(vm, frameNode, config);
             select->SetNativePointerFieldCount(vm, 1);
             select->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
             panda::Local<panda::JSValueRef> params[] = { context, select };
-            LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
