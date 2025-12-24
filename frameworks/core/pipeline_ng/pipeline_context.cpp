@@ -56,7 +56,6 @@
 #include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/text_field_manager.h"
-#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/base/ui_node_gc.h"
@@ -1704,6 +1703,7 @@ void PipelineContext::SetupRootElement()
     auto frameNode = DynamicCast<FrameNode>(installationFree_ ? atomicService->GetParent() :
         stageNode->GetParent());
     overlayManager_ = MakeRefPtr<OverlayManager>(frameNode);
+    inspectorOffscreenNodesMgr_ = MakeRefPtr<InspectorOffscreenNodesMgr>();
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     fontManager_->AddFontObserver(selectOverlayManager_);
@@ -1824,6 +1824,7 @@ void PipelineContext::SetupSubRootElement()
     };
     stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
+    inspectorOffscreenNodesMgr_ = MakeRefPtr<InspectorOffscreenNodesMgr>();
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     fontManager_->AddFontObserver(selectOverlayManager_);
@@ -2442,6 +2443,11 @@ void PipelineContext::UpdateSystemSafeAreaWithoutAnimation(const SafeAreaInsets&
     if (safeAreaManager_->UpdateSystemSafeArea(systemSafeArea)) {
         SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
     }
+}
+
+const RefPtr<InspectorOffscreenNodesMgr>& PipelineContext::GetInspectorOffscreenNodesMgr()
+{
+    return inspectorOffscreenNodesMgr_;
 }
 
 void PipelineContext::UpdateCutoutSafeAreaWithoutAnimation(const SafeAreaInsets& cutoutSafeArea,
@@ -5278,14 +5284,6 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
     renderContext->UpdateWindowBlur();
 }
 
-void PipelineContext::ClearInspectorOffScreenNodes()
-{
-    auto containerLocalSet = ContainerScope::GetAllLocalContainer();
-    if (static_cast<uint32_t>(containerLocalSet.size()) == 1 && *containerLocalSet.cbegin() == instanceId_) {
-        Inspector::ClearAllOffscreenNodes();
-    }
-}
-
 void PipelineContext::Destroy()
 {
     CHECK_RUN_ON(UI);
@@ -5340,7 +5338,6 @@ void PipelineContext::Destroy()
     uiExtensionManager_.Reset();
 #endif
     uiContextImpl_.Reset();
-    ClearInspectorOffScreenNodes();
     PipelineBase::Destroy();
 }
 
