@@ -658,9 +658,6 @@ static napi_value JSRouterGetLength(napi_env env, napi_callback_info info)
 static napi_value JSRouterGetStackSize(napi_env env, napi_callback_info info)
 {
     napi_value result = nullptr;
-    if (TryGetLengthFromDynamicIfNeeded(env, info, result)) {
-        return result;
-    }
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "UI execution context not found.");

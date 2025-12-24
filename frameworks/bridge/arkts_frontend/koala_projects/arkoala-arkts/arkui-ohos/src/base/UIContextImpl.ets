@@ -635,6 +635,16 @@ export class RouterImpl extends Router {
         return result;
     }
 
+    public getStackSize(): int {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.getStackSize();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
     public getParams(): Object {
         if (this.router_ === undefined) {
             throw Error("router set in uiContext is empty");

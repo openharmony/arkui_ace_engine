@@ -161,6 +161,9 @@ export class Router {
     public getLength(): string {
         throw Error("getLength not implemented in Router!");
     }
+    public getStackSize(): int {
+        throw Error("getStackSize not implemented in Router!")
+    }
 
     public getParams(): Object {
         throw Error("getParams not implemented in Router!");

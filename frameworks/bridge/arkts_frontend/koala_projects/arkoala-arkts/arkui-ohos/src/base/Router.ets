@@ -200,6 +200,8 @@ export interface Router {
 
     getLength(): string
 
+    getStackSize(): int
+
     getParams(): Object
 
     getState(): router.RouterState
@@ -867,6 +869,10 @@ export class RouterImpl implements Router {
 
     getLength(): string {
         return String(this.visiblePages.length)
+    }
+
+    getStackSize(): int {
+        return this.visiblePages.length
     }
 
     getState(): router.RouterState {
