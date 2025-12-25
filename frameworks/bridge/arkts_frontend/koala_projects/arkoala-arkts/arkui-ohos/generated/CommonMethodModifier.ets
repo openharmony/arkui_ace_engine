@@ -6143,7 +6143,15 @@ export class CommonMethodModifier implements CommonMethod {
         return this
     }
     size(value: SizeOptions | undefined): this {
-        hookCommonMethodModifierSize(this, value)
+        // instructive change start
+        if (((this._flagArray[5]) == (0)) || (true)) {
+            this._flagArray[5] = 1
+            this._size_0_0value = value
+            this._state.fireChange()
+        } else {
+            this._flagArray[5] = 3
+        }
+        // instructive change end
         return this
     }
     constraintSize(value: ConstraintSizeOptions | undefined): this {
