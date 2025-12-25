@@ -147,6 +147,14 @@
       OHOS::Ace::DividerModel::*;
       OHOS::Ace::EllipseModel::*;
       OHOS::Ace::ForEachModel::*;
+      OHOS::Ace::NG::BorderRadiusPropertyT*;
+      OHOS::Ace::NG::BorderStyleProperty::*;
+      OHOS::Ace::NG::ButtonPattern*;
+      OHOS::Ace::NG::CommonBridge::ParseLayoutPolicy*;
+      OHOS::Ace::ResourceParseUtils::ConvertFromResObjNG*;
+      "bool OHOS::Ace::ResourceParseUtils::ConvertFromResObjNG<OHOS::Ace::Dimension>(OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&, OHOS::Ace::Dimension&)";
+      OHOS::Ace::CounterComponent*;
+      OHOS::Ace::AceForwardCompatibility::IsUseNG*;
       OHOS::Ace::NG::GaugeModelNG::*;
       "OHOS::Ace::GaugeModel::GetInstance()";
       "OHOS::Ace::GaugeModel::instance_";
@@ -441,6 +449,7 @@
       OHOS::Ace::NG::Modifier::*;
       OHOS::Ace::NG::ArkTSUtils::*;
       "OHOS::Ace::NG::TextPattern::TextPattern()";
+      OHOS::Ace::NG::TextPattern::UpdateFontColor*;
       OHOS::Ace::NG::ViewAbstractModelStatic::*;
       OHOS::Ace::FlexElement::*;
       OHOS::Ace::FocusGroup::*;
@@ -545,6 +554,8 @@
       vtable?for?OHOS::Ace::BoxComponent;
       vtable?for?OHOS::Ace::PageTransitionComponent;
       vtable?for?OHOS::Ace::Framework::DOMDocument;
+      vtable?for?OHOS::Ace::NG::ButtonPattern;
+      vtable?for?OHOS::Ace::CounterComponent;
       vtable?for?OHOS::Ace::NG::TapGesture;
       vtable?for?OHOS::Ace::NG::LongPressGesture;
       vtable?for?OHOS::Ace::NG::PinchGesture;
@@ -596,6 +607,8 @@
       VTT?for?OHOS::Ace::BoxComponent;
       VTT?for?OHOS::Ace::PageTransitionComponent;
       VTT?for?OHOS::Ace::Framework::DOMDocument;
+      VTT?for?OHOS::Ace::NG::ButtonPattern;
+      VTT?for?OHOS::Ace::CounterComponent;
       VTT?for?OHOS::Ace::NG::TapGesture;
       VTT?for?OHOS::Ace::NG::LongPressGesture;
       VTT?for?OHOS::Ace::NG::PinchGesture;

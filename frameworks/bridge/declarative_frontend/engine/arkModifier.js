@@ -472,10 +472,58 @@ class ColumnSplitModifier extends ArkColumnSplitComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class CounterModifier extends ArkCounterComponent {
+class LazyArkCounterComponent extends ArkComponent {
+    static module = undefined;
+
+    constructor(nativePtr, classType) {
+      super(nativePtr, classType);
+      if (LazyArkCounterComponent.module === undefined) {
+        LazyArkCounterComponent.module = globalThis.requireNapi('arkui.components.arkcounter');
+      }
+      this.lazyComponent = LazyArkCounterComponent.module.createComponent(nativePtr, classType);
+      console.log("LazyArkCounterComponent lazyload nativeModule");
+    }
+    setMap() {
+      this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+    }
+    onInc(event) {
+      this.lazyComponent.onInc(event);
+      return this;
+    }
+    onDec(event) {
+      this.lazyComponent.onDec(event);
+      return this;
+    }
+    enableDec(value) {
+      this.lazyComponent.enableDec(value);
+      return this;
+    }
+    enableInc(value) {
+      this.lazyComponent.enableInc(value);
+      return this;
+    }
+    backgroundColor(value) {
+      this.lazyComponent.backgroundColor(value);
+      return this;
+    }
+    width(value) {
+      this.lazyComponent.width(value);
+      return this;
+    }
+    height(value) {
+      this.lazyComponent.height(value);
+      return this;
+    }
+    size(value) {
+      this.lazyComponent.size(value);
+      return this;
+    }
+}
+class CounterModifier extends LazyArkCounterComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

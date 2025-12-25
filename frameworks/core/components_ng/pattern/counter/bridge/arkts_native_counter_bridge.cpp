@@ -12,26 +12,97 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.h"
+#include "core/components_ng/pattern/counter/bridge/arkts_native_counter_bridge.h"
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components_ng/pattern/counter/counter_model_ng.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
+{
+    if (firstArg->IsNativePointer(vm)) {
+        nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+        return true;
+    }
+    if (firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value()) {
+        nativeNode = nullptr;
+        return true;
+    }
+
+    return false;
+}
+
+bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
+{
+    return firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
+}
+} // namespace
+void CounterBridge::RegisterCounterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    LOGE("Start RegisterCounterAttributes nativeModule");
+
+    const char* functionNames[] = { "create", "setEnableInc", "resetEnableInc", "setEnableDec",
+        "resetEnableDec", "setCounterHeight", "resetCounterHeight", "setCounterWidth",
+        "resetCounterWidth", "setCounterBackgroundColor", "resetCounterBackgroundColor", "setCounterSize",
+        "resetCounterSize", "setCounterOnInc", "resetCounterOnInc", "setCounterOnDec", "resetCounterOnDec", };
+
+    Local<JSValueRef> funcValues[] = {
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::CreateCounter),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetEnableInc),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetEnableInc),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetEnableDec),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetEnableDec),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterHeight),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterHeight),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterWidth),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterWidth),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterBackgroundColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterBackgroundColor),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterSize),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterSize),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterOnInc),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterOnInc),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterOnDec),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterOnDec),
+    };
+
+    auto counter = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "counter"), counter);
+    LOGE("Finish RegisterCounterAttributes nativeModule");
+}
+
+ArkUINativeModuleValue CounterBridge::CreateCounter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+
+    static CounterModelNG model;
+    model.Create();
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue CounterBridge::SetEnableInc(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> flagArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if (flagArg->IsUndefined() || !flagArg->IsBoolean()) {
+
+    bool isJsView = IsJsView(firstArg, vm);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+
+    bool hasValidFlag = flagArg->IsBoolean();
+    bool flagValue = hasValidFlag ? flagArg->ToBoolean(vm)->Value() : true;
+
+    if (!hasValidFlag && !isJsView) {
         GetArkUINodeModifiers()->getCounterModifier()->resetEnableInc(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    bool flag = flagArg->ToBoolean(vm)->Value();
-    GetArkUINodeModifiers()->getCounterModifier()->setEnableInc(nativeNode, flag);
+
+    GetArkUINodeModifiers()->getCounterModifier()->setEnableInc(nativeNode, flagValue);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -50,16 +121,22 @@ ArkUINativeModuleValue CounterBridge::SetEnableDec(ArkUIRuntimeCallInfo* runtime
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> flagArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if (flagArg->IsUndefined() || !flagArg->IsBoolean()) {
+
+    bool isJsView = IsJsView(firstArg, vm);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+
+    bool hasValidFlag = flagArg->IsBoolean();
+    bool flagValue = hasValidFlag ? flagArg->ToBoolean(vm)->Value() : true;
+
+    if (!isJsView && !hasValidFlag) {
         GetArkUINodeModifiers()->getCounterModifier()->resetEnableDec(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    bool flag = flagArg->ToBoolean(vm)->Value();
-    GetArkUINodeModifiers()->getCounterModifier()->setEnableDec(nativeNode, flag);
+
+    GetArkUINodeModifiers()->getCounterModifier()->setEnableDec(nativeNode, flagValue);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -78,10 +155,11 @@ ArkUINativeModuleValue CounterBridge::SetCounterHeight(ArkUIRuntimeCallInfo* run
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> heightValue = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
 
     CalcDimension height;
     RefPtr<ResourceObject> heightResObj;
@@ -111,9 +189,11 @@ ArkUINativeModuleValue CounterBridge::ResetCounterHeight(ArkUIRuntimeCallInfo* r
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+
     GetArkUINodeModifiers()->getCounterModifier()->resetCounterHeight(nativeNode);
     ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
     return panda::JSValueRef::Undefined(vm);
@@ -123,10 +203,11 @@ ArkUINativeModuleValue CounterBridge::SetCounterWidth(ArkUIRuntimeCallInfo* runt
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> widthValue = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
 
     CalcDimension width;
     RefPtr<ResourceObject> widthResObj;
@@ -156,9 +237,11 @@ ArkUINativeModuleValue CounterBridge::ResetCounterWidth(ArkUIRuntimeCallInfo* ru
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+
     GetArkUINodeModifiers()->getCounterModifier()->resetCounterWidth(nativeNode);
     ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
     return panda::JSValueRef::Undefined(vm);
@@ -170,8 +253,8 @@ ArkUINativeModuleValue CounterBridge::SetCounterBackgroundColor(ArkUIRuntimeCall
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     Color color;
     RefPtr<ResourceObject> colorResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
@@ -189,9 +272,11 @@ ArkUINativeModuleValue CounterBridge::ResetCounterBackgroundColor(ArkUIRuntimeCa
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+
     GetArkUINodeModifiers()->getCounterModifier()->resetCounterBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -200,14 +285,17 @@ ArkUINativeModuleValue CounterBridge::SetCounterSize(ArkUIRuntimeCallInfo* runti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+
     Local<JSValueRef> widthValue = runtimeCallInfo->GetCallArgRef(1); // 1: width Value
     Local<JSValueRef> heightValue = runtimeCallInfo->GetCallArgRef(2); // 2: height Value
     CalcDimension width;
     RefPtr<ResourceObject> widthResObj;
     ArkTSUtils::ParseJsDimensionVp(vm, widthValue, width, widthResObj, false);
+
     if (GreatNotEqual(width.Value(), 0.0)) {
         auto widthRawPtr = AceType::RawPtr(widthResObj);
         GetArkUINodeModifiers()->getCounterModifier()->setCounterWidthRes(
@@ -218,6 +306,7 @@ ArkUINativeModuleValue CounterBridge::SetCounterSize(ArkUIRuntimeCallInfo* runti
     CalcDimension height;
     RefPtr<ResourceObject> heightResObj;
     ArkTSUtils::ParseJsDimensionVp(vm, heightValue, height, heightResObj, false);
+
     if (GreatNotEqual(height.Value(), 0.0)) {
         auto heightRawPtr = AceType::RawPtr(heightResObj);
         GetArkUINodeModifiers()->getCounterModifier()->setCounterHeightRes(
@@ -232,9 +321,11 @@ ArkUINativeModuleValue CounterBridge::ResetCounterSize(ArkUIRuntimeCallInfo* run
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+
     GetArkUINodeModifiers()->getCounterModifier()->resetCounterWidth(nativeNode);
     GetArkUINodeModifiers()->getCounterModifier()->resetCounterHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -246,19 +337,35 @@ ArkUINativeModuleValue CounterBridge::SetCounterOnInc(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+
+    bool isJsView = IsJsView(firstArg, vm);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    bool isValidCallback = callbackArg->IsFunction(vm);
+    if (!isJsView && (!isValidCallback || callbackArg->IsUndefined() || callbackArg->IsNull())) {
         GetArkUINodeModifiers()->getCounterModifier()->resetCounterOnInc(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    if (isJsView && !isValidCallback) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    FrameNode* frameNode = nullptr;
+    if (isJsView) {
+        frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    } else {
+        frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    }
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void()> callback = [vm, isJsView, frameNode, func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        func->Call(vm, func.ToLocal(), nullptr, 0);
+        auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+        }
     };
     GetArkUINodeModifiers()->getCounterModifier()->setCounterOnInc(nativeNode, reinterpret_cast<void*>(&callback));
     return panda::JSValueRef::Undefined(vm);
@@ -269,8 +376,10 @@ ArkUINativeModuleValue CounterBridge::ResetCounterOnInc(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+
     GetArkUINodeModifiers()->getCounterModifier()->resetCounterOnInc(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -281,19 +390,34 @@ ArkUINativeModuleValue CounterBridge::SetCounterOnDec(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+
+    bool isJsView = IsJsView(firstArg, vm);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    bool isValidCallback = callbackArg->IsFunction(vm);
+    if (!isJsView && (!isValidCallback || callbackArg->IsUndefined() || callbackArg->IsNull())) {
         GetArkUINodeModifiers()->getCounterModifier()->resetCounterOnDec(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    if (isJsView && !isValidCallback) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    FrameNode* frameNode = nullptr;
+    if (isJsView) {
+        frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    } else {
+        frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    }
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void()> callback = [vm, isJsView, frameNode, func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        func->Call(vm, func.ToLocal(), nullptr, 0);
+        auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+        }
     };
     GetArkUINodeModifiers()->getCounterModifier()->setCounterOnDec(nativeNode, reinterpret_cast<void*>(&callback));
     return panda::JSValueRef::Undefined(vm);
@@ -304,8 +428,10 @@ ArkUINativeModuleValue CounterBridge::ResetCounterOnDec(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+
     GetArkUINodeModifiers()->getCounterModifier()->resetCounterOnDec(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
