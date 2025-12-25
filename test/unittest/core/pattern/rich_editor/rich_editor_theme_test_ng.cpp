@@ -71,9 +71,16 @@ void RichEditorThemeTestNg::TearDownTestSuite()
  */
 HWTEST_F(RichEditorThemeTestNg, RichEditorThemePadding, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get rich editor pattern.
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. mock rich editor theme.
+     */
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     auto resourceAdapter = AceType::MakeRefPtr<MockResourceAdapterV2>();
@@ -82,6 +89,10 @@ HWTEST_F(RichEditorThemeTestNg, RichEditorThemePadding, TestSize.Level0)
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(RichEditorTheme::Builder().Build(themeConstants)));
     EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(RichEditorTheme::Builder().Build(themeConstants)));
     pipeline->SetThemeManager(theme);
+
+    /**
+     * @tc.steps: step3. get rich editor theme from pattern.
+     */
     auto richEditorTheme = richEditorPattern->GetTheme<RichEditorTheme>();
     EXPECT_TRUE(static_cast<bool>(richEditorTheme));
     auto padding = richEditorTheme->GetPadding();
