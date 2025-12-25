@@ -315,7 +315,7 @@ class JSBuilderNode extends BaseNode {
         }
     }
     clearChildBuilderNodeWeakMap() {
-        this.builderNodeWeakrefMap_.forEach((weakRefChild) => {
+        this.builderNodeWeakrefMap_?.forEach((weakRefChild) => {
             const child = weakRefChild?.deref();
             if (child instanceof JSBuilderNode) {
                 child.__parentViewOfBuildNode = undefined;

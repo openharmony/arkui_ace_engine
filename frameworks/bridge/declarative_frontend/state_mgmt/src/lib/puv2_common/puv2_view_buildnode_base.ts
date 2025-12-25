@@ -26,7 +26,7 @@ abstract class ViewBuildNodeBase {
     protected isView_: boolean;
     protected childrenWeakrefMap_ = new Map<number, WeakRef<IView>>();
     // Tracks all child BuilderNodes of this ViewBuildNodeBase instance using WeakRefs.
-    protected builderNodeWeakrefMap_ = new Map<number, WeakRef<ViewBuildNodeBase>>();
+    protected builderNodeWeakrefMap__?: Map<number, WeakRef<ViewBuildNodeBase>>;
     protected updateFuncByElmtId = new UpdateFuncsByElmtId();
     protected id_: number;
     protected shareLocalStorage_: LocalStorage = undefined;
@@ -56,9 +56,19 @@ abstract class ViewBuildNodeBase {
 
     constructor(isView: boolean) {
         this.isView_ = isView;
-        this.childrenWeakrefMap_ = new Map();
-        this.builderNodeWeakrefMap_ = new Map();
     }
+
+    get builderNodeWeakrefMap_(): Map<number, WeakRef<ViewBuildNodeBase>> | undefined {
+        return this.builderNodeWeakrefMap__;
+    }
+
+    getOrCreateBuilderNodeWeakrefMap(): Map<number, WeakRef<ViewBuildNodeBase>> {
+        if (!this.builderNodeWeakrefMap__) {
+            this.builderNodeWeakrefMap__ = new Map<number, WeakRef<ViewBuildNodeBase>>();
+        }
+        return this.builderNodeWeakrefMap__;
+    }
+
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__(): number {
         return this.id_;
@@ -118,11 +128,11 @@ abstract class ViewBuildNodeBase {
      */
     public addChildBuilderNode(child: ViewBuildNodeBase): boolean {
         stateMgmtConsole.debug(`BuildNode ${child?.debugInfo__()} is added to the ${this.debugInfo__()}`);
-        if (this.builderNodeWeakrefMap_.has(child.id__())) {
+        if (this.builderNodeWeakrefMap_?.has(child.id__())) {
             stateMgmtConsole.warn(`${this.debugInfo__()}: addChildBuilderNode '${child?.debugInfo__()}' elmtId already exists ${child.id__()}. Internal error!`);
             return false;
         }
-        this.builderNodeWeakrefMap_.set(child.id__(), new WeakRef(child));
+        this.getOrCreateBuilderNodeWeakrefMap().set(child.id__(), new WeakRef(child));
         // recursively check children for buildNode and view
         // if it has the default consume needs to reconnect the provide
         if (child.__enableBuilderNodeConsume__) {
@@ -137,9 +147,9 @@ abstract class ViewBuildNodeBase {
      * Invoke by buildNode when it attach to the view.
      */
     propagateToChildrenToConnected(): void {
-        if (this instanceof ViewPU && this.defaultConsume_.size > 0) {
+        if (this instanceof ViewPU && this.defaultConsume_ && this.defaultConsume_.size > 0) {
             this.reconnectToConsume()
-        } else if (this instanceof ViewV2 && this.defaultConsumerV2__.size > 0) {
+        } else if (this instanceof ViewV2 && this.defaultConsumerV2_ && this.defaultConsumerV2_.size > 0) {
             this.__reconnectToConsumer__ViewV2__Internal();
         }
 
@@ -149,7 +159,7 @@ abstract class ViewBuildNodeBase {
                 child.propagateToChildrenToConnected();
             }
         })
-        this.builderNodeWeakrefMap_.forEach((weakRefChild) => {
+        this.builderNodeWeakrefMap_?.forEach((weakRefChild) => {
             const child = weakRefChild?.deref();
             if (child instanceof ViewBuildNodeBase && child.__enableBuilderNodeConsume__) {
                 child.propagateToChildrenToConnected();
@@ -163,24 +173,25 @@ abstract class ViewBuildNodeBase {
      */
     public removeChildBuilderNode(elmtId: number): void {
         stateMgmtConsole.debug(`BuildNode ${elmtId} is removed from the ${this.debugInfo__()}`);
-        if (!this.builderNodeWeakrefMap_.has(elmtId)) {
+        const weakBuilderNode = this.builderNodeWeakrefMap_?.get(elmtId);
+        if (!weakBuilderNode) {
             stateMgmtConsole.warn(`${this.debugInfo__()}: removeChildBuilderNode(${elmtId}) no child with this elmtId. Internal error!`);
             return;
         }
 
-        const buildNode: ViewBuildNodeBase = this.builderNodeWeakrefMap_.get(elmtId)?.deref();
+        const buildNode: ViewBuildNodeBase | undefined = weakBuilderNode.deref();
         // recursively check children for buildNode and view
         // if it has the default consume needs to reconnect the provide
         if (buildNode && buildNode.__enableBuilderNodeConsume__) {
             buildNode.propagateToChildrenToDisconnected();
         }
-        this.builderNodeWeakrefMap_.delete(elmtId);
+        this.builderNodeWeakrefMap_!.delete(elmtId);
     }
     /**
      * Clears all child BuilderNodes from this view
      */
     public clearChildBuilderNode(): void {
-        this.builderNodeWeakrefMap_.clear();
+        this.builderNodeWeakrefMap_?.clear();
     }
 
     /**
@@ -189,9 +200,9 @@ abstract class ViewBuildNodeBase {
      * Invoke by buildNode when it attach to the view.
      */
     public propagateToChildrenToDisconnected(): void {
-        if (this instanceof ViewPU && this.reconnectConsume_.size > 0) {
+        if (this instanceof ViewPU && this.reconnectConsume_ && this.reconnectConsume_.size > 0) {
             this.disconnectedConsume();
-        } else if (this instanceof ViewV2 && this.connectConsumerV2__.size > 0) {
+        } else if (this instanceof ViewV2 && this.connectConsumerV2_ && this.connectConsumerV2_.size > 0) {
             this.__disconnectToConsumer__ViewV2__Internal();
         }
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
@@ -200,7 +211,7 @@ abstract class ViewBuildNodeBase {
                 child.propagateToChildrenToDisconnected();
             }
         })
-        this.builderNodeWeakrefMap_.forEach((weakRefChild) => {
+        this.builderNodeWeakrefMap_?.forEach((weakRefChild) => {
             const child = weakRefChild?.deref();
             if (child instanceof ViewBuildNodeBase && child.__enableBuilderNodeConsume__) {
                 child.propagateToChildrenToDisconnected();

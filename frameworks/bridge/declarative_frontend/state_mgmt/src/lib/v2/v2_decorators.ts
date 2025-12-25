@@ -223,10 +223,10 @@ const Consumer = (aliasName?: string) => {
         let providerInfo = ProviderConsumerUtilV2.findProvider(this, providerName);
         if (providerInfo && providerInfo[0] && providerInfo[1]) {
           ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
-          this.connectConsumerV2__.set(varName, providerName);
+          this.getOrCreateConnectConsumerV2().set(varName, providerName);
         } else {
           ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, val);
-          this.defaultConsumerV2__.set(varName, providerName);
+          this.getOrCreateDefaultConsumerV2().set(varName, providerName);
         }
       },
       enumerable: true,

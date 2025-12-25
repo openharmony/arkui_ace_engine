@@ -33,21 +33,31 @@ type SynchedPropertyFactoryFunc = <T>(source: ObservedPropertyAbstract<T>) => Ob
    and SyncedPropertyTwoWay
 */
 abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T> implements AbstractProperty<T> {
-  protected subscribers_: Set<number>;
+  protected subscribers__?: Set<number>;
   private id_: number;
   protected info_?: PropertyInfo;
   protected isFake_: boolean = false;
   constructor(subscribeMe?: IPropertySubscriber, info?: PropertyInfo) {
     super();
-    this.subscribers_ = new Set<number>();
     this.id_ = SubscriberManager.MakeStateVariableId();
     SubscriberManager.Add(this);
     if (subscribeMe) {
-      this.subscribers_.add(subscribeMe.id__());
+      this.getOrCreateSubscribers().add(subscribeMe.id__());
     }
     if (info) {
       this.info_ = info;
     }
+  }
+
+  get subscribers_(): Set<number> | undefined {
+    return this.subscribers__;
+  }
+
+  getOrCreateSubscribers(): Set<number> {
+    if (!this.subscribers__) {
+      this.subscribers__ = new Set<number>();
+    }
+    return this.subscribers__;
   }
 
   aboutToBeDeleted() {
@@ -83,9 +93,9 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
 
   // update the element id for recycle custom component
   public updateElmtId(oldElmtId: number, newElmtId: number): void {
-    if (this.subscribers_.has(oldElmtId)) {
-      this.subscribers_.delete(oldElmtId);
-      this.subscribers_.add(newElmtId);
+    if (this.subscribers_?.has(oldElmtId)) {
+      this.subscribers_!.delete(oldElmtId);
+      this.subscribers_!.add(newElmtId);
     }
   }
 
@@ -93,7 +103,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
   // Do NOT override in derived classed, use addSubscriber
   public subscribeMe(subscriber: ISinglePropertyChangeSubscriber<T>): void {
     stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || 'unknown'}']: subscribeMe: Property new subscriber '${subscriber.id__()}'`);
-    this.subscribers_.add(subscriber.id__());
+    this.getOrCreateSubscribers().add(subscriber.id__());
   }
 
   /*
@@ -101,7 +111,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
     Do NOT override in derived classed, use removeSubscriber
   */
   public unlinkSuscriber(subscriberId: number): void {
-    this.subscribers_.delete(subscriberId);
+    this.subscribers_?.delete(subscriberId);
   }
 
   /*
@@ -128,7 +138,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
   protected notifyHasChanged(newValue: T) {
     stateMgmtProfiler.begin('ObservedPropertyAbstract.notifyHasChanged');
     stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || 'unknown'}']: notifyHasChanged, notifying.`);
-    this.subscribers_.forEach((subscribedId) => {
+    this.subscribers_?.forEach((subscribedId) => {
       let subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId);
       if (subscriber) {
         // FU code path
@@ -148,7 +158,7 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
   protected notifyPropertyRead() {
     stateMgmtProfiler.begin('ObservedPropertyAbstract.notifyPropertyRead');
     stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || 'unknown'}']: propertyRead.`);
-    this.subscribers_.forEach((subscribedId) => {
+    this.subscribers_?.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (subscriber) {
         if ('propertyRead' in subscriber) {
@@ -163,8 +173,8 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
   return numebr of subscribers to this property
   mostly useful for unit testin
   */
-  public numberOfSubscrbers(): number {
-    return this.subscribers_.size;
+  public numberOfSubscrbers(): number  {
+    return this.subscribers_?.size ?? 0;
   }
 
 

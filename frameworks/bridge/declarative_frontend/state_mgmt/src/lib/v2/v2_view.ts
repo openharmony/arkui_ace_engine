@@ -47,12 +47,12 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     // Set of elmtIds that need re-render
     protected dirtDescendantElementIds_: Set<number> = new Set<number>();
 
-    private monitorIdsDelayedUpdate: Set<number> = new Set();
-    private monitorIdsDelayedUpdateForAddMonitor_: Set<number> = new Set();
-    private computedIdsDelayedUpdate: Set<number> = new Set();
+    private monitorIdsDelayedUpdate__?: Set<number>;
+    private monitorIdsDelayedUpdateForAddMonitor__?: Set<number>;
+    private computedIdsDelayedUpdate__?: Set<number>;
 
-    public defaultConsumerV2__: Map<string, string> = new Map();
-    public connectConsumerV2__: Map<string, string> = new Map();
+    public defaultConsumerV2__?: Map<string, string>;
+    public connectConsumerV2__?: Map<string, string>;
 
     private recyclePoolV2_: RecyclePoolV2 | undefined = undefined;
 
@@ -72,6 +72,61 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             ObserveV2.getObserve().id2cmp_[this.id__()] = new WeakRef(this);
         }
         stateMgmtConsole.debug(`ViewV2 constructor: Creating @ComponentV2 '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
+    }
+    
+    get monitorIdsDelayedUpdate(): Set<number> | undefined {
+        return this.monitorIdsDelayedUpdate__;
+    }
+
+    getOrCreateMonitorIdsDelayedUpdate(): Set<number> {
+        if (!this.monitorIdsDelayedUpdate__) {
+            this.monitorIdsDelayedUpdate__ = new Set<number>();
+        }
+        return this.monitorIdsDelayedUpdate__;
+    }
+
+    get monitorIdsDelayedUpdateForAddMonitor_(): Set<number> | undefined {
+        return this.monitorIdsDelayedUpdateForAddMonitor__;
+    }
+
+    getOrCreateMonitorIdsDelayedUpdateForAddMonitor(): Set<number> {
+        if (!this.monitorIdsDelayedUpdateForAddMonitor__) {
+            this.monitorIdsDelayedUpdateForAddMonitor__ = new Set<number>();
+        }
+        return this.monitorIdsDelayedUpdateForAddMonitor__;
+    }
+
+    get computedIdsDelayedUpdate(): Set<number> | undefined {
+        return this.computedIdsDelayedUpdate__;
+    }
+
+    getOrCreateComputedIdsDelayedUpdate(): Set<number> {
+        if (!this.computedIdsDelayedUpdate__) {
+            this.computedIdsDelayedUpdate__ = new Set<number>();
+        }
+        return this.computedIdsDelayedUpdate__;
+    }
+
+    get defaultConsumerV2_(): Map<string, string> | undefined {
+        return this.defaultConsumerV2__;
+    }
+
+    getOrCreateDefaultConsumerV2(): Map<string, string> {
+        if (!this.defaultConsumerV2__) {
+            this.defaultConsumerV2__ = new Map<string, string>();
+        }
+        return this.defaultConsumerV2__;
+    }
+
+    get connectConsumerV2_(): Map<string, string> | undefined {
+        return this.connectConsumerV2__;
+    }
+
+    getOrCreateConnectConsumerV2(): Map<string, string> {
+        if (!this.connectConsumerV2__) {
+            this.connectConsumerV2__ = new Map<string, string>();
+        }
+        return this.connectConsumerV2__;
     }
 
     /**
@@ -363,8 +418,8 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
                 `${this.debugInfo__()} is in the process of destruction`);
         }
 
-        this.defaultConsumerV2__.clear();
-        this.connectConsumerV2__.clear();
+        this.defaultConsumerV2_?.clear();
+        this.connectConsumerV2_?.clear();
     }
 
     public initialRenderView(): void {
@@ -390,8 +445,8 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      */
     public resetMonitorsOnReuse(): void {
         // Clear the monitorIds set for delayed updates, if any
-        this.monitorIdsDelayedUpdate.clear();
-        this.monitorIdsDelayedUpdateForAddMonitor_.clear()
+        this.monitorIdsDelayedUpdate?.clear();
+        this.monitorIdsDelayedUpdateForAddMonitor_?.clear()
         ObserveV2.getObserve().resetMonitorValues();
 
         this.resetAllMonitorsOnReuse();
@@ -429,7 +484,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     // through the resetStateVarsOnReuse process
     public resetComputed(name: string): void {
         // Clear the computedIds set for delayed updates, if any
-        this.computedIdsDelayedUpdate.clear();
+        this.computedIdsDelayedUpdate?.clear();
 
         const refs = this[ObserveV2.COMPUTED_REFS];
         refs[name].resetComputed(name);
@@ -438,22 +493,22 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     // The Consumer uses providerName when findProvider
     // but uses varName when connect or disconnect.
     public __reconnectToConsumer__ViewV2__Internal<T>(): void {
-        this.defaultConsumerV2__.forEach((value: string, varName: string) => {
+        this.defaultConsumerV2_?.forEach((value: string, varName: string) => {
             const providerInfo = ProviderConsumerUtilV2.findProvider(this, value);
             if (providerInfo && providerInfo[0] && providerInfo[1]) {
                 ProviderConsumerUtilV2.connectConsumer2Provider(this, varName, providerInfo[0], providerInfo[1]);
                 ObserveV2.getObserve().fireChange(this, varName);
-                this.connectConsumerV2__.set(varName, value);
+                this.getOrCreateConnectConsumerV2().set(varName, value);
             }
         })
     }
     public __disconnectToConsumer__ViewV2__Internal<T>(): void {
-        this.connectConsumerV2__.forEach((value: string, varName: string) => {
+        this.connectConsumerV2_?.forEach((value: string, varName: string) => {
             const providerInfo = ProviderConsumerUtilV2.findProvider(this, value);
             if (!providerInfo) {
                 ProviderConsumerUtilV2.defineConsumerWithoutProvider(this, varName, this[ObserveV2.OB_PREFIX + varName]);
                 ObserveV2.getObserve().fireChange(this, varName);
-                this.connectConsumerV2__.delete(varName);
+                this.connectConsumerV2_!.delete(varName);
             }
         })
     }
@@ -713,17 +768,17 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     // monitor fireChange will be triggered for all these watchIds once this view gets active
     public addDelayedMonitorIds(watchId: number): void  {
         stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedMonitorIds called for watchId: ${watchId}`);
-        this.monitorIdsDelayedUpdate.add(watchId);
+        this.getOrCreateMonitorIdsDelayedUpdate().add(watchId);
     }
 
     public addDelayedMonitorIdsForAddMonitor(watchId: number): void  {
         stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedMonitorIdsForAddMonitor called for watchId: ${watchId}`);
-        this.monitorIdsDelayedUpdateForAddMonitor_.add(watchId);
+        this.getOrCreateMonitorIdsDelayedUpdateForAddMonitor().add(watchId);
     }
 
     public addDelayedComputedIds(watchId: number): void {
         stateMgmtConsole.debug(`${this.debugInfo__()} addDelayedComputedIds called for watchId: ${watchId}`);
-        this.computedIdsDelayedUpdate.add(watchId);
+        this.getOrCreateComputedIdsDelayedUpdate().add(watchId);
     }
     // If the component has `hasComponentFreezeEnabled` set to true and is marked as @ReusableV2,
     // skip the delayed update, as freeze and delayed updates are handled in `aboutToRecycleInternal`
@@ -755,15 +810,15 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
     private performDelayedUpdate(): void {
         stateMgmtProfiler.begin('ViewV2: performDelayedUpdate');
-        if(this.computedIdsDelayedUpdate.size) {
+        if(this.computedIdsDelayedUpdate?.size) {
             // exec computed functions
             ObserveV2.getObserve().updateDirtyComputedProps([...this.computedIdsDelayedUpdate]);
         }
-        if(this.monitorIdsDelayedUpdate.size) {
+        if(this.monitorIdsDelayedUpdate?.size) {
           // exec monitor functions
           ObserveV2.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
         }
-        if (this.monitorIdsDelayedUpdateForAddMonitor_.size) {
+        if (this.monitorIdsDelayedUpdateForAddMonitor_?.size) {
             ObserveV2.getObserve().updateDirtyMonitorPath(this.monitorIdsDelayedUpdateForAddMonitor_);
         }
         if (ObserveV2.getObserve().monitorFuncsToRun_.size) {
@@ -784,9 +839,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         }
         this.markNeedUpdate();
         this.elmtIdsDelayedUpdate.clear();
-        this.monitorIdsDelayedUpdate.clear();
-        this.monitorIdsDelayedUpdateForAddMonitor_.clear();
-        this.computedIdsDelayedUpdate.clear();
+        this.monitorIdsDelayedUpdate?.clear();
+        this.monitorIdsDelayedUpdateForAddMonitor_?.clear();
+        this.computedIdsDelayedUpdate?.clear();
         stateMgmtProfiler.end();
     }
 
