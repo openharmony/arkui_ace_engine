@@ -253,7 +253,7 @@ void ImageModelStatic::SetHdrBrightness(FrameNode* frameNode, const std::optiona
 void ImageModelStatic::ResetDraggable(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto draggable = pipeline->GetDraggable<ImageTheme>();
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
