@@ -212,29 +212,13 @@ interface ArcButtonThemeInterface {
 
 @ObservedV2
 export class ArcButtonProgressConfig {
-  /**
-   * 指定当前Progress进度值
-   */
   @Trace public value: double;
-  /**
-   * 指定Progress总进度值
-   */
   @Trace public total?: double;
-  /**
-   * Progress进度条颜色
-   */
   @Trace public color?: ResourceColor;
-}
-
-@ObservedV2
-export class ArcButtonProgress {
-  @Trace public value?: number;
-  @Trace public total?: number;
-  @Trace public color?: ResourceColor;
-  constructor(options: ArcButtonProgressConfig) {
-    this.value = options?.value;
-    this.total = options?.total;
-    this.color = options?.color;
+  constructor(value: double, total?: double, color?:ResourceColor) {
+    this.value = value ?? 0;
+    this.total = total ?? 100;
+    this.color = color ?? Constants.EMPHASIZED_DISABLE_BTN_COLOR;
   }
 }
 
@@ -256,7 +240,7 @@ export class ArcButtonOptions {
   @Trace public fontMargin: LocalizedMargin;
   @Trace public onTouch?: Callback<TouchEvent>;
   @Trace public onClick?: Callback<ClickEvent>;
-  @Trace public progressConfig?: ArcButtonProgress;
+  @Trace public progressConfig?: ArcButtonProgressConfig;
 
   constructor(options: CommonArcButtonOptions) {
     this.position = options.position ?? ArcButtonPosition.BOTTOM_EDGE;
@@ -285,7 +269,7 @@ export class ArcButtonOptions {
     if (options?.progressConfig) {
       this.backgroundColor = options.backgroundColor ?? ColorMetrics.resourceColor(
         Constants.EMPHASIZED_DISABLE_BTN_COLOR);
-      this.progressConfig = new ArcButtonProgress(options?.progressConfig as ArcButtonProgressConfig)
+      this.progressConfig = options?.progressConfig as ArcButtonProgressConfig;
     } else {
       this.progressConfig = undefined;
     }
@@ -347,7 +331,7 @@ export struct ArcButton {
   progressOptionsUpdate(){
     if (this.options?.progressConfig) {
       if (this.options?.progressConfig?.value) {
-        this.progressValue = this.options?.progressConfig?.value as number;
+        this.progressValue = this.options?.progressConfig?.value as double;
       } else {
         this.progressValue = 0;
       }
@@ -359,7 +343,7 @@ export struct ArcButton {
         this.progressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
       }
       if (this.options?.progressConfig?.total) {
-        this.progressTotal = this.options?.progressConfig?.total as number;
+        this.progressTotal = this.options?.progressConfig?.total as double;
       } else {
         this.progressTotal = 100;
       }
