@@ -5226,6 +5226,8 @@ void RosenRenderContext::OnMagnifierUpdate(const MagnifierParams& magnifierParam
     rsMagnifierParams->cornerRadius_ = magnifierParams.cornerRadius_;
     rsMagnifierParams->offsetX_ = magnifierParams.offsetX_;
     rsMagnifierParams->offsetY_ = magnifierParams.offsetY_;
+    rsMagnifierParams->zoomOffsetX_ = magnifierParams.zoomOffsetX_;
+    rsMagnifierParams->zoomOffsetY_ = magnifierParams.zoomOffsetY_;
     rsMagnifierParams->shadowOffsetX_ = magnifierParams.shadowOffsetX_;
     rsMagnifierParams->shadowOffsetY_ = magnifierParams.shadowOffsetY_;
     rsMagnifierParams->shadowSize_ = magnifierParams.shadowSize_;

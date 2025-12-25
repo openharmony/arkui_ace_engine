@@ -117,7 +117,7 @@ static napi_value JSShowGeneratorDialog(napi_env env, napi_callback_info info)
     }
     // parse uiContext finish
     napi_value options = argc == 2 ? argv[1] : nullptr;
-    if (!Framework::ImageGeneratorDialogView::ExecuteImageGeneratorDialogAbc(-1)) {
+    if (!Framework::ImageGeneratorDialogView::ExecuteImageGeneratorDialogAbc(instanceId)) {
         return CreatePromise(env, ERROR_CODE_INTERNAL_ERROR, INTERNAL_ERROR_MSG);
     }
     int32_t errorCode = CallImageGeneratorCreator(env, options);
@@ -132,15 +132,55 @@ static napi_value JSShowGeneratorDialog(napi_env env, napi_callback_info info)
     }
     if (Framework::ImageGeneratorDialogView::Create(instanceId)) {
         return CreatePromise(env, ERROR_CODE_NO_ERROR, "");
-    } else {
-        return CreatePromise(env, ERROR_CODE_INTERNAL_ERROR, INTERNAL_ERROR_MSG);
     }
+    return CreatePromise(env, ERROR_CODE_INTERNAL_ERROR, INTERNAL_ERROR_MSG);
+}
+
+static napi_value JSScaleGeneratorDialog(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, 3);
+    NAPI_ASSERT(env, (argc == 3), "Invalid argc");
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv[0], &valueType);
+    if (valueType != napi_object) {
+        return nullptr;
+    }
+    napi_value napiInstanceId = nullptr;
+    napi_get_named_property(env, argv[0], "instanceId_", &napiInstanceId);
+    int32_t instanceId = -1;
+    if (napi_get_value_int32(env, napiInstanceId, &instanceId) != napi_ok) {
+        return nullptr;
+    }
+    napi_typeof(env, argv[1], &valueType);
+    if (valueType != napi_number) {
+        return nullptr;
+    }
+    int32_t uniqueId = -1;
+    if (napi_get_value_int32(env, argv[1], &uniqueId) != napi_ok) {
+        return nullptr;
+    }
+    napi_typeof(env, argv[2], &valueType);
+    if (valueType != napi_boolean) {
+        return nullptr;
+    }
+    bool isMinimize = true;
+    if (napi_get_value_bool(env, argv[2], &isMinimize) != napi_ok) {
+        return nullptr;
+    }
+    if (isMinimize) {
+        Framework::ImageGeneratorDialogView::MinimizeDialog(instanceId, uniqueId);
+    } else {
+        Framework::ImageGeneratorDialogView::RecoverDialog(instanceId, uniqueId);
+    }
+    return CreatePromise(env, ERROR_CODE_NO_ERROR, "");
 }
 
 static napi_value Export(napi_env env, napi_value exports)
 {
-    napi_property_descriptor properties[] = { DECLARE_NAPI_FUNCTION(
-        "showGeneratorDialog", JSShowGeneratorDialog) };
+    napi_property_descriptor properties[] = {
+        DECLARE_NAPI_FUNCTION("showGeneratorDialog", JSShowGeneratorDialog),
+        DECLARE_NAPI_FUNCTION("scaleGeneratorDialog", JSScaleGeneratorDialog)
+    };
 
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(properties) / sizeof(properties[0]), properties));
     return exports;

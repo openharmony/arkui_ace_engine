@@ -21,6 +21,9 @@
 
 #include "compatible/components/badge/badge_loader.h"
 #include "compatible/components/canvas/canvas_loader.h"
+#include "compatible/components/grid_column/grid_col_loader.h"
+#include "compatible/components/grid_container/grid_container_loader.h"
+#include "compatible/components/grid_row/grid_row_loader.h"
 #include "compatible/components/marquee/marquee_loader.h"
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_Compatible_GetLoader(const char* name)
@@ -35,6 +38,9 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
     std::string nameStr(name);
     static std::unordered_map<std::string, std::function<ComponentLoader*()>> sLoaderMap = {
         { "badge", []() -> ComponentLoader* { return new BadgeLoader(); } },
+        { "grid-col", []() -> ComponentLoader* { return new GridColLoader(); } },
+        { "grid-container", []() -> ComponentLoader* { return new GridContainerLoader(); } },
+        { "grid-row", []() -> ComponentLoader* { return new GridRowLoader(); } },
         { "marquee", []() -> ComponentLoader* { return new MarqueeLoader(); } }
     };
     auto loaderIter = sLoaderMap.find(nameStr);

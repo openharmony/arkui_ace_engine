@@ -543,6 +543,8 @@ frameworks/bridge/common/manifest/ @arkui_framework_xnode
 frameworks/bridge/common/media_query/ @arkuilayout1
 frameworks/bridge/common/plugin_adapter/ @ArkUI_ability_group
 frameworks/bridge/common/utils/ @arkui_framework_xnode
+frameworks/bridge/common/utils/module_buffer_reader.h @arkui_framework_resource
+frameworks/bridge/common/utils/module_buffer_reader.cpp @arkui_framework_resource
 frameworks/bridge/declarative_frontend/ark_breakpoint/ @arkui_framework_resource
 frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/ark_component/src/ArkAlphabetIndexer.ts @arkuicodepulse
@@ -744,7 +746,7 @@ frameworks/bridge/declarative_frontend/ark_theme/ @arkui_framework_resource
 frameworks/bridge/declarative_frontend/BUILD.gn @arkui_architecture
 frameworks/bridge/declarative_frontend/declarative_frontend.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/declarative_frontend.h @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/engine/arkComponent.js
+frameworks/bridge/declarative_frontend/engine/arkComponent.js @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/arkModifier.js
 frameworks/bridge/declarative_frontend/engine/arkThemeControl.js @arkui_framework_resource
 frameworks/bridge/declarative_frontend/engine/arkTheme.js @arkui_framework_resource
@@ -1068,6 +1070,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_searcher.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_searcher.h @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_loader.cpp @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_loader.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/js_object_template.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/js_object_template.inl @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsPrefetcher.js
@@ -2607,6 +2611,7 @@ frameworks/core/components_ng/pattern/scroll_bar/ @arkuiscroll
 frameworks/core/components_ng/pattern/scroll/ @arkuiscroll
 frameworks/core/components_ng/pattern/search/ @huawei_g_five
 frameworks/core/components_ng/pattern/security_component/ @harylee
+frameworks/core/components_ng/pattern/select_content_overlay/ @huawei_g_five
 frameworks/core/components_ng/pattern/select_overlay/ @huawei_g_five
 frameworks/core/components_ng/pattern/select/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/shape/ @arkuieco3
@@ -3230,9 +3235,9 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.a
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.UIContext.ts @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/ArkDragDrop.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/gesture.ts @ArkUI_Event
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/pasteButton.ts @harylee
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/saveButton.ts @harylee
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/securityComponent.ts @harylee
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/pasteButton.ets @harylee
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/saveButton.ets @harylee
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/securityComponent.ets @harylee
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/gesture.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/CommonMethodModifier.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/common.ts @arkui_framework_xnode

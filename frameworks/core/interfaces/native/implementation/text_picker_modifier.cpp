@@ -348,19 +348,6 @@ void ProcessCascadeSelected(
         ProcessCascadeSelected(options[selectedValues[index]].children, index + 1, selectedValues);
     }
 }
-
-namespace Converter {
-template<>
-ItemDivider Convert(const Ark_DividerOptions& src)
-{
-    ItemDivider divider;
-    divider.strokeWidth = OptConvert<Dimension>(src.strokeWidth).value_or(divider.strokeWidth);
-    divider.color = OptConvert<Color>(src.color).value_or(divider.color);
-    divider.startMargin = OptConvert<Dimension>(src.startMargin).value_or(divider.startMargin);
-    divider.endMargin = OptConvert<Dimension>(src.endMargin).value_or(divider.endMargin);
-    return divider;
-}
-} // namespace Converter
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -638,30 +625,35 @@ void SetDividerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto dividerParams = Converter::OptConvertPtr<ItemDivider>(value);
-
-    ItemDivider divider;
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<PickerTheme>();
-    if (theme) {
-        divider.strokeWidth = theme->GetDividerThickness();
-        divider.color = theme->GetDividerColor();
+    CHECK_NULL_VOID(theme);
+    auto defaultStrokeWidth = theme->GetDividerThickness();
+    auto defaultColor = theme->GetDividerColor();
+
+    ItemDivider divider;
+    divider.color = Converter::OptConvert<Color>(value->value.color).value_or(defaultColor);
+
+    auto strokeWidthVal = Converter::OptConvert<Dimension>(value->value.strokeWidth);
+    if (strokeWidthVal.has_value() && strokeWidthVal.value().IsNonNegative() &&
+        strokeWidthVal.value().Unit() != DimensionUnit::PERCENT) {
+        divider.strokeWidth = strokeWidthVal.value();
+    } else {
+        divider.strokeWidth = defaultStrokeWidth;
     }
 
-    divider.strokeWidth = dividerParams && dividerParams->strokeWidth.IsNonNegative() &&
-        dividerParams->strokeWidth.Unit() != DimensionUnit::PERCENT
-        ? dividerParams->strokeWidth
-        : divider.strokeWidth;
-    divider.color = dividerParams ? dividerParams->color : divider.color;
-    divider.startMargin = dividerParams && dividerParams->startMargin.IsNonNegative() &&
-        dividerParams->startMargin.Unit() != DimensionUnit::PERCENT
-        ? dividerParams->startMargin
-        : divider.startMargin;
-    divider.endMargin = dividerParams && dividerParams->endMargin.IsNonNegative() &&
-        dividerParams->endMargin.Unit() != DimensionUnit::PERCENT
-        ? dividerParams->endMargin
-        : divider.endMargin;
+    auto startMarginVal = Converter::OptConvert<Dimension>(value->value.startMargin);
+    if (startMarginVal.has_value() && startMarginVal.value().IsNonNegative() &&
+        startMarginVal.value().Unit() != DimensionUnit::PERCENT) {
+        divider.startMargin = startMarginVal.value();
+    }
+
+    auto endMarginVal = Converter::OptConvert<Dimension>(value->value.endMargin);
+    if (endMarginVal.has_value() && endMarginVal.value().IsNonNegative() &&
+        endMarginVal.value().Unit() != DimensionUnit::PERCENT) {
+        divider.endMargin = endMarginVal.value();
+    }
 
     TextPickerModelStatic::SetDivider(frameNode, divider);
 }

@@ -6484,6 +6484,9 @@ void OverlayManager::ComputeSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr
         case SheetType::SHEET_POPUP:
             sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight);
             break;
+        case SheetType::SHEET_MINIMIZE:
+            sheetPattern->SetSheetHeightForTranslate(0.0f);
+            break;
         default:
             break;
     }
@@ -9275,5 +9278,14 @@ bool OverlayManager::CloseImageGeneratorSheet()
     PlaySheetTransition(sheetNode, false);
     imageGeneratorSheetKey_.reset();
     return true;
+}
+
+void OverlayManager::UpdateImageGeneratorSheetScale(
+    const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle, int32_t targetId,
+    std::function<void(const int32_t)>&& onWillDismiss, std::function<void()>&& sheetSpringBack)
+{
+    UpdateSheetPage(sheetNode, sheetStyle, targetId, true, false,
+            nullptr, nullptr, nullptr, std::move(onWillDismiss), nullptr, nullptr,
+            nullptr, nullptr, nullptr, nullptr, std::move(sheetSpringBack));
 }
 } // namespace OHOS::Ace::NG

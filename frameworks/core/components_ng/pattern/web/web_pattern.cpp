@@ -4609,7 +4609,7 @@ void WebPattern::RegisterWebDomNativeInterface()
                 pattern->webDomDocument_->UpdateScrollInfoFromJsonString(param[WEB_NATIVE_PARAM_INDEX]);
             },
         },
-        false, "", false);
+        true, "", false);
 }
 
 void WebPattern::RecordWebEvent(bool isInit)
@@ -4964,6 +4964,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
     if (!ParseTouchInfo(info, touchInfos)) {
         return;
     }
+    lastTouchDownTime_ = GetCurrentTimestamp();
     for (auto& touchPoint : touchInfos) {
         if (fromOverlay) {
             touchPoint.x -= webOffset_.GetX();
@@ -9363,6 +9364,13 @@ void WebPattern::UninitRotationEventCallback()
     rotationEndCallbackId_ = 0;
 }
 
+void WebPattern::NotifyOverlayRotation()
+{
+    if (webSelectOverlay_) {
+        webSelectOverlay_->OnOrientationChanged();
+    }
+}
+
 void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
 {
     if (type != WindowSizeChangeReason::ROTATION) {
@@ -9372,6 +9380,7 @@ void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
         TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::AdjustRotationRenderFit not support");
         return;
     }
+    NotifyOverlayRotation();
 
     if (delegate_ && renderFit_ == RenderFit::TOP_LEFT &&
         renderMode_ == RenderMode::ASYNC_RENDER && layoutMode_ != WebLayoutMode::FIT_CONTENT) {
@@ -9458,6 +9467,32 @@ bool WebPattern::IsAccessibilityUsedByEventReport()
         return webAccessibilityEventReport_->GetEventReportEnable();
     }
     return false;
+}
+
+
+RefPtr<WebAgentEventReporter> WebPattern::GetAgentEventReporter()
+{
+    if (!webAgentEventReporter_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::GetAgentEventReporter, create new agent report instance");
+        webAgentEventReporter_ = AceType::MakeRefPtr<WebAgentEventReporter>(WeakClaim(this));
+    }
+    return webAgentEventReporter_;
+}
+
+void WebPattern::ReportSelectedText()
+{
+    if (UiSessionManager::GetInstance()->GetSelectTextEventRegistered()) {
+        CHECK_NULL_VOID(delegate_);
+        auto text = delegate_->GetLastSelectionText();
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::ReportSelectedText %{public}zu", text.size());
+        UiSessionManager::GetInstance()->ReportSelectTextEvent(text);
+    }
+}
+
+std::pair<int32_t, RectF> WebPattern::GetScrollAreaInfoFromDocument(int32_t id)
+{
+    CHECK_NULL_RETURN(webDomDocument_, std::make_pair(-1, RectF()));
+    return webDomDocument_->GetScrollAreaInfoById(id);
 }
 
 RefPtr<WebDataDetectorAdapter> WebPattern::GetDataDetectorAdapter()

@@ -17,44 +17,37 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DYNAMIC_MODULE_HELPER_H
 
 #include <memory>
+#include <mutex>
 #include <string>
+#include <unordered_map>
 
 #include "compatible/components/component_loader.h"
-#include "interfaces/inner_api/ace/utils.h"
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "core/common/dynamic_module.h"
 
 namespace OHOS::Ace {
 
 using ComponentLoaderFunc = ComponentLoader* (*)(const char* name);
-using CanvasLoaderFunc = void* (*)(bool offscreen);
-using CanvasBridgeFunc = void* (*)(CanvasBridgeParams& params);
+using DynamicModuleCreateFunc = DynamicModule* (*)();
 
-const std::string COMPATIABLE_COMPONENT_LOADER = "OHOS_ACE_Compatible_GetLoader";
-const std::string COMPATIABLE_CANVAS_RENDERING_CONTEXT = "OHOS_ACE_Compatible_GetCanvasRenderingContext";
-const std::string COMPATIABLE_CANVAS_BRIDGE = "OHOS_ACE_Compatible_CreateCanvasBridge";
+constexpr const char* COMPATIABLE_COMPONENT_LOADER = "OHOS_ACE_Compatible_GetLoader";
+constexpr const char* DYNAMIC_MODULE_CREATE = "OHOS_ACE_DynamicModule_Create";
 
-class ACE_EXPORT DynamicModuleHelper final {
+class ACE_FORCE_EXPORT DynamicModuleHelper final {
 public:
     static DynamicModuleHelper& GetInstance();
     std::unique_ptr<ComponentLoader> GetLoaderByName(const char* name);
-    void* CreateCanvasRenderingContextModel(bool isOffscreen);
-    void* CreateCanvasBridge(CanvasBridgeParams& params);
+    DynamicModule* GetDynamicModule(const std::string& name);
 
 private:
-    DynamicModuleHelper();
-    ~DynamicModuleHelper();
-    bool DynamicLoadLibrary();
-    void CloseLibrary();
-    void* LoadSymbol(const char* symName);
+    DynamicModuleHelper() = default;
+    ~DynamicModuleHelper() = default;
 
-    LIBHANDLE compatibleLibHandle_ = nullptr;
-    bool compatibleLibLoaded_ = false;
-
-    ComponentLoaderFunc componentLoaderFunc_ = nullptr;
-    CanvasLoaderFunc canvasRenderingContextLoaderFunc_ = nullptr;
-    CanvasBridgeFunc canvasBridgeLoaderFunc_ = nullptr;
+    std::unique_ptr<ComponentLoader> compatibleLib_ = nullptr;
+    std::unordered_map<std::string, std::unique_ptr<DynamicModule>> moduleMap_;
+    std::mutex moduleMapMutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DYNAMIC_MODULE_HELPER_H

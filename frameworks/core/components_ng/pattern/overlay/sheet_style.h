@@ -59,6 +59,7 @@ enum SheetType {
     SHEET_BOTTOMLANDSPACE,
     SHEET_BOTTOM_FREE_WINDOW,
     SHEET_BOTTOM_OFFSET,
+    SHEET_MINIMIZE,
 };
 
 enum class SheetAccessibilityDetents {

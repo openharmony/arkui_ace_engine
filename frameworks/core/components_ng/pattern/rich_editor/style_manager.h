@@ -38,6 +38,7 @@ public:
     inline static const std::string TEXT_DECORATION_COLOR_KEY = "textDecorationColor";
     inline static const std::string DRAG_BACKGROUND_COLOR_KEY = "dragBackgroundColor";
     inline static const std::string SYMBOL_COLOR_KEY_PREFIX = "symbolColor_";
+    inline static const std::string STROKE_COLOR_KEY = "strokeColor";
 
     // color updater
     inline static const auto TEXT_COLOR_UPDATER = [](const RefPtr<ResourceObject>& colorResObj, FontStyle& fontStyle) {
@@ -59,7 +60,28 @@ public:
         ResourceParseUtils::ParseResColor(colorResObj, colorValue);
         updateSpanStyle.updateTextColor = colorValue;
     };
-    
+
+    inline static const auto STROKE_COLOR_UPDATER = [](
+        const RefPtr<ResourceObject>& colorResObj, FontStyle& fontStyle) {
+        Color colorValue;
+        ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+        fontStyle.UpdateStrokeColor(colorValue);
+    };
+ 
+    inline static const auto TEXT_STYLE_STROKE_COLOR_UPDATER = [](
+        const RefPtr<ResourceObject>& colorResObj, TextStyle& textStyle) {
+        Color colorValue;
+        ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+        textStyle.SetStrokeColor(colorValue);
+    };
+
+    inline static const auto UPDATE_SPAN_STYLE_STROKE_COLOR_UPDATER = [](
+        const RefPtr<ResourceObject>& colorResObj, struct UpdateSpanStyle& updateSpanStyle) {
+        Color colorValue;
+        ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+        updateSpanStyle.updateStrokeColor = colorValue;
+    };
+
     inline static const auto TEXT_DECORATION_COLOR_UPDATER = [](
         const RefPtr<ResourceObject>& colorResObj, FontStyle& fontStyle) {
         Color colorValue;
@@ -112,6 +134,32 @@ public:
         const auto& key = TEXT_COLOR_KEY;
         const auto& updater = TEXT_COLOR_UPDATER;
         spanNode->AddResource(key, textStyle.GetResource(key), updater);
+    }
+
+    static void AddStrokeColorResource(TextStyle& textStyle, const RefPtr<ResourceObject>& colorResObj)
+    {
+        CHECK_NULL_VOID(colorResObj);
+        const auto& key = STROKE_COLOR_KEY;
+        const auto& updater = TEXT_STYLE_STROKE_COLOR_UPDATER;
+        textStyle.AddResource(key, colorResObj, updater);
+    }
+
+    static void AddStrokeColorResource(struct UpdateSpanStyle& updateSpanStyle,
+        const RefPtr<ResourceObject>& colorResObj)
+    {
+        CHECK_NULL_VOID(colorResObj);
+        const auto& key = STROKE_COLOR_KEY;
+        const auto& updater = UPDATE_SPAN_STYLE_STROKE_COLOR_UPDATER;
+        updateSpanStyle.AddResource(key, colorResObj, updater);
+    }
+
+    static void UpdateStrokeColorResource(RefPtr<SpanNode>& spanNode, const TextStyle& textStyle)
+    {
+        CHECK_NULL_VOID(spanNode);
+        const auto& key = STROKE_COLOR_KEY;
+        const auto& updater = STROKE_COLOR_UPDATER;
+        auto colorResObj = textStyle.GetResource(key);
+        colorResObj ? spanNode->AddResource(key, colorResObj, updater) : (void)spanNode->RemoveResource(key);
     }
 
     static void AddTextDecorationColorResource(TextStyle& textStyle, const RefPtr<ResourceObject>& colorResObj)
@@ -244,6 +292,9 @@ public:
         spanNode->UpdateFontFeature(updateSpanStyle.updateFontFeature);
 
         UpdateTextBackgroundStyle(spanNode, updateSpanStyle.updateTextBackgroundStyle);
+        spanNode->UpdateStrokeWidth(updateSpanStyle.updateStrokeWidth);
+        spanNode->UpdateStrokeColor(updateSpanStyle.updateStrokeColor);
+        spanItem->strokeColorFollowFontColor = updateSpanStyle.strokeColorFollowFontColor;
     }
 
     static void UpdateTextBackgroundStyle(RefPtr<SpanNode>& spanNode, const std::optional<TextBackgroundStyle>& style)

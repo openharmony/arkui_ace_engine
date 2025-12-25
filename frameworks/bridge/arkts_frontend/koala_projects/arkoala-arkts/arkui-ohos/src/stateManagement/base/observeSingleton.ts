@@ -18,8 +18,6 @@ import { IObservedObject, RenderIdType } from '../decorator';
 import { IBindingSource, ITrackedDecoratorRef } from './mutableStateMeta';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { NullableObject } from './types';
-import { StateManagerImpl } from '@koalaui/runtime';
-import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { MonitorFunctionDecorator, MonitorValueInternal } from '../decoratorImpl/decoratorMonitor';
 import { ComputedDecoratedVariable, IComputedDecoratorRef } from '../decoratorImpl/decoratorComputed';
 import { PersistenceV2Impl } from '../storage/persistenceV2';
@@ -66,7 +64,7 @@ export class ObserveSingleton implements IObserve {
 
     get renderingId(): RenderIdType | undefined {
         const id =
-            (StateMgmtTool.getGlobalStateManager() as StateManagerImpl).current?.id ?? ObserveSingleton.InvalidRenderId;
+            StateMgmtTool.getGlobalStateManager().currentScope?.id ?? ObserveSingleton.InvalidRenderId;
         return id;
     }
     set renderingId(value: RenderIdType | undefined) {

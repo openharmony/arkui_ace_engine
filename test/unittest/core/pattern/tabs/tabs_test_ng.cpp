@@ -902,4 +902,41 @@ HWTEST_F(TabsTestNg, TabContentCreatePaddingWithResourceObj001, TestSize.Level1)
     EXPECT_TRUE(TabContentModelNG::CreateIndicatorBorderRadiusWithResourceObj(frameNode, resObj));
     EXPECT_TRUE(TabContentModelNG::CreateIndicatorMarginTopWithResourceObj(frameNode, resObj));
 }
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    CreateTabs();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    ASSERT_NE(tabsNode, nullptr);
+
+    auto property = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(tabsPattern, nullptr);
+
+    tabsPattern->OnColorConfigurationUpdate();
+
+    property->propDividerColorSetByUser_ = false;
+    tabsPattern->OnColorConfigurationUpdate();
+
+    property->propDividerColorSetByUser_ = true;
+    tabsPattern->OnColorConfigurationUpdate();
+
+    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
+    ASSERT_NE(dividerFrameNode, nullptr);
+    auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
+    ASSERT_NE(dividerRenderProperty, nullptr);
+    dividerRenderProperty->propDividerColor_ = Color::RED;
+    tabsPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(dividerRenderProperty->propDividerColor_, Color::RED);
+}
 } // namespace OHOS::Ace::NG

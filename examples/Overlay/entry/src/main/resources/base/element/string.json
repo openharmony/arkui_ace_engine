@@ -259,6 +259,18 @@
     {
       "name": "string_20percent",
       "value": "20%"
+    },
+    {
+      "name": "errorColor",
+      "value": "这是一个错误的颜色"
+    },
+    {
+      "name": "error",
+      "value": "error"
+    },
+    {
+      "name": "width",
+      "value": "5vp"
     }
   ]
 }

@@ -90,6 +90,13 @@ bool IsJumpLink(const std::string& content)
 }
 }; // namespace
 
+TextPattern::TextPattern()
+{
+    selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(WeakClaim(this));
+    pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+    ResetOriginCaretPosition();
+}
+
 TextPattern::~TextPattern()
 {
     // node destruct, need to stop text race animation
@@ -3665,6 +3672,8 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     if (textVerticalAlign.has_value()) {
         textStyle.textVerticalAlign =static_cast<int32_t>(textVerticalAlign.value());
     }
+    textStyle.strokeWidth = node->GetStrokeWidthValue(Dimension()).ConvertToVp();
+    textStyle.strokeColor = node->GetStrokeColorValue(Color::BLACK).ColorToString();
     return textStyle;
 }
 

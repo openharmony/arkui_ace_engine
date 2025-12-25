@@ -1694,7 +1694,7 @@ export class TextPickerDialogOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForSelectedTmpValueForIdx0  = valueHolderForSelectedTmpValue as int32
                 valueSerializer.writeInt32(valueHolderForSelectedTmpValueForIdx0)
-            } else if (TypeChecker.isArray_Number(valueHolderForSelectedTmpValue)) {
+            } else if (TypeChecker.isArray_Int32(valueHolderForSelectedTmpValue)) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForSelectedTmpValueForIdx1  = valueHolderForSelectedTmpValue as Array<int32>
                 valueSerializer.writeInt32((valueHolderForSelectedTmpValueForIdx1.length).toInt())

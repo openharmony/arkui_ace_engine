@@ -1046,15 +1046,19 @@ bool Localization::ConvertToDouble(const std::string& str, double& outValue)
 
 bool Localization::IsValidValue(const char* end, const std::string& str)
 {
+    if (!end) {
+        return false;
+    }
     if (end == str.c_str() || errno == ERANGE || *end != '\0') {
         return false;
     }
     return true;
 }
 
-bool Localization::LocalizeNumber(std::string &inputOutputNum, const int32_t precision)
+bool Localization::LocalizeNumber(const std::string &inputNum, std::string &outputNum, const int32_t precision)
 {
     WaitingForInit();
+    outputNum = inputNum;
     if (!locale_) {
         return false;
     }
@@ -1068,8 +1072,8 @@ bool Localization::LocalizeNumber(std::string &inputOutputNum, const int32_t pre
     }
 
     double num = 0.0;
-    if (!Localization::ConvertToDouble(inputOutputNum, num)) {
-        LOGW("Failed to convert string to double: %{private}s", inputOutputNum.c_str());
+    if (!Localization::ConvertToDouble(inputNum, num)) {
+        LOGW("Failed to convert string to double: %{private}s", inputNum.c_str());
         return false;
     }
 
@@ -1080,8 +1084,8 @@ bool Localization::LocalizeNumber(std::string &inputOutputNum, const int32_t pre
         return false;
     }
 
-    inputOutputNum.clear();
-    UnicodeString2String(formattedNum, inputOutputNum);
+    outputNum.clear();
+    UnicodeString2String(formattedNum, outputNum);
     return true;
 }
 

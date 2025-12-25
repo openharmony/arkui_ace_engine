@@ -628,6 +628,18 @@ int64_t JsonValue::GetInt64(const std::string& key, int64_t defaultVal) const
     return defaultVal;
 }
 
+std::unique_ptr<JsonValue> JsonValue::Duplicate()
+{
+    if (object_ == nullptr) {
+        return std::make_unique<JsonValue>(nullptr);
+    }
+    cJSON* jsonObject = cJSON_Duplicate(object_, true);
+    if (jsonObject == nullptr) {
+        return std::make_unique<JsonValue>(nullptr);
+    }
+    return std::make_unique<JsonValue>(jsonObject);
+}
+
 std::unique_ptr<JsonValue> JsonUtil::ParseJsonData(const char* data, const char** parseEnd)
 {
     return std::make_unique<JsonValue>(cJSON_ParseWithOpts(data, parseEnd, true), true);

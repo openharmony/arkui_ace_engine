@@ -22390,6 +22390,8 @@ typedef struct Ark_RichEditorTextStyle {
     Opt_Boolean halfLeading;
     Opt_String fontFeature;
     Opt_TextBackgroundStyle textBackgroundStyle;
+    Opt_LengthMetrics strokeWidth;
+    Opt_ResourceColor strokeColor;
 } Ark_RichEditorTextStyle;
 typedef struct Opt_RichEditorTextStyle {
     Ark_Tag tag;
@@ -22409,6 +22411,8 @@ typedef struct Ark_RichEditorTextStyleResult {
     Opt_Boolean halfLeading;
     Opt_String fontFeature;
     Opt_TextBackgroundStyle textBackgroundStyle;
+    Opt_Float64 strokeWidth;
+    Opt_ResourceColor strokeColor;
 } Ark_RichEditorTextStyleResult;
 typedef struct Opt_RichEditorTextStyleResult {
     Ark_Tag tag;
@@ -22489,7 +22493,7 @@ typedef struct Ark_TextPickerDialogOptions {
     Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable value;
     Opt_Union_I32_Array_I32_Bindable_Bindable selected;
     Opt_Array_LengthMetrics columnWidths;
-    Opt_Union_Number_String defaultPickerItemHeight;
+    Opt_Union_F64_String defaultPickerItemHeight;
     Opt_Boolean canLoop;
     Opt_PickerTextStyle disappearTextStyle;
     Opt_PickerTextStyle textStyle;
@@ -27272,6 +27276,10 @@ typedef struct GENERATED_ArkUIContentTransitionEffectAccessor {
     void (*setOPACITY)(Ark_ContentTransitionEffect OPACITY);
 } GENERATED_ArkUIContentTransitionEffectAccessor;
 
+typedef struct GENERATED_ArkUIContextMenuAccessor {
+    void (*close)();
+} GENERATED_ArkUIContextMenuAccessor;
+
 typedef struct GENERATED_ArkUIControllerHandlerAccessor {
     void (*destroyPeer)(Ark_ControllerHandler peer);
     Ark_ControllerHandler (*construct)();
@@ -30133,6 +30141,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIConsoleMessageAccessor* (*getConsoleMessageAccessor)();
     const GENERATED_ArkUIContentModifierHelperAccessor* (*getContentModifierHelperAccessor)();
     const GENERATED_ArkUIContentTransitionEffectAccessor* (*getContentTransitionEffectAccessor)();
+    const GENERATED_ArkUIContextMenuAccessor* (*getContextMenuAccessor)();
     const GENERATED_ArkUIControllerHandlerAccessor* (*getControllerHandlerAccessor)();
     const GENERATED_ArkUICopyEventAccessor* (*getCopyEventAccessor)();
     const GENERATED_ArkUICustomDialogControllerAccessor* (*getCustomDialogControllerAccessor)();

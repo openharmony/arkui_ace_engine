@@ -115,6 +115,8 @@ public:
     // serialize
     std::string ToString() override;
 
+    std::unique_ptr<JsonValue> Duplicate();
+
 private:
     JsonObject* object_ = nullptr;
     bool isRoot_ = false;

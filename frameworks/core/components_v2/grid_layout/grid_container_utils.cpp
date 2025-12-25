@@ -43,15 +43,6 @@ RefPtr<GridSizeInfo> ParseBreakpoints(const BreakPoints& breakpoints)
     return sizeInfo;
 }
 
-RefPtr<GridSizeInfo> ParseBreakpoints(const RefPtr<BreakPoints>& breakpoints)
-{
-    if (!breakpoints) {
-        LOGI("user hasnt set breakpoint, use WindowSize and xs: 320vp, sm: 600vp, md: 840vp");
-        return AceType::MakeRefPtr<GridSizeInfo>();
-    }
-    return ParseBreakpoints(*breakpoints);
-}
-
 } // namespace
 
 int GridContainerUtils::CalcBreakPoint(const RefPtr<GridSizeInfo> &threshold, double windowWidth)
@@ -134,33 +125,6 @@ WidthBreakpoint GridContainerUtils::GetWidthBreakpoint(
         finalBreakpoints, density, pipeline->CalcPageWidth(pipeline->GetDisplayWindowRectInfo().GetSize().Width()));
 }
 
-GridSizeType GridContainerUtils::ProcessGridSizeType(
-    const RefPtr<BreakPoints>& breakpoints, const Size& size, const RefPtr<PipelineContext>& pipeline)
-{
-    auto threshold = ParseBreakpoints(breakpoints);
-    double windowWidth = 0.0;
-    CHECK_NULL_RETURN(pipeline, GridSizeType::UNDEFINED);
-    if (breakpoints->reference == BreakPointsReference::WindowSize) {
-        windowWidth = GridSystemManager::GetInstance().GetScreenWidth();
-        auto windowManager = pipeline->GetWindowManager();
-        auto mode = windowManager->GetWindowMode();
-        if (mode == WindowMode::WINDOW_MODE_FLOATING
-            && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-            windowWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
-        }
-    } else {
-        windowWidth = size.Width();
-    }
-    int index = 0;
-    for (const auto& cur : threshold->sizeInfo) {
-        if (pipeline->NormalizeToPx(cur) > windowWidth) {
-            break;
-        }
-        index++;
-    }
-    return static_cast<GridSizeType>(index);
-}
-
 std::pair<Dimension, Dimension> GridContainerUtils::ProcessGutter(GridSizeType sizeType, const Gutter& gutter)
 {
     switch (sizeType) {
@@ -181,11 +145,6 @@ std::pair<Dimension, Dimension> GridContainerUtils::ProcessGutter(GridSizeType s
     }
 }
 
-std::pair<Dimension, Dimension> GridContainerUtils::ProcessGutter(GridSizeType sizeType, const RefPtr<Gutter>& gutter)
-{
-    return ProcessGutter(sizeType, *gutter);
-}
-
 int32_t GridContainerUtils::ProcessColumn(GridSizeType sizeType, const GridContainerSize& columnNum)
 {
     switch (sizeType) {
@@ -204,11 +163,6 @@ int32_t GridContainerUtils::ProcessColumn(GridSizeType sizeType, const GridConta
         default:
             return columnNum.xs;
     }
-}
-
-int32_t GridContainerUtils::ProcessColumn(GridSizeType sizeType, const RefPtr<GridContainerSize>& columnNum)
-{
-    return ProcessColumn(sizeType, *columnNum);
 }
 
 double GridContainerUtils::ProcessColumnWidth(const std::pair<double, double>& gutter, int32_t columnNum, double width)

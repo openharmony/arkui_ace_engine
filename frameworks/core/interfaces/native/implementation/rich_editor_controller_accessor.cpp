@@ -87,6 +87,17 @@ void ConversionPart2(TextStyle& ret, const Ark_RichEditorTextStyle& src)
 
     auto textBackgroundStyle = Converter::OptConvert<TextBackgroundStyle>(src.textBackgroundStyle);
     ret.SetTextBackgroundStyle(textBackgroundStyle);
+
+    auto strokeWidth = Converter::OptConvert<OHOS::Ace::Dimension>(src.strokeWidth);
+    Validator::ValidateNonPercent(strokeWidth);
+    if (strokeWidth) {
+        ret.SetStrokeWidth(strokeWidth.value());
+    }
+    if (auto strokeColor = Converter::OptConvert<Color>(src.strokeColor); strokeColor) {
+        ret.SetStrokeColor(strokeColor.value());
+    } else if (auto color = Converter::OptConvert<Color>(src.fontColor); color) {
+        ret.SetStrokeColor(color.value());
+    }
 }
 
 template<>
@@ -593,6 +604,8 @@ void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const TextStyleResult& s
     }
     dst.halfLeading = ArkValue<Opt_Boolean>(src.halfLeading);
     dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(src.textBackgroundStyle, ctx);
+    dst.strokeWidth = ArkValue<Opt_Float64>(src.strokeWidth);
+    dst.strokeColor = ArkUnion<Opt_ResourceColor, Ark_String>(src.strokeColor, ctx);
 }
 
 void AssignArkValue(Ark_RichEditorSpanPosition& dst, const SpanPosition& src, ConvContext *ctx)

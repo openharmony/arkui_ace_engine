@@ -29,6 +29,7 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -501,6 +502,159 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_SetLocalOffset001, Test
     EXPECT_EQ(controller.globalOffset_, OffsetF(10.f, 10.f));
     controller.SetLocalOffset(OffsetF(10.f, 10.f), OffsetF(20.f, 20.f));
     EXPECT_EQ(controller.globalOffset_, OffsetF(20.f, 20.f));
+}
+
+/**
+ * @tc.name: MagnifierController_UpdateMagnifierOffset001
+ * @tc.desc: test UpdateMagnifierOffsetX、UpdateMagnifierOffsetY
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up test environment.
+     */
+    auto frameSize = SizeF(400.f, 400.f);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto rootUINode = pipeline->GetRootElement();
+    ASSERT_NE(rootUINode, nullptr);
+    auto rootGeometryNode = rootUINode->GetGeometryNode();
+    ASSERT_NE(rootGeometryNode, nullptr);
+    rootGeometryNode->SetFrameSize(frameSize);
+
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> weakPattern(pattern);
+    MagnifierController controller(weakPattern);
+    auto windowNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pattern, false);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, pattern, false);
+    columnNode->MountToParent(windowNode);
+
+    /**
+     * @tc.steps: step2. Set magnifier to top-left position.
+     */
+    controller.magnifierNodeWidth_ = MAGNIFIER_WIDTH + MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5;
+    controller.magnifierNodeHeight_ = MAGNIFIER_HEIGHT + MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * 1.5;
+    float magnifierWidth = controller.magnifierNodeWidth_.ConvertToPx();
+    float magnifierHeight = controller.magnifierNodeHeight_.ConvertToPx();
+    OffsetF localOffset(20.f, 20.f);
+    controller.SetLocalOffset(localOffset);
+    EXPECT_EQ(controller.globalOffset_, localOffset);
+
+    /**
+     * @tc.steps: step3. Test zoomOffset value when magnifier at top-left position.
+     */
+    OffsetF magnifierPaintOffset;
+    VectorF magnifierOffset(0.f, 0.f);
+    VectorF zoomOffset(0.f, 0.f);
+    EXPECT_EQ(controller.UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
+    EXPECT_EQ(controller.UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
+    EXPECT_EQ(magnifierPaintOffset, OffsetF(0.f, 0.f));
+    EXPECT_EQ(magnifierOffset, VectorF(0.f, 0.f));
+    EXPECT_EQ(zoomOffset, VectorF(localOffset.GetX() - magnifierWidth / 2, localOffset.GetY() - magnifierHeight / 2));
+}
+
+/**
+ * @tc.name: MagnifierController_UpdateMagnifierOffset002
+ * @tc.desc: test UpdateMagnifierOffsetX、UpdateMagnifierOffsetY
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up test environment.
+     */
+    auto frameSize = SizeF(400.f, 400.f);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto rootUINode = pipeline->GetRootElement();
+    ASSERT_NE(rootUINode, nullptr);
+    auto rootGeometryNode = rootUINode->GetGeometryNode();
+    ASSERT_NE(rootGeometryNode, nullptr);
+    rootGeometryNode->SetFrameSize(frameSize);
+
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> weakPattern(pattern);
+    MagnifierController controller(weakPattern);
+    auto windowNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pattern, false);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, pattern, false);
+    columnNode->MountToParent(windowNode);
+
+    /**
+     * @tc.steps: step2. Set magnifier to bottom-right position.
+     */
+    controller.magnifierNodeWidth_ = MAGNIFIER_WIDTH + MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5;
+    controller.magnifierNodeHeight_ = MAGNIFIER_HEIGHT + MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * 1.5;
+    float magnifierWidth = controller.magnifierNodeWidth_.ConvertToPx();
+    float magnifierHeight = controller.magnifierNodeHeight_.ConvertToPx();
+    OffsetF localOffset(380.f, 380.f);
+    controller.SetLocalOffset(localOffset);
+    EXPECT_EQ(controller.globalOffset_, localOffset);
+
+    /**
+     * @tc.steps: step3. Test zoomOffset value when magnifier at bottom-right position.
+     */
+    OffsetF magnifierPaintOffset;
+    VectorF magnifierOffset(0.f, 0.f);
+    VectorF zoomOffset(0.f, 0.f);
+    EXPECT_EQ(controller.UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
+    EXPECT_EQ(controller.UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
+    EXPECT_EQ(magnifierPaintOffset, OffsetF(frameSize.Width() - magnifierWidth,
+      localOffset.GetY() - MAGNIFIER_OFFSETY.ConvertToPx() - magnifierHeight / 2));
+    EXPECT_EQ(magnifierOffset, VectorF(0.f, MAGNIFIER_OFFSETY.ConvertToPx()));
+    EXPECT_EQ(zoomOffset, VectorF(localOffset.GetX() - frameSize.Width() + magnifierWidth / 2,
+        localOffset.GetY() - frameSize.Height() + magnifierHeight / 2));
+}
+
+/**
+ * @tc.name: MagnifierController_UpdateMagnifierOffset003
+ * @tc.desc: test UpdateMagnifierOffsetX、UpdateMagnifierOffsetY
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up test environment.
+     */
+    auto frameSize = SizeF(400.f, 400.f);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto rootUINode = pipeline->GetRootElement();
+    ASSERT_NE(rootUINode, nullptr);
+    auto rootGeometryNode = rootUINode->GetGeometryNode();
+    ASSERT_NE(rootGeometryNode, nullptr);
+    rootGeometryNode->SetFrameSize(frameSize);
+
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> weakPattern(pattern);
+    MagnifierController controller(weakPattern);
+    auto windowNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pattern, false);
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, pattern, false);
+    columnNode->MountToParent(windowNode);
+
+    /**
+     * @tc.steps: step2. Set magnifier to center position.
+     */
+    controller.magnifierNodeWidth_ = MAGNIFIER_WIDTH + MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5;
+    controller.magnifierNodeHeight_ = MAGNIFIER_HEIGHT + MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * 1.5;
+    float magnifierWidth = controller.magnifierNodeWidth_.ConvertToPx();
+    float magnifierHeight = controller.magnifierNodeHeight_.ConvertToPx();
+    OffsetF localOffset(200.f, 200.f);
+    controller.SetLocalOffset(localOffset);
+    EXPECT_EQ(controller.globalOffset_, localOffset);
+
+    /**
+     * @tc.steps: step3. Test zoomOffset value when magnifier at center position.
+     */
+    OffsetF magnifierPaintOffset;
+    VectorF magnifierOffset(0.f, 0.f);
+    VectorF zoomOffset(0.f, 0.f);
+    EXPECT_EQ(controller.UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
+    EXPECT_EQ(controller.UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
+    EXPECT_EQ(magnifierPaintOffset, OffsetF(localOffset.GetX() - magnifierWidth / 2,
+      localOffset.GetY() - MAGNIFIER_OFFSETY.ConvertToPx() - magnifierHeight / 2));
+    EXPECT_EQ(magnifierOffset, VectorF(0.f, MAGNIFIER_OFFSETY.ConvertToPx()));
+    EXPECT_EQ(zoomOffset, VectorF(0.f, 0.f));
 }
 
 /**

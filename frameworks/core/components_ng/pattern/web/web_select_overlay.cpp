@@ -356,6 +356,9 @@ void WebSelectOverlay::HideMagnifier()
 
 bool WebSelectOverlay::IsShowMenuOfAutoFill(uint32_t flags, SelectOverlayInfo& selectInfo)
 {
+    if (IS_CALLING_FROM_M114()) {
+        return false;
+    }
     if (!(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_AUTOFILL) ||
         !(selectInfo.isSingleHandle || selectInfo.menuInfo.showCut)) {
         return false;
@@ -1523,11 +1526,7 @@ bool WebSelectOverlay::InitMenuAvoidStrategyMember(MenuAvoidStrategyMember& memb
     InitMenuAvoidStrategyAboutBottom(member, tools);
     InitMenuAvoidStrategyAboutPosition(member, tools);
 
-    if (QuickMenuIsReallyNeedNewAvoid(member)) {
-        return false;
-    }
-
-    return true;
+    return MenuPositionCanReset(member);
 }
 
 void WebSelectOverlay::InitMenuAvoidStrategyAboutParam(MenuAvoidStrategyMember& member, InitStrategyTools& tools)
@@ -1560,7 +1559,8 @@ void WebSelectOverlay::InitMenuAvoidStrategyAboutTop(MenuAvoidStrategyMember& me
 
     member.upPaint = upHandle.GetPaintRect() - tools.geometryNode->GetFrameOffset() + member.windowOffset;
     member.topArea = GreatNotEqual(rootTop, topArea) ? rootTop : topArea;
-    member.selectionTop = upHandle.isShow ? member.upPaint.Top() : member.topArea;
+    bool verticalInLimit = GreatNotEqual(member.upPaint.Top(), member.topArea);
+    member.selectionTop = verticalInLimit ? member.upPaint.Top() : member.topArea;
 }
 
 void WebSelectOverlay::InitMenuAvoidStrategyAboutBottom(MenuAvoidStrategyMember& member, InitStrategyTools& tools)
@@ -1579,7 +1579,8 @@ void WebSelectOverlay::InitMenuAvoidStrategyAboutBottom(MenuAvoidStrategyMember&
     bottomArea = GreatNotEqual(bottomArea, 0.0f) ? bottomArea : tools.pipeline->GetRootRect().Bottom();
     bottomArea = GreatNotEqual(bottomArea, frameHeight) ? frameHeight : bottomArea;
 
-    auto handleIsShow = hasKeyboard ? (LessOrEqual(handleBottom, keyboardStart) ? true : false) : downHandle.isShow;
+    bool verticalInLimit = GreatNotEqual(bottomArea, downPaint.Bottom());
+    auto handleIsShow = hasKeyboard ? (LessOrEqual(handleBottom, keyboardStart) ? true : false) : verticalInLimit;
     auto selectionBottom = handleIsShow ? handleBottom : bottomArea;
     selectionBottom = NearEqual(selectionBottom, keyboardStart - defaultY) ? keyboardStart : selectionBottom;
 
@@ -1598,6 +1599,8 @@ void WebSelectOverlay::InitMenuAvoidStrategyAboutPosition(MenuAvoidStrategyMembe
 
     member.avoidPositionX = (selectArea.Left() + selectArea.Right() - member.menuWidth) / 2.0f;
     member.avoidPositionY = GreatNotEqual(avoidPositionY, defaultAvoidY) ? avoidPositionY : defaultAvoidY;
+    member.menuAboveUphandle = member.upPaint.Top() - member.avoidFromText - member.menuHeight;
+    member.menuBelowDownhandle = member.downPaint.Bottom() + member.avoidFromText;
 }
 
 void WebSelectOverlay::SetDefaultDownPaint(MenuAvoidStrategyMember& member)
@@ -1618,7 +1621,7 @@ void WebSelectOverlay::SingleHandlePosition(OffsetF& menuOffset, MenuAvoidStrate
 void WebSelectOverlay::MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyMember& member)
 {
     SetDefaultDownPaint(member);
-    if (member.fixWrongNewAvoid) {
+    if (member.needReset) {
         double fixY = member.upPaint.Top() - member.avoidFromText - member.menuHeight;
         if (GreatNotEqual(fixY, member.topArea)) {
             menuOffset.SetY(fixY);
@@ -1654,17 +1657,20 @@ void WebSelectOverlay::MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyM
     menuOffset.SetX(member.avoidPositionX);
 }
 
-bool WebSelectOverlay::QuickMenuIsReallyNeedNewAvoid(MenuAvoidStrategyMember& member)
+bool WebSelectOverlay::MenuPositionCanReset(MenuAvoidStrategyMember& member)
 {
-    if (!member.info->isNewAvoid || member.info->isSingleHandle) {
-        return false;
+    if (member.info->isSingleHandle) {
+        return true;
+    }
+    if (!member.info->isNewAvoid && !GreatNotEqual(member.menuAboveUphandle, member.menuHeight)) {
+        return true;
     }
     bool upHandleIsNotShow = GreatNotEqual(member.topArea, member.upPaint.Top()) ||
                              GreatNotEqual(member.upPaint.Bottom(), member.bottomArea);
     bool downHandleIsNotShow = GreatNotEqual(member.topArea, member.downPaint.Top()) ||
                                GreatNotEqual(member.downPaint.Bottom(), member.bottomArea);
-    member.fixWrongNewAvoid = !upHandleIsNotShow || !downHandleIsNotShow;
-    return !member.fixWrongNewAvoid;
+    member.needReset = !upHandleIsNotShow || !downHandleIsNotShow;
+    return member.needReset;
 }
 
 void WebSelectOverlay::UpdateSelectAreaInfo()
@@ -1685,5 +1691,13 @@ void WebSelectOverlay::OnClippedSelectionBoundsChanged(int32_t x, int32_t y, int
     RectF rect(x, y, width, height);
     selectArea_ = rect;
     UpdateSelectAreaInfo();
+}
+
+void WebSelectOverlay::OnOrientationChanged()
+{
+    if (webSelectInfo_.menuInfo.menuIsShow) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Hide menu when orientation is changed.");
+        ChangeVisibilityOfQuickMenu();
+    }
 }
 } // namespace OHOS::Ace::NG

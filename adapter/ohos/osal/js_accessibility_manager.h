@@ -226,6 +226,7 @@ public:
     void UpdateFrameNodeState(int32_t nodeId) override;
 
     void ReleaseCacheEvent();
+    void ReleaseUIExtCacheEvent();
     void UpdatePageMode(const std::string& pageMode) override
     {
         pageMode_ = std::make_optional(pageMode);

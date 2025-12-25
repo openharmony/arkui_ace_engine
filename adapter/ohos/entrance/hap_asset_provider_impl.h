@@ -75,5 +75,8 @@ private:
     std::shared_ptr<AbilityBase::Extractor> runtimeExtractor_;
     std::vector<std::string> assetBasePaths_;
 };
+
+bool ReadHspModuleBuffer(const std::string& request, uint8_t** buffer, size_t* bufferSize);
+
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_HAP_ASSET_PROVIDER_IMPL_H

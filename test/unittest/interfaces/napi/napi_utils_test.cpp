@@ -470,4 +470,17 @@ HWTEST_F(NapiUtilsTest, NapiUtilsTest010, TestSize.Level1)
     EXPECT_FALSE(result.empty());
 }
 
+/**
+ * @tc.name: NapiUtilsTest011
+ * @tc.desc: GetLocalizedParamStr
+ * @tc.type: FUNC
+ */
+HWTEST_F(NapiUtilsTest, NapiUtilsTest011, TestSize.Level1)
+{
+    std::string paramStr = "123.45";
+    std::string type = "d";
+
+    std::string result = Napi::GetLocalizedParamStr(paramStr, type);
+    EXPECT_FALSE(result.empty());
+}
 } // namespace OHOS::Ace

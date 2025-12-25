@@ -122,7 +122,7 @@ struct TextMarqueeOptions {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeSpacing, CalcDimension);
 };
 
-class ACE_EXPORT TextLayoutProperty : public LayoutProperty {
+class ACE_FORCE_EXPORT TextLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(TextLayoutProperty, LayoutProperty);
 
 public:

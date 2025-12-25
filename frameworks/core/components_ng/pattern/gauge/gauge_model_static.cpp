@@ -23,9 +23,9 @@
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> GaugeModelStatic::CreateFrameNode(int32_t nodeId)
 {
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::GAUGE_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", GAUGE_ETS_TAG, nodeId);
     return FrameNode::GetOrCreateFrameNode(
-        V2::GAUGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GaugePattern>(); }
+        GAUGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GaugePattern>(); }
     );
 }
 

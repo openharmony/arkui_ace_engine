@@ -6242,6 +6242,8 @@ struct ArkUINavRouterModifier {
 };
 
 struct ArkUIGaugeModifier {
+    void (*createModel)(ArkUI_Float32 value, ArkUI_Float32 min, ArkUI_Float32 max);
+    void (*setIsShowLimitValue)(ArkUINodeHandle node, ArkUI_Bool isShowLimitValue);
     void (*setGaugeValue)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*resetGaugeValue)(ArkUINodeHandle node);
     void (*setGaugeStartAngle)(ArkUINodeHandle node, ArkUI_Float32 value);
@@ -6274,6 +6276,10 @@ struct ArkUIGaugeModifier {
     void (*setGradientColors)(
         ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Uint32 weightLength);
     void (*resetGradientColors)(ArkUINodeHandle node);
+    void (*setUseSpecialDefaultIndicator)(ArkUINodeHandle node, ArkUI_Bool useSpecial);
+    void (*setIsShowDescription)(ArkUINodeHandle node, ArkUI_Bool isShowDescription);
+    void (*setDescription)();
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
 };
 
 struct ArkUIBadgeModifier {

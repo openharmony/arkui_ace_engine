@@ -401,8 +401,14 @@ void DefaultOnShowFileSelector(const std::function<void(void*, void*, std::funct
     auto* eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     auto paramPeer = new FileSelectorParamPeer();
+    CHECK_NULL_VOID(paramPeer);
     paramPeer->handler = eventInfo->GetParam();
     auto resultPeer = new FileSelectorResultPeer();
+    if (!resultPeer) {
+        delete paramPeer;
+        paramPeer = nullptr;
+        return;
+    }
     resultPeer->handler = eventInfo->GetFileSelectorResult();
     auto releaseFunc = [&paramPeer, &resultPeer](void* peer) {
         if (paramPeer == peer) {
@@ -593,6 +599,26 @@ void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_
     peer->handler = eventInfo->GetWebPermissionRequest();
     parameter.request = peer;
     arkCallback.InvokeSync(parameter);
+}
+
+void DefaultPermissionClipboard(const std::function<void(void*, std::function<void()>)>& callback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    CHECK_NULL_VOID(callback);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<WebPermissionRequestEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+    auto peer = new PermissionRequestPeer();
+    CHECK_NULL_VOID(peer);
+    peer->handler = eventInfo->GetWebPermissionRequest();
+    auto releaseFunc = [&peer]() {
+        delete peer;
+        peer = nullptr;
+    };
+    callback(peer, std::move(releaseFunc));
 }
 
 void OnScreenCaptureRequest(const CallbackHelper<Callback_OnScreenCaptureRequestEvent_Void>& arkCallback,

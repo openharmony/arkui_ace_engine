@@ -591,7 +591,7 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
         navigationPattern->SetNavigationModeChange(modeChange);
     }
     pipeline->AddAfterLayoutTask([weakNavigationPattern = WeakPtr<NavigationPattern>(navigationPattern),
-        modeChange, doModeSwitchAnimationInAnotherTask, isFirstTimeLayout, isSplitDisplayChange]() {
+        modeChange, doModeSwitchAnimationInAnotherTask, isSplitDisplayChange]() {
         auto navigationPattern = weakNavigationPattern.Upgrade();
         CHECK_NULL_VOID(navigationPattern);
         if (doModeSwitchAnimationInAnotherTask) {
@@ -607,7 +607,7 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
                 navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_HIDE, true);
             }
             auto host = navigationPattern->GetHost();
-            if (host && IsForceSplitSupported(host->GetContext()) && isSplitDisplayChange && !isFirstTimeLayout) {
+            if (host && IsForceSplitSupported(host->GetContext()) && isSplitDisplayChange) {
                 navigationPattern->FireRelatedDestinationLifecycleForModeChange();
             }
             navigationPattern->OnNavBarStateChange(modeChange);

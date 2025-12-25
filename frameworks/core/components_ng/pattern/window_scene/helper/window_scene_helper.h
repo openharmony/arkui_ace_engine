@@ -106,6 +106,8 @@ public:
     static std::string RSNodeToStr(const std::shared_ptr<Rosen::RSNode>& rsNode);
 
     static std::string RSUIContextToStr(const std::shared_ptr<Rosen::RSUIContext>& rsUIContext);
+
+    static void ConvertSystemWindowId(const RefPtr<FrameNode>& frameNode, uint32_t& systemWindowId);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_HELPER_H

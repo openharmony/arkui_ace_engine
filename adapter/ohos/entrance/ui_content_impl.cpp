@@ -51,6 +51,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/module_buffer_reader.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -1960,6 +1961,7 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
     CapabilityRegistry::Register();
     ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
     XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
+    Framework::ModuleBufferReader::GetInstance().SetBufferReaderImpl(ReadHspModuleBuffer);
 
     auto task = [] {
         std::unordered_map<std::string, std::string> payload;
@@ -6061,7 +6063,8 @@ void UIContentImpl::InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor
     UiSessionManager::GetInstance()->SaveForSendCommandFunction(sendCommand);
 }
 
-bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
+bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data,
+    uint8_t subSystemId, const UIExtOptions& options)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
@@ -6071,13 +6074,13 @@ bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uin
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     taskExecutor->PostTask(
-        [instanceId = instanceId_, code, data, subSystemId]() {
+        [instanceId = instanceId_, code, data, subSystemId, options]() {
             auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
             CHECK_NULL_VOID(context);
             auto uiExtManager = context->GetUIExtensionManager();
             CHECK_NULL_VOID(uiExtManager);
             uiExtManager->UpdateWMSUIExtProperty(static_cast<Ace::NG::UIContentBusinessCode>(code),
-                data, static_cast<Ace::NG::RSSubsystemId>(subSystemId));
+                data, static_cast<Ace::NG::RSSubsystemId>(subSystemId), options);
         }, TaskExecutor::TaskType::UI, "ArkUISendUIExtProprty");
     return true;
 }

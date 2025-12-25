@@ -595,6 +595,52 @@ void NavigationPattern::OnModifyDone()
     UpdateToobarFocusColor();
     UpdateDividerBackgroundColor();
     NavigationModifyDoneToolBarManager();
+    ProcessHideNavBarChangeInForceSplit();
+}
+
+void NavigationPattern::ProcessHideNavBarChangeInForceSplit()
+{
+    if (!navBarVisibilityChange_) {
+        return;
+    }
+    auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    if (!IsForceSplitSupported(context) || !forceSplitSuccess_) {
+        return;
+    }
+    auto relatedPage = AceType::DynamicCast<NavDestinationGroupNode>(host->GetRelatedPageDestNode());
+    CHECK_NULL_VOID(relatedPage);
+    auto preRelatedIsVisible = IsRelatedDestinationShouldVisible();
+    auto preRelatedAtTop = IsRelatedDestinationAtTop();
+    RecognizeHomePageIfNeeded();
+    auto task = [weakPattern = WeakClaim(this), weakRelatedPage = WeakPtr(relatedPage),
+        preRelatedIsVisible, preRelatedAtTop]() {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto relatedPage = weakRelatedPage.Upgrade();
+        CHECK_NULL_VOID(relatedPage);
+        auto curRelatedIsVisible = pattern->IsRelatedDestinationShouldVisible();
+        auto curRelatedAtTop = pattern->IsRelatedDestinationAtTop();
+        if (!curRelatedAtTop && preRelatedAtTop) {
+            pattern->NotifyDestinationLifecycle(
+                relatedPage, NavDestinationLifecycle::ON_INACTIVE, NavDestinationActiveReason::TRANSITION);
+        }
+        if (!curRelatedIsVisible && preRelatedIsVisible) {
+            pattern->NotifyDestinationLifecycle(
+                relatedPage, NavDestinationLifecycle::ON_HIDE, NavDestVisibilityChangeReason::TRANSITION);
+        }
+        if (curRelatedIsVisible && !preRelatedIsVisible) {
+            pattern->NotifyDestinationLifecycle(
+                relatedPage, NavDestinationLifecycle::ON_SHOW, NavDestVisibilityChangeReason::TRANSITION);
+        }
+        if (curRelatedAtTop && !preRelatedAtTop) {
+            pattern->NotifyDestinationLifecycle(
+                relatedPage, NavDestinationLifecycle::ON_ACTIVE, NavDestinationActiveReason::TRANSITION);
+        }
+    };
+    context->AddAfterLayoutTask(std::move(task));
 }
 
 void NavigationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)

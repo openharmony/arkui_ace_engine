@@ -18,9 +18,12 @@
 
 #include <string>
 #include <unordered_map>
+#include <mutex>
+#include <shared_mutex>
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/json/json_util.h"
 
 namespace OHOS::Ace {
 class JsonValue;
@@ -28,6 +31,7 @@ class JsonValue;
 
 namespace OHOS::Ace::NG {
 class WebDomDocument;
+struct ActiveDocument;
 
 constexpr char WEB_DOM_JSON_CHILDREN[] = "$children-web";
 constexpr char WEB_DOM_JSON_TITLE[] = "title";
@@ -41,12 +45,26 @@ constexpr char WEB_NATIVE_FUNC_SCROLL[] = "scrollInfo";
 constexpr int32_t WEB_NATIVE_PARAM_SIZE = 1;
 constexpr int32_t WEB_NATIVE_PARAM_INDEX = 0;
 
+struct ActiveNode {
+    int32_t id;
+    std::string tagName;
+    std::string type;
+    RectF rect;
+    std::unique_ptr<JsonValue> attributes;
+    int32_t parentId;
+    std::vector<ActiveNode> children;
+    std::unique_ptr<JsonValue> ToJson(const WebDomDocument& document) const;
+};
+
+struct ActiveDocument {
+    ActiveNode root;
+    std::unordered_map<int32_t, const ActiveNode*> idToActiveNodeMap;
+};
 class WebDomNode : public std::enable_shared_from_this<WebDomNode> {
 public:
     WebDomNode(int32_t id, const std::string& tagName);
 
     void SetAttributes(std::unique_ptr<JsonValue> attributes);
-    std::unique_ptr<JsonValue> ToJson(const WebDomDocument& document);
 
 private:
     friend class WebDomDocument;
@@ -72,7 +90,7 @@ public:
 
     bool IsValid()
     {
-        return root_ != nullptr;
+        return root_ != nullptr && active_ != nullptr;
     }
 
     std::string GetUrl() const
@@ -96,10 +114,11 @@ public:
     }
 
     std::unique_ptr<JsonValue> ExportToJson();
-    const WebDomNode* GetNodeById(int32_t id) const;
+    const ActiveNode* GetNodeById(int32_t id) const;
     std::pair<int32_t, RectF> GetScrollAreaInfoById(int32_t id) const;
     std::string GetXpathById(int32_t id) const;
     std::string GetImageUrlById(int32_t id) const;
+    void MarkDirty();
 
 private:
     std::string url_ = "";
@@ -109,8 +128,19 @@ private:
     std::shared_ptr<WebDomNode> root_;
 
     std::unordered_map<int32_t, std::shared_ptr<WebDomNode>> idToNodeMap_;
+
+    std::atomic<bool> isDirty_ = false;
+    mutable std::shared_mutex activeMutex_;
+    std::shared_ptr<const ActiveDocument> active_;
+
     std::shared_ptr<WebDomNode> CreateNode(std::unique_ptr<JsonValue>& json);
     void UpdateNodeScrollInfo(WebDomNode* node, const OffsetF& delta);
+    ActiveNode BuildActiveNode(const std::shared_ptr<WebDomNode>& domNode,
+        int32_t parentId) const;
+    void BuildActiveNodeMap(const ActiveNode& node,
+        std::unordered_map<int32_t, const ActiveNode*>& map);
+    std::shared_ptr<const ActiveDocument> GetActiveDocument() const;
+    void Commit();
 };
 }  // namespace OHOS::Ace::NG
 

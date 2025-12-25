@@ -16,7 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_container.h"
 
 #include "base/log/ace_trace.h"
-#include "bridge/declarative_frontend/jsview/models/grid_container_model_impl.h"
+#include "core/common/dynamic_module_helper.h"
 #include "frameworks/core/components/common/layout/grid_system_manager.h"
 #include "frameworks/core/components_ng/base/view_stack_model.h"
 #include "frameworks/core/components_ng/pattern/grid_container/grid_container_model_ng.h"
@@ -32,8 +32,10 @@ GridContainerModel* GridContainerModel::GetInstance()
         static NG::GridContainerModelNG instance;
         return &instance;
     } else {
-        static Framework::GridContainerModelImpl instance;
-        return &instance;
+        static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("grid_container");
+        static GridContainerModel* instance =
+            loader ? reinterpret_cast<GridContainerModel*>(loader->CreateModel()) : nullptr;
+        return instance;
     }
 #endif
 }

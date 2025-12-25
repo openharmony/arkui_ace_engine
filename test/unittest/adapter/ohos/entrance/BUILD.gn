@@ -299,6 +299,50 @@ ohos_unittest("rs_adapter_test") {
   ]
 }
 
+ohos_unittest("mmi_event_converter_test") {
+  module_out_path = adapter_test_output_path
+  sources = [
+    "mmi_event_converter_test.cpp",
+    "$ace_root/adapter/ohos/entrance/mmi_event_convertor.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
+    "$ace_root/test/mock/adapter/mock_ace_extra_input_data.cpp",
+    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
+  ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
+    "$ace_root/test/unittest:ace_unittest_log",
+  ]
+  external_deps = [
+    "googletest:gmock_main",
+    "googletest:gmock",
+    "googletest:gtest_main",
+    "input:libmmi-client",
+    "ability_base:base",
+    "resource_management:global_resmgr",
+    "window_manager:libdm",
+    "samgr:samgr_proxy",
+    "napi:ace_napi",
+    "ability_runtime:ability_manager",
+    "ability_runtime:napi_common",
+  ]
+}
+
 group("entrance_unittest") {
   testonly = true
   deps = [
@@ -306,5 +350,6 @@ group("entrance_unittest") {
     ":high_contrast_observer_test",
     ":layout_inspector_test",
     ":rs_adapter_test",
+    ":mmi_event_converter_test",
   ]
 }

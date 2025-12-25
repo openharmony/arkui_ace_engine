@@ -44,7 +44,7 @@ struct DragSpanPosition {
 };
 
 // TextLayoutAlgorithm acts as the underlying text layout.
-class ACE_EXPORT TextLayoutAlgorithm : public MultipleParagraphLayoutAlgorithm, public TextAdaptFontSizer {
+class ACE_FORCE_EXPORT TextLayoutAlgorithm : public MultipleParagraphLayoutAlgorithm, public TextAdaptFontSizer {
     DECLARE_ACE_TYPE(TextLayoutAlgorithm, BoxLayoutAlgorithm, TextAdaptFontSizer);
 
 public:

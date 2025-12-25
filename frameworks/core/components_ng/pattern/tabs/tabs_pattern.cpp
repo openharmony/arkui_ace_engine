@@ -1013,6 +1013,32 @@ void TabsPattern::SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScro
     swiperPattern->SetOnContentDidScroll(std::move(toSwiperCallback));
 }
 
+void TabsPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(theme);
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    if (!tabsLayoutProperty->HasDividerColorSetByUser() || !tabsLayoutProperty->GetDividerColorSetByUserValue()) {
+        auto currentDivider = tabsLayoutProperty->GetDivider().value_or(TabsItemDivider());
+        currentDivider.color = theme->GetDividerColor();
+        tabsLayoutProperty->UpdateDivider(currentDivider);
+        auto dividerFrameNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());
+        CHECK_NULL_VOID(dividerFrameNode);
+        auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
+        CHECK_NULL_VOID(dividerRenderProperty);
+        dividerRenderProperty->UpdateDividerColor(currentDivider.color);
+    }
+}
+
 void TabsPattern::OnColorModeChange(uint32_t colorMode)
 {
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());

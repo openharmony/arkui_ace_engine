@@ -19,12 +19,12 @@ import hilog from '@ohos.hilog'
 
 @Builder
 export function RatingStarStyleStaticBuilder(name: string, param: Object) {
-  RatingStarStyleStaticExample()
+  RatingStarStyleStatic()
 }
 
 @Entry
 @Component
-struct RatingStarStyleStaticExample {
+struct RatingStarStyleStatic {
   @State rating: Double = 3.5;
 
   build() {
@@ -44,9 +44,9 @@ struct RatingStarStyleStaticExample {
         .stars(5)
         .stepSize(0.5)
         .starStyle({
-          backgroundUri: $r('app.media.image1'),
-          foregroundUri: $r('app.media.image2'),
-          secondaryUri: $r('app.media.image3')
+          backgroundUri: $r('app.media.startIcon'),
+          foregroundUri: $r('app.media.startIcon'),
+          secondaryUri: $r('app.media.startIcon')
         })
         .margin(10)
         .onChange((value: number) => {

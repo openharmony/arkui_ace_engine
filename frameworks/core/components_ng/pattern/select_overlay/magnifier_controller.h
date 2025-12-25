@@ -37,8 +37,8 @@ public:
     void OpenMagnifier();
     void CloseMagnifier();
 
-    bool UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset);
-    bool UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset);
+    bool UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset, VectorF& zoomOffset);
+    bool UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset, VectorF& zoomOffset);
     bool UpdateMagnifierOffset();
 
     void UpdateShowMagnifier(bool isShowMagnifier = false);

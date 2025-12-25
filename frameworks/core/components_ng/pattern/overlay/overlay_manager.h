@@ -789,6 +789,8 @@ public:
 
     void UpdateImageGeneratorSheetKey(const RefPtr<UINode>& sheetNode, int32_t rootId);
     bool CloseImageGeneratorSheet();
+    void UpdateImageGeneratorSheetScale(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle,
+        int32_t targetId, std::function<void(const int32_t)>&& onWillDismiss, std::function<void()>&& sheetSpringBack);
 private:
     RefPtr<PipelineContext> GetPipelineContext() const;
     void SetSheetProperty(

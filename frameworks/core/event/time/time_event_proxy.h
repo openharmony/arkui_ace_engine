@@ -30,7 +30,7 @@ namespace OHOS::Ace {
  * @brief The TimeEventProxy class is responsible for managing time event subscriptions and notifying subscribers.
  *        It provides a singleton instance and allows subscribers to register for time events.
  */
-class TimeEventProxy {
+class ACE_FORCE_EXPORT TimeEventProxy {
 public:
     virtual ~TimeEventProxy() = default;
 

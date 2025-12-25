@@ -16,8 +16,10 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_LINEAR_GRADIENT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_LINEAR_GRADIENT_H
 
+#include "ui/base/geometry/dimension.h"
+#include "ui/properties/color.h"
+
 #include "base/memory/referenced.h"
-#include "bridge/declarative_frontend/engine/bindings.h"
 
 namespace OHOS::Ace::Framework {
 class JSLinearGradient final : public Referenced {
@@ -25,15 +27,13 @@ public:
     JSLinearGradient() = default;
     ~JSLinearGradient() override = default;
 
-    static void JSBind(BindingTarget globalObj);
-    static void Constructor(const JSCallbackInfo& args);
-    static void Destructor(JSLinearGradient* jsLinearGradientPtr);
     std::vector<std::pair<Color, Dimension>> GetGradient()
     {
         return gradient_;
     }
 
 private:
+    friend class JSLinearGradientBinding;
     std::vector<std::pair<Color, Dimension>> gradient_;
     ACE_DISALLOW_COPY_AND_MOVE(JSLinearGradient);
 };

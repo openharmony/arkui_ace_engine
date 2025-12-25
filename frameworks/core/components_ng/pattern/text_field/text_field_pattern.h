@@ -1894,7 +1894,6 @@ private:
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     void GetTextSelectRectsInRangeAndWillChange();
-    void reportOnWillInsertEvent();
     void reportOnWillDeleteEvent();
     void reportOnDidInsertEvent();
     void reportOnDidDeleteEvent();

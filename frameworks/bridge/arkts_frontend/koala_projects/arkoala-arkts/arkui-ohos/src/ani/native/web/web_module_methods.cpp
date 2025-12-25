@@ -62,7 +62,7 @@ static void GetCommonFunc(ani_vm* vm, ani_ref savePtr,
     webviewControllerPeer->releaseRefFunc = std::move(releaseRefFunc);
 }
 
-static bool GetFileSelectorObject(ani_env* env, const char* classDesc, ani_object* obj, void* args)
+static bool GetObjectFromPtr(ani_env* env, const char* classDesc, ani_object* obj, void* args)
 {
     ani_class cls;
     if (env->FindClass(classDesc, &cls) != ANI_OK) {
@@ -92,13 +92,13 @@ static void DefaultOnShowFileSelector(ani_vm* vm, void* paramPeer, void* resultP
         return;
     }
     ani_object paramObj;
-    if (!GetFileSelectorObject(env, "arkui.component.web.FileSelectorParam", &paramObj, paramPeer)) {
+    if (!GetObjectFromPtr(env, "arkui.component.web.FileSelectorParam", &paramObj, paramPeer)) {
         release(paramPeer);
         release(resultPeer);
         return;
     }
     ani_object resultObj;
-    if (!GetFileSelectorObject(env, "arkui.component.web.FileSelectorResult", &resultObj, resultPeer)) {
+    if (!GetObjectFromPtr(env, "arkui.component.web.FileSelectorResult", &resultObj, resultPeer)) {
         release(resultPeer);
         return;
     }
@@ -128,6 +128,39 @@ static void DefaultOnShowFileSelector(ani_vm* vm, void* paramPeer, void* resultP
         return;
     }
     HILOGI("Call defaultOnShowFileSelector done");
+}
+
+static void DefaultPermissionClipboard(ani_vm* vm, void* peer, std::function<void()> release)
+{
+    HILOGI("Call defaultPermissionClipboard start");
+    ani_env* env = GetAniEnv(vm);
+    if (!env) {
+        HILOGE("DefaultPermissionClipboard callback env is nullptr");
+        release();
+        return;
+    }
+    ani_object obj;
+    if (!GetObjectFromPtr(env, "arkui.component.web.PermissionRequest", &obj, peer)) {
+        release();
+        return;
+    }
+    ani_class cls;
+    if (env->FindClass("@ohos.web.permissionRequest.PermissionClipboard", &cls) != ANI_OK) {
+        HILOGE("FindClass fail: PermissionClipboard");
+        return;
+    }
+    ani_static_method method;
+    if (env->Class_FindStaticMethod(cls, "defaultPermissionClipboard",
+                                    "C{arkui.component.web.PermissionRequest}:",
+                                    &method) != ANI_OK) {
+        HILOGE("Class_FindStaticMethod fail, defaultPermissionClipboard");
+        return;
+    }
+    if (env->Class_CallStaticMethod_Void(cls, method, obj) != ANI_OK) {
+        HILOGE("Call defaultPermissionClipboard fail");
+        return;
+    }
+    HILOGI("Call defaultPermissionClipboard done");
 }
 
 static void GetWebOptionsFunc(ani_vm* vm, ani_ref savePtr,
@@ -167,10 +200,14 @@ static void GetWebOptionsFunc(ani_vm* vm, ani_ref savePtr,
     auto defaultOnShowFileSelectorFunc = [vm](void* paramPeer, void* resultPeer, std::function<void(void*)> release) {
         DefaultOnShowFileSelector(vm, paramPeer, resultPeer, std::move(release));
     };
+    auto defaultPermissionClipboardFunc = [vm](void* peer, std::function<void()> release) {
+        DefaultPermissionClipboard(vm, peer, std::move(release));
+    };
     webviewControllerPeer->setWebIdFunc = std::move(setWebIdFunc);
     webviewControllerPeer->setHapPathFunc = std::move(setHapPathFunc);
     webviewControllerPeer->setWebDetachFunc = std::move(setWebDetachFunc);
     webviewControllerPeer->defaultOnShowFileSelectorFunc = std::move(defaultOnShowFileSelectorFunc);
+    webviewControllerPeer->defaultPermissionClipboardFunc = std::move(defaultPermissionClipboardFunc);
 }
 
 static void GetWebviewControllerHandlerFunc(ani_vm* vm, ani_ref savePtr,

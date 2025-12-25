@@ -1024,6 +1024,7 @@ public:
     void UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled);
     void UpdateCacheMode(const WebCacheMode& mode);
     std::shared_ptr<OHOS::NWeb::NWeb> GetNweb();
+    std::shared_ptr<OHOS::NWeb::NWebAgentManager> GetNWebAgentManager();
     bool GetForceDarkMode();
     void OnConfigurationUpdated(const OHOS::AppExecFwk::Configuration& configuration);
     void UpdateDarkMode(const WebDarkMode& mode);
@@ -1375,6 +1376,8 @@ public:
     std::string GetAllTextInfo() const;
     int GetSelectStartIndex() const;
     int GetSelectEndIndex() const;
+
+    void ReportEventJson(const std::string& jsonString);
 
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnCameraCaptureStateChanged(int originalState, int newState);

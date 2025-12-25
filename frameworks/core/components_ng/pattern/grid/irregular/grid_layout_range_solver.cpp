@@ -183,6 +183,8 @@ std::pair<int32_t, int32_t> GridLayoutRangeSolver::CheckMultiRow(const int32_t i
         if (opts_->irregularIndexes.find(itemIdx) != opts_->irregularIndexes.end()) {
             if (opts_->getSizeByIndex) {
                 auto size = opts_->getSizeByIndex(itemIdx);
+                size.columns = std::max(1, size.columns);
+                size.rows = std::max(1, size.rows);
                 c += (info_->axis_ == Axis::VERTICAL ? size.columns : size.rows) - 1;
             } else {
                 // no getSizeByIndex implies itemWidth == crossCount

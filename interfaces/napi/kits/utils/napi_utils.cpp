@@ -14,12 +14,11 @@
  */
 
 #include "napi_utils.h"
+#include "base/i18n/localization.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/pipeline/pipeline_base.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "jsnapi.h"
-#include "base/i18n/localization.h"
-
 namespace OHOS::Ace::Napi {
 using namespace OHOS::Ace;
 namespace {
@@ -29,7 +28,7 @@ const std::regex FLOAT_PATTERN(R"(-?(0|[1-9]\d*)(\.\d+))", std::regex::icase);
 constexpr int32_t NAPI_BUF_LENGTH = 256;
 constexpr int32_t UNKNOWN_RESOURCE_ID = -1;
 constexpr int32_t UNKNOWN_RESOURCE_TYPE = -1;
-constexpr int32_t INVALID_PRECISION = -1;
+constexpr int32_t FLOAT_PRECISION = -1;
 constexpr char BUNDLE_NAME[] = "bundleName";
 std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
 } // namespace
@@ -72,11 +71,9 @@ std::string GetLocalizedParamStr(const std::string& paramStr, const std::string&
         return paramStr;
     }
 
-    int32_t precision = (type == "d") ? 0 : INVALID_PRECISION;
-    std::string result = paramStr;
-    std::string backup = paramStr;
-
-    return localization->LocalizeNumber(result, precision) ? result : backup;
+    int32_t precision = (type == "d") ? 0 : FLOAT_PRECISION;
+    std::string result;
+    return localization->LocalizeNumber(paramStr, result, precision) ? result : paramStr;
 }
 
 void ReplaceHolder(std::string& originStr, const std::vector<std::string>& params, uint32_t containCount)

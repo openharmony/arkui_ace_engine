@@ -80,7 +80,6 @@ ohos_shared_library("imagegeneration") {
   }
   deps = [ 
     ":imagegeneration_static_ohos",
-    "$ace_root/advanced_ui_component/imageGeneratorDialog/interfaces:imageGeneratorDialog",
     ]
   cflags = []
   ldflags = []

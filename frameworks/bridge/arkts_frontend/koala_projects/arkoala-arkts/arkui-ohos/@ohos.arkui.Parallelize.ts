@@ -1,6 +1,6 @@
 import { KPointer, InteropNativeModule } from "@koalaui/interop"
 import { int32} from "@koalaui/common"
-import { GlobalStateManager, MutableState, rememberDisposable, mutableState, __context, memoEntry1, memoEntry, __id, StateManager, StateManagerImpl, ComputableState, memoize, NodeAttach, remember } from "@koalaui/runtime"
+import { GlobalStateManager, MutableState, rememberDisposable, mutableState, __context, memoEntry1, memoEntry, __id, StateManager, ComputableState, memoize, NodeAttach, remember } from '@koalaui/runtime'
 import { StateContext } from 'arkui.incremental.runtime.state';
 import { PeerNode } from "arkui/PeerNode"
 import { ArkContentSlotPeer } from "arkui/component/contentSlot"
@@ -436,7 +436,7 @@ export function ParallelizeUI<V, T>(
     SerializerBase.setMultithreadMode()
 
     let isLazy = false
-    const peerNode = (__context() as StateManagerImpl)?.current?.nodeRef
+    const peerNode = (__context() as StateManager).node
     if (peerNode instanceof ArkListPeer || peerNode instanceof ArkGridPeer) {
         isLazy = true
     }

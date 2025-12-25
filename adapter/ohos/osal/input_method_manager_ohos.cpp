@@ -309,6 +309,9 @@ void InputMethodManager::HideKeyboardAcrossProcesses()
     auto pipeline = currentFocusNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto systemWindowId = pipeline->GetFocusWindowId();
+#ifdef WINDOW_SCENE_SUPPORTED
+    NG::WindowSceneHelper::ConvertSystemWindowId(currentFocusNode, systemWindowId);
+#endif
     inputMethod->RequestHideInput(systemWindowId);
     inputMethod->Close();
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "across processes CloseKeyboard Successfully.");
