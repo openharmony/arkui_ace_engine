@@ -1055,7 +1055,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         return true;
     }
 
-    if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_CROWN) {
+    if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_CROWN || source == SCROLL_FROM_BAR_OVER_DRAG) {
         auto res = GetOutBoundaryOffset(currentDelta_);
         // over scroll in drag update from normal to over scroll.
         float overScroll = std::max(res.start, res.end);

@@ -18,6 +18,7 @@
 #define private public
 // mock
 #include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -2142,5 +2143,44 @@ HWTEST_F(WaterFlowTestNg, ScrollBarOverDrag001, TestSize.Level1)
 
     scrollBarPattern->HandleDragEnd(info);
     EXPECT_EQ(pattern_->GetTotalOffset(), prevOffset);
+}
+
+/**
+ * @tc.name: ScrollBarOverDrag002
+ * @tc.desc: Test ScrollBar over drag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollBarOverDrag002, TestSize.Level1)
+{
+    auto container = AceType::DynamicCast<Container>(MockContainer::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY_THREE);
+    StackModelNG stackModel;
+    stackModel.Create();
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    WaterFlowModelNG::SetEdgeEffect(AceType::RawPtr(frameNode_), EdgeEffect::SPRING, true, EffectEdge::ALL);
+
+    CreateWaterFlowItems(20);
+    ScrollBarModelNG scrollBarModel;
+    scrollBarModel.Create(
+        pattern_->GetScrollBarProxy(), true, true, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON));
+    auto scrollBarPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ScrollBarPattern>();
+    ViewAbstract::SetHeight(CalcLength(WATER_FLOW_HEIGHT));
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainDelta(-MAIN_DELTA);
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    scrollBarPattern->scrollBar_->HandleDragStart(info);
+    scrollBarPattern->scrollBar_->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_LE(std::abs(pattern_->GetTotalOffset()), std::abs(MAIN_DELTA));
+
+    scrollBarPattern->scrollBar_->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollBarPattern->scrollBar_->HandleDragEnd(info);
+    EXPECT_LE(std::abs(pattern_->GetTotalOffset()), std::abs(MAIN_DELTA + MAIN_DELTA));
 }
 } // namespace OHOS::Ace::NG

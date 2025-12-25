@@ -455,7 +455,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular);
     float mainContentSize = GetMainContentSize();
     if (info_.offsetEnd_) {
-        if (source == SCROLL_FROM_UPDATE) {
+        if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_BAR_OVER_DRAG) {
             float overScroll = 0.0f;
             if (GetTotalHeight() <= mainContentSize) {
                 overScroll = GetTotalOffset();
@@ -482,7 +482,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         return true;
     }
     if (info_.reachStart_) {
-        if (source == SCROLL_FROM_UPDATE) {
+        if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_BAR_OVER_DRAG) {
             if (!NearZero(mainContentSize)) {
                 auto friction = CalculateFriction(std::abs(info_.currentOffset_) / mainContentSize);
                 offset *= friction;
