@@ -467,6 +467,15 @@ bool ImageSourceInfo::IsImageHdr() const
     return isHdr_;
 }
 
+void ImageSourceInfo::UpdateLocalColorMode(ColorMode localColorMode)
+{
+    if (localColorMode_ == localColorMode || srcType_ != SrcType::RESOURCE) {
+        return;
+    }
+    localColorMode_ = localColorMode;
+    GenerateCacheKey();
+}
+
 std::string ImageSourceInfo::GetTaskKey() const
 {
     // only svg sets fillColor

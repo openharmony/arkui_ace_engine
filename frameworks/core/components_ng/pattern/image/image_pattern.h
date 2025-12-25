@@ -447,6 +447,7 @@ private:
     void OnDpiConfigurationUpdate() override;
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     ImageDfxConfig CreateImageDfxConfig(const ImageSourceInfo& src);
     void ReportPerfData(const RefPtr<NG::FrameNode>& host, int32_t state);
     void ClearReloadFlagsAfterLoad();
