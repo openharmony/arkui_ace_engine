@@ -196,6 +196,30 @@ HWTEST_F(WindowPatternTest, AddBackgroundColorDelayed, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DelayAddAppWindowForDmaResume
+ * @tc.desc: delay add app window for dma resume
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, DelayAddAppWindowForDmaResume, TestSize.Level1)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+    sceneSession_->collaboratorType_ = 0;
+    windowScene_->dmaReclaimEnabled_ = false;
+    windowScene_->DelayAddAppWindowForDmaResume(0);
+    EXPECT_EQ(windowScene_->dmaReclaimEnabled_, false);
+
+    windowScene_->dmaReclaimEnabled_ = true;
+    sceneSession_->collaboratorType_ = static_cast<int32_t>(Rosen::CollaboratorType::RESERVE_TYPE);
+    windowScene_->DelayAddAppWindowForDmaResume(0);
+    EXPECT_EQ(windowScene_->dmaReclaimEnabled_, true);
+
+    sceneSession_->collaboratorType_ = 0;
+    windowScene_->DelayAddAppWindowForDmaResume(0);
+    EXPECT_EQ(windowScene_->dmaReclaimEnabled_, true);
+}
+
+/**
  * @tc.name: CreateSnapshotWindow
  * @tc.desc: CreateSnapshotWindow Test
  * @tc.type: FUNC

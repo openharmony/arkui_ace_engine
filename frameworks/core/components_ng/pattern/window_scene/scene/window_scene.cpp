@@ -55,6 +55,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     CHECK_NULL_VOID(session_);
     initWindowMode_ = session_->GetWindowMode();
     syncStartingWindow_ = Rosen::SceneSessionManager::GetInstance().IsSyncLoadStartingWindow();
+    dmaReclaimEnabled_ = Rosen::SceneSessionManager::GetInstance().IsDmaReclaimEnabled();
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
@@ -182,6 +183,7 @@ RefPtr<RosenRenderContext> WindowScene::GetContextByDisableDelegator(bool isAbil
     }
     return AceType::DynamicCast<RosenRenderContext>(appWindow_->GetRenderContext());
 }
+
 void WindowScene::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -224,6 +226,7 @@ void WindowScene::OnAttachToFrameNode()
     RegisterFocusCallback();
     WindowPattern::OnAttachToFrameNode();
     session_->ResetLockedCacheSnapshot();
+    session_->ResetPreloadSnapshot();
 }
 
 void WindowScene::InsertSurfaceNodeId(uint64_t nodeId)
@@ -655,7 +658,7 @@ void WindowScene::OnActivation()
             self->session_->GetSessionState() != Rosen::SessionState::STATE_DISCONNECT) {
             auto surfaceNode = self->session_->GetSurfaceNode();
             CHECK_NULL_VOID(surfaceNode);
-            self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
+            self->DelayAddAppWindowForDmaResume(self->session_->GetCallingPid());
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             CHECK_EQUAL_VOID(isRestart, true);
             surfaceNode->SetBufferAvailableCallback(self->callback_);
@@ -685,7 +688,7 @@ void WindowScene::DisposeSnapshotAndBlankWindow()
     CHECK_NULL_VOID(surfaceNode);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    AddChild(host, appWindow_, appWindowName_, 0);
+    DelayAddAppWindowForDmaResume(session_->GetCallingPid());
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->SetBufferAvailableCallback(callback_);
     CHECK_EQUAL_VOID(session_->GetSystemConfig().IsPcWindow(), true);
@@ -1076,7 +1079,7 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     SetSubSessionVisible();
     RemoveChild(host, startingWindow_, startingWindowName_);
     startingWindow_.Reset();
-    AddChild(host, appWindow_, appWindowName_, 0);
+    DelayAddAppWindowForDmaResume(session_->GetCallingPid());
     if (surfaceNode) {
         surfaceNode->SetVisible(false);
     }

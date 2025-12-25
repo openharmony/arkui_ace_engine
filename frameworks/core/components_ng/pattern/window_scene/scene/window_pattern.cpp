@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 
+#include <fcntl.h>
+#include <sys/ioctl.h>
+
 #include "session_manager/include/scene_session_manager.h"
 #include "start_window_option.h"
 #include "ui/rs_surface_node.h"
@@ -60,6 +63,14 @@ constexpr uint32_t SNAPSHOT_LOAD_COMPLETE = 1;
 constexpr uint32_t ROTATION_COUNT = 4;
 constexpr uint32_t ROTATION_COUNT_SNAPSHOT = 2;
 constexpr uint32_t STARTING_WINDOW_TIMEOUT_MS = 10000;
+constexpr uint32_t DMA_RECLAIM_TIMEOUT_MS = 500;
+constexpr const char* DMA_DEVICE_FILE = "/dev/dma_reclaim";
+
+struct DmaBufIoctlSwPara {
+    pid_t pid = 0;
+    unsigned long ino = 0;
+    unsigned int fd = 0;
+};
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {
@@ -233,7 +244,7 @@ void WindowPattern::OnAttachToFrameNode()
     if (state == Rosen::SessionState::STATE_BACKGROUND && session_->GetScenePersistence() &&
         (session_->GetScenePersistence()->HasSnapshot() || session_->HasSnapshot())) {
         if (!session_->GetShowRecent() && !session_->GetAppLockControl()) {
-            AddChild(host, appWindow_, appWindowName_, 0);
+            DelayAddAppWindowForDmaResume(session_->GetCallingPid());
         }
         CreateSnapshotWindow();
         AddChild(host, snapshotWindow_, snapshotWindowName_);
@@ -736,6 +747,10 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         auto pixelMap = PixelMap::CreatePixelMap(&snapshot.value());
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
         pattern->SetSyncLoad(true);
+    } else if (auto preloadSnapshot = session_->GetPreloadSnapshot(); preloadSnapshot != nullptr) {
+        auto pixelMap = PixelMap::CreatePixelMap(&preloadSnapshot);
+        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+        pattern->SetSyncLoad(true);
     } else {
         if ((DeviceConfig::realDeviceType == DeviceType::PHONE) && session_->GetShowRecent()) {
             needAddBackgroundColor_ = true;
@@ -840,6 +855,57 @@ void WindowPattern::AddBackgroundColorDelayed()
     });
     taskExecutor->PostDelayedTask(
         addBackgroundColorTask_, TaskExecutor::TaskType::UI, ADD_BACKGROUND_COLOR_MS, __func__);
+}
+
+void WindowPattern::DelayAddAppWindowForDmaResume(int32_t pid)
+{
+    if (!dmaReclaimEnabled_ || session_->IsAnco()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        AddChild(host, appWindow_, appWindowName_, 0);
+        return;
+    }
+    appWindowDelayAdded_ = false;
+    auto addAppUITask = [weakThis = WeakClaim(this)]() {
+        ACE_SCOPED_TRACE("WindowScene::AddAppUITask");
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        CHECK_EQUAL_VOID(self->appWindowDelayAdded_, true);
+        CHECK_NULL_VOID(self->appWindow_);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        self->appWindowDelayAdded_ = true;
+    };
+    auto dmaResumeTask = [containerId = instanceId_, pid, addAppUITask]() {
+        ACE_SCOPED_TRACE("WindowScene::WaitForDmaResume[%d]", pid);
+        auto fd = open(DMA_DEVICE_FILE, O_RDWR | O_CLOEXEC | O_NONBLOCK);
+        if (fd > 0) {
+            DmaBufIoctlSwPara param{.pid = pid};
+            int32_t ret = ioctl(fd, _IOWR('d', 0x05, int), &param);
+            TAG_LOGD(AceLogTag::ACE_WINDOW_SCENE, "swap in dma buf: %{public}d, ret: %{public}d", pid, ret);
+            close(fd);
+        } else {
+            TAG_LOGD(AceLogTag::ACE_WINDOW_SCENE, "failed to open device: %{public}d", pid);
+        }
+        ContainerScope scope(containerId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->PostAsyncEvent(
+            std::move(addAppUITask), "ArkUIWindowSceneAddAppWindowAfterDmaResume", TaskExecutor::TaskType::UI);
+    };
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(
+        std::move(dmaResumeTask), "ArkUIWindowSceneWaitForDmaResume", TaskExecutor::TaskType::BACKGROUND);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    delayAddAppWindowTask_.Cancel();
+    delayAddAppWindowTask_.Reset(addAppUITask);
+    taskExecutor->PostDelayedTask(delayAddAppWindowTask_, TaskExecutor::TaskType::UI,
+        DMA_RECLAIM_TIMEOUT_MS, "ArkUIWindowSceneDelayAddAppWindow");
 }
 
 void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::SnapshotStatus key, bool freeMultiWindow)
