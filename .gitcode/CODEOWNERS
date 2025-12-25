@@ -1496,6 +1496,8 @@ frameworks/bridge/declarative_frontend/jsview/models/divider_model_impl.cpp @ark
 frameworks/bridge/declarative_frontend/jsview/models/divider_model_impl.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/models/effect_component_model_impl.cpp
 frameworks/bridge/declarative_frontend/jsview/models/effect_component_model_impl.h
+frameworks/bridge/declarative_frontend/jsview/models/effect_component_pattern.cpp @arkuicodepulse
+frameworks/bridge/declarative_frontend/jsview/models/effect_component_pattern.h @arkuicodepulse
 frameworks/bridge/declarative_frontend/jsview/models/ellipse_model_impl.cpp @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/models/ellipse_model_impl.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/models/flex_model_impl.cpp @arkuilayout1
@@ -3353,6 +3355,7 @@ frameworks/core/interfaces/native/implementation/global_scope_ohos_measure_utils
 frameworks/core/interfaces/native/implementation/global_scope_uicontext_text_menu_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/global_scope_uicontext_font_scale_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/edit_menu_options_accessor.cpp @huawei_g_five
+frameworks/core/interfaces/native/implementation/effect_component_modifier.cpp @arkuicodepulse
 frameworks/core/interfaces/native/implementation/text_menu_item_id_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_menu_item_id_peer.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/symbol_effect_accessor.cpp @huawei_g_five
@@ -3396,6 +3399,8 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani
 frameworks/core/interfaces/native/ani/text_based_ani_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/ani/text_based_ani_modifier.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/symbol_glyph_modifier_peer.h @huawei_g_five
+frameworks/core/interfaces/native/utility/converter.cpp @arkuicodepulse
+frameworks/core/interfaces/native/utility/converter.h @arkuicodepulse
 
 [Web ArkTS1.2]
 frameworks/core/interfaces/native/ani/web_ani_modifier.cpp @arkweb-committer-group
