@@ -5018,8 +5018,10 @@ export class ArkUIGeneratedNativeModule {
     native static _PinchRecognizer_construct(): KPointer
     @ani.unsafe.Direct
     native static _PinchRecognizer_getFinalizer(): KPointer
-    @ani.unsafe.Quick
+    // instructive change start
+    @ani.unsafe.Direct
     native static _PinchRecognizer_getDistance(ptr: KPointer): KDouble
+    // instructive change end
     @ani.unsafe.Direct
     native static _PixelMapMock_construct(): KPointer
     @ani.unsafe.Direct
