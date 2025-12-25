@@ -22,6 +22,7 @@
 #include <unordered_map>
 
 #include "interfaces/inner_api/ace/ai/data_detector_interface.h"
+#include "ui/base/macros.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -77,7 +78,7 @@ struct SpanNodeInfo {
 enum class SelectionMenuCalblackId { MENU_APPEAR, MENU_SHOW, MENU_HIDE };
 
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public virtual Pattern,
+class ACE_FORCE_EXPORT TextPattern : public virtual Pattern,
                     public TextDragBase,
                     public TextBase,
                     public TextGestureSelector,
@@ -86,12 +87,7 @@ class TextPattern : public virtual Pattern,
     DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase, TextGestureSelector, Magnifier);
 
 public:
-    TextPattern()
-    {
-        selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(WeakClaim(this));
-        pManager_ = AceType::MakeRefPtr<ParagraphManager>();
-        ResetOriginCaretPosition();
-    }
+    TextPattern();
 
     ~TextPattern() override;
 

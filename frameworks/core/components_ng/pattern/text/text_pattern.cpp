@@ -90,6 +90,13 @@ bool IsJumpLink(const std::string& content)
 }
 }; // namespace
 
+TextPattern::TextPattern()
+{
+    selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(WeakClaim(this));
+    pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+    ResetOriginCaretPosition();
+}
+
 TextPattern::~TextPattern()
 {
     // node destruct, need to stop text race animation

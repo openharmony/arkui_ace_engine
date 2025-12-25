@@ -42,7 +42,7 @@ enum class ResourceType : uint32_t {
     SYMBOL = 40000
 };
 
-class ResourceParseUtils final : public AceType {
+class ACE_FORCE_EXPORT ResourceParseUtils final : public AceType {
     DECLARE_ACE_TYPE(ResourceParseUtils, AceType);
 
 public:

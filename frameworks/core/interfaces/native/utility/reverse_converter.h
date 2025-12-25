@@ -307,7 +307,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src);
     void AssignArkValue(Ark_Float64& dst, const Dimension& src);
     void AssignArkValue(Ark_Float64& dst, const LeadingMargin& src);
-    void AssignArkValue(Ark_Float64& dst, const double& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_Float64& dst, const double& src);
     void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
     void AssignArkValue(Ark_FontWeight& dst, OHOS::Ace::FontWeight src);

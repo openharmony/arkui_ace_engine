@@ -220,7 +220,7 @@ public:
  * @brief A wrapper around panda::ObjectRef
  *
  */
-class JsiObject : public JsiType<panda::ObjectRef> {
+class ACE_FORCE_EXPORT JsiObject : public JsiType<panda::ObjectRef> {
 public:
     JsiObject();
     explicit JsiObject(panda::Local<panda::ObjectRef> val);

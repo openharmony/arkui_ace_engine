@@ -13,15 +13,28 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/models/gauge_model_impl.h"
+#include "core/components_ng/pattern/gauge/bridge/gauge_model_impl.h"
 
 #include "base/log/log_wrapper.h"
-#include "bridge/declarative_frontend/jsview/js_gauge.h"
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "frameworks/core/components/progress/progress_component.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/chart/chart_component.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+RefPtr<ProgressTheme> GetProgressTheme()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    return node ? themeManager->GetTheme<ProgressTheme>(node->GetThemeScopeId())
+                : themeManager->GetTheme<ProgressTheme>();
+}
+} // namespace
 
 void GaugeModelImpl::Create(float values, float min, float max)
 {
@@ -30,7 +43,7 @@ void GaugeModelImpl::Create(float values, float min, float max)
     progressChild->SetInspectorTag("Gauge");
     ViewStackProcessor::GetInstance()->ClaimElementId(progressChild);
     ViewStackProcessor::GetInstance()->Push(progressChild);
-    RefPtr<ProgressTheme> progressTheme = JSGauge::GetTheme<ProgressTheme>();
+    RefPtr<ProgressTheme> progressTheme = GetProgressTheme();
     progressChild->InitStyle(progressTheme);
 }
 

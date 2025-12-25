@@ -15,6 +15,7 @@
 #include <cstdint>
 
 #include "jsnapi_expo.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
@@ -103,7 +104,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_water_flow_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_alphabet_indexer_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_data_panel_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_gauge_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scroll_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scrollable_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_marquee_bridge.h"
@@ -494,6 +494,26 @@ ArkUINativeModuleValue ArkUINativeModule::SetMarqueeFrameRateRange(ArkUIRuntimeC
     CHECK_NULL_RETURN(marqueeFrameNode, panda::JSValueRef::Undefined(vm));
     MarqueeModelNG::SetMarqueeFrameRateRange(marqueeFrameNode, frameRateRange, type);
 
+    return panda::JSValueRef::Undefined(vm);
+}
+
+using RegisterModuleFunc = void (*)(Local<panda::ObjectRef>, EcmaVM*);
+
+ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    static const std::unordered_set<std::string> loadModuleName = { { "gauge" } };
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> thisArg = runtimeCallInfo->GetThisRef();
+    auto thisObj = thisArg->ToObject(vm);
+    auto moduleName = firstArg->ToString(vm)->ToString(vm);
+    if (loadModuleName.find(moduleName) != loadModuleName.end()) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule(moduleName);
+        if (module != nullptr) {
+            module->RegisterAttributes(thisObj, vm);
+        }
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2053,7 +2073,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterMarqueeAttributes(object, vm);
     RegisterDatePickerAttributes(object, vm);
     RegisterAlphabetIndexerAttributes(object, vm);
-    RegisterGaugeAttributes(object, vm);
     RegisterSwiperAttributes(object, vm);
     RegisterSelectAttributes(object, vm);
     RegisterRadioAttributes(object, vm);
@@ -4337,45 +4356,6 @@ void ArkUINativeModule::RegisterAlphabetIndexerAttributes(Local<panda::ObjectRef
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "alphabetIndexer"), alphabetIndexer);
 }
 
-void ArkUINativeModule::RegisterGaugeAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
-{
-    auto gauge = panda::ObjectRef::New(vm);
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGaugeVaule"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::SetGaugeValue));
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGaugeVaule"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::ResetGaugeValue));
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGaugeStartAngle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::SetGaugeStartAngle));
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGaugeStartAngle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::ResetGaugeStartAngle));
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGaugeEndAngle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::SetGaugeEndAngle));
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGaugeEndAngle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::ResetGaugeEndAngle));
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGaugeStrokeWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::SetGaugeStrokeWidth));
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGaugeStrokeWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::ResetGaugeStrokeWidth));
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGaugeTrackShadow"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::SetGaugeTrackShadow));
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGaugeTrackShadow"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::ResetGaugeTrackShadow));
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGaugeIndicator"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::SetGaugeIndicator));
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGaugeIndicator"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::ResetGaugeIndicator));
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGaugeColors"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::SetColors));
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGaugeColors"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::ResetColors));
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::SetContentModifierBuilder));
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGaugePrivacySensitive"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::SetGaugePrivacySensitive));
-    gauge->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGaugePrivacySensitive"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GaugeBridge::ResetGaugePrivacySensitive));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "gauge"), gauge);
-}
 void ArkUINativeModule::RegisterMarqueeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto marquee = panda::ObjectRef::New(vm);
@@ -6324,7 +6304,6 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     RegisterDataPanelAttributes(object, vm);
     RegisterDividerAttributes(object, vm);
     RegisterFlexAttributes(object, vm);
-    RegisterGaugeAttributes(object, vm);
     RegisterGridColAttributes(object, vm);
     RegisterGridRowAttributes(object, vm);
     RegisterIndicatorComponentAttributes(object, vm);
@@ -6384,6 +6363,8 @@ void ArkUINativeModule::RegisterGlobalMethods(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetFrameRateRange));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarqueeFrameRateRange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetMarqueeFrameRateRange));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadNativeModule"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LoadNativeModule));
 }
 
 void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

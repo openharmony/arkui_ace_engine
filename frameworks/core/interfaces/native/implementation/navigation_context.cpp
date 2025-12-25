@@ -986,10 +986,10 @@ void NavigationStack::UpdatePathInfoIfNeeded(RefPtr<NG::UINode>& uiNode, int32_t
 {
     auto pathInfo = PathStack::GetPathInfo(index);
     CHECK_NULL_VOID(pathInfo);
-    bool needUpdate = pathInfo->needUpdate_;
     if (!pathInfo->needUpdate_) {
         return;
     }
+    bool needUpdate = pathInfo->needUpdate_;
     pathInfo->needUpdate_ = false;
 
     RefPtr<NG::NavDestinationGroupNode> desNode;

@@ -250,6 +250,7 @@ template("declarative_js_engine") {
       ":windowsizelayoutbreakpoint",
       "ark_node:x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
+      "ark_component/components:module_group",
     ]
 
     if (!is_arkui_x) {
@@ -356,7 +357,6 @@ template("declarative_js_engine") {
       "jsview/js_flex_impl.cpp",
       "jsview/js_foreach.cpp",
       "jsview/js_form_link.cpp",
-      "jsview/js_gauge.cpp",
       "jsview/js_gesture.cpp",
       "jsview/js_grid.cpp",
       "jsview/js_grid_col.cpp",
@@ -513,7 +513,6 @@ template("declarative_js_engine") {
       "jsview/models/ellipse_model_impl.cpp",
       "jsview/models/flex_model_impl.cpp",
       "jsview/models/for_each_model_impl.cpp",
-      "jsview/models/gauge_model_impl.cpp",
       "jsview/models/gesture_model_impl.cpp",
       "jsview/models/grid_item_model_impl.cpp",
       "jsview/models/grid_model_impl.cpp",
@@ -838,6 +837,7 @@ template("declarative_js_engine_ng") {
       ":windowsizelayoutbreakpoint",
       "ark_node:x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
+      "ark_component/components:module_group",
     ]
 
     if (!is_arkui_x) {
@@ -950,7 +950,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_flex_impl.cpp",
       "jsview/js_foreach.cpp",
       "jsview/js_form_link.cpp",
-      "jsview/js_gauge.cpp",
       "jsview/js_gesture.cpp",
       "jsview/js_grid.cpp",
       "jsview/js_grid_col.cpp",
