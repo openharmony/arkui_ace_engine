@@ -22,11 +22,15 @@ group("arkuicustomnode_group") {
 
 ohos_shared_library("arkuicustomnode_ani") {
   deps = [ "$ace_root/build:libace_compatible" ]
+  if (!build_ohos_sdk) {
+    deps += [ "$ace_root/frameworks/bridge/arkts_frontend:ArkoalaNative_ark" ]
+  }
   defines = []
   include_dirs = [
     "./",
     "//foundation/arkui/ace_engine/frameworks/",
     "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/",
+    "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/framework/native/src/",
   ]
   sources = [
     "../utils/ani_utils.cpp",

@@ -25,6 +25,8 @@ export class ArkUIAniCustomNodeModule {
     native static _CustomNode_Construct(id: int32, component: ArkCustomComponent): KPointer
 
     native static _CustomNode_SetBuildFunction(ptr: KPointer, buildFunc: () => KPointer): void
+
+    native static _CustomNode_AddChild(parent: KPointer, child: KPointer): void
 }
 
 export class MeasurableLayoutableInner implements Measurable, Layoutable {
