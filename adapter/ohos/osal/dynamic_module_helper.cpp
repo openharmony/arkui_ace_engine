@@ -41,7 +41,7 @@ std::unique_ptr<ComponentLoader> DynamicModuleHelper::GetLoaderByName(const char
         return std::move(compatibleLib_);
     }
     void* handle = LOADLIB(COMPATIABLE_LIB.c_str());
-    auto* createSym = reinterpret_cast<ComponentLoaderFunc>(LOADSYM(handle, DYNAMIC_MODULE_CREATE));
+    auto* createSym = reinterpret_cast<ComponentLoaderFunc>(LOADSYM(handle, COMPATIABLE_COMPONENT_LOADER));
     CHECK_NULL_RETURN(createSym, nullptr);
     ComponentLoader* module = createSym(name);
     CHECK_NULL_RETURN(module, nullptr);
