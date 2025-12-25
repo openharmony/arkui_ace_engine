@@ -183,4 +183,23 @@ HWTEST_F(SwiperIndicatorTestTwoNg, PlayBlackPointsAnimation001, TestSize.Level1)
     modifier.PlayBlackPointsAnimation(itemHalfSizes);
     EXPECT_EQ(modifier.longPointRightCenterX_, 1);
 }
+
+/**
+ * @tc.name: PlayBlackPointsAnimation002
+ * @tc.desc: Test OverlengthDotIndicatorModifier PlayBlackPointsAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestTwoNg, PlayBlackPointsAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create OverlengthDotIndicatorModifier, check isSelectedColorAnimEnd_ after animation end.
+     */
+    RefPtr<OverlengthDotIndicatorModifier> modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    modifier->targetSelectedIndex_ = 0;
+    modifier->moveDirection_ = OverlongIndicatorMove::MOVE_BACKWARD;
+    LinearVector<float> itemHalfSizes(3, 0.0f);
+    itemHalfSizes[0] = 10.0f;
+    modifier->PlayBlackPointsAnimation(itemHalfSizes);
+    EXPECT_EQ(modifier->isSelectedColorAnimEnd_, true);
+}
 } // namespace OHOS::Ace::NG
