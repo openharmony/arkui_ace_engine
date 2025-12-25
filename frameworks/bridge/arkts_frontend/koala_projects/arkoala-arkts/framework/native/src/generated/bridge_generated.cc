@@ -33364,11 +33364,13 @@ Ark_NativePointer impl_PinchRecognizer_getFinalizer() {
         return GetAccessors()->getPinchRecognizerAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(PinchRecognizer_getFinalizer, Ark_NativePointer)
-Ark_Int32 impl_PinchRecognizer_getDistance(Ark_NativePointer thisPtr) {
+// instructive change start
+KDouble impl_PinchRecognizer_getDistance(Ark_NativePointer thisPtr) {
         Ark_PinchRecognizer self = reinterpret_cast<Ark_PinchRecognizer>(thisPtr);
         return GetAccessors()->getPinchRecognizerAccessor()->getDistance(self);
 }
-KOALA_INTEROP_1(PinchRecognizer_getDistance, Ark_Int32, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(PinchRecognizer_getDistance, KDouble, Ark_NativePointer)
+// instructive change end
 Ark_NativePointer impl_PixelMapMock_construct() {
         return GetAccessors()->getPixelMapMockAccessor()->construct();
 }
