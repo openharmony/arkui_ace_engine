@@ -30,6 +30,9 @@ import { FlexDirection, ScrollSource } from './enums'
 import { OnScrollFrameBeginCallback, Scroller, Scroller_serializer } from './scroll'
 import { ScrollState } from './list'
 import { AttributeModifier, initializers, WaterFlowSections, hookWaterFlowAttributeModifier, AttributeUpdater, extractors } from '#handwritten'
+// instructive change start
+import { hookWaterFlowOptionsImpl } from '#handwritten'
+// instructive change end
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
@@ -312,8 +315,9 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
     }
     public setWaterFlowOptions(options?: WaterFlowOptions): this {
         if (this.checkPriority('setWaterFlowOptions')) {
-            const options_casted = options as (WaterFlowOptions | undefined)
-            this.getPeer()?.setWaterFlowOptionsAttribute(options_casted)
+            // instructive change start
+            hookWaterFlowOptionsImpl(this, options);
+            // instructive change end
             this.applyOptionsFinish('WaterFlowAttribute');
             return this
         }
