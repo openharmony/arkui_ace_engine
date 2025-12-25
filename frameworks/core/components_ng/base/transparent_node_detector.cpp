@@ -35,14 +35,14 @@ TransparentNodeDetector& TransparentNodeDetector::GetInstance()
 }
 
 bool TransparentNodeDetector::CheckWindowTransparent(const RefPtr<FrameNode>& root, int32_t currentId,
-    bool isNavigation)
+    bool isUECWindow, bool isSubWindow, bool isDialogWindow, bool isNavigation)
 {
     CHECK_NULL_RETURN(root, false);
     auto pipeline = root->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto container = Container::GetContainer(currentId);
     CHECK_NULL_RETURN(container, false);
-    if (!container->IsHostMainWindow()) {
+    if (isUECWindow || isSubWindow || isDialogWindow) {
         return (pipeline->GetRootWidth() * pipeline->GetRootHeight() >= SystemProperties::GetDeviceWidth() *
             SystemProperties::GetDeviceHeight() * TRANSPARENT_NODE_SIZE_THRESHOLD && root->IsContextTransparent());
     }
@@ -51,7 +51,12 @@ bool TransparentNodeDetector::CheckWindowTransparent(const RefPtr<FrameNode>& ro
         RefPtr<NG::FrameNode> topNavDesNode;
         root->FindTopNavDestination(topNavDesNode);
         CHECK_NULL_RETURN(topNavDesNode, false);
-        if (!topNavDesNode->IsContextTransparent()) {
+        auto navDestinationNodeBase = AceType::DynamicCast<NavDestinationNodeBase>(topNavDesNode);
+        CHECK_NULL_RETURN(navDestinationNodeBase, false);
+        auto navDestContentFrameNode = AceType::DynamicCast<FrameNode>(navDestinationNodeBase->GetContentNode());
+        CHECK_NULL_RETURN(navDestContentFrameNode, false);
+        auto rootNode = navDestContentFrameNode->GetChildren().front();
+        if (rootNode && !rootNode->IsContextTransparent()) {
             return false;
         }
     } else {
@@ -86,19 +91,22 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
     auto container = Container::GetContainer(currentId);
     CHECK_NULL_VOID(container);
     bool isUECWindow = container->IsUIExtensionWindow();
-    if (!(isUECWindow || container->IsHostSubWindow() ||
-        container->IsHostDialogWindow() || container->IsHostMainWindow()) || !pipelineContext->GetOnFocus()) {
+    bool isSubWindow = container->IsHostSubWindow();
+    bool isDialogWindow = container->IsHostDialogWindow();
+    bool isMainWindow = container->IsHostMainWindow();
+    if (!(isUECWindow || isSubWindow || isDialogWindow || isMainWindow)) {
         return;
     }
     detectCount--;
-    auto task = [weakNode = AceType::WeakClaim(AceType::RawPtr(rootNode)),
-        detectCount, currentId, pageUrl, isUECWindow, isNav]() {
+    auto task = [weakNode = AceType::WeakClaim(AceType::RawPtr(rootNode)), detectCount, currentId, pageUrl,
+        isUECWindow, isSubWindow, isDialogWindow, isMainWindow, isNav]() {
         ContainerScope scope(currentId);
         auto root = weakNode.Upgrade();
         CHECK_NULL_VOID(root);
         auto pipeline = root->GetContext();
         CHECK_NULL_VOID(pipeline);
-        if (!TransparentNodeDetector::GetInstance().CheckWindowTransparent(root, currentId, isNav)) {
+        if (!TransparentNodeDetector::GetInstance().CheckWindowTransparent(root, currentId,
+            isUECWindow, isSubWindow, isDialogWindow, isNav)) {
             return;
         }
         if (detectCount > 0) {
@@ -113,8 +121,11 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
         auto container = Container::GetContainer(currentId);
         std::string bundleName = container ? container->GetBundleName() : "";
         std::string moduleName = container ? container->GetModuleName() : "";
-        container->IsHostMainWindow() ? EventReport::ReportMainWindowTransparentEvent(pageUrl, bundleName, moduleName)
-            : EventReport::ReportUiExtensionTransparentEvent(pageUrl, bundleName, moduleName);
+        if (isUECWindow || isSubWindow || isDialogWindow) {
+            EventReport::ReportUiExtensionTransparentEvent(pageUrl, bundleName, moduleName);
+        } else {
+            EventReport::ReportMainWindowTransparentEvent(pageUrl, bundleName, moduleName);
+        }
         if (isUECWindow) {
             window->NotifyExtensionTimeout(ERROR_CODE_UIEXTENSION_TRANSPARENT);
         }

@@ -40,7 +40,8 @@ private:
     void DumpNodeInfo(const RefPtr<FrameNode>& node, Window* window);
 
 private:
-    bool CheckWindowTransparent(const RefPtr<FrameNode>& root, int32_t currentId, bool isNavigation);
+    bool CheckWindowTransparent(const RefPtr<FrameNode>& root, int32_t currentId, bool isUECWindow, bool isSubWindow,
+        bool isDialogWindow, bool isNavigation);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_TRANSPARENT_NODE_DETECTOR_H
