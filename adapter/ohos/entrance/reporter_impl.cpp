@@ -40,7 +40,8 @@ void ReporterImpl::HandleUISessionReporting(const JsonReport& report) const
     if (value->IsNull()) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_GESTURE, "UISession JsonString %{public}s", value->ToString().c_str());
+    TAG_LOGD(
+        AceLogTag::ACE_GESTURE, "UISession JsonString " SEC_PLD("%{public}s"), SEC_PARAM(value->ToString().c_str()));
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(report.GetId(), "event", value);
 }
 
