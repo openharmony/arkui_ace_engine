@@ -4813,6 +4813,15 @@ void TextPattern::GetGlobalOffset(Offset& offset)
     offset = Offset(globalOffset.GetX(), globalOffset.GetY());
 }
 
+void TextPattern::OnVisibleAreaChange(bool isVisible)
+{
+    if (!isVisible) {
+        PauseSymbolAnimation();
+    } else {
+        ResumeSymbolAnimation();
+    }
+}
+
 void TextPattern::OnVisibleChange(bool isVisible)
 {
     if (!isVisible) {
@@ -4823,12 +4832,10 @@ void TextPattern::OnVisibleChange(bool isVisible)
         if (textDetectEnable_) {
             GetDataDetectorAdapter()->aiDetectDelayTask_.Cancel();
         }
-        PauseSymbolAnimation();
     } else {
         if (CanStartAITask()) {
             GetDataDetectorAdapter()->StartAITask();
         }
-        ResumeSymbolAnimation();
     }
 }
 
@@ -7310,7 +7317,7 @@ void TextPattern::RegisterVisibleAreaChangeCallback()
         auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->OnVisibleChange(visible);
+            pattern->OnVisibleAreaChange(visible);
         };
         std::vector<double> ratioList = {0.0};
         pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);

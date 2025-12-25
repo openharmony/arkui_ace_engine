@@ -90,8 +90,6 @@ public:
         return textId_.value();
     }
 
-    void OnVisibleChange(bool isVisible) override;
-
     void OnTimeChange() override;
 
     void SetBuilderFunc(TextClockMakeCallback&& makeFunc)
@@ -193,7 +191,6 @@ private:
     std::optional<int32_t> textId_;
     bool isStart_ = true;
     bool is24H_ = SystemProperties::Is24HourClock();
-    bool isSetVisible_ = true;
     bool isInVisibleArea_ = true;
     bool isForm_ = false;
     std::string prevTime_;

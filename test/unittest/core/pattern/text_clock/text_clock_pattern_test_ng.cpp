@@ -518,14 +518,14 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnDateChange002, TestSize.Level1)
      * @tc.expected: check whether the value is correct.
      */
     pattern->isStart_ = true;
-    pattern->OnVisibleChange(false);
+    pattern->OnVisibleAreaChange(false);
     pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_INPUT2);
-    pattern->OnVisibleChange(true);
+    pattern->OnVisibleAreaChange(true);
     pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_INPUT_NEXT2);
     pattern->prevTime_ = "1";
-    pattern->OnVisibleChange(true);
+    pattern->OnVisibleAreaChange(true);
     pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_INPUT_NEXT2);
 
@@ -583,14 +583,14 @@ HWTEST_F(TextClockPatternTestNG, TextClockOnDateChange003, TestSize.Level1)
      * @tc.expected: check whether the value is correct.
      */
     pattern->isStart_ = true;
-    pattern->OnVisibleChange(false);
+    pattern->OnVisibleAreaChange(false);
     pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_INPUT3);
-    pattern->OnVisibleChange(true);
+    pattern->OnVisibleAreaChange(true);
     pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_INPUT_NEXT3);
     pattern->prevTime_ = "1";
-    pattern->OnVisibleChange(true);
+    pattern->OnVisibleAreaChange(true);
     pattern->UpdateTimeText();
     EXPECT_EQ(utc, UTC_INPUT_NEXT3);
 
