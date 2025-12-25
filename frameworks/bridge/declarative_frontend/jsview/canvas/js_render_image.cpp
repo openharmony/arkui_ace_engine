@@ -50,15 +50,14 @@ void* GetNapiCallbackInfoAndThis(napi_env env, napi_callback_info info)
 
 void* DetachImageBitmap(napi_env env, void* value, void* hint)
 {
+    // DetachImageBitmap IncRefCount for AttachImageBitmap
+    auto* wrapper = (JSRenderImage*)value;
+    wrapper->IncRefCount();
     return value;
 }
 
 napi_value AttachImageBitmap(napi_env env, void* value, void*)
 {
-    if (value == nullptr) {
-        LOGW("Invalid parameter.");
-        return nullptr;
-    }
     auto* wrapper = (JSRenderImage*)value;
     if (wrapper == nullptr) {
         LOGW("Invalid context.");
@@ -79,7 +78,6 @@ napi_value AttachImageBitmap(napi_env env, void* value, void*)
 
     napi_coerce_to_native_binding_object(env, imageBitmap, DetachImageBitmap, AttachImageBitmap, value, nullptr);
     napi_wrap_with_size(env, imageBitmap, value, JSRenderImage::Finalizer, nullptr, nullptr, wrapper->GetBindingSize());
-    wrapper->IncRefCount();
     return imageBitmap;
 }
 
