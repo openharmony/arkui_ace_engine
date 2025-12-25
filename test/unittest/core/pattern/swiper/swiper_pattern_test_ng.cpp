@@ -2483,7 +2483,7 @@ HWTEST_F(SwiperPatternTestNg, GetScrollAbility001, TestSize.Level1)
     CreateSwiper();
     SwiperModelNG::SetLoop(AceType::RawPtr(frameNode_), true);
     CreateSwiperItems(1);
-    EXPECT_EQ(pattern_->GetScrollAbility(), "unable");
+    EXPECT_EQ(std::string(pattern_->GetScrollAbility()), "unable");
 
     /**
      * @tc.steps: step2. Add Swiper items and turn next.
@@ -2492,14 +2492,14 @@ HWTEST_F(SwiperPatternTestNg, GetScrollAbility001, TestSize.Level1)
     CreateSwiperItems(3);
     CreateSwiperDone();
     pattern_->ChangeIndex(1, false);
-    EXPECT_EQ(pattern_->GetScrollAbility(), "bidirectional");
+    EXPECT_EQ(std::string(pattern_->GetScrollAbility()), "bidirectional");
 
     /**
      * @tc.steps: step3. Disable Swiper.
      * @tc.expected: Swiper is unable to scroll.
      */
     layoutProperty_->UpdateDisableSwipe(true);
-    EXPECT_EQ(pattern_->GetScrollAbility(), "unable");
+    EXPECT_EQ(std::string(pattern_->GetScrollAbility()), "unable");
 }
 
 /**
@@ -2519,7 +2519,7 @@ HWTEST_F(SwiperPatternTestNg, GetScrollAbility002, TestSize.Level1)
     CreateSwiperItems(3);
     CreateSwiperDone();
     EXPECT_EQ(SwiperModelNG::GetDisplayCount(AceType::RawPtr(frameNode_)), 3);
-    EXPECT_EQ(pattern_->GetScrollAbility(), "unable");
+    EXPECT_EQ(std::string(pattern_->GetScrollAbility()), "unable");
 }
 
 /**
