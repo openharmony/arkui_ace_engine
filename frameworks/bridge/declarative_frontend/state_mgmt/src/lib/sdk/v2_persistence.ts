@@ -499,8 +499,9 @@ class PersistenceV2Impl extends StorageHelper {
       return;
     }
 
-    if (typeof keyOrType !== 'string')
+    if (typeof keyOrType !== 'string') {
       this.throwIfTypeIsNotSupported(keyOrType);
+    }
 
     const key: string = this.getKeyOrTypeName(keyOrType);
 
@@ -517,8 +518,9 @@ class PersistenceV2Impl extends StorageHelper {
       return;
     }
 
-    if (typeof keyOrType !== 'string')
+    if (typeof keyOrType !== 'string') {
       this.throwIfTypeIsNotSupported(keyOrType);
+    }
 
     const key: string = this.getKeyOrTypeName(keyOrType);
 
@@ -584,7 +586,7 @@ class PersistenceV2Impl extends StorageHelper {
     this.removeFromPersistenceV2(key, areaMode);
   }
 
-  protected throwIfTypeIsNotSupported<T>(type: TypeConstructorWithArgs<T>) {
+  protected throwIfTypeIsNotSupported<T>(type: TypeConstructorWithArgs<T>): void {
     if (typeof type !== 'function') {
       throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
     }
@@ -594,7 +596,7 @@ class PersistenceV2Impl extends StorageHelper {
     }
   }
 
-  protected throwIfNotSupported(value: object) {
+  protected throwIfNotSupported(value: object): void {
     const classes = PersistenceV2Impl.NOT_SUPPORT_TYPES_;
     if (classes.some(clazz => (value instanceof clazz))) {
       throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
@@ -604,7 +606,7 @@ class PersistenceV2Impl extends StorageHelper {
   protected getRightKey<T extends object>(
     type: TypeConstructorWithArgs<T>,
     keyOrDefaultCreator?: string | StorageDefaultCreator<T>
-  ) {
+  ): string | undefined {
     const key = this.getConnectedKey(type, keyOrDefaultCreator);
 
     if (key === undefined) {
@@ -874,7 +876,7 @@ class PersistenceV2Impl extends StorageHelper {
     PersistenceV2Impl.storage_.set(PersistenceV2Impl.KEYS_ARR_, JSON.stringify(Array.from(keysArr)), areaMode);
   }
 
-  protected errorHelper(key: string, reason: PersistError, message: string) {
+  protected errorHelper(key: string, reason: PersistError, message: string): void {
     if (this.cb_ && typeof this.cb_ === 'function') {
       this.cb_(key, reason, message);
       return;

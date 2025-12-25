@@ -14,6 +14,10 @@
  *
  */
 
+function nullOrUndef(value: unknown): boolean {
+  return value === null || value === undefined;
+}
+
 class DataCoder {
   // Tag to detect payload format
   public static readonly FORMAT_TAG = 'JSON2';
@@ -47,9 +51,17 @@ class DataCoder {
       ? UIUtilsImpl.instance().getTarget(target)
       : target;
 
-    let factory = defaultSubCreator
-      ? (_: object) => (function() { return defaultSubCreator(); }) as unknown as TypeConstructor<any>
-      : undefined;
+    let factory: FactoryConstructor<S> | undefined = undefined;
+
+    if (defaultSubCreator) {
+      factory = (_: object): TypeConstructor<S> => {
+        return class {
+          constructor() {
+            return defaultSubCreator();
+          }
+        } as TypeConstructor<S>;
+      };
+    }
 
     try {
       const dst = { root: origTarget };
@@ -214,33 +226,33 @@ class DataCoder {
       return;
     }
 
-    if (srcVal != undefined && globalThis.isSendable(srcVal)) {
+    if (!nullOrUndef(srcVal) && globalThis.isSendable(srcVal)) {
       this.throwIfNotSendable(tgtVal);
       target[targetProp] = srcVal;
       return;
     }
 
-    if (srcVal == undefined && tgtVal instanceof Array) {
+    if (nullOrUndef(srcVal) && tgtVal instanceof Array) {
       target[targetProp].length = 0;
       return;
     }
 
-    if (srcVal == undefined && tgtVal instanceof Map) {
+    if (nullOrUndef(srcVal) && tgtVal instanceof Map) {
       target[targetProp].clear();
       return;
     }
 
-    if (srcVal == undefined && tgtVal instanceof Set) {
+    if (nullOrUndef(srcVal) && tgtVal instanceof Set) {
       target[targetProp].clear();
       return;
     }
 
-    if (srcVal == undefined) {
+    if (nullOrUndef(srcVal)) {
       target[targetProp] = srcVal;
       return;
     }
 
-    if (tgtVal == undefined && opts.factory) {
+    if (nullOrUndef(tgtVal) && opts.factory) {
       const type = opts.factory(srcVal);
       target[targetProp] = type ? new type() : {};
       this.restoreObject(target[targetProp], srcVal, {});
@@ -267,7 +279,7 @@ class DataCoder {
   }
 
   // Ensure target is instanceof the clazz
-  private static throwIfNotInstanceOf(target: any, clazz: new (...args: any[]) => any) {
+  private static throwIfNotInstanceOf(target: unknown, clazz: new (...args: unknown[]) => unknown): void {
     if (target instanceof clazz === false) {
       const type = target?.constructor?.name ?? typeof target;
       throw new Error(`The class of target (${type}) mismatches '${clazz.name}'`);
@@ -275,14 +287,14 @@ class DataCoder {
   }
 
   // Ensure target has given type
-  private static throwIfNotTypeOf(target: any, type: string) {
+  private static throwIfNotTypeOf(target: unknown, type: string): void {
     if (typeof target !== type) {
       throw new Error(`The type of target ('${typeof target}') mismatches '${type}'`);
     }
   }
 
   // Ensure target is Sendable
-  private static throwIfNotSendable(target: any) {
+  private static throwIfNotSendable(target: unknown): void {
     if (target != null && globalThis.isSendable(target) === false) {
       const type = target.constructor?.name ?? typeof target
       throw new Error(`The target (${type}) is not @Sendable`);
@@ -290,13 +302,13 @@ class DataCoder {
   }
 
   // Ensure value is not collection
-  private static throwIfCollection(value: any) {
+  private static throwIfCollection(value: unknown): void {
     if ([Array, Map, Set, SendableArray, SendableMap, SendableSet].some(clazz => value instanceof clazz)) {
       throw new Error(`Array, Map, Set, or collections.Array/Map/Set cannot be used as collection items`);
     }
   }
 
-  private static throwNoFactory<T>(targetProp: string) {
+  private static throwNoFactory<T>(targetProp: string): void {
     throw new Error(`Miss @Type in object defined, the property name is ${targetProp}`);
   }
 
