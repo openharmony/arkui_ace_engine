@@ -436,7 +436,7 @@ export struct FoldSplitContainer {
       Logger.error('Failed to get foldStatus. code:%{public}d, message:%{public}s', err.code, err.message);
     }
     try {
-      display.on('foldStatusChange', (foldStatus) => {
+      display.onFoldStatusChange((foldStatus) => {
         if (this.foldStatus !== foldStatus) {
           this.foldStatus = foldStatus;
           this.updateLayout('');
@@ -444,7 +444,7 @@ export struct FoldSplitContainer {
         }
       });
     } catch (err : BusinessError<void>) {
-      Logger.error('Failed display.on foldStatusChange. code:%{public}d, message:%{public}s', err.code, err.message);
+      Logger.error('Failed display.onFoldStatusChange. code:%{public}d, message:%{public}s', err.code, err.message);
     }
 
     try {
@@ -490,9 +490,9 @@ export struct FoldSplitContainer {
       this.listener = undefined;
     }
     try {
-      display.off('foldStatusChange');
+      display.offFoldStatusChange();
     } catch (err : BusinessError<void>) {
-      Logger.error('Failed display.off foldStatusChange. code:%{public}d, message:%{public}s', err.code, err.message);
+      Logger.error('Failed display.offFoldStatusChange. code:%{public}d, message:%{public}s', err.code, err.message);
     }
     if (this.windowInstance) {
       this.windowInstance?.off('windowStatusChange');
