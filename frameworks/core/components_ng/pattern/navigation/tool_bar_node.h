@@ -75,6 +75,8 @@ public:
     {
         return isHideItemText_;
     }
+
+    bool IsHideToolBar() const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 private:
