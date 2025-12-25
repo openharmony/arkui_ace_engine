@@ -196,9 +196,7 @@ void AssignArkValue(Ark_text_TextDecorationType& dst, const TextDecoration& src,
 void AssignArkValue(Ark_PositionWithAffinity& dst, const PositionWithAffinity& src, ConvContext *ctx)
 {
     dst.position = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(src.position_));
-#ifdef WRONG_SDK
     dst.affinity = Converter::ArkValue<Ark_text_Affinity>(src.affinity_);
-#endif
 }
 } // OHOS::Ace::NG::Converter
 
