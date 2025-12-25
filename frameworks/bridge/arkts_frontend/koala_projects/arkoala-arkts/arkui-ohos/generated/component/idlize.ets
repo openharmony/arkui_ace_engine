@@ -2108,7 +2108,7 @@ export class FrameNodeExtender {
     }
 }
 export class GestureOps {
-    static createTapGesture_serialize(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: boolean): KPointer {
+    static createTapGesture_serialize(fingers: number, count: number, distanceThreshold: double, isFingerCountLimited: boolean): KPointer {
         console.log("zcb createTapGesture_serialize");
         const retval  = ArkUIGeneratedNativeModule._GestureOps_createTapGesture(fingers, count, distanceThreshold, isFingerCountLimited ? 1 : 0)
         return retval
@@ -2210,10 +2210,10 @@ export class GestureOps {
         const retval  = ArkUIGeneratedNativeModule._GestureOps_isScrollableComponent(event)
         return retval
     }
-    public static createTapGesture(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: boolean): KPointer {
+    public static createTapGesture(fingers: number, count: number, distanceThreshold: double, isFingerCountLimited: boolean): KPointer {
         const fingers_casted = fingers as (number)
         const count_casted = count as (number)
-        const distanceThreshold_casted = distanceThreshold as (number)
+        const distanceThreshold_casted = distanceThreshold as (double)
         const isFingerCountLimited_casted = isFingerCountLimited as (boolean)
         return GestureOps.createTapGesture_serialize(fingers_casted, count_casted, distanceThreshold_casted, isFingerCountLimited_casted)
     }

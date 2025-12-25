@@ -31254,10 +31254,10 @@ KInteropReturnBuffer impl_GestureEvent_getTapLocation(Ark_NativePointer thisPtr)
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(GestureEvent_getTapLocation, KInteropReturnBuffer, Ark_NativePointer)
-Ark_NativePointer impl_GestureOps_createTapGesture(KInteropNumber fingers, KInteropNumber count, KInteropNumber distanceThreshold, Ark_Boolean isFingerCountLimited) {
-        return GetAccessors()->getGestureOpsAccessor()->createTapGesture((const Ark_Number*) (&fingers), (const Ark_Number*) (&count), (const Ark_Number*) (&distanceThreshold), isFingerCountLimited);
+Ark_NativePointer impl_GestureOps_createTapGesture(KInteropNumber fingers, KInteropNumber count, KDouble distanceThreshold, Ark_Boolean isFingerCountLimited) {
+        return GetAccessors()->getGestureOpsAccessor()->createTapGesture((const Ark_Number*) (&fingers), (const Ark_Number*) (&count), distanceThreshold, isFingerCountLimited);
 }
-KOALA_INTEROP_DIRECT_4(GestureOps_createTapGesture, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, Ark_Boolean)
+KOALA_INTEROP_DIRECT_4(GestureOps_createTapGesture, Ark_NativePointer, KInteropNumber, KInteropNumber, KDouble, Ark_Boolean)
 Ark_NativePointer impl_GestureOps_createLongPressGesture(KInteropNumber fingers, Ark_Boolean repeat, KInteropNumber duration, Ark_Boolean isFingerCountLimited) {
         return GetAccessors()->getGestureOpsAccessor()->createLongPressGesture((const Ark_Number*) (&fingers), repeat, (const Ark_Number*) (&duration), isFingerCountLimited);
 }
