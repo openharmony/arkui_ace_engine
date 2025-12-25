@@ -17,6 +17,7 @@
 
 #include "js_backend_timer_module.h"
 #include "js_environment.h"
+#include "js_runtime_utils.h"
 #include "napi_common_ability.h"
 
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
@@ -593,6 +594,7 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func, const
 {
     shared_ptr<JsRuntime> runtime = GetJsRuntime();
     ACE_DCHECK(runtime);
+    AbilityRuntime::HandleScope handleScope(jsAbilityRuntime_);
     if (func == nullptr) {
         LOGE("func is nullptr!");
         return runtime->NewUndefined();
