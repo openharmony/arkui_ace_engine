@@ -343,10 +343,15 @@ export class DragControllerImpl extends DragController {
     }
 
     //@ts-ignore
-    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo,
+    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo,
         callback: AsyncCallback<dragController.DragEventParam>): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        if (typeof custom === "function") {
+        if (custom === undefined) {
+            let destroyCallback = (): void => {}
+            let dragItemInfoNull: DragItemInfo = {};
+            ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, nullptr,
+                destroyCallback, dragInfo, callback);
+        } else if (typeof custom === "function") {
             const peerNode = createUiDetachedRoot((): PeerNode => {
                 return ArkComponentRootPeer.create(undefined);
             }, custom as CustomBuilder);
@@ -386,11 +391,16 @@ export class DragControllerImpl extends DragController {
     }
 
     // @ts-ignore
-    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo):
+    public executeDrag(custom: CustomBuilder | DragItemInfo | undefined, dragInfo: dragController.DragInfo):
         Promise<dragController.DragEventParam> | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let promise = new Promise<dragController.DragEventParam>((resolve, reject) => { });
-        if (typeof custom === "function") {
+        if (custom === undefined) {
+            let destroyCallback = (): void => {}
+            let dragItemInfoNull: DragItemInfo = {};
+            ArkUIAniModule._DragController_executeDragWithPromise(dragItemInfoNull, nullptr,
+                destroyCallback, dragInfo);
+        } else if (typeof custom === "function") {
             const peerNode = createUiDetachedRoot((): PeerNode => {
                 return ArkComponentRootPeer.create(undefined);
             }, custom as CustomBuilder);
@@ -430,34 +440,37 @@ export class DragControllerImpl extends DragController {
         return promise;
     }
 
-    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo>,
+    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo> | undefined,
         dragInfo: dragController.DragInfo): dragController.DragAction {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
 
         let rootNodeArray: Array<KPointer> = [];
         let peerNodeArray: Array<PeerNode> = [];
         let dragItemInfoArray: Array<DragItemInfo> = [];
-
-        for (let element of customArray) {
-            if (typeof element === "function") {
-                const builder = element as CustomBuilder;
-                const peerNode = createUiDetachedRoot((): PeerNode => {
-                    return ArkComponentRootPeer.create(undefined);
-                }, builder);
-                const rootNode = peerNode.peer.ptr;
-                rootNodeArray.push(rootNode);
-                peerNodeArray.push(peerNode);
-            } else if (element instanceof DragItemInfo) {
-                const dragItemInfo = element as DragItemInfo;
-                if (dragItemInfo.pixelMap !== undefined) {
-                    dragItemInfoArray.push(dragItemInfo);
-                } else if (dragItemInfo.builder !== undefined) {
+        
+        if (customArray !== undefined) {
+            let arrayData = customArray as Array<CustomBuilder | DragItemInfo>
+            for (let element of arrayData) {
+                if (typeof element === "function") {
+                    const builder = element as CustomBuilder;
                     const peerNode = createUiDetachedRoot((): PeerNode => {
                         return ArkComponentRootPeer.create(undefined);
-                    }, dragItemInfo.builder as CustomBuilder);
+                    }, builder);
                     const rootNode = peerNode.peer.ptr;
                     rootNodeArray.push(rootNode);
                     peerNodeArray.push(peerNode);
+                } else if (element instanceof DragItemInfo) {
+                    const dragItemInfo = element as DragItemInfo;
+                    if (dragItemInfo.pixelMap !== undefined) {
+                        dragItemInfoArray.push(dragItemInfo);
+                    } else if (dragItemInfo.builder !== undefined) {
+                        const peerNode = createUiDetachedRoot((): PeerNode => {
+                            return ArkComponentRootPeer.create(undefined);
+                        }, dragItemInfo.builder as CustomBuilder);
+                        const rootNode = peerNode.peer.ptr;
+                        rootNodeArray.push(rootNode);
+                        peerNodeArray.push(peerNode);
+                    }
                 }
             }
         }
