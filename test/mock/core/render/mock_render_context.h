@@ -89,8 +89,8 @@ public:
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
         auto geometryNode = frameNode->GetGeometryNode();
-        float relativeLeft = geometryNode->GetPixelGridRoundOffset().GetX();
-        float relativeTop = geometryNode->GetPixelGridRoundOffset().GetY();
+        float relativeLeft = geometryNode->GetFrameOffset().GetX();
+        float relativeTop = geometryNode->GetFrameOffset().GetY();
         float nodeWidth = geometryNode->GetFrameSize().Width();
         float nodeHeight = geometryNode->GetFrameSize().Height();
         float roundToPixelErrorX = 0.0f;
