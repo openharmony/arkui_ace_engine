@@ -713,7 +713,7 @@ void WebSelectOverlay::CheckHandles(SelectHandleInfo& handleInfo,
     auto paintRect = handleInfo.paintRect;
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() };
     PointF topPoint = { paintRect.Left(), paintRect.Top() };
-    handleInfo.isShow = (visibleInnerRect.IsInRegion(bottomPoint) && visibleInnerRect.IsInRegion(topPoint));
+    handleInfo.isShow = (visibleInnerRect.IsInnerRegion(bottomPoint) && visibleInnerRect.IsInnerRegion(topPoint));
 }
 
 RectF WebSelectOverlay::ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle)
@@ -1024,11 +1024,6 @@ void WebSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     CHECK_NULL_VOID(pattern);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto manager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(manager);
-    if (pattern->isDragging_ || manager->IsDragged()) {
-        return;
-    }
     TouchInfo touchPoint;
     touchPoint.id = 0;
     touchPoint.x = handleRect.GetX() - pattern->webOffset_.GetX();
