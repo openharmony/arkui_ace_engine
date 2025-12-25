@@ -247,6 +247,9 @@ namespace Converter {
         DimensionUnit defaultUnit = DimensionUnit::FP);
     std::optional<Dimension> OptConvertFromArkLengthResource(const Ark_Resource& src,
         DimensionUnit defaultUnit = DimensionUnit::VP);
+    std::optional<Dimension> OptConvertFromResourceStr(const Ark_ResourceStr& src, DimensionUnit defaultUnit);
+    std::optional<Dimension> OptConvertFromF64ResourceStr(
+        const Opt_Union_F64_ResourceStr& src, DimensionUnit defaultUnit);
 
     template<typename T, typename P>
     void AssignCast(std::optional<T>& dst, const P& src)
