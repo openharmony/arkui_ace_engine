@@ -398,7 +398,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     RequestFrame();
 }
 
-void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle)
+void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle, bool postByTraverse)
 {
     CHECK_RUN_ON(UI);
     if (IsDestroyed()) {
@@ -408,7 +408,7 @@ void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&&
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
         ACE_MEASURE_SCOPED_TRACE("PostponeBundleByIgnore postponedChildCount = %zu", bundle.first.size());
     }
-    taskScheduler_->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
+    taskScheduler_->AddIgnoreLayoutSafeAreaBundle(std::move(bundle), postByTraverse);
 }
 
 void PipelineContext::AddLayoutNode(const RefPtr<FrameNode>& layoutNode)

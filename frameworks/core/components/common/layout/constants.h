@@ -1245,7 +1245,8 @@ enum class DividerMode {
 enum class LayoutType : int32_t {
     NONE = 0,
     MEASURE_FOR_IGNORE = 1,
-    LAYOUT_FOR_IGNORE = 2
+    LAYOUT_FOR_IGNORE = 2,
+    TRAVERSE_FOR_IGNORE = 3
 };
 } // namespace OHOS::Ace
 
