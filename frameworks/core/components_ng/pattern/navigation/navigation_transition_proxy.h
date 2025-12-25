@@ -220,6 +220,16 @@ public:
         return proxyId_;
     }
 
+    void SetIsTriggerByTimeout(bool isTriggerByTimeout)
+    {
+        isTriggerByTimeout_ = isTriggerByTimeout;
+    }
+    
+    bool GetIsTriggerByTimeout() const
+    {
+        return isTriggerByTimeout_;
+    }
+
 private:
     uint64_t proxyId_ = 0;
     RefPtr<NavDestinationContext> preContext_;
@@ -233,6 +243,7 @@ private:
     bool isSuccess_ = true; // set current custom transition is start success or not
     bool interactive_ = false; // set current interactive animation
     bool isStartAnimation_ = false;
+    bool isTriggerByTimeout_ = false;
 };
 
 struct NavigationTransition {
