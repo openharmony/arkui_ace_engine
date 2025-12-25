@@ -64,7 +64,7 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
     fingerList_.clear();
     lastPointEvent_.reset();
     auto maxTimeStamp = TimeStamp::min().time_since_epoch().count();
-    std::unordered_map<int32_t, FingerInfo> latestTouchPoints;
+    std::map<int32_t, FingerInfo> latestTouchPoints;
     std::unordered_map<int32_t, uint64_t> latestTimeStamps;
     for (const auto& point : touchPoints_) {
         if (CheckFingerListInDownFingers(point.second.id)) {
