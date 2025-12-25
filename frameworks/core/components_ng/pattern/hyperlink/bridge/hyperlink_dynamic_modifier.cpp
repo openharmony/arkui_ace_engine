@@ -22,6 +22,31 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_static.h"
 
+#include "bridge/declarative_frontend/jsview/models/hyperlink_model_impl.h"
+
+namespace OHOS::Ace {
+std::unique_ptr<HyperlinkModel> HyperlinkModel::instance_ = nullptr;
+std::mutex HyperlinkModel::mutex_;
+HyperlinkModel* HyperlinkModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::HyperlinkModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::HyperlinkModelNG());
+            } else {
+                instance_.reset(new Framework::HyperlinkModelImpl());
+            }
+#endif
+        }
+    }
+    return instance_.get();
+}
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int NUM_0 = 0;
@@ -30,6 +55,12 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 } // namespace
+
+void Create(const std::string& address, const std::string& content)
+{
+    HyperlinkModel::GetInstance()->Create(address, content);
+}
+
 void SetHyperlinkColor(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -120,10 +151,16 @@ ArkUINodeHandle CreateHyperlinkFrameNode(ArkUI_Int32 nodeId)
     return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
 }
 
+void Pop()
+{
+    HyperlinkModel::GetInstance()->Pop();
+}
+
 const ArkUIHyperlinkModifier* GetHyperlinkDynamicModifier()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIHyperlinkModifier modifier = {
+        .create = Create,
         .setHyperlinkColor = SetHyperlinkColor,
         .resetHyperlinkColor = ResetHyperlinkColor,
         .setHyperlinkDraggable = SetHyperlinkDraggable,
@@ -131,6 +168,7 @@ const ArkUIHyperlinkModifier* GetHyperlinkDynamicModifier()
         .setHyperlinkResponseRegion = SetHyperlinkResponseRegion,
         .resetHyperlinkResponseRegion = ResetHyperlinkResponseRegion,
         .createHyperlinkFrameNode = CreateHyperlinkFrameNode,
+        .pop = Pop
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

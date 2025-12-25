@@ -6313,6 +6313,7 @@ struct ArkUIRefreshModifier {
 };
 
 struct ArkUIHyperlinkModifier {
+    void (*create)(const std::string& address, const std::string& content);
     void (*setHyperlinkColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
     void (*resetHyperlinkColor)(ArkUINodeHandle node);
     void (*setHyperlinkDraggable)(ArkUINodeHandle node, ArkUI_Bool draggable);
@@ -6321,6 +6322,7 @@ struct ArkUIHyperlinkModifier {
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetHyperlinkResponseRegion)(ArkUINodeHandle node);
     ArkUINodeHandle (*createHyperlinkFrameNode)(ArkUI_Int32 nodeId);
+    void (*pop)();
 };
 
 struct ArkUIAlphabetIndexerModifier {

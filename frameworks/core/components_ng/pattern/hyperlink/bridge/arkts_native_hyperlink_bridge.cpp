@@ -18,26 +18,7 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-
-namespace OHOS::Ace {
-
-HyperlinkModel* HyperlinkModel::GetInstance()
-{
-#ifdef NG_BUILD
-    static NG::HyperlinkModelNG instance;
-    return &instance;
-#else
-    if (Container::IsCurrentUseNewPipeline()) {
-        static NG::HyperlinkModelNG instance;
-        return &instance;
-    } else {
-        static Framework::HyperlinkModelImpl instance;
-        return &instance;
-    }
-#endif
-}
-
-} // namespace OHOS::Ace
+#include "bridge/declarative_frontend/jsview/models/hyperlink_model_impl.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -131,6 +112,10 @@ ArkUINativeModuleValue HyperlinkBridge::CreateHyperlink(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     std::string address{};
@@ -141,15 +126,12 @@ ArkUINativeModuleValue HyperlinkBridge::CreateHyperlink(ArkUIRuntimeCallInfo* ru
     std::string content{};
     RefPtr<ResourceObject> contentResObj{};
     auto contentRet = runtimeCallInfo->GetArgsNumber() == 2
-                        ? ArkTSUtils::ParseJsString(vm, firstArg, address, contentResObj)
+                        ? ArkTSUtils::ParseJsString(vm, secondArg, address, contentResObj)
                         : false;
 
-    HyperlinkModel::GetInstance()->Create(address, content);
-
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm))
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getHyperlinkModifier()->create(address, content);
 
     if (addressRet && SystemProperties::ConfigChangePerform() && addressResObj) {
         pattern->RegisterResource<std::string>("Address", addressResObj, address);
@@ -166,19 +148,18 @@ ArkUINativeModuleValue HyperlinkBridge::CreateHyperlink(ArkUIRuntimeCallInfo* ru
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue HyperlinkBridge::Pop() {
+void HyperlinkBridge::Pop() {
     if (ViewStackModel::GetInstance()->IsPrebuilding()) {
-        ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSHyperlink][pop]", &JSHyperlink::Pop);
-        return panda::JSValueRef::Undefined(vm);
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[HyperlinkBridge][pop]", &HyperlinkBridge::Pop);
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        ViewStackModel::GetInstance()->PopContainer();
-        return panda::JSValueRef::Undefined(vm);
+        return ViewStackModel::GetInstance()->PopContainer();
     }
 
-    HyperlinkModel::GetInstance()->Pop();
-    return panda::JSValueRef::Undefined(vm);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    nodeModifiers->getHyperlinkModifier()->pop();
 }
 
 } // namespace OHOS::Ace::NG

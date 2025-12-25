@@ -435,6 +435,7 @@
       vtable?for?OHOS::Ace::NG::HyperlinkPattern;
       vtable?for?OHOS::Ace::NG::TextLayoutProperty;
       vtable?for?OHOS::Ace::NG::TextAccessibilityProperty;
+      vtable?for?OHOS::Ace::Framework::HyperlinkModelImpl;
       virtual?thunk?to?OHOS::Ace::NG::TextPattern::*;
       non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::*;
 

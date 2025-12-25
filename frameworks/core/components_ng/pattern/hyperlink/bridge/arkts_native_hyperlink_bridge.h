@@ -26,6 +26,7 @@ public:
     static ArkUINativeModuleValue Color(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue Draggable(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static void Pop();
 };
 } // namespace OHOS::Ace::NG
 

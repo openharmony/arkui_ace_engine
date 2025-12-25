@@ -20,7 +20,7 @@
 #include "core/components/hyperlink/hyperlink_component.h"
 
 namespace OHOS::Ace::Framework {
-class ACE_EXPORT HyperlinkModelImpl : public HyperlinkModel {
+class ACE_FORCE_EXPORT HyperlinkModelImpl : public HyperlinkModel {
 public:
     void Create(const std::string& address, const std::string& summary) override;
     void SetColor(const Color& value) override;
