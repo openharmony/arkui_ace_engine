@@ -1071,6 +1071,51 @@ HWTEST_F(TabBarEventTestNg, HandleSubTabBarClick005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleSubTabBarClick006
+ * @tc.desc: test HandleSubTabBarClick with tabsPattern->IsCustomAnimation()
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, HandleSubTabBarClick006, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    tabBarPattern_->changeByClick_ = false;
+    tabBarPattern_->isAnimating_ = false;
+    pattern_->isCustomAnimation_ = true;
+    swiperPattern_->currentIndex_ = 0;
+    swiperPattern_->customAnimationToIndex_ = 0;
+    swiperPattern_->customAnimationPrevIndex_ = 0;
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarPattern_->animationDuration_ = 3;
+    tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::SUBTABBATSTYLE,
+        TabBarStyle::SUBTABBATSTYLE, TabBarStyle::SUBTABBATSTYLE };
+    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
+    MockAnimationManager::Enable(true);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    /**
+     * @tc.steps: step1. call method in tabsPattern->GetIsCustomAnimation() and TriggerTranslateAnimation.
+     */
+    tabBarPattern_->HandleSubTabBarClick(tabBarLayoutProperty_, 1);
+    EXPECT_EQ(swiperPattern_->customAnimationToIndex_, 1);
+    EXPECT_EQ(swiperPattern_->customAnimationPrevIndex_, 0);
+    EXPECT_TRUE(tabBarPattern_->isAnimating_);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->indicatorAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->indicatorAnimationIsRunning_);
+
+    tabBarPattern_->HandleSubTabBarClick(tabBarLayoutProperty_, 2);
+    EXPECT_EQ(swiperPattern_->customAnimationToIndex_, 2);
+    EXPECT_EQ(swiperPattern_->customAnimationPrevIndex_, 1);
+    EXPECT_TRUE(tabBarPattern_->isAnimating_);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(tabBarPattern_->indicatorAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(tabBarPattern_->indicatorAnimationIsRunning_);
+}
+
+/**
  * @tc.name: HandleTouchEvent004
  * @tc.desc: Test HandleTouchEvent
  * @tc.type: FUNC
