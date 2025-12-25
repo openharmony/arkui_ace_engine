@@ -221,7 +221,7 @@ bool SecurityComponentHandler::CheckParentBorder(const RefPtr<FrameNode>& parent
         return false;
     }
     for (const auto& rect : borderRects) {
-        if (!rect.IsInnerIntersectWithRound(scRect)) {
+        if (!rect.IsInnerIntersectForSeccompBorder(scRect)) {
             continue;
         }
         SC_LOG_ERROR("SecurityComponentCheckFail: security component is covered by the border of parent" \
