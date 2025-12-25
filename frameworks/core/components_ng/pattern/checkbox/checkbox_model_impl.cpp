@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,39 +12,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "bridge/declarative_frontend/jsview/models/checkboxgroup_model_impl.h"
 
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model_impl.h"
+
 #include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
-void CheckBoxGroupModelImpl::Create(const std::optional<std::string>& groupName)
+RefPtr<CheckboxTheme> GetCheckboxTheme()
 {
-    RefPtr<CheckboxTheme> checkBoxTheme = JSViewAbstract::GetTheme<CheckboxTheme>();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto checkBoxTheme =
+        node ? themeManager->GetTheme<CheckboxTheme>(node->GetThemeScopeId()) : themeManager->GetTheme<CheckboxTheme>();
+    return checkBoxTheme;
+}
+void CheckBoxModelImpl::Create(
+    const std::optional<std::string>& name, const std::optional<std::string>& groupName, const std::string& tagName)
+{
+    auto checkBoxTheme = GetCheckboxTheme();
     auto checkboxComponent = AceType::MakeRefPtr<OHOS::Ace::CheckboxComponent>(checkBoxTheme);
 
+    if (name.has_value()) {
+        const auto& checkboxName = name.value();
+        checkboxComponent->SetCheckboxName(checkboxName);
+    }
     if (groupName.has_value()) {
-        const auto& checkboxGroupName = groupName.value();
-        checkboxComponent->SetGroupName(checkboxGroupName);
+        const auto& checkboxGroup = groupName.value();
+        checkboxComponent->SetBelongGroup(checkboxGroup);
         auto& checkboxGroupmap = CheckboxComponent::GetCheckboxGroupComponent();
-        checkboxGroupmap.emplace(checkboxGroupName, checkboxComponent);
-        auto& ungroupedCheckboxs = CheckboxComponent::GetUngroupedCheckboxs();
-        auto item = ungroupedCheckboxs.find(checkboxGroupName);
-        if (item != ungroupedCheckboxs.end()) {
-            for (auto component : item->second) {
-                auto chkComponent = component.Upgrade();
-                if (chkComponent) {
-                    checkboxComponent->AddCheckbox(chkComponent);
-                    chkComponent->SetGroup(checkboxComponent);
-                }
-            }
-            ungroupedCheckboxs.erase(item);
+        auto item = checkboxGroupmap.find(checkboxGroup);
+        if (item != checkboxGroupmap.end()) {
+            item->second->AddCheckbox(checkboxComponent);
+            checkboxComponent->SetGroup(item->second);
+        } else {
+            auto& ungroupedCheckboxs = CheckboxComponent::GetUngroupedCheckboxs();
+            auto retPair = ungroupedCheckboxs.try_emplace(checkboxGroup, std::list<WeakPtr<CheckboxComponent>>());
+            retPair.first->second.push_back(checkboxComponent);
         }
     }
 
-    checkboxComponent->SetInspectorTag("CheckboxGroupComponent");
+    checkboxComponent->SetInspectorTag("Checkbox");
     checkboxComponent->SetMouseAnimationType(HoverAnimationType::NONE);
     ViewStackProcessor::GetInstance()->ClaimElementId(checkboxComponent);
     ViewStackProcessor::GetInstance()->Push(checkboxComponent);
@@ -58,14 +70,14 @@ void CheckBoxGroupModelImpl::Create(const std::optional<std::string>& groupName)
     box->SetHeight(checkBoxTheme->GetHeight());
 }
 
-void CheckBoxGroupModelImpl::SetSelectAll(bool isSelected)
+void CheckBoxModelImpl::SetSelect(bool isSelected)
 {
     auto *stack = ViewStackProcessor::GetInstance();
     auto checkboxComponent = AceType::DynamicCast<CheckboxComponent>(stack->GetMainComponent());
     checkboxComponent->SetValue(isSelected);
 }
 
-void CheckBoxGroupModelImpl::SetSelectedColor(const Color& color)
+void CheckBoxModelImpl::SetSelectedColor(const Color& color)
 {
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto checkable = AceType::DynamicCast<CheckboxComponent>(mainComponent);
@@ -75,13 +87,21 @@ void CheckBoxGroupModelImpl::SetSelectedColor(const Color& color)
     }
 }
 
-void CheckBoxGroupModelImpl::SetOnChange(NG::GroupChangeEvent&& onChange)
+void CheckBoxModelImpl::SetOnChange(NG::ChangeEvent&& onChange)
 {
-    auto checkbox = AceType::DynamicCast<CheckboxComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    checkbox->SetOnGroupChange(EventMarker(std::move(onChange)));
+#ifndef NG_BUILD
+    auto component = AceType::DynamicCast<CheckboxComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!component) {
+        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<CheckboxComponent>());
+        return;
+    }
+    component->SetOnChange(std::move(onChange));
+#else
+    LOGE("do not support JSViewSetProperty in new pipeline");
+#endif
 }
 
-void CheckBoxGroupModelImpl::SetWidth(const Dimension& width)
+void CheckBoxModelImpl::SetWidth(const Dimension& width)
 {
     auto *stack = ViewStackProcessor::GetInstance();
     Dimension padding;
@@ -93,8 +113,8 @@ void CheckBoxGroupModelImpl::SetWidth(const Dimension& width)
         box->SetWidth(width + padding * 2);
     }
 }
-
-void CheckBoxGroupModelImpl::SetHeight(const Dimension& height)
+    
+void CheckBoxModelImpl::SetHeight(const Dimension& height)
 {
     auto *stack = ViewStackProcessor::GetInstance();
     auto box = stack->GetBoxComponent();
@@ -107,7 +127,7 @@ void CheckBoxGroupModelImpl::SetHeight(const Dimension& height)
     }
 }
 
-void CheckBoxGroupModelImpl::SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag)
+void CheckBoxModelImpl::SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag)
 {
     if (!flag) {
         return;

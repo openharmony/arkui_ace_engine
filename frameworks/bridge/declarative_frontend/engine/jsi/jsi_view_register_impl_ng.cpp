@@ -41,8 +41,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_picker.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_checkbox.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
@@ -525,8 +523,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSTextAreaController::JSBind(globalObj);
     JSTextInputController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
-    JSCheckbox::JSBind(globalObj);
-    JSCheckboxGroup::JSBind(globalObj);
     JSRefresh::JSBind(globalObj);
     JSWaterFlow::JSBind(globalObj);
     JSWaterFlowItem::JSBind(globalObj);

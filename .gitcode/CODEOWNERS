@@ -553,6 +553,9 @@ frameworks/bridge/declarative_frontend/ark_component/.gitignore @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/package-lock.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/package.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/tsconfig.release.json @arkuieco3
+frameworks/bridge/declarative_frontend/ark_component/components/arkgauge.js @arkui001
+frameworks/bridge/declarative_frontend/ark_component/components/arkcheckboxgroup.js @arkuipopupwindow_all
+frameworks/bridge/declarative_frontend/ark_component/components/arkcheckbox.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/src/ArkAlphabetIndexer.ts @arkuicodepulse
 frameworks/bridge/declarative_frontend/ark_component/src/ArkBadge.ts @huawei_g_five
@@ -887,10 +890,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_butt
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_button_bridge.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_calendar_picker_bridge.cpp @arkui001
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_calendar_picker_bridge.h @arkui001
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkbox_bridge.cpp @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkbox_bridge.h @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkboxgroup_bridge.cpp @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_checkboxgroup_bridge.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_split_bridge.cpp @arkuilayout1
@@ -919,8 +918,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.h @form_framework
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_gauge_bridge.cpp @huawei_g_five
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_gauge_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_bridge.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_bridge.h @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_col_bridge.cpp @arkuilayout1
@@ -1124,10 +1121,6 @@ frameworks/bridge/declarative_frontend/jsview/js_calendar_picker.cpp @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_calendar_picker.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_camera.cpp @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_camera.h @arkuieco3
-frameworks/bridge/declarative_frontend/jsview/js_checkbox.cpp @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.cpp @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.h @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/jsview/js_checkbox.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/jsview/js_circle.cpp @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_circle.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_circle_shape.cpp @arkuieco3
@@ -1185,8 +1178,6 @@ frameworks/bridge/declarative_frontend/jsview/js_form_link.cpp @form_framework
 frameworks/bridge/declarative_frontend/jsview/js_form_link.h @form_framework
 frameworks/bridge/declarative_frontend/jsview/js_form_menu_item.cpp @form_framework
 frameworks/bridge/declarative_frontend/jsview/js_form_menu_item.h @form_framework
-frameworks/bridge/declarative_frontend/jsview/js_gauge.cpp @huawei_g_five
-frameworks/bridge/declarative_frontend/jsview/js_gauge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_gesture.cpp @ArkUI_Event
 frameworks/bridge/declarative_frontend/jsview/js_gesture.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/jsview/js_grid_col.cpp @arkuilayout1
@@ -1483,10 +1474,6 @@ frameworks/bridge/declarative_frontend/jsview/models/calendar_model_impl.cpp @ar
 frameworks/bridge/declarative_frontend/jsview/models/calendar_model_impl.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/models/calendar_picker_model_impl.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/models/canvas/  @arkuieco3
-frameworks/bridge/declarative_frontend/jsview/models/checkboxgroup_model_impl.cpp @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/jsview/models/checkboxgroup_model_impl.h @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/jsview/models/checkbox_model_impl.cpp @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/jsview/models/checkbox_model_impl.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/jsview/models/circle_model_impl.cpp @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/models/circle_model_impl.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/models/column_model_impl.cpp @arkuilayout1
@@ -1513,8 +1500,6 @@ frameworks/bridge/declarative_frontend/jsview/models/for_each_model_impl.cpp @ar
 frameworks/bridge/declarative_frontend/jsview/models/for_each_model_impl.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/models/form_model_impl.cpp @form_framework
 frameworks/bridge/declarative_frontend/jsview/models/form_model_impl.h @form_framework
-frameworks/bridge/declarative_frontend/jsview/models/gauge_model_impl.cpp @huawei_g_five
-frameworks/bridge/declarative_frontend/jsview/models/gauge_model_impl.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/models/gesture_model_impl.cpp @ArkUI_Event
 frameworks/bridge/declarative_frontend/jsview/models/gesture_model_impl.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/jsview/models/grid_col_model_impl.cpp @arkuilayout1

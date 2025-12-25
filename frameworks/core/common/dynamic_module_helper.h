@@ -33,7 +33,7 @@ using ComponentLoaderFunc = ComponentLoader* (*)(const char* name);
 using DynamicModuleCreateFunc = DynamicModule* (*)();
 
 constexpr const char* COMPATIABLE_COMPONENT_LOADER = "OHOS_ACE_Compatible_GetLoader";
-constexpr const char* DYNAMIC_MODULE_CREATE = "OHOS_ACE_DynamicModule_Create";
+constexpr const char* DYNAMIC_MODULE_CREATE = "OHOS_ACE_DynamicModule_Create_";
 
 class ACE_FORCE_EXPORT DynamicModuleHelper final {
 public:

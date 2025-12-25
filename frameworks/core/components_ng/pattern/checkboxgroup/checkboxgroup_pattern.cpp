@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
-
+const char NAVDESTINATION_CONTENT_ETS_TAG[] = "NavDestinationContent";
 inline std::string ToString(const CheckBoxGroupPaintProperty::SelectStatus& status)
 {
     const LinearEnumMapNode<CheckBoxGroupPaintProperty::SelectStatus, std::string> table[] = {
@@ -814,7 +814,7 @@ void CheckBoxGroupPattern::OnAttachToMainTreeImpl(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(groupManager);
     auto parent = host->GetParent();
     while (parent) {
-        if (parent->GetTag() == V2::NAVDESTINATION_CONTENT_ETS_TAG) {
+        if (parent->GetTag() == NAVDESTINATION_CONTENT_ETS_TAG) {
             currentNavId_ = std::to_string(parent->GetId());
             groupManager->SetLastNavId(currentNavId_);
             UpdateState();

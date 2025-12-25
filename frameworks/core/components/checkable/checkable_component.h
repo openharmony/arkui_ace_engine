@@ -70,7 +70,7 @@ private:
     bool hasValue_ = false;
 };
 
-class ACE_EXPORT CheckableComponent : public RenderComponent {
+class ACE_FORCE_EXPORT CheckableComponent : public RenderComponent {
     DECLARE_ACE_TYPE(CheckableComponent, RenderComponent);
 
 public:
@@ -362,7 +362,7 @@ private:
     int32_t status_ = 0;
 };
 
-class ACE_EXPORT CheckboxComponent : public CheckableComponent, public CheckableValue<bool>, public LabelTarget {
+class ACE_FORCE_EXPORT CheckboxComponent : public CheckableComponent, public CheckableValue<bool>, public LabelTarget {
     DECLARE_ACE_TYPE(CheckboxComponent, CheckableComponent, LabelTarget);
 
 public:

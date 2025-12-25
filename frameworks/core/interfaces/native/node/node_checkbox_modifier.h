@@ -17,10 +17,11 @@
 #define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_CHECKBOX_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
-
+#include "core/components_ng/pattern/checkbox/bridge/checkbox_custom_modifier.h"
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUICheckboxModifier* GetCheckboxModifier();
 const CJUICheckboxModifier* GetCJUICheckboxModifier();
+const ArkUICheckboxCustomModifier* GetCheckboxCustomModifier();
 void SetCheckboxChange(ArkUINodeHandle node, void* extraParam);
 }
 #endif

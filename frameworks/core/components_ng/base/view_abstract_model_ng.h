@@ -2003,7 +2003,7 @@ public:
         const std::string& key, EdgesParam& edges, const RefPtr<ResourceObject>& resObj);
     static void RegisterEdgesWidthResObj(
         const std::string& key, NG::BorderWidthProperty& borderWidth, const RefPtr<ResourceObject>& resObj);
-    static void RegisterEdgeMarginsResObj(
+    ACE_FORCE_EXPORT static void RegisterEdgeMarginsResObj(
         const std::string& key, NG::MarginProperty& margins, const RefPtr<ResourceObject>& resObj);
     static void RegisterLocalizedBorderColor(
         const std::string& key, NG::BorderColorProperty& borderColors, const RefPtr<ResourceObject>& resObj);

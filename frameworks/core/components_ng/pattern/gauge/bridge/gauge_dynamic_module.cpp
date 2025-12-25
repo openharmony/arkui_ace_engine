@@ -25,7 +25,7 @@
 #include "core/components_ng/pattern/gauge/gauge_model_static.h"
 #endif
 
-extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_DynamicModule_Create()
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_DynamicModule_Create_Gauge()
 {
     return new OHOS::Ace::GaugeDynamicModule();
 }

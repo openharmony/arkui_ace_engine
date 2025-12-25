@@ -57,13 +57,22 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
             return iter->second.get();
         }
     }
-
+    static const std::unordered_map<std::string, std::string> soMap = {
+        {"Checkbox", "checkbox"},
+        {"CheckboxGroup", "checkbox"},
+        {"Gauge", "gauge"}
+    };
+    auto it = soMap.find(name);
+    if (it == soMap.end()) {
+        LOGI("No shared library mapping found for nativeModule: %{public}s", name.c_str());
+        return nullptr;
+    }
     // Load module without holding the lock (dlopen/dlsym may be slow)
-    auto libName = DYNAMIC_MODULE_LIB_PREFIX + name + DYNAMIC_MODULE_LIB_POSTFIX;
+    auto libName = DYNAMIC_MODULE_LIB_PREFIX + it->second + DYNAMIC_MODULE_LIB_POSTFIX;
     auto* handle = dlopen(libName.c_str(), RTLD_LAZY);
     LOGI("First load %{public}s nativeModule start", name.c_str());
     CHECK_NULL_RETURN(handle, nullptr);
-    auto* createSym = reinterpret_cast<DynamicModuleCreateFunc>(dlsym(handle, DYNAMIC_MODULE_CREATE));
+    auto* createSym = reinterpret_cast<DynamicModuleCreateFunc>(dlsym(handle, (DYNAMIC_MODULE_CREATE + name).c_str()));
     CHECK_NULL_RETURN(createSym, nullptr);
     DynamicModule* module = createSym();
     CHECK_NULL_RETURN(module, nullptr);

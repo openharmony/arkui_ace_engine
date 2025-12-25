@@ -29,7 +29,7 @@ class CalcDimensionRect;
 
 namespace OHOS::Ace::Framework {
 
-class ViewAbstractModelImpl : public ViewAbstractModel {
+class ACE_FORCE_EXPORT ViewAbstractModelImpl : public ViewAbstractModel {
 public:
     ~ViewAbstractModelImpl() override = default;
 

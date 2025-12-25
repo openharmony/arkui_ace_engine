@@ -42,8 +42,6 @@
 #include "bridge/declarative_frontend/jsview/js_calendar.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_picker.h"
-#include "bridge/declarative_frontend/jsview/js_checkbox.h"
-#include "bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "bridge/declarative_frontend/jsview/js_circle.h"
 #include "bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "bridge/declarative_frontend/jsview/js_clipboard.h"
@@ -527,8 +525,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Sheet", JSSheet::JSBind },
     { "TextTimer", JSTextTimer::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
-    { "Checkbox", JSCheckbox::JSBind },
-    { "CheckboxGroup", JSCheckboxGroup::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "LinearGradient", JSLinearGradientBinding::JSBind },
@@ -758,8 +754,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextAreaController", JSTextAreaController::JSBind },
     { "TextInputController", JSTextInputController::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
-    { "Checkbox", JSCheckbox::JSBind },
-    { "CheckboxGroup", JSCheckboxGroup::JSBind },
     { "Refresh", JSRefresh::JSBind },
     { "WaterFlow", JSWaterFlow::JSBind },
     { "FlowItem", JSWaterFlowItem::JSBind },

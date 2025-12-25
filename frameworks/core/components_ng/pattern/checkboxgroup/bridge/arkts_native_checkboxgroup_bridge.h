@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_CHECKBOXGROUP_BRIDGE_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_CHECKBOXGROUP_BRIDGE_H
+#ifndef FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CHECKBOXGROUP_BRIDGE_ARKTS_NATIVE_CHECKBOXGROUP_BRIDGE_H
+#define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CHECKBOXGROUP_BRIDGE_ARKTS_NATIVE_CHECKBOXGROUP_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
+
 namespace OHOS::Ace::NG {
 class CheckboxGroupBridge {
 public:
+    static void RegisterCheckboxGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static ArkUINativeModuleValue CreateCheckboxGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCheckboxGroupSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetCheckboxGroupSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCheckboxGroupUnSelectedColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -40,7 +43,12 @@ public:
     static ArkUINativeModuleValue SetCheckboxGroupOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetCheckboxGroupOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetContentModifierBuilder(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetCheckboxGroupResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetCheckboxGroupPadding(ArkUIRuntimeCallInfo* runtimeCallInfo);
+
+    static ArkUINativeModuleValue JsOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue JsMark(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_CHECKBOXGROUP_BRIDGE_H
+#endif // FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CHECKBOXGROUP_BRIDGE_ARKTS_NATIVE_CHECKBOXGROUP_BRIDGE_H

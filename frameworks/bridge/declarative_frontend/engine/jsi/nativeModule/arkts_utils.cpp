@@ -1917,6 +1917,7 @@ void ArkTSUtils::ParsePadding(
         } else {
             result.value = dimen.Value();
         }
+        result.isSet = true;
     }
 }
 
@@ -1934,6 +1935,48 @@ void ArkTSUtils::ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, 
         } else {
             result.value = dimen.Value();
         }
+        result.isSet = true;
+    }
+}
+
+void ArkTSUtils::ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
+    ArkUISizeType& result, std::vector<RefPtr<ResourceObject>>& resObjs)
+{
+    RefPtr<ResourceObject> resObj;
+    ArkTSUtils::ParsePadding(vm, value, dimen, result, resObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        resObjs.push_back(resObj);
+    }
+}
+
+void ArkTSUtils::ParseMargin(
+    const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result)
+{
+    RefPtr<ResourceObject> resObj;
+    ParseMargin(vm, value,  dimen, result, resObj);
+}
+
+void ArkTSUtils::ParseMargin(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
+    ArkUISizeType& result, RefPtr<ResourceObject>& resObj)
+{
+    if (ArkTSUtils::ParseJsDimensionVp(vm, value, dimen, resObj)) {
+        result.unit = static_cast<int8_t>(dimen.Unit());
+        if (dimen.CalcValue() != "") {
+            result.string = dimen.CalcValue().c_str();
+        } else {
+            result.value = dimen.Value();
+        }
+        result.isSet = true;
+    }
+}
+
+void ArkTSUtils::ParseMargin(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
+    ArkUISizeType& result, std::vector<RefPtr<ResourceObject>>& resObjs)
+{
+    RefPtr<ResourceObject> resObj;
+    ArkTSUtils::ParseMargin(vm, value, dimen, result, resObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        resObjs.push_back(resObj);
     }
 }
 
@@ -1992,6 +2035,184 @@ bool ArkTSUtils::ParseResponseRegion(
         regionUnits[i + 2] = static_cast<int32_t>(widthDimen.Unit()); // 2: width Unit
         regionValues[i + 3] = static_cast<ArkUI_Float32>(heightDimen.Value()); // 3: height value
         regionUnits[i + 3] = static_cast<int32_t>(heightDimen.Unit()); // 3: height Unit
+    }
+    return true;
+}
+bool ArkTSUtils::CheckLengthMetrics(EcmaVM* vm, const Local<panda::ObjectRef>& jsObject)
+{
+    if (jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "strat")) ||
+        jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "end")) ||
+        jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "topStart")) ||
+        jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "topEnd")) ||
+        jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "bottomStart")) ||
+        jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "bottomEnd"))) {
+        return true;
+    }
+    auto jsTop = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "top"));
+    if (jsTop->IsObject(vm)) {
+        auto topObj = jsTop->ToObject(vm);
+        if (topObj->Has(vm, panda::StringRef::NewFromUtf8(vm, "value"))) {
+            return true;
+        }
+    }
+    auto jsBottom = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "bottom"));
+    if (jsBottom->IsObject(vm)) {
+        auto bottomObj = jsBottom->ToObject(vm);
+        if (bottomObj->Has(vm, panda::StringRef::NewFromUtf8(vm, "value"))) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ArkTSUtils::ParseLocalizedMargin(
+    const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result)
+{
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, value, dimen)) {
+        result.unit = static_cast<int8_t>(dimen.Unit());
+        if (dimen.CalcValue() != "") {
+            result.string = dimen.CalcValue().c_str();
+        } else {
+            result.value = dimen.Value();
+        }
+        result.isSet = true;
+        return true;
+    }
+    return false;
+}
+
+bool ArkTSUtils::ParseLocalizedPadding(
+    const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result)
+{
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, value, dimen)) {
+        if (LessOrEqual(dimen.Value(), 0.0)) {
+            dimen.SetValue(0.0);
+            dimen.SetUnit(DimensionUnit::VP);
+        }
+        result.unit = static_cast<int8_t>(dimen.Unit());
+        if (dimen.CalcValue() != "") {
+            result.string = dimen.CalcValue().c_str();
+        } else {
+            result.value = dimen.Value();
+        }
+        result.isSet = true;
+        return true;
+    }
+    return false;
+}
+
+bool ArkTSUtils::ParseJsDimensionRect(const EcmaVM* vm, const Local<panda::JSValueRef>& jsValue, DimensionRect& result)
+{
+    result.SetOffset(DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
+    result.SetSize(DimensionSize(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT)));
+    if (!jsValue->IsObject(vm)) {
+        return true;
+    }
+    auto obj = jsValue->ToObject(vm);
+    auto x = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "x"));
+    auto y = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "y"));
+    auto width = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "width"));
+    auto height = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "height"));
+    CalcDimension xDimen = result.GetOffset().GetX();
+    CalcDimension yDimen = result.GetOffset().GetY();
+    CalcDimension widthDimen = result.GetWidth();
+    CalcDimension heightDimen = result.GetHeight();
+    auto s1 = width->ToString(vm)->ToString(vm);
+    auto s2 = height->ToString(vm)->ToString(vm);
+    if (s1.find('-') != std::string::npos) {
+        width = OHOS::Ace::Framework::ToJSValue("100%");
+    }
+    if (s2.find('-') != std::string::npos) {
+        height = OHOS::Ace::Framework::ToJSValue("100%");
+    }
+    if (ArkTSUtils::ParseJsDimensionNG(vm, x, xDimen, DimensionUnit::VP)) {
+        auto offset = result.GetOffset();
+        offset.SetX(xDimen);
+        result.SetOffset(offset);
+    }
+    if (ArkTSUtils::ParseJsDimensionNG(vm, y, yDimen, DimensionUnit::VP)) {
+        auto offset = result.GetOffset();
+        offset.SetY(yDimen);
+        result.SetOffset(offset);
+    }
+    if (ArkTSUtils::ParseJsDimensionNG(vm, width, widthDimen, DimensionUnit::VP)) {
+        if (widthDimen.Unit() == DimensionUnit::PERCENT && widthDimen.Value() < 0) {
+            return true;
+        }
+        result.SetWidth(widthDimen);
+    }
+    if (ArkTSUtils::ParseJsDimensionNG(vm, height, heightDimen, DimensionUnit::VP)) {
+        if (heightDimen.Unit() == DimensionUnit::PERCENT && heightDimen.Value() < 0) {
+            return true;
+        }
+        result.SetHeight(heightDimen);
+    }
+    return true;
+}
+
+bool ArkTSUtils::ParseJsResponseRegion(
+    const EcmaVM* vm, const Local<panda::JSValueRef>& jsValue, ArkUI_Float32* values, int32_t* units, uint32_t length)
+{
+    if (!jsValue->IsArray(vm) && !jsValue->IsObject(vm)) {
+        return false;
+    }
+    const uint32_t DIMENSION_LENGTH = 4;
+    if (jsValue->IsArray(vm)) {
+        auto transArray = static_cast<Local<panda::ArrayRef>>(jsValue);
+        uint32_t arrayLength = transArray->Length(vm);
+        for (uint32_t i = 0; i < arrayLength; i++) {
+            CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+            CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+            DimensionOffset offsetDimen(xDimen, yDimen);
+            DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+            if (ArkTSUtils::ParseJsDimensionRect(vm, transArray->GetValueAt(vm, jsValue, i), dimenRect)) {
+                values[DIMENSION_LENGTH * i] = static_cast<ArkUI_Float32>(dimenRect.GetOffset().GetX().Value());
+                units[DIMENSION_LENGTH * i] = static_cast<int32_t>(dimenRect.GetOffset().GetX().Unit());
+                values[DIMENSION_LENGTH * i + NUM_1] = static_cast<ArkUI_Float32>(dimenRect.GetOffset().GetY().Value());
+                units[DIMENSION_LENGTH * i + NUM_1] = static_cast<int32_t>(dimenRect.GetOffset().GetY().Unit());
+                values[DIMENSION_LENGTH * i + NUM_2] = static_cast<ArkUI_Float32>(dimenRect.GetWidth().Value());
+                units[DIMENSION_LENGTH * i + NUM_2] = static_cast<int32_t>(dimenRect.GetWidth().Unit());
+                values[DIMENSION_LENGTH * i + NUM_3] = static_cast<ArkUI_Float32>(dimenRect.GetHeight().Value());
+                units[DIMENSION_LENGTH * i + NUM_3] = static_cast<int32_t>(dimenRect.GetHeight().Unit());
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    DimensionOffset offsetDimen(xDimen, yDimen);
+    DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+    if (ArkTSUtils::ParseJsDimensionRect(vm, jsValue, dimenRect)) {
+        values[NUM_0] = static_cast<ArkUI_Float32>(dimenRect.GetOffset().GetX().Value());
+        units[NUM_0] = static_cast<int32_t>(dimenRect.GetOffset().GetX().Unit());
+        values[NUM_1] = static_cast<ArkUI_Float32>(dimenRect.GetOffset().GetY().Value());
+        units[NUM_1] = static_cast<int32_t>(dimenRect.GetOffset().GetY().Unit());
+        values[NUM_2] = static_cast<ArkUI_Float32>(dimenRect.GetWidth().Value());
+        units[NUM_2] = static_cast<int32_t>(dimenRect.GetWidth().Unit());
+        values[NUM_3] = static_cast<ArkUI_Float32>(dimenRect.GetHeight().Value());
+        units[NUM_3] = static_cast<int32_t>(dimenRect.GetHeight().Unit());
+        return true;
+    }
+    return false;
+}
+
+bool ArkTSUtils::HandleCallbackJobs(
+    const EcmaVM* vm, panda::TryCatch& trycatch, const Local<JSValueRef>& resultException)
+{
+    JSNApi::ExecutePendingJob(vm);
+    auto runtime =
+        std::static_pointer_cast<Framework::ArkJSRuntime>(Framework::JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (resultException.IsEmpty() || trycatch.HasCaught()) {
+        LOGW("after call jsFunction hasError, empty: %{public}d, caught: %{public}d", resultException.IsEmpty(),
+            trycatch.HasCaught());
+        runtime->HandleUncaughtException(trycatch);
+        return false;
     }
     return true;
 }

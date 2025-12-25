@@ -85,7 +85,11 @@ public:
     static void ResetUnSelectedColor(FrameNode* frameNode);
     static void SetBuilderFunc(FrameNode* frameNode, NG::CheckBoxGroupMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, bool value);
-
+    static void ResetCheckMarkColor(FrameNode* frameNode);
+    static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
+    static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& padding);
+    static void SetChangeEvent(FrameNode* frameNode, GroupChangeEvent&& changeEvent);
+    static void CreateCheckboxGroup(const std::optional<std::string>& groupName);
 private:
     static std::string ColorTypeToString(const CheckBoxGroupColorType& checkBoxGroupColorType);
 };
