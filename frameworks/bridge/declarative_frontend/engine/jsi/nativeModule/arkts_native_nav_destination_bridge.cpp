@@ -293,12 +293,17 @@ ArkUINativeModuleValue NavDestinationBridge::SetBackButtonIcon(ArkUIRuntimeCallI
 #endif
     std::string bundleName;
     std::string moduleName;
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
+    auto isSymbol = info[1]->IsObject() && src.empty() && pixMap == nullptr;
+    if (isSymbol) {
+        Framework::JSViewAbstract::SetSymbolOptionApply(info, iconSymbol, info[1]);
+    }
     
     Framework::JSViewAbstract::GetJsMediaBundleInfo(info[1], bundleName, moduleName);
     if (SystemProperties::ConfigChangePerform() && backButtonIconResObj) {
-        NavDestinationModelNG::SetBackButtonIcon(frameNode, noPixMap, pixMap, backButtonIconResObj);
+        NavDestinationModelNG::SetBackButtonIcon(frameNode, iconSymbol, noPixMap, pixMap, backButtonIconResObj);
     } else {
-        NavDestinationModelNG::SetBackButtonIcon(frameNode, src, noPixMap, pixMap);
+        NavDestinationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, noPixMap, pixMap);
     }
     GetArkUINodeModifiers()->getNavDestinationModifier()->resetNavDestinationBackButtonText(nativeNode);
     // add accessibilityText
@@ -352,7 +357,7 @@ ArkUINativeModuleValue NavDestinationBridge::ResetBackButtonIcon(ArkUIRuntimeCal
     bool noPixMap = false;
     RefPtr<PixelMap> pixMap = nullptr;
     std::string src;
-    NavDestinationModelNG::SetBackButtonIcon(frameNode, src, noPixMap, pixMap);
+    NavDestinationModelNG::SetBackButtonIcon(frameNode, nullptr, src, noPixMap, pixMap);
     GetArkUINodeModifiers()->getNavDestinationModifier()->resetNavDestinationBackButtonText(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
