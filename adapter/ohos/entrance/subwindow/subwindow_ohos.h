@@ -313,6 +313,8 @@ private:
 
     void InitDialogWindowRSUIDirector(const RefPtr<Platform::AceContainer>& container);
     void InitWindowRSUIDirector(const RefPtr<Platform::AceContainer>& container);
+    void ResizeWindow(double width, double height);
+    void ResizeWindowForToast(const NG::ToastInfo& toastInfo);
 
     static int32_t id_;
     int32_t windowId_ = 0;
