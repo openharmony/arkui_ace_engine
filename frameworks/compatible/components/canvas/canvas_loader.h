@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_CANVAS_LOADER
 
 #include "compatible/components/component_loader.h"
+#include "frameworks/bridge/js_frontend/engine/common/base_canvas_bridge.h"
+#include "frameworks/core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 
@@ -29,6 +31,7 @@ public:
     void* CreateModel() override;
     RefPtr<Declaration> CreateDeclaration() override;
     RefPtr<V2::InspectorComposedElement> CreateInspectorElement(const std::string& id) override;
+    const void* GetCustomModifier(const std::string& tag = "") override;
 };
 
 } // namespace OHOS::Ace

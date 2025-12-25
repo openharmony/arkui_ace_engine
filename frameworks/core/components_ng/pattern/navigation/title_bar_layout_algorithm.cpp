@@ -37,9 +37,6 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "base/utils/measure_util.h"
-#ifdef ENABLE_ROSEN_BACKEND
-#include "core/components/custom_paint/rosen_render_custom_paint.h"
-#endif
 
 namespace OHOS::Ace::NG {
 
@@ -794,11 +791,8 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         MeasureContext context;
         context.textContent = UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue());
         context.fontSize = titleFontSize_;
-#ifdef ENABLE_ROSEN_BACKEND
-        minTitleHeight_ = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(context).Height());
-#else
+        minTitleHeight_ = static_cast<float>(MeasureUtil::MeasureTextSize(context).Height());
         minTitleHeight_ = 0.0;
-#endif
         initialTitleOffsetY_ = menuOccupiedHeight_ + offsetY;
         isInitialTitle_ = false;
         auto titleOffset = OffsetF(offsetX, initialTitleOffsetY_);

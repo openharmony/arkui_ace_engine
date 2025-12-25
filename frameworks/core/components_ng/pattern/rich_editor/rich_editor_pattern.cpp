@@ -36,6 +36,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/measure_util.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
@@ -84,10 +85,6 @@
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
-#endif
-
-#ifdef ENABLE_ROSEN_BACKEND
-#include "core/components/custom_paint/rosen_render_custom_paint.h"
 #endif
 
 #ifdef CROSS_PLATFORM
@@ -9700,7 +9697,7 @@ void RichEditorPattern::CalculateDefaultHandleHeight(float& height)
     content.fontSize = TEXT_DEFAULT_FONT_SIZE;
     auto fontweight = StringUtils::FontWeightToString(FontWeight::NORMAL);
     content.fontWeight = fontweight;
-    height = std::max(static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Height()), 0.0f);
+    height = std::max(static_cast<float>(MeasureUtil::MeasureTextSize(content).Height()), 0.0f);
 #endif
 }
 

@@ -23,7 +23,6 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "bridge/cj_frontend/cppview/render_image.h"
-#include "bridge/declarative_frontend/jsview/models/canvas/offscreen_canvas_rendering_context_2d_model_impl.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_rendering_context_2d_model_ng.h"
 
 using namespace OHOS;

@@ -103,7 +103,7 @@ private:
     static std::string GetThumbnailOrientation(const ImageSourceInfo& src);
 };
 
-class AssetImageLoader final : public ImageLoader {
+class ACE_FORCE_EXPORT AssetImageLoader final : public ImageLoader {
 public:
     AssetImageLoader() = default;
     ~AssetImageLoader() override = default;

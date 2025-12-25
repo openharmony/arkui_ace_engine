@@ -28,7 +28,6 @@ template("bridge_common") {
       # dom
       "dom/dom_button.cpp",
       "dom/dom_calendar.cpp",
-      "dom/dom_canvas.cpp",
       "dom/dom_dialog.cpp",
       "dom/dom_div.cpp",
       "dom/dom_divider.cpp",

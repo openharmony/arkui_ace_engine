@@ -97,7 +97,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
     static const LinearMapNode<RefPtr<DOMNode> (*)(NodeId, const std::string&, int32_t)> domNodeCreators[] = {
         { DOM_NODE_TAG_BUTTON, &DOMNodeCreator<DOMButton> },
         { DOM_NODE_TAG_CALENDAR, &DOMNodeCreator<DomCalendar> },
-        { DOM_NODE_TAG_CANVAS, &DOMNodeCreator<DOMCanvas> },
         { DOM_NODE_TAG_DIALOG, &DOMNodeCreator<DOMDialog> },
         { DOM_NODE_TAG_DIV, &DOMNodeCreator<DOMDiv> },
         { DOM_NODE_TAG_DIVIDER, &DOMNodeCreator<DOMDivider> },

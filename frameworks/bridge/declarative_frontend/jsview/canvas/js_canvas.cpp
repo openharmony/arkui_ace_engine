@@ -21,8 +21,8 @@
 #include "bridge/declarative_frontend/jsview/canvas/js_drawing_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_rendering_context_base.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "bridge/declarative_frontend/jsview/models/canvas/canvas_model_impl.h"
 #include "core/common/container.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
@@ -39,8 +39,12 @@ CanvasModel* CanvasModel::GetInstance()
         static NG::CanvasModelNG instance;
         return &instance;
     } else {
-        static Framework::CanvasModelImpl instance;
-        return &instance;
+        static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("canvas");
+        if (loader == nullptr) {
+            LOGF("Can't find canvas loader");
+            abort();
+        }
+        return reinterpret_cast<CanvasModel*>(loader->CreateModel());
     }
 #endif
 }

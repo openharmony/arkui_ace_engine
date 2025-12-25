@@ -57,9 +57,6 @@
 #include "frameworks/base/utils/measure_util.h"
 #include "frameworks/core/components_ng/pattern/menu/menu_model_ng.h"
 
-#ifdef ENABLE_ROSEN_BACKEND
-#include "core/components/custom_paint/rosen_render_custom_paint.h"
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {

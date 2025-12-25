@@ -28,6 +28,9 @@ template("ace_compatible_source") {
     defines += [
       "USE_ARK_ENGINE"
     ]
+    if (ace_engine_feature_enable_upgrade_skia) {
+      defines += [ "USE_NEW_SKIA" ]
+    }
     configs = [ "$ace_root:ace_config" ]
     sources = [
       "components/badge/badge_component.cpp",
@@ -504,6 +507,23 @@ template("ace_compatible_source") {
       "components/swiper/swiper_loader.cpp",
       "components/swiper/swiper_model_impl.cpp",
       "components/swiper/swiper_modifier_compatible.cpp",
+
+      "components/canvas/bridge/jsi_canvas_bridge.cpp",
+      "components/canvas/bridge/jsi_offscreen_canvas_bridge.cpp",
+      "components/canvas/canvas_declaration.cpp",
+      "components/canvas/canvas_loader.cpp",
+      "components/canvas/canvas_model_impl.cpp",
+      "components/canvas/canvas_rendering_context_2d_model_impl.cpp",
+      "components/canvas/custom_paint_component.cpp",
+      "components/canvas/dom_canvas.cpp",
+      "components/canvas/offscreen_canvas_rendering_context_2d_model_impl.cpp",
+      "components/canvas/render_custom_paint_creator.cpp",
+      "components/canvas/render_custom_paint.cpp",
+      "components/canvas/render_offscreen_canvas_creator.cpp",
+      "components/canvas/rosen_render_custom_paint.cpp",
+      "components/canvas/rosen_render_offscreen_canvas.cpp",
+      "components/canvas/canvas_modifier.cpp",
+      "components/js_command.cpp",
     ]
 
     if (qrcodegen_support) {
@@ -531,8 +551,13 @@ template("ace_compatible_source") {
       "graphic_2d:rosen_text",
       "icu:shared_icui18n",
       "icu:shared_icuuc",
-      "napi:ace_napi",
+      "napi:ace_napi"
     ]
+    if (!build_ohos_sdk) {
+      external_deps += [
+        "image_framework:image"
+      ]
+    }
     if (defined(global_parts_info.inputmethod_imf) && !use_mingw_win && !use_mac && !use_linux) {
       sources += [ "components/text_field/on_text_changed_listener_impl.cpp" ]
       external_deps += [ "imf:inputmethod_client" ]
