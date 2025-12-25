@@ -29,7 +29,7 @@ interface TransformOptions<T> {
 class Meta {
   private static proto2props: WeakMap<object, object> = new WeakMap();
 
-  public static define(proto: object, prop: string, value: any) {
+  public static define(proto: object, prop: string, value: any): void {
     const meta = Meta.proto2props.get(proto);
     if (!meta) {
       Meta.proto2props.set(proto, { [prop]: value });
@@ -67,26 +67,26 @@ class Meta {
   }
 }
 
-function __Type__<T>(type: TypeConstructor<T> | TransformOptions<T> | string, alias?: string) {
+function __Type__<T>(type: TypeConstructor<T> | TransformOptions<T> | string, alias?: string): (target: any, prop: string) =>void {
   const options: TransformOptions<T> = JSONCoder.getOptions(type);
 
   if (alias) {
     options.alias = alias;
   }
 
-  return (target: any, prop: string) => {
+  return (target: any, prop: string): void => {
     const tar = typeof target === 'function' ? target.prototype : target;
     Meta.define(tar, prop, options);
   };
 }
 
-function ObservedReplacer(replacer: any) {
-  const defaultReplacer = function (key: string, value: any) {
+function ObservedReplacer(replacer: any): (this: any, key: string, value: any) => any {
+  const defaultReplacer = function (key: string, value: any): any {
     return value;
   }
 
   const realReplacer = replacer || defaultReplacer;
-  return function (this: any, key: string, value: any) {
+  return function (this: any, key: string, value: any): any {
     if (typeof value !== 'object' || Array.isArray(value)) {
       return realReplacer.call(this, key, value);
     }
@@ -207,7 +207,7 @@ class JSONCoder {
     if (paramType === 'object') {
       Object.assign(options, type);
     } else if (paramType === 'function') {
-      options.factory = (_: object) => type as TypeConstructor<T>;
+      options.factory = (_: object): TypeConstructor<T> => type as TypeConstructor<T>;
     } else if (paramType === 'string') {
       options.alias = type as string;
     }
@@ -243,7 +243,7 @@ class JSONCoder {
     return target;
   }
 
-  private static parseItemInto(target: any, targetKey: string, source: any, options: any) {
+  private static parseItemInto(target: any, targetKey: string, source: any, options: any): void {
     if (source === null || source === undefined) {
       return;
     }
@@ -312,7 +312,7 @@ class JSONCoder {
     return type && new type();
   }
 
-  private static getTargetValue(value: any, options: any) {
+  private static getTargetValue(value: any, options: any): any {
     // future can convert the value to different type or value
     return value;
   }

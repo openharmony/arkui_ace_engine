@@ -21,17 +21,17 @@ class JSON2 {
     // visited objects along with their assigned refIDs
     const visited = new Map<object, string>();
 
-    const serialize = (value: any) => {
+    const serialize = (value: unknown): string => {
       const root = value;
-      return JSON.stringify(value, function(key: string, value: any) {
+      return JSON.stringify(value, function(key: string, value: unknown) {
         return replace.call(this, key, value, root);
       });
     };
 
-    const serializeSendable = (value: any) => {
+    const serializeSendable = (value: unknown): string => {
       // Sendables can only be deserialized via JSON.parseSendable, which skips the
       // reviver, so encoding types and using Meta aliases is useless.
-      return (JSON as any)['stringifySendable'](value);
+      return (JSON as any)?.stringifySendable(value)?? '';
     };
 
     const replace = function (key: string, val: any, root: any): any {
@@ -94,14 +94,14 @@ class JSON2 {
     const objects = new Map<string, object>();
     const visited = new Set<object>();
 
-    const resolveRefs = (obj: any) => {
-      JSON2.forEach(obj, (value, key) => {
-        if (typeof value === 'object' && visited.has(value)) {
+    const resolveRefs = (obj: any): unknown => {
+      JSON2.forEach(obj as object, (value, key) => {
+        if (typeof value === 'object' && visited.has(value as object)) {
           return;
         }
 
         if (typeof value === 'object') {
-          visited.add(value);
+          visited.add(value as object);
           resolveRefs(value);
           return;
         }
@@ -138,11 +138,11 @@ class JSON2 {
     // parse main structure, gathering objects
     let root = JSON2.parseStructure(text, objects);
     // then resolve all references
-    return resolveRefs(root.$);
+    return resolveRefs((root as any).$);
   }
 
   // Convert object properties to their aliased names according to Meta, skip disabled ones
-  static toAliasedObject(value: any) {
+  static toAliasedObject<T extends object>(value: T): T {
     const meta: any = Meta.gets(value);
     const result: any = {};
 
@@ -150,22 +150,22 @@ class JSON2 {
       const baseKey = key.replace(new RegExp('^' + V2_STATE_PREFIX), '');
       const options = meta?.[baseKey];
       if (options?.disabled) { return; }
-      result[options?.alias || baseKey] = value[baseKey];
+      result[options?.alias || baseKey] = (value as Record<string, unknown>)[baseKey];
     });
     return result;
   }
 
   // Parse JSON string with special types, gathering objects and their refIDs
-  static parseStructure(text: string, objects: Map<string, any>) {
-    const parse = (str: string) =>
+  static parseStructure(text: string, objects: Map<string, object>): unknown {
+    const parse = (str: string): any =>
       JSON.parse(str, reviver)
 
-    const parseSendable = (str: string) =>
+    const parseSendable = (str: string): any =>
       // reviver is not supported by parseSendable()
-      (JSON as any)['parseSendable'](str)
+      (JSON as any)?.parseSendable(str)?? ''
 
-    const reviver = function(key: string, value: any) {
-      const { type, refId, payload } = JSON2.parseTRP(value);
+    const reviver = function(key: string, value: unknown): any {
+      const { type, refId, payload } = JSON2.parseTRP(value as string);
 
       let result = value;
       if (type === 'Da') { result = new Date(payload); }
@@ -207,33 +207,47 @@ class JSON2 {
   }
 
   // Iterate any collection, callback(value, key)
-  static forEach(col: Iterable<any>, callback: (val: any, key: any) => void) {
+  static forEach(col: object, callback: (val: unknown, key: string|number) => void): void {
     if (col instanceof Array) {
-      for (const [key, val] of col.entries()) callback(val, key);
+      for (const [key, val] of col.entries()) {
+        callback(val, key);
+      }
     }
 
     if (col instanceof Map) {
-      for (const [key, val] of col.entries()) callback(val, key);
+      for (const [key, val] of col.entries()) { 
+        callback(val, key);
+      }
     }
 
     if (col instanceof Set) {
-      for (const val of col) callback(val, val);
+      for (const val of col) { 
+        callback(val, val);
+      }
     }
 
     if (col instanceof SendableArray) {
-      for (const [key, val] of col.entries()) callback(val, key);
+      for (const [key, val] of col.entries()) { 
+        callback(val, key);
+      }
     }
 
     if (col instanceof SendableMap) {
-      for (const [key, val] of col) callback(val, key);
+      for (const [key, val] of col) { 
+        callback(val, key);
+      }
     }
 
     if (col instanceof SendableSet) {
-      for (const val of col) callback(val, val);
+      for (const val of col) { 
+        callback(val, val);
+      }
     }
 
     if (col instanceof Object) {
-      for (const [key, val] of Object.entries(col)) callback(val, key);
+      for (const [key, val] of Object.entries(col)) { 
+        callback(val, key);
+      }
     }
   }
 }
