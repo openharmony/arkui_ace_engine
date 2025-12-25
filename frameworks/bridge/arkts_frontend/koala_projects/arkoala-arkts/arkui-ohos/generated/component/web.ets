@@ -322,6 +322,21 @@ export class FileSelectorParam implements MaterializedBase {
     public getMimeTypes(): Array<string> {
         return this.getMimeTypes_serialize()
     }
+    public getSuggestedName(): string {
+        return this.getSuggestedName_serialize()
+    }
+    public getDefaultPath(): string {
+        return this.getDefaultPath_serialize()
+    }
+    public getDescriptions(): Array<string> {
+        return this.getDescriptions_serialize()
+    }
+    public isAcceptAllOptionExcluded(): boolean {
+        return this.isAcceptAllOptionExcluded_serialize()
+    }
+    public getAcceptableFileTypes(): Array<Array<AcceptableFileType>> {
+        return this.getAcceptableFileTypes_serialize()
+    }
     getTitle_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getTitle(this.peer!.ptr)
         return retval
@@ -354,6 +369,45 @@ export class FileSelectorParam implements MaterializedBase {
             buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
         }
         const returnResult : Array<string> = buffer
+        return returnResult
+    }
+    getSuggestedName_serialize(): string {
+        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getSuggestedName(this.peer!.ptr)
+        return retval
+    }
+    getDefaultPath_serialize(): string {
+        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getDefaultPath(this.peer!.ptr)
+        return retval
+    }
+    getDescriptions_serialize(): Array<string> {
+        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getDescriptions(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<string> = new Array<string>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            buffer[bufferBufCounterI] = (retvalDeserializer.readString() as string)
+        }
+        const returnResult : Array<string> = buffer
+        return returnResult
+    }
+    isAcceptAllOptionExcluded_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_isAcceptAllOptionExcluded(this.peer!.ptr)
+        return retval
+    }
+    getAcceptableFileTypes_serialize(): Array<Array<AcceptableFileType>> {
+        const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_getAcceptableFileTypes(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferLength : int32 = retvalDeserializer.readInt32()
+        let buffer : Array<Array<AcceptableFileType>> = new Array<Array<AcceptableFileType>>(bufferLength)
+        for (let bufferBufCounterI = 0; bufferBufCounterI < bufferLength; bufferBufCounterI++) {
+            const bufferTempBufLength : int32 = retvalDeserializer.readInt32()
+            let bufferTempBuf : Array<AcceptableFileType> = new Array<AcceptableFileType>(bufferTempBufLength)
+            for (let bufferTempBufBufCounterI = 0; bufferTempBufBufCounterI < bufferTempBufLength; bufferTempBufBufCounterI++) {
+                bufferTempBuf[bufferTempBufBufCounterI] = AcceptableFileType_serializer.read(retvalDeserializer)
+            }
+            buffer[bufferBufCounterI] = bufferTempBuf
+        }
+        const returnResult : Array<Array<AcceptableFileType>> = buffer
         return returnResult
     }
 }
@@ -3004,6 +3058,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setEnableImageAnalyzer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableAutoFillAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setEnableAutoFill(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOnMicrophoneCaptureStateChangeAttribute(value: OnMicrophoneCaptureStateChangeCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -4064,6 +4130,9 @@ export interface WebAttribute extends CommonMethod {
     enableImageAnalyzer(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableImageAnalyzer")
     }
+    enableAutoFill(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableAutoFill")
+    }
     onMicrophoneCaptureStateChange(value: OnMicrophoneCaptureStateChangeCallback | undefined): this {
         throw new Error("Unimplemented method onMicrophoneCaptureStateChange")
     }
@@ -4219,6 +4288,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     enableSelectedDataDetector_value?: boolean | undefined
     onTextSelectionChange_value?: TextSelectionChangeCallback | undefined
     enableImageAnalyzer_value?: boolean | undefined
+    enableAutoFill_value?: boolean | undefined
     onMicrophoneCaptureStateChange_value?: OnMicrophoneCaptureStateChangeCallback | undefined
     onCameraCaptureStateChange_value?: OnCameraCaptureStateChangeCallback | undefined
     attributeModifier_value?: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined
@@ -4639,6 +4709,9 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     enableImageAnalyzer(value: boolean | undefined): this {
         return this
     }
+    enableAutoFill(value: boolean | undefined): this {
+        return this
+    }
     onMicrophoneCaptureStateChange(value: OnMicrophoneCaptureStateChangeCallback | undefined): this {
         return this
     }
@@ -4674,6 +4747,10 @@ export interface NestedScrollOptionsExt {
 export interface EmbedOptions {
     supportDefaultIntrinsicSize?: boolean;
     supportCssDisplayChange?: boolean;
+}
+export interface AcceptableFileType {
+    mimeType: string;
+    acceptableType: Array<string>;
 }
 export enum GestureFocusMode {
     DEFAULT = 0,
@@ -5816,6 +5893,14 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
+    public enableAutoFill(value: boolean | undefined): this {
+        if (this.checkPriority("enableAutoFill")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableAutoFillAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public onMicrophoneCaptureStateChange(value: OnMicrophoneCaptureStateChangeCallback | undefined): this {
         if (this.checkPriority("onMicrophoneCaptureStateChange")) {
             const value_casted = value as (OnMicrophoneCaptureStateChangeCallback | undefined)
@@ -6331,6 +6416,31 @@ export class WebResourceResponse_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return WebResourceResponseInternal.fromPtr(ptr)
+    }
+}
+export class AcceptableFileType_serializer {
+    public static write(buffer: SerializerBase, value: AcceptableFileType): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForMimeType  = value.mimeType
+        valueSerializer.writeString(valueHolderForMimeType)
+        const valueHolderForAcceptableType  = value.acceptableType
+        valueSerializer.writeInt32((valueHolderForAcceptableType.length).toInt())
+        for (let valueHolderForAcceptableTypeCounterI = 0; valueHolderForAcceptableTypeCounterI < valueHolderForAcceptableType.length; valueHolderForAcceptableTypeCounterI++) {
+            const valueHolderForAcceptableTypeTmpElement : string = valueHolderForAcceptableType[valueHolderForAcceptableTypeCounterI]
+            valueSerializer.writeString(valueHolderForAcceptableTypeTmpElement)
+        }
+    }
+    public static read(buffer: DeserializerBase): AcceptableFileType {
+        let valueDeserializer : DeserializerBase = buffer
+        const mimeTypeTmpResult : string = (valueDeserializer.readString() as string)
+        const acceptableTypeTmpBufLength : int32 = valueDeserializer.readInt32()
+        let acceptableTypeTmpBuf : Array<string> = new Array<string>(acceptableTypeTmpBufLength)
+        for (let acceptableTypeTmpBufBufCounterI = 0; acceptableTypeTmpBufBufCounterI < acceptableTypeTmpBufLength; acceptableTypeTmpBufBufCounterI++) {
+            acceptableTypeTmpBuf[acceptableTypeTmpBufBufCounterI] = (valueDeserializer.readString() as string)
+        }
+        const acceptableTypeTmpResult : Array<string> = acceptableTypeTmpBuf
+        let value : AcceptableFileType = ({mimeType: mimeTypeTmpResult, acceptableType: acceptableTypeTmpResult} as AcceptableFileType)
+        return value
     }
 }
 export class AdsBlockedDetails_serializer {

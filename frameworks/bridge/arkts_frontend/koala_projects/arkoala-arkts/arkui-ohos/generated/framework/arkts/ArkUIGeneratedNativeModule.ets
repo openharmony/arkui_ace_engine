@@ -3246,6 +3246,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_setEnableImageAnalyzer(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _WebAttribute_setEnableAutoFill(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _WebAttribute_setOnMicrophoneCaptureStateChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _WebAttribute_setOnCameraCaptureStateChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -4219,6 +4221,16 @@ export class ArkUIGeneratedNativeModule {
     native static _FileSelectorParam_isCapture(ptr: KPointer): boolean
     @ani.unsafe.Quick
     native static _FileSelectorParam_getMimeTypes(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FileSelectorParam_getSuggestedName(ptr: KPointer): string
+    @ani.unsafe.Quick
+    native static _FileSelectorParam_getDefaultPath(ptr: KPointer): string
+    @ani.unsafe.Quick
+    native static _FileSelectorParam_getDescriptions(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _FileSelectorParam_isAcceptAllOptionExcluded(ptr: KPointer): boolean
+    @ani.unsafe.Quick
+    native static _FileSelectorParam_getAcceptableFileTypes(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _FileSelectorResult_construct(): KPointer
     @ani.unsafe.Direct

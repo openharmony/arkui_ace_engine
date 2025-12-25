@@ -316,6 +316,8 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     _onTextSelectionChange_0_0value?: TextSelectionChangeCallback | undefined
     _enableImageAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableImageAnalyzer_0_0value?: boolean | undefined
+    _enableAutoFill_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableAutoFill_0_0value?: boolean | undefined
     _onMicrophoneCaptureStateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onMicrophoneCaptureStateChange_0_0value?: OnMicrophoneCaptureStateChangeCallback | undefined
     _onCameraCaptureStateChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -2816,6 +2818,24 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (this._enableAutoFill_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableAutoFill_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableAutoFillAttribute((this._enableAutoFill_0_0value as boolean | undefined));
+                    this._enableAutoFill_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableAutoFill_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableAutoFill_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableAutoFillAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._onMicrophoneCaptureStateChange_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onMicrophoneCaptureStateChange_0_flag) {
@@ -4686,6 +4706,19 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (modifier._enableAutoFill_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableAutoFill_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableAutoFill(modifier._enableAutoFill_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableAutoFill((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._registerNativeEmbedRule_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._registerNativeEmbedRule_0_flag) {
@@ -6228,6 +6261,17 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         } else
         {
             this._enableImageAnalyzer_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    enableAutoFill(value: boolean | undefined): this {
+        if (((this._enableAutoFill_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableAutoFill_0_0value) !== (value)))
+        {
+            this._enableAutoFill_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableAutoFill_0_0value = value
+        } else
+        {
+            this._enableAutoFill_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

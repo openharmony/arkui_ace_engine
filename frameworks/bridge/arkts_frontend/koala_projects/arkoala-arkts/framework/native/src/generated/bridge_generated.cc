@@ -26927,6 +26927,19 @@ void impl_WebAttribute_setEnableImageAnalyzer(Ark_NativePointer thisPtr, KSerial
         GetNodeModifiers()->getWebModifier()->setEnableImageAnalyzer(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(WebAttribute_setEnableImageAnalyzer, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_WebAttribute_setEnableAutoFill(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getWebModifier()->setEnableAutoFill(self, static_cast<Opt_Boolean*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(WebAttribute_setEnableAutoFill, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WebAttribute_setOnMicrophoneCaptureStateChange(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -30587,6 +30600,49 @@ KInteropReturnBuffer impl_FileSelectorParam_getMimeTypes(Ark_NativePointer thisP
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FileSelectorParam_getMimeTypes, KInteropReturnBuffer, Ark_NativePointer)
+Ark_String impl_FileSelectorParam_getSuggestedName(Ark_NativePointer thisPtr) {
+        Ark_FileSelectorParam self = reinterpret_cast<Ark_FileSelectorParam>(thisPtr);
+        return GetAccessors()->getFileSelectorParamAccessor()->getSuggestedName(self);
+}
+KOALA_INTEROP_1(FileSelectorParam_getSuggestedName, KStringPtr, Ark_NativePointer)
+Ark_String impl_FileSelectorParam_getDefaultPath(Ark_NativePointer thisPtr) {
+        Ark_FileSelectorParam self = reinterpret_cast<Ark_FileSelectorParam>(thisPtr);
+        return GetAccessors()->getFileSelectorParamAccessor()->getDefaultPath(self);
+}
+KOALA_INTEROP_1(FileSelectorParam_getDefaultPath, KStringPtr, Ark_NativePointer)
+KInteropReturnBuffer impl_FileSelectorParam_getDescriptions(Ark_NativePointer thisPtr) {
+        Ark_FileSelectorParam self = reinterpret_cast<Ark_FileSelectorParam>(thisPtr);
+        const auto &retValue = GetAccessors()->getFileSelectorParamAccessor()->getDescriptions(self);
+        SerializerBase _retSerializer {};
+        _retSerializer.writeInt32(retValue.length);
+        for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
+            const Ark_String retValueTmpElement = retValue.array[retValueCounterI];
+            _retSerializer.writeString(retValueTmpElement);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FileSelectorParam_getDescriptions, KInteropReturnBuffer, Ark_NativePointer)
+Ark_Boolean impl_FileSelectorParam_isAcceptAllOptionExcluded(Ark_NativePointer thisPtr) {
+        Ark_FileSelectorParam self = reinterpret_cast<Ark_FileSelectorParam>(thisPtr);
+        return GetAccessors()->getFileSelectorParamAccessor()->isAcceptAllOptionExcluded(self);
+}
+KOALA_INTEROP_DIRECT_1(FileSelectorParam_isAcceptAllOptionExcluded, Ark_Boolean, Ark_NativePointer)
+KInteropReturnBuffer impl_FileSelectorParam_getAcceptableFileTypes(Ark_NativePointer thisPtr) {
+        Ark_FileSelectorParam self = reinterpret_cast<Ark_FileSelectorParam>(thisPtr);
+        const auto &retValue = GetAccessors()->getFileSelectorParamAccessor()->getAcceptableFileTypes(self);
+        SerializerBase _retSerializer {};
+        _retSerializer.writeInt32(retValue.length);
+        for (int retValueCounterI = 0; retValueCounterI < retValue.length; retValueCounterI++) {
+            const Array_AcceptableFileType retValueTmpElement = retValue.array[retValueCounterI];
+            _retSerializer.writeInt32(retValueTmpElement.length);
+            for (int retValueTmpElementCounterI = 0; retValueTmpElementCounterI < retValueTmpElement.length; retValueTmpElementCounterI++) {
+                const Ark_AcceptableFileType retValueTmpElementTmpElement = retValueTmpElement.array[retValueTmpElementCounterI];
+                AcceptableFileType_serializer::write(_retSerializer, retValueTmpElementTmpElement);
+            }
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FileSelectorParam_getAcceptableFileTypes, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_FileSelectorResult_construct() {
         return GetAccessors()->getFileSelectorResultAccessor()->construct();
 }

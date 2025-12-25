@@ -228,6 +228,7 @@ public:
     static void SetBackToTop(FrameNode* frameNode, bool isEnabled);
     static void SetEnableSelectedDataDetector(FrameNode* frameNode, bool isEnabled);
     static void SetEnableImageAnalyzer(FrameNode* frameNode, bool isEnabled);
+    static void SetEnableAutoFill(FrameNode* frameNode, bool isEnabled);
     static void NotifyPopupWindowResultStatic(int32_t webId, bool result);
     static void SetJsEnabled(FrameNode* frameNode, bool isJsEnabled);
     static void SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled);

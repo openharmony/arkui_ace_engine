@@ -8362,6 +8362,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                     const Opt_Boolean* value)
     {
     }
+    void SetEnableAutoFillImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+    {
+    }
     void SetOnMicrophoneCaptureStateChangeImpl(Ark_NativePointer node,
                                                const Opt_OnMicrophoneCaptureStateChangeCallback* value)
     {
@@ -10850,6 +10854,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
             WebAttributeModifier::SetOnTextSelectionChangeImpl,
             WebAttributeModifier::SetEnableImageAnalyzerImpl,
+            WebAttributeModifier::SetEnableAutoFillImpl,
             WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
             WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
@@ -13507,6 +13512,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     Array_String GetMimeTypesImpl(Ark_FileSelectorParam peer)
+    {
+        return {};
+    }
+    Ark_String GetSuggestedNameImpl(Ark_FileSelectorParam peer)
+    {
+        return {};
+    }
+    Ark_String GetDefaultPathImpl(Ark_FileSelectorParam peer)
+    {
+        return {};
+    }
+    Array_String GetDescriptionsImpl(Ark_FileSelectorParam peer)
+    {
+        return {};
+    }
+    Ark_Boolean IsAcceptAllOptionExcludedImpl(Ark_FileSelectorParam peer)
+    {
+        return {};
+    }
+    Array_Array_AcceptableFileType GetAcceptableFileTypesImpl(Ark_FileSelectorParam peer)
     {
         return {};
     }
@@ -20525,6 +20550,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FileSelectorParamAccessor::GetAcceptTypeImpl,
             FileSelectorParamAccessor::IsCaptureImpl,
             FileSelectorParamAccessor::GetMimeTypesImpl,
+            FileSelectorParamAccessor::GetSuggestedNameImpl,
+            FileSelectorParamAccessor::GetDefaultPathImpl,
+            FileSelectorParamAccessor::GetDescriptionsImpl,
+            FileSelectorParamAccessor::IsAcceptAllOptionExcludedImpl,
+            FileSelectorParamAccessor::GetAcceptableFileTypesImpl,
         };
         return &FileSelectorParamAccessorImpl;
     }
