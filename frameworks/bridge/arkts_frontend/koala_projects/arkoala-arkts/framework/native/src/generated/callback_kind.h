@@ -209,6 +209,7 @@ typedef enum CallbackKind {
     Kind_Callback_Tuple_I32_I32_Void = -1321460777,
     Kind_Callback_UIExtensionProxy_Void = -1063506522,
     Kind_Callback_Union_CustomBuilder_DragItemInfo_Void = -620935067,
+    Kind_Callback_Union_DrawingRenderingContext_Undefined_Void = -495170669,
     Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void = -1322200028,
     Kind_Callback_VisibilityChangeReason_Void = -2144679285,
     Kind_Callback_Void = -1867723152,

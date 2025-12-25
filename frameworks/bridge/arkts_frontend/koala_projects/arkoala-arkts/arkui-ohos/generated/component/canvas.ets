@@ -656,7 +656,7 @@ export class ArkCanvasPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setCanvasOptionsAttribute(context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): void {
+    setCanvasOptions0Attribute(context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (context !== undefined) {
@@ -681,10 +681,16 @@ export class ArkCanvasPeer extends ArkCommonMethodPeer {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CanvasInterface_setCanvasOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasInterface_setCanvasOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setOnReadyAttribute(value: VoidCallback | undefined): void {
+    setCanvasOptions1Attribute(params: CanvasParams): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        CanvasParams_serializer.write(thisSerializer, params)
+        ArkUIGeneratedNativeModule._CanvasInterface_setCanvasOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnReadyAttribute(value: ((value0: DrawingRenderingContext | undefined) => void) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -731,11 +737,21 @@ export interface TextMetrics {
     readonly width: double;
     readonly height: double;
 }
+export interface RenderingContextOptions {
+    antialias?: boolean;
+}
+export interface CanvasParams {
+    unit?: LengthMetricsUnit;
+    imageAIOptions?: ImageAIOptions;
+}
 export interface CanvasAttribute extends CommonMethod {
     setCanvasOptions(context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): this {
         throw new Error("Unimplemented method setCanvasOptions")
     }
-    onReady(value: VoidCallback | undefined): this {
+    setCanvasOptions(params: CanvasParams): this {
+        throw new Error("Unimplemented method setCanvasOptions")
+    }
+    onReady(value: ((value0: DrawingRenderingContext | undefined) => void) | undefined): this {
         throw new Error("Unimplemented method onReady")
     }
     enableAnalyzer(value: boolean | undefined): this {
@@ -746,13 +762,16 @@ export interface CanvasAttribute extends CommonMethod {
     }
 }
 export class ArkCanvasStyle extends ArkCommonMethodStyle implements CanvasAttribute {
-    onReady_value?: VoidCallback | undefined
+    onReady_value?: ((value0: DrawingRenderingContext | undefined) => void) | undefined
     enableAnalyzer_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined
     setCanvasOptions(context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): this {
         return this
     }
-    onReady(value: VoidCallback | undefined): this {
+    setCanvasOptions(params: CanvasParams): this {
+        return this
+    }
+    onReady(value: ((value0: DrawingRenderingContext | undefined) => void) | undefined): this {
         return this
     }
     enableAnalyzer(value: boolean | undefined): this {
@@ -771,19 +790,27 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements Canv
         return (this.peer as ArkCanvasPeer)
     }
     public setCanvasOptions(context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): this {
-        if (this.checkPriority("setCanvasOptions")) {
+        if (this.checkPriority("setCanvasOptions0")) {
             hookSetCanvasOptions(this, context, imageAIOptions)
             const context_casted = context as (CanvasRenderingContext2D | DrawingRenderingContext | undefined)
             const imageAIOptions_casted = imageAIOptions as (ImageAIOptions | undefined)
-            this.getPeer()?.setCanvasOptionsAttribute(context_casted, imageAIOptions_casted)
-            this.applyOptionsFinish('CanvasAttribute');
+            this.getPeer()?.setCanvasOptions0Attribute(context_casted, imageAIOptions_casted)
             return this
         }
         return this
     }
-    public onReady(value: VoidCallback | undefined): this {
+    public setCanvasOptions(params: CanvasParams): this {
+        if (this.checkPriority("setCanvasOptions1")) {
+            hookSetCanvasOptions(this, params)
+            const params_casted = params as (CanvasParams)
+            this.getPeer()?.setCanvasOptions1Attribute(params_casted)
+            return this
+        }
+        return this
+    }
+    public onReady(value: ((value0: DrawingRenderingContext | undefined) => void) | undefined): this {
         if (this.checkPriority("onReady")) {
-            const value_casted = value as (VoidCallback | undefined)
+            const value_casted = value as (((value0: DrawingRenderingContext | undefined) => void) | undefined)
             this.getPeer()?.setOnReadyAttribute(value_casted)
             return this
         }
@@ -816,8 +843,6 @@ export class ArkCanvasComponent extends ArkCommonMethodComponent implements Canv
 export function CanvasImpl(
     @memo
     style: ((attributes: CanvasAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkCanvasComponent>((): ArkCanvasComponent => {
         return new ArkCanvasComponent()
@@ -826,7 +851,6 @@ export function CanvasImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
@@ -956,6 +980,30 @@ export class DrawingRenderingContext_serializer {
         return DrawingRenderingContextInternal.fromPtr(ptr)
     }
 }
+export class RenderingContextOptions_serializer {
+    public static write(buffer: SerializerBase, value: RenderingContextOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForAntialias  = value.antialias
+        if (valueHolderForAntialias !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAntialiasTmpValue  = valueHolderForAntialias!
+            valueSerializer.writeBoolean(valueHolderForAntialiasTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): RenderingContextOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const antialiasTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let antialiasTmpBuf : boolean | undefined = undefined
+        if ((antialiasTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            antialiasTmpBuf = valueDeserializer.readBoolean()
+        }
+        const antialiasTmpResult : boolean | undefined = antialiasTmpBuf
+        let value : RenderingContextOptions = ({antialias: antialiasTmpResult} as RenderingContextOptions)
+        return value
+    }
+}
 export class RenderingContextSettings_serializer {
     public static write(buffer: SerializerBase, value: RenderingContextSettings): void {
         let valueSerializer : SerializerBase = buffer
@@ -965,6 +1013,44 @@ export class RenderingContextSettings_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return RenderingContextSettingsInternal.fromPtr(ptr)
+    }
+}
+export class CanvasParams_serializer {
+    public static write(buffer: SerializerBase, value: CanvasParams): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForUnit  = value.unit
+        if (valueHolderForUnit !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForUnitTmpValue  = (valueHolderForUnit as LengthMetricsUnit)
+            valueSerializer.writeInt32(valueHolderForUnitTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForImageAIOptions  = value.imageAIOptions
+        if (valueHolderForImageAIOptions !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForImageAIOptionsTmpValue  = valueHolderForImageAIOptions!
+            ImageAIOptions_serializer.write(valueSerializer, valueHolderForImageAIOptionsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): CanvasParams {
+        let valueDeserializer : DeserializerBase = buffer
+        const unitTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let unitTmpBuf : LengthMetricsUnit | undefined = undefined
+        if ((unitTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            unitTmpBuf = LengthMetricsUnit.fromValue(valueDeserializer.readInt32())
+        }
+        const unitTmpResult : LengthMetricsUnit | undefined = unitTmpBuf
+        const imageAIOptionsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let imageAIOptionsTmpBuf : ImageAIOptions | undefined = undefined
+        if ((imageAIOptionsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            imageAIOptionsTmpBuf = ImageAIOptions_serializer.read(valueDeserializer)
+        }
+        const imageAIOptionsTmpResult : ImageAIOptions | undefined = imageAIOptionsTmpBuf
+        let value : CanvasParams = ({unit: unitTmpResult, imageAIOptions: imageAIOptionsTmpResult} as CanvasParams)
+        return value
     }
 }
 export class CanvasRenderer_serializer {
@@ -2199,6 +2285,20 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._CanvasRenderingContext2D_getFinalizer()
     }
+    static getContext2DFromDrawingContext_serialize(drawingContext: DrawingRenderingContext, options?: RenderingContextOptions): CanvasRenderingContext2D {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            RenderingContextOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = ArkUIGeneratedNativeModule._CanvasRenderingContext2D_getContext2DFromDrawingContext(toPeerPtr(drawingContext), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : CanvasRenderingContext2D = CanvasRenderingContext2DInternal.fromPtr(retval)
+        return obj
+    }
     public toDataURL(type?: string, quality?: double): string {
         const type_casted = type as (string | undefined)
         const quality_casted = quality as (double | undefined)
@@ -2236,6 +2336,11 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         const callback__casted = callback_ as (VoidCallback | undefined)
         this.offDetach_serialize(callback__casted)
         return
+    }
+    public static getContext2DFromDrawingContext(drawingContext: DrawingRenderingContext, options?: RenderingContextOptions): CanvasRenderingContext2D {
+        const drawingContext_casted = drawingContext as (DrawingRenderingContext)
+        const options_casted = options as (RenderingContextOptions | undefined)
+        return CanvasRenderingContext2D.getContext2DFromDrawingContext_serialize(drawingContext_casted, options_casted)
     }
     private getHeight(): double {
         return this.getHeight_serialize()

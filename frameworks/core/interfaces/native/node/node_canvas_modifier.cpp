@@ -26,7 +26,7 @@ void SetCanvasOnReady(ArkUINodeHandle node, void* callback)
         auto onReady = reinterpret_cast<std::function<void()>*>(callback);
         CanvasModelNG::SetOnReady(frameNode, std::move(*onReady));
     } else {
-        CanvasModelNG::SetOnReady(frameNode, nullptr);
+        CanvasModelNG::ResetOnReady(frameNode);
     }
 }
 
@@ -34,7 +34,7 @@ void ResetCanvasOnReady(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CanvasModelNG::SetOnReady(frameNode, nullptr);
+    CanvasModelNG::ResetOnReady(frameNode);
 }
 
 void SetCanvasEnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool value)

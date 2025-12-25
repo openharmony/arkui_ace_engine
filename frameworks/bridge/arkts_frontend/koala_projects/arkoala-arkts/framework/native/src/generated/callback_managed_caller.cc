@@ -4817,6 +4817,40 @@ void callManagedCallback_Union_CustomBuilder_DragItemInfo_VoidSync(Ark_VMContext
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedCallback_Union_DrawingRenderingContext_Undefined_Void(Ark_Int32 resourceId, Opt_DrawingRenderingContext value0)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_Union_DrawingRenderingContext_Undefined_Void);
+    argsSerializer.writeInt32(resourceId);
+    if (runtimeType(value0) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto value0TmpValue = value0.value;
+        DrawingRenderingContext_serializer::write(argsSerializer, value0TmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedCallback_Union_DrawingRenderingContext_Undefined_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Opt_DrawingRenderingContext value0)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_Callback_Union_DrawingRenderingContext_Undefined_Void);
+    argsSerializer.writeInt32(resourceId);
+    if (runtimeType(value0) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto value0TmpValue = value0.value;
+        DrawingRenderingContext_serializer::write(argsSerializer, value0TmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void(Ark_Int32 resourceId, Opt_Object value0)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -8759,6 +8793,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_Tuple_I32_I32_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Tuple_I32_I32_Void);
         case Kind_Callback_UIExtensionProxy_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_UIExtensionProxy_Void);
         case Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_CustomBuilder_DragItemInfo_Void);
+        case Kind_Callback_Union_DrawingRenderingContext_Undefined_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_DrawingRenderingContext_Undefined_Void);
         case Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void);
         case Kind_Callback_VisibilityChangeReason_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_VisibilityChangeReason_Void);
         case Kind_Callback_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Void);
@@ -9090,6 +9125,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_Tuple_I32_I32_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Tuple_I32_I32_VoidSync);
         case Kind_Callback_UIExtensionProxy_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_UIExtensionProxy_VoidSync);
         case Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_CustomBuilder_DragItemInfo_VoidSync);
+        case Kind_Callback_Union_DrawingRenderingContext_Undefined_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_DrawingRenderingContext_Undefined_VoidSync);
         case Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_Object_Idlize_Stdlib_Null_Undefined_VoidSync);
         case Kind_Callback_VisibilityChangeReason_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_VisibilityChangeReason_VoidSync);
         case Kind_Callback_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_VoidSync);

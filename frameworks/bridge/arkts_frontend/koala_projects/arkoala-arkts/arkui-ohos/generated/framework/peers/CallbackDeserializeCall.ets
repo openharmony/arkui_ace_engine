@@ -40,6 +40,7 @@ import { Resource_serializer } from "./../resource"
 import { TextPickerResult_serializer, TextPickerResult, OnTextPickerChangeCallback, TextPickerEnterSelectedAreaCallback, TextPickerScrollStopCallback } from "./../../component/textPicker"
 import { TimePickerResult_serializer, TimePickerResult, OnTimePickerChangeCallback } from "./../../component/timePicker"
 import { UIExtensionProxy_serializer, UIExtensionProxy } from "./../../component/uiExtensionComponent"
+import { DrawingRenderingContext_serializer, DrawingRenderingContext } from "./../../component/canvas"
 import { CheckBoxConfiguration_serializer, CheckBoxConfiguration, OnCheckboxChangeCallback } from "./../../component/checkbox"
 import { DataPanelConfiguration_serializer, DataPanelConfiguration } from "./../../component/dataPanel"
 import { BusinessError_serializer } from "./../ohos.base"
@@ -1903,6 +1904,17 @@ export function deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void
     }
     let value : CustomBuilder | DragItemInfo = (valueTmpBuf as CustomBuilder | DragItemInfo)
     _call(value)
+}
+export function deserializeAndCallCallback_Union_DrawingRenderingContext_Undefined_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: DrawingRenderingContext | undefined) => void))
+    const value0TmpBuf_runtimeType  = thisDeserializer.readInt8().toInt()
+    let value0TmpBuf : DrawingRenderingContext | undefined = undefined
+    if ((value0TmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+        value0TmpBuf = (DrawingRenderingContext_serializer.read(thisDeserializer) as DrawingRenderingContext)
+    }
+    let value0 : DrawingRenderingContext | undefined = value0TmpBuf
+    _call(value0)
 }
 export function deserializeAndCallCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -3819,6 +3831,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_Tuple_I32_I32_Void: return deserializeAndCallCallback_Tuple_I32_I32_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_UIExtensionProxy_Void: return deserializeAndCallCallback_UIExtensionProxy_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Union_DrawingRenderingContext_Undefined_Void: return deserializeAndCallCallback_Union_DrawingRenderingContext_Undefined_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return deserializeAndCallCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_VisibilityChangeReason_Void: return deserializeAndCallCallback_VisibilityChangeReason_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Void: return deserializeAndCallCallback_Void(thisDeserializer);

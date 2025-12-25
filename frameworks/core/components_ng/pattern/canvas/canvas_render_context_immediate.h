@@ -27,12 +27,17 @@ public:
     void PushTask(std::function<void(CanvasPaintMethod&)>&& task) override;
     bool NeedRender() const override;
     void FlushTask() override;
+    void SetVisibility(bool isVisible) override
+    {
+        isVisible_ = isVisible;
+    }
 
     TransformParam GetTransform() const override;
     LineDashParam GetLineDash() const override;
 
 private:
     bool needRender_;
+    bool isVisible_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_RENDER_CONTEXT_IMMEDIATE_H

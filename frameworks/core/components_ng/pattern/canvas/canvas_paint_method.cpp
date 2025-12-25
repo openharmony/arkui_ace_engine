@@ -120,6 +120,15 @@ void CanvasPaintMethod::UpdateRecordingCanvas(float width, float height)
     needMarkDirty_ = true;
 }
 
+void CanvasPaintMethod::ClearRecordingCanvas()
+{
+    auto rsRecordingCanvas = std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_);
+    CHECK_NULL_VOID(rsRecordingCanvas);
+    auto drawCmdList = rsRecordingCanvas->GetDrawCmdList();
+    CHECK_EQUAL_VOID(drawCmdList->IsEmpty(), true);
+    rsRecordingCanvas->Clear();
+}
+
 void CanvasPaintMethod::ResetRecordingCanvas()
 {
     if (canvasCallback_) {

@@ -368,14 +368,18 @@ std::unique_ptr<Ace::ImageData> CanvasPattern::GetImageData(double left, double 
         return data;
     }
     // Rely on the single-threaded model. Should guarantee the timing between Render Task of pipeline and GetImageData
-    paintMethod_->FlushUITasks();
+    if (immediateRender_.value_or(false) == false) {
+        paintMethod_->FlushUITasks();
+    }
     return paintMethod_->GetImageData(left, top, width, height);
 }
 
 void CanvasPattern::GetImageData(const std::shared_ptr<Ace::ImageData>& imageData)
 {
     CHECK_NULL_VOID(paintMethod_);
-    paintMethod_->FlushUITasks();
+    if (immediateRender_.value_or(false) == false) {
+        paintMethod_->FlushUITasks();
+    }
     paintMethod_->GetImageData(imageData);
 }
 
@@ -649,7 +653,9 @@ void CanvasPattern::Translate(double x, double y)
 std::string CanvasPattern::ToDataURL(const std::string& type, double quality)
 {
     // Rely on the single-threaded model. Should guarantee the timing between Render Task of pipeline and ToDataURL
-    paintMethod_->FlushUITasks();
+    if (immediateRender_.value_or(false) == false) {
+        paintMethod_->FlushUITasks();
+    }
     return paintMethod_->ToDataURL(type, quality);
 }
 
@@ -670,7 +676,7 @@ double CanvasPattern::GetHeight()
     return canvasSize_->Height();
 }
 
-void CanvasPattern::SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback)
+void CanvasPattern::SetRSCanvasCallback(std::function<void(std::shared_ptr<RSCanvas>, double, double)>& callback)
 {
     CHECK_NULL_VOID(paintMethod_);
     paintMethod_->SetRSCanvasCallback(callback);
@@ -832,6 +838,7 @@ void CanvasPattern::ReleaseImageAnalyzer()
 
 void CanvasPattern::DumpInfo()
 {
+    DumpLog::GetInstance().AddDesc(GetDumpInfo());
     CHECK_NULL_VOID(paintMethod_);
     DumpLog::GetInstance().AddDesc(paintMethod_->GetDumpInfo());
     CHECK_NULL_VOID(contentModifier_);
@@ -884,6 +891,7 @@ int32_t CanvasPattern::GetId()
 
 void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
+    json->Put("CanvasPattern", GetDumpInfo().c_str());
     CHECK_NULL_VOID(paintMethod_);
     json->Put("CanvasPaint", paintMethod_->GetDumpInfo().c_str());
     CHECK_NULL_VOID(contentModifier_);
@@ -892,6 +900,9 @@ void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 
 void CanvasPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
+    auto canvasPatternJson = JsonUtil::Create();
+    GetSimplifyDumpInfo(canvasPatternJson);
+    json->PutRef("CanvasPattern", std::move(canvasPatternJson));
     CHECK_NULL_VOID(paintMethod_);
     auto jsonMethod = JsonUtil::Create();
     paintMethod_->GetSimplifyDumpInfo(jsonMethod);
@@ -924,6 +935,56 @@ void CanvasPattern::UpdateUnit(CanvasUnit unit)
     }
 }
 
+std::string CanvasPattern::GetDumpInfo()
+{
+    std::string renderingMode = immediateRender_.value_or(false) ? "immediate" : "deferred";
+    return "RENDERING_MODE: " + renderingMode + "; ";
+}
+
+void CanvasPattern::GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    std::string renderingMode = immediateRender_.value_or(false) ? "immediate" : "deferred";
+    json->Put("RenderingMode", renderingMode.c_str());
+}
+
+void CanvasPattern::OnVisibleChange(bool isVisible)
+{
+    CHECK_NULL_VOID(paintMethod_);
+    paintMethod_->SetVisibility(isVisible);
+}
+
+void CanvasPattern::OnVisibleAreaChange(bool isVisible, double ratio)
+{
+    CHECK_NULL_VOID(paintMethod_);
+    paintMethod_->SetVisibility(isVisible);
+}
+
+void CanvasPattern::UnregisterVisibleAreaChange()
+{
+    CHECK_EQUAL_VOID(hasRegisteredVisibleAreaChange_, false);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveVisibleAreaChangeNode(id_);
+    hasRegisteredVisibleAreaChange_ = false;
+}
+
+void CanvasPattern::RegisterVisibleAreaChange()
+{
+    CHECK_EQUAL_VOID(hasRegisteredVisibleAreaChange_, true);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto callback = [weak = WeakClaim(this)](bool isVisible, double ratio) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->OnVisibleAreaChange(isVisible, ratio);
+    };
+    std::vector<double> ratioList = { 0.0 };
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
+    hasRegisteredVisibleAreaChange_ = true;
+}
+
 void CanvasPattern::SetImmediateRender(bool immediateRender)
 {
     if (immediateRender_.has_value() && immediateRender_.value() == immediateRender) {
@@ -933,8 +994,10 @@ void CanvasPattern::SetImmediateRender(bool immediateRender)
     CHECK_NULL_VOID(paintMethod_);
     RefPtr<CanvasRenderContext> canvasRenderContext;
     if (immediateRender) {
+        RegisterVisibleAreaChange();
         canvasRenderContext = MakeRefPtr<CanvasRenderContextImmediate>();
     } else {
+        UnregisterVisibleAreaChange();
         canvasRenderContext = MakeRefPtr<CanvasRenderContextDeferred>();
     }
     paintMethod_->SetCanvasRenderContext(canvasRenderContext);

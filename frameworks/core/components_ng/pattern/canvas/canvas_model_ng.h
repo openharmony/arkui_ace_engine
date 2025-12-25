@@ -34,6 +34,10 @@ public:
     static RefPtr<AceType> GetCanvasPattern(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void DetachRenderContext(FrameNode* frameNode);
+    static void SetImmediateRender(FrameNode* frameNode, bool immediateRender);
+    static void SetOnReady(FrameNode* frameNode, std::function<void(bool, CanvasUnit)>&& onReady);
+    static void ResetOnReady(FrameNode* frameNode);
+    static void UpdateUnit(FrameNode* frameNode, CanvasUnit unit);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_MODEL_NG_H

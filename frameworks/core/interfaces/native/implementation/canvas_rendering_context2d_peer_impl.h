@@ -15,11 +15,11 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERING_CONTEXT2D_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERING_CONTEXT2D_PEER_IMPL_H
 
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "canvas_renderer_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+using ReadyEvent = std::function<void()>;
 
 class CanvasRenderingContext2DPeerImpl : public CanvasRendererPeerImpl {
 public:
@@ -28,7 +28,7 @@ public:
         ON_DETACH,
         UNKNOWN
     };
-    using CanvasCallbackList = std::list<std::pair<int32_t, CallbackHelper<VoidCallback>>>;
+    using CanvasCallbackList = std::list<std::pair<int32_t, std::function<void()>>>;
     using CanvasCallbackIterator = CanvasCallbackList::const_iterator;
     CanvasRenderingContext2DPeerImpl();
     ~CanvasRenderingContext2DPeerImpl() override = default;
@@ -41,9 +41,10 @@ public:
     void StopImageAnalyzer();
     double GetHeight();
     double GetWidth();
-    void On(CallbackHelper<VoidCallback> &&callback, const CanvasCallbackType& type);
-    void Off(CallbackHelper<VoidCallback> &&callback, const CanvasCallbackType& type);
+    void On(std::function<void()> &&callback, const CanvasCallbackType& type);
+    void Off(std::function<void()> &&callback, const CanvasCallbackType& type);
     int32_t GetCanvasId();
+    void SetRenderingContextOptions(const RenderingContextOptions& options);
     void SetAttachCallbackId(int32_t attachCallbackId)
     {
         attachCallbackId_ = attachCallbackId;
@@ -52,12 +53,20 @@ public:
     {
         detachCallbackId_ = detachCallbackId;
     }
+    void SetBuiltIn(bool builtIn)
+    {
+        builtIn_ = builtIn;
+    }
+    bool IsBuiltIn() const
+    {
+        return builtIn_;
+    }
 
 private:
     CanvasCallbackList::const_iterator FindCallbackInList(
         const CanvasCallbackList& callbackFuncPairList, int32_t callbackId) const;
-    void DeleteCallbackFromList(const CallbackHelper<VoidCallback>& callback, const CanvasCallbackType& type);
-    void AddCallbackToList(CallbackHelper<VoidCallback> &&callback, const CanvasCallbackType& type);
+    void DeleteCallbackFromList(const std::function<void()>& callback, const CanvasCallbackType& type);
+    void AddCallbackToList(std::function<void()> &&callback, const CanvasCallbackType& type);
 
     bool isImageAnalyzing_ = false;
     int32_t attachCallbackId_ = -1;
@@ -65,6 +74,7 @@ private:
     ImageAnalyzerConfig config_;
     CanvasCallbackList attachCallback_;
     CanvasCallbackList detachCallback_;
+    bool builtIn_ = false;
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

@@ -30,21 +30,17 @@ public:
     void SetOptions(const std::optional<CanvasUnit>& unit);
     void SetInvalidate();
     SizeF GetSize();
-    drawing_CanvasPeer* GetCanvas() const;
-    void SetRSCanvasCallback(RefPtr<AceType>& canvasPattern);
+    std::shared_ptr<drawing_CanvasPeer> GetCanvas() const;
+    void SetRSCanvasCallback(WeakPtr<AceType>& canvasPattern);
+    CanvasRenderingContext2DPeer* GetOrCreateContext2D();
+    void SetCanvasPattern(const RefPtr<AceType>& canvas);
+    void SetUnit(CanvasUnit unit);
 
-    void SetCanvasPattern(const RefPtr<AceType>& canvas)
-    {
-        canvasPattern_ = canvas;
-        SetRSCanvasCallback(canvasPattern_);
-    }
+    static void ThrowError(int32_t errCode, const std::string& errorMsg);
+
     void SetInstanceId(int32_t id)
     {
         instanceId_ = id;
-    }
-    void SetUnit(CanvasUnit unit)
-    {
-        unit_ = unit;
     }
     CanvasUnit GetUnit()
     {
@@ -55,15 +51,25 @@ public:
         double density = PipelineBase::GetCurrentDensity();
         return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
     }
+    void SetBuiltIn(bool builtIn)
+    {
+        builtIn_ = builtIn;
+    }
+    bool IsBuiltIn() const
+    {
+        return builtIn_;
+    }
 
 protected:
-    RefPtr<AceType> canvasPattern_;
+    WeakPtr<AceType> canvasPattern_;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
 private:
-    drawing_CanvasPeer *rsCanvas_;
+    std::shared_ptr<drawing_CanvasPeer> rsCanvas_;
     NG::OptionalSizeF size_;
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
+    CanvasRenderingContext2DPeer* context2d_ = nullptr;
+    bool builtIn_ = false;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TABS_CONTROLLER_PEER_IMPL_H

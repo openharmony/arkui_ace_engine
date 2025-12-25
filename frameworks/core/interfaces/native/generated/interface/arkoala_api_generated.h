@@ -1520,6 +1520,8 @@ typedef struct Callback_UIExtensionProxy_Void Callback_UIExtensionProxy_Void;
 typedef struct Opt_Callback_UIExtensionProxy_Void Opt_Callback_UIExtensionProxy_Void;
 typedef struct Callback_Union_CustomBuilder_DragItemInfo_Void Callback_Union_CustomBuilder_DragItemInfo_Void;
 typedef struct Opt_Callback_Union_CustomBuilder_DragItemInfo_Void Opt_Callback_Union_CustomBuilder_DragItemInfo_Void;
+typedef struct Callback_Union_DrawingRenderingContext_Undefined_Void Callback_Union_DrawingRenderingContext_Undefined_Void;
+typedef struct Opt_Callback_Union_DrawingRenderingContext_Undefined_Void Opt_Callback_Union_DrawingRenderingContext_Undefined_Void;
 typedef struct Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void;
 typedef struct Opt_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void Opt_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void;
 typedef struct Callback_Void Callback_Void;
@@ -2337,6 +2339,8 @@ typedef struct Ark_RadioOptions Ark_RadioOptions;
 typedef struct Opt_RadioOptions Opt_RadioOptions;
 typedef struct Ark_RatingConfiguration Ark_RatingConfiguration;
 typedef struct Opt_RatingConfiguration Opt_RatingConfiguration;
+typedef struct Ark_RenderingContextOptions Ark_RenderingContextOptions;
+typedef struct Opt_RenderingContextOptions Opt_RenderingContextOptions;
 typedef struct RenderingContextSettingsPeer RenderingContextSettingsPeer;
 typedef struct RenderingContextSettingsPeer* Ark_RenderingContextSettings;
 typedef struct Opt_RenderingContextSettings Opt_RenderingContextSettings;
@@ -2724,6 +2728,8 @@ typedef struct Ark_ButtonIconOptions Ark_ButtonIconOptions;
 typedef struct Opt_ButtonIconOptions Opt_ButtonIconOptions;
 typedef struct Ark_CalendarOptions Ark_CalendarOptions;
 typedef struct Opt_CalendarOptions Opt_CalendarOptions;
+typedef struct Ark_CanvasParams Ark_CanvasParams;
+typedef struct Opt_CanvasParams Opt_CanvasParams;
 typedef struct CanvasRendererPeer CanvasRendererPeer;
 typedef struct CanvasRendererPeer* Ark_CanvasRenderer;
 typedef struct Opt_CanvasRenderer Opt_CanvasRenderer;
@@ -12249,6 +12255,16 @@ typedef struct Opt_Callback_Union_CustomBuilder_DragItemInfo_Void {
     Ark_Tag tag;
     Callback_Union_CustomBuilder_DragItemInfo_Void value;
 } Opt_Callback_Union_CustomBuilder_DragItemInfo_Void;
+typedef struct Callback_Union_DrawingRenderingContext_Undefined_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Opt_DrawingRenderingContext value0);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_DrawingRenderingContext value0);
+} Callback_Union_DrawingRenderingContext_Undefined_Void;
+typedef struct Opt_Callback_Union_DrawingRenderingContext_Undefined_Void {
+    Ark_Tag tag;
+    Callback_Union_DrawingRenderingContext_Undefined_Void value;
+} Opt_Callback_Union_DrawingRenderingContext_Undefined_Void;
 typedef struct Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -15973,6 +15989,14 @@ typedef struct Opt_RatingConfiguration {
     Ark_Tag tag;
     Ark_RatingConfiguration value;
 } Opt_RatingConfiguration;
+typedef struct Ark_RenderingContextOptions {
+    /* kind: Interface */
+    Opt_Boolean antialias;
+} Ark_RenderingContextOptions;
+typedef struct Opt_RenderingContextOptions {
+    Ark_Tag tag;
+    Ark_RenderingContextOptions value;
+} Opt_RenderingContextOptions;
 typedef struct Opt_RenderingContextSettings {
     Ark_Tag tag;
     Ark_RenderingContextSettings value;
@@ -18056,6 +18080,15 @@ typedef struct Opt_CalendarOptions {
     Ark_Tag tag;
     Ark_CalendarOptions value;
 } Opt_CalendarOptions;
+typedef struct Ark_CanvasParams {
+    /* kind: Interface */
+    Opt_LengthMetricsUnit unit;
+    Opt_ImageAIOptions imageAIOptions;
+} Ark_CanvasParams;
+typedef struct Opt_CanvasParams {
+    Ark_Tag tag;
+    Ark_CanvasParams value;
+} Opt_CanvasParams;
 typedef struct Opt_CanvasRenderer {
     Ark_Tag tag;
     Ark_CanvasRenderer value;
@@ -22961,11 +22994,13 @@ typedef struct GENERATED_ArkUICalendarPickerModifier {
 typedef struct GENERATED_ArkUICanvasModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
-    void (*setCanvasOptions)(Ark_NativePointer node,
-                             const Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext* context,
-                             const Opt_ImageAIOptions* imageAIOptions);
+    void (*setCanvasOptions0)(Ark_NativePointer node,
+                              const Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext* context,
+                              const Opt_ImageAIOptions* imageAIOptions);
+    void (*setCanvasOptions1)(Ark_NativePointer node,
+                              const Ark_CanvasParams* params);
     void (*setOnReady)(Ark_NativePointer node,
-                       const Opt_VoidCallback* value);
+                       const Opt_Callback_Union_DrawingRenderingContext_Undefined_Void* value);
     void (*setEnableAnalyzer)(Ark_NativePointer node,
                               const Opt_Boolean* value);
 } GENERATED_ArkUICanvasModifier;
@@ -27077,6 +27112,8 @@ typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
                      const VoidCallback* callback_);
     void (*offDetach)(Ark_CanvasRenderingContext2D peer,
                       const Opt_VoidCallback* callback_);
+    Ark_CanvasRenderingContext2D (*getContext2DFromDrawingContext)(Ark_DrawingRenderingContext drawingContext,
+                                                                   const Opt_RenderingContextOptions* options);
     Ark_Float64 (*getHeight)(Ark_CanvasRenderingContext2D peer);
     void (*setHeight)(Ark_CanvasRenderingContext2D peer,
                       Ark_Float64 height);

@@ -30,7 +30,7 @@ import { ArkButtonComponent, ButtonAttribute } from "./../../component/button"
 import { ButtonModifier } from "./../../ButtonModifier"
 import { ArkCalendarPickerComponent, CalendarPickerAttribute } from "./../../component/calendarPicker"
 import { CalendarPickerModifier } from "./../../CalendarPickerModifier"
-import { ArkCanvasComponent, CanvasAttribute, CanvasRenderingContext2D, DrawingRenderingContext, ArkCanvasPeer } from "./../../component/canvas"
+import { ArkCanvasComponent, CanvasAttribute, CanvasRenderingContext2D, DrawingRenderingContext, ArkCanvasPeer, CanvasParams } from "./../../component/canvas"
 import { CanvasModifier } from "./../../CanvasModifier"
 import { ArkCheckboxComponent, CheckboxAttribute } from "./../../component/checkbox"
 import { CheckboxModifier } from "./../../CheckboxModifier"
@@ -322,16 +322,21 @@ export function hookCanvasAttributeModifier(component: ArkCanvasComponent, modif
         if (params.length < 1) {
             return;
         }
-        let context_casted: CanvasRenderingContext2D | DrawingRenderingContext | undefined = undefined
-        let imageAIOptions_casted: ImageAIOptions | undefined = undefined
-        if (params.length >= 1) {
-            context_casted = params[0] as CanvasRenderingContext2D | DrawingRenderingContext | undefined
-        }
-        if (params.length == 2) {
-            imageAIOptions_casted = params[1] as ImageAIOptions | undefined
-        }
         let peer: ArkCanvasPeer = component.getPeer() as Object as ArkCanvasPeer;
-        peer?.setCanvasOptionsAttribute(context_casted, imageAIOptions_casted)
+        if (params.length >= 1 && params[0] instanceof CanvasParams) {
+            let canvasParams_casted = params[0] as CanvasParams
+            peer?.setCanvasOptions1Attribute(canvasParams_casted)
+        } else {
+            let context_casted: CanvasRenderingContext2D | DrawingRenderingContext | undefined = undefined
+            let imageAIOptions_casted: ImageAIOptions | undefined = undefined
+            if (params.length >= 1) {
+                context_casted = params[0] as CanvasRenderingContext2D | DrawingRenderingContext | undefined
+            }
+            if (params.length == 2) {
+                imageAIOptions_casted = params[1] as ImageAIOptions | undefined
+            }
+            peer?.setCanvasOptions0Attribute(context_casted, imageAIOptions_casted)
+        }
     };
     let updaterReceiver = (): ArkCanvasComponent => {
         let componentNew: ArkCanvasComponent = new ArkCanvasComponent();

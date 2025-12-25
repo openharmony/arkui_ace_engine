@@ -99,7 +99,7 @@ void JSDrawingRenderingContext::JsGetSize(const JSCallbackInfo& info)
 
 void JSDrawingRenderingContext::SetRSCanvasCallback(WeakPtr<AceType>& canvasPattern)
 {
-    auto func = [wp = WeakClaim(this)](RSCanvas* canvas, double width, double height) {
+    auto func = [wp = WeakClaim(this)](std::shared_ptr<RSCanvas> canvas, double width, double height) {
         auto context = wp.Upgrade();
         CHECK_NULL_VOID(context);
         auto engine = EngineHelper::GetCurrentEngine();
@@ -112,11 +112,12 @@ void JSDrawingRenderingContext::SetRSCanvasCallback(WeakPtr<AceType>& canvasPatt
         width /= density;
         context->size_.SetHeight(height);
         context->size_.SetWidth(width);
-        auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, canvas);
+        context->canvas_ = canvas;
+        auto jsCanvas = OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, canvas.get());
         JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
         context->jsCanvasVal_ = JSRef<JSVal>::Cast(jsCanvasVal);
     };
-    std::function<void(RSCanvas*, double, double)> callback = func;
+    std::function<void(std::shared_ptr<RSCanvas>, double, double)> callback = func;
     auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern.Upgrade());
     if (customPaintPattern) {
         customPaintPattern->SetRSCanvasCallback(callback);

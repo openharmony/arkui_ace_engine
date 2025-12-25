@@ -48,7 +48,7 @@ import { CommonMethod, StateStyles, ArkCommonMethodComponent, ArkCommonMethodPee
 import { CommonMethodModifier } from "../CommonMethodModifier"
 import { AnimateParam } from "#generated";
 import { GestureModifier } from "#generated";
-import { CanvasRenderer, ImageData, OffscreenCanvas, RenderingContextSettings, CanvasRenderingContext2D, OffscreenCanvasRenderingContext2D, VoidCallback } from "#generated";
+import { CanvasRenderer, ImageData, OffscreenCanvas, RenderingContextSettings, CanvasRenderingContext2D, OffscreenCanvasRenderingContext2D, VoidCallback, } from "#generated";
 import { pointer } from "@koalaui/interop";
 import { ArkUIAniModule } from "arkui.ani"
 import { InteropNativeModule } from "@koalaui/interop"
@@ -62,7 +62,7 @@ import { ArkWaterFlowComponent, WaterFlowOptions } from '#generated';
 import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
 import { TabsOpsHandWritten } from "./TabsOpsHandWritten";
 import { WaterFlowHandWritten } from './WaterFlowHandWritten';
-import { ArkCanvasComponent, CanvasRenderingContext2D, DrawingRenderingContext } from "#generated";
+import { ArkCanvasComponent, CanvasRenderingContext2D, DrawingRenderingContext, CanvasParams } from "#generated";
 import { ArkVideoComponent, ArkVideoPeer, VideoOptions } from "#generated";
 import { ArkXComponentComponent, XComponentOptions, XComponentParameters, NativeXComponentParameters, XComponentController, ImageAnalyzerConfig } from "#generated";
 import { CanvasOpsHandWritten } from "./CanvasOpsHandWritten";
@@ -640,6 +640,10 @@ export function unregisterDetach(peerPtr: CanvasRenderingContext2D, callback?: V
 export function hookSetCanvasOptions(component: ArkCanvasComponent,
   context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): void {
   CanvasOpsHandWritten.hookSetCanvasOptionsImpl(component, context, imageAIOptions);
+}
+
+export function hookSetCanvasOptions(component: ArkCanvasComponent, params: CanvasParams): void {
+  CanvasOpsHandWritten.hookSetCanvasOptionsImpl(component, params);
 }
 
 export function hookCanvasStartImageAnalyzer(
