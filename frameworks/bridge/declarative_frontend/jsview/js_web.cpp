@@ -3199,6 +3199,15 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             };
     }
 
+    auto OnMediaCastEnterFunction = controller->GetProperty("OnMediaCastEnter");
+    std::function<void()> OnMediaCastEnterrCallback = nullptr;
+    if (OnMediaCastEnterFunction->IsFunction()) {
+        OnMediaCastEnterrCallback = [webviewController = controller,
+            func = JSRef<JSFunc>::Cast(OnMediaCastEnterFunction)] () {
+                auto result = func->Call(webviewController);
+            };
+    }
+
     auto innerWebNativeMessageManagerFunction = controller->GetProperty("innerWebNativeMessageManager");
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> webNativeMessageManagerFunctionCallback = nullptr;
     if (innerWebNativeMessageManagerFunction->IsFunction()) {
@@ -3241,6 +3250,7 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             auto result = func->Call(webviewController, 1, argv);
         };
     }
+    WebModel::GetInstance()->SetOnMediaCastEnter(std::move(OnMediaCastEnterrCallback));
     WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
     WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
     WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));

@@ -1745,4 +1745,12 @@ void WebClientImpl::OnMicrophoneCaptureStateChanged(int originalState, int newSt
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnMicrophoneCaptureStateChanged(originalState, newState);
 }
+
+void WebClientImpl::OnMediaCastEnter()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebClientImpl::OnMediaCastEnter");
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnMediaCastEnter();
+}
 } // namespace OHOS::Ace
