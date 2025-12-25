@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::V2 {
 
-class ACE_FORCE_EXPORT ColumnComposedElement : public InspectorComposedElement {
+class ACE_EXPORT ColumnComposedElement : public InspectorComposedElement {
     DECLARE_ACE_TYPE(ColumnComposedElement, InspectorComposedElement);
 
 public:

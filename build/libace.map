@@ -661,14 +661,6 @@
       OHOS::Ace::RenderText::*;
       OHOS::Ace::Framework::ViewStackProcessor::*;
       OHOS::Ace::ComposedElement::*;
-      OHOS::Ace::V2::ColumnComposedElement::*;
-      OHOS::Ace::RenderFlexItem::Create*;
-      OHOS::Ace::ScreenSystemManager::GetScreenWidth*;
-      OHOS::Ace::ScreenSystemManager::lock;
-      OHOS::Ace::GridContainerInfo::GetSizeType*;
-      OHOS::Ace::GridContainerInfo::GetColumns*;
-      OHOS::Ace::GridContainerInfo::GetGutterWidth*;
-      OHOS::Ace::Framework::DOMDiv::*;
       OHOS::Ace::V2::InspectorComposedElement::*;
       OHOS::Ace::Declaration::*;
       OHOS::Ace::Edge::NONE;
@@ -686,17 +678,12 @@
       virtual?thunk?to?OHOS::Ace::Element::*;
       virtual?thunk?to?OHOS::Ace::V2::InspectorComposedElement::*;
       virtual?thunk?to?OHOS::Ace::Declaration::*;
-      virtual?thunk?to?OHOS::Ace::Framework::DOMDiv::*;
       VTT?for?OHOS::Ace::SoleChildElement;
       VTT?for?OHOS::Ace::ComposedElement;
       VTT?for?OHOS::Ace::ClickRecognizer;
-      VTT?for?OHOS::Ace::FocusNode;
-      VTT?for?OHOS::Ace::Framework::DOMDiv;
-      VTT?for?OHOS::Ace::V2::ColumnComposedElement;
       vtable?for?OHOS::Ace::SoleChildElement;
       vtable?for?OHOS::Ace::ClickRecognizer;
       non-virtual?thunk?to?OHOS::Ace::V2::InspectorComposedElement::*;
-      non-virtual?thunk?to?OHOS::Ace::V2::ColumnComposedElement::ToJsonObject*;
       VTT?for?OHOS::Ace::NG::NavigationStack;
 
       OHOS::Ace::LinearColor::TRANSPARENT;

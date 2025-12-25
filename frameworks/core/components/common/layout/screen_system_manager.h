@@ -77,7 +77,7 @@ public:
 
     void OnSurfaceChanged(double width);
 
-    ACE_FORCE_EXPORT double GetScreenWidth(const RefPtr<PipelineBase>& pipeline = nullptr) const;
+    double GetScreenWidth(const RefPtr<PipelineBase>& pipeline = nullptr) const;
 
     double GetDipScale() const
     {
@@ -109,7 +109,7 @@ private:
 private:
     ScreenSystemManager() = default;
     ~ScreenSystemManager() = default;
-    ACE_FORCE_EXPORT static std::mutex lock;
+    static std::mutex lock;
     ACE_DISALLOW_COPY_AND_MOVE(ScreenSystemManager);
 };
 

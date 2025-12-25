@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class ACE_FORCE_EXPORT DOMDiv : public DOMNode {
+class DOMDiv : public DOMNode {
     DECLARE_ACE_TYPE(DOMDiv, DOMNode);
 
 public:

@@ -20,7 +20,7 @@
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "core/common/dynamic_module_helper.h"
+#include "bridge/declarative_frontend/jsview/models/grid_row_model_impl.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
@@ -38,9 +38,8 @@ GridRowModel* GridRowModel::GetInstance()
         static NG::GridRowModelNG instance;
         return &instance;
     } else {
-        static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("grid_row");
-        static GridRowModel* instance = loader ? reinterpret_cast<GridRowModel*>(loader->CreateModel()) : nullptr;
-        return instance;
+        static Framework::GridRowModelImpl instance;
+        return &instance;
     }
 #endif
 }

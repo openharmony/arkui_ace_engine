@@ -21,9 +21,11 @@
 #include "frameworks/bridge/common/dom/dom_button.h"
 #include "frameworks/bridge/common/dom/dom_calendar.h"
 #include "frameworks/bridge/common/dom/dom_dialog.h"
-#include "frameworks/bridge/common/dom/dom_div.h"
 #include "frameworks/bridge/common/dom/dom_divider.h"
 #include "frameworks/bridge/common/dom/dom_form.h"
+#include "frameworks/bridge/common/dom/dom_grid_column.h"
+#include "frameworks/bridge/common/dom/dom_grid_container.h"
+#include "frameworks/bridge/common/dom/dom_grid_row.h"
 #include "frameworks/bridge/common/dom/dom_image.h"
 #include "frameworks/bridge/common/dom/dom_label.h"
 #include "frameworks/bridge/common/dom/dom_list.h"
@@ -147,6 +149,9 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_FILTER, &DOMNodeCreator<DOMSvgFilter> },
         { DOM_NODE_TAG_FORM, &DOMNodeCreator<DOMForm> },
         { DOM_NODE_TAG_G, &DOMNodeCreator<DOMSvgG> },
+        { DOM_NODE_TAG_GRID_COLUMN, &DOMNodeCreator<DomGridColumn> },
+        { DOM_NODE_TAG_GRID_CONTAINER, &DOMNodeCreator<DomGridContainer> },
+        { DOM_NODE_TAG_GRID_ROW, &DOMNodeCreator<DomGridRow> },
         { DOM_NODE_TAG_IMAGE, &DOMNodeCreator<DOMImage> },
         { DOM_NODE_TAG_IMAGE_ANIMATOR, &DOMNodeCreator<DOMImageAnimator> },
         { DOM_NODE_TAG_INPUT, &DOMNodeCreator<DOMInput> },

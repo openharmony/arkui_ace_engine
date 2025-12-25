@@ -26,7 +26,7 @@ class ACE_EXPORT RenderFlexItem final : public RenderProxy {
     DECLARE_ACE_TYPE(RenderFlexItem, RenderProxy);
 
 public:
-    ACE_FORCE_EXPORT static RefPtr<RenderNode> Create();
+    static RefPtr<RenderNode> Create();
 
     void OnAttachContext() override
     {

@@ -13,23 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_CONTAINER_MODEL_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_CONTAINER_MODEL_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_GRID_ROW_ELEMENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_GRID_ROW_ELEMENT_H
 
-#include <memory>
-#include <mutex>
+#include "core/pipeline/base/sole_child_element.h"
 
-#include "base/utils/macros.h"
-#include "frameworks/core/components/common/layout/grid_container_info.h"
+namespace OHOS::Ace::V2 {
 
-namespace OHOS::Ace {
-class ACE_EXPORT GridContainerModel {
-public:
-    static GridContainerModel* GetInstance();
-    virtual ~GridContainerModel() = default;
-
-    virtual void Create(const RefPtr<GridContainerInfo>& containerInfo) = 0;
-    virtual void Pop() {}
+class GridColElement : public SoleChildElement, public FocusNode {
+    DECLARE_ACE_TYPE(GridColElement, SoleChildElement, FocusNode);
 };
-} // namespace OHOS::Ace
-#endif
+} // namespace OHOS::Ace::V2
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_GRID_LAYOUT_GRID_ROW_ELEMENT_H

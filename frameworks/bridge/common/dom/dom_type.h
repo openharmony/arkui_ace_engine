@@ -1089,6 +1089,31 @@ ACE_EXPORT extern const char DOM_BADGE_TEXT_FONT_SIZE[];
 ACE_EXPORT extern const char DOM_BADGE_TEXT_COLOR[];
 
 // grid container/row/columns
+ACE_EXPORT extern const char DOM_GRID_CONTAINER_COLUMNS[];
+ACE_EXPORT extern const char DOM_GRID_CONTAINER_SIZE_TYPE[];
+ACE_EXPORT extern const char DOM_GRID_CONTAINER_GUTTER_WIDTH[];
+ACE_EXPORT extern const char DOM_GRID_CONTAINER_GUTTER[];
+ACE_EXPORT extern const char DOM_GRID_CONTAINER_TEMPLATE[];
+ACE_EXPORT extern const char DOM_GRID_TEMPLATE_TYPE_NORMAL[];
+ACE_EXPORT extern const char DOM_GRID_TEMPLATE_TYPE_GRID[];
+ACE_EXPORT extern const char DOM_GRID_CONTAINER_GET_COLUMNS[];
+ACE_EXPORT extern const char DOM_GRID_CONTAINER_GET_COLUMN_WIDTH[];
+ACE_EXPORT extern const char DOM_GRID_CONTAINER_GET_GUTTER_WIDTH[];
+ACE_EXPORT extern const char DOM_GRID_CONTAINER_GET_SIZE_TYPE[];
+ACE_EXPORT extern const char DOM_GRID_COLUMN_SPAN[];
+ACE_EXPORT extern const char DOM_GRID_COLUMN_OFFSET[];
+
+ACE_EXPORT extern const char DOM_GRID_COLUMN_TYPE[];
+ACE_EXPORT extern const char DOM_GRID_SIZE_TYPE_XS[];
+ACE_EXPORT extern const char DOM_GRID_SIZE_TYPE_SM[];
+ACE_EXPORT extern const char DOM_GRID_SIZE_TYPE_MD[];
+ACE_EXPORT extern const char DOM_GRID_SIZE_TYPE_LG[];
+
+ACE_EXPORT extern const char DOM_COLUMN_TYPE_NONE[];
+ACE_EXPORT extern const char DOM_COLUMN_TYPE_BUBBLE[];
+ACE_EXPORT extern const char DOM_COLUMN_TYPE_BUTTON[];
+ACE_EXPORT extern const char DOM_COLUMN_TYPE_CARD[];
+ACE_EXPORT extern const char DOM_COLUMN_TYPE_CONTENT[];
 
 ACE_EXPORT extern const char DOM_CLICK_EFFECT[];
 ACE_EXPORT extern const char DOM_SPRING_EFFECT[];

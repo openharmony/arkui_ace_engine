@@ -66,7 +66,7 @@ public:
     RefPtr<StepperItemComponent> GetStepperItemComponent();
     RefPtr<DisplayComponent> GetStepperDisplayComponent();
     RefPtr<ScrollComponent> GetStepperScrollComponent();
-    ACE_FORCE_EXPORT RefPtr<BoxComponent> GetBoxComponent();
+    RefPtr<BoxComponent> GetBoxComponent();
     ACE_FORCE_EXPORT RefPtr<Component> GetMainComponent() const;
     RefPtr<DisplayComponent> GetDisplayComponent();
     bool HasDisplayComponent() const;
