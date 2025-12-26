@@ -483,12 +483,12 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0065, TestSize.Level1)
     frameNode->children_.push_back(frameNode4);
 
     auto res = focusHub->AcceptFocusByRectOfLastFocusFlex(RectF(0, 0, -1, -1));
-    ASSERT_FALSE(res);
+    EXPECT_FALSE(res);
     focusHub->AcceptFocusByRectOfLastFocusFlex(RectF());
     focusHub->focusDepend_ = FocusDependence::SELF;
     focusHub->focusType_ = FocusType::DISABLE;
     res = focusHub->AcceptFocusByRectOfLastFocusFlex(RectF(0, 0, -1, -1));
-    ASSERT_FALSE(res);
+    EXPECT_FALSE(res);
 }
 
 /**
@@ -534,7 +534,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0067, TestSize.Level1)
     frameNode->children_.push_back(frameNode1);
 
     auto res = focusHub->GetChildFocusNodeByType(FocusNodeType::GROUP_DEFAULT);
-    ASSERT_NE(res, nullptr);
+    EXPECT_NE(res, nullptr);
 }
 
 /**
@@ -557,7 +557,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0069, TestSize.Level1)
     focusHub->focusType_ = FocusType::SCOPE;
     TabIndexNodeList list;
     focusHub->CollectTabIndexNodes(list);
-    ASSERT_TRUE(list.empty());
+    EXPECT_TRUE(list.empty());
 }
 
 /**
@@ -585,10 +585,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0070, TestSize.Level1)
     frameNode1->parent_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     frameNode->children_.push_back(frameNode1);
 
-    ASSERT_TRUE(focusHub->IsFocusableNode());
-    ASSERT_TRUE(focusHub->IsFocusableScope());
+    EXPECT_TRUE(focusHub->IsFocusableNode());
+    EXPECT_TRUE(focusHub->IsFocusableScope());
     auto res = focusHub1->IsFocusableWholePath();
-    ASSERT_TRUE(res);
+    EXPECT_TRUE(res);
 }
 
 /**
@@ -626,16 +626,16 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0072, TestSize.Level1)
     frameNode->children_.push_back(frameNode2);
     focusHub1->focusable_ = false;
     auto res = focusHub->AcceptFocusOfSpecifyChild(FocusStep::TAB);
-    ASSERT_TRUE(res);
+    EXPECT_TRUE(res);
     res = focusHub->AcceptFocusOfSpecifyChild(FocusStep::SHIFT_TAB);
-    ASSERT_TRUE(res);
+    EXPECT_TRUE(res);
     res = focusHub->AcceptFocusOfSpecifyChild(FocusStep::DOWN);
-    ASSERT_FALSE(res);
+    EXPECT_FALSE(res);
     focusHub2->focusable_ = false;
     res = focusHub->AcceptFocusOfSpecifyChild(FocusStep::SHIFT_TAB);
-    ASSERT_FALSE(res);
+    EXPECT_FALSE(res);
     res = focusHub->AcceptFocusOfSpecifyChild(FocusStep::TAB);
-    ASSERT_FALSE(res);
+    EXPECT_FALSE(res);
 }
 
 /**
@@ -661,7 +661,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0073, TestSize.Level1)
 
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
     focusHub->ClearAllFocusState();
-    ASSERT_NE(focusHub->lastWeakFocusNode_.Upgrade(), nullptr);
+    EXPECT_NE(focusHub->lastWeakFocusNode_.Upgrade(), nullptr);
 
     /**
      * @tc.steps: step1. Create frameNode.
@@ -697,7 +697,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0076, TestSize.Level1)
     frameNode->children_.push_back(frameNode1);
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
     focusHub->OnFocusScope();
-    ASSERT_FALSE(focusHub1->focusable_);
+    EXPECT_FALSE(focusHub1->focusable_);
 }
 
 /**
@@ -718,7 +718,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0077, TestSize.Level1)
 
     focusHub->focusType_ = FocusType::DISABLE;
     focusHub->OnFocus();
-    ASSERT_EQ(focusHub->focusType_, FocusType::DISABLE);
+    EXPECT_EQ(focusHub->focusType_, FocusType::DISABLE);
 }
 
 /**
@@ -744,7 +744,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0078, TestSize.Level1)
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
     frameNode1->geometryNode_ = nullptr;
     auto res = focusHub->CalculatePosition();
-    ASSERT_FALSE(res);
+    EXPECT_FALSE(res);
 }
 
 /**
@@ -863,7 +863,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0098, TestSize.Level1)
     frameNode->children_.push_back(frameNode1);
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
     focusHub->OnBlurScope();
-    ASSERT_NE(focusHub->lastWeakFocusNode_.Upgrade(), nullptr);
+    EXPECT_NE(focusHub->lastWeakFocusNode_.Upgrade(), nullptr);
 }
 
 /**
@@ -913,7 +913,7 @@ HWTEST_F(FocusHubTestNg, LostFocusToViewRoot001, TestSize.Level1)
      * @tc.Calling LostFocusToViewRoot to increase coverage
      */
     focusHub->LostFocusToViewRoot();
-    ASSERT_TRUE(focusHub->currentFocus_ == false);
+    EXPECT_TRUE(focusHub->currentFocus_ == false);
 }
 
 /*
@@ -935,7 +935,7 @@ HWTEST_F(FocusHubTestNg, SetEnabled001, TestSize.Level1)
     focusHub->currentFocus_ = true;
 
     focusHub->SetEnabled(false);
-    ASSERT_FALSE(focusHub->currentFocus_);
+    EXPECT_FALSE(focusHub->currentFocus_);
 }
 
 /**
@@ -959,14 +959,14 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0102, TestSize.Level1)
     textFieldNode->GetOrCreateFocusHub();
     auto textFieldFocusHub = textFieldNode->GetFocusHub();
     ASSERT_NE(textFieldNode, nullptr);
-    ASSERT_FALSE(focusHub->ScrollByOffsetToParent(textFieldNode));
+    EXPECT_FALSE(focusHub->ScrollByOffsetToParent(textFieldNode));
 
     auto listNode = FrameNodeOnTree::CreateFrameNode("frameNode", 104,
         AceType::MakeRefPtr<ListPattern>());
     listNode->GetOrCreateFocusHub();
     auto listFocusHub = listNode->GetFocusHub();
     ASSERT_NE(listFocusHub, nullptr);
-    ASSERT_FALSE(focusHub->ScrollByOffsetToParent(listNode));
+    EXPECT_FALSE(focusHub->ScrollByOffsetToParent(listNode));
 }
 
 
@@ -1108,7 +1108,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0108, TestSize.Level1)
      * @tc.expected: The return value of HasFocusedChild is false.
      */
     focusHub->focusType_ = FocusType::DISABLE;
-    ASSERT_FALSE(focusHub->HasFocusedChild());
+    EXPECT_FALSE(focusHub->HasFocusedChild());
 
     /**
      * @tc.steps4: call the function HasFocusedChild with false and FocusType::DISABLE
@@ -1116,7 +1116,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0108, TestSize.Level1)
      */
     focusHub->currentFocus_ = false;
     focusHub->focusType_ = FocusType::DISABLE;
-    ASSERT_FALSE(focusHub->HasFocusedChild());
+    EXPECT_FALSE(focusHub->HasFocusedChild());
 
 
     /**
@@ -1124,7 +1124,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0108, TestSize.Level1)
      * @tc.expected: The return value of HasFocusedChild is false.
      */
     focusHub->focusType_ = FocusType::SCOPE;
-    ASSERT_FALSE(focusHub->HasFocusedChild());
+    EXPECT_FALSE(focusHub->HasFocusedChild());
 }
 
 /**
@@ -1545,7 +1545,7 @@ HWTEST_F(FocusHubTestNg, SetFocusable001, TestSize.Level1)
     focusHub->SetFocusable(true, true);
     focusHub->focusDepend_ = FocusDependence::CHILD;
     focusHub->SetFocusable(true, true);
-    ASSERT_NE(focusHub->focusDepend_, FocusDependence::CHILD);
+    EXPECT_NE(focusHub->focusDepend_, FocusDependence::CHILD);
 }
 
 /**
