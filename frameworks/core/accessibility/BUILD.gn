@@ -42,6 +42,10 @@ template("ace_core_accessibility_ng_source_set") {
       "utils/accessibility_property_utils.cpp",
     ]
 
+    if (!build_ohos_sdk) {
+      sources += [ "utils/accessibility_manager_utils.cpp" ]
+    }
+
     configs = [ "$ace_root:ace_config" ]
 
     deps = []
