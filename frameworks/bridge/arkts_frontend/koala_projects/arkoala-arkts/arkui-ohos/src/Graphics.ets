@@ -132,7 +132,7 @@ export class ColorMetrics {
     static readonly YELLOW: int32 = 0xffffff00;
     static readonly TRANSPARENT: string = '#00000000';
     get color(): string {
-        return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha / MAX_CHANNEL_VALUE})`;
+        return `rgba(${this.red}, ${this.green}, ${this.blue}, ${(this.alpha as double) / MAX_CHANNEL_VALUE})`;
     }
     get red(): int32 {
         return this.red_!;
@@ -286,7 +286,7 @@ export class ColorMetrics {
             b = parseInt(hexFormat.slice(7), 16);
         }
 
-        return ColorMetrics.rgba(r, g, b, a);
+        return new ColorMetrics(r, g, b, a);
     }
     private toNumeric(): number {
         return (this.alpha_! << 24) + (this.red_! << 16) + (this.green_! << 8) + this.blue_!;
