@@ -1,5 +1,3 @@
-'use static'
-
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,6 +73,7 @@ import {
 } from '@ohos.arkui.node';
 import i18n from '@ohos.i18n';
 import util from '@ohos.util';
+import uiMaterial from '@ohos.arkui.uiMaterial';
 
 export interface SegmentButtonV2ItemOptions {
   text?: ResourceStr;
@@ -299,6 +298,7 @@ export struct TabSegmentButtonV2 {
   @Param buttonMinHeight?: LengthMetrics = undefined;
   @Param buttonPadding?: LengthMetrics = undefined;
   @Param languageDirection?: Direction = undefined;
+  @Param backgroundSystemMaterial?: uiMaterial.Material = undefined;
 
   build() {
     SimpleSegmentButtonV2({
@@ -337,6 +337,7 @@ export struct TabSegmentButtonV2 {
       buttonMinHeight: this.buttonMinHeight,
       buttonPadding: this.buttonPadding,
       languageDirection: this.languageDirection,
+      backgroundSystemMaterial: this.backgroundSystemMaterial
     })
   }
 }
@@ -350,10 +351,10 @@ export struct CapsuleSegmentButtonV2 {
   @Param itemMinFontScale?: double | Resource = undefined;
   @Param itemMaxFontScale?: double | Resource = undefined;
   @Param itemSpace?: LengthMetrics = undefined;
-  @Param itemFontColor?: ColorMetrics = undefined;
-  @Param itemSelectedFontColor?: ColorMetrics = undefined;
   @Param itemFontSize?: LengthMetrics = undefined;
   @Param itemSelectedFontSize?: LengthMetrics = undefined;
+  @Param itemFontColor?: ColorMetrics = undefined;
+  @Param itemSelectedFontColor?: ColorMetrics = undefined;
   @Param itemFontWeight?: FontWeight = undefined;
   @Param itemSelectedFontWeight?: FontWeight = undefined;
   @Param itemBorderRadius?: LengthMetrics = undefined;
@@ -375,6 +376,7 @@ export struct CapsuleSegmentButtonV2 {
   @Param buttonMinHeight?: LengthMetrics = undefined;
   @Param buttonPadding?: LengthMetrics = undefined;
   @Param languageDirection?: Direction = undefined;
+  @Param backgroundSystemMaterial?: uiMaterial.Material = undefined;
 
   build() {
     SimpleSegmentButtonV2({
@@ -413,6 +415,7 @@ export struct CapsuleSegmentButtonV2 {
       buttonMinHeight: this.buttonMinHeight,
       buttonPadding: this.buttonPadding,
       languageDirection: this.languageDirection,
+      backgroundSystemMaterial: this.backgroundSystemMaterial
     })
   }
 }
@@ -452,6 +455,7 @@ struct SimpleSegmentButtonV2 {
   @Require @Param buttonMinHeight?: LengthMetrics = undefined;
   @Require @Param buttonPadding?: LengthMetrics = undefined;
   @Require @Param languageDirection?: Direction = undefined;
+  @Require @Param backgroundSystemMaterial?: uiMaterial.Material = undefined;
   @Local itemRects: Map<int, SegmentButtonV2ItemRect> = new Map<int, SegmentButtonV2ItemRect>();
   @Local itemScale: double = 1;
   @Local hoveredItemIndex: int = -1;
@@ -723,6 +727,7 @@ struct SimpleSegmentButtonV2 {
       .direction(this.languageDirection)
     }
     .backgroundColor(this.getButtonBackgroundColor())
+    .systemMaterial(this.backgroundSystemMaterial)
     .backgroundEffect(this.buttonBackgroundEffect, { disableSystemAdaptation: true })
     .borderRadius(this.getButtonBorderRadius())
     .clip(false)
@@ -1476,6 +1481,9 @@ class GroupIdGenerator {
 }
 
 function minInt(...elements: int[]): int {
+  if (elements.length === 0) {
+    return Int.MAX_VALUE;
+  }
   let min: int = elements[0];
   for (let i = 1; i < elements.length; ++i) {
     const element = elements[i];
@@ -1487,6 +1495,9 @@ function minInt(...elements: int[]): int {
 }
 
 function maxInt(...elements: int[]): int {
+  if (elements.length === 0) {
+    return Int.MIN_VALUE;
+  }
   let max: int = elements[0];
   for (let i = 1; i < elements.length; ++i) {
     const element = elements[i];
