@@ -348,6 +348,8 @@ public:
         needHideAfterTouch_ = needHideAfterTouch;
     }
 
+    void DoCloseSubMenus() const;
+
     void HideMenu(const HideMenuType& reason)
     {
         HideMenu(false, OffsetF(), reason);
@@ -835,7 +837,7 @@ private:
     std::optional<SelectMakeCallback> makeFunc_;
 
     RefPtr<FrameNode> parentMenuItem_;
-    RefPtr<FrameNode> showedSubMenu_;
+    mutable RefPtr<FrameNode> showedSubMenu_;
     std::vector<RefPtr<FrameNode>> options_;
     std::vector<RefPtr<FrameNode>> menuItems_;
     std::optional<int32_t> foldStatusChangedCallbackId_;
@@ -872,7 +874,7 @@ private:
     bool expandDisplay_ = false;
     RefPtr<FrameNode> lastSelectedItem_ = nullptr;
     bool isEmbedded_ = false;
-    std::vector<RefPtr<FrameNode>> embeddedMenuItems_;
+    mutable std::vector<RefPtr<FrameNode>> embeddedMenuItems_;
     bool isStackSubmenu_ = false;
     bool isNeedDivider_ = false;
     PreviewMenuParam layoutParam_;
