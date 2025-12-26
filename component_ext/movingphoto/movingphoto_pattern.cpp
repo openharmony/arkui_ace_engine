@@ -1380,7 +1380,9 @@ SizeF MovingPhotoPattern::MeasureContentLayout(const SizeF& layoutSize,
         default:
             contentSize = CalculateFitAuto(rawImageSize, layoutSize);
     }
-
+    if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
+        contentSize = CalculateFitFill(layoutSize);
+    }
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto MeasureContentLayout.%{public}f, %{public}f",
         contentSize.Width(), contentSize.Height());
     return contentSize;
