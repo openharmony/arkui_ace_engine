@@ -71,6 +71,7 @@ export interface StateManager extends StateContext {
     updatableNodeEx<Node extends IncrementalNode>(node: Node, update: (context: StateContextBase) => void, cleanup?: () => void): ComputableState<Node>
     scheduleCallback(callback: () => void): void
     callCallbacks(): void
+    /** @deprecated */
     frozen: boolean
     reset(): void
 }

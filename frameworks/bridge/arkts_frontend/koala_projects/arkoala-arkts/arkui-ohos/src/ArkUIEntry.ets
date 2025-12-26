@@ -127,10 +127,7 @@ export function createUiDetachedBuilderRoot(
     manager: StateManager
 ): ComputableState<PeerNode> {
     const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
-        const frozen = manager.frozen
-        manager.frozen = true
         memoEntry<void>(context, 0, builder)
-        manager.frozen = frozen
     })
     detachedRoots.set(node.value.peer.ptr, node)
     detachedStatMgt.set(new WeakRef<StateManager>(manager), new WeakRef<ComputableState<PeerNode>>(node))
@@ -284,10 +281,7 @@ export class Application {
             root = this.trackFrame(() => {
                 if (plugin) {
                     this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {
-                        const frozen = this.manager!.frozen
-                        this.manager!.frozen = true
                         memoEntry<void>(context, 0, builder)
-                        this.manager!.frozen = frozen
                     })
                 } else {
                     Application.createMemoRootState(this.manager!, builder, this.moduleName, this.startUrl)

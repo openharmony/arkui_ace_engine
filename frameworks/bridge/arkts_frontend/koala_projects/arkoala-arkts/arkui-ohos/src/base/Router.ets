@@ -345,12 +345,9 @@ class RouterImpl implements Router {
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
-                const frozen = manager.frozen
-                manager.frozen = true
                 memoEntry<void>(context, 0, () => {
                     entryObject!.entry()
                 })
-                manager.frozen = frozen
             })
             let peerNode: PeerNode | undefined = undefined;
             try {
@@ -431,12 +428,9 @@ class RouterImpl implements Router {
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
-                const frozen = manager.frozen
-                manager.frozen = true
                 memoEntry<void>(context, 0, () => {
                     entryObject!.entry()
                 })
-                manager.frozen = frozen
             })
             let peerNode: PeerNode | undefined = undefined;
             try {
@@ -511,12 +505,9 @@ class RouterImpl implements Router {
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
-                const frozen = manager.frozen
-                manager.frozen = true
                 memoEntry<void>(context, 0, () => {
                     entryObject!.entry()
                 })
-                manager.frozen = frozen
             })
             let peerNode: PeerNode | undefined = undefined;
             try {
@@ -605,12 +596,9 @@ class RouterImpl implements Router {
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
-                const frozen = manager.frozen
-                manager.frozen = true
                 memoEntry<void>(context, 0, () => {
                     entryObject!.entry()
                 })
-                manager.frozen = frozen
             })
             let peerNode: PeerNode | undefined = undefined;
             try {
@@ -682,12 +670,9 @@ class RouterImpl implements Router {
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
-                const frozen = manager.frozen
-                manager.frozen = true
                 memoEntry<void>(context, 0, () => {
                     entryObject!.entry()
                 })
-                manager.frozen = frozen
             })
             
             let peerNode: PeerNode | undefined = undefined;
@@ -765,12 +750,9 @@ class RouterImpl implements Router {
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
-                const frozen = manager.frozen
-                manager.frozen = true
                 memoEntry<void>(context, 0, () => {
                     entryObject!.entry()
                 })
-                manager.frozen = frozen
             })
             
             let peerNode: PeerNode | undefined = undefined;
@@ -845,12 +827,9 @@ class RouterImpl implements Router {
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
-                const frozen = manager.frozen
-                manager.frozen = true
                 memoEntry<void>(context, 0, () => {
                     entryObject!.entry()
                 })
-                manager.frozen = frozen
             })
             
             let peerNode: PeerNode | undefined = undefined;
@@ -937,12 +916,9 @@ class RouterImpl implements Router {
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
-                const frozen = manager.frozen
-                manager.frozen = true
                 memoEntry<void>(context, 0, () => {
                     entryObject!.entry()
                 })
-                manager.frozen = frozen
             })
             
             let peerNode: PeerNode | undefined = undefined;
@@ -1099,10 +1075,7 @@ class RouterImpl implements Router {
     runStartPage(options: router.RouterOptions, builder: UserViewBuilder): void {
         let manager = GlobalStateManager.instance
         let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
-            const frozen = manager.frozen
-            manager.frozen = true
             memoEntry<void>(context, 0, builder)
-            manager.frozen = frozen
         })
 
         let peerNode: PeerNode | undefined = undefined;

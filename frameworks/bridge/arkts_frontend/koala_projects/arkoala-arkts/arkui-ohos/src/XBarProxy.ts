@@ -117,8 +117,6 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
         manager = GlobalStateManager.instance;
     }
     const node = manager.updatableNode(new IncrementalNode(), (context: StateContext) => {
-        const frozen = manager.frozen;
-        manager.frozen = true;
         ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
         let r = OBSERVE.renderingComponent;
         OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
@@ -127,7 +125,6 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
         setNeedCreate(needCreate);
         OBSERVE.renderingComponent = r;
         ArkUIAniModule._Common_Restore_InstanceId();
-        manager.frozen = frozen;
     });
     InteropNativeModule._NativeLog(`[createXBarCustomComponent]updatableNode`)
     const inc = node.value;

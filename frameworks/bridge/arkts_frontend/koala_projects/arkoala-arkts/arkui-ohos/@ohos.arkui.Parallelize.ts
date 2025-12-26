@@ -109,10 +109,7 @@ export class ParallelNode<T> {
             const result = setNeedCreate(true)
             this.rootState = manager!.updatableNode<PeerNode>(this.peerNode!, (context: StateContext) => {
                 try {
-                    const frozen = manager.frozen
-                    manager.frozen = true
                     memoEntry1<T,void>(context, 0, builder, this._args!)
-                    manager.frozen = frozen
                 } catch(err: Error) {
                     console.error('parallel run in taskpool error :', err);
                     console.error(err.stack);
