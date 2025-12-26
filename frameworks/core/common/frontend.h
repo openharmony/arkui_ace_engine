@@ -505,6 +505,11 @@ public:
     {
         return 0;
     }
+    // getStackSize from ArkTS1.1
+    virtual int32_t GetStackSizeFromDynamicExtender()
+    {
+        return 0;
+    }
     // getParams from ArkTS1.1
     virtual std::string GetParamsFromDynamicExtender()
     {

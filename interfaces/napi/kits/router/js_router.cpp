@@ -655,6 +655,20 @@ static napi_value JSRouterGetLength(napi_env env, napi_callback_info info)
     return result;
 }
 
+static napi_value JSRouterGetStackSize(napi_env env, napi_callback_info info)
+{
+    napi_value result = nullptr;
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "UI execution context not found.");
+        napi_create_int32(env, 0, &result);
+        return result;
+    }
+    int32_t routeNumber = delegate->GetStackSize();
+    napi_create_int32(env, routeNumber, &result);
+    return result;
+}
+
 static void CreateStateInfoObj(napi_env env, const StateInfo& state, napi_value& result)
 {
     napi_value params = state.params.empty() ? nullptr : ParseJSONParams(env, state.params);
@@ -1169,6 +1183,7 @@ static napi_value RouterExport(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("back", JSRouterBack),
         DECLARE_NAPI_FUNCTION("clear", JSRouterClear),
         DECLARE_NAPI_FUNCTION("getLength", JSRouterGetLength),
+        DECLARE_NAPI_FUNCTION("getStackSize", JSRouterGetStackSize),
         DECLARE_NAPI_FUNCTION("getState", JSRouterGetState),
         DECLARE_NAPI_FUNCTION("getStateByIndex", JSGetStateByIndex),
         DECLARE_NAPI_FUNCTION("getStateByUrl", JSGetStateByUrl),
