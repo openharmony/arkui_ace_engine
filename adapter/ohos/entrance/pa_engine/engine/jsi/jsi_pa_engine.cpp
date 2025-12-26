@@ -594,7 +594,7 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func, const
 {
     shared_ptr<JsRuntime> runtime = GetJsRuntime();
     ACE_DCHECK(runtime);
-    AbilityRuntime::HandleScope handleScope(jsAbilityRuntime_);
+    AbilityRuntime::HandleScope handleScope(jsAbilityRuntime_->GetNapiEnv());
     if (func == nullptr) {
         LOGE("func is nullptr!");
         return runtime->NewUndefined();
