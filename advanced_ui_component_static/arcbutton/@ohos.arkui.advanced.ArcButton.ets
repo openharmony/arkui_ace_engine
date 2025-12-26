@@ -210,19 +210,20 @@ interface ArcButtonThemeInterface {
   CHAMFER_CIRCLE_RADIUS: number,
 }
 
+@ObservedV2
 export class ArcButtonProgressConfig {
   /**
    * 指定当前Progress进度值
    */
-  value?: double;
+  @Trace public value: double;
   /**
    * 指定Progress总进度值
    */
-  total?: double;
+  @Trace public total?: double;
   /**
    * Progress进度条颜色
    */
-  color?: ResourceColor;
+  @Trace public color?: ResourceColor;
 }
 
 @ObservedV2
@@ -247,7 +248,7 @@ export class ArcButtonOptions {
   @Trace public backgroundColor: ColorMetrics;
   @Trace public shadowColor: ColorMetrics;
   @Trace public shadowEnabled: boolean;
-  @Trace public fontSize: LengthMetrics;
+  @Trace public fontSize?: LengthMetrics;
   @Trace public fontColor: ColorMetrics;
   @Trace public pressedFontColor: ColorMetrics;
   @Trace public fontStyle: FontStyle;
@@ -266,7 +267,7 @@ export class ArcButtonOptions {
     this.backgroundColor = options.backgroundColor ?? ColorMetrics.resourceColor(Color.Black);
     this.shadowColor = options.shadowColor ?? ColorMetrics.resourceColor('#000000');
     this.shadowEnabled = options.shadowEnabled ?? false;
-    this.fontSize = options.fontSize ?? LengthMetrics.fp(Constants.MAX_FONT_SIZE);
+    this.fontSize = options.fontSize ?? undefined;
     this.fontColor = options.fontColor ?? ColorMetrics.resourceColor(Color.White);
     this.pressedFontColor = options.pressedFontColor ?? ColorMetrics.resourceColor(Color.White);
     this.fontStyle = options.fontStyle ?? FontStyle.Normal;
@@ -304,7 +305,7 @@ export struct ArcButton {
   @Local private fontColor: ColorMetrics = ColorMetrics.resourceColor(Color.White);
   @Local private isExceed: boolean = false;
   @Local private pathString: string = '';
-  @Local private fontSize: string = '';
+  @Local private fontSize: string | undefined = undefined;
   @Local private progressValue: number = 0;
   @Local private progressTotal: number = 100;
   @Local private progressColor: ColorMetrics = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
@@ -328,7 +329,11 @@ export struct ArcButton {
   @Monitor(['options.label', 'options.fontSize', 'options.styleMode', 'options.status', 'options.backgroundColor',
     'options.fontColor'])
   optionsChange(monitor: IMonitor) {
-    this.fontSize = this.cover(this.options.fontSize ?? LengthMetrics.fp(Constants.MAX_FONT_SIZE))
+    if (this.options.fontSize) {
+      this.fontSize = this.cover(this.options.fontSize as LengthMetrics);
+    } else {
+      this.fontSize = undefined;
+    }
     this.judgeTextWidth()
     this.changeStatus()
   }
@@ -770,8 +775,8 @@ class DataProcessUtil {
 
   /**
    * 查找两圆的交点
-   * @param C1 第一个圆
-   * @param c2 第二个圆
+   * @param firstCircus 第一个圆
+   * @param secondCircus 第二个圆
    * @returns 两圆相交的点的数组
    */
   findCircleIntersections(firstCircus: ArcButtonCircle, secondCircus: ArcButtonCircle): ArcButtonPoint[] {
