@@ -1227,12 +1227,9 @@ export class DetachedRootEntryManager {
             manager = GlobalStateManager.instance;
         }
         const node = manager.updatableNodeEx<PeerNode>(peerFactory(), (context: StateContext) => {
-            const frozen = manager.frozen
-            manager.frozen = true
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
             memoEntry<void>(context, 0, builder)
             ArkUIAniModule._Common_Restore_InstanceId();
-            manager.frozen = frozen
         })
         this.detachedRoots_.set(node.value.peer.ptr, new DetachedRootEntryImpl<PeerNode>(node))
         return node.value
@@ -1249,12 +1246,9 @@ export class DetachedRootEntryManager {
             manager = GlobalStateManager.instance;
         }
         const node = manager.updatableNodeEx<PeerNode>(peerFactory(), (context: StateContext) => {
-            const frozen = manager.frozen
-            manager.frozen = true
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
             memoEntry1<T, void>(context, 0, builder, arg)
             ArkUIAniModule._Common_Restore_InstanceId();
-            manager.frozen = frozen
         })
         this.detachedRoots_.set(node.value.peer.ptr, new DetachedRootEntryImpl<PeerNode>(node))
         return node.value
@@ -1270,12 +1264,9 @@ export class DetachedRootEntryManager {
             manager = GlobalStateManager.instance;
         }
         const node = manager.updatableNodeEx<IncrementalNode>(nodeFactory(), (context: StateContext) => {
-            const frozen = manager.frozen
-            manager.frozen = true
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
             memoEntry<void>(context, 0, builder)
             ArkUIAniModule._Common_Restore_InstanceId();
-            manager.frozen = frozen
         })
 
         const inc = node.value;
