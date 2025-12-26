@@ -709,7 +709,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest027, TestSize.Level1)
     listNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     listNode->geometryNode_->SetFrameSize(SizeF(10, 10));
 
-    ASSERT_TRUE(focusHub->ScrollByOffsetToParent(listNode));
+    EXPECT_TRUE(focusHub->ScrollByOffsetToParent(listNode));
 }
 
 /**
@@ -742,7 +742,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest028, TestSize.Level1)
     frameNode->geometryNode_->SetFrameSize(SizeF(5, 5));
     listNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     listNode->geometryNode_->SetFrameSize(SizeF(15, 15));
-    ASSERT_TRUE(focusHub->ScrollByOffsetToParent(listNode));
+    EXPECT_TRUE(focusHub->ScrollByOffsetToParent(listNode));
     frameNode->geometryNode_->SetFrameSize(SizeF(25, 25));
     EXPECT_FALSE(focusHub->ScrollByOffsetToParent(listNode));
 }
