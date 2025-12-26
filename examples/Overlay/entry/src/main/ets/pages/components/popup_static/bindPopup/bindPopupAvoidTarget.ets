@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -71,7 +73,7 @@ struct BindPopupAvoidTarget {
     Column({ space: 5 } as ColumnOptions) {
       Text(`enableArrow设置为true:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Row({ space: 5 } as RowOptions) {
         Button('COVER_TARGET')
           .onClick(() => {
@@ -115,7 +117,6 @@ struct BindPopupAvoidTarget {
                 this.handlePopup1 = false;
               }
             }
-
           })
       }
 
@@ -162,7 +163,6 @@ struct BindPopupAvoidTarget {
                 this.handlePopup2 = false;
               }
             }
-
           })
         Button('un')
           .onClick(() => {
@@ -206,7 +206,6 @@ struct BindPopupAvoidTarget {
                 this.handlePopup3 = false;
               }
             }
-
           })
       }
 
@@ -253,9 +252,8 @@ struct BindPopupAvoidTarget {
                 this.handlePopup = false;
               }
             }
-
           })
-        Button("动态切换 : " + this.avoidTargetList[this.avoidTargetIndex])
+        Button('动态切换 : ' + this.avoidTargetList[this.avoidTargetIndex])
           .onClick(() => {
             setTimeout(() => {
               this.avoidTargetIndex++
@@ -268,7 +266,7 @@ struct BindPopupAvoidTarget {
 
       Text(`enableArrow设置为false:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Row({ space: 5 } as RowOptions) {
         Button('COVER_TARGET')
           .onClick(() => {
@@ -312,7 +310,6 @@ struct BindPopupAvoidTarget {
                 this.handlePopup10 = false;
               }
             }
-
           })
       }
 
@@ -359,7 +356,6 @@ struct BindPopupAvoidTarget {
                 this.handlePopup11 = false;
               }
             }
-
           })
         Button('un')
           .onClick(() => {
@@ -403,7 +399,6 @@ struct BindPopupAvoidTarget {
                 this.handlePopup12 = false;
               }
             }
-
           })
       }
 
@@ -450,9 +445,8 @@ struct BindPopupAvoidTarget {
                 this.handlePopup19 = false;
               }
             }
-
           })
-        Button("动态切换 : " + this.avoidTargetList1[this.avoidTargetIndex1])
+        Button('动态切换 : ' + this.avoidTargetList1[this.avoidTargetIndex1])
           .onClick(() => {
             setTimeout(() => {
               this.avoidTargetIndex1++

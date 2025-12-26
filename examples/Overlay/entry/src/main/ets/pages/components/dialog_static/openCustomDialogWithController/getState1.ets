@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -30,7 +32,7 @@ import promptAction from '@ohos.promptAction';
 import hilog from '@ohos.hilog'
 
 class Params {
-  dialogController: promptAction.DialogController = new promptAction.DialogController();
+  public dialogController: promptAction.DialogController = new promptAction.DialogController();
 
   constructor(dialogController: promptAction.DialogController) {
     this.dialogController = dialogController;
@@ -38,7 +40,7 @@ class Params {
 }
 
 @Builder
-function DialogBuilder(params: Params) {
+function dialogBuilder(params: Params) {
   Column() {
     Button('点我查询弹窗状态:通过外部传递的DialogController')
       .onClick(() => {
@@ -84,7 +86,7 @@ struct GetState {
       Button(`openCustomDialogWithController`)
         .onClick(() => {
           try {
-            let contentNode = new ComponentContent<Params>(this.uiContext, wrapBuilder(DialogBuilder),
+            let contentNode = new ComponentContent<Params>(this.uiContext, wrapBuilder(dialogBuilder),
               new Params(this.dialogController2));
             console.info('openCustomDialogWithController state:', this.dialogController2.getState())
             this.promptAction.openCustomDialogWithController(contentNode, this.dialogController2,

@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -59,67 +61,29 @@ struct CustomPopupBorderWidth {
   @State handlePopup24: boolean = false;
   @State handlePopup25: boolean = false;
   @State borderWidthIndex: Int = 0;
-  @State borderWidthList: Array<Dimension | undefined> = new Array<Dimension | undefined>(
-    '1vp',
-    '2vp',
-    '5vp',
-    '10vp',
-    undefined,
-    0,
-    -1,
-    '2px',
-    '3.9fp',
-    '5vp',
-    '10lpx',
-    1000,
-    $r("app.string.width"),
-    $r("app.string.error")
-  )
+  @State borderWidthList: (Dimension | undefined)[] = [
+    '1vp' as Dimension, '2vp' as Dimension, '5vp' as Dimension, '10vp' as Dimension, undefined, 0 as Dimension,
+    -1 as Dimension, '2px' as Dimension, '3.9fp' as Dimension, '5vp' as Dimension, '10lpx' as Dimension,
+    1000 as Dimension, $r('app.string.width') as Dimension, $r('app.string.error') as Dimension,
+  ]
   @State borderWidthIndex1: Int = 0;
-  @State borderWidthList1: Array<Dimension | undefined> = new Array<Dimension | undefined>(
-    '1vp',
-    '2vp',
-    '5vp',
-    '10vp',
-    undefined,
-    0,
-    -1,
-    '2px',
-    '3.9fp',
-    '5vp',
-    '10lpx',
-    1000,
-    $r("app.string.width"),
-    $r("app.string.error")
-  )
+  @State borderWidthList1: (Dimension | undefined)[] = [
+    '1vp' as Dimension, '2vp' as Dimension, '5vp' as Dimension, '10vp' as Dimension, undefined, 0 as Dimension,
+    -1 as Dimension, '2px' as Dimension, '3.9fp' as Dimension, '5vp' as Dimension, '10lpx' as Dimension,
+    1000 as Dimension, $r('app.string.width') as Dimension, $r('app.string.error') as Dimension,
+  ]
   @State borderWidthIndex2: Int = 0;
-  @State borderWidthList2: Array<Dimension | undefined> = new Array<Dimension | undefined>(
-    '10vp',
-    undefined,
-    0,
-    -1,
-    '2px',
-    '3.9fp',
-    '5vp',
-    '10lpx',
-    1000,
-    $r("app.string.width"),
-    $r("app.string.error")
-  )
+  @State borderWidthList2: (Dimension | undefined)[] = [
+    '10vp' as Dimension, undefined, 0 as Dimension, -1 as Dimension, '2px' as Dimension, '3.9fp' as Dimension,
+    '5vp' as Dimension, '10lpx' as Dimension, 1000 as Dimension, $r('app.string.width') as Dimension,
+    $r('app.string.error') as Dimension,
+  ]
   @State outlineWidthIndex: Int = 0;
-  @State outlineWidthList: Array<Dimension | undefined> = new Array<Dimension | undefined>(
-    '10vp',
-    undefined,
-    0,
-    -1,
-    '2px',
-    '3.9fp',
-    '5vp',
-    '10lpx',
-    1000,
-    $r("app.string.width"),
-    $r("app.string.error")
-  )
+  @State outlineWidthList: (Dimension | undefined)[] = [
+    '10vp' as Dimension, undefined, 0 as Dimension, -1 as Dimension, '2px' as Dimension, '3.9fp' as Dimension,
+    '5vp' as Dimension, '10lpx' as Dimension, 1000 as Dimension, $r('app.string.width') as Dimension,
+    $r('app.string.error') as Dimension,
+  ]
 
   @Builder
   PopupBuilder() {
@@ -135,7 +99,7 @@ struct CustomPopupBorderWidth {
     Column({ space: 5 } as ColumnOptions) {
       Text(`enableArrow设置为true:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Row({ space: 5 } as RowOptions) {
         Button('10vp')
           .onClick(() => {
@@ -155,7 +119,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup1 = false;
               }
             }
-
           })
         Button('0')
           .onClick(() => {
@@ -175,7 +138,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup2 = false;
               }
             }
-
           })
         Button('2px')
           .onClick(() => {
@@ -195,7 +157,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup3 = false;
               }
             }
-
           })
         Button('3.9fp')
           .onClick(() => {
@@ -215,7 +176,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup4 = false;
               }
             }
-
           })
         Button('5vp')
           .onClick(() => {
@@ -235,7 +195,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup5 = false;
               }
             }
-
           })
       }
 
@@ -258,7 +217,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup6 = false;
               }
             }
-
           })
         Button('1000')
           .onClick(() => {
@@ -278,7 +236,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup7 = false;
               }
             }
-
           })
         Button('-1')
           .onClick(() => {
@@ -298,7 +255,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup8 = false;
               }
             }
-
           })
         Button('app.string.width')
           .onClick(() => {
@@ -308,7 +264,7 @@ struct CustomPopupBorderWidth {
             builder: this.PopupBuilder,
             placement: Placement.Bottom,
             enableArrow: true,
-            borderWidth: $r("app.string.width"),
+            borderWidth: $r('app.string.width'),
             borderLinearGradient: {
               direction: GradientDirection.None,
               colors: [[Color.Pink, 0.0], [Color.Blue, 1.0]]
@@ -318,7 +274,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup9 = false;
               }
             }
-
           })
       }
 
@@ -331,7 +286,7 @@ struct CustomPopupBorderWidth {
             builder: this.PopupBuilder,
             placement: Placement.Bottom,
             enableArrow: true,
-            borderWidth: $r("app.string.error"),
+            borderWidth: $r('app.string.error'),
             borderLinearGradient: {
               direction: GradientDirection.None,
               colors: [[Color.Pink, 0.0], [Color.Blue, 1.0]]
@@ -341,7 +296,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup20 = false;
               }
             }
-
           })
         Button('undefined')
           .onClick(() => {
@@ -361,7 +315,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup21 = false;
               }
             }
-
           })
       }
 
@@ -384,9 +337,8 @@ struct CustomPopupBorderWidth {
                 this.handlePopup = false;
               }
             }
-
           })
-        Button("动态切换 : " + this.borderWidthList[this.borderWidthIndex])
+        Button('动态切换 : ' + this.borderWidthList[this.borderWidthIndex])
           .onClick(() => {
             setTimeout(() => {
               this.borderWidthIndex++
@@ -399,7 +351,7 @@ struct CustomPopupBorderWidth {
 
       Text(`enableArrow设置为false:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Row({ space: 5 } as RowOptions) {
         Button('10vp')
           .onClick(() => {
@@ -419,7 +371,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup10 = false;
               }
             }
-
           })
         Button('0')
           .onClick(() => {
@@ -439,7 +390,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup11 = false;
               }
             }
-
           })
         Button('2px')
           .onClick(() => {
@@ -459,7 +409,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup12 = false;
               }
             }
-
           })
         Button('3.9fp')
           .onClick(() => {
@@ -479,7 +428,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup13 = false;
               }
             }
-
           })
         Button('5vp')
           .onClick(() => {
@@ -499,7 +447,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup14 = false;
               }
             }
-
           })
       }
 
@@ -522,7 +469,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup15 = false;
               }
             }
-
           })
         Button('1000')
           .onClick(() => {
@@ -542,7 +488,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup16 = false;
               }
             }
-
           })
         Button('-1')
           .onClick(() => {
@@ -562,7 +507,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup17 = false;
               }
             }
-
           })
         Button('app.string.width')
           .onClick(() => {
@@ -572,7 +516,7 @@ struct CustomPopupBorderWidth {
             builder: this.PopupBuilder,
             placement: Placement.Bottom,
             enableArrow: false,
-            borderWidth: $r("app.string.width"),
+            borderWidth: $r('app.string.width'),
             borderLinearGradient: {
               direction: GradientDirection.None,
               colors: [[Color.Pink, 0.0], [Color.Blue, 1.0]]
@@ -582,7 +526,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup18 = false;
               }
             }
-
           })
       }
 
@@ -595,7 +538,7 @@ struct CustomPopupBorderWidth {
             builder: this.PopupBuilder,
             placement: Placement.Bottom,
             enableArrow: false,
-            borderWidth: $r("app.string.error"),
+            borderWidth: $r('app.string.error'),
             borderLinearGradient: {
               direction: GradientDirection.None,
               colors: [[Color.Pink, 0.0], [Color.Blue, 1.0]]
@@ -605,7 +548,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup22 = false;
               }
             }
-
           })
         Button('undefined')
           .onClick(() => {
@@ -625,7 +567,6 @@ struct CustomPopupBorderWidth {
                 this.handlePopup23 = false;
               }
             }
-
           })
       }
 
@@ -648,9 +589,8 @@ struct CustomPopupBorderWidth {
                 this.handlePopup19 = false;
               }
             }
-
           })
-        Button("动态切换 : " + this.borderWidthList1[this.borderWidthIndex1])
+        Button('动态切换 : ' + this.borderWidthList1[this.borderWidthIndex1])
           .onClick(() => {
             setTimeout(() => {
               this.borderWidthIndex1++
@@ -663,7 +603,7 @@ struct CustomPopupBorderWidth {
 
       Text(`内外描边结合:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Button('popup_false')
         .onClick(() => {
           this.handlePopup24 = !this.handlePopup24;
@@ -687,7 +627,6 @@ struct CustomPopupBorderWidth {
               this.handlePopup24 = false;
             }
           }
-
         })
       Button('popup_true')
         .onClick(() => {
@@ -712,16 +651,15 @@ struct CustomPopupBorderWidth {
               this.handlePopup25 = false;
             }
           }
-
         })
-      Button("动态切换borderWidth : " + this.borderWidthList2[this.borderWidthIndex2])
+      Button('动态切换borderWidth : ' + this.borderWidthList2[this.borderWidthIndex2])
         .onClick(() => {
           this.borderWidthIndex2++
           if (this.borderWidthIndex2 >= this.borderWidthList2.length) {
             this.borderWidthIndex2 = 0
           }
         })
-      Button("动态切换borderWidth : " + this.outlineWidthList[this.outlineWidthIndex])
+      Button('动态切换borderWidth : ' + this.outlineWidthList[this.outlineWidthIndex])
         .onClick(() => {
           this.outlineWidthIndex++
           if (this.outlineWidthIndex >= this.outlineWidthList.length) {

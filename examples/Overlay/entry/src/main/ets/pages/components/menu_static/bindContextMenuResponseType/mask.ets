@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -34,39 +36,39 @@ let endIcon: ResourceStr = $r('app.media.startIcon')
 let subMenuExpandingMode: SubMenuExpandingMode | undefined = SubMenuExpandingMode.SIDE_EXPAND;
 
 @Builder
-function SubMenuBuilder() {
+function subMenuBuilder() {
   Menu() {
     MenuItem({
       startIcon: startIcon,
-      content: "图标",
-      builder: SubMenuBuilder,
+      content: '图标',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "列表",
-      builder: SubMenuBuilder,
+      content: '列表',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
   }.backgroundColor(Color.Grey)
 }
 
 @Builder
-function MyMenu() {
+function menuBuilder() {
   Menu() {
     MenuItem({
       startIcon: startIcon,
       endIcon: endIcon,
-      content: "新建文件夹",
-      builder: SubMenuBuilder,
+      content: '新建文件夹',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "排序方式",
-      builder: SubMenuBuilder,
+      content: '排序方式',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "查看方式",
-      builder: SubMenuBuilder,
+      content: '查看方式',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
   }
   .backgroundColor(Color.Grey)
@@ -115,7 +117,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.Thin }
           } as ContextMenuOptions)
         Text(`rgba(23,169,141,0.5)`)
@@ -123,7 +125,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: 'rgba(23,169,141,0.5)', backgroundBlurStyle: BlurStyle.Thin }
           } as ContextMenuOptions)
         Text(`#FFFFFF00`)
@@ -131,7 +133,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: '#FFFFFF00', backgroundBlurStyle: BlurStyle.Thin }
           } as ContextMenuOptions)
       }
@@ -142,7 +144,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: 12345, backgroundBlurStyle: BlurStyle.Thin }
           } as ContextMenuOptions)
         Text(`undefined`)
@@ -150,7 +152,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: undefined, backgroundBlurStyle: BlurStyle.Thin }
           } as ContextMenuOptions)
         Text(`app.color.blue`)
@@ -158,7 +160,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: $r('app.color.blue'), backgroundBlurStyle: BlurStyle.Thin }
           } as ContextMenuOptions)
       }
@@ -169,7 +171,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: $r('app.string.errorColor'), backgroundBlurStyle: BlurStyle.Thin }
           } as ContextMenuOptions)
         Text(`预览默认显示蒙层`)
@@ -177,7 +179,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             preview: this.MyPreview,
             previewBorderRadius: 50,
             previewAnimationOptions: {
@@ -198,7 +200,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.Thin }
           } as ContextMenuOptions)
         Text(`BlurStyle.Regular`)
@@ -206,7 +208,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.Regular }
           } as ContextMenuOptions)
         Text(`BlurStyle.Thick`)
@@ -214,7 +216,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.Thick }
           } as ContextMenuOptions)
       }
@@ -225,7 +227,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.BACKGROUND_THIN }
           } as ContextMenuOptions)
         Text(`BlurStyle.BACKGROUND_REGULAR`)
@@ -233,7 +235,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.BACKGROUND_REGULAR }
           } as ContextMenuOptions)
         Text(`BlurStyle.BACKGROUND_THICK`)
@@ -241,7 +243,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.BACKGROUND_THICK }
           } as ContextMenuOptions)
       }
@@ -252,7 +254,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.BACKGROUND_ULTRA_THICK }
           } as ContextMenuOptions)
         Text(`BlurStyle.NONE`)
@@ -260,7 +262,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.NONE }
           } as ContextMenuOptions)
         Text(`BlurStyle.COMPONENT_ULTRA_THIN`)
@@ -268,7 +270,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.COMPONENT_ULTRA_THIN }
           } as ContextMenuOptions)
       }
@@ -279,7 +281,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.COMPONENT_THIN }
           } as ContextMenuOptions)
         Text(`BlurStyle.COMPONENT_REGULAR`)
@@ -287,7 +289,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.COMPONENT_REGULAR }
           } as ContextMenuOptions)
         Text(`BlurStyle.COMPONENT_THICK`)
@@ -295,7 +297,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.COMPONENT_THICK }
           } as ContextMenuOptions)
       }
@@ -306,7 +308,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.COMPONENT_ULTRA_THICK }
           } as ContextMenuOptions)
         Text(`undefined`)
@@ -314,7 +316,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: { color: Color.Red, backgroundBlurStyle: undefined }
           } as ContextMenuOptions)
       }
@@ -325,7 +327,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: true
           } as ContextMenuOptions)
         Text(`false`)
@@ -333,7 +335,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: false
           } as ContextMenuOptions)
       }
@@ -365,7 +367,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             mask: {
               color: this.changeList[this.changeIndex],
               backgroundBlurStyle: this.changeBlurList[this.changeBlurIndex]

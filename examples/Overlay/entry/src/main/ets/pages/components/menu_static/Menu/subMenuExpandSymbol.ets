@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -48,33 +50,33 @@ struct Index {
     Menu() {
       MenuItem({
         symbolStartIcon: this.startIconModifier,
-        content: "图标"
+        content: '图标'
       })
       MenuItem({
         symbolStartIcon: this.startIconModifier,
-        content: "列表"
+        content: '列表'
       })
     }.backgroundColor(Color.Grey)
   }
 
   @Builder
-  MyMenu() {
+  menuBuilder() {
     Menu() {
       MenuItem({
         symbolStartIcon: this.startIconModifier,
         symbolEndIcon: this.endIconModifier,
-        content: "新建文件夹",
+        content: '新建文件夹',
         builder: (): void => this.SubMenu(),
       })
       MenuItem({
         symbolStartIcon: this.startIconModifier,
-        content: "排序方式",
+        content: '排序方式',
         builder: (): void => this.SubMenu(),
       })
         .borderRadius('300.00vp')
       MenuItem({
         symbolStartIcon: this.startIconModifier,
-        content: "查看方式",
+        content: '查看方式',
         builder: (): void => this.SubMenu(),
       })
     }
@@ -94,7 +96,7 @@ struct Index {
         })
       Button('click to show menu')
         .position({ top: 40, left: 40 })
-        .bindMenu(this.MyMenu)
+        .bindMenu(this.menuBuilder)
     }
   }
 }

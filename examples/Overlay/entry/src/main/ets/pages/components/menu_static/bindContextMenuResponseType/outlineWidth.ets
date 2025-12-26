@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -34,39 +36,39 @@ let endIcon: ResourceStr = $r('app.media.startIcon')
 let subMenuExpandingMode: SubMenuExpandingMode | undefined = SubMenuExpandingMode.SIDE_EXPAND;
 
 @Builder
-function SubMenuBuilder() {
+function subMenuBuilder() {
   Menu() {
     MenuItem({
       startIcon: startIcon,
-      content: "图标",
-      builder: SubMenuBuilder,
+      content: '图标',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "列表",
-      builder: SubMenuBuilder,
+      content: '列表',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
   }.backgroundColor(Color.Grey)
 }
 
 @Builder
-function MyMenu() {
+function menuBuilder() {
   Menu() {
     MenuItem({
       startIcon: startIcon,
       endIcon: endIcon,
-      content: "新建文件夹",
-      builder: SubMenuBuilder,
+      content: '新建文件夹',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "排序方式",
-      builder: SubMenuBuilder,
+      content: '排序方式',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "查看方式",
-      builder: SubMenuBuilder,
+      content: '查看方式',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
   }
   .backgroundColor(Color.Grey)
@@ -104,7 +106,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             outlineWidth: '10px',
             outlineColor: Color.Blue
           } as ContextMenuOptions)
@@ -113,7 +115,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             outlineWidth: '20vp',
             outlineColor: Color.Blue
           } as ContextMenuOptions)
@@ -122,7 +124,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             outlineWidth: '30fp',
             outlineColor: Color.Blue
           } as ContextMenuOptions)
@@ -134,7 +136,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             outlineWidth: '40lpx',
             outlineColor: Color.Blue
           } as ContextMenuOptions)
@@ -143,7 +145,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             outlineWidth: '20%',
             outlineColor: Color.Blue
           } as ContextMenuOptions)
@@ -152,7 +154,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             outlineWidth: $r('app.float.outlineWidth'),
             outlineColor: Color.Blue
           } as ContextMenuOptions)
@@ -164,7 +166,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             outlineWidth: undefined,
             outlineColor: Color.Blue
           } as ContextMenuOptions)
@@ -173,7 +175,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             outlineWidth: -1,
             outlineColor: Color.Blue
           } as ContextMenuOptions)
@@ -182,7 +184,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             outlineWidth: {
               left: -100,
               right: '20px',
@@ -213,7 +215,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+          .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
             outlineWidth: this.changeList[this.changeIndex],
             outlineColor: Color.Blue
 

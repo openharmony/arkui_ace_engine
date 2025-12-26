@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -32,7 +34,7 @@ import hilog from '@ohos.hilog'
 @Entry
 @Component
 struct popupIndex {
-  @State stateVar: string = "state var";
+  @State stateVar: string = 'state var';
   uiContext: UIContext | undefined = undefined;
 
   aboutToAppear(): void {
@@ -47,64 +49,84 @@ struct popupIndex {
         .textAlign(TextAlign.Center)
         .width('80%')
         .backgroundColor(0x0000FF)
-      Button("outlineWidth")
+      Button('outlineWidth')
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/outlineWidth' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/outlineWidth' });
         })
-      Button("outlineColor")
+      Button('outlineColor')
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/outlineColor' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/outlineColor' });
         })
-      Button("mask")
+      Button('mask')
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/mask' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/mask' });
         })
-      Button("modalMode")
+      Button('modalMode')
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/modalMode' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/modalMode' });
         })
-      Button("anchorPosition")
+      Button('anchorPosition')
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/anchorPosition' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/anchorPosition' });
         })
-      Button("onWillAppear")
+      Button('onWillAppear')
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/onWillAppear' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/onWillAppear' });
         })
-      Button("onDidAppear")
+      Button('onDidAppear')
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/onDidAppear' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/onDidAppear' });
         })
-      Button("onWillDisappear")
+      Button('onWillDisappear')
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/onWillDisappear' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/onWillDisappear' });
         })
-      Button("onDidDisappear")
+      Button('onDidDisappear')
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/onDidDisappear' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/onDidDisappear' });
         })
-      Button("previewScaleMode")
+      Button('previewScaleMode')
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/previewScaleMode' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/previewScaleMode' });
         })
-      Button("availableLayoutArea")
+      Button('availableLayoutArea')
         .width('80%')
         .onClick((e: ClickEvent) => {
           this.getUIContext()
             .getRouter()
             .pushUrl({ url: 'pages/components/menu_static/bindContextMenuResponseType/availableLayoutArea' });
         })
-      Button("previewAnimationOptions")
+      Button('previewAnimationOptions')
         .width('80%')
         .onClick((e: ClickEvent) => {
           this.getUIContext()
@@ -115,6 +137,3 @@ struct popupIndex {
     .width('100%')
   }
 }
-
-
-

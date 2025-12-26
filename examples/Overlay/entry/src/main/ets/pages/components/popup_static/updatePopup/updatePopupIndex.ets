@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -46,25 +48,31 @@ struct UpdatePopupOptionsIndex {
         .textAlign(TextAlign.Center)
         .width('100%')
         .backgroundColor(0x0000FF)
-      Button("outlineWidth")
+      Button('outlineWidth')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/popup_static/updatePopup/updateOutlineWidth' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/popup_static/updatePopup/updateOutlineWidth' });
         })
-      Button("borderWidth")
+      Button('borderWidth')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/popup_static/updatePopup/updateBorderWidth' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/popup_static/updatePopup/updateBorderWidth' });
         })
-      Button("outlineLinearGradient")
+      Button('outlineLinearGradient')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/popup_static/updatePopup/updateOutlineLinearGradient' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/popup_static/updatePopup/updateOutlineLinearGradient' });
         })
-      Button("outlineLinearGradient_direction")
+      Button('outlineLinearGradient_direction')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
@@ -72,19 +80,23 @@ struct UpdatePopupOptionsIndex {
             .getRouter()
             .pushUrl({ url: 'pages/components/popup_static/updatePopup/updateOutlineLinearGradientDirection' });
         })
-      Button("outlineLinearGradient_colors")
+      Button('outlineLinearGradient_colors')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/popup_static/updatePopup/updateOutlineLinearGradientColors' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/popup_static/updatePopup/updateOutlineLinearGradientColors' });
         })
-      Button("borderLinearGradient")
+      Button('borderLinearGradient')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/popup_static/updatePopup/updateBorderLinearGradient' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/popup_static/updatePopup/updateBorderLinearGradient' });
         })
-      Button("borderLinearGradient_direction")
+      Button('borderLinearGradient_direction')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
@@ -92,17 +104,21 @@ struct UpdatePopupOptionsIndex {
             .getRouter()
             .pushUrl({ url: 'pages/components/popup_static/updatePopup/updateBorderLinearGradientDirection' });
         })
-      Button("borderLinearGradient_colors")
+      Button('borderLinearGradient_colors')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/popup_static/updatePopup/updateBorderLinearGradientColors' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/popup_static/updatePopup/updateBorderLinearGradientColors' });
         })
-      Button("avoidTarget")
+      Button('avoidTarget')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/popup_static/updatePopup/updateAvoidTarget' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/popup_static/updatePopup/updateAvoidTarget' });
         })
     }
   }

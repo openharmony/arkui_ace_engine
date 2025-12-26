@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -34,39 +36,39 @@ let endIcon: ResourceStr = $r('app.media.startIcon')
 let subMenuExpandingMode: SubMenuExpandingMode | undefined = SubMenuExpandingMode.SIDE_EXPAND;
 
 @Builder
-function SubMenuBuilder() {
+function subMenuBuilder() {
   Menu() {
     MenuItem({
       startIcon: startIcon,
-      content: "图标",
-      builder: SubMenuBuilder,
+      content: '图标',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "列表",
-      builder: SubMenuBuilder,
+      content: '列表',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
   }.backgroundColor(Color.Grey)
 }
 
 @Builder
-function MyMenu() {
+function menuBuilder() {
   Menu() {
     MenuItem({
       startIcon: startIcon,
       endIcon: endIcon,
-      content: "新建文件夹",
-      builder: SubMenuBuilder,
+      content: '新建文件夹',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "排序方式",
-      builder: SubMenuBuilder,
+      content: '排序方式',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "查看方式",
-      builder: SubMenuBuilder,
+      content: '查看方式',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
   }
   .backgroundColor(Color.Grey)
@@ -136,7 +138,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow0, MyMenu, {
+          .bindContextMenu(this.isShow0, menuBuilder, {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.Thin }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -147,7 +149,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow1, MyMenu, {
+          .bindContextMenu(this.isShow1, menuBuilder, {
             mask: { color: 'rgba(23,169,141,0.5)', backgroundBlurStyle: BlurStyle.Thin }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -158,7 +160,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow2, MyMenu, {
+          .bindContextMenu(this.isShow2, menuBuilder, {
             mask: { color: '#FFFFFF00', backgroundBlurStyle: BlurStyle.Thin }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -172,7 +174,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow3, MyMenu, {
+          .bindContextMenu(this.isShow3, menuBuilder, {
             mask: { color: 12345, backgroundBlurStyle: BlurStyle.Thin }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -183,7 +185,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow4, MyMenu, {
+          .bindContextMenu(this.isShow4, menuBuilder, {
             mask: { color: undefined, backgroundBlurStyle: BlurStyle.Thin }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -194,7 +196,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow5, MyMenu, {
+          .bindContextMenu(this.isShow5, menuBuilder, {
             mask: { color: $r('app.color.blue'), backgroundBlurStyle: BlurStyle.Thin }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -208,7 +210,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow21, MyMenu, {
+          .bindContextMenu(this.isShow21, menuBuilder, {
             mask: { color: $r('app.string.errorColor'), backgroundBlurStyle: BlurStyle.Thin }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -219,7 +221,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow22, MyMenu, {
+          .bindContextMenu(this.isShow22, menuBuilder, {
             preview: this.MyPreview,
             previewBorderRadius: 50,
             previewAnimationOptions: {
@@ -243,7 +245,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow6, MyMenu, {
+          .bindContextMenu(this.isShow6, menuBuilder, {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.Thin }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -254,7 +256,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow7, MyMenu, {
+          .bindContextMenu(this.isShow7, menuBuilder, {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.Regular }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -265,7 +267,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow8, MyMenu, {
+          .bindContextMenu(this.isShow8, menuBuilder, {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.Thick }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -279,7 +281,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow9, MyMenu, {
+          .bindContextMenu(this.isShow9, menuBuilder, {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.BACKGROUND_THIN }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -290,7 +292,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow10, MyMenu, {
+          .bindContextMenu(this.isShow10, menuBuilder, {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.BACKGROUND_REGULAR }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -301,7 +303,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow11, MyMenu, {
+          .bindContextMenu(this.isShow11, menuBuilder, {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.BACKGROUND_THICK }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -315,7 +317,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow12, MyMenu, {
+          .bindContextMenu(this.isShow12, menuBuilder, {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.BACKGROUND_ULTRA_THICK }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -326,7 +328,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow13, MyMenu, {
+          .bindContextMenu(this.isShow13, menuBuilder, {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.NONE }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -337,7 +339,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow14, MyMenu, {
+          .bindContextMenu(this.isShow14, menuBuilder, {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.COMPONENT_ULTRA_THIN }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -351,7 +353,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow15, MyMenu, {
+          .bindContextMenu(this.isShow15, menuBuilder, {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.COMPONENT_THIN }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -362,7 +364,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow16, MyMenu, {
+          .bindContextMenu(this.isShow16, menuBuilder, {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.COMPONENT_REGULAR }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -373,7 +375,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow17, MyMenu, {
+          .bindContextMenu(this.isShow17, menuBuilder, {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.COMPONENT_THICK }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -387,7 +389,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow18, MyMenu, {
+          .bindContextMenu(this.isShow18, menuBuilder, {
             mask: { color: Color.Red, backgroundBlurStyle: BlurStyle.COMPONENT_ULTRA_THICK }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -398,7 +400,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow19, MyMenu, {
+          .bindContextMenu(this.isShow19, menuBuilder, {
             mask: { color: Color.Red, backgroundBlurStyle: undefined }
           } as ContextMenuOptions)
           .onClick(() => {
@@ -412,7 +414,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow23, MyMenu, {
+          .bindContextMenu(this.isShow23, menuBuilder, {
             mask: true
           } as ContextMenuOptions)
           .onClick(() => {
@@ -423,7 +425,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow24, MyMenu, {
+          .bindContextMenu(this.isShow24, menuBuilder, {
             mask: false
           } as ContextMenuOptions)
           .onClick(() => {
@@ -454,7 +456,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow20, MyMenu, {
+          .bindContextMenu(this.isShow20, menuBuilder, {
             mask: {
               color: this.changeList[this.changeIndex],
               backgroundBlurStyle: this.changeBlurList[this.changeBlurIndex]
