@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -999,6 +999,6 @@ HWTEST_F(FocusHubTestNg, HasBackwardFocusMovementInChildren001, TestSize.Level1)
     auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     ASSERT_NE(focusHub, nullptr);
     KeyEvent keyEvent;
-    ASSERT_FALSE(focusHub->HasBackwardFocusMovementInChildren());
+    EXPECT_FALSE(focusHub->HasBackwardFocusMovementInChildren());
 }
 } // namespace OHOS::Ace::NG
