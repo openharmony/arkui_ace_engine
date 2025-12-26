@@ -130,9 +130,9 @@ export interface ArcSliderOptionsConstructorOptions {
 
 @ObservedV2
 export class ArcSliderValueOptions {
-  @Trace public progress: number;
-  @Trace public min: number;
-  @Trace public max: number;
+  @Trace public progress?: number;
+  @Trace public min?: number;
+  @Trace public max?: number;
 
   constructor(options?: ArcSliderValueOptionsConstructorOptions) {
     this.progress = options?.progress ?? PROGRESS_DEFAULT;
@@ -143,8 +143,8 @@ export class ArcSliderValueOptions {
 
 @ObservedV2
 export class ArcSliderLayoutOptions {
-  @Trace public reverse: boolean;
-  @Trace public position: ArcSliderPosition;
+  @Trace public reverse?: boolean;
+  @Trace public position?: ArcSliderPosition;
 
   constructor(options?: ArcSliderLayoutOptionsConstructorOptions) {
     this.reverse = options?.reverse ?? REVERSE_DEFAULT;
@@ -154,11 +154,11 @@ export class ArcSliderLayoutOptions {
 
 @ObservedV2
 export class ArcSliderStyleOptions {
-  @Trace public trackThickness: number;
-  @Trace public activeTrackThickness: number;
-  @Trace public trackColor: string;
-  @Trace public selectedColor: string;
-  @Trace public trackBlur: number;
+  @Trace public trackThickness?: number;
+  @Trace public activeTrackThickness?: number;
+  @Trace public trackColor?: string;
+  @Trace public selectedColor?: string;
+  @Trace public trackBlur?: number;
 
   constructor(options?: ArcSliderStyleOptionsConstructorOptions) {
     this.trackThickness = options?.trackThickness ?? TRACK_THICKNESS_DEFAULT;
@@ -171,13 +171,13 @@ export class ArcSliderStyleOptions {
 
 @ObservedV2
 export class ArcSliderOptions {
-  @Trace public valueOptions: ArcSliderValueOptions;
-  @Trace public layoutOptions: ArcSliderLayoutOptions;
-  @Trace public styleOptions: ArcSliderStyleOptions;
-  @Trace public digitalCrownSensitivity: CrownSensitivity;
-  @Trace public onTouch: Callback<TouchEvent>;
-  @Trace public onChange: Callback<number>;
-  @Trace public onEnlarge: Callback<boolean>;
+  @Trace public valueOptions?: ArcSliderValueOptions;
+  @Trace public layoutOptions?: ArcSliderLayoutOptions;
+  @Trace public styleOptions?: ArcSliderStyleOptions;
+  @Trace public digitalCrownSensitivity?: CrownSensitivity;
+  @Trace public onTouch?: Callback<TouchEvent>;
+  @Trace public onChange?: Callback<number>;
+  @Trace public onEnlarge?: Callback<boolean>;
 
   constructor(options?: ArcSliderOptionsConstructorOptions) {
     this.valueOptions = options?.valueOptions ?? new ArcSliderValueOptions();
@@ -350,7 +350,7 @@ export struct ArcSlider {
         this.trackStartAngle = this.activeStartAngle;
       }
       if (isThicknessChanged) {
-        this.lineWidth = this.options.styleOptions.activeTrackThickness;
+        this.lineWidth = this.options.styleOptions!.activeTrackThickness!;
       }
       this.updateArcSlider();
     })
@@ -386,8 +386,8 @@ export struct ArcSlider {
       end: 1
     })
     this.touchAnimator!.onFrame = (fraction: number) => {
-      this.lineWidth = this.calcAnimatorChange(this.options.styleOptions.trackThickness,
-        this.options.styleOptions.activeTrackThickness, fraction);
+      this.lineWidth = this.calcAnimatorChange(this.options.styleOptions!.trackThickness!,
+        this.options.styleOptions!.activeTrackThickness!, fraction);
       this.selectedStartAngle = this.calcAnimatorChange(this.normalStartAngle, this.activeStartAngle, fraction);
       this.trackStartAngle = this.selectedStartAngle;
       this.trackEndAngle = this.calcAnimatorChange(this.normalEndAngle, this.activeEndAngle, fraction);
@@ -417,7 +417,7 @@ export struct ArcSlider {
       end: 1
     })
     this.maxRestoreAnimator!.onFrame = (fraction: number) => {
-      this.lineWidth = this.calcAnimatorChange(this.lineWidthBegin, this.options.styleOptions.activeTrackThickness,
+      this.lineWidth = this.calcAnimatorChange(this.lineWidthBegin, this.options.styleOptions!.activeTrackThickness!,
         fraction);
       this.selectedEndAngle = this.calcAnimatorChange(this.selectedEndAngleBegin, this.activeEndAngle, fraction);
       this.trackEndAngle = this.selectedEndAngle;
@@ -446,7 +446,7 @@ export struct ArcSlider {
       end: 1
     })
     this.minRestoreAnimator!.onFrame = (fraction: number) => {
-      this.lineWidth = this.calcAnimatorChange(this.lineWidthBegin, this.options.styleOptions.activeTrackThickness,
+      this.lineWidth = this.calcAnimatorChange(this.lineWidthBegin, this.options.styleOptions!.activeTrackThickness!,
         fraction);
       this.trackStartAngle = this.calcAnimatorChange(this.trackStartAngleBegin, this.activeStartAngle,
         fraction);
@@ -475,8 +475,8 @@ export struct ArcSlider {
       end: 1
     })
     this.restoreAnimator!.onFrame = (fraction: number) => {
-      this.lineWidth = this.calcAnimatorChange(this.options.styleOptions.activeTrackThickness,
-        this.options.styleOptions.trackThickness, fraction)
+      this.lineWidth = this.calcAnimatorChange(this.options.styleOptions!.activeTrackThickness!,
+        this.options.styleOptions!.trackThickness!, fraction)
       this.selectedStartAngle = this.calcAnimatorChange(this.activeStartAngle, this.normalStartAngle, fraction) *
         ANGLE_TO_RADIAN;
       this.trackStartAngle = this.selectedStartAngle;
@@ -495,7 +495,7 @@ export struct ArcSlider {
 
   updateArcSlider() {
     this.checkParam();
-    this.setLayoutState(this.options.layoutOptions.reverse, this.options.layoutOptions.position);
+    this.setLayoutState(this.options.layoutOptions!.reverse!, this.options.layoutOptions!.position!);
     this.resetDrawing();
   }
 
@@ -510,19 +510,19 @@ export struct ArcSlider {
   }
 
   private checkParam() {
-    if (this.options.valueOptions.max === this.options.valueOptions.min ||
-      this.options.valueOptions.max < this.options.valueOptions.min) {
-      this.options.valueOptions.max = MAX_DEFAULT;
-      this.options.valueOptions.min = MIN_DEFAULT;
-      this.options.valueOptions.progress = PROGRESS_DEFAULT;
+    if (this.options.valueOptions!.max! === this.options.valueOptions!.min! ||
+      this.options.valueOptions!.max! < this.options.valueOptions!.min!) {
+      this.options.valueOptions!.max = MAX_DEFAULT;
+      this.options.valueOptions!.min = MIN_DEFAULT;
+      this.options.valueOptions!.progress = PROGRESS_DEFAULT;
     }
-    this.options.valueOptions.progress = Math.min(this.options.valueOptions.max, this.options.valueOptions.progress);
-    this.options.valueOptions.progress = Math.max(this.options.valueOptions.min, this.options.valueOptions.progress);
-    this.options.styleOptions.trackBlur = this.setLimitValues(this.options.styleOptions.trackBlur, TRACK_BLUR_DEFAULT,
+    this.options.valueOptions!.progress = Math.min(this.options.valueOptions!.max!, this.options.valueOptions!.progress!);
+    this.options.valueOptions!.progress = Math.max(this.options.valueOptions!.min!, this.options.valueOptions!.progress!);
+    this.options.styleOptions!.trackBlur = this.setLimitValues(this.options.styleOptions!.trackBlur!, TRACK_BLUR_DEFAULT,
       0);
-    this.options.styleOptions.trackThickness = this.setLimitValues(this.options.styleOptions.trackThickness,
+    this.options.styleOptions!.trackThickness = this.setLimitValues(this.options.styleOptions!.trackThickness!,
       TRACK_THICKNESS_DEFAULT, TRACK_THICKNESS_DEFAULT, TRACK_THICKNESS_MAX);
-    this.options.styleOptions.activeTrackThickness = this.setLimitValues(this.options.styleOptions.activeTrackThickness,
+    this.options.styleOptions!.activeTrackThickness = this.setLimitValues(this.options.styleOptions!.activeTrackThickness!,
       ACTIVE_TRACK_THICKNESS_DEFAULT, ACTIVE_TRACK_THICKNESS_DEFAULT, ACTIVE_TRACK_THICKNESS_MAX);
   }
 
@@ -534,20 +534,20 @@ export struct ArcSlider {
     this.parameters.trackStartAngle = this.trackStartAngle;
     this.parameters.selectedEndAngle = this.selectedEndAngle;
     try {
-      this.parameters.trackColor = ColorMetrics.resourceColor(this.options.styleOptions.trackColor);
+      this.parameters.trackColor = ColorMetrics.resourceColor(this.options.styleOptions!.trackColor!);
     } catch (err) {
       let error = err as BusinessError;
       console.error(`Failed to set track color, code = ${error.code}, message =${error.message}`);
       this.parameters.trackColor = ColorMetrics.resourceColor(TRACK_COLOR_DEFAULT);
     }
     try {
-      this.parameters.selectedColor = ColorMetrics.resourceColor(this.options.styleOptions.selectedColor);
+      this.parameters.selectedColor = ColorMetrics.resourceColor(this.options.styleOptions!.selectedColor!);
     } catch (err) {
       let error = err as BusinessError;
       console.error(`Failed to set selected color, code = ${error.code}, message =${error.message}`);
       this.parameters.selectedColor = ColorMetrics.resourceColor(SELECTED_COLOR_DEFAULT);
     }
-    this.parameters.blur = this.options.styleOptions.trackBlur;
+    this.parameters.blur = this.options.styleOptions!.trackBlur!;
   }
 
   setDiameter() {
@@ -623,10 +623,10 @@ export struct ArcSlider {
       this.trackEndAngle = this.normalEndAngle;
       this.trackStartAngle = this.normalStartAngle;
       this.radius = this.radius - PADDING_DEFAULT;
-      this.lineWidth = this.options.styleOptions.trackThickness;
+      this.lineWidth = this.options.styleOptions!.trackThickness!;
     }
-    const selectedRatio = (this.options.valueOptions.progress - this.options.valueOptions.min) /
-      (this.options.valueOptions.max - this.options.valueOptions.min);
+    const selectedRatio = (this.options.valueOptions!.progress! - this.options.valueOptions!.min!) /
+      (this.options.valueOptions!.max! - this.options.valueOptions!.min!);
     const deltaRadian = this.trackEndAngle - this.selectedStartAngle;
     const selectedAngle = selectedRatio * Math.abs(deltaRadian);
     if (this.trackEndAngle > this.selectedStartAngle) {
@@ -727,9 +727,9 @@ export struct ArcSlider {
     }
     this.selectRatioNow = Math.min(1, this.selectRatioNow);
     this.selectRatioNow = Math.max(0, this.selectRatioNow);
-    this.clickValue = this.selectRatioNow * (this.options.valueOptions.max - this.options.valueOptions.min) +
-    this.options.valueOptions.min;
-    this.options.valueOptions.progress = this.clickValue;
+    this.clickValue = this.selectRatioNow * (this.options.valueOptions!.max! - this.options.valueOptions!.min!) +
+    this.options.valueOptions!.min!;
+    this.options.valueOptions!.progress = this.clickValue;
     this.setLayoutOptions();
     this.updateModifier();
     this.fullModifier.invalidate();
@@ -738,17 +738,17 @@ export struct ArcSlider {
   calcValue(moveY: number) {
     this.delta = this.touchY - moveY;
     const total = this.radius * Math.sqrt(3);
-    let valueNow = (this.options.valueOptions.progress - this.options.valueOptions.min) /
-      (this.options.valueOptions.max - this.options.valueOptions.min);
-    if (this.options.layoutOptions.reverse) {
+    let valueNow = (this.options.valueOptions!.progress! - this.options.valueOptions!.min!) /
+      (this.options.valueOptions!.max! - this.options.valueOptions!.min!);
+    if (this.options.layoutOptions!.reverse) {
       valueNow += this.delta / total;
     } else {
       valueNow -= this.delta / total;
     }
     valueNow = Math.min(1, valueNow);
     valueNow = Math.max(0, valueNow);
-    this.options.valueOptions.progress = valueNow * (this.options.valueOptions.max - this.options.valueOptions.min) +
-    this.options.valueOptions.min;
+    this.options.valueOptions!.progress = valueNow * (this.options.valueOptions!.max! - this.options.valueOptions!.min!) +
+    this.options.valueOptions!.min!;
     this.setLayoutOptions();
     this.updateModifier();
     this.fullModifier.invalidate();
@@ -757,12 +757,12 @@ export struct ArcSlider {
 
   calcCrownTotal(activeStartAngle: number, activeEndAngle: number): number {
     if (activeEndAngle > activeStartAngle) {
-      if (this.options.layoutOptions.reverse) {
+      if (this.options.layoutOptions!.reverse) {
         return (TWO_PI_RADIAN - Math.abs(activeEndAngle - activeStartAngle));
       }
       return Math.abs(activeEndAngle - activeStartAngle);
     } else {
-      if (this.options.layoutOptions.reverse) {
+      if (this.options.layoutOptions!.reverse) {
         return Math.abs(activeEndAngle - activeStartAngle);
       }
       return (TWO_PI_RADIAN - Math.abs(activeEndAngle - activeStartAngle));
@@ -771,19 +771,19 @@ export struct ArcSlider {
 
   calcCrownValue(deltaCrownAngle: number) {
     const totalAngle = this.calcCrownTotal(this.activeStartAngle, this.activeEndAngle);
-    const totalValue = this.options.valueOptions.max - this.options.valueOptions.min;
-    let valueNow = (this.options.valueOptions.progress - this.options.valueOptions.min) / totalValue;
+    const totalValue = this.options.valueOptions!.max! - this.options.valueOptions!.min!;
+    let valueNow = (this.options.valueOptions!.progress! - this.options.valueOptions!.min!) / totalValue;
     valueNow += deltaCrownAngle / totalAngle;
     valueNow = Math.min(1, valueNow);
     valueNow = Math.max(0, valueNow);
-    this.options.valueOptions.progress = valueNow * totalValue + this.options.valueOptions.min;
+    this.options.valueOptions!.progress = valueNow * totalValue + this.options.valueOptions!.min!;
     this.setLayoutOptions();
     this.updateModifier();
     this.fullModifier.invalidate();
   }
 
   calcMaxValueDeltaIsPositive(delta: number) {
-    const isLineWidthFitted: boolean = this.lineWidth >= this.options.styleOptions.activeTrackThickness *
+    const isLineWidthFitted: boolean = this.lineWidth >= this.options.styleOptions!.activeTrackThickness! *
       (1 - LENGTH_OVER_MIN);
     if (this.isAntiClock) {
       const isEndAngleFitted: boolean = this.selectedEndAngle >= (this.activeEndAngle - ANGLE_OVER_MIN);
@@ -809,13 +809,13 @@ export struct ArcSlider {
       }
     }
     this.trackEndAngle = this.selectedEndAngle;
-    if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN)) {
-      this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN);
+    if (this.lineWidth <= this.options.styleOptions!.activeTrackThickness! * (1 - LENGTH_OVER_MIN)) {
+      this.lineWidth = this.options.styleOptions!.activeTrackThickness! * (1 - LENGTH_OVER_MIN);
     }
   }
 
   calcMaxValueDeltaIsNegative(delta: number) {
-    const isLineWidthFitted: boolean = this.lineWidth <= this.options.styleOptions.activeTrackThickness;
+    const isLineWidthFitted: boolean = this.lineWidth <= this.options.styleOptions!.activeTrackThickness!;
     const isEndAngleFitted: boolean = this.selectedEndAngle <= this.activeEndAngle;
     if (this.isAntiClock) {
       if (isEndAngleFitted || isLineWidthFitted) {
@@ -837,15 +837,15 @@ export struct ArcSlider {
     this.lineWidth += LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) / (LENGTH_OVER_MIN * this.lineWidth +
     Math.abs(this.delta));
     this.trackEndAngle = this.selectedEndAngle;
-    if (this.lineWidth >= this.options.styleOptions.activeTrackThickness) {
-      this.lineWidth = this.options.styleOptions.activeTrackThickness;
+    if (this.lineWidth >= this.options.styleOptions!.activeTrackThickness!) {
+      this.lineWidth = this.options.styleOptions!.activeTrackThickness!;
     }
   }
 
   calcMaxValue(moveY: number) {
     this.delta = this.touchY - moveY;
     let delta: number = this.delta;
-    if (!this.options.layoutOptions.reverse) {
+    if (!this.options.layoutOptions!.reverse) {
       delta = -this.delta;
     }
     if (delta >= 0) {
@@ -860,7 +860,7 @@ export struct ArcSlider {
   }
 
   calcMinValueDeltaIsNegative(delta: number) {
-    const isLineWidthFitted: boolean = this.lineWidth >= this.options.styleOptions.activeTrackThickness *
+    const isLineWidthFitted: boolean = this.lineWidth >= this.options.styleOptions!.activeTrackThickness! *
       (1 - LENGTH_OVER_MIN);
     if (this.isAntiClock) {
       const isStartAngleFitted: boolean = this.trackStartAngle <= this.selectedStartAngle + ANGLE_OVER_MIN;
@@ -885,13 +885,13 @@ export struct ArcSlider {
         this.trackStartAngle = this.selectedStartAngle - ANGLE_OVER_MIN;
       }
     }
-    if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN)) {
-      this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN);
+    if (this.lineWidth <= this.options.styleOptions!.activeTrackThickness! * (1 - LENGTH_OVER_MIN)) {
+      this.lineWidth = this.options.styleOptions!.activeTrackThickness! * (1 - LENGTH_OVER_MIN);
     }
   }
 
   calcMinValueDeltaIsPositive(delta: number) {
-    const isLineWidthFitted: boolean = this.lineWidth <= this.options.styleOptions.activeTrackThickness;
+    const isLineWidthFitted: boolean = this.lineWidth <= this.options.styleOptions!.activeTrackThickness!;
     const isStartAngleFitted: boolean = this.trackStartAngle > this.selectedStartAngle;
     if (this.isAntiClock) {
       if (isStartAngleFitted || isLineWidthFitted) {
@@ -912,15 +912,15 @@ export struct ArcSlider {
         this.trackStartAngle = this.selectedStartAngle;
       }
     }
-    if (this.lineWidth >= this.options.styleOptions.activeTrackThickness) {
-      this.lineWidth = this.options.styleOptions.activeTrackThickness;
+    if (this.lineWidth >= this.options.styleOptions!.activeTrackThickness!) {
+      this.lineWidth = this.options.styleOptions!.activeTrackThickness!;
     }
   }
 
   calcMinValue(moveY: number) {
     this.delta = this.touchY - moveY;
     let delta: number = this.delta;
-    if (!this.options.layoutOptions.reverse) {
+    if (!this.options.layoutOptions!.reverse) {
       delta = -this.delta;
     }
     if (delta <= 0) {
@@ -936,7 +936,7 @@ export struct ArcSlider {
 
   isHotRegion(touchX: number, touchY: number): boolean {
     const radius = Math.sqrt(Math.pow(touchX - this.normalRadius, 2) + Math.pow(touchY - this.normalRadius, 2));
-    let isRadiusNoFitted: boolean = (radius < this.normalRadius - this.options.styleOptions.activeTrackThickness) ||
+    let isRadiusNoFitted: boolean = (radius < this.normalRadius - this.options.styleOptions!.activeTrackThickness!) ||
       (radius > this.normalRadius);
     if (isRadiusNoFitted) {
       return false;
@@ -1007,7 +1007,7 @@ export struct ArcSlider {
     } else if (isTouchTypeMove && this.isFocus) {
       this.options.onTouch?.(event);
       this.onTouchMove(event.touches[0].y);
-      this.options.onChange?.(this.options.valueOptions.progress);
+      this.options.onChange?.(this.options.valueOptions!.progress!);
       this.clearTimeout();
     }
   }
@@ -1032,7 +1032,7 @@ export struct ArcSlider {
         }
         this.touchY = event.touches[0].y;
         this.calcValue(event.touches[0].y);
-        this.options.onChange?.(this.options.valueOptions.progress);
+        this.options.onChange?.(this.options.valueOptions!.progress!);
         this.setLayoutOptions();
         this.updateModifier();
         this.fullModifier.invalidate();
@@ -1074,12 +1074,12 @@ export struct ArcSlider {
     let delta: number = this.delta;
     maxAngel = this.selectedEndAngle;
     minAngel = this.trackStartAngle;
-    if (!this.options.layoutOptions.reverse) {
+    if (!this.options.layoutOptions!.reverse) {
       delta = -this.delta;
     }
     const isMaxFitted: boolean = !(delta < 0 && nearEqual(maxAngel, this.activeEndAngle));
     const isMinFitted: boolean = !(delta > 0 && nearEqual(this.trackStartAngle, this.activeStartAngle)) &&
-    nearEqual(this.options.valueOptions.progress, this.options.valueOptions.min);
+    nearEqual(this.options.valueOptions!.progress!, this.options.valueOptions!.min!);
     const isMaxNearEqual: boolean = nearEqual(maxAngel, this.activeEndAngle);
     const isMinNearEqual: boolean = nearEqual(minAngel, this.activeStartAngle);
     if (this.isAntiClock) {
@@ -1123,7 +1123,7 @@ export struct ArcSlider {
     } else if (isVibEnabled) {
       this.clearTimeout();
       this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
-      this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
+      this.calcDisplayControlRatio(this.options.digitalCrownSensitivity!)) / this.radius;
       this.calcCrownValue(this.crownDeltaAngle);
       this.setVibration();
     } else if (this.isEnlarged && event.action === CrownAction.END) {
@@ -1140,8 +1140,8 @@ export struct ArcSlider {
   }
 
   setVibration() {
-    const isMaxOrMin: boolean = this.options.valueOptions.progress === this.options.valueOptions.max ||
-      this.options.valueOptions.progress === this.options.valueOptions.min;
+    const isMaxOrMin: boolean = this.options.valueOptions!.progress === this.options.valueOptions!.max ||
+      this.options.valueOptions!.progress === this.options.valueOptions!.min;
     if (this.timeCur - this.timePre >= CROWN_TIME_FLAG && !isMaxOrMin) {
       try {
         this.startVibration();
@@ -1175,7 +1175,7 @@ export struct ArcSlider {
         .width(this.diameter)
         .height(this.diameter)
         .fill(BLUR_COLOR_DEFAULT)
-        .backdropBlur(this.options.styleOptions.trackBlur, undefined, { disableSystemAdaptation: true })
+        .backdropBlur(this.options.styleOptions!.trackBlur, undefined, { disableSystemAdaptation: true })
 
       Button()
         .stateEffect(false)
@@ -1201,7 +1201,7 @@ export struct ArcSlider {
             this.onDigitalCrownEvent(event);
             event.stopPropagation();
           }
-          this.options.onChange?.(this.options.valueOptions.progress);
+          this.options.onChange?.(this.options.valueOptions!.progress!);
         })
     }
     .clipShape(new PathShape().commands(this.clipPath))
