@@ -547,6 +547,13 @@ private:
     bool isDragNewFwk_ = false;
 };
 
+#ifdef ENABLE_ROSEN_BACKEND
+class DragRSTransactionGuard : public AceType {
+    DECLARE_ACE_TYPE(DragRSTransactionGuard, AceType);
+public:
+    ~DragRSTransactionGuard();
+};
+#endif
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_GESTURE_EVENT_HUB_H
