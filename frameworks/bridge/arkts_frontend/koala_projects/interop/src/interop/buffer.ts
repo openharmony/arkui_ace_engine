@@ -13,7 +13,7 @@
  * limitations under the License.
 */
 
-import { int32 } from "@koalaui/common"
+import { int32 } from '@koalaui/common'
 
 // Improve: can be removed if passing ArrayBuffer type through interop is possible
 export class KBuffer {
