@@ -943,10 +943,11 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
     }
     public pageFlipMode(value: PageFlipMode | undefined): this {
         if (this.checkPriority('pageFlipMode')) {
-            hookTabsApplyAttributesFinish(this, value)
+            // instructive change start
             const value_casted = value as (PageFlipMode | undefined)
             this.getPeer()?.setPageFlipModeAttribute(value_casted)
             return this
+            // instructive change end
         }
         return this
     }
@@ -1001,6 +1002,9 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
+        // instructive change start
+        hookTabsApplyAttributesFinish(this)
+        // instructive change end
         super.applyAttributesFinish()
     }
     public applyOptionsFinish(traceName: string): void {
