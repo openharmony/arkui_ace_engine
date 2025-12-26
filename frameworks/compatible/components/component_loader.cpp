@@ -33,6 +33,7 @@
 #include "compatible/components/navigation_menu/navigation_menu_loader.h"
 #include "compatible/components/svg/svg_loader.h"
 #include "compatible/components/tab_bar/tab_loader.h"
+#include "compatible/components/piece/piece_loader.h"
 #include "compatible/components/qrcode/qrcode_loader.h"
 #include "compatible/components/rating/rating_loader.h"
 #include "compatible/components/refresh/refresh_loader.h"
@@ -95,6 +96,7 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "stop", []() -> ComponentLoader* { return new SvgStopLoader(); } },
         { "refresh", []() -> ComponentLoader* { return new RefreshLoader(); } },
         { "video", []() -> ComponentLoader* { return new VideoLoader(); } },
+        { "piece", []() -> ComponentLoader* { return new PieceLoader(); } },
         { "qrcode", []() -> ComponentLoader* { return new QRCodeLoader(); } },
         { "picker", []() -> ComponentLoader* { return new PickerLoader(); } },
         { "picker-view", []() -> ComponentLoader* { return new PickerViewLoader(); } },

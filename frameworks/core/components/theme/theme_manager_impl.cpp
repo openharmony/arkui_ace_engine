@@ -39,7 +39,7 @@
 #include "core/components/marquee/marquee_theme.h"
 #include "core/components/navigation_bar/navigation_bar_theme.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
-#include "core/components/piece/piece_theme.h"
+#include "frameworks/compatible/components/piece/piece_theme.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components/qrcode/qrcode_theme.h"

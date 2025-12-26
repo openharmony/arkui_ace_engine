@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PIECE_ROSEN_RENDER_PIECE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PIECE_ROSEN_RENDER_PIECE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PIECE_ROSEN_RENDER_PIECE_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PIECE_ROSEN_RENDER_PIECE_H
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkRRect.h"
 #endif
 
-#include "core/components/piece/render_piece.h"
+#include "compatible/components/piece/render_piece.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
@@ -41,4 +41,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PIECE_ROSEN_RENDER_PIECE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PIECE_ROSEN_RENDER_PIECE_H

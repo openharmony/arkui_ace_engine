@@ -910,12 +910,6 @@ const char DOM_MINUTE_HAND_SOURCE_NIGHT[] = "minuteHandNight";
 const char DOM_SECOND_HAND_SOURCE[] = "secondHand";
 const char DOM_SECOND_HAND_SOURCE_NIGHT[] = "secondHandNight";
 
-// piece constants
-const char DOM_PIECE_CONTENT[] = "content";
-const char DOM_PIECE_ICON[] = "icon";
-const char DOM_PIECE_CLOSABLE[] = "closable";
-const char DOM_PIECE_EVENT_CLOSE[] = "close";
-
 // badge constants
 const char DOM_BADGE_COLOR[] = "badgeColor";
 const char DOM_BADGE_CIRCLE_SIZE[] = "badgeSize";

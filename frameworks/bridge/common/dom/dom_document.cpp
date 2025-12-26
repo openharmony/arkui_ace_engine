@@ -44,7 +44,7 @@
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/common/dom/dom_menu.h"
 #include "frameworks/bridge/common/dom/dom_option.h"
-#include "frameworks/bridge/common/dom/dom_piece.h"
+#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/common/dom/dom_popup.h"
 #include "frameworks/bridge/common/dom/dom_select.h"
 #if !defined(PREVIEW)
@@ -146,27 +146,11 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_XCOMPONENT, &DOMNodeCreator<DOMXComponent> },
 #endif
     };
-#ifndef WEARABLE_PRODUCT
-    static const LinearMapNode<RefPtr<DOMNode> (*)(NodeId, const std::string&, int32_t)> phoneNodeCreators[] = {
-        { DOM_NODE_TAG_PIECE, &DOMNodeCreator<DOMPiece> },
-    };
-#endif
 
     RefPtr<DOMNode> domNode;
     int64_t creatorIndex = BinarySearchFindIndex(domNodeCreators, ArraySize(domNodeCreators), tag.c_str());
     if (creatorIndex >= 0) {
         domNode = domNodeCreators[creatorIndex].value(nodeId, tag, itemIndex);
-#ifndef WEARABLE_PRODUCT
-    } else {
-        if (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-            SystemProperties::GetDeviceType() == DeviceType::TABLET ||
-            SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
-            creatorIndex = BinarySearchFindIndex(phoneNodeCreators, ArraySize(phoneNodeCreators), tag.c_str());
-            if (creatorIndex >= 0) {
-                domNode = phoneNodeCreators[creatorIndex].value(nodeId, tag, itemIndex);
-            }
-        }
-#endif
     }
     if (!domNode) {
         auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName(tag.c_str());

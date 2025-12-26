@@ -181,7 +181,6 @@ template("ace_core_source_set") {
       "components/declaration/common/declaration_creator_manager.cpp",
       "components/declaration/common/event.cpp",
       "components/declaration/div/div_declaration.cpp",
-      "components/declaration/piece/piece_declaration.cpp",
       "components/declaration/richtext/rich_text_declaration.cpp",
       "components/declaration/side_bar/side_bar_declaration.cpp",
       "components/declaration/span/span_declaration.cpp",
@@ -620,7 +619,6 @@ template("ace_core_source_set") {
     if (!is_wearable_product) {
       deps += [
         "$ace_root/frameworks/core/components/multimodal:ace_core_components_multimodal_$platform",
-        "$ace_root/frameworks/core/components/piece:ace_core_components_piece_$platform",
         "$ace_root/frameworks/core/components/popup:ace_core_components_popup_$platform",
         "$ace_root/frameworks/core/components/select:ace_core_components_select_$platform",
       ]

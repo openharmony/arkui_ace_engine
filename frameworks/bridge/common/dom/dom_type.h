@@ -915,12 +915,6 @@ ACE_EXPORT extern const char DOM_SECOND_HAND_SOURCE_NIGHT[];
 ACE_EXPORT extern const char DOM_DIGIT_RADIUS_RATIO[];
 ACE_EXPORT extern const char DOM_DIGIT_SIZE_RATIO[];
 
-// piece attribute and style constants
-ACE_EXPORT extern const char DOM_PIECE_CONTENT[];
-ACE_EXPORT extern const char DOM_PIECE_ICON[];
-ACE_EXPORT extern const char DOM_PIECE_CLOSABLE[];
-ACE_EXPORT extern const char DOM_PIECE_EVENT_CLOSE[];
-
 // badge constants
 ACE_EXPORT extern const char DOM_BADGE_COLOR[];
 ACE_EXPORT extern const char DOM_BADGE_CIRCLE_SIZE[];

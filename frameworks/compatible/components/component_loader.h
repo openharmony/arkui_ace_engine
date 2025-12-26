@@ -59,6 +59,11 @@ public:
     }
 
     static ComponentLoader* GetLoaderByName(const char* name);
+
+    virtual const void* GetModifier()
+    {
+        return nullptr;
+    }
 };
 
 } // namespace OHOS::Ace

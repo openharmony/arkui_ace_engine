@@ -124,11 +124,6 @@ const std::shared_ptr<ButtonMethod> DeclarationConstants::DEFAULT_BUTTON_METHOD 
 const std::shared_ptr<DivAttribute> DeclarationConstants::DEFAULT_DIV_ATTR = std::make_shared<DivAttribute>();
 const std::shared_ptr<DivStyle> DeclarationConstants::DEFAULT_DIV_STYLE = std::make_shared<DivStyle>();
 
-// default value of piece
-const std::shared_ptr<PieceAttribute> DeclarationConstants::DEFAULT_PIECE_ATTR = std::make_shared<PieceAttribute>();
-const std::shared_ptr<PieceStyle> DeclarationConstants::DEFAULT_PIECE_STYLE = std::make_shared<PieceStyle>();
-const std::shared_ptr<PieceEvent> DeclarationConstants::DEFAULT_PIECE_EVENT = std::make_shared<PieceEvent>();
-
 // default value of side bar
 const std::shared_ptr<SideBarContainerAttribute> DeclarationConstants::DEFAULT_SIDE_BAR_ATTR =
     std::make_shared<SideBarContainerAttribute>();

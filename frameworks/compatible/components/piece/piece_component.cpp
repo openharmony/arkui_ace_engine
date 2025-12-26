@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "core/components/piece/piece_component.h"
+#include "compatible/components/piece/piece_component.h"
 
 #include "core/components/display/render_display.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/gesture_listener/gesture_listener_component.h"
 #include "core/components/image/image_component.h"
 #include "core/components/padding/padding_component.h"
-#include "core/components/piece/render_piece.h"
+#include "compatible/components/piece/render_piece.h"
 
 namespace OHOS::Ace {
 

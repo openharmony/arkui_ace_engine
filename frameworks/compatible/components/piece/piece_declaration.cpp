@@ -13,21 +13,31 @@
  * limitations under the License.
  */
 
-#include "core/components/declaration/piece/piece_declaration.h"
+#include "compatible/components/piece/piece_declaration.h"
 
 #include "core/components/declaration/common/declaration_constants.h"
-#include "frameworks/bridge/common/utils/utils.h"
+#include "bridge/common/utils/utils.h"
 
 namespace OHOS::Ace {
 
 using namespace Framework;
 
+const char DOM_PIECE_CONTENT[] = "content";
+const char DOM_PIECE_ICON[] = "icon";
+const char DOM_PIECE_CLOSABLE[] = "closable";
+const char DOM_PIECE_EVENT_CLOSE[] = "close";
+
+// default value
+const std::shared_ptr<PieceAttribute> DEFAULT_PIECE_ATTR = std::make_shared<PieceAttribute>();
+const std::shared_ptr<PieceStyle> DEFAULT_PIECE_STYLE = std::make_shared<PieceStyle>();
+const std::shared_ptr<PieceEvent> DEFAULT_PIECE_EVENT = std::make_shared<PieceEvent>();
+
 void PieceDeclaration::InitSpecialized()
 {
     AddCommonStyle(StyleTag::COMMON_IMAGE_STYLE);
-    AddSpecializedAttribute(DeclarationConstants::DEFAULT_PIECE_ATTR);
-    AddSpecializedStyle(DeclarationConstants::DEFAULT_PIECE_STYLE);
-    AddSpecializedEvent(DeclarationConstants::DEFAULT_PIECE_EVENT);
+    AddSpecializedAttribute(DEFAULT_PIECE_ATTR);
+    AddSpecializedStyle(DEFAULT_PIECE_STYLE);
+    AddSpecializedEvent(DEFAULT_PIECE_EVENT);
 }
 
 void PieceDeclaration::InitializeStyle()
@@ -115,7 +125,7 @@ bool PieceDeclaration::SetSpecializedAttr(const std::pair<std::string, std::stri
 
 bool PieceDeclaration::SetSpecializedStyle(const std::pair<std::string, std::string>& style)
 {
-    if (style.first == DOM_BACKGROUND || style.first == DOM_BACKGROUND_IMAGE) {
+    if (style.first == "background" || style.first == "backgroundImage") {
         hasBackground_ = true;
     }
     return false;

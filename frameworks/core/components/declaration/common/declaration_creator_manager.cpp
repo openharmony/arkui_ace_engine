@@ -37,7 +37,6 @@
 #include "core/common/dynamic_module_helper.h"
 #include "core/components/declaration/button/button_declaration.h"
 #include "core/components/declaration/canvas/canvas_declaration.h"
-#include "core/components/declaration/piece/piece_declaration.h"
 #include "core/components/declaration/richtext/rich_text_declaration.h"
 #include "core/components/declaration/span/span_declaration.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
@@ -63,7 +62,6 @@ const RefPtr<Declaration> DeclarationCreatorManager::CreateDeclaration(const std
     static const LinearMapNode<std::function<RefPtr<Declaration>(const std::string&)>> declarationCreators[] = {
         { DOM_NODE_TAG_BUTTON, DeclarationCreator<ButtonDeclaration> },
         { DOM_NODE_TAG_CANVAS, DeclarationCreator<CanvasDeclaration> },
-        { DOM_NODE_TAG_PIECE, DeclarationCreator<PieceDeclaration> },
         { DOM_NODE_TAG_RICH_TEXT, DeclarationCreator<RichTextDeclaration> },
         { DOM_NODE_TAG_SPAN, DeclarationCreator<SpanDeclaration> },
         { DOM_NODE_TAG_SWIPER, DeclarationCreator<SwiperDeclaration> },

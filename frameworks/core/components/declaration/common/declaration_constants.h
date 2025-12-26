@@ -24,7 +24,6 @@
 #include "core/components/declaration/common/method.h"
 #include "core/components/declaration/common/style.h"
 #include "core/components/declaration/div/div_declaration.h"
-#include "core/components/declaration/piece/piece_declaration.h"
 #include "core/components/declaration/richtext/rich_text_declaration.h"
 #include "core/components/declaration/side_bar/side_bar_declaration.h"
 #include "core/components/declaration/span/span_declaration.h"
@@ -99,11 +98,6 @@ public:
     // default value of div
     static const std::shared_ptr<DivAttribute> DEFAULT_DIV_ATTR;
     static const std::shared_ptr<DivStyle> DEFAULT_DIV_STYLE;
-
-    // default value of piece
-    static const std::shared_ptr<PieceAttribute> DEFAULT_PIECE_ATTR;
-    static const std::shared_ptr<PieceStyle> DEFAULT_PIECE_STYLE;
-    static const std::shared_ptr<PieceEvent> DEFAULT_PIECE_EVENT;
 
     // default value of side bar
     static const std::shared_ptr<SideBarContainerAttribute> DEFAULT_SIDE_BAR_ATTR;
