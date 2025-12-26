@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -30,7 +32,7 @@ import promptAction from '@ohos.promptAction';
 import hilog from '@ohos.hilog'
 
 @Builder
-function PopupBuilder() {
+function popupBuilder() {
   Scroll(new Scroller()) {
     Column({ space: 5 } as ColumnOptions) {
       Text('This is a popup with PopupOptionsThis is a popup with PopupOptionsThis is a popup with PopupOptions' +
@@ -71,18 +73,18 @@ function PopupBuilder() {
 struct UpdatePopupAvoidTarget {
   private uiContext: UIContext = this.getUIContext();
   private promptAction: PromptAction = this.uiContext.getPromptAction();
-  private contentNode: ComponentContent = new ComponentContent(this.uiContext, wrapBuilder(PopupBuilder));
+  private contentNode: ComponentContent = new ComponentContent(this.uiContext, wrapBuilder(popupBuilder));
 
   build() {
     Column({ space: 5 } as ColumnOptions) {
       Text(`enableArrow设置为true:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Row({ space: 5 } as RowOptions) {
         Text('从正常值更新成正常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("54%")
+          .width('54%')
         Button('更新为COVER_TARGET')
           .id('1')
           .onClick(() => {
@@ -130,7 +132,7 @@ struct UpdatePopupAvoidTarget {
         Text('从正常值更新成异常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("65%")
+          .width('65%')
         Button('更新为undefined')
           .id('3')
           .onClick(() => {
@@ -178,7 +180,7 @@ struct UpdatePopupAvoidTarget {
         Text('从异常值更新成正常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("40%")
+          .width('40%')
         Button('更新为AVOID_AROUND_TARGET')
           .id('17')
           .onClick(() => {
@@ -225,7 +227,7 @@ struct UpdatePopupAvoidTarget {
         Text('从不设置更新成正常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("40%")
+          .width('40%')
         Button('更新为AVOID_AROUND_TARGET')
           .id('6')
           .onClick(() => {
@@ -272,7 +274,7 @@ struct UpdatePopupAvoidTarget {
         Text('从不设置更新成异常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("65%")
+          .width('65%')
         Button('更新为undefined')
           .id('7')
           .onClick(() => {
@@ -319,7 +321,7 @@ struct UpdatePopupAvoidTarget {
         Text('从设置全量更新到不设置 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("70%")
+          .width('70%')
         Button('更新为不设置')
           .id('8')
           .onClick(() => {
@@ -366,12 +368,12 @@ struct UpdatePopupAvoidTarget {
 
       Text(`enableArrow设置为false:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Row({ space: 5 } as RowOptions) {
         Text('从正常值更新成正常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("54%")
+          .width('54%')
         Button('更新为COVER_TARGET')
           .id('9')
           .onClick(() => {
@@ -419,7 +421,7 @@ struct UpdatePopupAvoidTarget {
         Text('从正常值更新成异常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("65%")
+          .width('65%')
         Button('更新为undefined')
           .id('11')
           .onClick(() => {
@@ -467,7 +469,7 @@ struct UpdatePopupAvoidTarget {
         Text('从异常值更新成正常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("40%")
+          .width('40%')
         Button('更新为AVOID_AROUND_TARGET')
           .id('18')
           .onClick(() => {
@@ -513,7 +515,7 @@ struct UpdatePopupAvoidTarget {
         Text('从不设置更新成正常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("40%")
+          .width('40%')
         Button('更新为AVOID_AROUND_TARGET')
           .id('14')
           .onClick(() => {
@@ -560,7 +562,7 @@ struct UpdatePopupAvoidTarget {
         Text('从不设置更新成异常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("65%")
+          .width('65%')
         Button('更新为undefined')
           .id('15')
           .onClick(() => {
@@ -607,7 +609,7 @@ struct UpdatePopupAvoidTarget {
         Text('从设置全量更新到不设置 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("70%")
+          .width('70%')
         Button('更新为不设置')
           .id('16')
       }

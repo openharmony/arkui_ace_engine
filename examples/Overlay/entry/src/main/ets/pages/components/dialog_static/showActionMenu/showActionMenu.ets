@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -49,16 +51,16 @@ struct showActionMenuExample {
               } as promptAction.Button,
             ] as [promptAction.Button],
             onDidAppear: () => {
-              console.info("showActionMenu1,is onDidAppear!");
+              console.info('showActionMenu1,is onDidAppear!');
             },
             onDidDisappear: () => {
-              console.info("showActionMenu1,is onDidDisappear!");
+              console.info('showActionMenu1,is onDidDisappear!');
             },
             onWillAppear: () => {
-              console.info("showActionMenu1,is onWillAppear!");
+              console.info('showActionMenu1,is onWillAppear!');
             },
             onWillDisappear: () => {
-              console.info("showActionMenu1,is onWillDisappear!");
+              console.info('showActionMenu1,is onWillDisappear!');
             },
           } as promptAction.ActionMenuOptions)
             .then((data: promptAction.ActionMenuSuccessResponse | null): void => {
@@ -84,16 +86,16 @@ struct showActionMenuExample {
                 } as promptAction.Button,
               ] as [promptAction.Button],
               onDidAppear: () => {
-                console.info("showActionMenu2,is onDidAppear!");
+                console.info('showActionMenu2,is onDidAppear!');
               },
               onDidDisappear: () => {
-                console.info("showActionMenu2,is onDidDisappear!");
+                console.info('showActionMenu2,is onDidDisappear!');
               },
               onWillAppear: () => {
-                console.info("showActionMenu2,is onWillAppear!");
+                console.info('showActionMenu2,is onWillAppear!');
               },
               onWillDisappear: () => {
-                console.info("showActionMenu2,is onWillDisappear!");
+                console.info('showActionMenu2,is onWillDisappear!');
               },
             } as promptAction.ActionMenuOptions,
               (err: BusinessError<void> | null, data: promptAction.ActionMenuSuccessResponse | undefined): void => {

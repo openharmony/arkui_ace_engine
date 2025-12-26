@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -46,35 +48,43 @@ struct showActionMenuIndex {
         .textAlign(TextAlign.Center)
         .width('100%')
         .backgroundColor(0x0000FF)
-      Button("showActionMenuExample")
+      Button('showActionMenuExample')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/dialog_static/showActionMenu/showActionMenu' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/dialog_static/showActionMenu/showActionMenu' });
         })
-      Button("onDidAppear")
+      Button('onDidAppear')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
           this.getUIContext().getRouter().pushUrl({ url: 'pages/components/dialog_static/showActionMenu/onDidAppear' });
         })
-      Button("onDidDisappear")
+      Button('onDidDisappear')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/dialog_static/showActionMenu/onDidDisappear' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/dialog_static/showActionMenu/onDidDisappear' });
         })
-      Button("onWillAppear")
+      Button('onWillAppear')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/dialog_static/showActionMenu/onWillAppear' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/dialog_static/showActionMenu/onWillAppear' });
         })
-      Button("onWillDisappear")
+      Button('onWillDisappear')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/dialog_static/showActionMenu/onWillDisappear' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/dialog_static/showActionMenu/onWillDisappear' });
         })
     }
   }

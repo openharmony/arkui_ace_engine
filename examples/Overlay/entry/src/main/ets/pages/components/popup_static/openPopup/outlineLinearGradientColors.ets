@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -30,7 +32,7 @@ import promptAction from '@ohos.promptAction';
 import hilog from '@ohos.hilog'
 
 @Builder
-function PopupBuilder() {
+function popupBuilder() {
   Scroll(new Scroller()) {
     Column({ space: 5 } as ColumnOptions) {
       Text('This is a popup with PopupOptionsThis is a popup with PopupOptionsThis is a popup with PopupOptions' +
@@ -44,102 +46,134 @@ function PopupBuilder() {
 struct OpenPopupOutlineLinearGradientColors {
   private uiContext: UIContext = this.getUIContext();
   private promptAction: PromptAction = this.uiContext.getPromptAction();
-  private contentNode: ComponentContent = new ComponentContent(this.uiContext, wrapBuilder(PopupBuilder));
+  private contentNode: ComponentContent = new ComponentContent(this.uiContext, wrapBuilder(popupBuilder));
   @State outlineLinearGradientIndex: Int = 0;
-  @State outlineLinearGradientList: Array<PopupBorderLinearGradient | undefined> =
-    new Array<PopupBorderLinearGradient | undefined>(
-      { direction: GradientDirection.None, colors: [[Color.Yellow, 0.0], [Color.Green, 1.0]] },
-      { direction: GradientDirection.None, colors: [[undefined, 0.0], [Color.Blue, 1.0]] } as PopupBorderLinearGradient,
-      { direction: GradientDirection.None, colors: [[0xc6d40d, 0.5]] },
-      {
-        direction: GradientDirection.None,
-        colors: [['rgb(255, 100, 255)', 0.0], [Color.Green, 0.5], [Color.Blue, 1.0]]
-      },
-      {
-        direction: GradientDirection.None,
-        colors: [['rgba(33, 23, 169, 0.50)', 0.0], [Color.Green, 0.1], [Color.Blue, 1.0]]
-      },
-      {
-        direction: GradientDirection.None,
-        colors: [[$r("app.string.error"), 0.0], [Color.Pink, 0.5], [Color.Blue, 1.0]]
-      },
-      { direction: GradientDirection.None, colors: [[Color.Pink, -1], [Color.Blue, 1.0]] },
-      { direction: GradientDirection.None, colors: [[$r("app.color.color"), 0.0], [Color.Blue, 0.33]] },
-      { direction: GradientDirection.None, colors: [['#3317A98D', 0.0], [Color.Blue, 0.88]] },
-      { direction: GradientDirection.None, colors: [[Color.Pink, 0.0], [Color.Blue, 10]] },
-    )
+  @State outlineLinearGradientList: (PopupBorderLinearGradient)[] = [
+    {
+      direction: GradientDirection.None,
+      colors: [[Color.Yellow, 0.0], [Color.Green, 1.0]]
+    } as PopupBorderLinearGradient,
+    { direction: GradientDirection.None, colors: [[undefined, 0.0], [Color.Blue, 1.0]] } as PopupBorderLinearGradient,
+    { direction: GradientDirection.None, colors: [[0xc6d40d, 0.5]] } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [['rgb(255, 100, 255)', 0.0], [Color.Green, 0.5], [Color.Blue, 1.0]]
+    } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [['rgba(33, 23, 169, 0.50)', 0.0], [Color.Green, 0.1], [Color.Blue, 1.0]]
+    } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [[$r('app.string.error'), 0.0], [Color.Pink, 0.5], [Color.Blue, 1.0]]
+    } as PopupBorderLinearGradient,
+    { direction: GradientDirection.None, colors: [[Color.Pink, -1], [Color.Blue, 1.0]] } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [[$r('app.color.color'), 0.0], [Color.Blue, 0.33]]
+    } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [['#3317A98D', 0.0], [Color.Blue, 0.88]]
+    } as PopupBorderLinearGradient,
+    { direction: GradientDirection.None, colors: [[Color.Pink, 0.0], [Color.Blue, 10]] } as PopupBorderLinearGradient,
+  ]
   @State outlineLinearGradientIndex1: Int = 0;
-  @State outlineLinearGradientList1: Array<PopupBorderLinearGradient | undefined> =
-    new Array<PopupBorderLinearGradient | undefined>(
-      { direction: GradientDirection.None, colors: [[Color.Yellow, 0.0], [Color.Green, 1.0]] },
-      { direction: GradientDirection.None, colors: [[undefined, 0.0], [Color.Blue, 1.0]] } as PopupBorderLinearGradient,
-      { direction: GradientDirection.None, colors: [[0xc6d40d, 0.5]] },
-      {
-        direction: GradientDirection.None,
-        colors: [['rgb(255, 100, 255)', 0.0], [Color.Green, 0.5], [Color.Blue, 1.0]]
-      },
-      {
-        direction: GradientDirection.None,
-        colors: [['rgba(33, 23, 169, 0.50)', 0.0], [Color.Green, 0.1], [Color.Blue, 1.0]]
-      },
-      {
-        direction: GradientDirection.None,
-        colors: [[$r("app.string.error"), 0.0], [Color.Pink, 0.5], [Color.Blue, 1.0]]
-      },
-      { direction: GradientDirection.None, colors: [[Color.Pink, -1], [Color.Blue, 1.0]] },
-      { direction: GradientDirection.None, colors: [[$r("app.color.color"), 0.0], [Color.Blue, 0.33]] },
-      { direction: GradientDirection.None, colors: [['#3317A98D', 0.0], [Color.Blue, 0.88]] },
-      { direction: GradientDirection.None, colors: [[Color.Pink, 0.0], [Color.Blue, 10]] },
-    )
+  @State outlineLinearGradientList1: (PopupBorderLinearGradient)[] = [
+    {
+      direction: GradientDirection.None,
+      colors: [[Color.Yellow, 0.0], [Color.Green, 1.0]]
+    } as PopupBorderLinearGradient,
+    { direction: GradientDirection.None, colors: [[undefined, 0.0], [Color.Blue, 1.0]] } as PopupBorderLinearGradient,
+    { direction: GradientDirection.None, colors: [[0xc6d40d, 0.5]] } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [['rgb(255, 100, 255)', 0.0], [Color.Green, 0.5], [Color.Blue, 1.0]]
+    } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [['rgba(33, 23, 169, 0.50)', 0.0], [Color.Green, 0.1], [Color.Blue, 1.0]]
+    } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [[$r('app.string.error'), 0.0], [Color.Pink, 0.5], [Color.Blue, 1.0]]
+    } as PopupBorderLinearGradient,
+    { direction: GradientDirection.None, colors: [[Color.Pink, -1], [Color.Blue, 1.0]] } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [[$r('app.color.color'), 0.0], [Color.Blue, 0.33]]
+    } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [['#3317A98D', 0.0], [Color.Blue, 0.88]]
+    } as PopupBorderLinearGradient,
+    { direction: GradientDirection.None, colors: [[Color.Pink, 0.0], [Color.Blue, 10]] } as PopupBorderLinearGradient,
+  ]
   @State outlineLinearGradientIndex2: Int = 0;
-  @State outlineLinearGradientList2: Array<PopupBorderLinearGradient | undefined> =
-    new Array<PopupBorderLinearGradient | undefined>(
-      { direction: GradientDirection.None, colors: [[Color.Yellow, 0.0], [Color.Green, 1.0]] },
-      { direction: GradientDirection.None, colors: [[undefined, 0.0], [Color.Blue, 1.0]] } as PopupBorderLinearGradient,
-      { direction: GradientDirection.None, colors: [[0xc6d40d, 0.5]] },
-      {
-        direction: GradientDirection.None,
-        colors: [['rgb(255, 100, 255)', 0.0], [Color.Green, 0.5], [Color.Blue, 1.0]]
-      },
-      {
-        direction: GradientDirection.None,
-        colors: [['rgba(33, 23, 169, 0.50)', 0.0], [Color.Green, 0.1], [Color.Blue, 1.0]]
-      },
-      {
-        direction: GradientDirection.None,
-        colors: [[$r("app.string.error"), 0.0], [Color.Pink, 0.5], [Color.Blue, 1.0]]
-      },
-      { direction: GradientDirection.None, colors: [[Color.Pink, -1], [Color.Blue, 1.0]] },
-      { direction: GradientDirection.None, colors: [[$r("app.color.color"), 0.0], [Color.Blue, 0.33]] },
-      { direction: GradientDirection.None, colors: [['#3317A98D', 0.0], [Color.Blue, 0.88]] },
-      { direction: GradientDirection.None, colors: [[Color.Pink, 0.0], [Color.Blue, 10]] },
-    )
+  @State outlineLinearGradientList2: (PopupBorderLinearGradient)[] = [
+    {
+      direction: GradientDirection.None,
+      colors: [[Color.Yellow, 0.0], [Color.Green, 1.0]]
+    } as PopupBorderLinearGradient,
+    { direction: GradientDirection.None, colors: [[undefined, 0.0], [Color.Blue, 1.0]] } as PopupBorderLinearGradient,
+    { direction: GradientDirection.None, colors: [[0xc6d40d, 0.5]] } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [['rgb(255, 100, 255)', 0.0], [Color.Green, 0.5], [Color.Blue, 1.0]]
+    } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [['rgba(33, 23, 169, 0.50)', 0.0], [Color.Green, 0.1], [Color.Blue, 1.0]]
+    } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [[$r('app.string.error'), 0.0], [Color.Pink, 0.5], [Color.Blue, 1.0]]
+    } as PopupBorderLinearGradient,
+    { direction: GradientDirection.None, colors: [[Color.Pink, -1], [Color.Blue, 1.0]] } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [[$r('app.color.color'), 0.0], [Color.Blue, 0.33]]
+    } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [['#3317A98D', 0.0], [Color.Blue, 0.88]]
+    } as PopupBorderLinearGradient,
+    { direction: GradientDirection.None, colors: [[Color.Pink, 0.0], [Color.Blue, 10]] } as PopupBorderLinearGradient,
+  ]
   @State borderLinearGradientIndex: Int = 0;
-  @State borderLinearGradientList: Array<PopupBorderLinearGradient | undefined> =
-    new Array<PopupBorderLinearGradient | undefined>(
-      { direction: GradientDirection.None, colors: [[Color.Orange, 0.0], [Color.Red, 1.0]] },
-      { direction: GradientDirection.None, colors: [[Color.Red, 0.0], [undefined, 1.0]] } as PopupBorderLinearGradient,
-      { direction: GradientDirection.None, colors: [[0xc6d40d, 0.5]] },
-      { direction: GradientDirection.None, colors: [['rgb(255, 100, 255)', 0.0], ['#800080', 0.5], [Color.Red, 1.0]] },
-      {
-        direction: GradientDirection.None,
-        colors: [['rgba(33, 23, 169, 0.50)', 0.0], ['#800080', 0.1], [Color.Red, 1.0]]
-      },
-      {
-        direction: GradientDirection.None,
-        colors: [[$r("app.string.error"), 0.0], [Color.Pink, 0.5], [Color.Red, 1.0]]
-      },
-      { direction: GradientDirection.None, colors: [[Color.Pink, -1], [Color.Blue, 1.0]] },
-      { direction: GradientDirection.None, colors: [[$r("app.color.color"), 0.0], [Color.Blue, 0.33]] },
-      { direction: GradientDirection.None, colors: [['#3317A98D', 0.0], [Color.Blue, 0.88]] },
-      { direction: GradientDirection.None, colors: [[Color.Pink, 0.0], [Color.Blue, 10]] },
-    )
+  @State borderLinearGradientList: (PopupBorderLinearGradient)[] = [
+    { direction: GradientDirection.None, colors: [[Color.Orange, 0.0], [Color.Red, 1.0]] } as PopupBorderLinearGradient,
+    { direction: GradientDirection.None, colors: [[Color.Red, 0.0], [undefined, 1.0]] } as PopupBorderLinearGradient,
+    { direction: GradientDirection.None, colors: [[0xc6d40d, 0.5]] } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [['rgb(255, 100, 255)', 0.0], ['#800080', 0.5], [Color.Red, 1.0]]
+    } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [['rgba(33, 23, 169, 0.50)', 0.0], ['#800080', 0.1], [Color.Red, 1.0]]
+    } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [[$r('app.string.error'), 0.0], [Color.Pink, 0.5], [Color.Red, 1.0]]
+    } as PopupBorderLinearGradient,
+    { direction: GradientDirection.None, colors: [[Color.Pink, -1], [Color.Blue, 1.0]] } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [[$r('app.color.color'), 0.0], [Color.Blue, 0.33]]
+    } as PopupBorderLinearGradient,
+    {
+      direction: GradientDirection.None,
+      colors: [['#3317A98D', 0.0], [Color.Blue, 0.88]]
+    } as PopupBorderLinearGradient,
+    { direction: GradientDirection.None, colors: [[Color.Pink, 0.0], [Color.Blue, 10]] } as PopupBorderLinearGradient,
+  ]
 
   build() {
     Column({ space: 5 } as ColumnOptions) {
       Text(`enableArrow设置为true:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Row({ space: 5 } as RowOptions) {
         Button('Color_2_1.0')
           .id('1')
@@ -255,7 +289,7 @@ struct OpenPopupOutlineLinearGradientColors {
                 outlineWidth: 10,
                 outlineLinearGradient: {
                   direction: GradientDirection.None,
-                  colors: [[$r("app.string.error"), 0.0], [Color.Pink, 0.5], [Color.Blue, 1.0]]
+                  colors: [[$r('app.string.error'), 0.0], [Color.Pink, 0.5], [Color.Blue, 1.0]]
                 },
               } as PopupCommonOptions).then(() => {
                 console.info('---1130---openPopup success');
@@ -308,7 +342,7 @@ struct OpenPopupOutlineLinearGradientColors {
                 outlineWidth: 10,
                 outlineLinearGradient: {
                   direction: GradientDirection.None,
-                  colors: [[$r("app.color.color"), 0.0], [Color.Blue, 0.33]]
+                  colors: [[$r('app.color.color'), 0.0], [Color.Blue, 0.33]]
                 },
               } as PopupCommonOptions).then(() => {
                 console.info('---1130---openPopup success');
@@ -405,7 +439,7 @@ struct OpenPopupOutlineLinearGradientColors {
 
       Text(`enableArrow设置为false:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Row({ space: 5 } as RowOptions) {
         Button('Color_2_1.0')
           .id('12')
@@ -521,7 +555,7 @@ struct OpenPopupOutlineLinearGradientColors {
                 outlineWidth: 10,
                 outlineLinearGradient: {
                   direction: GradientDirection.None,
-                  colors: [[$r("app.string.error"), 0.0], [Color.Pink, 0.5], [Color.Blue, 1.0]]
+                  colors: [[$r('app.string.error'), 0.0], [Color.Pink, 0.5], [Color.Blue, 1.0]]
                 },
               } as PopupCommonOptions).then(() => {
                 console.info('---1130---openPopup success');
@@ -574,7 +608,7 @@ struct OpenPopupOutlineLinearGradientColors {
                 outlineWidth: 10,
                 outlineLinearGradient: {
                   direction: GradientDirection.None,
-                  colors: [[$r("app.color.color"), 0.0], [Color.Blue, 0.33]]
+                  colors: [[$r('app.color.color'), 0.0], [Color.Blue, 0.33]]
                 },
               } as PopupCommonOptions).then(() => {
                 console.info('---1130---openPopup success');
@@ -671,7 +705,7 @@ struct OpenPopupOutlineLinearGradientColors {
 
       Text(`内外描边结合:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Button('popup_false')
         .id('23')
         .onClick(() => {
@@ -720,14 +754,14 @@ struct OpenPopupOutlineLinearGradientColors {
           }
           ;
         })
-      Button("切换borderLinearGradient_colors : " + this.borderLinearGradientIndex)
+      Button('切换borderLinearGradient_colors : ' + this.borderLinearGradientIndex)
         .onClick(() => {
           this.borderLinearGradientIndex++
           if (this.borderLinearGradientIndex >= this.borderLinearGradientList.length) {
             this.borderLinearGradientIndex = 0
           }
         })
-      Button("切换outlineLinearGradient_colors : " + this.outlineLinearGradientIndex)
+      Button('切换outlineLinearGradient_colors : ' + this.outlineLinearGradientIndex)
         .onClick(() => {
           this.outlineLinearGradientIndex++
           if (this.outlineLinearGradientIndex >= this.outlineLinearGradientList.length) {

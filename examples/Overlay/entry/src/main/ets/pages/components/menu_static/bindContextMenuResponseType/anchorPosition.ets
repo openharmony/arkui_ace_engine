@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -34,39 +36,39 @@ let endIcon: ResourceStr = $r('app.media.startIcon')
 let subMenuExpandingMode: SubMenuExpandingMode | undefined = SubMenuExpandingMode.SIDE_EXPAND;
 
 @Builder
-function SubMenuBuilder() {
+function subMenuBuilder() {
   Menu() {
     MenuItem({
       startIcon: startIcon,
-      content: "图标",
-      builder: SubMenuBuilder,
+      content: '图标',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "列表",
-      builder: SubMenuBuilder,
+      content: '列表',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
   }.backgroundColor(Color.Grey)
 }
 
 @Builder
-function MyMenu() {
+function menuBuilder() {
   Menu() {
     MenuItem({
       startIcon: startIcon,
       endIcon: endIcon,
-      content: "新建文件夹",
-      builder: SubMenuBuilder,
+      content: '新建文件夹',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "排序方式",
-      builder: SubMenuBuilder,
+      content: '排序方式',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "查看方式",
-      builder: SubMenuBuilder,
+      content: '查看方式',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
   }
   .backgroundColor(Color.Grey)
@@ -110,7 +112,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+        .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
           anchorPosition: { x: '10px', y: '10px' }
         } as ContextMenuOptions)
       Text(`X:20vp;Y:20vp`)
@@ -118,7 +120,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+        .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
           anchorPosition: { x: '20vp', y: '20vp' }
         } as ContextMenuOptions)
       Text(`X:30fp;Y:30fp`)
@@ -126,7 +128,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+        .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
           anchorPosition: { x: '30fp', y: '30fp' }
         } as ContextMenuOptions)
       Text(`X:40lpx;Y:40lpx`)
@@ -134,7 +136,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+        .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
           anchorPosition: { x: '40lpx', y: '40lpx' }
         } as ContextMenuOptions)
       Text(`X:20%;Y:20%`)
@@ -142,7 +144,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+        .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
           anchorPosition: { x: '20%', y: '20%' }
         } as ContextMenuOptions)
       Text(`X:30;Y:30`)
@@ -150,7 +152,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+        .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
           anchorPosition: { x: 30, y: 30 }
         } as ContextMenuOptions)
       Text(`Resource-10vp`)
@@ -158,7 +160,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+        .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
           anchorPosition: { x: $r('app.float.outlineWidth'), y: $r('app.float.outlineWidth') }
         } as ContextMenuOptions)
       Text(`undefined`)
@@ -166,7 +168,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+        .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
           anchorPosition: { x: undefined, y: undefined }
         } as ContextMenuOptions)
       Text(`异常`)
@@ -174,7 +176,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+        .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
           anchorPosition: { x: -1, y: -1 }
         } as ContextMenuOptions)
       Text(`预览状态`)
@@ -182,7 +184,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+        .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
           preview: this.MyPreview,
           previewBorderRadius: 50,
           previewAnimationOptions: {
@@ -200,7 +202,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+        .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
           offset: { x: 100, y: 0 },
           anchorPosition: { x: 100, y: 0 }
         } as ContextMenuOptions)
@@ -209,7 +211,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+        .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
           placement: Placement.Left,
           anchorPosition: { x: 100, y: 100 }
         } as ContextMenuOptions)
@@ -240,7 +242,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(MyMenu, this.changeTypeList[this.changeTypeIndex], {
+        .bindContextMenu(menuBuilder, this.changeTypeList[this.changeTypeIndex], {
           anchorPosition: { x: this.changeXList[this.changeXIndex], y: this.changeYList[this.changeYIndex] }
         } as ContextMenuOptions)
 

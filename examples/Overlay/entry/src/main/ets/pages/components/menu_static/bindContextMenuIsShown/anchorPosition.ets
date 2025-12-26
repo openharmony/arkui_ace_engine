@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -34,39 +36,39 @@ let endIcon: ResourceStr = $r('app.media.startIcon')
 let subMenuExpandingMode: SubMenuExpandingMode | undefined = SubMenuExpandingMode.SIDE_EXPAND;
 
 @Builder
-function SubMenuBuilder() {
+function subMenuBuilder() {
   Menu() {
     MenuItem({
       startIcon: startIcon,
-      content: "图标",
-      builder: SubMenuBuilder,
+      content: '图标',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "列表",
-      builder: SubMenuBuilder,
+      content: '列表',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
   }.backgroundColor(Color.Grey)
 }
 
 @Builder
-function MyMenu() {
+function menuBuilder() {
   Menu() {
     MenuItem({
       startIcon: startIcon,
       endIcon: endIcon,
-      content: "新建文件夹",
-      builder: SubMenuBuilder,
+      content: '新建文件夹',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "排序方式",
-      builder: SubMenuBuilder,
+      content: '排序方式',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "查看方式",
-      builder: SubMenuBuilder,
+      content: '查看方式',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
   }
   .backgroundColor(Color.Grey)
@@ -116,7 +118,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(this.isShow0, MyMenu, {
+        .bindContextMenu(this.isShow0, menuBuilder, {
           anchorPosition: { x: '10px', y: '10px' }
         } as ContextMenuOptions)
         .onClick(() => {
@@ -127,7 +129,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(this.isShow1, MyMenu, {
+        .bindContextMenu(this.isShow1, menuBuilder, {
           anchorPosition: { x: '20vp', y: '20vp' }
         } as ContextMenuOptions)
         .onClick(() => {
@@ -138,7 +140,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(this.isShow2, MyMenu, {
+        .bindContextMenu(this.isShow2, menuBuilder, {
           anchorPosition: { x: '30fp', y: '30fp' }
         } as ContextMenuOptions)
         .onClick(() => {
@@ -149,7 +151,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(this.isShow3, MyMenu, {
+        .bindContextMenu(this.isShow3, menuBuilder, {
           anchorPosition: { x: '40lpx', y: '40lpx' }
         } as ContextMenuOptions)
         .onClick(() => {
@@ -160,7 +162,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(this.isShow4, MyMenu, {
+        .bindContextMenu(this.isShow4, menuBuilder, {
           anchorPosition: { x: '20%', y: '20%' }
         } as ContextMenuOptions)
         .onClick(() => {
@@ -171,7 +173,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(this.isShow5, MyMenu, {
+        .bindContextMenu(this.isShow5, menuBuilder, {
           anchorPosition: { x: 30, y: 30 }
         } as ContextMenuOptions)
         .onClick(() => {
@@ -182,7 +184,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(this.isShow6, MyMenu, {
+        .bindContextMenu(this.isShow6, menuBuilder, {
           anchorPosition: { x: $r('app.float.outlineWidth'), y: $r('app.float.outlineWidth') }
         } as ContextMenuOptions)
         .onClick(() => {
@@ -193,7 +195,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(this.isShow7, MyMenu, {
+        .bindContextMenu(this.isShow7, menuBuilder, {
           anchorPosition: { x: undefined, y: undefined }
         } as ContextMenuOptions)
         .onClick(() => {
@@ -204,7 +206,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(this.isShow8, MyMenu, {
+        .bindContextMenu(this.isShow8, menuBuilder, {
           anchorPosition: { x: -1, y: -1 }
         } as ContextMenuOptions)
         .onClick(() => {
@@ -215,7 +217,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(this.isShow9, MyMenu, {
+        .bindContextMenu(this.isShow9, menuBuilder, {
           preview: this.MyPreview,
           previewBorderRadius: 50,
           previewAnimationOptions: {
@@ -236,7 +238,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(this.isShow10, MyMenu, {
+        .bindContextMenu(this.isShow10, menuBuilder, {
           offset: { x: 100, y: 0 },
           anchorPosition: { x: 100, y: 0 }
         } as ContextMenuOptions)
@@ -248,7 +250,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(this.isShow11, MyMenu, {
+        .bindContextMenu(this.isShow11, menuBuilder, {
           placement: Placement.Left,
           anchorPosition: { x: 100, y: 100 }
         } as ContextMenuOptions)
@@ -274,7 +276,7 @@ struct Index {
         .backgroundColor(0x0000ff)
         .fontColor(0xffffff)
         .padding(5)
-        .bindContextMenu(this.isShow12, MyMenu, {
+        .bindContextMenu(this.isShow12, menuBuilder, {
           anchorPosition: { x: this.changeXList[this.changeXIndex], y: this.changeYList[this.changeYIndex] }
         } as ContextMenuOptions)
         .onClick(() => {

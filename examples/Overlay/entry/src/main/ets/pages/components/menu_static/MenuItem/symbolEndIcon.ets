@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -28,10 +30,6 @@ import { UIContext, PromptAction, TargetInfo } from '@ohos.arkui.UIContext'
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
 import promptAction from '@ohos.promptAction';
 import hilog from '@ohos.hilog'
-
-let startIcon: ResourceStr = $r('app.media.startIcon')
-let endIcon: ResourceStr = $r('app.media.startIcon')
-let subMenuExpandingMode: SubMenuExpandingMode | undefined = SubMenuExpandingMode.SIDE_EXPAND;
 
 @Entry
 @Component
@@ -42,22 +40,22 @@ struct Index {
   @State isShow: boolean = false;
 
   @Builder
-  MyMenu() {
+  menuBuilder() {
     Menu() {
       MenuItem({
         startIcon: $r('sys.symbol.ohos_mic'),
         symbolEndIcon: this.startIconModifier1,
-        content: "新建文件夹",
+        content: '新建文件夹',
       })
       MenuItem({
         startIcon: undefined,
         symbolEndIcon: this.startIconModifier2,
-        content: "排序方式",
+        content: '排序方式',
       })
       MenuItem({
         startIcon: $r('sys.symbol.ohos_mic'),
         symbolEndIcon: undefined,
-        content: "查看方式",
+        content: '查看方式',
       })
     }
   }
@@ -68,7 +66,7 @@ struct Index {
       .onClick(() => {
         this.isShow = !this.isShow;
       })
-      .bindMenu(this.isShow, this.MyMenu, {
+      .bindMenu(this.isShow, this.menuBuilder, {
         mask: { color: 'rgba(23,169,141,0.5)', backgroundBlurStyle: BlurStyle.Thin }
       })
   }

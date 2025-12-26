@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -62,73 +64,35 @@ struct BindPopupOutlineWidth {
   @State handlePopup24: boolean = false;
   @State handlePopup25: boolean = false;
   @State outlineWidthIndex: Int = 0;
-  @State outlineWidthList: Array<Dimension | undefined> = new Array<Dimension | undefined>(
-    '1vp',
-    '10vp',
-    undefined,
-    0,
-    -1,
-    '2px',
-    '3.9fp',
-    '5vp',
-    '10lpx',
-    1000,
-    $r("app.string.width"),
-    $r("app.string.error")
-  )
+  @State outlineWidthList: (Dimension | undefined)[] = [
+    '1vp' as Dimension, '10vp' as Dimension, undefined, 0 as Dimension, -1 as Dimension, '2px' as Dimension,
+    '3.9fp' as Dimension, '5vp' as Dimension, '10lpx' as Dimension, 1000 as Dimension,
+    $r('app.string.width') as Dimension, $r('app.string.error') as Dimension,
+  ]
   @State outlineWidthIndex1: Int = 0;
-  @State outlineWidthList1: Array<Dimension | undefined> = new Array<Dimension | undefined>(
-    '1vp',
-    '10vp',
-    undefined,
-    0,
-    -1,
-    '2px',
-    '3.9fp',
-    '5vp',
-    '10lpx',
-    1000,
-    $r("app.string.width"),
-    $r("app.string.error")
-  )
+  @State outlineWidthList1: (Dimension | undefined)[] = [
+    '1vp' as Dimension, '10vp' as Dimension, undefined, 0 as Dimension, -1 as Dimension, '2px' as Dimension,
+    '3.9fp' as Dimension, '5vp' as Dimension, '10lpx' as Dimension, 1000 as Dimension,
+    $r('app.string.width') as Dimension, $r('app.string.error') as Dimension,
+  ]
   @State outlineWidthIndex2: Int = 0;
-  @State outlineWidthList2: Array<Dimension | undefined> = new Array<Dimension | undefined>(
-    '2vp',
-    '5vp',
-    '10vp',
-    undefined,
-    0,
-    -1,
-    '2px',
-    '3.9fp',
-    '5vp',
-    '10lpx',
-    1000,
-    $r("app.string.width"),
-    $r("app.string.error")
-  )
+  @State outlineWidthList2: (Dimension | undefined)[] = [
+    '2vp' as Dimension, '5vp' as Dimension, '10vp' as Dimension, undefined, 0 as Dimension, -1 as Dimension,
+    '2px' as Dimension, '3.9fp' as Dimension, '5vp' as Dimension, '10lpx' as Dimension, 1000 as Dimension,
+    $r('app.string.width') as Dimension, $r('app.string.error') as Dimension,
+  ]
   @State borderWidthIndex: Int = 0;
-  @State borderWidthList: Array<Dimension | undefined> = new Array<Dimension | undefined>(
-    '2vp',
-    '5vp',
-    '10vp',
-    undefined,
-    0,
-    -1,
-    '2px',
-    '3.9fp',
-    '5vp',
-    '10lpx',
-    1000,
-    $r("app.string.width"),
-    $r("app.string.error")
-  )
+  @State borderWidthList: (Dimension | undefined)[] = [
+    '2vp' as Dimension, '5vp' as Dimension, '10vp' as Dimension, undefined, 0 as Dimension,
+    -1 as Dimension, '2px' as Dimension, '3.9fp' as Dimension, '5vp' as Dimension, '10lpx' as Dimension,
+    1000 as Dimension, $r('app.string.width') as Dimension, $r('app.string.error') as Dimension,
+  ]
 
   build() {
     Column({ space: 5 } as ColumnOptions) {
       Text(`enableArrow设置为true:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Row({ space: 5 } as RowOptions) {
         Button('10vp')
           .onClick(() => {
@@ -148,7 +112,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup1 = false;
               }
             }
-
           })
         Button('0')
           .onClick(() => {
@@ -168,7 +131,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup2 = false;
               }
             }
-
           })
         Button('2px')
           .onClick(() => {
@@ -188,9 +150,7 @@ struct BindPopupOutlineWidth {
                 this.handlePopup3 = false;
               }
             }
-
           })
-
         Button('3.9fp')
           .onClick(() => {
             this.handlePopup4 = !this.handlePopup4;
@@ -209,7 +169,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup4 = false;
               }
             }
-
           })
         Button('5vp')
           .onClick(() => {
@@ -229,7 +188,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup5 = false;
               }
             }
-
           })
       }
 
@@ -252,7 +210,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup6 = false;
               }
             }
-
           })
         Button('1000')
           .onClick(() => {
@@ -272,7 +229,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup7 = false;
               }
             }
-
           })
         Button('-1')
           .onClick(() => {
@@ -292,7 +248,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup8 = false;
               }
             }
-
           })
         Button('app.string.width')
           .onClick(() => {
@@ -302,7 +257,7 @@ struct BindPopupOutlineWidth {
             message: this.message,
             placement: Placement.Bottom,
             enableArrow: true,
-            outlineWidth: $r("app.string.width"),
+            outlineWidth: $r('app.string.width'),
             outlineLinearGradient: {
               direction: GradientDirection.None,
               colors: [[Color.Pink, 0.0], [Color.Blue, 1.0]]
@@ -312,7 +267,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup9 = false;
               }
             }
-
           })
       }
 
@@ -325,7 +279,7 @@ struct BindPopupOutlineWidth {
             message: this.message,
             placement: Placement.Bottom,
             enableArrow: true,
-            outlineWidth: $r("app.string.error"),
+            outlineWidth: $r('app.string.error'),
             outlineLinearGradient: {
               direction: GradientDirection.None,
               colors: [[Color.Pink, 0.0], [Color.Blue, 1.0]]
@@ -335,7 +289,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup20 = false;
               }
             }
-
           })
         Button('undefined')
           .onClick(() => {
@@ -355,7 +308,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup21 = false;
               }
             }
-
           })
       }
 
@@ -378,9 +330,8 @@ struct BindPopupOutlineWidth {
                 this.handlePopup = false;
               }
             }
-
           })
-        Button("动态切换 : " + this.outlineWidthList[this.outlineWidthIndex])
+        Button('动态切换 : ' + this.outlineWidthList[this.outlineWidthIndex])
           .onClick(() => {
             setTimeout(() => {
               this.outlineWidthIndex++
@@ -393,7 +344,7 @@ struct BindPopupOutlineWidth {
 
       Text(`enableArrow设置为false:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Row({ space: 5 } as RowOptions) {
         Button('10vp')
           .onClick(() => {
@@ -413,7 +364,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup10 = false;
               }
             }
-
           })
         Button('0')
           .onClick(() => {
@@ -433,7 +383,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup11 = false;
               }
             }
-
           })
         Button('2px')
           .onClick(() => {
@@ -453,7 +402,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup12 = false;
               }
             }
-
           })
         Button('3.9fp')
           .onClick(() => {
@@ -473,7 +421,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup13 = false;
               }
             }
-
           })
         Button('5vp')
           .onClick(() => {
@@ -493,7 +440,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup14 = false;
               }
             }
-
           })
       }
 
@@ -516,7 +462,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup15 = false;
               }
             }
-
           })
         Button('1000')
           .onClick(() => {
@@ -536,7 +481,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup16 = false;
               }
             }
-
           })
         Button('-1')
           .onClick(() => {
@@ -556,7 +500,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup17 = false;
               }
             }
-
           })
         Button('app.string.width')
           .onClick(() => {
@@ -566,7 +509,7 @@ struct BindPopupOutlineWidth {
             message: this.message,
             placement: Placement.Bottom,
             enableArrow: false,
-            outlineWidth: $r("app.string.width"),
+            outlineWidth: $r('app.string.width'),
             outlineLinearGradient: {
               direction: GradientDirection.None,
               colors: [[Color.Pink, 0.0], [Color.Blue, 1.0]]
@@ -576,7 +519,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup18 = false;
               }
             }
-
           })
       }
 
@@ -589,7 +531,7 @@ struct BindPopupOutlineWidth {
             message: this.message,
             placement: Placement.Bottom,
             enableArrow: false,
-            outlineWidth: $r("app.string.error"),
+            outlineWidth: $r('app.string.error'),
             outlineLinearGradient: {
               direction: GradientDirection.None,
               colors: [[Color.Pink, 0.0], [Color.Blue, 1.0]]
@@ -599,7 +541,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup22 = false;
               }
             }
-
           })
         Button('undefined')
           .onClick(() => {
@@ -619,7 +560,6 @@ struct BindPopupOutlineWidth {
                 this.handlePopup23 = false;
               }
             }
-
           })
       }
 
@@ -642,9 +582,8 @@ struct BindPopupOutlineWidth {
                 this.handlePopup19 = false;
               }
             }
-
           })
-        Button("动态切换 : " + this.outlineWidthList1[this.outlineWidthIndex1])
+        Button('动态切换 : ' + this.outlineWidthList1[this.outlineWidthIndex1])
           .onClick(() => {
             setTimeout(() => {
               this.outlineWidthIndex1++
@@ -657,7 +596,7 @@ struct BindPopupOutlineWidth {
 
       Text(`内外描边结合:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Button('popup_false')
         .onClick(() => {
           this.handlePopup24 = !this.handlePopup24;
@@ -706,14 +645,14 @@ struct BindPopupOutlineWidth {
             }
           }
         })
-      Button("动态切换outlineWidth : " + this.outlineWidthList2[this.outlineWidthIndex2])
+      Button('动态切换outlineWidth : ' + this.outlineWidthList2[this.outlineWidthIndex2])
         .onClick(() => {
           this.outlineWidthIndex2++
           if (this.outlineWidthIndex2 >= this.outlineWidthList2.length) {
             this.outlineWidthIndex2 = 0
           }
         })
-      Button("动态切换borderWidth : " + this.borderWidthList[this.borderWidthIndex])
+      Button('动态切换borderWidth : ' + this.borderWidthList[this.borderWidthIndex])
         .onClick(() => {
           this.borderWidthIndex++
           if (this.borderWidthIndex >= this.borderWidthList.length) {

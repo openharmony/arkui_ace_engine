@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -34,39 +36,39 @@ let endIcon: ResourceStr = $r('app.media.startIcon')
 let subMenuExpandingMode: SubMenuExpandingMode | undefined = SubMenuExpandingMode.SIDE_EXPAND;
 
 @Builder
-function SubMenuBuilder() {
+function subMenuBuilder() {
   Menu() {
     MenuItem({
       startIcon: startIcon,
-      content: "图标",
-      builder: SubMenuBuilder,
+      content: '图标',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "列表",
-      builder: SubMenuBuilder,
+      content: '列表',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
   }.backgroundColor(Color.Grey)
 }
 
 @Builder
-function MyMenu() {
+function menuBuilder() {
   Menu() {
     MenuItem({
       startIcon: startIcon,
       endIcon: endIcon,
-      content: "新建文件夹",
-      builder: SubMenuBuilder,
+      content: '新建文件夹',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "排序方式",
-      builder: SubMenuBuilder,
+      content: '排序方式',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "查看方式",
-      builder: SubMenuBuilder,
+      content: '查看方式',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
   }
   .backgroundColor(Color.Grey)
@@ -110,7 +112,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow0, MyMenu, {
+          .bindContextMenu(this.isShow0, menuBuilder, {
             outlineWidth: '10px',
             outlineColor: Color.Red
           } as ContextMenuOptions)
@@ -122,7 +124,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow1, MyMenu, {
+          .bindContextMenu(this.isShow1, menuBuilder, {
             outlineWidth: '10px',
             outlineColor: '#FFFFFF00'
           } as ContextMenuOptions)
@@ -134,7 +136,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow2, MyMenu, {
+          .bindContextMenu(this.isShow2, menuBuilder, {
             outlineWidth: '10px',
             outlineColor: 12345
           } as ContextMenuOptions)
@@ -149,7 +151,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow3, MyMenu, {
+          .bindContextMenu(this.isShow3, menuBuilder, {
             outlineWidth: '10px',
             outlineColor: $r('app.color.blue')
           } as ContextMenuOptions)
@@ -161,7 +163,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow4, MyMenu, {
+          .bindContextMenu(this.isShow4, menuBuilder, {
             outlineWidth: '10px',
             outlineColor: undefined
           } as ContextMenuOptions)
@@ -173,7 +175,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow5, MyMenu, {
+          .bindContextMenu(this.isShow5, menuBuilder, {
             outlineWidth: '10px',
             outlineColor: {
               left: Color.Red,
@@ -193,7 +195,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow6, MyMenu, {
+          .bindContextMenu(this.isShow6, menuBuilder, {
             outlineWidth: '10px',
             outlineColor: $r('app.string.errorColor')
           } as ContextMenuOptions)
@@ -205,7 +207,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow7, MyMenu, {
+          .bindContextMenu(this.isShow7, menuBuilder, {
             outlineWidth: '10px',
             outlineColor: 'rgba(23,169,141,0.5)'
           } as ContextMenuOptions)
@@ -227,7 +229,7 @@ struct Index {
           .backgroundColor(0x0000ff)
           .fontColor(0xffffff)
           .padding(5)
-          .bindContextMenu(this.isShow8, MyMenu, {
+          .bindContextMenu(this.isShow8, menuBuilder, {
             outlineWidth: '10px',
             outlineColor: this.changeList[this.changeIndex]
 

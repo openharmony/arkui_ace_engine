@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -34,38 +36,38 @@ let endIcon: ResourceStr = $r('app.media.startIcon')
 let subMenuExpandingMode: SubMenuExpandingMode | undefined = SubMenuExpandingMode.SIDE_EXPAND;
 
 @Builder
-function SubMenuBuilder() {
+function subMenuBuilder() {
   Menu() {
     MenuItem({
       startIcon: $r('app.media.startIcon'),
-      content: "图标",
-      builder: SubMenuBuilder,
+      content: '图标',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: $r('app.media.startIcon'),
-      content: "列表",
-      builder: SubMenuBuilder,
+      content: '列表',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
   }.backgroundColor(Color.Grey)
 }
 
 @Builder
-function MyMenu() {
+function menuBuilder() {
   Menu() {
     MenuItem({
       startIcon: startIcon,
       endIcon: endIcon,
-      content: "新建文件夹",
-      builder: SubMenuBuilder,
+      content: '新建文件夹',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      content: "排序方式",
-      builder: SubMenuBuilder,
+      content: '排序方式',
+      builder: subMenuBuilder,
     } as MenuItemOptions)
     MenuItem({
       startIcon: startIcon,
-      builder: SubMenuBuilder,
+      builder: subMenuBuilder,
     } as MenuItemOptions)
   }
   .backgroundColor(Color.Grey)
@@ -132,7 +134,7 @@ struct Index {
           .id('open1')
           .padding(5)
           .onClick(() => {
-            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(MyMenu));
+            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(menuBuilder));
             try {
               this.promptAction.openMenu(contentNode, this.targetInfo1, {
                 title: 'Color.Red',
@@ -159,7 +161,7 @@ struct Index {
           .id('open2')
           .padding(5)
           .onClick(() => {
-            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(MyMenu));
+            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(menuBuilder));
             try {
               this.promptAction.openMenu(contentNode, this.targetInfo2, {
                 title: '#FFFFFF00',
@@ -186,7 +188,7 @@ struct Index {
           .id('open3')
           .padding(5)
           .onClick(() => {
-            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(MyMenu));
+            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(menuBuilder));
             try {
               this.promptAction.openMenu(contentNode, this.targetInfo3, {
                 title: '12345',
@@ -216,7 +218,7 @@ struct Index {
           .id('open4')
           .padding(5)
           .onClick(() => {
-            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(MyMenu));
+            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(menuBuilder));
             try {
               this.promptAction.openMenu(contentNode, this.targetInfo4, {
                 title: 'app.color.blue',
@@ -243,7 +245,7 @@ struct Index {
           .id('open5')
           .padding(5)
           .onClick(() => {
-            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(MyMenu));
+            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(menuBuilder));
             try {
               this.promptAction.openMenu(contentNode, this.targetInfo5, {
                 title: 'undefined',
@@ -270,7 +272,7 @@ struct Index {
           .id('open6')
           .padding(5)
           .onClick(() => {
-            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(MyMenu));
+            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(menuBuilder));
             try {
               this.promptAction.openMenu(contentNode, this.targetInfo6, {
                 title: 'EdgeColors',
@@ -305,7 +307,7 @@ struct Index {
           .id('open7')
           .padding(5)
           .onClick(() => {
-            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(MyMenu));
+            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(menuBuilder));
             try {
               this.promptAction.openMenu(contentNode, this.targetInfo7, {
                 title: '异常',
@@ -332,7 +334,7 @@ struct Index {
           .id('open8')
           .padding(5)
           .onClick(() => {
-            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(MyMenu));
+            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(menuBuilder));
             try {
               this.promptAction.openMenu(contentNode, this.targetInfo8, {
                 title: 'rgba(23,169,141,0.5)',
@@ -369,7 +371,7 @@ struct Index {
           .id('open')
           .padding(5)
           .onClick(() => {
-            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(MyMenu));
+            let contentNode = new ComponentContent(this.uiContext, wrapBuilder(menuBuilder));
             try {
               this.promptAction.openMenu(contentNode, this.targetInfo, {
                 title: '' + this.changeList[this.changeIndex],
