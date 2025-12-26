@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@ const MeasureText = requireNapi('measure');
 const hilog = requireNapi('hilog');
 const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const i18n = requireNapi('i18n');
 const PUBLIC_MORE = {
     'id': -1,
     'type': 40000,
@@ -172,6 +173,10 @@ export class TabTitleBar extends ViewPU {
         this.__fontSize.set(l47);
     }
 
+    GradientMaskArray(k, l, m = null) {
+        this.GradientMask.bind(this)(k, l[0], l[1], l[2], l[3]);
+    }
+
     GradientMask(a47, b47, c47, d47, e47, f47 = null) {
         this.observeComponentCreation2((j47, k47) => {
             Column.create();
@@ -231,6 +236,18 @@ export class TabTitleBar extends ViewPU {
             }
             this.tabOffsets.push(v46);
         });
+    }
+
+    isRTL() {
+        try {
+            return i18n?.isRTL(i18n?.System?.getSystemLanguage()) ?? false;
+        }
+        catch (k211) {
+            const l211 = k211?.code;
+            const m211 = k211?.message;
+            hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to check RTL status, code: ${l211}, message: ${m211}`);
+            return false;
+        }
     }
 
     initialRender() {
@@ -347,11 +364,13 @@ export class TabTitleBar extends ViewPU {
         ForEach.pop();
         List.pop();
         Column.pop();
-        this.GradientMask.bind(this)(this.leftContext2D, 0, TabTitleBar.totalHeight / 2, TabTitleBar.gradientMaskWidth,
-            TabTitleBar.totalHeight / 2);
+        this.GradientMaskArray.bind(this)(this.isRTL() ? this.rightContext2D : this.leftContext2D, this.isRTL() ?
+            [TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2, 0, TabTitleBar.totalHeight / 2] :
+            [0, TabTitleBar.totalHeight / 2, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2]);
         Stack.pop();
-        this.GradientMask.bind(this)(this.rightContext2D, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2, 0,
-            TabTitleBar.totalHeight / 2);
+        this.GradientMaskArray.bind(this)(this.isRTL() ? this.leftContext2D : this.rightContext2D, this.isRTL() ?
+            [0, TabTitleBar.totalHeight / 2, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2] :
+            [TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2, 0, TabTitleBar.totalHeight / 2]);
         Stack.pop();
         this.observeComponentCreation2((a45, b45) => {
             If.create();
@@ -671,7 +690,7 @@ class CollapsibleMenuSection extends ViewPU {
         } catch (z43) {
             let a44 = z43?.code;
             let b44 = z43?.message;
-            hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${a44}, message: ${b44}`);
+            hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to decideFontScale,cause, code: ${a44}, message: ${b44}`);
         }
         this.menuItems.forEach((x43, y43) => {
             if (x43.isEnabled && this.firstFocusableIndex === -1 &&
@@ -1151,7 +1170,7 @@ class TabContentItem extends ViewPU {
             } catch (e41) {
                 let f41 = e41?.code;
                 let g41 = e41?.message;
-                hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${f41},message:${g41}`);
+                hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to TabTitleBar toStringFormat,code: ${f41},message:${g41}`);
             }
             return d41;
         }
@@ -1572,7 +1591,7 @@ class ImageMenuItem extends ViewPU {
             } catch (d39) {
                 let e39 = d39?.code;
                 let f39 = d39?.message;
-                hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${e39},message:${f39}`);
+                hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to TabTitleBar toStringFormat,code: ${e39},message:${f39}`);
             }
             return c39;
         }
@@ -1585,7 +1604,7 @@ class ImageMenuItem extends ViewPU {
             } catch (d39) {
                 let e39 = d39?.code;
                 let f39 = d39?.message;
-                hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${e39},message:${f39}`);
+                hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to TabTitleBar toStringFormat,code: ${e39},message:${f39}`);
             }
         } else if (this.item.accessibilityText) {
             return this.item.accessibilityText;
@@ -2184,7 +2203,7 @@ class TabTitleBarDialog extends ViewPU {
         } catch (z43) {
             let a44 = z43?.code;
             let b44 = z43?.message;
-            hilog.error(0x3900, 'tabTitleBar', `Faild to getSystemFontScale,cause, code: ${a44}, message: ${b44}`);
+            hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to getSystemFontScale,cause, code: ${a44}, message: ${b44}`);
         }
     }
 
