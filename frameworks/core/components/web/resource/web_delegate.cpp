@@ -9730,7 +9730,7 @@ void WebDelegate::OnPdfLoadEvent(int32_t result, const std::string& url)
 
 void WebDelegate::OnMediaCastEnter()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "zwp: WebDelegate::OnMediaCastEnter");
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnMediaCastEnter");
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     auto OnMediaCastEnterCallback = webPattern->GetOnMediaCastEnterCallback();
