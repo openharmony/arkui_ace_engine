@@ -241,8 +241,12 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_005, TestSize.Level1)
 HWTEST_F(WebPatternEventTest, WebPatternTestNg_006, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-
+    g_webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ABOUT_TO_DISAPPEAR);
+    EXPECT_FALSE(g_webPattern->isMenuShownFromWebBeforeStartClose_);
+    EXPECT_TRUE(g_webPattern->isLastEventMenuClose_);
+    
     g_webPattern->isLastEventMenuClose_ = true;
+    g_webPattern->lastMenuCloseTimestamp_ = GetCurrentTimestamp();
     MouseInfo info;
     info.SetAction(MouseAction::WINDOW_ENTER);
     g_webPattern->SupplementMouseEventsIfNeeded(info, 1, std::vector<int32_t>());
@@ -271,20 +275,20 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_006, TestSize.Level1)
 HWTEST_F(WebPatternEventTest, WebPatternTestNg_007, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    g_webPattern->isMenuShownFromWeb_ = true;
+    g_webPattern->isMenuShownFromWebBeforeStartClose_ = true;
     MouseInfo info;
     info.SetAction(MouseAction::PRESS);
     bool result = g_webPattern->CheckShouldBlockMouseEvent(info);
     EXPECT_TRUE(result);
 
-    g_webPattern->isMenuShownFromWeb_ = true;
+    g_webPattern->isMenuShownFromWebBeforeStartClose_ = true;
     MouseInfo infoHoverExit;
     infoHoverExit.SetAction(MouseAction::HOVER_EXIT);
     bool resultExit = g_webPattern->CheckShouldBlockMouseEvent(infoHoverExit);
     EXPECT_TRUE(resultExit);
     ASSERT_NE(g_webPattern->delegate_, nullptr);
     g_webPattern->delegate_->SetIsFileSelectorShow(false);
-    g_webPattern->isMenuShownFromWeb_ = false;
+    g_webPattern->isMenuShownFromWebBeforeStartClose_ = false;
     g_webPattern->isDragging_ = true;
     MouseInfo infoDrag;
     infoDrag.SetAction(MouseAction::HOVER_EXIT);
