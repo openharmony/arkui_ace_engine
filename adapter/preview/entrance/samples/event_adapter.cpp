@@ -64,6 +64,8 @@ const std::map<int, KeyCode> CODE_MAP = {
 };
 } // namespace
 
+SINGLETON_INSTANCE_IMPL(EventAdapter);
+
 EventAdapter::EventAdapter()
 {
     keyEvent_ = std::make_shared<KeyEvent>();

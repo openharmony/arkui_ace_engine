@@ -26,6 +26,10 @@
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 
+namespace OHOS::Ace {
+SINGLETON_INSTANCE_IMPL(Platform::EventDispatcher);
+}
+
 namespace OHOS::Ace::Platform {
 namespace {
 

@@ -593,6 +593,10 @@
       "OHOS::Ace::ElementRegister::AddUINode(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
       "OHOS::Ace::ElementRegister::GetNodeById(int)";
       "OHOS::Ace::ElementRegister::GetUINodeById(int)";
+      "OHOS::Ace::Singleton<OHOS::Ace::PluginManager>::GetInstance()";
+      "OHOS::Ace::Singleton<OHOS::Ace::ColorInverter>::GetInstance()";
+      "OHOS::Ace::Singleton<OHOS::Ace::DumpLog>::GetInstance()";
+      "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void ()>>::GetInstance()";
 
       construction?vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm-in-OHOS::Ace::NG::MovingPhotoLayoutAlgorithm;
       construction?vtable?for?OHOS::Ace::NG::EventHub-in-OHOS::Ace::NG::MovingPhotoEventHub;

@@ -19,6 +19,10 @@
 #include "core/components_ng/pattern/scrollable/selectable_item_event_hub.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
 
+namespace OHOS::Ace {
+SINGLETON_INSTANCE_IMPL(NG::SelectableUtils);
+}
+
 namespace OHOS::Ace::NG {
 namespace {
 RefPtr<FrameNode> FindItemParentNode(const RefPtr<FrameNode>& frameNode)

@@ -48,6 +48,8 @@
 
 namespace OHOS::Ace {
 
+SINGLETON_INSTANCE_IMPL(DeclarationCreatorManager);
+
 DeclarationCreatorManager::DeclarationCreatorManager() = default;
 DeclarationCreatorManager::~DeclarationCreatorManager() = default;
 

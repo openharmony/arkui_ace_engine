@@ -36,6 +36,8 @@ constexpr char TOAST_TWEEN_NAME[] = "toast";
 
 } // namespace
 
+SINGLETON_INSTANCE_IMPL(ToastComponent);
+
 ToastComponent::ToastComponent() = default;
 ToastComponent::~ToastComponent() = default;
 

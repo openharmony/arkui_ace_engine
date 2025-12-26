@@ -15,6 +15,10 @@
 
 #include "bridge/common/utils/module_buffer_reader.h"
 
+namespace OHOS::Ace {
+SINGLETON_INSTANCE_IMPL(Framework::ModuleBufferReader);
+}
+
 namespace OHOS::Ace::Framework {
 
 ModuleBufferReader::ModuleBufferReader() = default;
