@@ -35,10 +35,7 @@ export function memoRoot<Node extends IncrementalNode>(
 ): ComputableState<Node> {
     return manager.updatableNode<Node>(node, (context: StateContext) => {
         RuntimeProfiler.instance?.buildRootEnter()
-        const frozen = manager.frozen
-        manager.frozen = true // states are frozen during recomposition
         memoEntry1<Node, void>(context, KoalaCallsiteKeys.empty, update, node)
-        manager.frozen = frozen
         RuntimeProfiler.instance?.buildRootExit()
     })
 }
