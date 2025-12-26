@@ -151,7 +151,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0112, TestSize.Level1)
     RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
     auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     auto focusHubNull = AceType::MakeRefPtr<FocusHub>(WeakPtr<EventHub>(nullptr));
-    ASSERT_EQ(focusHubNull->GetChildPriorfocusNode(focusHub->focusScopeId_).Upgrade(), nullptr);
+    EXCEPT_EQ(focusHubNull->GetChildPriorfocusNode(focusHub->focusScopeId_).Upgrade(), nullptr);
 
     /**
      * @tc.steps2: call the function GetChildPriorfocusNode with focusScopeId_ empty
@@ -159,7 +159,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0112, TestSize.Level1)
      */
     focusHub->isGroup_ = false;
     auto childFocusHub = focusHub->GetChildPriorfocusNode(focusHub->focusScopeId_);
-    ASSERT_EQ(childFocusHub.Upgrade(), nullptr);
+    EXCEPT_EQ(childFocusHub.Upgrade(), nullptr);
 
     /**
      * @tc.steps2: call the function GetChildPriorfocusNode with focusScopeId_ = "1"
@@ -168,7 +168,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0112, TestSize.Level1)
     focusHub->isGroup_ = false;
     focusHub->focusScopeId_ = "1";
     childFocusHub = focusHub->GetChildPriorfocusNode(focusHub->focusScopeId_);
-    ASSERT_EQ(childFocusHub.Upgrade(), nullptr);
+    EXCEPT_EQ(childFocusHub.Upgrade(), nullptr);
 }
 
 /**
@@ -193,7 +193,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0113, TestSize.Level1)
      */
     focusHub->isFocusScope_ = true;
     focusHub->SetFocusScopePriority(focusScopeId, 0);
-    ASSERT_NE(focusHub->focusScopeId_, focusScopeId);
+    EXCEPT_EQ(focusHub->focusScopeId_, focusScopeId);
 
     /**
      * @tc.steps3: call the function SetFocusScopePriority with isFocusScope_ false
@@ -202,10 +202,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0113, TestSize.Level1)
     focusHub->isFocusScope_ = false;
     focusHub->focusPriority_ = FocusPriority::PRIOR;
     focusHub->SetFocusScopePriority(focusScopeId, 0);
-    ASSERT_EQ(focusHub->focusScopeId_, focusScopeId);
+    EXCEPT_EQ(focusHub->focusScopeId_, focusScopeId);
     focusHub->focusPriority_ = FocusPriority::AUTO;
     focusHub->SetFocusScopePriority(focusScopeId, 0);
-    ASSERT_EQ(focusHub->focusScopeId_, focusScopeId);
+    EXCEPT_EQ(focusHub->focusScopeId_, focusScopeId);
 
     /**
      * @tc.steps4: call the function SetFocusScopePriority with isFocusScope_ false and focusScopeId_ NE focusScopeId
@@ -213,11 +213,11 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0113, TestSize.Level1)
      */
     focusHub->focusPriority_ = FocusPriority::PRIOR;
     focusHub->SetFocusScopePriority(focusScopeId2, 0);
-    ASSERT_EQ(focusHub->focusScopeId_, focusScopeId2);
+    EXCEPT_EQ(focusHub->focusScopeId_, focusScopeId2);
     // focusPriority_ NE FocusPriority::AUTO
     focusHub->focusPriority_ = FocusPriority::AUTO;
     focusHub->SetFocusScopePriority(focusScopeId2, 0);
-    ASSERT_EQ(focusHub->focusScopeId_, focusScopeId2);
+    EXCEPT_EQ(focusHub->focusScopeId_, focusScopeId2);
 
     /**
      * @tc.steps5: call the function SetFocusScopePriority with isFocusScope_ false and focusScopeId empty
@@ -226,11 +226,11 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0113, TestSize.Level1)
     focusHub->isFocusScope_ = false;
     focusHub->focusScopeId_ = focusScopeId;
     focusHub->SetFocusScopePriority("", 2000);
-    ASSERT_EQ(focusHub->focusScopeId_, "");
+    EXCEPT_EQ(focusHub->focusScopeId_, "");
     // focusScopeId_ is empty
     focusHub->focusPriority_ = FocusPriority::PRIOR;
     focusHub->SetFocusScopePriority("", 2000);
-    ASSERT_EQ(focusHub->focusPriority_,  FocusPriority::AUTO);
+    EXCEPT_EQ(focusHub->focusPriority_,  FocusPriority::AUTO);
 }
 
 /**
@@ -266,10 +266,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0114, TestSize.Level1)
     focusHub->focusPriority_ = FocusPriority::PRIOR;
     focusHub->focusScopeId_ = "";
     focusHub->RemoveFocusScopeIdAndPriority();
-    ASSERT_EQ(focusHub->focusScopeId_, "");
+    EXCEPT_EQ(focusHub->focusScopeId_, "");
     focusHub->focusScopeId_ = "scop1";
     focusHub->RemoveFocusScopeIdAndPriority();
-    ASSERT_EQ(focusHub->focusScopeId_, "scop1");
+    EXCEPT_EQ(focusHub->focusScopeId_, "scop1");
 
     /**
      * @tc.steps3: call the function SetFocusScopePriority with isFocusScope_ false and focusPriority_ AUTO
@@ -278,10 +278,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0114, TestSize.Level1)
     focusHub->focusScopeId_ = "";
     focusHub->focusPriority_ = FocusPriority::AUTO;
     focusHub->RemoveFocusScopeIdAndPriority();
-    ASSERT_EQ(focusHub->focusScopeId_, "");
+    EXCEPT_EQ(focusHub->focusScopeId_, "");
     focusHub->focusScopeId_ = "scop1";
     focusHub->RemoveFocusScopeIdAndPriority();
-    ASSERT_EQ(focusHub->focusScopeId_, "scop1");
+    EXCEPT_EQ(focusHub->focusScopeId_, "scop1");
 }
 
 /**
@@ -305,7 +305,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0115, TestSize.Level1)
      */
     focusHub->focusType_ = FocusType::DISABLE;
     focusHub->SetFocusScopeId("scop2", true);
-    ASSERT_EQ(focusHub->focusScopeId_, "scop1");
+    EXCEPT_EQ(focusHub->focusScopeId_, "scop1");
 
     /**
      * @tc.steps3: call the function SetFocusScopeId with focusType_  FocusType::SCOPE and focusScopeId empty
@@ -318,7 +318,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0115, TestSize.Level1)
     EXCEPT_FALSE(focusHub->isFocusScope_);
     focusHub->focusScopeId_ = "scop1";
     focusHub->SetFocusScopeId("", true);
-    ASSERT_EQ(focusHub->focusScopeId_, "");
+    EXCEPT_EQ(focusHub->focusScopeId_, "");
     EXCEPT_FALSE(focusHub->isFocusScope_);
     EXCEPT_FALSE(focusHub->isGroup_);
 }
@@ -463,7 +463,7 @@ HWTEST_F(FocusHubTestNg, GetProjectAreaOnRect001, TestSize.Level1)
     rect = RectF(1, 1, 0, 0);
     projectRect = RectF(1, 1, 10, 0);
     focusHub->GetProjectAreaOnRect(rect, projectRect, step);
-    ASSERT_EQ(step, FocusStep::RIGHT);
+    EXPECT_EQ(step, FocusStep::RIGHT);
 }
 
 /**
@@ -485,7 +485,7 @@ HWTEST_F(FocusHubTestNg, GetFirstChildFocusView001, TestSize.Level1)
     auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     ASSERT_NE(focusHub, nullptr);
     RefPtr<FocusView> result = focusHub->GetFirstChildFocusView();
-    ASSERT_EQ(result, nullptr);
+    EXPECT_EQ(result, nullptr);
 }
 
 /**
@@ -673,7 +673,7 @@ HWTEST_F(FocusHubTestNg, ToJsonValue001, TestSize.Level1)
     RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(rootNode);
     auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    ASSERT_NE(focusHub, nullptr);
+    EXPECT_NE(focusHub, nullptr);
     focusHub->ToJsonValue(focusHub, json, filter);
 }
 
@@ -688,7 +688,7 @@ HWTEST_F(FocusHubTestNg, RemoveChild001, TestSize.Level1)
     RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(rootNode);
     auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    ASSERT_NE(focusHub, nullptr);
+    EXPECT_NE(focusHub, nullptr);
     focusHub->RemoveChild(focusHub, BlurReason::FOCUS_SWITCH);
 }
 
