@@ -391,6 +391,7 @@ export class Application {
             preState = uiContextRouter.getPreState();
         }
         ObserveSingleton.instance.updateDirty();
+        this.uiContext!.flushCallback();
         this.trackFrame(() => this.updateStates(this.manager!, rootState, preState));
         ObserveSingleton.instance.makeDelayedMutableStateChanges();
         while (StateUpdateLoop.len) {
