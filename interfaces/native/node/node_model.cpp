@@ -48,15 +48,37 @@ void* FindFunction(void* library, const char* name)
 }
 #else
 #include <dlfcn.h>
+class AceModule final {
+public:
+    AceModule()
+    {
+        const char libname[] = "libace_compatible.z.so";
+        handle_ = dlopen(libname, RTLD_LAZY | RTLD_LOCAL);
+        if (!handle_) {
+            TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot load libace: %{public}s", dlerror());
+        }
+    }
+    ~AceModule()
+    {
+        if (handle_) {
+            dlclose(handle_);
+            handle_ = nullptr;
+        }
+    }
+
+    void* GetHandle() const
+    {
+        return handle_;
+    }
+
+private:
+    void* handle_ = nullptr;
+};
+
 void* FindModule()
 {
-    const char libname[] = "libace_compatible.z.so";
-    void* result = dlopen(libname, RTLD_LAZY | RTLD_LOCAL);
-    if (result) {
-        return result;
-    }
-    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot load libace: %{public}s", dlerror());
-    return nullptr;
+    static AceModule module;
+    return module.GetHandle();
 }
 
 void* FindFunction(void* library, const char* name)
@@ -1097,7 +1119,6 @@ int32_t SetFrameDurations(void* object, uint32_t* durations, size_t size)
 
 int32_t GetFrameDurations(void* object, uint32_t* durations, size_t* size)
 {
-    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "GetFrameDurations 0");
     void* module = FindModule();
     if (!module) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
