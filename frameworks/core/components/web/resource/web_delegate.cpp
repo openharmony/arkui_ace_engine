@@ -9734,7 +9734,9 @@ void WebDelegate::OnMediaCastEnter()
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     auto OnMediaCastEnterCallback = webPattern->GetOnMediaCastEnterCallback();
-    OnMediaCastEnterCallback();
+    if (OnMediaCastEnterCallback) {
+        OnMediaCastEnterCallback();
+    }
 }
 
 void WebDelegate::SetForceEnableZoom(bool isEnabled)
