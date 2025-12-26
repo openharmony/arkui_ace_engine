@@ -54,10 +54,10 @@ void appendGroupedLog(int index, const char* str) {
 const char* getGroupedLog(int index) {
     if (index < static_cast<int>(groupedLogs.size())) {
         return groupedLogs[index]->log.c_str();
-        
     }
     return "";
 }
+
 
 int needGroupedLog(int index) {
     if (index < static_cast<int>(groupedLogs.size())) {

@@ -396,11 +396,11 @@ static Callback_Caller_Sync_t g_callbackCallerSync[API_KIND_MAX] = { 0 };
         INTEROP_FATAL("Maximum api kind is %d, received %d", API_KIND_MAX, apiKind);
 #define CHECK_HAS_CALLBACK_CALLER(apiKind, callbackCallers)                     \
     CHECK_VALID_API_KIND(apiKind);                                              \
-    if (callbackCallers[(apiKind)] == nullptr)                                    \
+    if ((callbackCallers)[(apiKind)] == nullptr)                                    \
         INTEROP_FATAL("Callback caller for api kind %d was not set", apiKind)
 #define CHECK_HAS_NOT_CALLBACK_CALLER(apiKind, callbackCallers)                 \
     CHECK_VALID_API_KIND(apiKind);                                              \
-    if (callbackCallers[(apiKind)] != nullptr)                                    \
+    if ((callbackCallers)[(apiKind)] != nullptr)                                    \
         INTEROP_FATAL("Callback caller for api kind %d already was set", apiKind)
 
 void setCallbackCaller(int apiKind, Callback_Caller_t callbackCaller) {
