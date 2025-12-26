@@ -939,6 +939,8 @@ HWTEST_F(TextFieldPatternTestTwo, UpdateErrorTextMargin001, TestSize.Level0)
     layoutProperty->margin_ = std::make_unique<MarginProperty>();
     ASSERT_NE(layoutProperty->margin_, nullptr);
     layoutProperty->margin_->bottom.emplace(Dimension(100.0));
+
+    // set showError and update error textmargin
     pattern->SetShowError();
     pattern->UpdateErrorTextMargin();
 
@@ -946,6 +948,10 @@ HWTEST_F(TextFieldPatternTestTwo, UpdateErrorTextMargin001, TestSize.Level0)
     pattern->UpdateErrorTextMargin();
     MockParagraph::enabled_ = true;
     EXPECT_NE(layoutProperty->margin_->bottom->GetDimension().ConvertToPx(), 100.0);
+
+    // set showError and update error textmargin
+    pattern->SetShowError();
+    pattern->UpdateErrorTextMargin();
 }
 
 /**
