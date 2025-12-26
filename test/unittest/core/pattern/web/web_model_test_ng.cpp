@@ -5660,10 +5660,10 @@ HWTEST_F(WebModelTestNg, SetOnMediaCastEnter001, TestSize.Level1)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
 
-    std::function<void()> callback = [&callbackCalled] {
+    std::function<void()> callback = [&callbackCalled] () {
         callbackCalled = true;
-    }
-    webPattern->SetOnMediaCastEnterCallback(std::move(callback))
+    };
+    webPattern->SetOnMediaCastEnterCallback(std::move(callback));
 
     auto callbackFunc = webPattern->GetOnMediaCastEnterCallback();
     if (callbackFunc) {
