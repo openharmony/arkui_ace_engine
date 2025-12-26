@@ -46,8 +46,6 @@ void AssignCast(std::optional<Position>& dst, const Ark_Position& src)
     dst->isPositionXy = true;
     dst->badgePositionX = Converter::OptConvert<Dimension>(src.x);
     dst->badgePositionY = Converter::OptConvert<Dimension>(src.y);
-    Validator::ValidateNonNegative(dst->badgePositionX);
-    Validator::ValidateNonNegative(dst->badgePositionY);
 }
 
 template<>
@@ -71,8 +69,8 @@ Style Convert(const Ark_BadgeStyle& src)
     dst.badgeColor = Converter::OptConvert<Color>(src.badgeColor);
     dst.badgeTextColor = Converter::OptConvert<Color>(src.color);
     dst.badgeBorderColor = Converter::OptConvert<Color>(src.borderColor);
-    dst.badgeFontSize = Converter::OptConvert<Dimension>(src.fontSize);
-    dst.badgeCircleSize = Converter::OptConvert<Dimension>(src.badgeSize);
+    dst.badgeFontSize = Converter::OptConvertFromF64ResourceStr(src.fontSize, DimensionUnit::FP);
+    dst.badgeCircleSize = Converter::OptConvertFromF64ResourceStr(src.badgeSize, DimensionUnit::FP);
     dst.badgeBorderWidth = Converter::OptConvert<Dimension>(src.borderWidth);
     dst.badgeFontWeight = Converter::OptConvert<FontWeight>(src.fontWeight);
     Validator::ValidateNonNegative(dst.badgeFontSize);
