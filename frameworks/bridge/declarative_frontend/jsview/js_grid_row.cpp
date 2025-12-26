@@ -38,9 +38,12 @@ GridRowModel* GridRowModel::GetInstance()
         static NG::GridRowModelNG instance;
         return &instance;
     } else {
-        static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("grid_row");
-        static GridRowModel* instance = loader ? reinterpret_cast<GridRowModel*>(loader->CreateModel()) : nullptr;
-        return instance;
+        static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("grid-row");
+        if (loader == nullptr) {
+            LOGF("Can't find grid-row loader");
+            abort();
+        }
+        return reinterpret_cast<GridRowModel*>(loader->CreateModel());
     }
 #endif
 }
