@@ -4794,6 +4794,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityFocusDrawLevel(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnTouchTestDoneAttribute(value: TouchTestDoneCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnTouchTestDone(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setSystemMaterialAttribute(value: uiMaterial.Material | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -6954,6 +6966,7 @@ export type SizeChangeCallback = (oldValue: SizeOptions, newValue: SizeOptions) 
 export type GestureRecognizerJudgeBeginCallback = (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>) => GestureJudgeResult;
 export type ShouldBuiltInRecognizerParallelWithCallback = (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer;
 export type TransitionFinishCallback = (transitionIn: boolean) => void;
+export type TouchTestDoneCallback = (event: BaseGestureEvent, recognizers: Array<GestureRecognizer>) => void;
 export type PixelMap = image.PixelMap;
 export enum DragBehavior {
     COPY = 0,
@@ -7960,6 +7973,9 @@ export interface CommonMethod {
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
         throw new Error("Unimplemented method accessibilityFocusDrawLevel")
     }
+    onTouchTestDone(value: TouchTestDoneCallback | undefined): this {
+        throw new Error("Unimplemented method onTouchTestDone")
+    }
     systemMaterial(value: uiMaterial.Material | undefined): this {
         throw new Error("Unimplemented method systemMaterial")
     }
@@ -8284,6 +8300,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onTouchIntercept_value?: ((value0: TouchEvent) => HitTestMode) | undefined
     onSizeChange_value?: SizeChangeCallback | undefined
     accessibilityFocusDrawLevel_value?: FocusDrawLevel | undefined
+    onTouchTestDone_value?: TouchTestDoneCallback | undefined
     systemMaterial_value?: uiMaterial.Material | undefined
     accessibilityStateDescription_value?: string | Resource | undefined
     accessibilityActionOptions_value?: AccessibilityActionOptions | undefined
@@ -8777,6 +8794,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
+        return this
+    }
+    onTouchTestDone(value: TouchTestDoneCallback | undefined): this {
         return this
     }
     systemMaterial(value: uiMaterial.Material | undefined): this {
@@ -10637,6 +10657,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("accessibilityFocusDrawLevel")) {
             const value_casted = value as (FocusDrawLevel | undefined)
             this.getPeer()?.setAccessibilityFocusDrawLevelAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onTouchTestDone(value: TouchTestDoneCallback | undefined): this {
+        if (this.checkPriority("onTouchTestDone")) {
+            const value_casted = value as (TouchTestDoneCallback | undefined)
+            this.getPeer()?.setOnTouchTestDoneAttribute(value_casted)
             return this
         }
         return this

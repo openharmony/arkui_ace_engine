@@ -336,6 +336,7 @@ typedef enum CallbackKind {
     Kind_TextTimerModifierBuilder = 505330174,
     Kind_TimerCallback = 938649756,
     Kind_ToggleModifierBuilder = -879751946,
+    Kind_TouchTestDoneCallback = -1411495064,
     Kind_TransitionFinishCallback = -1878458553,
     Kind_Type_CommonMethod_onDragStart = -201932855,
     Kind_Type_NavigationAttribute_customNavContentTransition = -1209910992,

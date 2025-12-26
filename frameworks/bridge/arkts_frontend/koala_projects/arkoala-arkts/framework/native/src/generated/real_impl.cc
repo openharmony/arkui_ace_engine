@@ -2199,6 +2199,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                             const Opt_FocusDrawLevel* value)
     {
     }
+    void SetOnTouchTestDoneImpl(Ark_NativePointer node,
+                                const Opt_TouchTestDoneCallback* value)
+    {
+    }
     void SetAccessibilityStateDescriptionImpl(Ark_NativePointer node,
                                               const Opt_Union_String_Resource* value)
     {
@@ -8813,6 +8817,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnTouchInterceptImpl,
             CommonMethodModifier::SetOnSizeChangeImpl,
             CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
+            CommonMethodModifier::SetOnTouchTestDoneImpl,
             CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
             CommonMethodModifier::SetAccessibilityActionOptionsImpl,
             CommonMethodModifier::SetExpandSafeAreaImpl,
@@ -14162,6 +14167,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_Boolean IsFingerCountLimitImpl(Ark_GestureRecognizer peer)
     {
         return {};
+    }
+    void PreventBeginImpl(Ark_GestureRecognizer peer)
+    {
     }
     } // GestureRecognizerAccessor
     namespace GestureStyleAccessor {
@@ -20793,6 +20801,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureRecognizerAccessor::IsValidImpl,
             GestureRecognizerAccessor::GetFingerCountImpl,
             GestureRecognizerAccessor::IsFingerCountLimitImpl,
+            GestureRecognizerAccessor::PreventBeginImpl,
         };
         return &GestureRecognizerAccessorImpl;
     }

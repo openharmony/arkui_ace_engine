@@ -1808,6 +1808,8 @@ typedef struct TimerCallback TimerCallback;
 typedef struct Opt_TimerCallback Opt_TimerCallback;
 typedef struct ToggleModifierBuilder ToggleModifierBuilder;
 typedef struct Opt_ToggleModifierBuilder Opt_ToggleModifierBuilder;
+typedef struct TouchTestDoneCallback TouchTestDoneCallback;
+typedef struct Opt_TouchTestDoneCallback Opt_TouchTestDoneCallback;
 typedef struct TransitionFinishCallback TransitionFinishCallback;
 typedef struct Opt_TransitionFinishCallback Opt_TransitionFinishCallback;
 typedef struct Type_CommonMethod_onDragStart Type_CommonMethod_onDragStart;
@@ -13653,6 +13655,16 @@ typedef struct Opt_ToggleModifierBuilder {
     Ark_Tag tag;
     ToggleModifierBuilder value;
 } Opt_ToggleModifierBuilder;
+typedef struct TouchTestDoneCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_BaseGestureEvent event, const Array_GestureRecognizer recognizers);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_BaseGestureEvent event, const Array_GestureRecognizer recognizers);
+} TouchTestDoneCallback;
+typedef struct Opt_TouchTestDoneCallback {
+    Ark_Tag tag;
+    TouchTestDoneCallback value;
+} Opt_TouchTestDoneCallback;
 typedef struct TransitionFinishCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -23419,6 +23431,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                             const Opt_SizeChangeCallback* value);
     void (*setAccessibilityFocusDrawLevel)(Ark_NativePointer node,
                                            const Opt_FocusDrawLevel* value);
+    void (*setOnTouchTestDone)(Ark_NativePointer node,
+                               const Opt_TouchTestDoneCallback* value);
     void (*setSystemMaterial)(Ark_NativePointer node,
                               const Opt_uiMaterial_Material* value);
     void (*setAccessibilityStateDescription)(Ark_NativePointer node,
@@ -27833,6 +27847,7 @@ typedef struct GENERATED_ArkUIGestureRecognizerAccessor {
     Ark_Boolean (*isValid)(Ark_GestureRecognizer peer);
     Ark_Int32 (*getFingerCount)(Ark_GestureRecognizer peer);
     Ark_Boolean (*isFingerCountLimit)(Ark_GestureRecognizer peer);
+    void (*preventBegin)(Ark_GestureRecognizer peer);
 } GENERATED_ArkUIGestureRecognizerAccessor;
 
 typedef struct GENERATED_ArkUIGestureStyleAccessor {
