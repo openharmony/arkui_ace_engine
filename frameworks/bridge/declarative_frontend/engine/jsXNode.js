@@ -96,13 +96,13 @@ class BaseNode extends ViewBuildNodeBase {
  */
 class Disposable {
     constructor() {
-        this.isDisposed_ = false;
+        this._isDisposed = false;
     }
     dispose() {
-        this.isDisposed_ = true;
+        this._isDisposed = true;
     }
     isDisposed() {
-        return this.isDisposed_;
+        return this._isDisposed;
     }
 }
 /*
@@ -1868,7 +1868,7 @@ class TypedFrameNode extends FrameNode {
         this.attrCreator_ = attrCreator;
     }
     dispose() {
-        this.isDisposed_ = true;
+        super.dispose();
         if (this.nodePtr_) {
             getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
         }

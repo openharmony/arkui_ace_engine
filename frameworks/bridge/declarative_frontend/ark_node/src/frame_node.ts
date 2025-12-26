@@ -1015,7 +1015,7 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
   }
 
   dispose() {
-    this.isDisposed_ = true;
+    super.dispose();
     if (this.nodePtr_) {
       getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
     }
