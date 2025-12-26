@@ -121,14 +121,10 @@ function createLazyNode(isRepeat: boolean): PeerNode {
 }
 
 class LazyItemCompositionContext {
-    private prevFrozen: boolean
     private prevNeedCreate: boolean
     private prevCurrent?: Object
 
     constructor(parentComponent?: Object) {
-        const manager = GlobalStateManager.instance
-        this.prevFrozen = manager.frozen
-        manager.frozen = true
         this.prevNeedCreate = setNeedCreate(true) // ensure synchronous creation of all inner CustomComponent
         this.prevCurrent = CustomComponent.current
         CustomComponent.current = parentComponent // setup CustomComponent context to link with @Provide variables
@@ -137,7 +133,6 @@ class LazyItemCompositionContext {
     exit(): void {
         CustomComponent.current = this.prevCurrent
         setNeedCreate(this.prevNeedCreate)
-        GlobalStateManager.instance.frozen = this.prevFrozen
     }
 }
 

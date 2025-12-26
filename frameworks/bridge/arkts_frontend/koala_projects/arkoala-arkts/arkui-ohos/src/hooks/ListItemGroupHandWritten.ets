@@ -46,10 +46,7 @@ export class ListItemGroupHandWritten {
                 GlobalStateManager.SetLocalManager(manager);
                 const builderNode = manager.updatableNode<PeerNode>(
                     ArkComponentRootPeer.create(undefined), (context: StateContext) => {
-                    const frozen = manager.frozen
-                    manager.frozen = true
                     memoEntry<void>(context, 0, valueBuilder)
-                    manager.frozen = frozen
                 })
                 GlobalStateManager.SetLocalManager(old);
                 ArkUIAniModule._SetListItemGroupHeader(
@@ -71,10 +68,7 @@ export class ListItemGroupHandWritten {
                 GlobalStateManager.SetLocalManager(manager);
                 const builderNode = manager.updatableNode<PeerNode>(
                     ArkComponentRootPeer.create(undefined), (context: StateContext) => {
-                    const frozen = manager.frozen
-                    manager.frozen = true
                     memoEntry<void>(context, 0, valueBuilder)
-                    manager.frozen = frozen
                 })
                 GlobalStateManager.SetLocalManager(old);
                 ArkUIAniModule._SetListItemGroupFooter(node.getPeer().peer.ptr, builderNode.value!.peer.ptr);

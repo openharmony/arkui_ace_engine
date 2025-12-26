@@ -79,12 +79,9 @@ function createUiDetachedBuilderRoot(
     instanceId: int32
 ): ComputableState<BuilderRootNode> {
     const node = manager.updatableNode<BuilderRootNode>(peerFactory(), (context: StateContext) => {
-        const frozen = manager.frozen
-        manager.frozen = true
         ArkUIAniModule._Common_Sync_InstanceId(instanceId)
         memoEntry<void>(context, 0, builder)
         ArkUIAniModule._Common_Restore_InstanceId()
-        manager.frozen = frozen
     })
     detachedStatMgt.set(new WeakRef<StateManager>(manager), new WeakRef<ComputableState<BuilderRootNode>>(node))
     return node
