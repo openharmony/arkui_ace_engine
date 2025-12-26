@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_static.h"
 #include "core/interfaces/native/implementation/dot_indicator_peer_impl.h"
 #include "core/interfaces/native/implementation/digit_indicator_peer_impl.h"

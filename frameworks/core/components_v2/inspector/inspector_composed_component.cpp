@@ -65,7 +65,6 @@
 #include "core/components_v2/inspector/stack_composed_element.h"
 #include "core/components_v2/inspector/stepper_composed_element.h"
 #include "core/components_v2/inspector/stepper_item_composed_element.h"
-#include "core/components_v2/inspector/swiper_composed_element.h"
 #include "core/components_v2/inspector/text_clock_composed_element.h"
 #include "core/components_v2/inspector/text_composed_element.h"
 #include "core/components_v2/inspector/texttimer_composed_element.h"
@@ -94,7 +93,8 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { ROW_SPLIT_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::RowSplitComposedElement>(id); } },
     { STACK_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::StackComposedElement>(id); } },
-    { SWIPER_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SwiperComposedElement>(id); } },
+    { SWIPER_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(SWIPER_ETS_TAG, id); } },
     { TAB_CONTENT_ITEM_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TAB_CONTENT, id); } },
     { TABS_COMPONENT_TAG, [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TABS, id); } },

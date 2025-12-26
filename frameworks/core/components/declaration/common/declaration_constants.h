@@ -28,7 +28,6 @@
 #include "core/components/declaration/richtext/rich_text_declaration.h"
 #include "core/components/declaration/side_bar/side_bar_declaration.h"
 #include "core/components/declaration/span/span_declaration.h"
-#include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components/declaration/text/text_declaration.h"
 #include "core/components/declaration/texttimer/texttimer_declaration.h"
 #include "core/components/declaration/web/web_declaration.h"
@@ -112,12 +111,6 @@ public:
     // default value of span
     static const std::shared_ptr<SpanAttribute> DEFAULT_SPAN_ATTR;
     static const std::shared_ptr<SpanStyle> DEFAULT_SPAN_STYLE;
-
-    // default value of swiper
-    static const std::shared_ptr<SwiperAttribute> DEFAULT_SWIPER_ATTR;
-    static const std::shared_ptr<SwiperStyle> DEFAULT_SWIPER_STYLE;
-    static const std::shared_ptr<SwiperEvent> DEFAULT_SWIPER_EVENT;
-    static const std::shared_ptr<SwiperMethod> DEFAULT_SWIPER_METHOD;
 
     // default value of text
     static const std::shared_ptr<TextSpecializedAttribute> DEFAULT_TEXT_ATTR;

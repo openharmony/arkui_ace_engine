@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_CIRCLE_DOT_INDICATOR_PAINT_METHOD_H
 
 #include "core/components/common/properties/swiper_indicator.h"
-#include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_modifier.h"
 #include "core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_paint_property.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
@@ -25,6 +24,7 @@
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/components_ng/pattern/swiper/swiper_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {

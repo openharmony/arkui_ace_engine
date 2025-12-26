@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
+#include "compatible/components/swiper/swiper_model_impl.h"
 
-#include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/swiper/swiper_component.h"
+#include "compatible/components/swiper/swiper_component.h"
+#include "core/components/swiper/swiper_indicator_theme.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -27,7 +27,15 @@ RefPtr<SwiperController> SwiperModelImpl::Create(bool isCreateArc)
     RefPtr<OHOS::Ace::SwiperComponent> component = AceType::MakeRefPtr<OHOS::Ace::SwiperComponent>(componentChildren);
 
     auto indicator = AceType::MakeRefPtr<OHOS::Ace::SwiperIndicator>();
-    auto indicatorTheme = JSViewAbstract::GetTheme<SwiperIndicatorTheme>();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto indicatorTheme = node ? themeManager->GetTheme<SwiperIndicatorTheme>(node->GetThemeScopeId())
+                               : themeManager->GetTheme<SwiperIndicatorTheme>();
     if (indicatorTheme) {
         indicator->InitStyle(indicatorTheme);
     }
@@ -39,7 +47,7 @@ RefPtr<SwiperController> SwiperModelImpl::Create(bool isCreateArc)
     component->SetCurve(Curves::LINEAR);
     ViewStackProcessor::GetInstance()->ClaimElementId(component);
     ViewStackProcessor::GetInstance()->Push(component);
-    JSInteractableView::SetFocusNode(true);
+    ViewAbstractModel::GetInstance()->SetFocusNode(true);
 
     return component->GetSwiperController();
 }

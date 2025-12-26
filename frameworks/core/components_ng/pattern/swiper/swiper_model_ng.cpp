@@ -24,7 +24,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/swiper/arc_swiper_pattern.h"
@@ -32,6 +31,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_controller.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
+#include "core/components_ng/pattern/swiper/swiper_change_event.h"
 
 namespace OHOS::Ace::NG {
 typedef enum {

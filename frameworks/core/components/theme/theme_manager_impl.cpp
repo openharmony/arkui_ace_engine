@@ -99,6 +99,7 @@
 #include "core/components_ng/pattern/navigation/navigation_bar_theme_wrapper.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme_wrapper.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme_wrapper.h"
+#include "core/components/swiper/swiper_indicator_theme.h"
 
 namespace OHOS::Ace {
 namespace {

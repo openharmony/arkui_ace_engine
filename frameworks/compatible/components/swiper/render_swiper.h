@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_RENDER_SWIPER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_RENDER_SWIPER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SWIPER_RENDER_SWIPER_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SWIPER_RENDER_SWIPER_H
 
 #include <functional>
 #include <map>
@@ -37,7 +37,7 @@
 #include "core/components/flex/render_flex.h"
 #include "core/components/text/render_text.h"
 #include "core/components/text/text_component.h"
-#include "core/components/swiper/swiper_component.h"
+#include "compatible/components/swiper/swiper_component.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/gestures/drag_recognizer.h"
 #include "core/gestures/raw_recognizer.h"
@@ -642,4 +642,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_RENDER_SWIPER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SWIPER_RENDER_SWIPER_H

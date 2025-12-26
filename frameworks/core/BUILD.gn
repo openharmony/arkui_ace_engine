@@ -185,7 +185,6 @@ template("ace_core_source_set") {
       "components/declaration/richtext/rich_text_declaration.cpp",
       "components/declaration/side_bar/side_bar_declaration.cpp",
       "components/declaration/span/span_declaration.cpp",
-      "components/declaration/swiper/swiper_declaration.cpp",
       "components/declaration/text/text_declaration.cpp",
       "components/declaration/texttimer/texttimer_declaration.cpp",
       "components/declaration/web/web_declaration.cpp",
@@ -418,7 +417,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/stack:ace_core_components_stack_$platform",
       "$ace_root/frameworks/core/components/stage:ace_core_components_stage_$platform",
       "$ace_root/frameworks/core/components/stepper:ace_core_components_stepper_$platform",
-      "$ace_root/frameworks/core/components/swiper:ace_core_components_swiper_$platform",
       "$ace_root/frameworks/core/components/text:ace_core_components_text_$platform",
       "$ace_root/frameworks/core/components/text_clock:ace_core_components_text_clock_$platform",
       "$ace_root/frameworks/core/components/text_span:ace_core_components_text_span_$platform",
@@ -446,7 +444,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_v2/inspector:ace_core_components_inspector_v2_$platform",
       "$ace_root/frameworks/core/components_v2/list:ace_core_components_list_v2_$platform",
       "$ace_root/frameworks/core/components_v2/pattern_lock:ace_core_components_pattern_lock_$platform",
-      "$ace_root/frameworks/core/components_v2/swiper:ace_core_components_swiper_v2_$platform",
       "$ace_root/frameworks/core/components_v2/water_flow:ace_core_components_water_flow_v2_$platform",
     ]
 

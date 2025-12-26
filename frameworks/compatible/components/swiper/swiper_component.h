@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,44 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_SWIPER_COMPONENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_SWIPER_COMPONENT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SWIPER_SWIPER_COMPONENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SWIPER_SWIPER_COMPONENT_H
 
 #include "core/components/common/layout/constants.h"
 #include "base/utils/macros.h"
 #include "core/components/common/properties/swiper_indicator.h"
-#include "core/components/declaration/swiper/swiper_declaration.h"
+#include "compatible/components/swiper/swiper_declaration.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 #include "core/pipeline/base/component_group.h"
+#include "core/components_ng/pattern/swiper/swiper_change_event.h"
 
 namespace OHOS::Ace {
 
 using SwiperChangeEndListener = std::function<void(int32_t)>;
 using MoveCallback = std::function<void(int32_t)>;
 
-class ACE_EXPORT SwiperChangeEvent : public BaseEventInfo, public EventToJSONStringAdapter {
-    DECLARE_RELATIONSHIP_OF_CLASSES(SwiperChangeEvent, BaseEventInfo, EventToJSONStringAdapter);
-
-public:
-    explicit SwiperChangeEvent(int32_t index) : BaseEventInfo("SwiperChangeEvent"), index_(index) {}
-    ~SwiperChangeEvent() = default;
-
-    int32_t GetIndex() const
-    {
-        return index_;
-    }
-
-    std::string ToJSONString() const override
-    {
-        return std::string(R"("change",{"index":)").append(std::to_string(index_).append("},null"));
-    }
-
-private:
-    int32_t index_ = 0;
-};
-
-class ACE_EXPORT SwiperComponent : public ComponentGroup {
+class ACE_FORCE_EXPORT SwiperComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(SwiperComponent, ComponentGroup);
 
 public:
@@ -231,4 +211,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_SWIPER_COMPONENT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SWIPER_SWIPER_COMPONENT_H

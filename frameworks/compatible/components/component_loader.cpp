@@ -44,6 +44,7 @@
 #include "compatible/components/toggle/toggle_loader.h"
 #include "compatible/components/toolbar/tool_bar_loader.h"
 #include "compatible/components/toolbaritem/tool_bar_item_loader.h"
+#include "compatible/components/swiper/swiper_loader.h"
 
 #include "compatible/components/video/video_loader.h"
 
@@ -115,6 +116,7 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "toggle", []() -> ComponentLoader* { return new ToggleLoader(); } },
         { "toolbar", []() -> ComponentLoader* { return new ToolBarLoader(); } },
         { "toolbar-item", []() -> ComponentLoader* { return new ToolBarItemLoader(); } },
+        { "swiper", []() -> ComponentLoader* { return new SwiperLoader(); } },
     };
     auto loaderIter = sLoaderMap.find(nameStr);
     if (loaderIter != sLoaderMap.end()) {

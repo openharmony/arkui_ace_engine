@@ -19,6 +19,7 @@
 #include "core/components/common/properties/color_factory.h"
 
 namespace OHOS::Ace::Framework {
+const char DOM_METHOD_APPEND[] = "append";
 namespace {
 
 const char LIGHT_RED_COLOR[] = "#EB4034";

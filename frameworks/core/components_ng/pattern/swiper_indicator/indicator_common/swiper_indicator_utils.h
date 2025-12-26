@@ -18,7 +18,6 @@
 
 #include <optional>
 
-#include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_layout_property.h"
 

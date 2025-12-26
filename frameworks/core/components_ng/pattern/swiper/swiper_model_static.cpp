@@ -15,9 +15,9 @@
 
 #include "core/components_ng/pattern/swiper/swiper_model_static.h"
 
-#include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_node.h"
+#include "core/components_ng/pattern/swiper/swiper_change_event.h"
 
 namespace {
 constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;

@@ -21,6 +21,8 @@
 #include "base/i18n/localization.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/base/rosen_render_context.h"
+#include "compatible/components/swiper/swiper_modifier.h"
+#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -520,6 +522,18 @@ void RosenRenderCalendar::HandleAdditionalConditions(RSCanvas* canvas, const Off
     }
 }
 
+const ArkUISwiperModifierCompatible* GetSwiperModifier()
+{
+    static const ArkUISwiperModifierCompatible* swiperModifier_ = nullptr;
+    if (swiperModifier_) {
+        return swiperModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("swiper");
+    CHECK_NULL_RETURN(loader, nullptr);
+    swiperModifier_ = reinterpret_cast<const ArkUISwiperModifierCompatible*>(loader->GetCustomModifier());
+    return swiperModifier_;
+}
+
 void RosenRenderCalendar::DrawTvCalendar(RSCanvas* canvas,
     const Offset& offset, const Offset& dayOffset, const CalendarDay& day, int32_t dateNumber)
 {
@@ -537,6 +551,7 @@ void RosenRenderCalendar::DrawTvCalendar(RSCanvas* canvas,
     if (!renderSwiper) {
         return;
     }
+    auto* modifier = GetSwiperModifier();
     int32_t selectedDay = selectedDayNumber_ + firstDayIndex_ - 1;
     auto x = dayOffset.GetX();
     auto y = dayOffset.GetY();
@@ -548,7 +563,7 @@ void RosenRenderCalendar::DrawTvCalendar(RSCanvas* canvas,
             SetNonFocusStyle(day, dateTextStyle, lunarTextStyle);
         }
     } else {
-        if (day.focused && day.month.month == currentMonth_.month && !renderSwiper->GetMoveStatus() &&
+        if (day.focused && day.month.month == currentMonth_.month && !modifier->getMoveStatus(renderSwiper) &&
             indexOfContainer_ == calendarController_->GetCurrentIndex()) {
             SetTextStyleColor(dateTextStyle, lunarTextStyle);
             DrawFocusedArea(canvas, offset, day, x, y);
@@ -557,7 +572,7 @@ void RosenRenderCalendar::DrawTvCalendar(RSCanvas* canvas,
         }
     }
 
-    if (selectedDay == (dateNumber - 1) && !calendarFocusStatus_ && !renderSwiper->GetMoveStatus() &&
+    if (selectedDay == (dateNumber - 1) && !calendarFocusStatus_ && !modifier->getMoveStatus(renderSwiper) &&
         hasRequestFocus_) {
         DrawBlurArea(canvas, offset, x, y);
     }

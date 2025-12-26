@@ -547,7 +547,6 @@ template("declarative_js_engine") {
       "jsview/models/stack_model_impl.cpp",
       "jsview/models/stepper_item_model_impl.cpp",
       "jsview/models/stepper_model_impl.cpp",
-      "jsview/models/swiper_model_impl.cpp",
       "jsview/models/text_clock_model_impl.cpp",
       "jsview/models/text_model_impl.cpp",
       "jsview/models/text_timer_model_impl.cpp",
