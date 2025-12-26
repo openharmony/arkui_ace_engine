@@ -965,6 +965,9 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
         videoFrameSize = MeasureModeContentLayout(movingPhotoNodeSize, layoutProperty);
     } else {
         videoFrameSize = MeasureContentLayout(movingPhotoNodeSize, layoutProperty);
+        if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
+            videoFrameSize = CalculateFitFill(movingPhotoNodeSize);
+        }
     }
     if (xmageModeValue_ != ROUND_XMAGE_MODE_VALUE) {
         SetRenderContextBoundsInXmage(movingPhotoNodeSize, videoFrameSize);
@@ -1380,9 +1383,7 @@ SizeF MovingPhotoPattern::MeasureContentLayout(const SizeF& layoutSize,
         default:
             contentSize = CalculateFitAuto(rawImageSize, layoutSize);
     }
-    if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
-        contentSize = CalculateFitFill(layoutSize);
-    }
+
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingPhoto MeasureContentLayout.%{public}f, %{public}f",
         contentSize.Width(), contentSize.Height());
     return contentSize;
@@ -1856,6 +1857,7 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     fd_ = dataProvider->ReadMovingPhotoVideo(uri_);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_.GetValue(), host);
     isRefreshMovingPhoto_ = true;
+    handleImageError_ = false;
     isSetAutoPlayPeriod_ = false;
     RefreshMovingPhotoSceneManager();
     ResetMediaPlayer();
