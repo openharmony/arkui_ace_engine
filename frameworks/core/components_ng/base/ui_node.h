@@ -1179,6 +1179,16 @@ public:
         return drawChildrenParent_.Upgrade();
     }
 
+    bool IsObservedByLayoutChildren() const
+    {
+        return isObservedByLayoutChildren_;
+    }
+
+    RefPtr<UINode> GetObserverParentForLayoutChildren() const
+    {
+        return layoutChildrenParent_.Upgrade();
+    }
+
     bool IsThreadSafeNode() const
     {
         return isThreadSafeNode_;
@@ -1223,6 +1233,7 @@ public:
     void GetNodeListByComponentName(int32_t depth, std::vector<int32_t>& foundNodeId, const std::string& name);
 
     virtual void DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
+    void UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isClearDrawObserver);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -1331,7 +1342,7 @@ private:
     void UpdateBuilderNodeColorMode(const RefPtr<UINode>& child);
     void UpdateForceDarkAllowedNode(const RefPtr<UINode>& child);
     bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
-    void UpdateDrawChildObserver(const RefPtr<UINode>& child);
+    void UpdateDrawLayoutChildObserver(const RefPtr<UINode>& child);
 
     void SetObserverParentForDrawChildren(const RefPtr<UINode>& parent);
     void ClearObserverParentForDrawChildren()
@@ -1342,6 +1353,9 @@ private:
             child->ClearObserverParentForDrawChildren();
         }
     }
+
+    void SetObserverParentForLayoutChildren(const RefPtr<UINode>& parent);
+    void ClearObserverParentForLayoutChildren();
 
     bool CheckThreadSafeNodeTree(bool needCheck);
     virtual bool MaybeRelease() override;
@@ -1420,6 +1434,8 @@ private:
     std::optional<bool> userFreeze_;
     WeakPtr<UINode> drawChildrenParent_;
     bool isObservedByDrawChildren_ = false;
+    WeakPtr<UINode> layoutChildrenParent_;
+    bool isObservedByLayoutChildren_ = false;
     static std::atomic_int32_t count_;
 
     bool isStaticNode_ = false;

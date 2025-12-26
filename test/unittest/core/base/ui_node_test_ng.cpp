@@ -1399,6 +1399,30 @@ HWTEST_F(UINodeTestNg, GetPerformanceCheckData002, TestSize.Level1)
 }
 
 /**
+@tc.name: SetObserverParentForLayoutChildren001
+@tc.desc: Test SetObserverParentForLayoutChildren
+@tc.type: FUNC
+*/
+HWTEST_F(UINodeTestNg, SetObserverParentForLayoutChildren001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a uinode
+     */
+    auto rootNode = FrameNode::CreateFrameNode("rootNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 2, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_EQ(rootNode->IsObservedByLayoutChildren(), false);
+
+    rootNode->SetObserverParentForLayoutChildren(parentNode);
+    EXPECT_EQ(rootNode->IsObservedByLayoutChildren(), true);
+    /**
+     * @tc.steps: step2. Test free node GetObserverParentForLayoutChildren
+     */
+    EXPECT_EQ(rootNode->GetObserverParentForLayoutChildren(), parentNode);
+    rootNode->ClearObserverParentForLayoutChildren();
+    EXPECT_EQ(rootNode->IsObservedByLayoutChildren(), false);
+}
+
+/**
  * @tc.name: TestPostAfterAttachMainTreeTask001
  * @tc.desc: Test PostAfterAttachMainTreeTask
  * @tc.type: FUNC

@@ -2533,6 +2533,11 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(weak);
         }
+        {
+            auto pipeline = self->GetContextRefPtr();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetNeedRenderNodeByUniqueId(weak);
+        }
         if (self->IsObservedByDrawChildren()) {
             auto pipeline = self->GetContextRefPtr();
             CHECK_NULL_VOID(pipeline);
@@ -5801,6 +5806,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         if (GetInspectorId()) {
             context->OnLayoutCompleted(GetInspectorId()->c_str());
         }
+        context->OnLayoutCompleted(GetId());
         if (eventHub_) {
             eventHub_->FireLayoutNDKCallback(context);
         }
@@ -5824,6 +5830,12 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     ProcessAccessibilityVirtualNode();
     CHECK_NULL_RETURN(context, false);
     context->SendUpdateVirtualNodeFocusEvent();
+
+    if (IsObservedByLayoutChildren() && !config.skipMeasure && !config.skipLayout) {
+        auto pipeline = GetContextRefPtr();
+        CHECK_NULL_RETURN(pipeline, true);
+        pipeline->SetNeedRenderForLayoutChildrenNode(GetObserverParentForLayoutChildren());
+    }
     return true;
 }
 

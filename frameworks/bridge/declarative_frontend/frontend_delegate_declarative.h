@@ -68,6 +68,11 @@ public:
         const MediaQueryCallback& mediaQueryCallback, const LayoutInspectorCallback& layoutInpsectorCallback,
         const DrawInspectorCallback& drawInpsectorCallback,
         const DrawChildrenInspectorCallback& drawChildrenInspectorCallback,
+        const LayoutChildrenInspectorCallback& layoutChildrenInspectorCallback,
+        const LayoutInspectorUniqueIdCallback& layoutInspectorUniqueIdCallback,
+        const DrawInspectorUniqueIdCallback& drawInspectorUniqueIdCallback,
+        const DrawChildrenInspectorUniqueIdCallback& drawChildrenInspectorUniqueIdCallback,
+        const LayoutChildrenInspectorUniqueIdCallback& layoutChildrenInspectorUniqueIdCallback,
         const RequestAnimationCallback& requestAnimationCallback,
         const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
         const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
@@ -145,7 +150,16 @@ public:
     void OnLayoutCompleted(const std::string& componentId);
     void OnDrawCompleted(const std::string& componentId);
     void OnDrawChildrenCompleted(const std::string& componentId);
+    void OnLayoutChildrenCompleted(const std::string& componentId);
     bool IsDrawChildrenCallbackFuncExist(const std::string& componentId);
+    bool IsLayoutChildrenCallbackFuncExist(const std::string& componentId);
+ 
+    void OnLayoutCompleted(int32_t uniqueId);
+    void OnDrawCompleted(int32_t uniqueId);
+    void OnDrawChildrenCompleted(int32_t uniqueId);
+    void OnLayoutChildrenCompleted(int32_t uniqueId);
+    bool IsDrawChildrenCallbackFuncExist(int32_t uniqueId);
+    bool IsLayoutChildrenCallbackFuncExist(int32_t uniqueId);
     // JSEventHandler delegate functions.
     void FireAsyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);
     bool FireSyncEvent(const std::string& eventId, const std::string& param, const std::string& jsonArgs);
@@ -515,6 +529,12 @@ private:
     LayoutInspectorCallback layoutInspectorCallback_;
     DrawInspectorCallback drawInspectorCallback_;
     DrawChildrenInspectorCallback drawChildrenInspectorCallback_;
+    LayoutChildrenInspectorCallback layoutChildrenInspectorCallback_;
+ 
+    LayoutInspectorUniqueIdCallback layoutInspectorUniqueIdCallback_;
+    DrawInspectorUniqueIdCallback drawInspectorUniqueIdCallback_;
+    DrawChildrenInspectorUniqueIdCallback drawChildrenInspectorUniqueIdCallback_;
+    LayoutChildrenInspectorUniqueIdCallback layoutChildrenInspectorUniqueIdCallback_;
     RequestAnimationCallback requestAnimationCallback_;
     JsCallback jsCallback_;
     OnWindowDisplayModeChangedCallBack onWindowDisplayModeChanged_;

@@ -60,7 +60,7 @@ import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
 
 export class UIInspector {
-    public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
+    public createComponentObserver(id: string | int): inspector.ComponentObserver {
         throw Error("createComponentObserver not implemented in UIInspector!")
     }
 }

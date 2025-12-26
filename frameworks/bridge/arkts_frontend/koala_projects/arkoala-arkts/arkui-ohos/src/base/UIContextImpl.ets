@@ -723,7 +723,7 @@ export class UIInspectorImpl extends UIInspector {
         super()
         this.instanceId_ = instanceId;
     }
-    public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
+    public createComponentObserver(id: string | int): inspector.ComponentObserver {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let componentObserver = inspector.createComponentObserver(id);
         ArkUIAniModule._Common_Restore_InstanceId();

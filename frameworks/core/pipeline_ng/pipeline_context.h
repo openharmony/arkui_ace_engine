@@ -1363,6 +1363,18 @@ public:
     void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline) override;
     RefPtr<ContentChangeManager>& GetContentChangeManager();
     void GetAppInfo(std::shared_ptr<JsonValue>& root) const;
+
+    void OnLayoutChildrenCompleted(const std::string& componentId);
+    void OnLayoutCompleted(int32_t uniqueId);
+    void OnDrawCompleted(int32_t uniqueId);
+    void OnDrawChildrenCompleted(int32_t uniqueId);
+    void OnLayoutChildrenCompleted(int32_t uniqueId);
+    void SetNeedRenderNodeByUniqueId(const WeakPtr<FrameNode>& node);
+    void SetNeedRenderForLayoutChildrenNode(const WeakPtr<NG::UINode>& node);
+    void UpdateDrawLayoutChildObserver(int32_t uniqueId, bool isClearLayoutObserver, bool isClearDrawObserver) override;
+    void UpdateDrawLayoutChildObserver(
+        const std::string& inspectorKey, bool isClearLayoutObserver, bool isClearDrawObserver) override;
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1451,6 +1463,7 @@ private:
     void ProcessDelayTasks();
 
     void InspectDrew();
+    void InspectLayoutChildren();
 
     void FlushBuildFinishCallbacks();
 
@@ -1730,6 +1743,8 @@ private:
     std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
     std::shared_ptr<ResSchedClickOptimizer> clickOptimizer_;
     RefPtr<ContentChangeManager> contentChangeMgr_;
+    std::set<WeakPtr<FrameNode>> needRenderNodeByUniqueId_;
+    std::set<WeakPtr<NG::UINode>> needRenderForLayoutChildrenNodes_;
     std::optional<bool> isRecycledInvisibleImageMemory_ = std::nullopt;
 };
 

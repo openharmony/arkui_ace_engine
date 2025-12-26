@@ -962,6 +962,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     }
     FlushWindowPatternInfo();
     InspectDrew();
+    InspectLayoutChildren();
     UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
     if (onShow_ && onFocus_ && isWindowHasFocused_) {
         auto isDynamicRender = Container::Current() == nullptr ? false : Container::Current()->IsDynamicRender();
@@ -993,6 +994,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         isNeedFlushAnimationStartTime_ = false;
     }
     needRenderNode_.clear();
+    needRenderNodeByUniqueId_.clear();
     taskScheduler_->FlushAfterRenderTask();
     window_->FlushLayoutSize(width_, height_);
     if (IsFocusWindowIdSetted()) {
@@ -1019,6 +1021,22 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     if (contentChangeMgr_) {
         contentChangeMgr_->OnVsyncEnd(rootNode_->GetRectWithRender());
     }
+}
+
+void PipelineContext::UpdateDrawLayoutChildObserver(
+    int32_t uniqueId, bool isClearLayoutObserver, bool isClearDrawObserver)
+{
+    auto uiNode = ElementRegister::GetInstance()->GetUINodeById(uniqueId);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->UpdateDrawLayoutChildObserver(isClearLayoutObserver, isClearDrawObserver);
+}
+
+void PipelineContext::UpdateDrawLayoutChildObserver(
+    const std::string& inspectorKey, bool isClearLayoutObserver, bool isClearDrawObserver)
+{
+    auto frameNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(inspectorKey);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UpdateDrawLayoutChildObserver(isClearLayoutObserver, isClearDrawObserver);
 }
 
 void PipelineContext::FlushMouseEventVoluntarily()
@@ -1097,6 +1115,16 @@ void PipelineContext::InspectDrew()
             eventHub->FireDrawCompletedNDKCallback(this);
         }
     }
+    if (!needRenderNodeByUniqueId_.empty()) {
+        auto needRenderNode = std::move(needRenderNodeByUniqueId_);
+        for (auto&& nodeWeak : needRenderNode) {
+            auto node = nodeWeak.Upgrade();
+            if (node == nullptr) {
+                continue;
+            }
+            OnDrawCompleted(node->GetId());
+        }
+    }
     if (!needRenderForDrawChildrenNodes_.empty()) {
         auto needRenderNodes = std::move(needRenderForDrawChildrenNodes_);
         for (auto&& nodeWeak : needRenderNodes) {
@@ -1107,8 +1135,28 @@ void PipelineContext::InspectDrew()
             if (node->GetInspectorId().has_value()) {
                 OnDrawChildrenCompleted(node->GetInspectorId().value());
             }
+            OnDrawChildrenCompleted(node->GetId());
         }
         needRenderForDrawChildrenNodes_.clear();
+    }
+}
+
+void PipelineContext::InspectLayoutChildren()
+{
+    CHECK_RUN_ON(UI);
+    if (!needRenderForLayoutChildrenNodes_.empty()) {
+        auto needRenderNodes = std::move(needRenderForLayoutChildrenNodes_);
+        needRenderForLayoutChildrenNodes_.clear();
+        for (auto&& nodeWeak : needRenderNodes) {
+            auto node = nodeWeak.Upgrade();
+            if (node == nullptr) {
+                continue;
+            }
+            if (node->GetInspectorId().has_value()) {
+                OnLayoutChildrenCompleted(node->GetInspectorId().value());
+            }
+            OnLayoutChildrenCompleted(node->GetId());
+        }
     }
 }
 
@@ -1321,6 +1369,12 @@ void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask()
     window_->Unlock();
 }
 
+void PipelineContext::SetNeedRenderNodeByUniqueId(const WeakPtr<FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    needRenderNodeByUniqueId_.insert(node);
+}
+
 void PipelineContext::SetNeedRenderNode(const WeakPtr<FrameNode>& node)
 {
     CHECK_RUN_ON(UI);
@@ -1331,6 +1385,12 @@ void PipelineContext::SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>
 {
     CHECK_NULL_VOID(node.Upgrade());
     needRenderForDrawChildrenNodes_.emplace(node);
+}
+
+void PipelineContext::SetNeedRenderForLayoutChildrenNode(const WeakPtr<NG::UINode>& node)
+{
+    CHECK_NULL_VOID(node.Upgrade());
+    needRenderForLayoutChildrenNodes_.emplace(node);
 }
 
 void PipelineContext::FlushFocus()
@@ -1933,6 +1993,51 @@ void PipelineContext::OnDrawChildrenCompleted(const std::string& componentId)
     }
 }
 
+void PipelineContext::OnLayoutChildrenCompleted(const std::string& componentId)
+{
+    CHECK_RUN_ON(UI);
+    auto frontend = weakFrontend_.Upgrade();
+    if (frontend) {
+        frontend->OnLayoutChildrenCompleted(componentId);
+    }
+}
+
+void PipelineContext::OnLayoutCompleted(int32_t uniqueId)
+{
+    CHECK_RUN_ON(UI);
+    auto frontend = weakFrontend_.Upgrade();
+    if (frontend) {
+        frontend->OnLayoutCompleted(uniqueId);
+    }
+}
+
+void PipelineContext::OnDrawCompleted(int32_t uniqueId)
+{
+    CHECK_RUN_ON(UI);
+    auto frontend = weakFrontend_.Upgrade();
+    if (frontend) {
+        frontend->OnDrawCompleted(uniqueId);
+    }
+}
+
+void PipelineContext::OnDrawChildrenCompleted(int32_t uniqueId)
+{
+    CHECK_RUN_ON(UI);
+    auto frontend = weakFrontend_.Upgrade();
+    if (frontend) {
+        frontend->OnDrawChildrenCompleted(uniqueId);
+    }
+}
+
+void PipelineContext::OnLayoutChildrenCompleted(int32_t uniqueId)
+{
+    CHECK_RUN_ON(UI);
+    auto frontend = weakFrontend_.Upgrade();
+    if (frontend) {
+        frontend->OnLayoutChildrenCompleted(uniqueId);
+    }
+}
+
 void PipelineContext::ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type)
 {
     SurfaceChangedCallbackMap callbackMap;
@@ -2491,6 +2596,7 @@ void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
     }
     dirtyPropertyNodes_.erase(frameNode);
     needRenderNode_.erase(WeakPtr<FrameNode>(frameNode));
+    needRenderNodeByUniqueId_.erase(WeakPtr<FrameNode>(frameNode));
 
     if (dirtyFocusNode_ == frameNode) {
         dirtyFocusNode_.Reset();
@@ -5223,6 +5329,7 @@ void PipelineContext::Destroy()
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
     needRenderNode_.clear();
+    needRenderNodeByUniqueId_.clear();
     dirtyRequestFocusNode_.Reset();
     auto formEventMgr = this->GetFormEventManager();
     if (formEventMgr) {

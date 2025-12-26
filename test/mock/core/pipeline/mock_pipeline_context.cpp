@@ -650,6 +650,23 @@ bool PipelineContext::CheckOverlayFocus()
 }
 
 void PipelineContext::OnDrawCompleted(const std::string& componentId) {}
+void PipelineContext::OnLayoutChildrenCompleted(const std::string& componentId) {}
+
+void PipelineContext::OnLayoutCompleted(int32_t uniqueId) {}
+void PipelineContext::OnDrawCompleted(int32_t uniqueId) {}
+void PipelineContext::OnDrawChildrenCompleted(int32_t uniqueId) {}
+void PipelineContext::OnLayoutChildrenCompleted(int32_t uniqueId) {}
+
+void PipelineContext::SetNeedRenderNodeByUniqueId(const WeakPtr<FrameNode>& node) {}
+void PipelineContext::SetNeedRenderForLayoutChildrenNode(const WeakPtr<NG::UINode>& node) {}
+
+void PipelineContext::UpdateDrawLayoutChildObserver(
+    int32_t uniqueId, bool isClearLayoutObserver, bool isClearDrawObserver)
+{}
+
+void PipelineContext::UpdateDrawLayoutChildObserver(
+    const std::string& inspectorKey, bool isClearLayoutObserver, bool isClearDrawObserver)
+{}
 
 void PipelineContext::SetNeedRenderNode(const WeakPtr<FrameNode>& node) {}
 
