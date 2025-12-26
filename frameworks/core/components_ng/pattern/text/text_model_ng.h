@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT TextModelNG : public TextModel {
+class ACE_FORCE_EXPORT TextModelNG : public TextModel {
 public:
     void Create(const std::u16string& content) override;
     void Create(const std::string& content) override;

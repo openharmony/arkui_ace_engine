@@ -18,10 +18,16 @@
 #include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier()
+ACE_FORCE_EXPORT const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier()
 {
-    auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("hyperlink");
-    CHECK_NULL_RETURN(module, nullptr);
-    return reinterpret_cast<const GENERATED_ArkUIHyperlinkModifier*>(module->GetStaticModifier());
+    static const GENERATED_ArkUIHyperlinkModifier* cachedModifier = nullptr;
+
+    if (cachedModifier == nullptr) {
+        auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("hyperlink");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUIHyperlinkModifier*>(module->GetStaticModifier());
+    }
+    
+    return cachedModifier;
 }
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

@@ -501,9 +501,7 @@ using RegisterModuleFunc = void (*)(Local<panda::ObjectRef>, EcmaVM*);
 
 ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    static const std::unordered_set<std::string> loadModuleName = {
-        { "hyperlink" },
-    };
+    static const std::unordered_set<std::string> loadModuleName = { { "hyperlink" } };
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
@@ -518,7 +516,6 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
     }
     return panda::JSValueRef::Undefined(vm);
 }
-
 
 ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {

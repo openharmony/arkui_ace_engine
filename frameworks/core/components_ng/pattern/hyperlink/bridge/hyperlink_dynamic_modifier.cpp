@@ -22,7 +22,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_static.h"
 
-#include "bridge/declarative_frontend/jsview/models/hyperlink_model_impl.h"
+#include "core/components_ng/pattern/hyperlink/bridge/hyperlink_model_impl.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<HyperlinkModel> HyperlinkModel::instance_ = nullptr;

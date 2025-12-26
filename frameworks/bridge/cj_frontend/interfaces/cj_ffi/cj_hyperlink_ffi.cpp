@@ -15,7 +15,9 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_hyperlink_ffi.h"
 
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 
 #include "base/log/log_wrapper.h"
@@ -23,6 +25,7 @@
 
 using namespace OHOS::Ace;
 
+namespace OHOS::Ace {
 NG::HyperlinkModelNG* GetHyperlinkModel()
 {
     auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("hyperlink");
@@ -31,6 +34,7 @@ NG::HyperlinkModelNG* GetHyperlinkModel()
         abort();
     }
     return reinterpret_cast<NG::HyperlinkModelNG*>(module->GetModel());
+}
 }
 
 extern "C" {

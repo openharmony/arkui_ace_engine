@@ -31,6 +31,10 @@
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_navigation_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
+
+#include "base/log/ace_scoring_log.h"
+#include "core/components/navigation_bar/navigation_container_component.h"
+
 namespace OHOS::Ace::NG {} // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;

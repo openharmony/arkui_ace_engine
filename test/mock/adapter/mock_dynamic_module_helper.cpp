@@ -16,7 +16,6 @@
 #include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace {
-class JsonValue;
 
 DynamicModuleHelper& DynamicModuleHelper::GetInstance()
 {
@@ -24,33 +23,12 @@ DynamicModuleHelper& DynamicModuleHelper::GetInstance()
     return instance;
 }
 
-DynamicModuleHelper::DynamicModuleHelper() {}
-
-DynamicModuleHelper::~DynamicModuleHelper() {}
-
 std::unique_ptr<ComponentLoader> DynamicModuleHelper::GetLoaderByName(const char* name)
 {
     return nullptr;
 }
 
-void* DynamicModuleHelper::CreateCanvasRenderingContextModel(bool isOffscreen)
-{
-    return nullptr;
-}
-
-void* DynamicModuleHelper::CreateCanvasBridge(CanvasBridgeParams& params)
-{
-    return nullptr;
-}
-
-bool DynamicModuleHelper::DynamicLoadLibrary()
-{
-    return false;
-}
-
-void DynamicModuleHelper::CloseLibrary() {}
-
-void* DynamicModuleHelper::LoadSymbol(const char* symName)
+DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
 {
     return nullptr;
 }

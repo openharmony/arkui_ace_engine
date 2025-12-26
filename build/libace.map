@@ -33,6 +33,7 @@
       non-virtual?thunk?to?OHOS::Ace::PluginComponentManager::UIServiceListener::OnPushCallBack*;
       non-virtual?thunk?to?OHOS::Ace::PluginComponentManager::UIServiceListener::OnRequestCallBack*;
       non-virtual?thunk?to?OHOS::Ace::PluginComponentManager::UIServiceListener::OnReturnRequest*;
+      non-virtual?thunk?to?OHOS::Ace::FlexElement::*;
 
       OHOS_ACE_*;
       GetArkUINodeAPI;
@@ -53,6 +54,7 @@
       OHOS::Ace::CalendarPickerModel::*;
       OHOS::Ace::ConnectServerManager::*;
       OHOS::Ace::Container::*;
+      *OHOS::Ace::Container::IsCurrentUseNewPipeline*;
       OHOS::Ace::CubicCurve::*;
       OHOS::Ace::Curves::*;
       OHOS::Ace::EngineHelper::*;
@@ -151,7 +153,9 @@
       OHOS::Ace::GridItemModel::*;
       OHOS::Ace::GridRowModel::*;
       OHOS::Ace::NG::HyperlinkModelNG::*;
-      OHOS::Ace::NG::HyperlinkModelStatic::*;
+      "OHOS::Ace::HyperlinkModel::GetInstance()";
+      "OHOS::Ace::HyperlinkModel::instance_";
+      "OHOS::Ace::HyperlinkModel::mutex_";
       OHOS::Ace::IfElseModel::*;
       OHOS::Ace::ImageAnimatorModel::*;
       OHOS::Ace::ImageModel::*;
@@ -202,6 +206,7 @@
       OHOS::Ace::TabContentModel::*;
       OHOS::Ace::TextClockModel::*;
       OHOS::Ace::TextModel::*;
+      OHOS::Ace::NG::TextModelNG::*;
       OHOS::Ace::TextFieldModel::*;
       OHOS::Ace::TextPickerModel::*;
       OHOS::Ace::TextTimerModel::*;
@@ -225,6 +230,9 @@
       "OHOS::Ace::ControlledAnimator::Forward()";
       "OHOS::Ace::ControlledAnimator::GetControlStatus() const";
       OHOS::Ace::DrawableDescriptorInfo::DrawableDescriptorInfo*;
+      OHOS::Ace::FlexElement::*;
+      OHOS::Ace::FocusGroup::*;
+      OHOS::Ace::RenderFlex::*;
 
       OHOS::Ace::Framework::JsAcePage::*;
       OHOS::Ace::TextPickerModel::*;
@@ -359,24 +367,25 @@
       OHOS::Ace::NG::DynamicModelStatic::*;
       OHOS::Ace::NG::DynamicParam::*;
       OHOS::Ace::NG::MinusPaddingToSize*;
+      OHOS::Ace::NG::AddPaddingToSize*;
       OHOS::Ace::ToRSPoint*;
       OHOS::Ace::NG::GeometryNode::*;
       OHOS::Ace::NG::ModifierAdapter::*;
       OHOS::Ace::NG::TextLayoutAlgorithm::*;
+      OHOS::Ace::NG::TextLayoutProperty::*;
       OHOS::Ace::NG::ImagePainter::DrawImage*;
       OHOS::Ace::NG::Modifier::*;
       OHOS::Ace::NG::ArkTSUtils::*;
       OHOS::Ace::NG::TextPattern::*;
-      OHOS::Ace::NG::HyperlinkPattern::*;
       OHOS::Ace::NG::ViewAbstractModelStatic::*;
       OHOS::Ace::NG::SelectOverlayClient::*;
-      OHOS::Ace::NG::TextLayoutProperty::*;
       OHOS::Ace::V2::HYPERLINK_ETS_TAG;
       OHOS::Ace::V2::SYMBOL_ETS_TAG;
       OHOS::Ace::NG::InputEventActuator::*;
       OHOS::Ace::NG::GetHyperlinkDynamicModifier;
       OHOS::Ace::NG::GetCJUIHyperlinkModifier;
       OHOS::Ace::NG::TextAccessibilityProperty::*;
+      OHOS::Ace::NG::GeneratedModifier::*;
 
       OHOS::Ace::PipelineBase::*;
       OHOS::Ace::FontManager::*;
@@ -436,8 +445,8 @@
       vtable?for?OHOS::Ace::NG::TextLayoutProperty;
       vtable?for?OHOS::Ace::NG::TextAccessibilityProperty;
       vtable?for?OHOS::Ace::Framework::HyperlinkModelImpl;
-      virtual?thunk?to?OHOS::Ace::NG::TextPattern::*;
-      non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::*;
+      vtable?for?OHOS::Ace::HyperlinkComponent;
+      vtable?for?OHOS::Ace::FlexElement;
 
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;
@@ -474,6 +483,9 @@
       VTT?for?OHOS::Ace::AnimatedDrawableDescriptor;
       VTT?for?OHOS::Ace::NG::TextLayoutProperty;
       VTT?for?OHOS::Ace::NG::TextAccessibilityProperty;
+      VTT?for?OHOS::Ace::HyperlinkComponent;
+      VTT?for?OHOS::Ace::FlexElement;
+      VTT?for?OHOS::Ace::FocusNode;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
@@ -616,10 +628,12 @@
 
       non-virtual?thunk?to?OHOS::Ace::NG::UINode::*;
       non-virtual?thunk?to?OHOS::Ace::NG::FrameNode::*;
+      non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::*;
 
       virtual?thunk?to?OHOS::Ace::NG::UINode::*;
       virtual?thunk?to?OHOS::Ace::NG::FrameNode::*;
       virtual?thunk?to?OHOS::Ace::NG::LayoutProperty::*;
+      virtual?thunk?to?OHOS::Ace::NG::TextPattern::*;
 
       vtable?for?OHOS::Ace::NG::AccessibilityProperty;
       vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm;

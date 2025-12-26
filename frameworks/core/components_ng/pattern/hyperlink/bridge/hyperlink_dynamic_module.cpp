@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,8 +36,8 @@ const ArkUIHyperlinkModifier* GetHyperlinkDynamicModifier();
 const CJUIHyperlinkModifier* GetCJUIHyperlinkModifier();
 #ifdef INCLUDE_GENERATED_SOURCES
 namespace GeneratedModifier{
-const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkStaticModifier();
-}
+const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier();
+} // namespace GeneratedModifier
 #endif
 } // namespace NG
 
@@ -54,7 +54,7 @@ const void* HyperlinkDynamicModule::GetDynamicModifier()
 const void* HyperlinkDynamicModule::GetStaticModifier()
 {
 #ifdef INCLUDE_GENERATED_SOURCES
-    return NG::GeneratedModifier::GetHyperlinkStaticModifier();
+    return NG::GeneratedModifier::GetHyperlinkModifier();
 #else
     return nullptr;
 #endif

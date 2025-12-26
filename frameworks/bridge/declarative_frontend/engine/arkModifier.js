@@ -471,33 +471,18 @@ class LazyArkHyperlinkComponent extends ArkComponent {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
   }
 
-  setColor(color) {
-    this.lazyComponent.setColor(color);
+  color(color) {
+    this.lazyComponent.color(color);
     return this;
   }
 
-  resetColor() {
-    this.lazyComponent.resetColor();
+  draggable(draggable) {
+    this.lazyComponent.draggable(draggable);
     return this;
   }
 
-  setDraggable(draggable) {
-    this.lazyComponent.setDraggable(draggable);
-    return this;
-  }
-
-  resetDraggable() {
-    this.lazyComponent.resetDraggable();
-    return this;
-  }
-
-  setResponseRegion(region) {
-    this.lazyComponent.setResponseRegion(region);
-    return this;
-  }
-
-  resetResponseRegion() {
-    this.lazyComponent.resetResponseRegion();
+  responseRegion(region) {
+    this.lazyComponent.responseRegion(region);
     return this;
   }
 }

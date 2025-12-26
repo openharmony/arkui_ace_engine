@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,11 +14,12 @@
  */
 
 #include "core/components_ng/pattern/hyperlink/bridge/arkts_native_hyperlink_bridge.h"
-#include "core/components_ng/base/frame_node.h"
+
+#include "base/log/ace_scoring_log.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "bridge/declarative_frontend/jsview/models/hyperlink_model_impl.h"
+#include "core/components_ng/pattern/hyperlink/bridge/hyperlink_model_impl.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -31,7 +32,7 @@ void HyperlinkBridge::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object
     LOGE("Start RegisterHyperlinkAttributes nativeModule");
 
     const char* functionNames[] = {
-        "create", "pop", "color", "draggable", "responseRegion"
+        "create", "color", "draggable", "responseRegion", "pop"
     };
 
     Local<JSValueRef> functionValues[] = {
@@ -39,6 +40,7 @@ void HyperlinkBridge::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::Color),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::Draggable),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::ResponseRegion),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::Pop),
     };
 
     auto hyperlink = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, functionValues);
@@ -148,9 +150,9 @@ ArkUINativeModuleValue HyperlinkBridge::CreateHyperlink(ArkUIRuntimeCallInfo* ru
     return panda::JSValueRef::Undefined(vm);
 }
 
-void HyperlinkBridge::Pop() {
+void HyperlinkBridge::PopNew() {
     if (ViewStackModel::GetInstance()->IsPrebuilding()) {
-        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[HyperlinkBridge][pop]", &HyperlinkBridge::Pop);
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[HyperlinkBridge][pop]", &HyperlinkBridge::PopNew);
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
@@ -160,6 +162,15 @@ void HyperlinkBridge::Pop() {
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_VOID(nodeModifiers);
     nodeModifiers->getHyperlinkModifier()->pop();
+}
+
+ArkUINativeModuleValue HyperlinkBridge::Pop(ArkUIRuntimeCallInfo* runtimeCallInfo) {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+
+    PopNew();
+
+    return panda::JSValueRef::Undefined(vm);
 }
 
 } // namespace OHOS::Ace::NG

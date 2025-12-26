@@ -519,7 +519,6 @@ template("declarative_js_engine") {
       "jsview/models/grid_item_model_impl.cpp",
       "jsview/models/grid_model_impl.cpp",
       "jsview/models/grid_row_model_impl.cpp",
-      "jsview/models/hyperlink_model_impl.cpp",
       "jsview/models/if_else_model_impl.cpp",
       "jsview/models/image_animator_model_impl.cpp",
       "jsview/models/image_model_impl.cpp",

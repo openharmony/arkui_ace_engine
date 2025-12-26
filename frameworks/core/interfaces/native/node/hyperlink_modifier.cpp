@@ -21,16 +21,28 @@ namespace OHOS::Ace::NG {
 namespace NodeModifier {
 const ArkUIHyperlinkModifier* GetHyperlinkModifier()
 {
-    auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("hyperlink");
-    CHECK_NULL_RETURN(module, nullptr);
-    return reinterpret_cast<const ArkUIHyperlinkModifier*>(module->GetDynamicModifier());
+    static const ArkUIHyperlinkModifier* cachedModifier = nullptr;
+
+    if (cachedModifier == nullptr) {
+        auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("hyperlink");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIHyperlinkModifier*>(module->GetDynamicModifier());
+    }
+    
+    return cachedModifier;
 }
 
 const CJUIHyperlinkModifier* GetCJUIHyperlinkModifier()
 {
-    auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("hyperlink");
-    CHECK_NULL_RETURN(module, nullptr);
-    return reinterpret_cast<const CJUIHyperlinkModifier*>(module->GetCjModifier());
+    static const CJUIHyperlinkModifier* cachedModifier = nullptr;
+
+    if (cachedModifier == nullptr) {
+        auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("hyperlink");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const CJUIHyperlinkModifier*>(module->GetCjModifier());
+    }
+
+    return cachedModifier;
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

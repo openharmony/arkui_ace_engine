@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
+
 #include <cstdint>
 
 #include "base/memory/ace_type.h"

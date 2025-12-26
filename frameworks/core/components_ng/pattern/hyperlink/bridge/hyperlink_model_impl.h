@@ -13,8 +13,8 @@
 * limitations under the License.
 */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_HYPERLINK_MODEL_IMPL_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_HYPERLINK_MODEL_IMPL_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HYPERLINK_BRIDGE_HYPERLINK_MODEL_IMPL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HYPERLINK_BRIDGE_HYPERLINK_MODEL_IMPL_H
 
 #include "core/components_ng/pattern/hyperlink/hyperlink_model.h"
 #include "core/components/hyperlink/hyperlink_component.h"
@@ -28,8 +28,10 @@ public:
     void SetDraggable(bool draggable) override {}
 
 private:
+    static void PopNew();
+
     RefPtr<HyperlinkComponent> GetComponent();
 };
 } // namespace OHOS::Ace::Framework
 
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_HYPERLINK_MODEL_IMPL_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_HYPERLINK_BRIDGE_HYPERLINK_MODEL_IMPL_H

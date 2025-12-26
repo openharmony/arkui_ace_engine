@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_extra_view_register.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
+#include "bridge/declarative_frontend/jsview/js_linear_gradient_binding.h"
 #ifdef NG_BUILD
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #else
@@ -536,7 +537,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "CheckboxGroup", JSCheckboxGroup::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
-    { "LinearGradient", JSLinearGradient::JSBind },
+    { "LinearGradient", JSLinearGradientBinding::JSBind },
     { "ColorMetricsLinearGradient", JSColorMetricsLinearGradient::JSBind },
     { "FormLink", JSFormLink::JSBind },
 #ifdef FORM_BUTTON_COMPONENT_SUPPORT
@@ -775,7 +776,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "__Recycle__", JSRecycleView::JSBind },
-    { "LinearGradient", JSLinearGradient::JSBind },
+    { "LinearGradient", JSLinearGradientBinding::JSBind },
     { "ColorMetricsLinearGradient", JSColorMetricsLinearGradient::JSBind },
     { "ImageSpan", JSImageSpan::JSBind },
 #ifdef PREVIEW
@@ -903,7 +904,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine, bool isCusto
     JSSearchController::JSBind(globalObj);
     JSTextClockController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
-    JSLinearGradient::JSBind(globalObj);
+    JSLinearGradientBinding::JSBind(globalObj);
     JSColorMetricsLinearGradient::JSBind(globalObj);
 #ifdef WEB_SUPPORTED
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
@@ -943,7 +944,7 @@ void RegisterAllFormModule(BindingTarget globalObj, void* nativeEngine)
     JSPath2D::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
-    JSLinearGradient::JSBind(globalObj);
+    JSLinearGradientBinding::JSBind(globalObj);
     JSColorMetricsLinearGradient::JSBind(globalObj);
     for (auto& iter : formBindFuncs) {
         iter.second(globalObj);
@@ -1082,7 +1083,7 @@ void JsBindFormViews(
 
         JSProfiler::JSBind(globalObj);
         JSCommonView::JSBind(globalObj);
-        JSLinearGradient::JSBind(globalObj);
+        JSLinearGradientBinding::JSBind(globalObj);
         JSColorMetricsLinearGradient::JSBind(globalObj);
         JSPath2D::JSBind(globalObj);
         JSOffscreenRenderingContext::JSBind(globalObj);

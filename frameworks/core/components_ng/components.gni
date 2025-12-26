@@ -32,12 +32,6 @@ template("build_component_ng") {
     component_deps = []
     extra_deps = []
 
-    is_component_model = false
-
-    if (defined(invoker.is_component_model)) {
-      is_component_model = invoker.is_component_model
-    }
-
     foreach(item, component_deps) {
       extra_deps += [ "$ace_root/frameworks/core/components/${item}:ace_core_components_${item}_${platform}" ]
     }
@@ -162,10 +156,12 @@ template("build_component_ng") {
           }
         }
       }
-      if (!is_component_model && defined(vendor_configs.ace_engine_advanced) &&
+
+      if (defined(invoker.ark_sources) && defined(vendor_configs.ace_engine_advanced) &&
           (platform == "ohos" || platform == "ohos_ng")) {
         include_dirs += vendor_configs.ace_advance_dirs
       }
+
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
@@ -194,16 +190,16 @@ template("build_component_ng") {
           "${ace_root}/interfaces/native/runtime",
         ]
 
-        if (defined(include_generated_sources) && include_generated_sources) {
-          defines += [ "INCLUDE_GENERATED_SOURCES" ]
-        }
-        
+        defines += [ "INCLUDE_GENERATED_SOURCES" ]
+
+
         if (is_arkui_x) {
           configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
           deps += [ "$ark_ets_path:libark_jsruntime_static" ]
         } else {
           external_deps += [
             "ets_runtime:libark_jsruntime",
+            "napi:ace_napi",
           ]
         }
       }
