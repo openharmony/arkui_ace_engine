@@ -104,7 +104,7 @@ HWTEST_F(FocusHubTestNg, GetRootFocusHub002, TestSize.Level1)
      * @tc.steps: step3. Expect the result is not nullptr.
      */
     EXPECT_TRUE(focusHub->GetParentFocusHub() != nullptr);
-    ASSERT_NE(focusHub->GetRootFocusHub(), nullptr);
+    EXPECT_NE(focusHub->GetRootFocusHub(), nullptr);
 }
 
 /**
@@ -143,7 +143,7 @@ HWTEST_F(FocusHubTestNg, GetFocusLeaf001, TestSize.Level1)
     focusHub->eventHub_ = nullptr;
     focusHub->frameNode_ = nullptr;
     focusHub->focusDepend_ = FocusDependence::SELF;
-    ASSERT_NE(focusHub->GetFocusLeaf(), nullptr);
+    EXPECT_NE(focusHub->GetFocusLeaf(), nullptr);
 }
 
 /**
@@ -312,7 +312,7 @@ HWTEST_F(FocusHubTestNg, TryRequestFocus002, TestSize.Level1)
      * @tc.steps: step3. Expect the ret is true.
      */
     auto res = focusHub->TryRequestFocus(focusHub1, RectF(), FocusStep::LEFT);
-    ASSERT_TRUE(res);
+    EXPECT_TRUE(res);
 }
 
 /**
@@ -391,7 +391,7 @@ HWTEST_F(FocusHubTestNg, IsNeedPaintFocusState001, TestSize.Level1)
     focusHub->focusType_ = FocusType::SCOPE;
     frameNode1->parent_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     frameNode->children_.push_back(frameNode1);
-    ASSERT_TRUE(focusHub->IsFocusableNode());
+    EXPECT_TRUE(focusHub->IsFocusableNode());
 
     /**
      * @tc.steps: step2. Set the corresponding variables to ensure entry into the target branch.
@@ -577,7 +577,7 @@ HWTEST_F(FocusHubTestNg, AcceptFocusOfSpecifyChild01, TestSize.Level1)
     focusHub->focusDepend_ = FocusDependence::SELF;
     EXPECT_EQ(focusHub->IsFocusableScope(), true);
     auto res = focusHub->AcceptFocusOfSpecifyChild(FocusStep::TAB);
-    ASSERT_TRUE(res);
+    EXPECT_TRUE(res);
 }
 
 /**
