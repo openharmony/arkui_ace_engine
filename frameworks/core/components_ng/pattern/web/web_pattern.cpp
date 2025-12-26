@@ -5439,6 +5439,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
 
 void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY, bool isMove)
 {
+    SetTextSelectionEnable(true);
     showMagnifierFingerId_ =
         isMove ? showMagnifierFingerId_ : touchEventInfo_.GetChangedTouches().front().GetFingerId();
     if (magnifierController_) {
@@ -5450,6 +5451,7 @@ void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY, bool isMove
 void WebPattern::HideMagnifier()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "HideMagnifier");
+    SetTextSelectionEnable(false);
     showMagnifierFingerId_ = -1;
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
