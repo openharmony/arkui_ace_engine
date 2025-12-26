@@ -5648,4 +5648,27 @@ HWTEST_F(WebModelTestNg, SetEnableAutoFill002, TestSize.Level1)
     EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableAutoFill(true), true);
 #endif
 }
+
+/**
+ * @tc.name: SetOnMediaCastEnter001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnMediaCastEnter001, TestSize.Level1)
+{
+    bool callbackCalled = false;
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    std::function<void()> callback = [&callbackCalled] {
+        callbackCalled = true;
+    }
+    webPattern->SetOnMediaCastEnterCallback(std::move(callback))
+
+    auto callbackFunc = webPattern->GetOnMediaCastEnterCallback();
+    if (callbackFunc) {
+        callbackFunc();
+        EXPECT_TRUE(callbackCalled);
+    }
+}
 } // namespace OHOS::Ace::NG
