@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,7 +58,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0109, TestSize.Level1)
      * @tc.expected: The return value of IsNestingFocusGroup is false.
      */
     focusHub->isGroup_ = false;
-    ASSERT_FALSE(focusHub->IsNestingFocusGroup());
+    EXCEPT_FALSE(focusHub->IsNestingFocusGroup());
 }
 
 /**
@@ -86,21 +86,21 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0110, TestSize.Level1)
      * @tc.expected: The return value of IsNestingFocusGroup is false.
      */
     focusHub->isGroup_ = false;
-    ASSERT_FALSE(focusHub->IsNestingFocusGroup());
+    EXCEPT_FALSE(focusHub->IsNestingFocusGroup());
 
     /**
      * @tc.steps3: call the function IsNestingFocusGroup with isGroup_ = true and nodeParent.focusHub.isGroup_ false
      * @tc.expected: The return value of IsNestingFocusGroup is true.
      */
     focusHub->isGroup_ = true;
-    ASSERT_FALSE(focusHub->IsNestingFocusGroup());
+    EXCEPT_FALSE(focusHub->IsNestingFocusGroup());
 
     /**
      * @tc.steps4: call the function IsNestingFocusGroup with isGroup_ = true and nodeParent.focusHub.isGroup_ true
      * @tc.expected: The return value of IsNestingFocusGroup is true.
      */
     nodeParent->GetFocusHub()->isGroup_ = true;
-    ASSERT_TRUE(focusHub->IsNestingFocusGroup());
+    EXCEPT_TRUE(focusHub->IsNestingFocusGroup());
 }
 
 /**
@@ -127,7 +127,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0111, TestSize.Level1)
      * @tc.expected: The return value of IsInFocusGroup is false.
      */
     focusHub->isGroup_ = false;
-    ASSERT_FALSE(focusHub->IsInFocusGroup());
+    EXCEPT_FALSE(focusHub->IsInFocusGroup());
 
     /**
      * @tc.steps3: call the function IsInFocusGroup with isGroup_ = false and nodeParent.focusHub.isGroup_ true
@@ -135,7 +135,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0111, TestSize.Level1)
      */
     focusHub->isGroup_ = false;
     nodeParent->GetFocusHub()->isGroup_ = true;
-    ASSERT_TRUE(focusHub->IsInFocusGroup());
+    EXCEPT_TRUE(focusHub->IsInFocusGroup());
 }
 
 /**
@@ -256,7 +256,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0114, TestSize.Level1)
     focusHub->RemoveFocusScopeIdAndPriority();
     focusHub->focusScopeId_ = "scop1";
     focusHub->RemoveFocusScopeIdAndPriority();
-    ASSERT_FALSE(focusHub->focusScopeId_.empty());
+    EXCEPT_FALSE(focusHub->focusScopeId_.empty());
 
     /**
      * @tc.steps3: call the function SetFocusScopePriority with isFocusScope_ false and focusPriority_ PRIOR
@@ -315,12 +315,12 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0115, TestSize.Level1)
     // focusScopeId_ empty
     focusHub->focusScopeId_ = "";
     focusHub->SetFocusScopeId("", true);
-    ASSERT_FALSE(focusHub->isFocusScope_);
+    EXCEPT_FALSE(focusHub->isFocusScope_);
     focusHub->focusScopeId_ = "scop1";
     focusHub->SetFocusScopeId("", true);
     ASSERT_EQ(focusHub->focusScopeId_, "");
-    ASSERT_FALSE(focusHub->isFocusScope_);
-    ASSERT_FALSE(focusHub->isGroup_);
+    EXCEPT_FALSE(focusHub->isFocusScope_);
+    EXCEPT_FALSE(focusHub->isGroup_);
 }
 
 /**
@@ -337,7 +337,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0119, TestSize.Level1)
     auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     ASSERT_NE(focusHub, nullptr);
     
-    ASSERT_FALSE(focusHub->IsFocusAbleChildOf(nullptr));
+    EXCEPT_FALSE(focusHub->IsFocusAbleChildOf(nullptr));
 }
 
 
@@ -356,19 +356,19 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0120, TestSize.Level1)
     ASSERT_NE(focusHub, nullptr);
 
     focusHub->focusType_ = FocusType::SCOPE;
-    ASSERT_FALSE(focusHub->SetLastWeakFocusNodeToPreviousNode());
+    EXCEPT_FALSE(focusHub->SetLastWeakFocusNodeToPreviousNode());
     focusHub->focusType_ = FocusType::DISABLE;
     focusHub->isFocusScope_ = true;
-    ASSERT_FALSE(focusHub->SetLastWeakFocusNodeToPreviousNode());
+    EXCEPT_FALSE(focusHub->SetLastWeakFocusNodeToPreviousNode());
     focusHub->focusType_ = FocusType::DISABLE;
     focusHub->isFocusScope_ = true;
-    ASSERT_FALSE(focusHub->SetLastWeakFocusNodeToPreviousNode());
+    EXCEPT_FALSE(focusHub->SetLastWeakFocusNodeToPreviousNode());
     focusHub->focusType_ = FocusType::SCOPE;
     focusHub->focusScopeId_ = "scop1";
     focusHub->isFocusScope_ = false;
-    ASSERT_FALSE(focusHub->SetLastWeakFocusNodeToPreviousNode());
+    EXCEPT_FALSE(focusHub->SetLastWeakFocusNodeToPreviousNode());
     focusHub->isFocusScope_ = true;
-    ASSERT_FALSE(focusHub->SetLastWeakFocusNodeToPreviousNode());
+    EXCEPT_FALSE(focusHub->SetLastWeakFocusNodeToPreviousNode());
 }
 
 /**
@@ -385,11 +385,11 @@ HWTEST_F(FocusHubTestNg, IsCurrentFocusWholePath001, TestSize.Level1)
     focusHub->currentFocus_ = true;
     focusHub->focusType_ = FocusType::SCOPE;
     focusHub->focusDepend_ = FocusDependence::SELF;
-    ASSERT_TRUE(focusHub->IsCurrentFocusWholePath());
+    EXCEPT_TRUE(focusHub->IsCurrentFocusWholePath());
     focusHub->focusDepend_ = FocusDependence::AUTO;
-    ASSERT_TRUE(focusHub->IsCurrentFocusWholePath());
+    EXCEPT_TRUE(focusHub->IsCurrentFocusWholePath());
     focusHub->focusDepend_ = FocusDependence::CHILD;
-    ASSERT_FALSE(focusHub->IsCurrentFocusWholePath());
+    EXCEPT_FALSE(focusHub->IsCurrentFocusWholePath());
 }
 
 /**
@@ -407,7 +407,7 @@ HWTEST_F(FocusHubTestNg, OnKeyPreIme001, TestSize.Level1)
     keyEvent.code = KeyCode::KEY_TAB;
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_HOME);
     auto info = KeyEventInfo(keyEvent);
-    ASSERT_FALSE(focusHub->OnKeyPreIme(info, keyEvent));
+    EXCEPT_FALSE(focusHub->OnKeyPreIme(info, keyEvent));
 }
 
 /**
