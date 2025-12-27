@@ -641,6 +641,7 @@ protected:
     void OnUseShadowBatchingUpdate(bool useShadowBatching) override;
     void OnFreezeUpdate(bool isFreezed) override;
     void OnRenderGroupUpdate(bool isRenderGroup) override;
+    void UpdateAdaptiveGroup(bool isRenderGroup, bool useAdaptiveFilter) override;
     void OnSuggestedRenderGroupUpdate(bool isRenderGroup) override;
     void OnExcludeFromRenderGroupUpdate(bool exclude) override;
     void OnRenderFitUpdate(RenderFit renderFit) override;
