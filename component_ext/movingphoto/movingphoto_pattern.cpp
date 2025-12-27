@@ -963,11 +963,11 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     SizeF videoFrameSize;
     if (isXmageMode_) {
         videoFrameSize = MeasureModeContentLayout(movingPhotoNodeSize, layoutProperty);
-    } else {
+    } else if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
+        videoFrameSize = CalculateFitFill(movingPhotoNodeSize);
+    }
+    else {
         videoFrameSize = MeasureContentLayout(movingPhotoNodeSize, layoutProperty);
-        if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
-            videoFrameSize = CalculateFitFill(movingPhotoNodeSize);
-        }
     }
     if (xmageModeValue_ != ROUND_XMAGE_MODE_VALUE) {
         SetRenderContextBoundsInXmage(movingPhotoNodeSize, videoFrameSize);
@@ -1851,13 +1851,13 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     }
     imageSrc += "?date_modified = " + std::to_string(GetMicroTickCount());
     ImageSourceInfo src;
+    handleImageError_ = false;
     src.SetSrc(imageSrc);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSourceInfo, src, host);
     UpdateImageNode();
     fd_ = dataProvider->ReadMovingPhotoVideo(uri_);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_.GetValue(), host);
     isRefreshMovingPhoto_ = true;
-    handleImageError_ = false;
     isSetAutoPlayPeriod_ = false;
     RefreshMovingPhotoSceneManager();
     ResetMediaPlayer();
