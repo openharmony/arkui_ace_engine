@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_TRANSITION_PROXY_H
 
 #include "base/memory/ace_type.h"
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "frameworks/core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -72,7 +74,7 @@ public:
         finishCallback_ = std::move(event);
     }
 
-    void FireFinishCallback()
+    void FireFinishCallback(bool isTimeout=false)
     {
         if (interactive_) {
             FinishInteractiveAnimation();
@@ -83,6 +85,9 @@ public:
             return;
         }
         hasFinished_ = true;
+        if (!isTimeout) {
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+        }
         finishCallback_();
         if (endCallback_) {
             endCallback_(true);
@@ -220,16 +225,6 @@ public:
         return proxyId_;
     }
 
-    void SetIsTriggerByTimeout(bool isTriggerByTimeout)
-    {
-        isTriggerByTimeout_ = isTriggerByTimeout;
-    }
-    
-    bool GetIsTriggerByTimeout() const
-    {
-        return isTriggerByTimeout_;
-    }
-
 private:
     uint64_t proxyId_ = 0;
     RefPtr<NavDestinationContext> preContext_;
@@ -243,7 +238,6 @@ private:
     bool isSuccess_ = true; // set current custom transition is start success or not
     bool interactive_ = false; // set current interactive animation
     bool isStartAnimation_ = false;
-    bool isTriggerByTimeout_ = false;
 };
 
 struct NavigationTransition {
