@@ -1905,7 +1905,7 @@ void AssignCast(std::optional<TipsAnchorType> &dst, const Ark_TipsAnchorType& sr
     switch (src) {
         case ARK_TIPS_ANCHOR_TYPE_TARGET: dst = TipsAnchorType::TARGET; break;
         case ARK_TIPS_ANCHOR_TYPE_CURSOR: dst = TipsAnchorType::CURSOR; break;
-        default: LOGE("Unexpected enum value in Ark_KeyboardAvoidMode: %{public}d", src);
+        default: LOGE("Unexpected enum value in Ark_TipsAnchorType: %{public}d", src);
     }
 }
 template<>
