@@ -1161,7 +1161,7 @@ export class SubHeader extends ViewPU {
     }
 
     onMeasureSize(m8, n8, o8) {
-        let p8 = { width: m8.width, height: m8.height };
+        let p8 = { width: m8?.width ?? 0, height: m8?.height ?? 0 };
         let q8 = this.getUIContext()?.getHostContext();
         this.fontSize = this.updateFontScale();
         if (this.isSuitableAging()) {
@@ -1172,16 +1172,16 @@ export class SubHeader extends ViewPU {
             this.subHeaderModifier.isAgeing = this.ageing;
         }
         n8.forEach((r8) => {
-            o8.minHeight = Math.min(Number(this.getMinHeight()), Number(o8.maxHeight));
-            p8.height = r8?.measure(o8).height;
-            p8.width = Number(o8.maxWidth);
+            o8.minHeight = Math.min(Number(this.getMinHeight()), Number(o8?.maxHeight ?? 0));
+            p8.height = r8?.measure(o8)?.height ?? 0;
+            p8.width = Number(o8?.maxWidth ?? 0);
         });
         return p8;
     }
 
     onPlaceChildren(i8, j8, k8) {
         j8.forEach((l8) => {
-            l8.layout({ x: 0, y: 0 });
+            l8?.layout({ x: 0, y: 0 });
         });
     }
 
@@ -2491,7 +2491,7 @@ class TextArrowLayout extends ViewPU {
         let t = 0;
         for (let u = 0; u < q.length; u++) {
             let v = q[u];
-            v.layout({ x: s, y: t });
+            v?.layout({ x: s, y: t });
         }
     }
 
@@ -2500,14 +2500,14 @@ class TextArrowLayout extends ViewPU {
         let j = OPERATE_ITEM_LENGTH();
         let k = g[INDEX_ZERO];
         let l = {
-            minWidth: Math.max(i, Number(h.minWidth)),
-            maxWidth: h.maxWidth,
-            minHeight: Math.max(j, Number(h.minHeight)),
-            maxHeight: h.maxHeight,
+            minWidth: Math.max(i, Number(h?.minWidth ?? 0)),
+            maxWidth: h?.maxWidth ?? 0,
+            minHeight: Math.max(j, Number(h?.minHeight ?? 0)),
+            maxHeight: h?.maxHeight ?? 0,
         };
-        let m = k.measure(l);
-        i = Math.max(i, m.width);
-        j = Math.max(j, m.height);
+        let m = k?.measure(l);
+        i = Math.max(i, m?.width ?? 0);
+        j = Math.max(j, m?.height ?? 0);
         let n = g[INDEX_ONE];
         let o = {
             minWidth: i,

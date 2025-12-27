@@ -609,7 +609,7 @@ export struct SubHeader {
   }
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
-    let result: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
+    let result: SizeResult = { width: selfLayoutInfo?.width ?? 0, height: selfLayoutInfo?.height ?? 0 };
     let context = this.getUIContext()?.getHostContext() as common.UIAbilityContext;
     this.fontSize = this.updateFontScale();
     if (this.isSuitableAging()) {
@@ -620,16 +620,16 @@ export struct SubHeader {
       this.subHeaderModifier.isAgeing = this.ageing;
     }
     children.forEach((child) => {
-      constraint.minHeight = Math.min(Number(this.getMinHeight()), Number(constraint.maxHeight));
-      result.height = child?.measure(constraint).height;
-      result.width = Number(constraint.maxWidth);
+      constraint.minHeight = Math.min(Number(this.getMinHeight()), Number(constraint?.maxHeight ?? 0));
+      result.height = child?.measure(constraint)?.height ?? 0;
+      result.width = Number(constraint?.maxWidth ?? 0);
     })
     return result;
   }
 
   onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Layoutable[], constraint: ConstraintSizeOptions): void {
     children.forEach((child) => {
-      child.layout({ x: 0, y: 0 });
+      child?.layout({ x: 0, y: 0 });
     })
   }
 
@@ -1404,7 +1404,7 @@ struct TextArrowLayout {
     let currentY: number = 0;
     for (let index = 0; index < children.length; index++) {
       let child = children[index];
-      child.layout({ x: currentX, y: currentY });
+      child?.layout({ x: currentX, y: currentY });
     }
   }
 
@@ -1415,14 +1415,14 @@ struct TextArrowLayout {
 
     let textChild: Measurable = children[INDEX_ZERO];
     let textConstraint: ConstraintSizeOptions = {
-      minWidth: Math.max(textArrowWidth, Number(constraint.minWidth)),
-      maxWidth: constraint.maxWidth,
-      minHeight: Math.max(textArrowHeight, Number(constraint.minHeight)),
-      maxHeight: constraint.maxHeight,
+      minWidth: Math.max(textArrowWidth, Number(constraint?.minWidth ?? 0)),
+      maxWidth: constraint?.maxWidth ?? 0,
+      minHeight: Math.max(textArrowHeight, Number(constraint?.minHeight ?? 0)),
+      maxHeight: constraint?.maxHeight ?? 0,
     };
-    let textMeasureResult: MeasureResult = textChild.measure(textConstraint);
-    textArrowWidth = Math.max(textArrowWidth, textMeasureResult.width);
-    textArrowHeight = Math.max(textArrowHeight, textMeasureResult.height);
+    let textMeasureResult: MeasureResult = textChild?.measure(textConstraint);
+    textArrowWidth = Math.max(textArrowWidth, textMeasureResult?.width ?? 0);
+    textArrowHeight = Math.max(textArrowHeight, textMeasureResult?.height ?? 0);
 
     let arrowChild: Measurable = children[INDEX_ONE];
     let arrowConstraint: ConstraintSizeOptions = {
