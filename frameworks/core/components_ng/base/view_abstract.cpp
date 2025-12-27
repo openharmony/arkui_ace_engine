@@ -6083,6 +6083,19 @@ void ViewAbstract::SetRenderGroup(bool isRenderGroup)
     frameNode->SetApplicationRenderGroupMarked(true);
 }
 
+void ViewAbstract::SetAdaptiveGroup(bool isRenderGroup, bool adaptive)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    const auto& ctx = frameNode->GetRenderContext();
+    if (ctx) {
+        ctx->UpdateAdaptiveGroup(isRenderGroup, adaptive);
+    }
+}
+
 void ViewAbstract::SetExcludeFromRenderGroup(bool exclude)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
