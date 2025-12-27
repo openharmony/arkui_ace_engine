@@ -2127,7 +2127,8 @@ void FormPattern::OnActionEvent(const std::string& action)
         }
     }
 
-    formManagerBridge_->OnActionEvent(action);
+    TAG_LOGE(AceLogTag::ACE_FORM, "[zzz] action type: %{public}s isManuallyClick_:%{public}d.", type.c_str(), isManuallyClick_);
+    formManagerBridge_->OnActionEvent(action, isManuallyClick_);
 }
 
 bool FormPattern::ISAllowUpdate() const

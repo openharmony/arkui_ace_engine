@@ -33,7 +33,7 @@ public:
         const std::string& formBindingDataStr, int64_t& formId, std::string &errMsg);
 
     virtual int32_t BackgroundEvent(const int64_t formId, const std::string& action, const int32_t containerId,
-        const std::string& defualtbundleName);
+        const std::string& defualtbundleName, bool isManuallyClick);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FORM_RESOURCE_FORM_UTILS_H

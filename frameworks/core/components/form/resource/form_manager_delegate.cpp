@@ -666,7 +666,7 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
     renderDelegate_->SetUpdateFormEventHandler(onUpdateFormDoneEventHandler);
 }
 
-void FormManagerDelegate::OnActionEvent(const std::string& action)
+void FormManagerDelegate::OnActionEvent(const std::string& action, bool isManuallyClick)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
@@ -691,7 +691,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
         OnRouterActionEvent(action);
         return;
     } else if (type == "call") {
-        OnCallActionEvent(action);
+        OnCallActionEvent(action, isManuallyClick);
         return;
     }
 
@@ -1291,7 +1291,7 @@ void FormManagerDelegate::OnRouterActionEvent(const std::string& action)
     }
 }
 
-void FormManagerDelegate::OnCallActionEvent(const std::string& action)
+void FormManagerDelegate::OnCallActionEvent(const std::string& action, bool isManuallyClick)
 {
     AAFwk::Want want;
     if (!ParseAction(action, "call", want)) {
@@ -1301,7 +1301,7 @@ void FormManagerDelegate::OnCallActionEvent(const std::string& action)
         auto context = context_.Upgrade();
         CHECK_NULL_VOID(context);
         auto instantId = context->GetInstanceId();
-        formUtils_->BackgroundEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
+        formUtils_->BackgroundEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName(), isManuallyClick);
     }
 }
 

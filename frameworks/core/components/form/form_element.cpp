@@ -293,7 +293,7 @@ void FormElement::OnActionEvent(const std::string& action) const
 
     if (formManagerBridge_) {
         LOGI("send action event to ability.");
-        formManagerBridge_->OnActionEvent(action);
+        formManagerBridge_->OnActionEvent(action, false);
     }
 }
 
