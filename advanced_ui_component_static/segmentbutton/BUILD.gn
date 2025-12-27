@@ -42,6 +42,6 @@ ohos_prebuilt_etc("segmentbutton_ets_abc_etc") {
   deps = [ ":copy_segmentbutton_ets_abc" ]
 }
 
-group("segmentbutton") {
+group("segmentButton") {
   deps = [ ":segmentbutton_ets_abc_etc" ]
 }
