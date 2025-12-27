@@ -3380,7 +3380,7 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
                 TaskExecutor::TaskType::UI, "ArkUIRecordResAdapter");
         }
     }
-    return isFormRender_ ? nullptr : context->CreateModuleContext(bundle, module);
+    return isFormRender_ ? nullptr : context->CreateModuleOrPluginContext(bundle, module);
 }
 
 void AceContainer::CheckAndSetFontFamily()
