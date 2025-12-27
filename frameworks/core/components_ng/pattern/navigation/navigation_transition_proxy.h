@@ -74,7 +74,7 @@ public:
         finishCallback_ = std::move(event);
     }
 
-    void FireFinishCallback(bool isTimeout=false)
+    void FireFinishCallback(bool isTimeout = false)
     {
         if (interactive_) {
             FinishInteractiveAnimation();
