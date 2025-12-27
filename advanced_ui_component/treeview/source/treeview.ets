@@ -2306,7 +2306,7 @@ class ListNodeDataSource extends BasicDataSource {
       maxWidth2: MAX_WIDTH,
     },
     padding: { left: $r('sys.float.padding_level4'), right: $r('sys.float.padding_level4') },
-    backgroundColor: COLOR_IMAGE_EDIT,
+    backgroundColor: $r('sys.color.comp_background_primary'),
     height: GRAG_POP_UP_HEIGHT,
     shadow: {
       radius: $r('sys.float.ohos_id_default_shadow_m'),
