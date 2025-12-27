@@ -806,7 +806,6 @@ private:
     void HandleNextPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover);
     void HandlePrevPressed(const RefPtr<UINode>& parent, int32_t index, bool press);
     void SetMenuBackGroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
-    void UpdateMenuBorderAndBackgroundBlur();
 
     RefPtr<FrameNode> BuildContentModifierNode(int index);
     bool IsMenuScrollable() const;
