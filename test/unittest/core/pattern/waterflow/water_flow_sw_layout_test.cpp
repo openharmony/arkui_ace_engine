@@ -2502,4 +2502,73 @@ HWTEST_F(WaterFlowSWTest, DeleteSection0LastItem001, TestSize.Level1)
     EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 200.000000 EndPos: 300.000000 Items [2 ] }");
     EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 200.000000 EndPos: 300.000000 Items [3 ] }");
 }
+
+/**
+ * @tc.name: ZeroHeightScrollBehavior001
+ * @tc.desc: scroll away and back should re-trigger isAtEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ZeroHeightAtEnd001, TestSize.Level1)
+{
+    int32_t reachEndCount = 0;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnReachEnd([&reachEndCount]() { reachEndCount++; });
+
+    for (int32_t i = 0; i < 20; i++) {
+        CreateItemWithHeight(100.0f);
+    }
+    CreateItemWithHeight(0.0f); // Trailing zero-height item
+    CreateDone();
+
+    // First scroll to bottom
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->layoutInfo_->itemEnd_);
+    EXPECT_TRUE(pattern_->layoutInfo_->offsetEnd_);
+    EXPECT_EQ(reachEndCount, 1);
+
+    // Scroll away from bottom
+    UpdateCurrentOffset(500.0f);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->layoutInfo_->itemEnd_);
+    EXPECT_FALSE(pattern_->layoutInfo_->offsetEnd_);
+
+    // Scroll back to bottom - should trigger onReachEnd again
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->layoutInfo_->itemEnd_);
+    EXPECT_TRUE(pattern_->layoutInfo_->offsetEnd_);
+    EXPECT_EQ(reachEndCount, 2);
+}
+
+/**
+ * @tc.name: ZeroHeightStability001
+ * @tc.desc: isAtEnd state stability after reaching end
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ZeroHeightAtEnd002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
+    model.SetColumnsTemplate("1fr 1fr");
+
+    for (int32_t i = 0; i < 10; i++) {
+        CreateItemWithHeight(100.0f);
+    }
+    CreateItemWithHeight(0.0f); // Trailing zero-height item
+    CreateDone();
+
+    // Scroll to bottom
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->layoutInfo_->itemEnd_);
+
+    // Verify state remains stable across multiple frames
+    for (int i = 0; i < 5; i++) {
+        FlushUITasks();
+        EXPECT_TRUE(pattern_->layoutInfo_->itemEnd_);
+    }
+}
 } // namespace OHOS::Ace::NG
