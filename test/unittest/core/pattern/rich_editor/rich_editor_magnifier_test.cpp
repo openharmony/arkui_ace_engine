@@ -245,6 +245,7 @@ void RichEditorMagnifierTest::TestMagnifier(const RefPtr<RichEditorPattern>& ric
     DirtySwapConfig config;
     config.frameSizeChange = true;
 
+    // The magnifier does not close by touch up while handle moving.
     richEditorPattern->selectOverlay_->isHandleMoving_ = true;
     richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(controller->GetShowMagnifier());
