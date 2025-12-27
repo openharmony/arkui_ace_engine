@@ -247,30 +247,27 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
             creatorIndex = BinarySearchFindIndex(phoneNodeCreators, ArraySize(phoneNodeCreators), tag.c_str());
             if (creatorIndex >= 0) {
                 domNode = phoneNodeCreators[creatorIndex].value(nodeId, tag, itemIndex);
-            } else {
-                
-                auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName(tag.c_str());
-                if (loader) {
-                    LOGI("DynamicModuleHelper getLoaderByName success, tag = %{public}s", tag.c_str());
-                    domNode = loader->CreateDomNode(nodeId, tag);
-                }
-                if (!domNode) {
-                    return nullptr;
-                }
             }
         }
 #endif
     }
     if (!domNode) {
-#if defined(PREVIEW)
-        if (std::strcmp(tag.c_str(), DOM_NODE_TAG_WEB) == 0 || std::strcmp(tag.c_str(), DOM_NODE_TAG_XCOMPONENT) == 0 ||
-            std::strcmp(tag.c_str(), DOM_NODE_TAG_RICH_TEXT) == 0) {
-            LOGW("[Engine Log] Unable to use the %{public}s component in the Previewer. Perform this operation on the "
-                 "emulator or a real device instead.",
-                tag.c_str());
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName(tag.c_str());
+        if (loader) {
+            LOGI("DynamicModuleHelper getLoaderByName success, tag = %{public}s", tag.c_str());
+            domNode = loader->CreateDomNode(nodeId, tag);
         }
+        if (!domNode) {
+#if defined(PREVIEW)
+            if (std::strcmp(tag.c_str(), DOM_NODE_TAG_WEB) == 0 || std::strcmp(tag.c_str(), DOM_NODE_TAG_XCOMPONENT) == 0 ||
+                std::strcmp(tag.c_str(), DOM_NODE_TAG_RICH_TEXT) == 0) {
+                LOGW("[Engine Log] Unable to use the %{public}s component in the Previewer. Perform this operation on the "
+                    "emulator or a real device instead.",
+                    tag.c_str());
+            }
 #endif
-        return nullptr;
+            return nullptr;
+        }
     }
 
     auto result = domNodes_.try_emplace(nodeId, domNode);
