@@ -425,4 +425,10 @@ sptr<IRemoteObject> Container::GetToken()
 {
     return nullptr;
 }
+
+bool Container::IsCurrentUseNewPipeline()
+{
+    auto container = Current();
+    return container ? container->useNewPipeline_ : AceForwardCompatibility::IsUseNG();
+}
 } // namespace OHOS::Ace
