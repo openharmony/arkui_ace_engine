@@ -724,7 +724,7 @@ void RichEditorPattern::BeforeCreateLayoutWrapper()
 
 void RichEditorPattern::UpdateMagnifierStateAfterLayout(bool frameSizeChange)
 {
-    CHECK_NULL_VOID(!selectOverlay_->GetIsHandleMoving());
+    CHECK_NULL_VOID(!IsHandleMoving());
     if (frameSizeChange && magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
         ResetTouchSelectState();
         ResetTouchAndMoveCaretState();
@@ -3356,9 +3356,9 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
 {
     CreateMultipleClickRecognizer();
     ResetAISelected(AIResetSelectionReason::CLICK);
-    if (selectOverlay_->GetIsHandleMoving() || isMouseSelect_) {
+    if (IsHandleMoving() || isMouseSelect_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "click rejected, isHandleMoving=%{public}d, isMouseSelect=%{public}d",
-            selectOverlay_->GetIsHandleMoving(), isMouseSelect_);
+            IsHandleMoving(), isMouseSelect_);
         return;
     }
     auto focusHub = GetFocusHub();
@@ -3392,7 +3392,7 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
 
 bool RichEditorPattern::HandleClickSelection(const OHOS::Ace::GestureEvent& info)
 {
-    CHECK_NULL_RETURN(!selectOverlay_->GetIsHandleMoving(), true);
+    CHECK_NULL_RETURN(!IsHandleMoving(), true);
     if (SelectOverlayIsOn()) {
         selectOverlay_->SwitchToOverlayMode();
         selectOverlay_->ToggleMenu();
@@ -4120,7 +4120,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "no finger touched, skip long press event");
         return;
     }
-    CHECK_NULL_VOID(!selectOverlay_->GetIsHandleMoving());
+    CHECK_NULL_VOID(!IsHandleMoving());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (!focusHub->IsFocusable()) {
@@ -4279,7 +4279,7 @@ bool RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
     bool isShowSelectOverlay = !isDoubleClickByMouse && caretUpdateType_ != CaretUpdateType::LONG_PRESSED;
     if (isShowSelectOverlay) {
         selectOverlay_->SwitchToOverlayMode();
-        ProcessOverlay({ .menuIsShow = !selectOverlay_->GetIsHandleMoving(), .animation = true });
+        ProcessOverlay({ .menuIsShow = !IsHandleMoving(), .animation = true });
         StopTwinkling();
     } else if (selectStart == selectEnd && isDoubleClickByMouse) {
         StartTwinkling();
@@ -8184,12 +8184,14 @@ void RichEditorPattern::HandleTouchDown(const TouchLocationInfo& info)
 
 void RichEditorPattern::HandleTouchUp()
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleTouchUp, fingers=%{public}d", --touchedFingerCount_);
+    bool isHandleMoving = IsHandleMoving();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleTouchUp, fingers=%{public}d, isHandleMoving=%{public}d",
+        --touchedFingerCount_, isHandleMoving);
     HandleTouchUpAfterLongPress();
     ResetTouchAndMoveCaretState();
     ResetTouchSelectState();
-    if (magnifierController_) {
-        magnifierController_->RemoveMagnifierFrameNode();
+    if (!isHandleMoving) {
+        IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (isLongPress_) {
@@ -9641,7 +9643,7 @@ OffsetF& handleOffset, float& handleHeight)
 void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
 {
     auto globalOffset = GetGlobalOffset();
-    if (!selectOverlay_->GetIsHandleMoving()) {
+    if (!IsHandleMoving()) {
         textSelector_.ReverseTextSelector();
     }
     int32_t baseOffset = std::min(textSelector_.baseOffset, GetTextContentLength());
@@ -9705,13 +9707,18 @@ OffsetF RichEditorPattern::GetGlobalOffset() const
 
 bool RichEditorPattern::IsSingleHandle()
 {
-    CHECK_NULL_RETURN(!selectOverlay_->GetIsHandleMoving(), selectOverlay_->IsSingleHandle());
+    CHECK_NULL_RETURN(!IsHandleMoving(), selectOverlay_->IsSingleHandle());
     return GetTextContentLength() == 0 || !IsSelected();
 }
 
 bool RichEditorPattern::IsHandlesShow()
 {
     return selectOverlay_->IsBothHandlesShow();
+}
+
+bool RichEditorPattern::IsHandleMoving()
+{
+    return selectOverlay_->GetIsHandleMoving();
 }
 
 void RichEditorPattern::ResetSelection()
@@ -10530,7 +10537,7 @@ void RichEditorPattern::OnScrollEndCallback()
     if (scrollBar) {
         scrollBar->ScheduleDisappearDelayTask();
     }
-    CHECK_NULL_VOID(!selectOverlay_->GetIsHandleMoving());
+    CHECK_NULL_VOID(!IsHandleMoving());
     if (IsSelectAreaVisible()) {
         auto info = selectOverlay_->GetSelectOverlayInfo();
         if (info && info->menuInfo.menuBuilder) {
@@ -11110,7 +11117,7 @@ void RichEditorPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
 
 void RichEditorPattern::OnVirtualKeyboardAreaChanged()
 {
-    CHECK_NULL_VOID(SelectOverlayIsOn() && !selectOverlay_->GetIsHandleMoving() && !selectOverlay_->GetIsHandleHidden());
+    CHECK_NULL_VOID(SelectOverlayIsOn() && !IsHandleMoving() && !selectOverlay_->GetIsHandleHidden());
     float selectLineHeight = 0.0f;
     textSelector_.selectionBaseOffset.SetX(
         CalcCursorOffsetByPosition(textSelector_.GetStart(), selectLineHeight).GetX());
@@ -12714,9 +12721,9 @@ void RichEditorPattern::HandleOnShowMenu()
         "previewTextInputting=%{public}d,isDragging=%{public}d,isMoveCaret=%{public}d,isHandleMoving=%{public}d,"
         "isTouchSelecting=%{public}d,mouseStatus=%{public}d",
         isSelectAreaVisible, IsPreviewTextInputting(), IsDragging(), moveCaretState_.isMoveCaret,
-        selectOverlay_->GetIsHandleMoving(), isTouchSelecting_, mouseStatus_);
+        IsHandleMoving(), isTouchSelecting_, mouseStatus_);
     CHECK_NULL_VOID(isSelectAreaVisible && !IsPreviewTextInputting() && !IsDragging());
-    CHECK_NULL_VOID(!moveCaretState_.isMoveCaret && !selectOverlay_->GetIsHandleMoving());
+    CHECK_NULL_VOID(!moveCaretState_.isMoveCaret && !IsHandleMoving());
     CHECK_NULL_VOID(!isTouchSelecting_ && mouseStatus_ != MouseStatus::MOVE);
 
     if (sourceType_ == SourceType::MOUSE) {
@@ -13073,7 +13080,7 @@ void RichEditorPattern::TripleClickSection(GestureEvent& info, int32_t start, in
         RequestKeyboard(false, true, true);
         HandleOnEditChanged(true);
         CalculateHandleOffsetAndShowOverlay();
-        ProcessOverlay({ .menuIsShow = !selectOverlay_->GetIsHandleMoving(), .animation = true });
+        ProcessOverlay({ .menuIsShow = !IsHandleMoving(), .animation = true });
     }
     if (info.GetSourceDevice() == SourceType::TOUCH && start == end) {
         selectOverlay_->SetIsSingleHandle(true);

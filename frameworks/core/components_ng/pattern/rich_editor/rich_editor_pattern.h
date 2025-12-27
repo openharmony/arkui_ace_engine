@@ -929,6 +929,7 @@ public:
     void CalculateDefaultHandleHeight(float& height) override;
     bool IsSingleHandle();
     bool IsHandlesShow() override;
+    bool IsHandleMoving();
     void SetCustomKeyboardNode(const RefPtr<UINode>& customKeyboardNode);
     void ProcessCloseKeyboard(const RefPtr<FrameNode>& currentNode);
     bool GetCustomKeyboardIsMatched(int32_t customKeyboard);

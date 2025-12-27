@@ -222,6 +222,8 @@ HWTEST_F(RichEditorMagnifierTest, MagnifierTest003, TestSize.Level1)
 void RichEditorMagnifierTest::TestMagnifier(const RefPtr<RichEditorPattern>& richEditorPattern,
     const RefPtr<MagnifierController>& controller, const OffsetF& localOffset)
 {
+    richEditorPattern->selectOverlay_->isHandleMoving_ = false;
+    EXPECT_FALSE(richEditorPattern->IsHandleMoving());
     richEditorPattern->HandleTouchUp();
     EXPECT_FALSE(controller->GetShowMagnifier());
 
@@ -243,8 +245,12 @@ void RichEditorMagnifierTest::TestMagnifier(const RefPtr<RichEditorPattern>& ric
     DirtySwapConfig config;
     config.frameSizeChange = true;
 
+    // The magnifier does not close by touch up while handle moving.
     richEditorPattern->selectOverlay_->isHandleMoving_ = true;
     richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_TRUE(controller->GetShowMagnifier());
+    EXPECT_TRUE(richEditorPattern->IsHandleMoving());
+    richEditorPattern->HandleTouchUp();
     EXPECT_TRUE(controller->GetShowMagnifier());
 
     richEditorPattern->selectOverlay_->isHandleMoving_ = false;
