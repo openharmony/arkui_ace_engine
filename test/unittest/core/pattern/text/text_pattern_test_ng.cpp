@@ -990,6 +990,12 @@ HWTEST_F(TextPatternTestNg, HandleMouseLeftMoveAction001, TestSize.Level1)
     textPattern->mouseStatus_ = MouseStatus::PRESSED;
     textPattern->HandleMouseLeftMoveAction(info, textOffset);
     EXPECT_NE(textPattern->mouseStatus_, MouseStatus::MOVE);
+
+    textPattern->mouseStatus_ = MouseStatus::RELEASED;
+    textPattern->blockPress_ = true;
+    textPattern->shiftFlag_ = false;
+    textPattern->HandleMouseLeftMoveAction(info, textOffset);
+    EXPECT_NE(textPattern->mouseStatus_, MouseStatus::MOVE);
 }
 
 /**
