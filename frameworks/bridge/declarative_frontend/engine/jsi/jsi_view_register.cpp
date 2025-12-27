@@ -102,6 +102,7 @@ static void ProcessCardData(const EcmaVM* vm, const std::string& data, const JSR
     const JSRef<JSFunc>& targetFunc, const char* logPrefix)
 {
     CHECK_NULL_VOID(vm);
+    LocalScope localScope(vm);
     TAG_LOGI(AceLogTag::ACE_FORM, "%s, dataList length: %{public}zu", logPrefix, data.length());
     std::unique_ptr<JsonValue> jsonRoot = JsonUtil::ParseJsonString(data);
     CHECK_NULL_VOID(jsonRoot);
