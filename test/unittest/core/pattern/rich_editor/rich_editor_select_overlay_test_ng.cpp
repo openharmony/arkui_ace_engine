@@ -558,6 +558,19 @@ HWTEST_F(RichEditorSelectOverlayTestNg, DumpInfo001, TestSize.Level0)
     json = std::make_unique<JsonValue>();
     richEditorPattern->DumpInfo(json);
     EXPECT_FALSE(richEditorPattern->selectOverlay_->HasRenderTransform());
+
+    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    ASSERT_NE(richEditorOverlay, nullptr);
+    richEditorOverlay->SetCaretOffsetAndHeight(OffsetF(80.0f, 100.0f), 60.0f);
+    auto cursorInfo = JsonUtil::ParseJsonString(richEditorPattern->GetCursorInfoInJson());
+    EXPECT_TRUE(cursorInfo->Contains("left"));
+    EXPECT_EQ(cursorInfo->GetDouble("left"), 80.0);
+    EXPECT_TRUE(cursorInfo->Contains("top"));
+    EXPECT_EQ(cursorInfo->GetDouble("top"), 100.0);
+    EXPECT_TRUE(cursorInfo->Contains("width"));
+    EXPECT_EQ(cursorInfo->GetDouble("width"), 2.0);
+    EXPECT_TRUE(cursorInfo->Contains("height"));
+    EXPECT_EQ(cursorInfo->GetDouble("height"), 60.0);
 }
 
 /**

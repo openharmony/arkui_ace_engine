@@ -4262,8 +4262,8 @@ bool RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
         editingLongPress_ = isEditing_;
         previewLongPress_ = !isEditing_;
     }
-    CHECK_EQUAL_RETURN(HandleLongPressOnAiSelection(), true, true);
     focusHub->RequestFocusImmediately();
+    CHECK_EQUAL_RETURN(HandleLongPressOnAiSelection(), true, true);
     InitSelection(textOffset);
     auto selectEnd = textSelector_.GetTextEnd();
     auto selectStart = textSelector_.GetTextStart();
@@ -9802,11 +9802,7 @@ void RichEditorPattern::DumpInfo()
     CHECK_NULL_VOID(host);
     auto richEditorTheme = GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(richEditorTheme);
-    dumpLog.AddDesc(std::string("caret offset: ").append(GetCaretRect().GetOffset().ToString()));
-    dumpLog.AddDesc(std::string("caret height: ")
-            .append(std::to_string(NearZero(GetCaretRect().Height())
-                                       ? richEditorTheme->GetDefaultCaretHeight().ConvertToPx()
-                                       : GetCaretRect().Height())));
+    dumpLog.AddDesc(std::string("cursorInfo: ").append(GetCursorInfoInJson()));
     dumpLog.AddDesc(std::string("text rect: ").append(richTextRect_.ToString()));
     dumpLog.AddDesc(std::string("content rect: ").append(contentRect_.ToString()));
     auto richEditorPaintOffset = host->GetPaintRectOffsetNG(false, true);
@@ -11031,6 +11027,20 @@ std::string RichEditorPattern::GetCustomKeyboardInJson() const
 {
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("supportAvoidance", keyboardAvoidance_ ? "true" : "false");
+    return StringUtils::RestoreBackslash(jsonValue->ToString());
+}
+
+std::string RichEditorPattern::GetCursorInfoInJson() const
+{
+    auto richEditorTheme = GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richEditorTheme, "");
+    RectF caretRect = GetCaretRect();
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("left", caretRect.Left());
+    jsonValue->Put("top", caretRect.Top());
+    jsonValue->Put("width", GetCaretWidth());
+    jsonValue->Put("height", NearZero(caretRect.Height()) ? richEditorTheme->GetDefaultCaretHeight().ConvertToPx()
+        : caretRect.Height());
     return StringUtils::RestoreBackslash(jsonValue->ToString());
 }
 
@@ -13552,11 +13562,7 @@ void RichEditorPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(host);
     auto richEditorTheme = GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(richEditorTheme);
-    json->Put("caret offset", GetCaretRect().GetOffset().ToString().c_str());
-    json->Put("caret height",
-        std::to_string(NearZero(GetCaretRect().Height()) ? richEditorTheme->GetDefaultCaretHeight().ConvertToPx()
-                                                         : GetCaretRect().Height())
-            .c_str());
+    json->Put("cursorInfo", GetCursorInfoInJson().c_str());
     json->Put("text rect", richTextRect_.ToString().c_str());
     json->Put("content rect", contentRect_.ToString().c_str());
     auto richEditorPaintOffset = host->GetPaintRectOffsetNG(false, true);
@@ -13588,7 +13594,7 @@ void RichEditorPattern::OnReportRichEditorEvent(const std::string& event)
         event.c_str());
 }
 
-float RichEditorPattern::GetCaretWidth()
+float RichEditorPattern::GetCaretWidth() const
 {
     return static_cast<float>(CARET_WIDTH.ConvertToPx());
 }
