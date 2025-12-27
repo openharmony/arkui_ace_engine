@@ -964,11 +964,7 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     if (isXmageMode_) {
         videoFrameSize = MeasureModeContentLayout(movingPhotoNodeSize, layoutProperty);
     } else {
-        if (autoAndRepeatLevel_ == PlaybackMode::REPEAT){
-            videoFrameSize = CalculateFitFill(movingPhotoNodeSize);
-        } else {
-            videoFrameSize = MeasureContentLayout(movingPhotoNodeSize, layoutProperty);
-        }
+        videoFrameSize = SetVideoFrameSize(movingPhotoNodeSize, layoutProperty);
     }
     if (xmageModeValue_ != ROUND_XMAGE_MODE_VALUE) {
         SetRenderContextBoundsInXmage(movingPhotoNodeSize, videoFrameSize);
@@ -1054,6 +1050,16 @@ void MovingPhotoPattern::SetRenderContextBoundsInXmage(
         renderContextForMediaPlayer_->SetBounds(0, 0,
             imageSize.Width() * xmageOffsetRatio.Width() + ROUND_XMAGE_PIXEL_GAP,
             imageSize.Height() * xmageOffsetRatio.Height() + ROUND_XMAGE_PIXEL_GAP);
+    }
+}
+
+SizeF MovingPhotoPattern::SetVideoFrameSize(const SizeF& layoutSize,
+    const RefPtr<MovingPhotoLayoutProperty>& layoutProperty)
+{
+    if (autoAndRepeatLevel_ == PlaybackMode::REPEAT){
+        return CalculateFitFill(layoutSize);
+    } else {
+        return MeasureContentLayout(layoutSize, layoutProperty);
     }
 }
 
