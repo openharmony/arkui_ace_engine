@@ -240,6 +240,7 @@ public:
     void OnLayoutCompleted(const std::string& componentId) override {}
     void OnDrawCompleted(const std::string& componentId) override {}
     void OnDrawChildrenCompleted(const std::string& componentId) override {}
+    void CallStateMgmtCleanUpIdleTaskFunc(int64_t maxTimeInNs) override;
     bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override
     {
         return false;

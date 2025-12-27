@@ -15,6 +15,7 @@
 
 #include "bridge/cj_frontend/cppview/view_stack_processor.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::Framework {
 void CJViewStackProcessor::StartGetAccessRecordingFor(int32_t elmtId)
@@ -35,6 +36,15 @@ void CJViewStackProcessor::StopGetAccessRecording()
 void CJViewStackProcessor::ImplicitPopBeforeContinue()
 {
     ViewStackModel::GetInstance()->ImplicitPopBeforeContinue();
+}
+
+void CJViewStackProcessor::MoveDeletedElmtIds(std::vector<int64_t>& vec)
+{
+    OHOS::Ace::RemovedElementsType removedElements;
+    OHOS::Ace::ElementRegister::GetInstance()->MoveRemovedItems(removedElements);
+    for (const auto& elmtId : removedElements) {
+        vec.push_back(static_cast<int64_t>(elmtId));
+    }
 }
 
 } // namespace OHOS::Ace::Framework
