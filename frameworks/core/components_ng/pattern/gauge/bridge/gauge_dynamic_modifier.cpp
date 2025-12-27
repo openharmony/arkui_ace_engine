@@ -22,11 +22,13 @@
 #include "core/interfaces/cjui/cjui_api.h"
 
 namespace OHOS::Ace {
+#ifndef CROSS_PLATFORM
 Framework::GaugeModelImpl* GetGaugeModelImpl()
 {
     static Framework::GaugeModelImpl instance;
     return &instance;
 }
+#endif
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
@@ -440,6 +442,7 @@ void SetDescription()
     GaugeModelNG::SetDescriptionStatic(customNode);
 }
 
+#ifndef CROSS_PLATFORM
 void CreateModelImpl(ArkUI_Float32 value, ArkUI_Float32 min, ArkUI_Float32 max)
 {
     GetGaugeModelImpl()->Create(value, min, max);
@@ -720,6 +723,7 @@ void SetIsShowDescriptionImpl(ArkUINodeHandle node, ArkUI_Bool isShowDescription
 }
 
 void SetDescriptionImpl() {}
+#endif
 
 ArkUINodeHandle CreateFrameNode(int32_t nodeId)
 {
@@ -729,73 +733,75 @@ ArkUINodeHandle CreateFrameNode(int32_t nodeId)
 const ArkUIGaugeModifier* GetGaugeDynamicModifier()
 {
     static bool isCurrentUseNewPipeline = Container::IsCurrentUseNewPipeline();
-    if (isCurrentUseNewPipeline) {
+    if (!isCurrentUseNewPipeline) {
+#ifndef CROSS_PLATFORM
         CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
         static const ArkUIGaugeModifier modifier = {
-            .createModel = CreateModel,
-            .setIsShowLimitValue = SetIsShowLimitValue,
-            .setGaugeValue = SetGaugeValue,
-            .resetGaugeValue = ResetGaugeValue,
-            .setGaugeStartAngle = SetGaugeStartAngle,
-            .resetGaugeStartAngle = ResetGaugeStartAngle,
-            .setGaugeEndAngle = SetGaugeEndAngle,
-            .resetGaugeEndAngle = ResetGaugeEndAngle,
-            .setGaugeStrokeWidth = SetGaugeStrokeWidth,
-            .setGaugeStrokeWidthPtr = SetGaugeStrokeWidthPtr,
-            .resetGaugeStrokeWidth = ResetGaugeStrokeWidth,
-            .setShadowOptions = SetShadowOptions,
-            .setShadowOptionsPtr = SetShadowOptionsPtr,
-            .resetShadowOptions = ResetShadowOptions,
-            .setIsShowIndicator = SetIsShowIndicator,
-            .setIndicatorIconPath = SetIndicatorIconPath,
-            .setIndicatorIconPathPtr = SetIndicatorIconPathPtr,
-            .resetIndicatorIconPath = ResetIndicatorIconPath,
-            .setIndicatorSpace = SetIndicatorSpace,
-            .setIndicatorSpacePtr = SetIndicatorSpacePtr,
-            .resetIndicatorSpace = ResetIndicatorSpace,
-            .setColors = SetColors,
-            .resetColors = ResetColors,
-            .setGradientColors = SetGradientColors,
-            .resetGradientColors = ResetGradientColors,
-            .setUseSpecialDefaultIndicator = SetUseSpecialDefaultIndicator,
-            .setIsShowDescription = SetIsShowDescription,
-            .setDescription = SetDescription,
+            .createModel = CreateModelImpl,
+            .setIsShowLimitValue = SetIsShowLimitValueImpl,
+            .setGaugeValue = SetValueImpl,
+            .resetGaugeValue = ResetGaugeValueImpl,
+            .setGaugeStartAngle = SetGaugeStartAngleImpl,
+            .resetGaugeStartAngle = ResetGaugeStartAngleImpl,
+            .setGaugeEndAngle = SetGaugeEndAngleImpl,
+            .resetGaugeEndAngle = ResetGaugeEndAngleImpl,
+            .setGaugeStrokeWidth = SetGaugeStrokeWidthImpl,
+            .setGaugeStrokeWidthPtr = SetGaugeStrokeWidthPtrImpl,
+            .resetGaugeStrokeWidth = ResetGaugeStrokeWidthImpl,
+            .setShadowOptions = SetShadowOptionsImpl,
+            .setShadowOptionsPtr = SetShadowOptionsPtrImpl,
+            .resetShadowOptions = ResetShadowOptionsImpl,
+            .setIsShowIndicator = SetIsShowIndicatorImpl,
+            .setIndicatorIconPath = SetIndicatorIconPathImpl,
+            .setIndicatorIconPathPtr = SetIndicatorIconPathPtrImpl,
+            .resetIndicatorIconPath = ResetIndicatorIconPathImpl,
+            .setIndicatorSpace = SetIndicatorSpaceImpl,
+            .setIndicatorSpacePtr = SetIndicatorSpacePtrImpl,
+            .resetIndicatorSpace = ResetIndicatorSpaceImpl,
+            .setColors = SetColorsImpl,
+            .resetColors = ResetColorsImpl,
+            .setGradientColors = SetGradientColorsImpl,
+            .resetGradientColors = ResetGradientColorsImpl,
+            .setUseSpecialDefaultIndicator = SetUseSpecialDefaultIndicatorImpl,
+            .setIsShowDescription = SetIsShowDescriptionImpl,
+            .setDescription = SetDescriptionImpl,
             .createFrameNode = CreateFrameNode,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
         return &modifier;
+#endif
     }
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIGaugeModifier modifier = {
-        .createModel = CreateModelImpl,
-        .setIsShowLimitValue = SetIsShowLimitValueImpl,
-        .setGaugeValue = SetValueImpl,
-        .resetGaugeValue = ResetGaugeValueImpl,
-        .setGaugeStartAngle = SetGaugeStartAngleImpl,
-        .resetGaugeStartAngle = ResetGaugeStartAngleImpl,
-        .setGaugeEndAngle = SetGaugeEndAngleImpl,
-        .resetGaugeEndAngle = ResetGaugeEndAngleImpl,
-        .setGaugeStrokeWidth = SetGaugeStrokeWidthImpl,
-        .setGaugeStrokeWidthPtr = SetGaugeStrokeWidthPtrImpl,
-        .resetGaugeStrokeWidth = ResetGaugeStrokeWidthImpl,
-        .setShadowOptions = SetShadowOptionsImpl,
-        .setShadowOptionsPtr = SetShadowOptionsPtrImpl,
-        .resetShadowOptions = ResetShadowOptionsImpl,
-        .setIsShowIndicator = SetIsShowIndicatorImpl,
-        .setIndicatorIconPath = SetIndicatorIconPathImpl,
-        .setIndicatorIconPathPtr = SetIndicatorIconPathPtrImpl,
-        .resetIndicatorIconPath = ResetIndicatorIconPathImpl,
-        .setIndicatorSpace = SetIndicatorSpaceImpl,
-        .setIndicatorSpacePtr = SetIndicatorSpacePtrImpl,
-        .resetIndicatorSpace = ResetIndicatorSpaceImpl,
-        .setColors = SetColorsImpl,
-        .resetColors = ResetColorsImpl,
-        .setGradientColors = SetGradientColorsImpl,
-        .resetGradientColors = ResetGradientColorsImpl,
-        .setUseSpecialDefaultIndicator = SetUseSpecialDefaultIndicatorImpl,
-        .setIsShowDescription = SetIsShowDescriptionImpl,
-        .setDescription = SetDescriptionImpl,
+        .createModel = CreateModel,
+        .setIsShowLimitValue = SetIsShowLimitValue,
+        .setGaugeValue = SetGaugeValue,
+        .resetGaugeValue = ResetGaugeValue,
+        .setGaugeStartAngle = SetGaugeStartAngle,
+        .resetGaugeStartAngle = ResetGaugeStartAngle,
+        .setGaugeEndAngle = SetGaugeEndAngle,
+        .resetGaugeEndAngle = ResetGaugeEndAngle,
+        .setGaugeStrokeWidth = SetGaugeStrokeWidth,
+        .setGaugeStrokeWidthPtr = SetGaugeStrokeWidthPtr,
+        .resetGaugeStrokeWidth = ResetGaugeStrokeWidth,
+        .setShadowOptions = SetShadowOptions,
+        .setShadowOptionsPtr = SetShadowOptionsPtr,
+        .resetShadowOptions = ResetShadowOptions,
+        .setIsShowIndicator = SetIsShowIndicator,
+        .setIndicatorIconPath = SetIndicatorIconPath,
+        .setIndicatorIconPathPtr = SetIndicatorIconPathPtr,
+        .resetIndicatorIconPath = ResetIndicatorIconPath,
+        .setIndicatorSpace = SetIndicatorSpace,
+        .setIndicatorSpacePtr = SetIndicatorSpacePtr,
+        .resetIndicatorSpace = ResetIndicatorSpace,
+        .setColors = SetColors,
+        .resetColors = ResetColors,
+        .setGradientColors = SetGradientColors,
+        .resetGradientColors = ResetGradientColors,
+        .setUseSpecialDefaultIndicator = SetUseSpecialDefaultIndicator,
+        .setIsShowDescription = SetIsShowDescription,
+        .setDescription = SetDescription,
         .createFrameNode = CreateFrameNode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
