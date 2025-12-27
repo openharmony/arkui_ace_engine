@@ -381,12 +381,12 @@ public:
 
     void SetOnMediaCastEnterCallback(OnMediaCastEnterCallback&& Callback)
     {
-        OnMediaCastEnterCallback_ = std::move(Callback);
+        onMediaCastEnterCallback_ = std::move(Callback);
     }
 
     OnMediaCastEnterCallback GetOnMediaCastEnterCallback()
     {
-        return OnMediaCastEnterCallback_;
+        return onMediaCastEnterCallback_;
     }
 
     PermissionClipboardCallback GetPermissionClipboardCallback() const
@@ -1396,7 +1396,7 @@ private:
     uint32_t rotation_ = 0;
     SetWebIdCallback setWebIdCallback_ = nullptr;
     SetWebDetachCallback setWebDetachCallback_ = nullptr;
-    OnMediaCastEnterCallback OnMediaCastEnterCallback_ = nullptr;
+    OnMediaCastEnterCallback onMediaCastEnterCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
     SetFaviconCallback setFaviconCallback_ = nullptr;
