@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
@@ -1462,19 +1463,55 @@ HWTEST_F(VideoTestExtraAddNg, RecoverState001, TestSize.Level1)
     ASSERT_NE(fullScreenPattern, nullptr);
     /* Indirectly call the RecoverState function by calling the ExitFullScreen function */
     EXPECT_TRUE(fullScreenPattern->ExitFullScreen());
+}
 
-    mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();
+/**
+ * @tc.name: RecoverState002
+ * @tc.desc: Test RecoverState
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestExtraAddNg, RecoverState002, TestSize.Level1)
+{
+    VideoModelNG videoModelNG;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    videoModelNG.Create(videoController);
+    auto frameNode = AceType::Claim<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    ASSERT_NE(videoPattern, nullptr);
+
+    auto mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();
     EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(false));
     videoPattern->mediaPlayer_ = mockMediaPlayer;
 
     videoPattern->FullScreen();
 
-    videoFullScreenNode = videoPattern->GetFullScreenNode();
+    auto videoFullScreenNode = videoPattern->GetFullScreenNode();
     ASSERT_NE(videoFullScreenNode, nullptr);
-    fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(videoFullScreenNode->GetPattern());
+    auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(videoFullScreenNode->GetPattern());
+    fullScreenPattern->currentPos_ = 5;
     ASSERT_NE(fullScreenPattern, nullptr);
     /* Indirectly call the RecoverState function by calling the ExitFullScreen function */
     EXPECT_TRUE(fullScreenPattern->ExitFullScreen());
+
+    auto layoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
+    ASSERT_TRUE(layoutProperty);
+    RefPtr<UINode> controlBar = nullptr;
+    auto children = frameNode->GetChildren();
+    for (const auto& child : children) {
+        if (child->GetTag() == V2::ROW_ETS_TAG) {
+            controlBar = child;
+            break;
+        }
+    }
+    ASSERT_TRUE(controlBar);
+    auto sliderNode = AceType::DynamicCast<FrameNode>(controlBar->GetChildAtIndex(2));
+    ASSERT_TRUE(sliderNode);
+    auto sliderPattern = AceType::DynamicCast<SliderPattern>(sliderNode->GetPattern());
+    sliderPattern->CalcSliderValue();
+    ASSERT_TRUE(sliderPattern);
+    auto value = sliderPattern->value_;
+    EXPECT_EQ(value, 5);
 
     videoPattern->mediaPlayer_ = nullptr;
 
