@@ -963,10 +963,12 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     SizeF videoFrameSize;
     if (isXmageMode_) {
         videoFrameSize = MeasureModeContentLayout(movingPhotoNodeSize, layoutProperty);
-    } else if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
-        videoFrameSize = CalculateFitFill(movingPhotoNodeSize);
     } else {
-        videoFrameSize = MeasureContentLayout(movingPhotoNodeSize, layoutProperty);
+        if (autoAndRepeatLevel_ == PlaybackMode::REPEAT){
+            videoFrameSize = CalculateFitFill(movingPhotoNodeSize);
+        } else {
+            videoFrameSize = MeasureContentLayout(movingPhotoNodeSize, layoutProperty);
+        }
     }
     if (xmageModeValue_ != ROUND_XMAGE_MODE_VALUE) {
         SetRenderContextBoundsInXmage(movingPhotoNodeSize, videoFrameSize);
