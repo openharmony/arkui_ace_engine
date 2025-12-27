@@ -32,6 +32,13 @@ void RenderContext::RequestNextFrameMultiThread(bool isOffScreenNode) const
                 pipeline->SetNeedRenderNode(weak);
             });
         }
+        {
+            node->PostAfterAttachMainTreeTask([weak = WeakPtr<FrameNode>(node)]() {
+                auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+                CHECK_NULL_VOID(pipeline);
+                pipeline->SetNeedRenderNodeByUniqueId(weak);
+            });
+        }
         if (node->IsObservedByDrawChildren()) {
             node->PostAfterAttachMainTreeTask([weak = WeakPtr<FrameNode>(node)]() {
                 auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
