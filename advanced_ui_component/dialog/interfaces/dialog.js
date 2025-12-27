@@ -4612,8 +4612,8 @@ export class PopoverDialog extends ViewPU {
                 'id': -1,
                 'type': 10002,
                 params: ['sys.float.corner_radius_level16'],
-                'bundleName': "__harDefaultBundleName__",
-                'moduleName': "__harDefaultModuleName__"
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
             };
             this.popover.shadow = this.popover?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD;
             this.popover.backgroundBlurStyle = this.popover?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK;
