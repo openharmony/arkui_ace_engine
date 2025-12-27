@@ -187,6 +187,7 @@ public:
     using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using WebNodeInfoCallback = const std::function<void(std::shared_ptr<JsonValue>& jsonNodeArray, int32_t webId)>;
     using TextBlurCallback = std::function<void(int64_t, const std::string)>;
+    using OnMediaCastEnterCallback = std::function<void()>;
     using WebComponentClickCallback = std::function<void(int64_t, const std::string)>;
     using OnWebNativeMessageConnectCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using OnWebNativeMessageDisConnectCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
@@ -376,6 +377,16 @@ public:
     DefaultFileSelectorShowCallback GetDefaultFileSelectorShowCallback()
     {
         return defaultFileSelectorShowCallback_;
+    }
+
+    void SetOnMediaCastEnterCallback(OnMediaCastEnterCallback&& Callback)
+    {
+        onMediaCastEnterCallback_ = std::move(Callback);
+    }
+
+    OnMediaCastEnterCallback GetOnMediaCastEnterCallback()
+    {
+        return onMediaCastEnterCallback_;
     }
 
     PermissionClipboardCallback GetPermissionClipboardCallback() const
@@ -1390,6 +1401,7 @@ private:
     uint32_t rotation_ = 0;
     SetWebIdCallback setWebIdCallback_ = nullptr;
     SetWebDetachCallback setWebDetachCallback_ = nullptr;
+    OnMediaCastEnterCallback onMediaCastEnterCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
     SetFaviconCallback setFaviconCallback_ = nullptr;

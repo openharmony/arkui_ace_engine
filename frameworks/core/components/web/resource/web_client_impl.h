@@ -395,6 +395,7 @@ public:
     void OnClippedSelectionBoundsChanged(int x, int y, int width, int height) override;
     void OnCameraCaptureStateChanged(int originalState, int new_state) override;
     void OnMicrophoneCaptureStateChanged(int originalState, int newState) override;
+    void OnMediaCastEnter() override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

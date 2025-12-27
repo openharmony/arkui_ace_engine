@@ -9729,6 +9729,17 @@ void WebDelegate::OnPdfLoadEvent(int32_t result, const std::string& url)
         TaskExecutor::TaskType::JS, "ArkUIWebPdfLoadEvent");
 }
 
+void WebDelegate::OnMediaCastEnter()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnMediaCastEnter");
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto onMediaCastEnterCallback = webPattern->GetOnMediaCastEnterCallback();
+    if (onMediaCastEnterCallback) {
+        onMediaCastEnterCallback();
+    }
+}
+
 void WebDelegate::SetForceEnableZoom(bool isEnabled)
 {
     CHECK_NULL_VOID(nweb_);

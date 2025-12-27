@@ -1514,6 +1514,7 @@ public:
     void UpdateEnableImageAnalyzer(bool enable);
     void OnPdfScrollAtBottom(const std::string& url);
     void OnPdfLoadEvent(int32_t result, const std::string& url);
+    void OnMediaCastEnter();
     void SetImeShow(bool visible);
     void OnRequestAutofill(int32_t menuType);
 

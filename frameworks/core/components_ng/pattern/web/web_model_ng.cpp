@@ -2797,6 +2797,13 @@ void WebModelNG::SetBackToTop(FrameNode* frameNode, bool isBackToTop)
     webPattern->UpdateBackToTop(isBackToTop);
 }
 
+void WebModelNG::SetOnMediaCastEnter(std::function<void()>&& jsCallback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetOnMediaCastEnterCallback(std::move(jsCallback));
+}
+
 void WebModelNG::SetOnVerifyPinRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
