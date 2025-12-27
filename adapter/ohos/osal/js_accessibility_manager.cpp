@@ -3763,6 +3763,9 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNodeInner(
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_VOID(ngPipeline);
 
+    auto blockEvent = blockerInAction_.ShouldBlock(frameNode->GetAccessibilityId(), accessibilityEvent.type);
+    CHECK_EQUAL_VOID(blockEvent, true);
+
     if ((!frameNode->IsActive()) || frameNode->CheckAccessibilityLevelNo()) {
         TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "node: %{public}" PRId64 ", is not active or level is no",
             frameNode->GetAccessibilityId());
@@ -6697,10 +6700,38 @@ AccessibilityScrollType getAccessibilityScrollType(const std::map<std::string, s
     auto argument = getArgumentByKey(actionArguments, checkKey);
     return findAccessibilityScrollType(argument);
 }
+}
+void JsAccessibilityManager::ResetBlockedEvent()
+{
+    blockerInAction_.Reset();
+}
 
+void JsAccessibilityManager::ActAccessibilityActionPreHandle(Accessibility::ActionType action,
+    const RefPtr<NG::FrameNode>& frameNode)
+{
+    // text update event not send while in SET_TEXT action
+    CHECK_NE_VOID(action, ActionType::ACCESSIBILITY_ACTION_SET_TEXT);
+    CHECK_NULL_VOID(frameNode);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(frameNode->GetContextRefPtr());
+    CHECK_NULL_VOID(ngPipeline);
 
-bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std::string, std::string>& actionArguments,
-    RefPtr<NG::AccessibilityProperty> accessibilityProperty)
+    std::vector<AccessibilityEventType> events = {
+        AccessibilityEventType::TEXT_CHANGE,
+        AccessibilityEventType::COMPONENT_CHANGE
+    };
+    blockerInAction_.SetBlockedEvents(frameNode->GetAccessibilityId(), events);
+    ngPipeline->AddAfterRenderTask(
+        [weak = WeakClaim(this)]() {
+            auto jsAccessibilityManager = weak.Upgrade();
+            CHECK_NULL_VOID(jsAccessibilityManager);
+            jsAccessibilityManager->ResetBlockedEvent();
+        }
+    );
+}
+
+bool JsAccessibilityManager::ActAccessibilityAction(Accessibility::ActionType action,
+    const std::map<std::string, std::string>& actionArguments,
+    RefPtr<NG::AccessibilityProperty> accessibilityProperty, const RefPtr<NG::FrameNode>& frameNode)
 {
     AccessibilityActionParam param;
     if (action == ActionType::ACCESSIBILITY_ACTION_SET_SELECTION) {
@@ -6738,22 +6769,15 @@ bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std
         param.scrollType = getAccessibilityScrollType(actionArguments, ACTION_ARGU_SCROLL_STUB);
     }
     if (action == ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK) {
-        auto iter = actionArguments.find(ACTION_ARGU_SPAN_ID);
-        int32_t spanId = -1;
-        if (iter != actionArguments.end()) {
-            std::stringstream strSpanId;
-            strSpanId << iter->second;
-            strSpanId >> spanId;
-        }
-        param.spanId = spanId;
+        param.spanId = getArgumentByKey(actionArguments, ACTION_ARGU_SPAN_ID);
     }
     auto accessibiltyAction = ACTIONS.find(action);
     if (accessibiltyAction != ACTIONS.end()) {
+        ActAccessibilityActionPreHandle(action, frameNode);
         param.accessibilityProperty = accessibilityProperty;
         return accessibiltyAction->second(param);
     }
     return false;
-}
 }
 
 bool JsAccessibilityManager::ExecuteExtensionActionNG(int64_t elementId,
@@ -6806,7 +6830,7 @@ bool JsAccessibilityManager::ExecuteActionNG(int64_t elementId,
     if (!result) {
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_RETURN(accessibilityProperty, false);
-        result = ActAccessibilityAction(action, actionArguments, accessibilityProperty);
+        result = ActAccessibilityAction(action, actionArguments, accessibilityProperty, frameNode);
     }
     return result;
 }
