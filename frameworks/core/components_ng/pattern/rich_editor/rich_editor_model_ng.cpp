@@ -28,12 +28,39 @@ void RichEditorModelNG::Create(bool isStyledStringMode)
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, nodeId,
         [isStyledStringMode]() { return AceType::MakeRefPtr<RichEditorPattern>(isStyledStringMode); });
     stack->Push(frameNode);
+    CreateRichEditorNodeBase(nodeId, isStyledStringMode, frameNode);
+    isStyledStringMode_ = isStyledStringMode;
+}
+ 
+void RichEditorModelNG::CreateRichEditorStyledStringNode(int32_t nodeId, RefPtr<FrameNode>& richEditorNode)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<RichEditorPattern>(true); });
+    CreateRichEditorNodeBase(nodeId, true, frameNode);
+    richEditorNode = frameNode;
+ 
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    auto host = richEditorPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto richEditorTheme = pipelineContext->GetTheme<RichEditorTheme>();
+    CHECK_NULL_VOID(richEditorTheme);
+    auto renderContext = richEditorNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(richEditorTheme->GetBgColor());
+}
+ 
+void RichEditorModelNG::CreateRichEditorNodeBase(
+    int32_t nodeId, bool isStyledStringMode, const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, TextAlign::START);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, WordBreak::BREAK_WORD);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
-    CHECK_NULL_VOID(frameNode);
+ 
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
-    isStyledStringMode_ = isStyledStringMode;
+ 
     if (isStyledStringMode) {
         richEditorPattern->SetRichEditorStyledStringController(AceType::MakeRefPtr<RichEditorStyledStringController>());
         richEditorPattern->GetRichEditorStyledStringController()->SetPattern(WeakPtr(richEditorPattern));
@@ -58,7 +85,7 @@ void RichEditorModelNG::Create(bool isStyledStringMode)
     richEditorPattern->SetSupportPreviewText(pipelineContext->GetSupportPreviewText());
     if (frameNode->IsFirstBuilding()) {
         auto draggable = pipelineContext->GetDraggable<RichEditorTheme>();
-        SetDraggable(draggable);
+        frameNode->SetDraggable(draggable);
         auto gestureHub = frameNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->SetTextDraggable(true);
@@ -269,7 +296,7 @@ void RichEditorModelNG::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& f
 void RichEditorModelNG::SetOnPaste(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPaste(std::move(func));
 }
@@ -330,6 +357,13 @@ void RichEditorModelNG::SetTextDetectEnable(bool value)
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetTextDetectEnable(value);
+}
+
+bool RichEditorModelNG::GetTextDetectEnable(FrameNode* frameNode) {
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetTextDetectEnable();
 }
 
 void RichEditorModelNG::SetSupportPreviewText(bool value)
@@ -405,6 +439,14 @@ void RichEditorModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
     pattern->SetCaretColor(color);
 }
 
+Color RichEditorModelNG::GetCaretColor(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, Color(0xff007dff));
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, Color(0xff007dff));
+    return pattern->GetCaretColor();
+}
+
 void RichEditorModelNG::SetOnEditingChange(std::function<void(const bool&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
@@ -438,6 +480,14 @@ void RichEditorModelNG::SetEnterKeyType(FrameNode* frameNode, const TextInputAct
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateTextInputAction(action);
+}
+
+TextInputAction RichEditorModelNG::GetEnterKeyType(FrameNode* frameNode)
+{
+    TextInputAction value = TextInputAction::UNSPECIFIED;
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    return pattern->GetTextInputActionValue(pattern->GetDefaultTextInputAction());
 }
 
 void RichEditorModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func)
@@ -615,6 +665,13 @@ void RichEditorModelNG::SetBarState(DisplayMode mode)
 void RichEditorModelNG::SetBarState(FrameNode* frameNode, DisplayMode mode)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, DisplayMode, mode, frameNode);
+}
+
+OHOS::Ace::DisplayMode RichEditorModelNG::GetBarState(FrameNode* frameNode)
+{
+    OHOS::Ace::DisplayMode value = OHOS::Ace::DisplayMode::AUTO;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(RichEditorLayoutProperty, DisplayMode, value, frameNode, value);
+    return value;
 }
 
 void RichEditorModelNG::SetMaxLength(std::optional<int32_t> value)
@@ -817,6 +874,14 @@ void RichEditorModelNG::ResetSingleLine()
 void RichEditorModelNG::SetSingleLine(FrameNode* frameNode, bool isEnable)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, SingleLine, isEnable, frameNode);
+}
+
+Color RichEditorModelNG::GetScrollBarColor(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, Color());
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(richEditorPattern, Color());
+    return richEditorPattern->GetScrollBarColor();
 }
 
 void RichEditorModelNG::ResetSingleLine(FrameNode* frameNode)

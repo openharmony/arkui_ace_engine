@@ -1453,6 +1453,7 @@ public:
 
     bool IsShortCutBlocked() override { return IsDragging(); }
     void UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty = false);
+    Color GetScrollBarColor() const;
     void UpdatePlaceholderFontColor(const Color& color);
     void MarkContentNodeForRender() override;
     void CreateRichEditorOverlayModifier();
@@ -1494,7 +1495,6 @@ private:
     bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
     Color GetUrlHoverColor();
     Color GetUrlPressColor();
-    Color GetScrollBarColor() const;
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
     RefPtr<RichEditorScrollController> scrollController_;
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);

@@ -6653,6 +6653,20 @@ ArkUI_ErrorCode OH_ArkUI_TextEditMenuOptions_RegisterOnMenuItemClickCallback(
 typedef struct ArkUI_TextSelectionMenuOptions ArkUI_TextSelectionMenuOptions;
 
 /**
+ * @brief Defines the decoration style.
+ *
+ * @since 24
+ */
+typedef struct ArkUI_DecorationStyleOptions ArkUI_DecorationStyleOptions;
+ 
+/**
+ * @brief Defines the config of data detector.
+ *
+ * @since 24
+ */
+typedef struct ArkUI_TextDataDetectorConfig ArkUI_TextDataDetectorConfig;
+
+/**
  * @brief Enumerates the text span type.
  *
  * @since 22
@@ -7275,6 +7289,262 @@ void OH_ArkUI_SelectedDragPreviewStyle_SetColor(
  */
 uint32_t OH_ArkUI_SelectedDragPreviewStyle_GetColor(
     ArkUI_SelectedDragPreviewStyle* config);
+
+/**
+ * @brief Creates an option object pointing to decoration style.
+ *
+ * @return A pointer to the option object.
+ * @since 24
+ */
+ArkUI_DecorationStyleOptions* OH_ArkUI_DecorationStyleOptions_Create();
+ 
+/**
+ * @brief Disposes the option object pointing to decoration style.
+ *
+ * @param option Pointer to the option object to be disposed.
+ * @since 24
+ */
+void OH_ArkUI_DecorationStyleOptions_Dispose(ArkUI_DecorationStyleOptions* options);
+ 
+/**
+ * @brief Sets the decoration type of decoration style.
+ *
+ * @param options Pointer to the ArkUI_DecorationStyleOptions object.
+ * @param type The decoration type {@link ArkUI_TextDecorationType}.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_SetTextDecorationType(ArkUI_DecorationStyleOptions* options,
+    ArkUI_TextDecorationType type);
+ 
+/**
+ * @brief Gets the decoration type of decoration style.
+ *
+ * @param options Pointer to the ArkUI_DecorationStyleOptions object.
+ * @param type The decoration type {@link ArkUI_TextDecorationType}.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_GetTextDecorationType(ArkUI_DecorationStyleOptions* options,
+    ArkUI_TextDecorationType* type);
+ 
+/**
+ * @brief Sets the color of decoration line.
+ *
+ * @param options Pointer to the ArkUI_DecorationStyleOptions object.
+ * @param color Color of decoration line.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_SetColor(ArkUI_DecorationStyleOptions* options, uint32_t color);
+ 
+/**
+ * @brief Gets the color of decoration line.
+ *
+ * @param options Pointer to the ArkUI_DecorationStyleOptions object.
+ * @param color Color of decoration line.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_GetColor(ArkUI_DecorationStyleOptions* options, uint32_t* color);
+ 
+/**
+ * @brief Sets the style of decoration line.
+ *
+ * @param options Pointer to the ArkUI_DecorationStyleOptions object.
+ * @param style Style of decoration line.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_SetTextDecorationStyle(ArkUI_DecorationStyleOptions* options,
+    ArkUI_TextDecorationStyle style);
+ 
+/**
+ * @brief Gets the style of decoration line.
+ *
+ * @param options Pointer to the ArkUI_DecorationStyleOptions object.
+ * @param style Style of decoration line.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_GetTextDecorationStyle(ArkUI_DecorationStyleOptions* options,
+    ArkUI_TextDecorationStyle* style);
+ 
+/**
+ * @brief Sets the thickness scale of decoration line.
+ *
+ * @param options Pointer to the ArkUI_DecorationStyleOptions object.
+ * @param thicknessScale Thickness of decoration line.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_SetThicknessScale(
+    ArkUI_DecorationStyleOptions* options, float thicknessScale);
+ 
+/**
+ * @brief Gets the thickness scale of decoration line.
+ *
+ * @param options Pointer to the ArkUI_DecorationStyleOptions object.
+ * @param thicknessScale Thickness of decoration line.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_GetThicknessScale(ArkUI_DecorationStyleOptions* options,
+    float* thicknessScale);
+ 
+/**
+ * @brief Creates a object pointing to data detector config.
+ *
+ * @return A pointer to the option object.
+ * @since 24
+ */
+ArkUI_TextDataDetectorConfig* OH_ArkUI_TextDataDetectorConfig_Create();
+ 
+/**
+ * @brief Disposes the object pointing to data detector config.
+ *
+ * @param config Pointer to the object to be disposed.
+ * @since 24
+ */
+void OH_ArkUI_TextDataDetectorConfig_Dispose(ArkUI_TextDataDetectorConfig* config);
+ 
+/**
+ * @brief Sets the types of data detector config.
+ *
+ * @param config Pointer to the ArkUI_TextDataDetectorConfig object.
+ * @param ArkUI_TextDataDetectorType Types of data detector config.
+ * @param length Number of types.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetTypes(
+    ArkUI_TextDataDetectorConfig* config, const ArkUI_TextDataDetectorType* types, int32_t length);
+ 
+/**
+ * @brief Gets the types of data detector config.
+ *
+ * @param config Pointer to the ArkUI_TextDataDetectorConfig object.
+ * @param ArkUI_TextDataDetectorType Types of data detector config.
+ * @param bufferSize Buffer size reserved for types by developer.
+ *                   It should be larger than writeLength,
+ *                   otherwise the opration will return ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR.
+ * @param writeLength Number of types.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if bufferSize is less than writeLength.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetTypes(ArkUI_TextDataDetectorConfig* config,
+    ArkUI_TextDataDetectorType* buffer, int32_t bufferSize, int32_t* writeLength);
+ 
+/**
+ * @brief Sets the event to be called when data detector works.
+ *
+ * @param config Pointer to the ArkUI_TextDataDetectorConfig object.
+ * @param result The information of the detected content.
+ * @param userData User data.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_RegisterOnDetectResultUpdateCallback(
+    ArkUI_TextDataDetectorConfig* config, void* userData, void (*callback)(char* result, void* userData));
+ 
+/**
+ * @brief Sets the color of detected content.
+ *
+ * @param config Pointer to the ArkUI_TextDataDetectorConfig object.
+ * @param color Color of detected content.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetColor(ArkUI_TextDataDetectorConfig* config, uint32_t color);
+ 
+/**
+ * @brief Gets the color of detected content.
+ *
+ * @param config Pointer to the ArkUI_TextDataDetectorConfig object.
+ * @param color Color of detected content.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetColor(ArkUI_TextDataDetectorConfig* config, uint32_t* color);
+ 
+/**
+ * @brief Sets the decoration style of detected content.
+ *
+ * @param config Pointer to the ArkUI_TextDataDetectorConfig object.
+ * @param decoration Decoration style of detected content.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetDecorationStyleOptions(
+    ArkUI_TextDataDetectorConfig* config, ArkUI_DecorationStyleOptions* decoration);
+ 
+/**
+ * @brief Gets the decoration style of detected content.
+ *
+ * @param config Pointer to the ArkUI_TextDataDetectorConfig object.
+ * @param decoration Decoration style of detected content.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetDecorationStyleOptions(
+    ArkUI_TextDataDetectorConfig* config, ArkUI_DecorationStyleOptions* decoration);
+ 
+/**
+ * @brief Sets whether to displaying a preview menu upon long press on detected content.
+ *
+ * @param config Pointer to the ArkUI_TextDataDetectorConfig object.
+ * @param enablePreviewMenu Whether to displaying a preview menu upon long press on detected content.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetEnablePreviewMenu(
+    ArkUI_TextDataDetectorConfig* config, bool enablePreviewMenu);
+ 
+/**
+ * @brief Gets whether to displaying a preview menu upon long press on detected content.
+ *
+ * @param config Pointer to the ArkUI_TextDataDetectorConfig object.
+ * @param enablePreviewMenu Whether to displaying a preview menu upon long press on detected content.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetEnablePreviewMenu(
+    ArkUI_TextDataDetectorConfig* config, bool* enablePreviewMenu);
 
 #ifdef __cplusplus
 };

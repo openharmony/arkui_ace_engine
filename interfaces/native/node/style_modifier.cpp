@@ -269,6 +269,7 @@ const std::string EMPTY_STR = "";
 const std::vector<std::string> ACCESSIBILITY_LEVEL_VECTOR = { "auto", "yes", "no", "no-hide-descendants" };
 std::map<std::string, int32_t> ACCESSIBILITY_LEVEL_MAP = { { "auto", 0 }, { "yes", 1 }, { "no", 2 },
     { "no-hide-descendants", 3 } };
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 
 std::unordered_map<uint32_t, std::string> ACCESSIBILITY_ROLE_CONVERT_PROPERTY_MAP = {
     { static_cast<uint32_t>(ARKUI_NODE_CUSTOM), "Custom" },
@@ -310,6 +311,7 @@ std::unordered_map<uint32_t, std::string> ACCESSIBILITY_ROLE_CONVERT_PROPERTY_MA
     { static_cast<uint32_t>(ARKUI_NODE_XCOMPONENT_TEXTURE), "XComponentTexture" },
     { static_cast<uint32_t>(ARKUI_NODE_EMBEDDED_COMPONENT), "EmbeddedComponent" },
     { static_cast<uint32_t>(ARKUI_NODE_PICKER), "Picker" },
+    { static_cast<uint32_t>(ARKUI_NODE_RICH_EDITOR), "RichEditor" },
 };
 
 std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP = {
@@ -352,6 +354,7 @@ std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP 
     { "XComponentTexture", static_cast<uint32_t>(ARKUI_NODE_XCOMPONENT_TEXTURE) },
     { "EmbeddedComponent", static_cast<uint32_t>(ARKUI_NODE_EMBEDDED_COMPONENT) },
     { "Picker", static_cast<uint32_t>(ARKUI_NODE_PICKER) },
+    { "RichEditor", static_cast<uint32_t>(ARKUI_NODE_RICH_EDITOR) },
 };
 
 void ResetAttributeItem()
@@ -5093,6 +5096,9 @@ int32_t SetCaretColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaCaretColor(
             node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
+    } else if (node->type == ARKUI_NODE_RICH_EDITOR) {
+        fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorCaretColor(
+            node->uiNodeHandle, item->value[NUM_0].u32);
     } else {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -5108,6 +5114,9 @@ const ArkUI_AttributeItem* GetCaretColor(ArkUI_NodeHandle node)
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         resultValue = GetFullImpl()->getNodeModifiers()->getTextAreaModifier()->getTextAreaCaretColor(
             node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_RICH_EDITOR) {
+        resultValue = GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->getRichEditorCaretColor(
+            node->uiNodeHandle);
     }
     g_numberValues[0].u32 = resultValue;
     return &g_attributeItem;
@@ -5122,6 +5131,9 @@ void ResetCaretColor(ArkUI_NodeHandle node)
             break;
         case ARKUI_NODE_TEXT_AREA:
             fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaCaretColor(node->uiNodeHandle);
+            break;
+        case ARKUI_NODE_RICH_EDITOR:
+            fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorCaretColor(node->uiNodeHandle);
             break;
         default:
             break;
@@ -5258,6 +5270,150 @@ void ResetEnterKeyType(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputEnterKeyType(node->uiNodeHandle);
+}
+
+int32_t SetRichEditorEnterKeyType(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 || item->value[NUM_0].i32 < static_cast<int32_t>(ARKUI_ENTER_KEY_TYPE_GO) ||
+        item->value[NUM_0].i32 > static_cast<int32_t>(ARKUI_ENTER_KEY_TYPE_NEW_LINE)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorEnterKeyType(
+        node->uiNodeHandle, item->value[NUM_0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+ 
+const ArkUI_AttributeItem* GetRichEditorEnterKeyType(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->getRichEditorEnterKeyType(
+        node->uiNodeHandle);
+    g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
+}
+ 
+void ResetRichEditorEnterKeyType(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorEnterKeyType(node->uiNodeHandle);
+}
+ 
+int32_t SetRichEditorScrollBarColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorScrollBarColor(
+        node->uiNodeHandle, item->value[NUM_0].u32);
+    return ERROR_CODE_NO_ERROR;
+}
+ 
+void ResetRichEditorScrollBarColor(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorScrollBarColor(node->uiNodeHandle);
+}
+ 
+const ArkUI_AttributeItem* GetRichEditorScrollBarColor(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->getRichEditorScrollBarColor(
+        node->uiNodeHandle);
+    g_numberValues[0].u32 = resultValue;
+    return &g_attributeItem;
+}
+ 
+int32_t SetRichEditorBarState(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 || item->value[0].i32 < static_cast<int32_t>(ArkUI_BarState::ARKUI_BAR_STATE_OFF) ||
+        item->value[0].i32 > static_cast<int32_t>(ArkUI_BarState::ARKUI_BAR_STATE_ON)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorBarState(
+        node->uiNodeHandle, static_cast<ArkUI_Uint32>(item->value[0].i32));
+    return ERROR_CODE_NO_ERROR;
+}
+ 
+void ResetRichEditorBarState(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorBarState(node->uiNodeHandle);
+}
+ 
+const ArkUI_AttributeItem* GetRichEditorBarState(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->getRichEditorBarState(
+        node->uiNodeHandle);
+    g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
+}
+ 
+int32_t SetRichEditorEnableDataDetector(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorEnableDataDetector(
+        node->uiNodeHandle, static_cast<uint32_t>(item->value[0].i32));
+    return ERROR_CODE_NO_ERROR;
+}
+ 
+void ResetRichEditorEnableDataDetector(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorEnableDataDetector(node->uiNodeHandle);
+}
+ 
+const ArkUI_AttributeItem* GetRichEditorEnableDataDetector(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorEnableDataDetector(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+ 
+int32_t SetRichEditorDataDetectorConfig(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    auto* dataDetectorConfig = reinterpret_cast<ArkUI_TextDataDetectorConfig*>(item->object);
+ 
+    ArkUITextDetectConfigStruct arkUITextDetectConfig;
+    std::string typesString;
+    for (size_t i = 0; i < item->size; i++) {
+        ArkUI_TextDataDetectorType value = dataDetectorConfig->types[i];
+        auto index = static_cast<size_t>(value);;
+        CHECK_NULL_RETURN(index >= 0 && index < static_cast<int32_t>(TEXT_DETECT_TYPES.size()),
+            ERROR_CODE_PARAM_INVALID);
+        if (i != 0) {
+            typesString.append(",");
+        }
+        typesString.append(TEXT_DETECT_TYPES[index]);
+    }
+    arkUITextDetectConfig.types = typesString.c_str();
+    arkUITextDetectConfig.onResult = dataDetectorConfig->onDetectResultUpdate;
+    arkUITextDetectConfig.entityColor = dataDetectorConfig->color;
+    arkUITextDetectConfig.entityEnablePreviewMenu = dataDetectorConfig->enablePreviewMenu;
+    arkUITextDetectConfig.entityDecorationType = dataDetectorConfig->decoration.type;
+    arkUITextDetectConfig.entityDecorationColor = dataDetectorConfig->decoration.color;
+    arkUITextDetectConfig.entityDecorationStyle = dataDetectorConfig->decoration.style;
+ 
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorNapiDataDetectorConfigWithEvent(
+        node->uiNodeHandle, &arkUITextDetectConfig);
+    return ERROR_CODE_NO_ERROR;
+}
+ 
+void ResetRichEditorDataDetectorConfig(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorDataDetectorConfigWithEvent(node->uiNodeHandle);
 }
 
 int32_t SetPlaceholderColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -19677,6 +19833,49 @@ void ResetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     }
 }
 
+int32_t SetRichEditorAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)
+{
+    static Setter* setters[] = {
+#define X(needSetter, needGetter, needResetter, name) IF_##needSetter(Set##name, nullptr),
+#include "rich_editor_properties.def"
+#undef X
+    };
+    if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
+        return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
+    }
+    return setters[subTypeId](node, value);
+}
+ 
+const ArkUI_AttributeItem* GetRichEditorAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
+{
+    static Getter* getters[] = {
+#define X(needSetter, needGetter, needResetter, name) IF_##needGetter(Get##name, nullptr),
+#include "rich_editor_properties.def"
+#undef X
+    };
+    if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "RichEditor node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return nullptr;
+    }
+    return getters[subTypeId](node);
+}
+ 
+void ResetRichEditorAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
+{
+    static Resetter* resetters[] = {
+#define X(needSetter, needGetter, needResetter, name) IF_##needResetter(Reset##name, nullptr),
+#include "rich_editor_properties.def"
+#undef X
+    };
+    if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "RichEditor node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return;
+    }
+    if (resetters[subTypeId]) {
+        resetters[subTypeId](node);
+    }
+}
+
 int32_t SetButtonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     static Setter* setters[] = { SetButtonLabel, SetButtonType, SetButtonMinFontScale, SetButtonMaxFontScale };
@@ -20925,7 +21124,7 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
         SetTextInputAttribute, SetTextAreaAttribute, SetButtonAttribute, SetProgressAttribute, SetCheckboxAttribute,
         SetXComponentAttribute, SetDatePickerAttribute, SetTimePickerAttribute, SetTextPickerAttribute,
         SetCalendarPickerAttribute, SetSliderAttribute, SetRadioAttribute, SetImageAnimatorAttribute,
-        SetXComponentAttribute, SetCheckboxGroupAttribute, SetStackAttribute, SetSwiperAttribute, SetScrollAttribute,
+        SetXComponentAttribute, SetCheckboxGroupAttribute, SetRichEditorAttribute, SetStackAttribute, SetSwiperAttribute, SetScrollAttribute,
         SetListAttribute, SetListItemAttribute, SetListItemGroupAttribute, SetColumnAttribute, SetRowAttribute,
         SetFlexAttribute, SetRefreshAttribute, SetWaterFlowAttribute, nullptr, SetRelativeContainerAttribute,
         SetGridAttribute, SetGridItemAttribute, nullptr, SetEmbeddedComponentAttribute, nullptr,
@@ -20957,7 +21156,7 @@ const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAtt
         GetTextInputAttribute, GetTextAreaAttribute, GetButtonAttribute, GetProgressAttribute, GetCheckboxAttribute,
         GetXComponentAttribute, GetDatePickerAttribute, GetTimePickerAttribute, GetTextPickerAttribute,
         GetCalendarPickerAttribute, GetSliderAttribute, GetRadioAttribute, GetImageAnimatorAttribute,
-        GetXComponentAttribute, GetCheckboxGroupAttribute, GetStackAttribute, GetSwiperAttribute, GetScrollAttribute,
+        GetXComponentAttribute, GetCheckboxGroupAttribute, GetRichEditorAttribute, GetStackAttribute, GetSwiperAttribute, GetScrollAttribute,
         GetListAttribute, nullptr, GetListItemGroupAttribute, GetColumnAttribute, GetRowAttribute, GetFlexAttribute,
         GetRefreshAttribute, GetWaterFlowAttribute, nullptr, GetRelativeContainerAttribute, GetGridAttribute,
         GetGridItemAttribute, nullptr, nullptr, nullptr, GetContainerPickerAttribute };
@@ -20984,8 +21183,8 @@ int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
         ResetTextInputAttribute, ResetTextAreaAttribute, ResetButtonAttribute, ResetProgressAttribute,
         ResetCheckboxAttribute, ResetXComponentAttribute, ResetDatePickerAttribute, ResetTimePickerAttribute,
         ResetTextPickerAttribute, ResetCalendarPickerAttribute, ResetSliderAttribute, ResetRadioAttribute,
-        ResetImageAnimatorAttribute, ResetXComponentAttribute, ResetCheckboxGroupAttribute, ResetStackAttribute,
-        ResetSwiperAttribute, ResetScrollAttribute, ResetListAttribute, ResetListItemAttribute,
+        ResetImageAnimatorAttribute, ResetXComponentAttribute, ResetCheckboxGroupAttribute, ResetRichEditorAttribute,
+        ResetStackAttribute, ResetSwiperAttribute, ResetScrollAttribute, ResetListAttribute, ResetListItemAttribute,
         ResetListItemGroupAttribute, ResetColumnAttribute, ResetRowAttribute, ResetFlexAttribute, ResetRefreshAttribute,
         ResetWaterFlowAttribute, nullptr, ResetRelativeContainerAttribute, ResetGridAttribute, ResetGridItemAttribute,
         nullptr, nullptr, nullptr, ResetContainerPickerAttribute };

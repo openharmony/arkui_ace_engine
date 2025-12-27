@@ -4794,5 +4794,89 @@
     {
         "first_introduced": "23",
         "name": "OH_ArkUI_PickerIndicatorStyle_ConfigureDivider"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_SetTextDecorationType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_GetTextDecorationType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_SetColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_GetColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_SetTextDecorationStyle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_GetTextDecorationStyle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_SetThicknessScale"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_DecorationStyleOptions_GetThicknessScale"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_SetTypes"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_GetTypes"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_RegisterOnDetectResultUpdateCallback"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_SetColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_GetColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_SetDecorationStyleOptions"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_GetDecorationStyleOptions"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_SetEnablePreviewMenu"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_TextDataDetectorConfig_GetEnablePreviewMenu"
     }
 ]

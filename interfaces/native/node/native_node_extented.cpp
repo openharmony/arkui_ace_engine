@@ -1551,6 +1551,202 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetLineMetrics(ArkUI_TextLayoutManage
     outMetrics->firstCharMetrics.strikeoutPosition = firstCharMetrics.fStrikeoutPosition;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
+
+ArkUI_DecorationStyleOptions* OH_ArkUI_DecorationStyleOptions_Create()
+{
+    ArkUI_DecorationStyleOptions* options = new ArkUI_DecorationStyleOptions();
+    options->type = ArkUI_TextDecorationType::ARKUI_TEXT_DECORATION_TYPE_NONE;
+    options->color = 0;
+    options->style = ArkUI_TextDecorationStyle::ARKUI_TEXT_DECORATION_STYLE_SOLID;
+    options->thicknessScale = 1.0f;
+    return options;
+}
+ 
+void OH_ArkUI_DecorationStyleOptions_Dispose(ArkUI_DecorationStyleOptions* options)
+{
+    if (!options) {
+        return;
+    }
+    delete options;
+    options = nullptr;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_SetTextDecorationType(
+    ArkUI_DecorationStyleOptions* options, ArkUI_TextDecorationType type)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->type = type;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_GetTextDecorationType(ArkUI_DecorationStyleOptions* options,
+    ArkUI_TextDecorationType* type)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(type, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *type = options->type;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_SetColor(
+    ArkUI_DecorationStyleOptions* options, uint32_t color)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->color = color;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_GetColor(ArkUI_DecorationStyleOptions* options, uint32_t* color)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(color, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *color = options->color;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_SetTextDecorationStyle(
+    ArkUI_DecorationStyleOptions* options, ArkUI_TextDecorationStyle style)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->style = style;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_GetTextDecorationStyle(ArkUI_DecorationStyleOptions* options,
+    ArkUI_TextDecorationStyle* style)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(style, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *style = options->style;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_SetThicknessScale(
+    ArkUI_DecorationStyleOptions* options, float thicknessScale)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    options->thicknessScale = thicknessScale;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_DecorationStyleOptions_GetThicknessScale(ArkUI_DecorationStyleOptions* options,
+    float* thicknessScale)
+{
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(thicknessScale, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *thicknessScale = options->thicknessScale;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_TextDataDetectorConfig* OH_ArkUI_TextDataDetectorConfig_Create()
+{
+    ArkUI_TextDataDetectorConfig* config = new ArkUI_TextDataDetectorConfig();
+    config->color = 0xFF000000;
+    return config;
+}
+ 
+void OH_ArkUI_TextDataDetectorConfig_Dispose(ArkUI_TextDataDetectorConfig* config)
+{
+    if (!config) {
+        return;
+    }
+    delete config;
+    config = nullptr;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetTypes(
+    ArkUI_TextDataDetectorConfig* config, const ArkUI_TextDataDetectorType* types, int32_t length)
+{
+    CHECK_NULL_RETURN(config, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    
+    ArkUI_TextDataDetectorType* newTypes = new ArkUI_TextDataDetectorType[length];
+    for (int32_t i = 0; i < length; i++) {
+        newTypes[i] = types[i];
+        config->types.push_back(newTypes[i]);
+    }
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetTypes(ArkUI_TextDataDetectorConfig* config,
+    ArkUI_TextDataDetectorType* buffer, int32_t bufferSize, int32_t* writeLength)
+{
+    CHECK_NULL_RETURN(config, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(buffer, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(writeLength, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    int32_t typeSize = static_cast<int32_t>(config->types.size());
+    if (bufferSize < typeSize) {
+        return ArkUI_ErrorCode::ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR;
+    }
+    std::copy(config->types.begin(), config->types.end(), buffer);
+    *writeLength = typeSize;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_RegisterOnDetectResultUpdateCallback(
+    ArkUI_TextDataDetectorConfig* config, void* userData, void (*callback)(char* result, void* userData))
+{
+    CHECK_NULL_RETURN(config, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(callback, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    config->onDetectResultUpdate = reinterpret_cast<void*>(callback);
+    config->onDetectResultUpdateUserData = userData;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetColor(
+    ArkUI_TextDataDetectorConfig* config, uint32_t color)
+{
+    CHECK_NULL_RETURN(config, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    config->color = color;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetColor(ArkUI_TextDataDetectorConfig* config, uint32_t* color)
+{
+    CHECK_NULL_RETURN(config, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(color, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *color = config->color;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetDecorationStyleOptions(
+    ArkUI_TextDataDetectorConfig* config, ArkUI_DecorationStyleOptions* decoration)
+{
+    CHECK_NULL_RETURN(config, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    ArkUI_DecorationStyleOptions newDecoration;
+    OH_ArkUI_DecorationStyleOptions_SetTextDecorationType(&newDecoration, decoration->type);
+    OH_ArkUI_DecorationStyleOptions_SetColor(&newDecoration, decoration->color);
+    OH_ArkUI_DecorationStyleOptions_SetTextDecorationStyle(&newDecoration, decoration->style);
+    OH_ArkUI_DecorationStyleOptions_SetThicknessScale(&newDecoration, decoration->thicknessScale);
+    config->decoration = newDecoration;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetDecorationStyleOptions(
+    ArkUI_TextDataDetectorConfig* config, ArkUI_DecorationStyleOptions* decoration)
+{
+    CHECK_NULL_RETURN(config, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(decoration, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *decoration = config->decoration;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetEnablePreviewMenu(
+    ArkUI_TextDataDetectorConfig* dataDetectorConfig, bool enablePreviewMenu)
+{
+    CHECK_NULL_RETURN(dataDetectorConfig, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    dataDetectorConfig->enablePreviewMenu = enablePreviewMenu;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+ 
+ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetEnablePreviewMenu(
+    ArkUI_TextDataDetectorConfig* config, bool* enablePreviewMenu)
+{
+    CHECK_NULL_RETURN(config, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(enablePreviewMenu, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    *enablePreviewMenu = config->enablePreviewMenu;
+    return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 #ifdef __cplusplus
 };
 #endif
