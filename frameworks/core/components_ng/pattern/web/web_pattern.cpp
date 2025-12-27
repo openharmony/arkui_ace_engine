@@ -9502,7 +9502,7 @@ RefPtr<WebAgentEventReporter> WebPattern::GetAgentEventReporter()
     return webAgentEventReporter_;
 }
 
-void WebPattern::ReportSelectedText()
+void WebPattern::ReportSelectedText(bool isRegister)
 {
     if (UiSessionManager::GetInstance()->GetSelectTextEventRegistered()) {
         CHECK_NULL_VOID(delegate_);

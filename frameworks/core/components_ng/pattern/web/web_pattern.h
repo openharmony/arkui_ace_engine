@@ -982,7 +982,7 @@ public:
     // WebAgentEventReporter funcs
     RefPtr<WebAgentEventReporter> GetAgentEventReporter();
     // WebAgentEventReporter reference
-    void ReportSelectedText() override;
+    void ReportSelectedText(bool isRegister = false) override;
     std::pair<int32_t, RectF> GetScrollAreaInfoFromDocument(int32_t id);
 
     // Data Detector funcs

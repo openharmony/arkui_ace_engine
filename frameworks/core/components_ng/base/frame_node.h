@@ -1463,7 +1463,7 @@ public:
     std::vector<std::pair<float, float>> GetSpecifiedContentOffsets(const std::string& content);
     void HighlightSpecifiedContent(
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs);
-    void ReportSelectedText();
+    void ReportSelectedText(bool isRegister);
 
     void ResetLastFrameNodeRect()
     {
