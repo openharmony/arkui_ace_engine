@@ -960,8 +960,7 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto movingPhotoNodeSize = geometryNode->GetContentSize();
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    SizeF videoFrameSize;
-    videoFrameSize = SetVideoFrameSize(movingPhotoNodeSize, layoutProperty);
+    SizeF videoFrameSize = SetVideoFrameSize(movingPhotoNodeSize, layoutProperty);
     if (xmageModeValue_ != ROUND_XMAGE_MODE_VALUE) {
         SetRenderContextBoundsInXmage(movingPhotoNodeSize, videoFrameSize);
     } else {
@@ -1055,7 +1054,7 @@ SizeF MovingPhotoPattern::SetVideoFrameSize(const SizeF& layoutSize,
     if (isXmageMode_) {
         return MeasureModeContentLayout(layoutSize, layoutProperty);
     } else {
-        if (autoAndRepeatLevel_ == PlaybackMode::REPEAT){
+        if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
             return CalculateFitFill(layoutSize);
         } else {
             return MeasureContentLayout(layoutSize, layoutProperty);
