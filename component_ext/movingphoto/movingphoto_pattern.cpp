@@ -965,8 +965,7 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
         videoFrameSize = MeasureModeContentLayout(movingPhotoNodeSize, layoutProperty);
     } else if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         videoFrameSize = CalculateFitFill(movingPhotoNodeSize);
-    }
-    else {
+    } else {
         videoFrameSize = MeasureContentLayout(movingPhotoNodeSize, layoutProperty);
     }
     if (xmageModeValue_ != ROUND_XMAGE_MODE_VALUE) {
