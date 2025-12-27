@@ -681,6 +681,7 @@
       OHOS::Ace::TouchEventTarget::SetCoordinateOffset*;
       OHOS::Ace::DOM_CLICK;
       OHOS::Ace::DOM_CATCH_BUBBLE_CLICK;
+      OHOS::Ace::ScreenSystemManager::GetInstance*;
       virtual?thunk?to?OHOS::Ace::Framework::DOMNode::*;
       virtual?thunk?to?OHOS::Ace::RenderElement::*;
       virtual?thunk?to?OHOS::Ace::Element::*;
