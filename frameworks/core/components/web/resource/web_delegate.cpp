@@ -9733,9 +9733,9 @@ void WebDelegate::OnMediaCastEnter()
     TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnMediaCastEnter");
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
-    auto OnMediaCastEnterCallback = webPattern->GetOnMediaCastEnterCallback();
-    if (OnMediaCastEnterCallback) {
-        OnMediaCastEnterCallback();
+    auto onMediaCastEnterCallback = webPattern->GetOnMediaCastEnterCallback();
+    if (onMediaCastEnterCallback) {
+        onMediaCastEnterCallback();
     }
 }
 
