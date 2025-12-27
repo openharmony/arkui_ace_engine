@@ -146,6 +146,7 @@ void ImageModelStatic::SetAlt(FrameNode* frameNode, const std::optional<ImageSou
 
 void ImageModelStatic::SetAltError(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src)
 {
+    CHECK_NULL_VOID(frameNode);
     if (src) {
         if (ImageSourceInfo::ResolveURIType(src.value().GetSrc()) == SrcType::NETWORK) {
             ImageSourceInfo defaultSrcInfo("");
@@ -159,6 +160,7 @@ void ImageModelStatic::SetAltError(FrameNode* frameNode, const std::optional<Ima
 
 void ImageModelStatic::SetAltPlaceholder(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src)
 {
+    CHECK_NULL_VOID(frameNode);
     if (src) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, AltPlaceholder, src.value(), frameNode);
     } else {
@@ -176,6 +178,7 @@ void ImageModelStatic::SetSupportSvg2(FrameNode* frameNode, bool enable)
 
 void ImageModelStatic::SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ContentTransition, contentTransition, frameNode);
 }
 

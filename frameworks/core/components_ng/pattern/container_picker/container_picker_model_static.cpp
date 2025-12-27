@@ -30,43 +30,55 @@ RefPtr<FrameNode> ContainerPickerModelStatic::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
-void ContainerPickerModelStatic::SetIndicatorStyle(FrameNode* frameNode, const PickerIndicatorStyle& style)
+void ContainerPickerModelStatic::SetIndicatorStyle(
+    FrameNode* frameNode, const std::optional<PickerIndicatorStyle>& style)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorType, style.type, frameNode);
-    if (style.type == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
-        if (style.strokeWidth.has_value()) {
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-                ContainerPickerLayoutProperty, IndicatorDividerWidth, style.strokeWidth.value(), frameNode);
-        }
-        if (style.dividerColor.has_value()) {
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-                ContainerPickerLayoutProperty, IndicatorDividerColor, style.dividerColor.value(), frameNode);
-        }
-        if (style.startMargin.has_value()) {
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-                ContainerPickerLayoutProperty, IndicatorStartMargin, style.startMargin.value(), frameNode);
-        }
-        if (style.endMargin.has_value()) {
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-                ContainerPickerLayoutProperty, IndicatorEndMargin, style.endMargin.value(), frameNode);
-        }
-    } else if (style.type == static_cast<int32_t>(PickerIndicatorType::BACKGROUND)) {
-        if (style.backgroundColor.has_value()) {
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-                ContainerPickerLayoutProperty, IndicatorBackgroundColor, style.backgroundColor.value(), frameNode);
-        }
-        if (style.borderRadius.has_value()) {
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-                ContainerPickerLayoutProperty, IndicatorBorderRadius, style.borderRadius.value(), frameNode);
-        }
+    if (!style.has_value()) {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorType, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorDividerWidth, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorDividerColor, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorStartMargin, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorEndMargin, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorBackgroundColor, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorBorderRadius, frameNode);
     } else {
-        TAG_LOGE(AceLogTag::ACE_CONTAINER_PICKER, "invalid type of PickerIndicatorStyle.");
-        return;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorType, style->type, frameNode);
+        if (style->type == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
+            if (style->strokeWidth.has_value()) {
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                    ContainerPickerLayoutProperty, IndicatorDividerWidth, style->strokeWidth.value(), frameNode);
+            }
+            if (style->dividerColor.has_value()) {
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                    ContainerPickerLayoutProperty, IndicatorDividerColor, style->dividerColor.value(), frameNode);
+            }
+            if (style->startMargin.has_value()) {
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                    ContainerPickerLayoutProperty, IndicatorStartMargin, style->startMargin.value(), frameNode);
+            }
+            if (style->endMargin.has_value()) {
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                    ContainerPickerLayoutProperty, IndicatorEndMargin, style->endMargin.value(), frameNode);
+            }
+        } else if (style->type == static_cast<int32_t>(PickerIndicatorType::BACKGROUND)) {
+            if (style->backgroundColor.has_value()) {
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                    ContainerPickerLayoutProperty, IndicatorBackgroundColor, style->backgroundColor.value(), frameNode);
+            }
+            if (style->borderRadius.has_value()) {
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                    ContainerPickerLayoutProperty, IndicatorBorderRadius, style->borderRadius.value(), frameNode);
+            }
+        } else {
+            TAG_LOGE(AceLogTag::ACE_CONTAINER_PICKER, "invalid type of PickerIndicatorStyle.");
+            return;
+        }
     }
+
     auto pickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
-    pickerPattern->SetIndicatorStyleVal(style);
+    pickerPattern->SetIndicatorStyleVal(style.value_or(PickerIndicatorStyle()));
 }
 
 void ContainerPickerModelStatic::SetSelectedIndex(FrameNode* frameNode, int32_t index)
