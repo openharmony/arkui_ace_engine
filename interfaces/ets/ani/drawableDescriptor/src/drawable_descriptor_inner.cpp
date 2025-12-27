@@ -52,6 +52,7 @@ constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
 constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
 constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
 constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
+constexpr char DEFAULT_MASK[] = "ohos_icon_mask";
 
 enum class DrawableType {
     BASE,
@@ -399,6 +400,14 @@ void CreateLayeredDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, an
     if (!isMaskUndefined) {
         auto mask = Media::PixelMapTaiheAni::GetNativePixelMap(env, maskAni);
         drawable->SetMask(PixelMap::Create(mask));
+    } else {
+        std::unique_ptr<uint8_t[]> maskData;
+        size_t maskLen = 0;
+        std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
+        auto state = resMgr->GetMediaDataByName(DEFAULT_MASK, maskLen, maskData);
+        if (state == Global::Resource::SUCCESS && maskLen > 0) {
+            drawable->SetMaskData(maskData.release(), maskLen);
+        }
     }
 }
 
