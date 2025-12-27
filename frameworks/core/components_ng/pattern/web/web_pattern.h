@@ -999,6 +999,7 @@ public:
         isAILinkMenuShow_ = isAILinkMenuShow;
     }
 
+    bool CheckCreateImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     void CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     void RemoveSnapshotFrameNode(bool isAnimate = false);
     void RealRemoveSnapshotFrameNode();
