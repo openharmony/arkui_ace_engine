@@ -1152,7 +1152,7 @@ public:
         } else {
             ani_string toNavBar {};
             env->String_NewUTF8(navBar.c_str(), navBar.size(), &toNavBar);
-            env->Object_SetPropertyByName_Ref(res, "from", toNavBar);
+            env->Object_SetPropertyByName_Ref(res, "to", toNavBar);
         }
 
         ani_enum operation;
