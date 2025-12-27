@@ -56,7 +56,7 @@ inline bool IsValid(ScreenSizeType val)
 
 class ScreenSystemManager final {
 public:
-    static ScreenSystemManager& GetInstance();
+    ACE_FORCE_EXPORT static ScreenSystemManager& GetInstance();
 
     void SetWindowInfo(double screenWidth, double density, double dipScale)
     {
@@ -112,12 +112,6 @@ private:
     ACE_FORCE_EXPORT static std::mutex lock;
     ACE_DISALLOW_COPY_AND_MOVE(ScreenSystemManager);
 };
-
-inline ScreenSystemManager& ScreenSystemManager::GetInstance()
-{
-    static ScreenSystemManager instance;
-    return instance;
-}
 
 template<typename T>
 class ArrayByScreenType final {
