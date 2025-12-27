@@ -215,14 +215,14 @@ ArkUI_Bool ConvertPoint(ArkUINodeHandle node, ArkUI_Float32 (*position)[2], ArkU
 }
 
 ArkUI_Int32 ConvertPositionToWindow(
-    ArkUINodeHandle node, ArkUI_Float32 position[2], ArkUI_Float32 (*windowPosition)[2], ArkUI_Bool useVp)
+    ArkUINodeHandle node, ArkUI_Float32 (*position)[2], ArkUI_Float32 (*windowPosition)[2], ArkUI_Bool useVp)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(frameNode->IsOnMainTree(), ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
     auto offset = frameNode->ConvertPositionToWindow(
-        { useVp ? PipelineBase::Vp2PxWithCurrentDensity(position[0]) : position[0],
-            useVp ? PipelineBase::Vp2PxWithCurrentDensity(position[1]) : position[1] },
+        { useVp ? PipelineBase::Vp2PxWithCurrentDensity((*position)[0]) : (*position)[0],
+            useVp ? PipelineBase::Vp2PxWithCurrentDensity((*position)[1]) : (*position)[1] },
         false);
     (*windowPosition)[0] = useVp ? PipelineBase::Px2VpWithCurrentDensity(offset.GetX()) : offset.GetX();
     (*windowPosition)[1] = useVp ? PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) : offset.GetY();
@@ -230,14 +230,14 @@ ArkUI_Int32 ConvertPositionToWindow(
 }
 
 ArkUI_Int32 ConvertPositionFromWindow(
-    ArkUINodeHandle node, ArkUI_Float32 windowPosition[2], ArkUI_Float32 (*position)[2], ArkUI_Bool useVp)
+    ArkUINodeHandle node, ArkUI_Float32 (*windowPosition)[2], ArkUI_Float32 (*position)[2], ArkUI_Bool useVp)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(frameNode->IsOnMainTree(), ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
     auto offset = frameNode->ConvertPositionToWindow(
-        { useVp ? PipelineBase::Vp2PxWithCurrentDensity(windowPosition[0]) : windowPosition[0],
-            useVp ? PipelineBase::Vp2PxWithCurrentDensity(windowPosition[1]) : windowPosition[1] },
+        { useVp ? PipelineBase::Vp2PxWithCurrentDensity((*windowPosition)[0]) : (*windowPosition)[0],
+            useVp ? PipelineBase::Vp2PxWithCurrentDensity((*windowPosition)[1]) : (*windowPosition)[1] },
         true);
     (*position)[0] = useVp ? PipelineBase::Px2VpWithCurrentDensity(offset.GetX()) : offset.GetX();
     (*position)[1] = useVp ? PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) : offset.GetY();
