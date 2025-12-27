@@ -1315,7 +1315,8 @@ napi_value UIContentImpl::GetUINapiContext()
     napi_value result = nullptr;
     auto frontend = container->GetFrontend();
     CHECK_NULL_RETURN(frontend, result);
-    if (frontend->GetType() == FrontendType::DECLARATIVE_JS) {
+    if (frontend->GetType() == FrontendType::DECLARATIVE_JS ||
+        frontend->GetType() == FrontendType::DYNAMIC_HYBRID_STATIC) {
 #ifdef NG_BUILD
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend);
 #else
