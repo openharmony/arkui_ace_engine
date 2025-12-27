@@ -50,7 +50,7 @@ void FormManagerDelegate::AddFormUninstallCallback(const OnFormUninstallCallback
 
 void FormManagerDelegate::AddUnTrustFormCallback(const UnTrustFormCallback& callback) {}
 
-void FormManagerDelegate::OnActionEvent(const std::string& action) {}
+void FormManagerDelegate::OnActionEvent(const std::string& action, bool isManuallyClick) {}
 
 void FormManagerDelegate::SetRSUIContext(std::shared_ptr<Rosen::RSUIContext> &rsUIContext) {}
 

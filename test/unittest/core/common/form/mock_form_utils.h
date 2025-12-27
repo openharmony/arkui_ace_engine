@@ -27,7 +27,7 @@ public:
     ~MockFormUtils() = default;
 
     int32_t RouterEvent(const int64_t formId, const std::string& action, const int32_t containerId,
-        const std::string& defualtbundleName)
+        const std::string& defaultbundleName)
     {
         return 1;
     }
@@ -39,7 +39,7 @@ public:
     }
     
     int32_t BackgroundEvent(const int64_t formId, const std::string& action, const int32_t containerId,
-        const std::string& defualtbundleName)
+        const std::string& defaultbundleName, bool isManuallyClick)
     {
         return 1;
     }
