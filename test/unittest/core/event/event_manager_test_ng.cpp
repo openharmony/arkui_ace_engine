@@ -1558,4 +1558,39 @@ HWTEST_F(EventManagerTestNg, AddHitTestInfoRecord002, TestSize.Level1)
     json = eventManager->GetLastHitTestNodeInfosForTouch(true);
     EXPECT_NE(static_cast<int32_t>(json.size()), 0);
 }
+
+/**
+ * @tc.name: AddHitTestInfoRecord
+ * @tc.desc: Test AddHitTestInfoRecord.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddHitTestInfoRecord003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    auto node1 = FrameNode::GetOrCreateFrameNode("node1", 1001, nullptr);
+    ASSERT_NE(node1, nullptr);
+    auto node2 = FrameNode::GetOrCreateFrameNode("node2", 1002, nullptr);
+    ASSERT_NE(node2, nullptr);
+    node1->AddChild(node2);
+
+    /**
+     * @tc.steps: step2. call TouchTest.
+     * @tc.expected: eventManager->hitTestRecordInfo_->isRealTouch is false
+     */
+    TouchEvent touchPoint;
+    touchPoint.type = TouchType::DOWN;
+    touchPoint.sourceTool = SourceTool::PEN;
+    touchPoint.sourceType = SourceType::TOUCH;
+    TouchRestrict touchRestrict;
+    Offset offset;
+
+    eventManager->TouchTest(touchPoint, node1, touchRestrict, offset, 0, true);
+    EXPECT_TRUE(eventManager->hitTestRecordInfo_.has_value());
+    EXPECT_FALSE(eventManager->hitTestRecordInfo_->isRealTouch);
+}
 } // namespace OHOS::Ace::NG

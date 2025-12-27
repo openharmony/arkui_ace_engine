@@ -3415,7 +3415,7 @@ void PipelineContext::OnTouchEvent(
     eventManager_->DispatchTouchEvent(scalePoint);
 
     if ((scalePoint.type == TouchType::UP) || (scalePoint.type == TouchType::CANCEL)) {
-        eventManager_->LogHitTestInfoRecord(scalePoint.id);
+        eventManager_->LogHitTestInfoRecord(scalePoint);
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
         if (formEventMgr) {
