@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_ANIMATABLE_ARITHMETIC_H
-#define FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_ANIMATABLE_ARITHMETIC_H
+#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_MODIFIER_PROPERTY_H
+#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_MODIFIER_PROPERTY_H
 
-#include "ui/animation/ng/animatable_arithmetic.h"
+namespace OHOS::Ace {
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_ANIMATABLE_ARITHMETIC_H
+enum class PropertyUnit {
+    UNKNOWN,
+    PIXEL_POSITION, // animatable properties are related to position of the object, the unit is pixels
+};
+
+} // namespace OHOS::Ace
+
+#endif //FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_MODIFIER_PROPERTY_H
