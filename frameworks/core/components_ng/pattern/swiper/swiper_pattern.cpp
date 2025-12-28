@@ -187,6 +187,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     if (props->GetIsCustomAnimation().value_or(false)) {
         algo->SetUseCustomAnimation(true);
         algo->SetCustomAnimationToIndex(customAnimationToIndex_);
+        algo->SetCustomAnimationPrevIndex(customAnimationPrevIndex_);
         algo->SetIndexsInAnimation(indexsInAnimation_);
         algo->SetNeedUnmountIndexs(needUnmountIndexs_);
         return algo;
@@ -6502,6 +6503,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
     FireSelectedEvent(fromIndex, toIndex);
     FireUnselectedEvent(fromIndex, toIndex);
     FireAnimationStartEvent(fromIndex, toIndex, info);
+    customAnimationPrevIndex_ = fromIndex;
 
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -6523,6 +6525,7 @@ void SwiperPattern::OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, 
     customAnimationToIndex_.reset();
     needUnmountIndexs_.insert(fromIndex);
     indexsInAnimation_.erase(toIndex);
+    customAnimationPrevIndex_ = toIndex;
 
     if (!hasOnChanged) {
         const auto props = GetLayoutProperty<SwiperLayoutProperty>();

@@ -1524,6 +1524,7 @@ private:
     std::set<int32_t> indexsInAnimation_;
     std::set<int32_t> needUnmountIndexs_;
     std::optional<int32_t> customAnimationToIndex_;
+    std::optional<int32_t> customAnimationPrevIndex_;
     RefPtr<TabContentTransitionProxy> currentProxyInAnimation_;
     PaddingPropertyF tabsPaddingAndBorder_;
     std::map<int32_t, bool> indexCanChangeMap_;
