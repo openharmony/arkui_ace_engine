@@ -67,6 +67,7 @@
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "render_service_client/core/pipeline/rs_render_thread.h"
 #endif
+#include "render_service_client/core/ui_effect/property/include/rs_ui_filter_base.h"
 #include "core/components_ng/render/adapter/drawing_decoration_painter.h"
 #include "core/components_ng/render/adapter/drawing_image.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
@@ -5221,25 +5222,29 @@ void RosenRenderContext::OnLinearGradientBlurUpdate(const NG::LinearGradientBlur
 void RosenRenderContext::OnMagnifierUpdate(const MagnifierParams& magnifierParams)
 {
     CHECK_NULL_VOID(rsNode_);
-    std::shared_ptr<Rosen::RSMagnifierParams> rsMagnifierParams(std::make_shared<Rosen::RSMagnifierParams>());
-    rsMagnifierParams->factor_ = magnifierParams.factor_;
-    rsMagnifierParams->width_ = magnifierParams.width_;
-    rsMagnifierParams->height_ = magnifierParams.height_;
-    rsMagnifierParams->borderWidth_ = magnifierParams.borderWidth_;
-    rsMagnifierParams->cornerRadius_ = magnifierParams.cornerRadius_;
-    rsMagnifierParams->offsetX_ = magnifierParams.offsetX_;
-    rsMagnifierParams->offsetY_ = magnifierParams.offsetY_;
-    rsMagnifierParams->zoomOffsetX_ = magnifierParams.zoomOffsetX_;
-    rsMagnifierParams->zoomOffsetY_ = magnifierParams.zoomOffsetY_;
-    rsMagnifierParams->shadowOffsetX_ = magnifierParams.shadowOffsetX_;
-    rsMagnifierParams->shadowOffsetY_ = magnifierParams.shadowOffsetY_;
-    rsMagnifierParams->shadowSize_ = magnifierParams.shadowSize_;
-    rsMagnifierParams->shadowStrength_ = magnifierParams.shadowStrength_;
-    rsMagnifierParams->gradientMaskColor1_ = magnifierParams.gradientMaskColor1_;
-    rsMagnifierParams->gradientMaskColor2_ = magnifierParams.gradientMaskColor2_;
-    rsMagnifierParams->outerContourColor1_ = magnifierParams.outerContourColor1_;
-    rsMagnifierParams->outerContourColor2_ = magnifierParams.outerContourColor2_;
-    rsNode_->SetMagnifierParams(rsMagnifierParams);
+    std::shared_ptr<Rosen::RSNGMagnifierFilter> rsMagnifierFilter(std::make_shared<Rosen::RSNGMagnifierFilter>());
+    rsMagnifierFilter->Setter<MagnifierFactorTag>(magnifierParams.factor_);
+    rsMagnifierFilter->Setter<MagnifierWidthTag>(magnifierParams.width_);
+    rsMagnifierFilter->Setter<MagnifierHeightTag>(magnifierParams.height_);
+    rsMagnifierFilter->Setter<MagnifierBorderWidthTag>(magnifierParams.borderWidth_);
+    rsMagnifierFilter->Setter<MagnifierCornerRadiusTag>(magnifierParams.cornerRadius_);
+    rsMagnifierFilter->Setter<MagnifierOffsetXTag>(magnifierParams.offsetX_);
+    rsMagnifierFilter->Setter<MagnifierOffsetYTag>(magnifierParams.offsetY_);
+    rsMagnifierFilter->Setter<MagnifierZoomOffsetXTag>(magnifierParams.zoomOffsetX_);
+    rsMagnifierFilter->Setter<MagnifierZoomOffsetYTag>(magnifierParams.zoomOffsetY_);
+    rsMagnifierFilter->Setter<MagnifierShadowOffsetXTag>(magnifierParams.shadowOffsetX_);
+    rsMagnifierFilter->Setter<MagnifierShadowOffsetYTag>(magnifierParams.shadowOffsetY_);
+    rsMagnifierFilter->Setter<MagnifierShadowSizeTag>(magnifierParams.shadowSize_);
+    rsMagnifierFilter->Setter<MagnifierShadowStrengthTag>(magnifierParams.shadowStrength_);
+    rsMagnifierFilter->
+        Setter<MagnifierGradientMaskColor1Tag>(Rosen::RSColor(magnifierParams.gradientMaskColor1_ & 0xFFFFFFFFU));
+    rsMagnifierFilter->
+        Setter<MagnifierGradientMaskColor2Tag>(Rosen::RSColor(magnifierParams.gradientMaskColor2_ & 0xFFFFFFFFU));
+    rsMagnifierFilter->
+        Setter<MagnifierOuterContourColor1Tag>(Rosen::RSColor(magnifierParams.outerContourColor1_ & 0xFFFFFFFFU));
+    rsMagnifierFilter->
+        Setter<MagnifierOuterContourColor2Tag>(Rosen::RSColor(magnifierParams.outerContourColor2_ & 0xFFFFFFFFU));
+    rsNode_->SetMaterialNGFilter(rsMagnifierFilter);
     RequestNextFrame();
 }
 void RosenRenderContext::OnDynamicDimDegreeUpdate(const float degree)
