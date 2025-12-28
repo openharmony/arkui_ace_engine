@@ -4255,6 +4255,9 @@ void SetAspectRatioImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
+        return;
+    }
     auto result = Converter::OptConvertPtr<float>(value);
     if (result) {
         auto ratio = result.value();
