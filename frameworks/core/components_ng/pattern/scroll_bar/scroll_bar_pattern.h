@@ -391,6 +391,7 @@ private:
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info);
+    void ProcessScrollOverDrag();
     void ProcessFrictionMotion(double value);
     void ProcessFrictionMotionStop();
     void CalcFlingVelocity(float offset);

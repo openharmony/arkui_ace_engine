@@ -183,10 +183,17 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty, cons
     auto layoutAlgorithm = DynamicCast<ScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     currentOffset_ = layoutAlgorithm->GetCurrentOffset();
-    if (freeScroll_ && scrollBar2d_) {
+    if (freeScroll_) {
         freeScroll_->OnLayoutFinished(layoutAlgorithm->GetFreeOffset(), layoutAlgorithm->GetScrollableArea());
-        scrollBar2d_->SyncLayout(
-            layoutAlgorithm->GetFreeOffset(), layoutAlgorithm->GetViewSize(), layoutAlgorithm->GetViewPortExtent());
+        if (scrollBar2d_) {
+            scrollBar2d_->SyncLayout(
+                layoutAlgorithm->GetFreeOffset(), layoutAlgorithm->GetViewSize(), layoutAlgorithm->GetViewPortExtent());
+        }
+        auto scrollBarProxy = GetScrollBarProxy();
+        if (scrollBarProxy) {
+            scrollBarProxy->SyncLayout(
+                layoutAlgorithm->GetFreeOffset(), layoutAlgorithm->GetViewSize(), layoutAlgorithm->GetViewPortExtent());
+        }
     }
     auto oldScrollableDistance = scrollableDistance_;
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
@@ -1818,13 +1825,6 @@ RefPtr<NGGestureRecognizer> ScrollPattern::GetOverrideRecognizer()
     return gestureGroup_;
 }
 
-bool ScrollPattern::FreeScrollBy(const OffsetF& delta, bool canOverScroll)
-{
-    CHECK_NULL_RETURN(freeScroll_, false);
-    freeScroll_->UpdateOffset(delta, canOverScroll);
-    const OffsetF newPos = freeScroll_->GetOffset() + delta;
-    return NearEqual(freeScroll_->ClampPosition(newPos), newPos);
-}
 bool ScrollPattern::FreeScrollPage(bool reverse, bool smooth)
 {
     CHECK_NULL_RETURN(freeScroll_, false);
@@ -1895,5 +1895,20 @@ TwoDimensionScrollResult ScrollPattern::FireObserverTwoDimensionOnWillScroll(Dim
     result.xOffset = xResult.offset;
     result.yOffset = yResult.offset;
     return result;
+}
+
+bool ScrollPattern::TryFreeScroll(double offset, Axis axis)
+{
+    CHECK_NULL_RETURN(freeScroll_, false);
+    FreeScrollBy(axis == Axis::VERTICAL ? OffsetF { 0.0f, offset } : OffsetF { offset, 0.0f }, true);
+    return true;
+}
+
+bool ScrollPattern::FreeScrollBy(const OffsetF& delta, bool canOverScroll)
+{
+    CHECK_NULL_RETURN(freeScroll_, false);
+    freeScroll_->UpdateOffset(delta, canOverScroll);
+    const OffsetF newPos = freeScroll_->GetOffset() + delta;
+    return NearEqual(freeScroll_->ClampPosition(newPos), newPos);
 }
 } // namespace OHOS::Ace::NG

@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 class ScrollablePattern;
 struct ScrollableNodeInfo {
     WeakPtr<ScrollablePattern> scrollableNode;
-    std::function<bool(double, int32_t source, bool, bool)> onPositionChanged;
+    std::function<bool(double, int32_t source, bool, bool, Axis)> onPositionChanged;
     std::function<bool(double, int32_t source, bool)> scrollStartCallback;
     std::function<void(bool)> scrollEndCallback;
     StartSnapAnimationCallback startSnapAnimationCallback;
@@ -63,7 +63,7 @@ public:
      * @param distance absolute distance that scroll bar has scrolled.
      */
     void NotifyScrollableNode(float distance, int32_t source, const WeakPtr<ScrollBarPattern>& weakScrollBar,
-        bool isMouseWheelScroll = false, bool originOffset = false) const;
+        Axis axis, bool isMouseWheelScroll = false, bool originOffset = false) const;
 
     /*
      * Notify scrollable node to callback scrollStart, called by scroll bar.
@@ -99,7 +99,7 @@ public:
 
     float CalcPatternOffset(float controlDistance, float barScrollableDistance, float delta) const;
 
-    void NotifyScrollBarNode(float distance, int32_t source, bool isMouseWheelScroll = false) const;
+    void NotifyScrollBarNode(float distance, int32_t source, Axis axis, bool isMouseWheelScroll = false) const;
 
     void NotifyScrollBarOnDidStopDragging(bool isWillFling) const;
 
@@ -143,12 +143,17 @@ public:
     {
         return isScrollableNodeScrolling_;
     }
+
+    bool IsFreeScroll() const;
     /*
      * Notify scroll bar to over scroll with velocity, called by scrollable node.
      */
     void NotifyScrollOverDrag(float velocity);
+    void NotifyFreeScrollOverDrag(const OffsetF velocity);
     bool CanOverScrollWithDelta(double delta) const;
+    bool CanFreeOverScrollWithDelta(Axis axis, double delta);
     bool Idle();
+    void SyncLayout(const OffsetF& offset, const SizeF& viewSize, const SizeF& content);
 private:
     /*
      * Drag the built-in or external scroll bar to slide the Scroll.
