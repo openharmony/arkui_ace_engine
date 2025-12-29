@@ -81,7 +81,7 @@ public:
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
     void SetItemFillPolicy(PresetFillType fillType) override;
     void ResetItemFillPolicy() override;
-    RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
+    RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* node = nullptr) override;
     void ParseResObjDividerStrokeWidth(const RefPtr<ResourceObject>& resObj) override;
     void ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj) override;
     void ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj) override;
