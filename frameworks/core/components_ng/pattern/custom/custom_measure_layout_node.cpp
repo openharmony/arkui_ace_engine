@@ -57,4 +57,26 @@ bool CustomMeasureLayoutNode::FireOnUpdateParam(NG::LayoutWrapper* layoutWrapper
     return false;
 }
 
+bool CustomMeasureLayoutNode::Render(int64_t deadline)
+{
+    if (deadline > 0 && GetSysTimestamp() > deadline) {
+        return false;
+    }
+    {
+        FireRecycleRenderFunc();
+    }
+    return true;
+}
+
+bool CustomMeasureLayoutNode::RenderCustomChild(int64_t deadline)
+{
+    if (GetSysTimestamp() > deadline) {
+        return false;
+    }
+    if (!Render(deadline)) {
+        return false;
+    }
+    return FrameNode::RenderCustomChild(deadline);
+}
+
 } // namespace OHOS::Ace::NG

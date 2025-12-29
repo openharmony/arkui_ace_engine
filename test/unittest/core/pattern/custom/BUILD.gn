@@ -18,5 +18,6 @@ ace_unittest("custom_test_ng") {
   sources = [
     "custom_test_ng_first_part.cpp",
     "custom_test_ng_second_part.cpp",
+    "custom_measure_layout_node_test.cpp"
   ]
 }
