@@ -31,7 +31,7 @@ class JSON2 {
     const serializeSendable = (value: unknown): string => {
       // Sendables can only be deserialized via JSON.parseSendable, which skips the
       // reviver, so encoding types and using Meta aliases is useless.
-      return (JSON as any)?.stringifySendable(value)?? '';
+      return (JSON as any).stringifySendable(value);
     };
 
     const replace = function (key: string, val: any, root: any): any {
