@@ -7469,7 +7469,7 @@ ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetTypes(ArkUI_TextDataDetectorC
  */
 ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_RegisterOnDetectResultUpdateCallback(
     ArkUI_TextDataDetectorConfig* config, void* userData,
-    void (*callback)(char* result, int32_t length, void* userData));
+    void (*callback)(const char* result, int32_t length, void* userData));
  
 /**
  * @brief Sets the color of detected content.

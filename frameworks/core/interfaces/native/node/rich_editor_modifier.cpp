@@ -81,10 +81,11 @@ void NodeModifier::SetRichEditorNapiDataDetectorConfigWithEvent(
     TextDetectConfig textDetectConfig;
     textDetectConfig.types = arkUITextDetectConfig->types;
     if (arkUITextDetectConfig->onResult) {
-        auto onResult = reinterpret_cast<void (*)(char*, int32_t)>(arkUITextDetectConfig->onResult);
-        textDetectConfig.onResult = [onResult](const std::string& result) {
+        auto onResult = reinterpret_cast<void (*)(const char*, int32_t, void*)>(arkUITextDetectConfig->onResult);
+        textDetectConfig.onResult = [onResult, arkUITextDetectConfig](const std::string& result) {
             if (onResult) {
-                onResult(result.c_str(), result.size(), arkUITextDetectConfig->onDetectResultUpdateUserData);
+                onResult(result.c_str(), static_cast<int32_t>(result.size()),
+                    arkUITextDetectConfig->onDetectResultUpdateUserData);
             }
         };
     }

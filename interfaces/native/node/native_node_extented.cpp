@@ -1685,7 +1685,7 @@ ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetTypes(ArkUI_TextDataDetectorC
  
 ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_RegisterOnDetectResultUpdateCallback(
     ArkUI_TextDataDetectorConfig* config, void* userData,
-    void (*callback)(char* result, int32_t length, void* userData))
+    void (*callback)(const char* result, int32_t length, void* userData))
 {
     CHECK_NULL_RETURN(config, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(callback, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
