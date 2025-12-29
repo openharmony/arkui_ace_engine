@@ -1805,7 +1805,7 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
 {
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.4f, 0.0f, 0.2f, 1.0f);
     AnimationOption option;
-    option.SetDuration(MASK_ANIMATION_DURATION);
+    option.SetDuration(shouldPlayMaskAnimation_ ? MASK_ANIMATION_DURATION : 0);
     option.SetCurve(curve);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -3578,6 +3578,16 @@ void TabBarPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("swiperStartIndex", swiperStartIndex_);
     json->Put("scrollMargin", scrollMargin_);
     SetRegionInfo(json);
+}
+
+TabBarParamType TabBarPattern::GetTabBarItemType(int32_t tabBarItemId)
+{
+    TabBarParamType itemType = TabBarParamType::NORMAL;
+    auto iter = tabBarType_.find(tabBarItemId);
+    if (iter != tabBarType_.end()) {
+        itemType = iter->second;
+    }
+    return itemType;
 }
 
 void TabBarPattern::AdjustTabBarInfo()
