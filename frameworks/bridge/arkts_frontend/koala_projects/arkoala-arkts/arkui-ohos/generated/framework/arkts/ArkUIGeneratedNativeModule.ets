@@ -867,8 +867,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GaugeAttribute_setTrackShadow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _GaugeAttribute_setIndicator(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _GaugeAttribute_setPrivacySensitive(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _Grid_construct(id: KInt, flags: KInt): KPointer
@@ -4401,6 +4399,8 @@ export class ArkUIGeneratedNativeModule {
     native static _FullScreenExitHandler_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _FullScreenExitHandler_exitFullScreen(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _GaugeExtender_setIndicator(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _GestureEvent_construct(): KPointer
     @ani.unsafe.Direct

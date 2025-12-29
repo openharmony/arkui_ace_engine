@@ -37,8 +37,11 @@ const ArkUIGaugeModifier* GetGaugeDynamicModifier();
 const CJUIGaugeModifier* GetCJUIGaugeModifier();
 #ifdef INCLUDE_GENERATED_SOURCES
 namespace GeneratedModifier {
+constexpr const char* CONTENT_MODIFIER = "contentModifier";
+constexpr const char* GAUGE_EXTENDER_ACCESSOR = "gaugeExtenderAccessor";
 const GENERATED_ArkUIGaugeModifier* GetGaugeStaticModifier();
 const GENERATED_ArkUIGaugeContentModifier* GetGaugeStaticContentModifier();
+const GENERATED_ArkUIGaugeExtenderAccessor* GetGaugeStaticExtenderAccessor();
 } // namespace GeneratedModifier
 #endif
 } // namespace NG
@@ -73,13 +76,17 @@ void* GaugeDynamicModule::GetModel()
     return &model;
 }
 
-const void* GaugeDynamicModule::GetCustomModifier()
+const void* GaugeDynamicModule::GetCustomModifier(const std::string& name)
 {
 #ifdef INCLUDE_GENERATED_SOURCES
-    return NG::GeneratedModifier::GetGaugeStaticContentModifier();
-#else
-    return nullptr;
+    if (name == NG::GeneratedModifier::CONTENT_MODIFIER) {
+        return NG::GeneratedModifier::GetGaugeStaticContentModifier();
+    }
+    if (name == NG::GeneratedModifier::GAUGE_EXTENDER_ACCESSOR) {
+        return NG::GeneratedModifier::GetGaugeStaticExtenderAccessor();
+    }
 #endif
+    return nullptr;
 }
 
 } // namespace OHOS::Ace

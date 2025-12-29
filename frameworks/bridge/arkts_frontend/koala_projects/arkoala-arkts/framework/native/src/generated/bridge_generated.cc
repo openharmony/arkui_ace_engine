@@ -7474,19 +7474,6 @@ void impl_GaugeAttribute_setTrackShadow(Ark_NativePointer thisPtr, KSerializerBu
         GetNodeModifiers()->getGaugeModifier()->setTrackShadow(self, static_cast<Opt_GaugeShadowOptions*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(GaugeAttribute_setTrackShadow, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_GaugeAttribute_setIndicator(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_GaugeIndicatorOptions valueValueTempTmpBuf = {};
-        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = GaugeIndicatorOptions_serializer::read(thisDeserializer);
-        }
-        Opt_GaugeIndicatorOptions valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getGaugeModifier()->setIndicator(self, static_cast<Opt_GaugeIndicatorOptions*>(&valueValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(GaugeAttribute_setIndicator, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_GaugeAttribute_setPrivacySensitive(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -31168,6 +31155,18 @@ void impl_FullScreenExitHandler_exitFullScreen(Ark_NativePointer thisPtr) {
         GetAccessors()->getFullScreenExitHandlerAccessor()->exitFullScreen(self);
 }
 KOALA_INTEROP_DIRECT_V1(FullScreenExitHandler_exitFullScreen, Ark_NativePointer)
+void impl_GaugeExtender_setIndicator(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_GaugeIndicatorOptions optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            optionsValueTempTmpBuf.value = GaugeIndicatorOptions_serializer::read(thisDeserializer);
+        }
+        Opt_GaugeIndicatorOptions optionsValueTemp = optionsValueTempTmpBuf;;
+        GetAccessors()->getGaugeExtenderAccessor()->setIndicator(node, static_cast<Opt_GaugeIndicatorOptions*>(&optionsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(GaugeExtender_setIndicator, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_GestureEvent_construct() {
         return GetAccessors()->getGestureEventAccessor()->construct();
 }

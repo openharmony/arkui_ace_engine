@@ -46,7 +46,7 @@ public:
     {
         return nullptr;
     }
-    virtual const void* GetCustomModifier()
+    virtual const void* GetCustomModifier(const std::string& name = "")
     {
         return nullptr;
     }

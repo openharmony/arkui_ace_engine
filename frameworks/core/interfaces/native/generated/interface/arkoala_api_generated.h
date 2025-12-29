@@ -23837,8 +23837,6 @@ typedef struct GENERATED_ArkUIGaugeModifier {
                            const Opt_CustomNodeBuilder* value);
     void (*setTrackShadow)(Ark_NativePointer node,
                            const Opt_GaugeShadowOptions* value);
-    void (*setIndicator)(Ark_NativePointer node,
-                         const Opt_GaugeIndicatorOptions* value);
     void (*setPrivacySensitive)(Ark_NativePointer node,
                                 const Opt_Boolean* value);
 } GENERATED_ArkUIGaugeModifier;
@@ -27738,6 +27736,11 @@ typedef struct GENERATED_ArkUIFullScreenExitHandlerAccessor {
     void (*exitFullScreen)(Ark_FullScreenExitHandler peer);
 } GENERATED_ArkUIFullScreenExitHandlerAccessor;
 
+typedef struct GENERATED_ArkUIGaugeExtenderAccessor {
+    void (*setIndicator)(Ark_NativePointer node,
+                         const Opt_GaugeIndicatorOptions* options);
+} GENERATED_ArkUIGaugeExtenderAccessor;
+
 typedef struct GENERATED_ArkUIGestureEventAccessor {
     void (*destroyPeer)(Ark_GestureEvent peer);
     Ark_GestureEvent (*construct)();
@@ -30262,6 +30265,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIFrameNodeExtenderAccessor* (*getFrameNodeExtenderAccessor)();
     const GENERATED_ArkUIFrictionMotionAccessor* (*getFrictionMotionAccessor)();
     const GENERATED_ArkUIFullScreenExitHandlerAccessor* (*getFullScreenExitHandlerAccessor)();
+    const GENERATED_ArkUIGaugeExtenderAccessor* (*getGaugeExtenderAccessor)();
     const GENERATED_ArkUIGestureEventAccessor* (*getGestureEventAccessor)();
     const GENERATED_ArkUIGestureOpsAccessor* (*getGestureOpsAccessor)();
     const GENERATED_ArkUIGestureRecognizerAccessor* (*getGestureRecognizerAccessor)();

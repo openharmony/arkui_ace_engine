@@ -30,7 +30,7 @@ public:
     const void* GetStaticModifier() override;
     const void* GetCjModifier() override;
     void* GetModel() override;
-    const void* GetCustomModifier() override;
+    const void* GetCustomModifier(const std::string& name = "") override;
 };
 
 } // namespace OHOS::Ace
