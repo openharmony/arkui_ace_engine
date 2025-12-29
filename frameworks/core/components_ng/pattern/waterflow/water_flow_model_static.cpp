@@ -269,4 +269,12 @@ void WaterFlowModelStatic::SetLayoutMode(FrameNode* frameNode, WaterFlowLayoutMo
     CHECK_NULL_VOID(pattern);
     pattern->SetLayoutMode(mode);
 }
+
+void WaterFlowModelStatic::ResetItemLayoutConstraint(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layout = frameNode->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_VOID(layout);
+    layout->ResetItemLayoutConstraint();
+}
 } // namespace OHOS::Ace::NG
