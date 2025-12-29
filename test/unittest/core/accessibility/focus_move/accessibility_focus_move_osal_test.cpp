@@ -439,6 +439,7 @@ HWTEST_F(AccessibilityFocusMoveTest, CheckAndGetReadableInfoToRootTest001, TestS
      * @tc.steps: step2. test CheckAndGetReadableInfoToRoot when framenode is nullptr
      */
     std::list<Accessibility::AccessibilityElementInfo> targetInfos;
+    int32_t windowId = 0;
     auto result = strategy.CheckAndGetReadableInfoToRoot(nullptr, targetInfos, windowId);
     EXPECT_EQ(result.resultType, FocusMoveResultType::SEARCH_FAIL);
 }
