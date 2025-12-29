@@ -93,6 +93,12 @@ export function hookKeyboardShortcut(peer: ArkCommonMethodPeer, shortcuts: Array
   if (shortcuts && shortcuts.length > 0) {
     for (let i = 0; i < shortcuts.length; i++) {
       const shortcut = shortcuts[i];
+      if (shortcut.value !== undefined && typeof shortcut.value === 'string') {
+        const strValue = shortcut.value as string;
+        if (strValue.length > 1) {
+            continue;
+        }
+      }
       peer.setKeyboardShortcutAttribute(
         shortcut.value as string | FunctionKey | undefined,
         shortcut.keys as Array<ModifierKey> | undefined,
