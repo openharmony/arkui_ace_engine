@@ -1259,10 +1259,7 @@ export class DetachedRootEntryManager {
         /** @memo */
         builder: () => void
     ): PeerNode | undefined {
-        let manager = this.uicontext_.stateMgr;
-        if (manager === undefined) {
-            manager = GlobalStateManager.instance;
-        }
+        const manager = GlobalStateManager.instance;
         const node = manager.updatableNodeEx<IncrementalNode>(nodeFactory(), (context: StateContext) => {
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
             memoEntry<void>(context, 0, builder)
