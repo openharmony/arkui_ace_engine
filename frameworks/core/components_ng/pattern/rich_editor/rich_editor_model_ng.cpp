@@ -58,7 +58,7 @@ void RichEditorModelNG::CreateRichEditorNodeBase(
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, TextAlign::START);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, WordBreak::BREAK_WORD);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
- 
+
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
  
     if (isStyledStringMode) {
@@ -441,9 +441,9 @@ void RichEditorModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
 
 Color RichEditorModelNG::GetCaretColor(FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(frameNode, Color(0xff007dff));
+    CHECK_NULL_RETURN(frameNode, Color());
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
-    CHECK_NULL_RETURN(pattern, Color(0xff007dff));
+    CHECK_NULL_RETURN(pattern, Color());
     return pattern->GetCaretColor();
 }
 
