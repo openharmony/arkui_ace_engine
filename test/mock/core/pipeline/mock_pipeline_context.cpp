@@ -27,6 +27,7 @@
 #include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -385,6 +386,7 @@ void PipelineContext::SetupRootElement()
     dragDropManager_ = MakeRefPtr<DragDropManager>();
     focusManager_ = MakeRefPtr<FocusManager>(AceType::Claim(this));
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
+    inspectorOffscreenNodesMgr_ = MakeRefPtr<InspectorOffscreenNodesMgr>();
 }
 
 void PipelineContext::SendEventToAccessibilityWithNode(
@@ -427,6 +429,11 @@ void PipelineContext::OnIdle(int64_t deadline)
     for (const auto& task : tasks) {
         task(deadline, true);
     }
+}
+
+const RefPtr<InspectorOffscreenNodesMgr>& PipelineContext::GetInspectorOffscreenNodesMgr()
+{
+    return inspectorOffscreenNodesMgr_;
 }
 
 void PipelineContext::Destroy()

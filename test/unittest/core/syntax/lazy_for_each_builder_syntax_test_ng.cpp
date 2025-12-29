@@ -1500,10 +1500,14 @@ HWTEST_F(LazyForEachSyntaxTestNg, ReorganizeOffscreenNode001, TestSize.Level1)
     lazyForEachBuilder->expiringItem_["2"] = LazyForEachCacheChild(2, node2);
     lazyForEachBuilder->expiringItem_["3"] = LazyForEachCacheChild(3, node3);
     lazyForEachBuilder->expiringItem_["4"] = LazyForEachCacheChild(4, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto offscreenNodesMgr = context->GetInspectorOffscreenNodesMgr();
+    ASSERT_NE(offscreenNodesMgr, nullptr);
     lazyForEachBuilder->ProcessOffscreenNode(node1, false);
-    auto count1 = Inspector::GetOffscreenNodesSize();
+    auto count1 = offscreenNodesMgr->GetOffscreenNodesSize();
     lazyForEachBuilder->ReorganizeOffscreenNode();
-    auto count2 = Inspector::GetOffscreenNodesSize();
+    auto count2 = offscreenNodesMgr->GetOffscreenNodesSize();
     EXPECT_EQ(count2 - count1, 1);
 }
 

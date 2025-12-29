@@ -91,6 +91,7 @@ class MagnifierController;
 class LoadCompleteManager;
 class PageInfo;
 class ContentChangeManager;
+class InspectorOffscreenNodesMgr;
 
 enum class MockFlushEventType : int32_t {
     REJECT = -1,
@@ -1375,6 +1376,7 @@ public:
     void UpdateDrawLayoutChildObserver(
         const std::string& inspectorKey, bool isClearLayoutObserver, bool isClearDrawObserver) override;
 
+    const RefPtr<InspectorOffscreenNodesMgr>& GetInspectorOffscreenNodesMgr();
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1540,7 +1542,6 @@ private:
     void UpdateDVSyncTime(uint64_t nanoTimestamp, const std::string& abilityName, uint64_t vsyncPeriod);
     void NotifyCoastingAxisEventOnHide();
     void ResSchedReportAxisEvent(const AxisEvent& event) const;
-    void ClearInspectorOffScreenNodes();
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
@@ -1746,6 +1747,7 @@ private:
     std::set<WeakPtr<FrameNode>> needRenderNodeByUniqueId_;
     std::set<WeakPtr<NG::UINode>> needRenderForLayoutChildrenNodes_;
     std::optional<bool> isRecycledInvisibleImageMemory_ = std::nullopt;
+    RefPtr<InspectorOffscreenNodesMgr> inspectorOffscreenNodesMgr_;
 };
 
 /**
