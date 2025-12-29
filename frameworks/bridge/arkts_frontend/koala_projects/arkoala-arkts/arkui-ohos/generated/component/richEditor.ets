@@ -832,7 +832,7 @@ export interface RichEditorTextStyle {
     halfLeading?: boolean;
     fontFeature?: string;
     textBackgroundStyle?: TextBackgroundStyle;
-    strokeWidth?: LengthMetrics;
+    strokeWidth?: LengthMetrics | double;
     strokeColor?: ResourceColor;
 }
 export interface LeadingMarginPlaceholder {
@@ -3502,7 +3502,15 @@ export class RichEditorTextStyle_serializer {
         if (valueHolderForStrokeWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStrokeWidthTmpValue  = valueHolderForStrokeWidth!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValue)
+            if (valueHolderForStrokeWidthTmpValue instanceof LengthMetrics) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForStrokeWidthTmpValueForIdx0  = valueHolderForStrokeWidthTmpValue as LengthMetrics
+                LengthMetrics_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValueForIdx0)
+            } else if (valueHolderForStrokeWidthTmpValue instanceof double) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForStrokeWidthTmpValueForIdx1  = valueHolderForStrokeWidthTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForStrokeWidthTmpValueForIdx1)
+            }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -3684,11 +3692,20 @@ export class RichEditorTextStyle_serializer {
         }
         const textBackgroundStyleTmpResult : TextBackgroundStyle | undefined = textBackgroundStyleTmpBuf
         const strokeWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let strokeWidthTmpBuf : LengthMetrics | undefined = undefined
+        let strokeWidthTmpBuf : LengthMetrics | double | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            strokeWidthTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+            const strokeWidthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let strokeWidthTmpBuf_ : LengthMetrics | double | undefined
+            if (strokeWidthTmpBuf_UnionSelector == (0).toByte()) {
+                strokeWidthTmpBuf_ = LengthMetrics_serializer.read(valueDeserializer)
+            } else if (strokeWidthTmpBuf_UnionSelector == (1).toByte()) {
+                strokeWidthTmpBuf_ = valueDeserializer.readFloat64()
+            } else {
+                throw new Error("One of the branches for strokeWidthTmpBuf_ has to be chosen through deserialisation.")
+            }
+            strokeWidthTmpBuf = (strokeWidthTmpBuf_ as LengthMetrics | double)
         }
-        const strokeWidthTmpResult : LengthMetrics | undefined = strokeWidthTmpBuf
+        const strokeWidthTmpResult : LengthMetrics | double | undefined = strokeWidthTmpBuf
         const strokeColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeColorTmpBuf : ResourceColor | undefined = undefined
         if ((strokeColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

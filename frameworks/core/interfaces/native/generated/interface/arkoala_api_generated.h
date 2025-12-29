@@ -2584,6 +2584,8 @@ typedef struct Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResou
 typedef struct Opt_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource Opt_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource;
 typedef struct Ark_Union_ImageBitmap_PixelMap Ark_Union_ImageBitmap_PixelMap;
 typedef struct Opt_Union_ImageBitmap_PixelMap Opt_Union_ImageBitmap_PixelMap;
+typedef struct Ark_Union_LengthMetrics_F64 Ark_Union_LengthMetrics_F64;
+typedef struct Opt_Union_LengthMetrics_F64 Opt_Union_LengthMetrics_F64;
 typedef struct Ark_Union_LengthMetrics_String Ark_Union_LengthMetrics_String;
 typedef struct Opt_Union_LengthMetrics_String Opt_Union_LengthMetrics_String;
 typedef struct Ark_Union_MenuPreviewMode_CustomBuilder Ark_Union_MenuPreviewMode_CustomBuilder;
@@ -17225,6 +17227,18 @@ typedef struct Opt_Union_ImageBitmap_PixelMap {
     Ark_Tag tag;
     Ark_Union_ImageBitmap_PixelMap value;
 } Opt_Union_ImageBitmap_PixelMap;
+typedef struct Ark_Union_LengthMetrics_F64 {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_LengthMetrics value0;
+        Ark_Float64 value1;
+    };
+} Ark_Union_LengthMetrics_F64;
+typedef struct Opt_Union_LengthMetrics_F64 {
+    Ark_Tag tag;
+    Ark_Union_LengthMetrics_F64 value;
+} Opt_Union_LengthMetrics_F64;
 typedef struct Ark_Union_LengthMetrics_String {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -22468,7 +22482,7 @@ typedef struct Ark_RichEditorTextStyle {
     Opt_Boolean halfLeading;
     Opt_String fontFeature;
     Opt_TextBackgroundStyle textBackgroundStyle;
-    Opt_LengthMetrics strokeWidth;
+    Opt_Union_LengthMetrics_F64 strokeWidth;
     Opt_ResourceColor strokeColor;
 } Ark_RichEditorTextStyle;
 typedef struct Opt_RichEditorTextStyle {
