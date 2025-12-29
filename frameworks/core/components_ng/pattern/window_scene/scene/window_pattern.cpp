@@ -742,6 +742,8 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     snapshotWindow_->SetHitTestMode(HitTestMode::HTMNONE);
     auto pattern = snapshotWindow_->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
+    snapshotWindow_->UpdateInspectorId("Snapshot_" + session_->GetSessionInfo().bundleName_ +
+        "_" + std::to_string(host->GetId()));
 
     if (snapshot) {
         auto pixelMap = PixelMap::CreatePixelMap(&snapshot.value());
