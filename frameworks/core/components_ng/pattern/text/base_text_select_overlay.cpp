@@ -49,18 +49,23 @@ void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
         CHECK_NULL_VOID(overlay);
         overlay->ShowSelectOverlay(request, hasData);
     };
+    CheckHasPasteData(checkClipboard);
+}
+
+void BaseTextSelectOverlay::CheckHasPasteData(const std::function<void(bool)>& callback)
+{
     auto textBase = hostTextBase_.Upgrade();
     CHECK_NULL_VOID(textBase);
     auto clipboard = textBase->GetClipboard();
     if (clipboard) {
         auto mimeTypes = GetPasteMimeTypes();
         if (!mimeTypes.empty()) {
-            clipboard->HasDataType(checkClipboard, mimeTypes);
+            clipboard->HasDataType(callback, mimeTypes);
             return;
         }
-        clipboard->HasData(checkClipboard);
+        clipboard->HasData(callback);
     } else {
-        checkClipboard(false);
+        callback(false);
     }
 }
 

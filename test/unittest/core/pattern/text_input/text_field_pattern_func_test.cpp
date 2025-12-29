@@ -1412,4 +1412,42 @@ HWTEST_F(TextFieldPatternFuncTest, GetKeyboardInsetImpl, TestSize.Level1)
     EXPECT_EQ(safeAreaManager->GetKeyboardInset().Length(), 0);
     EXPECT_EQ(safeAreaManager->GetKeyboardInsetImpl().Length(), 1000);
 }
+
+/**
+ * @tc.name: OnHandleBeforeMenuVisibiltyChanged
+ * @tc.desc: test text_field_select_overlay.cpp OnHandleBeforeMenuVisibiltyChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, OnHandleBeforeMenuVisibiltyChanged, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textFieldNode and get pattern.
+     */
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call OnHandleBeforeMenuVisibiltyChanged and expect no error.
+     */
+    pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(pattern);
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    SelectOverlayInfo overlayInfo;
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    shareOverlayInfo->isUseOverlayNG = true;
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo);
+    ASSERT_NE(overlayNode, nullptr);
+    overlayNode->MountToParent(textFieldNode);
+    manager->selectOverlayNode_ = overlayNode;
+    manager->shareOverlayInfo_ = shareOverlayInfo;
+    pattern->selectOverlay_->OnBind(manager);
+    manager->SetHolder(pattern->selectOverlay_);
+    pattern->selectOverlay_->SetShowPaste(false);
+    pattern->selectOverlay_->UpdatePasteMenu();
+    EXPECT_TRUE(pattern->selectOverlay_->needRefreshPasteButton_);
+    pattern->selectOverlay_->ShowMenu();
+    EXPECT_FALSE(pattern->selectOverlay_->needRefreshPasteButton_);
+}
 } // namespace OHOS::Ace

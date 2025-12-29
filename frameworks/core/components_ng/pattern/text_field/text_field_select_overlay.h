@@ -70,6 +70,10 @@ public:
     void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
 
     void HandleOnShowMenu();
+    void UpdatePasteMenu()
+    {
+        needRefreshPasteButton_ = !IsShowPaste();
+    }
 
     void ProcessSelectAllOverlay(const OverlayRequest& request);
 
@@ -100,6 +104,7 @@ public:
     void ProcessOverlayAfterLayout(const OverlayRequest& request);
     void IsAIMenuOptionChanged(SelectMenuInfo& menuInfo) override;
     void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
+    bool OnHandleBeforeMenuVisibiltyChanged(bool isVisible) override;
 
 protected:
     bool AllowTranslate() override;
@@ -116,6 +121,8 @@ private:
     void TriggerContentToScroll(const OffsetF& localOffset, bool isEnd);
     void UpdateMagnifier(const OffsetF& offset, bool updateOnScroll);
     bool CheckIfInterruptProcessing(const OverlayRequest& request);
+    void RefreshPasteButton();
+    bool needRefreshPasteButton_ = false;
     SourceType lastSourceType_ = SourceType::NONE;
     std::vector<std::string> pasteMimeTypes_ = { "text/plain", "text/html", "autofill/secure" };
 };
