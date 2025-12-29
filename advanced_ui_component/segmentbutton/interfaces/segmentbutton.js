@@ -431,6 +431,7 @@ let SegmentButtonOptions = (SegmentButtonOptions_1 = class SegmentButtonOptions 
       moduleName: '__harDefaultModuleName__',
     }).value;
     this.componentPadding = this.multiply ? 0 : themePadding;
+    this.backgroundSystemMaterial = options.backgroundSystemMaterial;
   }
   onButtonsUpdated() {
     this.buttons?.forEach(button => {
@@ -464,6 +465,7 @@ let SegmentButtonOptions = (SegmentButtonOptions_1 = class SegmentButtonOptions 
       borderRadiusMode: options.borderRadiusMode,
       backgroundBorderRadius: options.backgroundBorderRadius,
       itemBorderRadius: options.itemBorderRadius,
+      backgroundSystemMaterial: options.backgroundSystemMaterial,
     });
   }
   static capsule(options) {
@@ -704,8 +706,10 @@ class SelectItem extends ViewPU {
               x: this.zoomScaleArray[this.selectedIndexes[0]],
               y: this.zoomScaleArray[this.selectedIndexes[0]],
             });
-            Stack.shadow(this.isSegmentFocusStyleCustomized ? undefined :
-              resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_BUTTON_SHADOW, 0)
+            Stack.shadow(
+              this.isSegmentFocusStyleCustomized
+                ? undefined
+                : resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_BUTTON_SHADOW, 0)
             );
           }, Stack);
           Stack.pop();
@@ -2945,6 +2949,7 @@ export class SegmentButton extends ViewPU {
                   Stack.direction(this.options.direction);
                   Stack.size(ObservedObject.GetRawObject(this.componentSize));
                   Stack.backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR);
+                  Stack.systemMaterial(this.options.backgroundSystemMaterial);
                   Stack.borderRadius(getBackgroundBorderRadius(this.options, this.componentSize.height / 2));
                   Stack.backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, {
                     disableSystemAdaptation: true,
