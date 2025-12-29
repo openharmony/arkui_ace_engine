@@ -14398,6 +14398,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Opt_String GetResourceValueImpl(Ark_ImageAttachment peer)
+    {
+        return {};
+    }
     Opt_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
     {
         return {};
@@ -20937,6 +20941,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ImageAttachmentAccessor::ConstructImpl,
             ImageAttachmentAccessor::GetFinalizerImpl,
             ImageAttachmentAccessor::GetValueImpl,
+            ImageAttachmentAccessor::GetResourceValueImpl,
             ImageAttachmentAccessor::GetSizeImpl,
             ImageAttachmentAccessor::GetVerticalAlignImpl,
             ImageAttachmentAccessor::GetObjectFitImpl,

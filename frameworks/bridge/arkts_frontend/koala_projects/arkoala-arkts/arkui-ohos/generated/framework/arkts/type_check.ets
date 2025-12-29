@@ -1458,7 +1458,7 @@ export class TypeChecker {
     static isImageAnalyzerType(value: Object | string | number | undefined): boolean {
         return value instanceof ImageAnalyzerType
     }
-    static isImageAttachment(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
+    static isImageAttachment(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof ImageAttachment
     }
     static isImageAttachmentInterface(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {

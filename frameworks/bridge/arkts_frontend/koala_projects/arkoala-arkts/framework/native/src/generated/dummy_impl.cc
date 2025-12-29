@@ -33747,6 +33747,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_image_PixelMap>(300);
     }
+    Opt_String GetResourceValueImpl(Ark_ImageAttachment peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getResourceValue(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     Opt_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
     {
         if (!needGroupedLog(1))
@@ -48923,6 +48935,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ImageAttachmentAccessor::ConstructImpl,
             ImageAttachmentAccessor::GetFinalizerImpl,
             ImageAttachmentAccessor::GetValueImpl,
+            ImageAttachmentAccessor::GetResourceValueImpl,
             ImageAttachmentAccessor::GetSizeImpl,
             ImageAttachmentAccessor::GetVerticalAlignImpl,
             ImageAttachmentAccessor::GetObjectFitImpl,

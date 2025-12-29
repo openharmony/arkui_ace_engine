@@ -27955,6 +27955,7 @@ typedef struct GENERATED_ArkUIImageAttachmentAccessor {
     Ark_ImageAttachment (*construct)(const Opt_AttachmentType* value);
     Ark_NativePointer (*getFinalizer)();
     Ark_image_PixelMap (*getValue)(Ark_ImageAttachment peer);
+    Opt_String (*getResourceValue)(Ark_ImageAttachment peer);
     Opt_SizeOptions (*getSize)(Ark_ImageAttachment peer);
     Opt_ImageSpanAlignment (*getVerticalAlign)(Ark_ImageAttachment peer);
     Opt_ImageFit (*getObjectFit)(Ark_ImageAttachment peer);

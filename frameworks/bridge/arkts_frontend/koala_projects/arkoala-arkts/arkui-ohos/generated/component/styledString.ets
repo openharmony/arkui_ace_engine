@@ -324,6 +324,7 @@ export class ImageAttachment implements MaterializedBase {
         return this.peer
     }
     readonly value: image.PixelMap
+    readonly resourceValue?: string | undefined
     readonly size?: SizeOptions | undefined
     readonly verticalAlign?: ImageSpanAlignment | undefined
     readonly objectFit?: ImageFit | undefined
@@ -332,6 +333,7 @@ export class ImageAttachment implements MaterializedBase {
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ImageAttachment.getFinalizer())
         this.value = this.getValue()
+        this.resourceValue = this.getResourceValue()
         this.size = this.getSize()
         this.verticalAlign = this.getVerticalAlign()
         this.objectFit = this.getObjectFit()
@@ -368,6 +370,9 @@ export class ImageAttachment implements MaterializedBase {
     private getValue(): image.PixelMap {
         return this.getValue_serialize()
     }
+    private getResourceValue(): string | undefined {
+        return this.getResourceValue_serialize()
+    }
     private getSize(): SizeOptions | undefined {
         return this.getSize_serialize()
     }
@@ -387,6 +392,17 @@ export class ImageAttachment implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getValue(this.peer!.ptr)
         const obj : image.PixelMap = extractors.fromImagePixelMapPtr(retval)
         return obj
+    }
+    private getResourceValue_serialize(): string | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getResourceValue(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : string | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (retvalDeserializer.readString() as string)
+        }
+        const returnResult : string | undefined = buffer
+        return returnResult
     }
     private getSize_serialize(): SizeOptions | undefined {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getSize(this.peer!.ptr)

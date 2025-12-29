@@ -4618,6 +4618,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ImageAttachment_getValue(ptr: KPointer): KPointer
     @ani.unsafe.Quick
+    native static _ImageAttachment_getResourceValue(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
     native static _ImageAttachment_getSize(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _ImageAttachment_getVerticalAlign(ptr: KPointer): KInteropReturnBuffer

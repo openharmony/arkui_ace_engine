@@ -31917,6 +31917,20 @@ Ark_NativePointer impl_ImageAttachment_getValue(Ark_NativePointer thisPtr) {
         return GetAccessors()->getImageAttachmentAccessor()->getValue(self);
 }
 KOALA_INTEROP_DIRECT_1(ImageAttachment_getValue, Ark_NativePointer, Ark_NativePointer)
+KInteropReturnBuffer impl_ImageAttachment_getResourceValue(Ark_NativePointer thisPtr) {
+        Ark_ImageAttachment self = reinterpret_cast<Ark_ImageAttachment>(thisPtr);
+        const auto &retValue = GetAccessors()->getImageAttachmentAccessor()->getResourceValue(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeString(retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(ImageAttachment_getResourceValue, KInteropReturnBuffer, Ark_NativePointer)
 KInteropReturnBuffer impl_ImageAttachment_getSize(Ark_NativePointer thisPtr) {
         Ark_ImageAttachment self = reinterpret_cast<Ark_ImageAttachment>(thisPtr);
         const auto &retValue = GetAccessors()->getImageAttachmentAccessor()->getSize(self);
