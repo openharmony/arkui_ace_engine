@@ -9317,4 +9317,18 @@ bool JsAccessibilityManager::CheckWhiteList(const uint32_t& eventType)
     }
     return std::find(whiteList.begin(), whiteList.end(), eventType) != whiteList.end();
 }
+
+int32_t JsAccessibilityManager::GetTreeId(int32_t instanceId)
+{
+    if (instanceId == -1) {
+        return treeId_;
+    }
+    auto container = Platform::AceContainer::GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, treeId_);
+
+    if (container->IsSubWindow()) {
+        return 0;
+    }
+    return treeId_;
+}
 } // namespace OHOS::Ace::Framework

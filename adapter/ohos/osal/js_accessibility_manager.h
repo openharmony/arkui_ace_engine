@@ -475,6 +475,7 @@ public:
         RefPtr<NG::FrameNode>& readableNode) override;
 
     void ResetBlockedEvent();
+    int32_t GetTreeId(int32_t instanceId = -1) override;
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
