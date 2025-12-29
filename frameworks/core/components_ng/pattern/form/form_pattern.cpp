@@ -526,15 +526,15 @@ void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
     needSnapshotAgain_ = false;
 }
 
-void FormPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+bool FormPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
 {
     TAG_LOGD(AceLogTag::ACE_FORM, "OnAccessibilityChildTreeRegister, treeId: %{public}d, id: %{public}" PRId64, treeId,
         accessibilityId);
     if (formManagerBridge_ == nullptr) {
         TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
-        return;
+        return false;
     }
-    formManagerBridge_->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    return formManagerBridge_->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
 }
 
 void FormPattern::OnAccessibilityChildTreeDeregister()

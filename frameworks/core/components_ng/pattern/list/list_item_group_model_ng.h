@@ -35,7 +35,7 @@ public:
     void SetDivider(const V2::ItemDivider& divider) override;
     void SetHeader(std::function<void()>&& header) override;
     void SetFooter(std::function<void()>&& footer) override;
-    RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
+    RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* node = nullptr) override;
     void SetHeaderComponent(const RefPtr<NG::UINode>& headerComponent) override;
     void SetFooterComponent(const RefPtr<NG::UINode>& footerComponent) override;
     void RemoveHeader() override;

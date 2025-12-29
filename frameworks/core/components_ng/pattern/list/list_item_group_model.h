@@ -40,7 +40,7 @@ public:
     virtual void SetDivider(const V2::ItemDivider& divider) = 0;
     virtual void SetHeader(std::function<void()>&& header) = 0;
     virtual void SetFooter(std::function<void()>&& footer) = 0;
-    virtual RefPtr<NG::ListChildrenMainSize> GetOrCreateListChildrenMainSize()
+    virtual RefPtr<NG::ListChildrenMainSize> GetOrCreateListChildrenMainSize(NG::FrameNode* node = nullptr)
     {
         return nullptr;
     }

@@ -826,6 +826,7 @@ ArkUINativeModuleValue SliderBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
         [vm, frameNode, obj = std::move(obj), containerId](
             SliderConfiguration config) -> RefPtr<FrameNode> {
             ContainerScope scope(containerId);
+            LocalScope pandaScope(vm);
             auto context = ArkTSUtils::GetContext(vm);
             const char* keyOfSlider[] = { "value", "min", "max", "step", "enabled", "triggerChange" };
             Local<JSValueRef> valuesOfSlider[] = { panda::NumberRef::New(vm, config.value_),
@@ -837,7 +838,6 @@ ArkUINativeModuleValue SliderBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
             slider->SetNativePointerFieldCount(vm, 1);
             slider->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
             panda::Local<panda::JSValueRef> params[NUM_2] = { context, slider };
-            LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));

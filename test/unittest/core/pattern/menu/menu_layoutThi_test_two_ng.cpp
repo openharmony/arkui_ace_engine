@@ -1124,6 +1124,16 @@ HWTEST_F(MenuLayout3TwoTestNg, MenuKeyboardAvoidMode002, TestSize.Level1)
     minKeyboardAvoidDistance = Dimension();
     layoutAlgorithm->MenuAvoidKeyboard(menuNode, minKeyboardAvoidDistance, KEY_BOARD_TOP_POSITION);
     EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(0.0f, 0.0f, 0.0f, KEY_BOARD_TOP_POSITION));
+    /**
+     * @tc.steps: step6. The test minKeyboardAvoidDistance not support percentage
+     * @tc.expected: The minKeyboardAvoidDistance will use default
+     */
+    wrapperRect = Rect(0.0f, 0.0f, 0.0f, WRAPPER_RECT_HEIGHT_LARGE);
+    layoutAlgorithm->wrapperRect_ = wrapperRect;
+    minKeyboardAvoidDistance = Dimension(1.0f, DimensionUnit::PERCENT);
+    layoutAlgorithm->MenuAvoidKeyboard(menuNode, minKeyboardAvoidDistance, KEY_BOARD_TOP_POSITION);
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_,
+        Rect(0.0f, 0.0f, 0.0f, KEY_BOARD_TOP_POSITION - MIN_KEYBOARD_AVOID_DISTANCE.ConvertToPx()));
 }
 
 /**
