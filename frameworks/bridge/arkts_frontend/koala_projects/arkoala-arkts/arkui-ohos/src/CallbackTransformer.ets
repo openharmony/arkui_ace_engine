@@ -68,20 +68,20 @@ export class CallbackTransformer {
                 ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
                 ExtendableComponent.current = currentExtendableComponent;
                 // set StateManager which is the customComponent created before invoking build function
-                GlobalStateManager.setLocalManager(currentStateManager);
+                GlobalStateManager.SetLocalManager(currentStateManager);
                 try {
                     value();
                 } finally {
                     ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
                     ExtendableComponent.current = lastExtendableComponent;
                     // revert stateManager is using mow
-                    GlobalStateManager.setLocalManager(latestStateManager);
+                    GlobalStateManager.SetLocalManager(latestStateManager);
                 }
             };
             const latestStateManager = GlobalStateManager.instance;
-            GlobalStateManager.setLocalManager(currentStateManager);
+            GlobalStateManager.SetLocalManager(currentStateManager);
             const peer = context.getDetachedRootEntryManager().createUiDetachedFreeRoot(componentFreeRootFactory, cb);
-            GlobalStateManager.setLocalManager(latestStateManager);
+            GlobalStateManager.SetLocalManager(latestStateManager);
             return peer ? peer.peer.ptr : nullptr;
         }
     }

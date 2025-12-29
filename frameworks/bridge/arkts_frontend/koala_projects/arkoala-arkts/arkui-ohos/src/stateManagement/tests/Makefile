@@ -63,7 +63,6 @@ SRCSTS = \
 	mock/env_mock.ts  \
 	mock/interop.ts  \
 	mock/UIContextUtil.ts  \
-	mock/UIContextImpl.ts  \
 	mock/interopStorageV2.ts \
 	\
 	interop/interopStorage.ts \
