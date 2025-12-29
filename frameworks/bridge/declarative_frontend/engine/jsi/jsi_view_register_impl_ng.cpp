@@ -98,6 +98,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navrouter.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_particle.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
@@ -590,6 +591,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSWebController::JSBind(globalObj);
 #endif
 #endif
+    JSParticle::JSBind(globalObj);
     JSNodeContainer::JSBind(globalObj);
     JSBaseNode::JSBind(globalObj);
     JSContentSlot::JSBind(globalObj);
