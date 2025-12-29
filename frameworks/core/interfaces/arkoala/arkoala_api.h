@@ -3511,6 +3511,7 @@ struct ArkUITextModifier {
     void (*setTextSelectedDragPreviewStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetTextSelectedDragPreviewStyle)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextSelectedDragPreviewStyle)(ArkUINodeHandle node);
+    void (*setFontColorWithPlaceholder)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Uint32 colorPlaceholder);
 };
 
 struct ArkUIButtonModifier {
@@ -3575,6 +3576,8 @@ struct ArkUIButtonModifier {
     void (*setButtonMinFontScalePtr)(ArkUINodeHandle node, ArkUI_Float32 minFontScale, ArkUI_VoidPtr scaleRawPtr);
     void (*setButtonMaxFontScalePtr)(ArkUINodeHandle node, ArkUI_Float32 maxFontScale,  ArkUI_VoidPtr scaleRawPtr);
     void (*setButtonBackgroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
+    void (*setButtonFontColorWithPlaceholder)(
+        ArkUINodeHandle node, ArkUI_Uint32 fontColor, ArkUI_Uint32 colorPlaceholder);
 };
 
 struct ArkUIImageModifier {
@@ -6874,6 +6877,8 @@ struct ArkUISymbolGlyphModifier {
     void (*setMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 maxFontScale, void* resourceRawPtr);
     void (*resetMaxFontScale)(ArkUINodeHandle node);
     void (*setCustomSymbolGlyphInitialize)(ArkUINodeHandle node, ArkUI_Uint32 symbolId, ArkUI_CharPtr fontFamily);
+    void (*setFontColorWithPlaceholder)(
+        ArkUINodeHandle node, ArkUI_Uint32* color, ArkUI_Uint32 colorPlaceholder, ArkUI_Int32 size);
 };
 
 struct ArkUISymbolSpanModifier {

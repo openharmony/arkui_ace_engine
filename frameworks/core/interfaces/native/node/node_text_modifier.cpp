@@ -2696,6 +2696,15 @@ ArkUI_Uint32 GetTextSelectedDragPreviewStyle(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return TextModelNG::GetSelectedDragPreviewStyle(frameNode).GetValue();
 }
+
+void SetFontColorWithPlaceholder(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Uint32 colorPlaceholder)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
+    result.SetPlaceholder(static_cast<ColorPlaceholder>(colorPlaceholder));
+    TextModelNG::SetTextColor(frameNode, result);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2895,6 +2904,7 @@ const ArkUITextModifier* GetTextModifier()
         .setTextSelectedDragPreviewStyle = SetTextSelectedDragPreviewStyle,
         .resetTextSelectedDragPreviewStyle = ResetTextSelectedDragPreviewStyle,
         .getTextSelectedDragPreviewStyle = GetTextSelectedDragPreviewStyle,
+        .setFontColorWithPlaceholder = SetFontColorWithPlaceholder,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
