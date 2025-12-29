@@ -3648,7 +3648,7 @@ void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceI
     CHECK_NULL_VOID(taskExecutor);
 
     // Ensure keyboard avoid logic runs on UI thread to prevent EcmaVM multi-thread check failure
-    auto task = [pipelineContext, instanceld, keyboardRect, info]() {
+    auto task = [pipelineContext, instanceId, keyboardRect, info]() {
         ACE_LAYOUT_SCOPED_TRACE("KeyboardAvoid keyboardRect %s", keyboardRect.ToString().c_str());
         ContainerScope scope(instanceId);
         auto curWindow = pipelineContext->GetCurrentWindowRect();
