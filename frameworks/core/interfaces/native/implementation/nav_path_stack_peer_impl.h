@@ -28,11 +28,11 @@ struct NavPathStackPeer {
 public:
     NavPathStackPeer(): navStack_(nullptr)
     {
-        auto* stack = new Nav::NavigationStack();
-        navStack_ = AceType::Claim(stack);
-        navStack_->SetStaticStackPtr(&navStack_);
+        auto staticStack = AceType::MakeRefPtr<Nav::NavigationStack>();
+        navStack_ = staticStack;
+        staticStack->SetStaticStackPtr(&navStack_);
     }
-    
+
     NavPathStackPeer(const RefPtr<AceType>& stack)
     {
         SetNavigationStack(stack);
@@ -40,11 +40,7 @@ public:
 
     void SetNavigationStack(const RefPtr<AceType>& stack)
     {
-        navStack_ = nullptr;
-        CHECK_NULL_VOID(stack);
-        auto navStack = AceType::DynamicCast<Nav::NavigationStack>(stack);
-        CHECK_NULL_VOID(navStack);
-        navStack_ = navStack;
+        navStack_ = AceType::DynamicCast<OHOS::Ace::NG::NavigationStack>(stack);
     }
 
     void SetInstanceId(int32_t instanceId)
@@ -57,13 +53,18 @@ public:
         return instanceId_;
     }
 
-    RefPtr<Nav::NavigationStack> GetNavPathStack() const
+    RefPtr<OHOS::Ace::NG::NavigationStack> GetBaseNavPathStack() const
     {
         return navStack_;
     }
 
+    RefPtr<Nav::NavigationStack> GetNavPathStack() const
+    {
+        return AceType::DynamicCast<Nav::NavigationStack>(navStack_);
+    }
+
 protected:
-    RefPtr<Nav::NavigationStack> navStack_;
+    RefPtr<OHOS::Ace::NG::NavigationStack> navStack_;
     int32_t instanceId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_NAV_PATH_STACK_PEER_IMPL_H
