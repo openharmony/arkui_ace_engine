@@ -4374,7 +4374,6 @@ bool NavigationPattern::ExecuteAddAnimation(RefPtr<NavDestinationGroupNode> preT
         proxy->SetIsFinished(true);
         // update pre navigation stack
         ACE_SCOPED_TRACE_COMMERCIAL("navigation page custom transition end");
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
         pattern->LoadCompleteManagerStopCollect();
         pattern->ClearRecoveryList();
         pattern->OnCustomAnimationFinish(preDestination, topDestination, isPopPage);
@@ -4406,7 +4405,7 @@ bool NavigationPattern::ExecuteAddAnimation(RefPtr<NavDestinationGroupNode> preT
         [weakProxy = WeakPtr<NavigationTransitionProxy>(proxy)] {
             auto transitionProxy = weakProxy.Upgrade();
             CHECK_NULL_VOID(transitionProxy);
-            transitionProxy->FireFinishCallback();
+            transitionProxy->FireFinishCallback(true);
         },
         TaskExecutor::TaskType::UI, timeout, "ArkUINavigationTransitionProxyFinish");
     return true;
