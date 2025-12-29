@@ -168,9 +168,22 @@ public:
     {
         return false;
     }
+
+    virtual bool TryFreeScroll(double offset, Axis axis)
+    {
+        return false;
+    }
+
+    virtual bool FreeOverScrollWithDelta(Axis axis, double delta)
+    {
+        return false;
+    }
+
     virtual bool CanOverScrollWithDelta(double delta, bool isNestScroller = false);
 
     virtual void OnTouchDown(const TouchEventInfo& info);
+
+    virtual void ProcessFreeScrollOverDrag(const OffsetF velocity) {};
 
     void AddScrollEvent();
     RefPtr<ScrollableEvent> GetScrollableEvent()
