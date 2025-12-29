@@ -178,31 +178,6 @@ template("build_component_ng") {
           ]
         }
       }
-      
-      if (defined(invoker.ark_sources)) {
-        sources += invoker.ark_sources
-
-        include_dirs += [
-          "${ace_root}/frameworks/core/interfaces/native/generated/interface",
-          "${ace_root}/interfaces/inner_api/ace",
-          "${ace_root}/interfaces/native",
-          "${ace_root}/interfaces/native/node",
-          "${ace_root}/interfaces/native/runtime",
-        ]
-
-        defines += [ "INCLUDE_GENERATED_SOURCES" ]
-
-
-        if (is_arkui_x) {
-          configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
-          deps += [ "$ark_ets_path:libark_jsruntime_static" ]
-        } else {
-          external_deps += [
-            "ets_runtime:libark_jsruntime",
-            "napi:ace_napi",
-          ]
-        }
-      }
 
       if (defined(invoker.ark_sources)) {
         sources += invoker.ark_sources
