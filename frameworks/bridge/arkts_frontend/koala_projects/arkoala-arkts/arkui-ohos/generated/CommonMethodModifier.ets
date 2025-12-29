@@ -268,7 +268,7 @@ export class CommonMethodModifier implements CommonMethod {
     _overlay_0_1value?: OverlayOptions | undefined
     _blendMode_0_0value?: BlendMode | undefined
     _blendMode_0_1value?: BlendApplyType | undefined
-    _advancedBlendMode_0_0value?: BlendMode | uiEffect.Blender
+    _advancedBlendMode_0_0value?: BlendMode | uiEffect.Blender | undefined
     _advancedBlendMode_0_1value?: BlendApplyType | undefined
     _geometryTransition_1_0value?: string | undefined
     _geometryTransition_1_1value?: GeometryTransitionOptions | undefined
@@ -3691,6 +3691,24 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[186] != 0)
+        {
+            switch (flagArray[186] as int32) {
+                case 1: {
+                    peer.setAdvancedBlendModeAttribute((this._advancedBlendMode_0_0value as BlendMode | uiEffect.Blender | undefined), (this._advancedBlendMode_0_1value as BlendApplyType | undefined));
+                    flagArray[186] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[186] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[186] = 0;
+                    peer.setAdvancedBlendModeAttribute((undefined as BlendMode | uiEffect.Blender | undefined), (undefined as BlendApplyType | undefined));
+                }
+            }
+        }
         if (flagArray[187] != 0)
         {
             switch (flagArray[187] as int32) {
@@ -6486,9 +6504,11 @@ export class CommonMethodModifier implements CommonMethod {
             switch (flagArray[186] as int32) {
                 case 1:
                 case 3: {
+                    this.advancedBlendMode(modifier._advancedBlendMode_0_0value, modifier._advancedBlendMode_0_1value);
                     break;
                 }
                 default: {
+                    this.advancedBlendMode((undefined as BlendMode | uiEffect.Blender | undefined), (undefined as BlendApplyType | undefined));
                 }
             }
         }
@@ -8873,8 +8893,18 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    advancedBlendMode(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): this {
-        throw new Error("Not implemented")
+    advancedBlendMode(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): this {
+        if (((this._flagArray[186]) == (0)) || (true) || (true))
+        {
+            this._flagArray[186] = 1
+            this._advancedBlendMode_0_0value = effect
+            this._advancedBlendMode_0_1value = type
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[186] = 3
+        }
+        return this
     }
     geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {
         if (((this._flagArray[187]) == (0)) || ((this._geometryTransition_1_0value) !== (id)) || (true))

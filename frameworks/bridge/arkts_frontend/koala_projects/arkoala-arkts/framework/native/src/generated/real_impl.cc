@@ -2354,7 +2354,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetAdvancedBlendModeImpl(Ark_NativePointer node,
-                                  const Ark_Union_BlendMode_Blender* effect,
+                                  const Opt_Union_BlendMode_Blender* effect,
                                   const Opt_BlendApplyType* type)
     {
     }

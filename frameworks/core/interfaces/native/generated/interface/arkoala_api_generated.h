@@ -2499,7 +2499,8 @@ typedef struct Ark_Tuple_ResourceColor_Number Ark_Tuple_ResourceColor_Number;
 typedef struct Opt_Tuple_ResourceColor_Number Opt_Tuple_ResourceColor_Number;
 typedef struct Ark_Tuple_ResourceColor_ResourceColor Ark_Tuple_ResourceColor_ResourceColor;
 typedef struct Opt_Tuple_ResourceColor_ResourceColor Opt_Tuple_ResourceColor_ResourceColor;
-typedef struct Ark_uiEffect_BrightnessBlender Ark_uiEffect_BrightnessBlender;
+typedef struct uiEffect_BrightnessBlenderPeer uiEffect_BrightnessBlenderPeer;
+typedef struct uiEffect_BrightnessBlenderPeer* Ark_uiEffect_BrightnessBlender;
 typedef struct Opt_uiEffect_BrightnessBlender Opt_uiEffect_BrightnessBlender;
 typedef struct Ark_UIExtensionOptions Ark_UIExtensionOptions;
 typedef struct Opt_UIExtensionOptions Opt_UIExtensionOptions;
@@ -16704,17 +16705,6 @@ typedef struct Opt_Tuple_ResourceColor_ResourceColor {
     Ark_Tag tag;
     Ark_Tuple_ResourceColor_ResourceColor value;
 } Opt_Tuple_ResourceColor_ResourceColor;
-typedef struct Ark_uiEffect_BrightnessBlender {
-    /* kind: Interface */
-    Ark_Float64 cubicRate;
-    Ark_Float64 quadraticRate;
-    Ark_Float64 linearRate;
-    Ark_Float64 degree;
-    Ark_Float64 saturation;
-    Ark_uiEffect_Tuple_F64_F64_F64 positiveCoefficient;
-    Ark_uiEffect_Tuple_F64_F64_F64 negativeCoefficient;
-    Ark_Float64 fraction;
-} Ark_uiEffect_BrightnessBlender;
 typedef struct Opt_uiEffect_BrightnessBlender {
     Ark_Tag tag;
     Ark_uiEffect_BrightnessBlender value;
@@ -23523,7 +23513,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                          const Opt_BlendMode* value,
                          const Opt_BlendApplyType* type);
     void (*setAdvancedBlendMode)(Ark_NativePointer node,
-                                 const Ark_Union_BlendMode_Blender* effect,
+                                 const Opt_Union_BlendMode_Blender* effect,
                                  const Opt_BlendApplyType* type);
     void (*setGeometryTransition1)(Ark_NativePointer node,
                                    const Opt_String* id,
