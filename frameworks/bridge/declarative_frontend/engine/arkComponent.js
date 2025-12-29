@@ -41993,7 +41993,7 @@ if (globalThis.Picker !== undefined) {
 }
 
 // @ts-ignore
-if (globalThis.Hyperlink !== undefined) {
+if (globalThis.Hyperlink === undefined) {
   globalThis.Hyperlink = {
     create: function(params) {
       getUINativeModule().loadNativeModule("hyperlink");

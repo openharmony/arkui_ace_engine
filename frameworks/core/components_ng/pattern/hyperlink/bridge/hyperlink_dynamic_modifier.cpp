@@ -58,7 +58,9 @@ constexpr int NUM_4 = 4;
 
 void Create(const std::string& address, const std::string& content)
 {
+    LOGI("[Hyperlink] HyperlinkDynamicModifier::Create arrived");
     HyperlinkModel::GetInstance()->Create(address, content);
+    LOGI("[Hyperlink] HyperlinkDynamicModifier::Create finished");
 }
 
 void SetHyperlinkColor(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
