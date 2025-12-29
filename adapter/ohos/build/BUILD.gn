@@ -34,6 +34,7 @@ foreach(module, component_modules) {
     } else if (use_linux) {
       deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_linux" ]
     }
+
     deps += [
       "$ace_root/build:libace_compatible",
       "$ace_root/frameworks/core:ace_container_scope"
