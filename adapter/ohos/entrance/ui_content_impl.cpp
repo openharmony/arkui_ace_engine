@@ -3676,7 +3676,7 @@ void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceI
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         task();
     } else {
-        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::Ul, "ArkUIKeyboardAvoid");
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIKeyboardAvoid");
     }
 }
 
