@@ -3671,7 +3671,7 @@ void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceI
         double textFieldHeight = info->textFieldHeight_;
         textFieldPositionY -= curWindow.Top();
         pipelineContext->OnVirtualKeyboardAreaChange(keyboardRect, textFieldPositionY, textFieldHeight);
-    }
+    };
 
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         task();
