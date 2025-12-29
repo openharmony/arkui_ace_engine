@@ -21,6 +21,7 @@ namespace OHOS::Ace::NG {
 namespace {
     constexpr uint32_t NORMAL_VALUE_ARRAY_STEP = 2;
     constexpr DisplayMode DEFAULT_BAR_STATE_VALUE = DisplayMode::AUTO;
+    constexpr int32_t ERROR_INT_CODE = -1;
     const uint32_t ERROR_UINT_CODE = -1;
 }
 

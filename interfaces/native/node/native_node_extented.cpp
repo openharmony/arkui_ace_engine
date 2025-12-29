@@ -1660,10 +1660,8 @@ ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetTypes(
     CHECK_NULL_RETURN(config, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(types, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     
-    ArkUI_TextDataDetectorType* newTypes = new ArkUI_TextDataDetectorType[length];
     for (int32_t i = 0; i < length; i++) {
-        newTypes[i] = types[i];
-        config->types.push_back(newTypes[i]);
+        config->types.push_back(types[i]);
     }
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
