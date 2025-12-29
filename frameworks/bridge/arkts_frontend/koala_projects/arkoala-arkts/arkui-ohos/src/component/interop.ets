@@ -494,21 +494,15 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
                 }
             }
         } else {
-            const target = (reflect.Value.of(rawValue) as ClassValue).getFieldByName('@target').getData() as Object;
-            const keys = Object.keys(target);
-            if (rawValue instanceof IObservedObject) {
-                const PREFIX = '__backing_';
-                keys.forEach((key)=>{
-                    if(key.startsWith(PREFIX)){
-                        const value = (reflect.Value.of(target) as ClassValue).getFieldByName(key).getData() as Object;
-                        stateParam.setProperty(key.slice(PREFIX.length), value);
-                        invokeObserveFireChange.invoke(stateParam, ESValue.wrap(key.slice(PREFIX.length)));
-                    }
-                })
+            if (!Object.keys(rawValue as Object).includes('handler')) {
+                return;
             } else {
-                keys.forEach((key)=>{
+                const handler = (reflect.Value.of(rawValue) as ClassValue).getFieldByName('handler').getData() as Object;
+                const target = (reflect.Value.of(handler) as ClassValue).getFieldByName('_target').getData() as Object;
+                const keys = Object.keys(target);
+                keys.forEach((key) => {
                     const value = (reflect.Value.of(target) as ClassValue).getFieldByName(key).getData() as Object;
-                    stateParam.setProperty(key, value);
+                    stateParam.setProperty(ESValue.wrap(key), ESValue.wrap(value));
                     invokeObserveFireChange.invoke(stateParam, ESValue.wrap(key));
                 })
             }
