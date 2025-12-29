@@ -36,7 +36,7 @@ export class ArkTextTimerNode extends ArkBaseNode implements TextTimerAttribute 
         this.markDirty()
         return this
     }
-    public fontWeight(value: int32 | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         this.component.fontWeight(value)
         this.markDirty()
         return this

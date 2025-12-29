@@ -106,7 +106,10 @@ void SetImageOnErrorCallback(
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-
+    if (!callback) {
+        ImageModelNG::SetOnError(frameNode, nullptr);
+        return;
+    }
     std::function<void(const ArkUIAniImageOnErrorParams &param)>
         callbackFun = std::move(callback);
     std::function<void(const LoadImageFailEvent& info)> onErrorCallbackFun = [callbackFun](
