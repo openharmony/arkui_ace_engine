@@ -3995,6 +3995,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             }
             auto childrenJson = root->GetValue("$children");
             auto topNavDestinationJson = JsonUtil::CreateSharedPtrJson();
+            GetAppInfo(topNavDestinationJson);
             topNavNode->DumpSimplifyTreeWithParamConfig(0, topNavDestinationJson, true, { true, true, true });
             childrenJson->Put(topNavDestinationJson);
         }
@@ -6660,6 +6661,7 @@ void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(
         }
         auto childrenJson = root->GetValue("$children");
         auto topNavDestinationJson = JsonUtil::CreateSharedPtrJson();
+        GetAppInfo(topNavDestinationJson);
         topNavNode->DumpSimplifyTreeWithParamConfig(0, topNavDestinationJson, true, config);
         childrenJson->Put(topNavDestinationJson);
     } else {

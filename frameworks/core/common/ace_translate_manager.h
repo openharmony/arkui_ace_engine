@@ -69,7 +69,6 @@ private:
     static constexpr int32_t QUERY_IMAGES_TIMEOUT_TIME = 1500;
     std::map<int32_t, WeakPtr<NG::FrameNode>> listenerMap_;
     std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> pixelMap_;
-    const static std::set<std::string> layoutTags_;
     RefPtr<TaskExecutor> taskExecutor_;
 };
 } // namespace OHOS::Ace

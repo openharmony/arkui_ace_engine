@@ -1424,7 +1424,7 @@ public:
         return GetTag() == V2::SCREEN_ETS_TAG;
     }
 
-    bool CheckVisibleOrActive() override;
+    bool CheckVisibleAndActive() override;
 
     void SetPaintNode(const RefPtr<FrameNode>& paintNode)
     {
