@@ -111,6 +111,8 @@ public:
         return loop_;
     }
 
+    void UpdateControllerBar();
+
     void SetSurfaceBackgroundColor(Color color);
 
     virtual bool IsFullScreen() const;
@@ -366,7 +368,6 @@ private:
     void OnSliderChange(float posTime, int32_t mode);
 
     void UpdatePreviewImage();
-    void UpdateControllerBar();
     void UpdateVideoProperty();
 
     RefPtr<FrameNode> CreateSVG();
