@@ -5823,6 +5823,8 @@ void NavigationPattern::AdjustNodeForNonDestForceSplit(bool needFireLifecycle)
     CHECK_NULL_VOID(navContentNode);
     auto primaryContentNode = AceType::DynamicCast<FrameNode>(host->GetPrimaryContentNode());
     CHECK_NULL_VOID(primaryContentNode);
+    auto primaryProperty = primaryContentNode->GetLayoutProperty();
+    CHECK_NULL_VOID(primaryProperty);
 
     if (needFireLifecycle) {
         FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_HIDE, NavDestVisibilityChangeReason::TRANSITION);
@@ -5841,6 +5843,7 @@ void NavigationPattern::AdjustNodeForNonDestForceSplit(bool needFireLifecycle)
         bool hideNavBar = navProperty->GetHideNavBarValue(false);
         navBarProperty->UpdateVisibility(hideNavBar ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
     }
+    primaryProperty->UpdateVisibility(VisibleType::INVISIBLE);
     bool placeHolderIsVisible = forceSplitSuccess_ && stackNodePairs.empty();
     UpdateNavContentAndChildVisibility(navContentNode, !placeHolderIsVisible);
     UpdatePlaceholderOrRelatedPageVisible(placeHolderIsVisible);
