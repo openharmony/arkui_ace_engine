@@ -594,7 +594,6 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func, const
 {
     shared_ptr<JsRuntime> runtime = GetJsRuntime();
     ACE_DCHECK(runtime);
-    AbilityRuntime::HandleScope handleScope(jsAbilityRuntime_->GetNapiEnv());
     if (func == nullptr) {
         LOGE("func is nullptr!");
         return runtime->NewUndefined();
@@ -607,6 +606,7 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(const shared_ptr<JsValue>& func, const
     auto nativeEngine = GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, runtime->NewUndefined());
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    AbilityRuntime::HandleScope handleScope(env);
     auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine CallFunc FAILED!");
@@ -909,6 +909,7 @@ int32_t JsiPaEngine::Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket&
     auto nativeEngine = GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, 0);
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value argNapiValue = rdbValueBucketNewInstance_(env, const_cast<OHOS::NativeRdb::ValuesBucket&>(value));
     std::vector<shared_ptr<JsValue>> argv;
     argv.push_back(runtime->NewString(uri.ToString()));
@@ -1008,6 +1009,7 @@ int32_t JsiPaEngine::BatchInsert(
         LOGE("JsiPaEngine create array failed");
         return 0;
     }
+    AbilityRuntime::HandleScope handleScope(env);
     int32_t index = 0;
     for (auto value : values) {
         napi_value result = rdbValueBucketNewInstance_(env, const_cast<OHOS::NativeRdb::ValuesBucket&>(value));
@@ -1038,6 +1040,7 @@ std::shared_ptr<OHOS::NativeRdb::AbsSharedResultSet> JsiPaEngine::Query(const Ur
     auto nativeEngine = GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, resultSet);
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value argColumnsNapiValue = nullptr;
     napi_create_array(env, &argColumnsNapiValue);
     bool isArray = false;
@@ -1098,6 +1101,7 @@ int32_t JsiPaEngine::Update(const Uri& uri, const OHOS::NativeRdb::ValuesBucket&
     auto nativeEngine = GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, 0);
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value argNapiValue = rdbValueBucketNewInstance_(env, const_cast<OHOS::NativeRdb::ValuesBucket&>(value));
 
     OHOS::NativeRdb::DataAbilityPredicates* predicatesPtr = new OHOS::NativeRdb::DataAbilityPredicates();
