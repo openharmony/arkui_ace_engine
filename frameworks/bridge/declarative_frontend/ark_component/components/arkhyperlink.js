@@ -126,9 +126,9 @@ class JSHyperlink extends JSViewAbstract {
 
   static attributeModifier(modifier) {
     attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkGaugeComponent(nativePtr);
+      return new ArkHyperlinkComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.GaugeModifier(nativePtr, classType);
+      return new modifierJS.HyperlinkModifier(nativePtr, classType);
     });
   }
 }
