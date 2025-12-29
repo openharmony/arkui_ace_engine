@@ -19,8 +19,8 @@ import { int32 } from '@koalaui/compat'
 const K = [
     (0x5a827999 | 0) as int32,
     (0x6ed9eba1 | 0) as int32,
-    (0x8f1bbcdc | 0) as int32,
-    (0xca62c1d6 | 0) as int32,
+    (-0x70e44324 | 0) as int32,
+    (-0x359d3e2a | 0) as int32,
 ]
 
 const inputBytes = 64
@@ -38,10 +38,10 @@ export function createSha1(): SHA1Hash {
 
 export class SHA1Hash {
     private A = (0x67452301 | 0) as int32
-    private B = (0xefcdab89 | 0) as int32
-    private C = (0x98badcfe | 0) as int32
+    private B = (-0x10325477 | 0) as int32
+    private C = (-0x67452302 | 0) as int32
     private D = (0x10325476 | 0) as int32
-    private E = (0xc3d2e1f0 | 0) as int32
+    private E = (-0x3c2d1e10 | 0) as int32
     private readonly _byte: Uint8Array
     private readonly _word: Int32Array
     private _size = 0
@@ -306,7 +306,7 @@ const W = new Int32Array(workWords)
 let sharedBuffer: ArrayBuffer
 let sharedOffset: int32 = 0
 
-const swapLE: NN = ((c:int32):int32 => (((c << 24) & 0xff000000) | ((c << 8) & 0xff0000) | ((c >> 8) & 0xff00) | ((c >> 24) & 0xff)))
+const swapLE: NN = ((c:int32):int32 => ((((c << 24) & 0xff000000) | ((c << 8) & 0xff0000) | ((c >> 8) & 0xff00) | ((c >> 24) & 0xff)).toInt()))
 const swapBE: NN = ((c:int32):int32 => c)
 const swap32: NN = isBE() ? swapBE : swapLE
 const rotate1: NN = (num: int32): int32 => (num << 1) | (num >>> 31)
