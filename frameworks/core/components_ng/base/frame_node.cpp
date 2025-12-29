@@ -1214,13 +1214,9 @@ void FrameNode::DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json)
     json->Put("OverlayOffset", (offsetX.ToString() + "," + offsetY.ToString()).c_str());
 }
 
-bool FrameNode::CheckVisibleOrActive()
+bool FrameNode::CheckVisibleAndActive()
 {
-    if (layoutTags_.find(tag_) != layoutTags_.end()) {
-        return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE && IsActive();
-    } else {
-        return true;
-    }
+    return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE && IsActive();
 }
 
 void FrameNode::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)

@@ -23,8 +23,6 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 
 namespace OHOS::Ace {
-const std::set<std::string> UiTranslateManagerImpl::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene",
-    "root", "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
 void UiTranslateManagerImpl::AddTranslateListener(const WeakPtr<NG::FrameNode> node)
 {
     auto frameNode = node.Upgrade();
@@ -397,18 +395,10 @@ void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
 {
     for (const auto& item : currentNode->GetChildren()) {
         auto node = AceType::DynamicCast<NG::FrameNode>(item);
-        if (node) {
-            if (!node->CheckVisibleOrActive()) {
-                continue;
-            }
-            auto property = node->GetLayoutProperty();
-            if (node->GetTag() == V2::IMAGE_ETS_TAG && property &&
-                (static_cast<int32_t>(property->GetVisibility().value_or(VisibleType::VISIBLE)) == 0) &&
-                node->IsActive()) {
-                auto imagePattern = node->GetPattern<NG::ImagePattern>();
-                CHECK_NULL_VOID(imagePattern);
-                imagePattern->AddPixelMapToUiManager();
-            }
+        if (node && node->CheckVisibleAndActive() && node->GetTag() == V2::IMAGE_ETS_TAG) {
+            auto imagePattern = node->GetPattern<NG::ImagePattern>();
+            CHECK_NULL_VOID(imagePattern);
+            imagePattern->AddPixelMapToUiManager();
         }
         TravelFindPixelMap(item);
     }
