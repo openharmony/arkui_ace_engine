@@ -1534,7 +1534,7 @@ OHOS::Ace::Color Convert(const Ark_ColorMetrics& src)
     uint8_t blue = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.blue_));
     uint8_t alpha = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.alpha_));
     auto dst = Color::FromARGB(alpha, red, green, blue);
-    dst.SetColorSpace(static_cast<ColorSpace>(src.colorSpace_));
+    dst.SetColorSpace(Converter::OptConvert<ColorSpace>(src.colorSpace_).value_or(ColorSpace::SRGB));
     return dst;
 }
 
