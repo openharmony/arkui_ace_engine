@@ -1222,10 +1222,7 @@ export class DetachedRootEntryManager {
         /** @memo */
         builder: () => void
     ): PeerNode {
-        let manager = this.uicontext_.stateMgr;
-        if (manager === undefined) {
-            manager = GlobalStateManager.instance;
-        }
+        const manager = GlobalStateManager.instance;
         const node = manager.updatableNodeEx<PeerNode>(peerFactory(), (context: StateContext) => {
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
             memoEntry<void>(context, 0, builder)
@@ -1241,10 +1238,7 @@ export class DetachedRootEntryManager {
         builder: (arg: T) => void,
         arg: T
     ): PeerNode {
-        let manager = this.uicontext_.stateMgr;
-        if (manager === undefined) {
-            manager = GlobalStateManager.instance;
-        }
+        const manager = GlobalStateManager.instance;
         const node = manager.updatableNodeEx<PeerNode>(peerFactory(), (context: StateContext) => {
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
             memoEntry1<T, void>(context, 0, builder, arg)
@@ -1291,7 +1285,6 @@ export class DetachedRootEntryManager {
 
 export class UIContextImpl extends UIContext {
     instanceId_: int32 = -1;
-    stateMgr: StateManager | undefined = undefined;
     observer_ :UIObserver |null = null;
     router_: Router;
     focusController_: FocusControllerImpl;
@@ -1853,7 +1846,8 @@ export class UIContextImpl extends UIContext {
         if (this.checkThread(this.instanceId_)) {
             callback();
         } else {
-            this.stateMgr?.scheduleCallback(callback);
+            const manager = GlobalStateManager.instance;
+            manager.scheduleCallback(callback);
         }
     }
 

@@ -131,10 +131,7 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
     };
 
     const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-    let manager = uiContext.stateMgr;
-    if (manager === undefined) {
-        manager = GlobalStateManager.instance;
-    }
+    const manager = GlobalStateManager.instance;
 
     ArkThemeScopeManager.getInstance().applyColorModeFromThemeScope();
     
@@ -529,10 +526,7 @@ export function transferCompatibleBuilder<T extends Function>(
         };
 
         const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-        let manager = uiContext.stateMgr;
-        if (manager === undefined) {
-            manager = GlobalStateManager.instance;
-        }
+        const manager = GlobalStateManager.instance;
         const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
             ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
             let r = OBSERVE.renderingComponent;
@@ -570,10 +564,7 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
             }
         }
         const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-        let manager = uiContext.stateMgr;
-        if (manager === undefined) {
-            manager = GlobalStateManager.instance;
-        }
+        const manager = GlobalStateManager.instance;
         const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
             ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
             let r = OBSERVE.renderingComponent;
