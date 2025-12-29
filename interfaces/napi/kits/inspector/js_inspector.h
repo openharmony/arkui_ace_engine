@@ -63,6 +63,7 @@ public:
     std::list<napi_ref> cbDrawList_;
     std::list<napi_ref> cbDrawChildrenList_;
     std::list<napi_ref> cbLayoutChildrenList_;
+    int32_t instanceId_ = -1;
     void SetEngine(const RefPtr<Framework::JsEngine>& engine)
     {
         weakEngine_ = engine;
