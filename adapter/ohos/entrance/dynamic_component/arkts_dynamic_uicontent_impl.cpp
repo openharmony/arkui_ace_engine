@@ -158,8 +158,9 @@ void AddResConfigInfo(
     }
     auto resourceManager = context->GetResourceManager();
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
-    resourceManager->GetResConfig(*resConfig);
     CHECK_NULL_VOID(resConfig);
+    CHECK_NULL_VOID(resourceManager);
+    resourceManager->GetResConfig(*resConfig);
     aceResCfg.SetMcc(resConfig->GetMcc());
     aceResCfg.SetMnc(resConfig->GetMnc());
     aceResCfg.SetAppHasDarkRes(resConfig->GetAppDarkRes());
