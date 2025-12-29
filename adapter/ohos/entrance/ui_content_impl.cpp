@@ -3643,13 +3643,26 @@ void KeyboardAvoid(OHOS::Rosen::WindowSizeChangeReason reason, int32_t instanceI
         TAG_LOGD(AceLogTag::ACE_KEYBOARD, "SceneBoard window, no keyboard avoidance");
         return;
     }
-    ACE_LAYOUT_SCOPED_TRACE("KeyboardAvoid keyboardRect %s", keyboardRect.ToString().c_str());
-    auto curWindow = pipelineContext->GetCurrentWindowRect();
-    double textFieldPositionY = info->textFieldPositionY_;
-    double textFieldHeight = info->textFieldHeight_;
-    textFieldPositionY -= curWindow.Top();
-    ContainerScope scope(instanceId);
-    pipelineContext->OnVirtualKeyboardAreaChange(keyboardRect, textFieldPositionY, textFieldHeight);
+
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    // Ensure keyboard avoid logic runs on UI thread to prevent EcmaVM multi-thread check failure
+    auto task = [pipelineContext, instanceld, keyboardRect, info]() {
+        ACE_LAYOUT_SCOPED_TRACE("KeyboardAvoid keyboardRect %s", keyboardRect.ToString().c_str());
+        ContainerScope scope(instanceId);
+        auto curWindow = pipelineContext->GetCurrentWindowRect();
+        double textFieldPositionY = info->textFieldPositionY_;
+        double textFieldHeight = info->textFieldHeight_;
+        textFieldPositionY -= curWindow.Top();
+        pipelineContext->OnVirtualKeyboardAreaChange(keyboardRect, textFieldPositionY, textFieldHeight);
+    }
+
+    if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        task();
+    } else {
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::Ul, "ArkUIKeyboardAvoid");
+    }
 }
 
 void UIContentImpl::ProcessWindowSizeLayoutBreakPointChange()
