@@ -26,6 +26,9 @@ class PipelineBase;
 enum class StatisticEventType {
     FA_APP_START = 0,
     CALL_SET_CACHE_RANGE,
+    SEARCH_ONDIDINSERT,
+    SEARCH_ONWILLDELETE,
+    SEARCH_ONDIDDELETE,
 };
 
 struct StatisticAppInfo {

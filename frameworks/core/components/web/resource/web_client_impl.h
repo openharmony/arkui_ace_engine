@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_RESOURCE_WEBVIEW_CLIENT_IMPL_H
 
 #include "foundation/arkui/ace_engine/frameworks/base/memory/referenced.h"
+#include "nweb_agent_handler.h"
 #include "nweb_drag_data.h"
 #include "nweb_handler.h"
 
@@ -75,6 +76,23 @@ public:
 
     void OnFindResultReceived(
         const int activeMatchOrdinal, const int numberOfMatches, const bool isDoneCounting) override;
+
+    void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
+    {
+        webDelegate_ = delegate;
+    }
+
+private:
+    WeakPtr<WebDelegate> webDelegate_;
+};
+
+class WebAgentClientImpl : public std::enable_shared_from_this<WebAgentClientImpl>,
+                           public OHOS::NWeb::NWebAgentHandler {
+public:
+    WebAgentClientImpl() = default;
+    ~WebAgentClientImpl() = default;
+
+    void ReportEventJson(const std::string& json) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
@@ -377,6 +395,7 @@ public:
     void OnClippedSelectionBoundsChanged(int x, int y, int width, int height) override;
     void OnCameraCaptureStateChanged(int originalState, int new_state) override;
     void OnMicrophoneCaptureStateChanged(int originalState, int newState) override;
+    void OnMediaCastEnter() override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

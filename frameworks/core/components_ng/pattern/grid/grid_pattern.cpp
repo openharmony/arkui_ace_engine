@@ -140,6 +140,7 @@ void GridPattern::OnModifyDone()
     info_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
     isConfigScrollable_ = gridLayoutProperty->IsConfiguredScrollable();
     if (!isConfigScrollable_) {
+        SetScrollBar(DisplayMode::OFF);
         return;
     }
     SetAxis(info_.axis_);
@@ -872,6 +873,7 @@ void GridPattern::ScrollTo(float position)
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
     SetIsOverScroll(GetCanStayOverScroll());
     // AccessibilityEventType::SCROLL_END
+    ContentChangeReport(GetHost());
 }
 
 float GridPattern::EstimateHeight() const
@@ -1482,6 +1484,7 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             UpdateStartIndex(index, align);
+            ContentChangeReport(host);
         }
     }
     FireAndCleanScrollingListener();

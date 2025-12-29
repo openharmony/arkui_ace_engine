@@ -84,6 +84,14 @@ UpdateSpanStyle Convert(const Ark_RichEditorTextStyle& src)
     if (auto textBackgroundStyleOpt = Converter::OptConvert<TextBackgroundStyle>(src.textBackgroundStyle)) {
         ret.updateTextBackgroundStyle = textBackgroundStyleOpt.value();
     }
+    if (auto strokeWidth = Converter::OptConvert<OHOS::Ace::Dimension>(src.strokeWidth); strokeWidth) {
+        ret.updateStrokeWidth = strokeWidth.value();
+    }
+    if (auto strokeColor = Converter::OptConvert<Color>(src.strokeColor); strokeColor) {
+        ret.updateStrokeColor = strokeColor.value();
+    } else if (ret.updateTextColor.has_value()) {
+        ret.updateStrokeColor = ret.updateTextColor.value();
+    }
     return ret;
 }
 
@@ -110,6 +118,8 @@ Ark_RichEditorTextStyle CreateEmptyArkTextStyle()
     dst.fontFeature = Converter::ArkValue<Opt_String>(Ark_Empty());
     dst.halfLeading = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(Ark_Empty());
+    dst.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty());
+    dst.strokeColor = Converter::ArkUnion<Opt_ResourceColor>(Ark_Empty());
     return dst;
 }
 
@@ -137,6 +147,8 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const UpdateSpanStyle& src, Co
     }
     dst.halfLeading = Converter::ArkValue<Opt_Boolean>(src.updateHalfLeading);
     dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(src.updateTextBackgroundStyle, ctx);
+    dst.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(src.updateStrokeWidth, ctx);
+    dst.strokeColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(src.updateStrokeColor, ctx);
 }
 
 void AssignArkValue(Ark_PreviewText& dst, const PreviewTextInfo& src, Converter::ConvContext *ctx)

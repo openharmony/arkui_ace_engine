@@ -22,7 +22,8 @@ import unifiedDataChannel from '@ohos.data.unifiedDataChannel';
 import uniformTypeDescriptor from '@ohos.data.uniformTypeDescriptor';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from 'arkui.Graphics';
-import { AnimatableArithmetic, AsyncCallback, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from '#generated';
+import { AnimatableArithmetic, Callback, DragItemInfo, ResourceColor, DragPreviewOptions, DragInteractionOptions, ExpectedFrameRateRange } from '#generated';
+import { AsyncCallback } from '#external'
 import { ArkCustomComponent } from 'arkui/ArkCustomComponent';
 import { SectionChangeInfo, WaterFlowSections, OverlayOptions, ImageErrorCallback } from '#generated';
 import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from '#generated';
@@ -138,6 +139,7 @@ export class ArkUIAniModule {
     native static _ScrollableTargetInfoAccessorWithId(input: KPointer, id: string): void
     native static _ScrollableTargetInfoAccessorWithPointer(input: KPointer, pointer: KPointer): void
     native static _TransferScrollableTargetInfoPointer(input: KPointer): KPointer
+    native static _Common_setIsRecycleInvisibleImageMemory(value: KBoolean, instanceId: KInt): void
     native static _BaseEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean
     native static _DragEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean
     native static _KeyEvent_getModifierKeyState(ptr: KPointer, keys: Array<string>): boolean

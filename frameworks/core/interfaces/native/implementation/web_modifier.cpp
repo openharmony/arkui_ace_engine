@@ -270,6 +270,12 @@ void SetWebOptionsImpl(Ark_NativePointer node,
             WebAttributeModifier::DefaultOnShowFileSelector(std::move(callback), weakNode, instanceId, info);
         };
         WebModelStatic::SetDefaultFileSelectorShow(frameNode, std::move(fileSelectorShowFromUserCallback));
+        auto requestPermissionsFromUserCallback = [callback = std::move(controller->defaultPermissionClipboardFunc),
+                                                      weakNode = AceType::WeakClaim(frameNode),
+                                                      instanceId = Container::CurrentId()](const BaseEventInfo* info) {
+            WebAttributeModifier::DefaultPermissionClipboard(std::move(callback), weakNode, instanceId, info);
+        };
+        WebModelStatic::SetPermissionClipboard(frameNode, std::move(requestPermissionsFromUserCallback));
         /* This controller is only used to pass the hook function for initializing the webviewController.
          * After passing, the corresponding memory needs to be released.
          */
@@ -2898,6 +2904,17 @@ void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
     WebModelStatic::SetEnableImageAnalyzer(frameNode, convValue.value_or(true));
 #endif // WEB_SUPPORTED
 }
+
+void SetEnableAutoFillImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    WebModelStatic::SetEnableAutoFill(frameNode, convValue.value_or(true));
+#endif // WEB_SUPPORTED
+}
 void SetOnMicrophoneCaptureStateChangeImpl(Ark_NativePointer node,
                                            const Opt_OnMicrophoneCaptureStateChangeCallback* value)
 {
@@ -3083,6 +3100,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
         WebAttributeModifier::SetOnTextSelectionChangeImpl,
         WebAttributeModifier::SetEnableImageAnalyzerImpl,
+        WebAttributeModifier::SetEnableAutoFillImpl,
         WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
         WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,

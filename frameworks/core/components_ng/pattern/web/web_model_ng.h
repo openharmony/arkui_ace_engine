@@ -269,6 +269,7 @@ public:
     void SetSafeBrowsingCheckFinishId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId) override;
     void SetBackToTop(bool isBackToTop) override;
+    void SetOnMediaCastEnter(std::function<void()>&& jsCallback) override;
     void SetOnVerifyPinRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetMicrophoneCaptureStateChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
 

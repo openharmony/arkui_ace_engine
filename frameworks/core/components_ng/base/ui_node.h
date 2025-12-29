@@ -198,6 +198,8 @@ public:
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
+    void ProcessOffscreenResource();
+
     // Determine if the node is a SyntaxNode, default returns false.
     // SyntaxNode classes need to override the method and return true.
     virtual bool IsSyntaxNode() const
@@ -1177,6 +1179,16 @@ public:
         return drawChildrenParent_.Upgrade();
     }
 
+    bool IsObservedByLayoutChildren() const
+    {
+        return isObservedByLayoutChildren_;
+    }
+
+    RefPtr<UINode> GetObserverParentForLayoutChildren() const
+    {
+        return layoutChildrenParent_.Upgrade();
+    }
+
     bool IsThreadSafeNode() const
     {
         return isThreadSafeNode_;
@@ -1221,6 +1233,7 @@ public:
     void GetNodeListByComponentName(int32_t depth, std::vector<int32_t>& foundNodeId, const std::string& name);
 
     virtual void DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
+    void UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isClearDrawObserver);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -1273,6 +1286,8 @@ protected:
     // run offscreen process.
     virtual void OnOffscreenProcess(bool recursive) {}
 
+    virtual void OnOffscreenProcessResource() {}
+
     bool isRemoving_ = false;
 
     virtual bool RemoveImmediately() const;
@@ -1319,6 +1334,7 @@ protected:
     int32_t rootNodeId_ = 0; // host is Page or NavDestination
     int32_t themeScopeId_ = 0;
     int32_t subtreeIgnoreCount_ = 0;
+    std::list<RefPtr<FrameNode>> adoptedChildren_;
 
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
@@ -1326,7 +1342,7 @@ private:
     void UpdateBuilderNodeColorMode(const RefPtr<UINode>& child);
     void UpdateForceDarkAllowedNode(const RefPtr<UINode>& child);
     bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
-    void UpdateDrawChildObserver(const RefPtr<UINode>& child);
+    void UpdateDrawLayoutChildObserver(const RefPtr<UINode>& child);
 
     void SetObserverParentForDrawChildren(const RefPtr<UINode>& parent);
     void ClearObserverParentForDrawChildren()
@@ -1338,13 +1354,15 @@ private:
         }
     }
 
+    void SetObserverParentForLayoutChildren(const RefPtr<UINode>& parent);
+    void ClearObserverParentForLayoutChildren();
+
     bool CheckThreadSafeNodeTree(bool needCheck);
     virtual bool MaybeRelease() override;
     void DumpBasicInfo(int32_t depth, bool hasJson, const std::string& desc);
     void DumpMoreBasicInfo();
 
     std::list<RefPtr<UINode>> children_;
-    std::list<RefPtr<FrameNode>> adoptedChildren_;
     // disappearingChild、index、branchId
     std::list<std::tuple<RefPtr<UINode>, uint32_t, int32_t>> disappearingChildren_;
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
@@ -1416,6 +1434,8 @@ private:
     std::optional<bool> userFreeze_;
     WeakPtr<UINode> drawChildrenParent_;
     bool isObservedByDrawChildren_ = false;
+    WeakPtr<UINode> layoutChildrenParent_;
+    bool isObservedByLayoutChildren_ = false;
     static std::atomic_int32_t count_;
 
     bool isStaticNode_ = false;

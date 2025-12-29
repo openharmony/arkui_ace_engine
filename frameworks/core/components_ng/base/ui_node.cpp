@@ -747,7 +747,7 @@ void UINode::DoAddChild(
         }
     }
 
-    UpdateDrawChildObserver(child);
+    UpdateDrawLayoutChildObserver(child);
 
     child->SetParent(WeakClaim(this), false);
     auto themeScopeId = GetThemeScopeId();
@@ -1108,6 +1108,14 @@ void UINode::ProcessOffscreenTask(bool recursive)
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     for (const auto& child : GetChildren()) {
         child->ProcessOffscreenTask(isRecursive);
+    }
+}
+
+void UINode::ProcessOffscreenResource()
+{
+    OnOffscreenProcessResource();
+    for (const auto& child : GetChildren()) {
+        child->ProcessOffscreenResource();
     }
 }
 
@@ -2510,7 +2518,27 @@ bool UINode::LessThanAPITargetVersion(PlatformVersion version) const
     return context_->LessThanAPITargetVersion(version);
 }
 
-void UINode::UpdateDrawChildObserver(const RefPtr<UINode>& child)
+void UINode::UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isClearDrawObserver)
+{
+    if (isObservedByDrawChildren_) {
+        return;
+    }
+    if (isClearLayoutObserver) {
+        ClearObserverParentForLayoutChildren();
+    }
+    if (isClearDrawObserver) {
+        ClearObserverParentForDrawChildren();
+    }
+    if (isClearLayoutObserver || isClearDrawObserver) {
+        return;
+    }
+    for (const auto& child : GetChildren()) {
+        CHECK_NULL_CONTINUE(child);
+        UpdateDrawLayoutChildObserver(child);
+    }
+}
+
+void UINode::UpdateDrawLayoutChildObserver(const RefPtr<UINode>& child)
 {
     if (GetInspectorId().has_value()) {
         auto pipeline = GetContextRefPtr();
@@ -2521,12 +2549,37 @@ void UINode::UpdateDrawChildObserver(const RefPtr<UINode>& child)
             if (hasDrawChildCallback) {
                 child->SetObserverParentForDrawChildren(Claim(this));
             }
+            auto hasLayoutChildCallback = front->IsLayoutChildrenCallbackFuncExist(GetInspectorId().value_or(""));
+            if (hasLayoutChildCallback) {
+                child->SetObserverParentForLayoutChildren(Claim(this));
+            }
+        }
+    }
+    {
+        auto pipeline = GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto front = pipeline->GetFrontend();
+        if (front) {
+            auto hasDrawChildUniqueIdCallback = front->IsDrawChildrenCallbackFuncExist(GetId());
+            if (hasDrawChildUniqueIdCallback) {
+                child->SetObserverParentForDrawChildren(Claim(this));
+            }
+            auto hasLayoutChildUniqueIdCallback = front->IsLayoutChildrenCallbackFuncExist(GetId());
+            if (hasLayoutChildUniqueIdCallback) {
+                child->SetObserverParentForLayoutChildren(Claim(this));
+            }
         }
     }
     if (IsObservedByDrawChildren()) {
         auto parentForObserverDrawChildren = GetObserverParentForDrawChildren();
         if (parentForObserverDrawChildren) {
             child->SetObserverParentForDrawChildren(parentForObserverDrawChildren);
+        }
+    }
+    if (IsObservedByLayoutChildren()) {
+        auto parentForObserverLayoutChildren = GetObserverParentForLayoutChildren();
+        if (parentForObserverLayoutChildren) {
+            child->SetObserverParentForLayoutChildren(parentForObserverLayoutChildren);
         }
     }
 }
@@ -2538,6 +2591,25 @@ void UINode::SetObserverParentForDrawChildren(const RefPtr<UINode>& parent)
     drawChildrenParent_ = parent;
     for (const auto& child : GetChildren()) {
         child->SetObserverParentForDrawChildren(parent);
+    }
+}
+
+void UINode::SetObserverParentForLayoutChildren(const RefPtr<UINode>& parent)
+{
+    CHECK_NULL_VOID(parent);
+    isObservedByLayoutChildren_ = true;
+    layoutChildrenParent_ = parent;
+    for (const auto& child : GetChildren()) {
+        child->SetObserverParentForLayoutChildren(parent);
+    }
+}
+
+void UINode::ClearObserverParentForLayoutChildren()
+{
+    layoutChildrenParent_.Reset();
+    isObservedByLayoutChildren_ = false;
+    for (const auto& child : GetChildren()) {
+        child->ClearObserverParentForLayoutChildren();
     }
 }
 

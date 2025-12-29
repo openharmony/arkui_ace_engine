@@ -45,8 +45,7 @@ public:
     void SetCancelImageIcon(NG::IconOptions& iconOptions) override{}
     void SetCancelButtonStyle(OHOS::Ace::CancelButtonStyle cancelButtonStyle) override {}
     void SetSearchButtonFontSize(const Dimension& value) override {}
-    void SetSearchButtonFontColor(const Color& color) override {}
-    void ResetSearchButtonFontColor() override {}
+    void SetSearchButtonFontColor(const Color& color, bool isTheme = false) override {}
     void SetSearchButtonAutoDisable(bool needToDisable) override {};
     void SetPlaceholderColor(const Color& color) override;
     void ResetPlaceholderColor() override {};

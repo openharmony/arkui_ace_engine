@@ -297,6 +297,7 @@ public:
     bool needRemoveNewLine = false;
     bool useThemeFontColor = true;
     bool useThemeDecorationColor = true;
+    bool strokeColorFollowFontColor = true;
     std::optional<LeadingMargin> leadingMargin;
     int32_t selectedStart = -1;  // relative offset from span, [selectedStart, selectedEnd)
     int32_t selectedEnd = -1;
@@ -511,6 +512,11 @@ public:
         std::function<void(const RefPtr<ResourceObject>&, FontStyle&)>&& updateFunc)
     {
         fontStyle->AddResource(key, resObj, std::move(updateFunc));
+    }
+
+    size_t RemoveResource(const std::string& key)
+    {
+        return fontStyle->RemoveResource(key);
     }
 
     void CopyResource(const RefPtr<SpanItem>& source)
@@ -765,6 +771,11 @@ public:
         spanItem_->AddResource(key, resObj, std::move(updateFunc));
     }
 
+    size_t RemoveResource(const std::string& key)
+    {
+        return spanItem_->RemoveResource(key);
+    }
+
     void CopyResource(const RefPtr<SpanNode>& source)
     {
         spanItem_->CopyResource(source->GetSpanItem());
@@ -781,8 +792,8 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontWeight, FontWeight, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(FontFamily, std::vector<std::string>, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(StrokeWidth, Dimension, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_FONT_STYLE_ITEM(StrokeColor, Color, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_FONT_STYLE_ITEM(StrokeWidth, Dimension, ChangeFlag::RE_CREATE);
+    DEFINE_SPAN_FONT_STYLE_ITEM(StrokeColor, Color, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_FONT_STYLE_ITEM(Superscript, SuperscriptStyle, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecoration, std::vector<TextDecoration>, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextDecorationStyle, TextDecorationStyle, ChangeFlag::RE_LAYOUT);

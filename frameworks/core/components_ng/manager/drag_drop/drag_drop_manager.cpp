@@ -1354,9 +1354,10 @@ bool DragDropManager::IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode)
 void DragDropManager::RequestDragSummaryInfoAndPrivilege()
 {
     RequireSummary();
-    int ret = InteractionInterface::GetInstance()->AddPrivilege();
-    if (ret != 0 && SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_DRAG, "Interaction AddPrivilege in DragEnd with code:%{public}d", ret);
+    int ret = InteractionInterface::GetInstance()->AddPrivilege(
+        lastDragPointerEvent_.signature, lastDragPointerEvent_.dragEventData);
+    if (ret != 0) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Interaction AddPrivilege in DragEnd with code:%{public}d", ret);
     }
     ShadowOffsetData shadowOffsetData { -1, -1, -1, -1 };
     ret = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
@@ -3427,4 +3428,63 @@ void DragDropManager::NotifyDragSpringLoadingIntercept(std::string_view extraPar
     }
     dragDropSpringLoadingDetector_->NotifyIntercept(extraParams);
 }
+
+#ifdef ENABLE_ROSEN_BACKEND
+void DragDropManager::InitSyncTransaction()
+{
+    auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        auto window = pipeline->GetWindow();
+        CHECK_NULL_VOID(window);
+        auto rsUIDirector = window->GetRSUIDirector();
+        CHECK_NULL_VOID(rsUIDirector);
+        auto rsUIContext = rsUIDirector->GetRSUIContext();
+        CHECK_NULL_VOID(rsUIContext);
+        transactionHandler_ = rsUIContext->GetSyncTransactionHandler();
+    } else {
+        transactionController_ = Rosen::RSSyncTransactionController::GetInstance();
+    }
+}
+
+void DragDropManager::ResetSyncTransaction()
+{
+    transactionController_ = nullptr;
+    transactionHandler_ = nullptr;
+}
+
+void DragDropManager::OpenSyncTransaction()
+{
+    if (transactionController_) {
+        transactionController_->OpenSyncTransaction();
+    } else if (transactionHandler_) {
+        transactionHandler_->OpenSyncTransaction();
+    } else {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "transactionController and handler invalid");
+    }
+}
+
+void DragDropManager::CloseSyncTransaction()
+{
+    if (transactionController_) {
+        transactionController_->CloseSyncTransaction();
+    } else if (transactionHandler_) {
+        transactionHandler_->CloseSyncTransaction();
+    } else {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "transactionController and handler invalid");
+    }
+}
+
+std::shared_ptr<Rosen::RSTransaction> DragDropManager::GetRSTransaction()
+{
+    if (transactionController_) {
+        return transactionController_->GetRSTransaction();
+    } else if (transactionHandler_) {
+        return transactionHandler_->GetRSTransaction();
+    } else {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "transactionController and handler invalid");
+        return nullptr;
+    }
+}
+#endif
 } // namespace OHOS::Ace::NG

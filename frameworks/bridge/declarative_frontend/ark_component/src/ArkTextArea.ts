@@ -1015,7 +1015,9 @@ class TextAreaBorderModifier extends ModifierWithKey<ArkBorder> {
     }
   }
   checkObjectDiff(): boolean {
-    return this.value.checkObjectDiff(this.stageValue);
+    let emptyColor = new ArkBorderColor();
+    let hasBorderColor = !this.stageValue.arkColor.isEqual(emptyColor) || !this.value.arkColor.isEqual(emptyColor);
+    return hasBorderColor || this.value.checkObjectDiff(this.stageValue);
   }
 }
 
@@ -1073,6 +1075,16 @@ class TextAreaBorderColorModifier extends ModifierWithKey<ResourceColor | EdgeCo
     super(value);
   }
   static identity: Symbol = Symbol('textAreaBorderColor');
+  applyStage(node: KNode, component?: ArkComponent): boolean {
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.value = this.stageValue;
+      this.applyPeer(node, true, component);
+      return true;
+    }
+    this.value = this.stageValue;
+    this.applyPeer(node, false, component);
+    return false;
+  }
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().textArea.resetBorderColor(node);
@@ -1562,6 +1574,23 @@ class TextAreaSelectedDragPreviewStyleModifier extends ModifierWithKey<ArkSelect
       return !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
   }
 }
+class TextAreaDirectionModifier extends ModifierWithKey<TextDirection> {
+  constructor(value: TextDirection) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaDirection');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetTextDirection(node);
+    }
+    else {
+      getUINativeModule().textArea.setTextDirection(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
@@ -1969,6 +1998,10 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     arkSelectedDragPreviewStyle.color = value?.color;
     modifierWithKey(this._modifiersWithKeys, TextAreaSelectedDragPreviewStyleModifier.identity,
         TextAreaSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
+    return this;
+  }
+  textDirection(value: TextDirection): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaDirectionModifier.identity, TextAreaDirectionModifier, value);
     return this;
   }
 }

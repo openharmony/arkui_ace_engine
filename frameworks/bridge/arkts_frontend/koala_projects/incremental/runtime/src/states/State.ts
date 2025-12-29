@@ -57,7 +57,7 @@ export const StateManagerLocal = new WorkerLocalValue<StateManager | undefined>(
  * applications.
  */
 export interface StateManager extends StateContext {
-    readonly currentScopeId: KoalaCallsiteKey | undefined
+    currentScope: IncrementalScopeEx | undefined
     contextData: object | undefined
     isDebugMode: boolean
     _isNeedCreate: boolean
@@ -71,6 +71,7 @@ export interface StateManager extends StateContext {
     updatableNodeEx<Node extends IncrementalNode>(node: Node, update: (context: StateContextBase) => void, cleanup?: () => void): ComputableState<Node>
     scheduleCallback(callback: () => void): void
     callCallbacks(): void
+    /** @deprecated */
     frozen: boolean
     reset(): void
 }
@@ -97,15 +98,15 @@ export interface ArrayState<Item> extends ReadableState<ReadonlyArray<Item>> {
     at(index: int32): Item
     get(index: int32): Item
     set(index: int32, item: Item): void
-    copyWithin(target: number, start: number, end?: number): Array<Item>
-    fill(value: Item, start?: number, end?: number): Array<Item>
+    copyWithin(target: int32, start: int32, end?: int32): Array<Item>
+    fill(value: Item, start?: int32, end?: int32): Array<Item>
     pop(): Item | undefined
-    push(...items: Item[]): number
+    push(...items: Item[]): int32
     reverse(): Array<Item>
     shift(): Item | undefined
     sort(comparator?: (a: Item, b: Item) => number): Array<Item>
     splice(start: int32, deleteCount: int32 | undefined, ...items: Item[]): Array<Item>
-    unshift(...items: Item[]): number
+    unshift(...items: Item[]): int32
 }
 
 /**
@@ -191,6 +192,13 @@ export interface InternalScope<Value> extends IncrementalScope<Value> {
     paramEx<V>(index: int32, value: V, equivalent?: Equivalent<V>, name?: string, contextLocal?: boolean): ReadableState<V>
 }
 
+export interface IncrementalScopeEx {
+    readonly id: KoalaCallsiteKey
+    readonly parent: IncrementalScopeEx | undefined
+    readonly nodeRef: IncrementalNode | undefined
+    forceCompleteRerender(): void
+}
+
 /**
  * The interface represents a user-controlled scope,
  * that can be used outside of the incremental update.
@@ -215,8 +223,7 @@ interface ManagedState extends Disposable, Dependent {
     updateStateSnapshot(changes?: Changes): void
 }
 
-interface ManagedScope extends Disposable, Dependent, Dependency, ReadonlyTreeNode {
-    forceCompleteRerender(): void
+interface ManagedScope extends IncrementalScopeEx, Disposable, Dependent, Dependency, ReadonlyTreeNode {
     readonly id: KoalaCallsiteKey
     readonly disabledStateUpdates: boolean
     readonly node: IncrementalNode | undefined
@@ -467,11 +474,11 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
         this.mutable[index] = item
     }
 
-    copyWithin(target: number, start: number, end?: number): Array<Item> {
+    copyWithin(target: int32, start: int32, end?: int32): Array<Item> {
         return this.mutable.copyWithin(target, start, end)
     }
 
-    fill(value: Item, start?: number, end?: number): Array<Item> {
+    fill(value: Item, start?: int32, end?: int32): Array<Item> {
         return this.mutable.fill(value, start, end)
     }
 
@@ -479,7 +486,7 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
         return this.mutable.pop()
     }
 
-    push(...items: Item[]): number {
+    push(...items: Item[]): int32 {
         return this.mutable.push(...items)
     }
 
@@ -500,7 +507,7 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
         return array.splice(start, deleteCount ?? array.length, ...items)
     }
 
-    unshift(...items: Item[]): number {
+    unshift(...items: Item[]): int32 {
         return this.mutable.unshift(...items)
     }
 
@@ -598,7 +605,7 @@ class ParameterImpl<Value> implements Dependent, MutableState<Value> {
     }
 }
 
-export class StateManagerImpl implements StateManager {
+class StateManagerImpl implements StateManager {
     private stateCreating: string | undefined = undefined
     private readonly statesNamed: Map<string, Disposable> = new Map<string, Disposable>()
     private readonly statesCreated: Set<ManagedState> = new Set<ManagedState>()
@@ -618,8 +625,19 @@ export class StateManagerImpl implements StateManager {
     private parentManager: StateManagerImpl | undefined = undefined
     _isNeedCreate: boolean
 
-    get currentScopeId(): KoalaCallsiteKey | undefined {
-        return this.current?.id
+    get currentScope(): IncrementalScopeEx | undefined {
+        return this.current
+    }
+
+    set currentScope(scope: IncrementalScopeEx | undefined) {
+        if (scope === undefined) {
+            this.current = undefined
+        }
+        else if (scope instanceof ScopeImpl) {
+            this.current = scope
+        } else {
+            throw new Error('Wrong use of Internal API: unexpected implementation of IncrementalScopeEx')
+        }
     }
 
     reset(): void {
@@ -706,7 +724,6 @@ export class StateManagerImpl implements StateManager {
         return this.updatableNodeEx(node, update, cleanup)
     }
 
-    
     updatableNodeEx<Node extends IncrementalNode>(node: Node, update: (context: StateContextBase) => void, cleanup?: () => void): ComputableState<Node> {
         const scope = ScopeImpl.create<Node>(0, 0, (): Node => {
             update(this)
@@ -747,8 +764,14 @@ export class StateManagerImpl implements StateManager {
     }
 
     callCallbacks(): void {
-        this.callbacks.setMarker()
-        this.callbacks.callCallbacks()
+        const local = StateManagerLocal.get()
+        try {
+            StateManagerLocal.set(this)
+            this.callbacks.setMarker()
+            this.callbacks.callCallbacks()
+        } finally {
+            StateManagerLocal.set(local)
+        }
     }
 
     private isGlobal(global?: boolean): boolean {
@@ -1173,7 +1196,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         if (once !== true && this.once) {
             throw new Error('prohibited to create scope(' + id.toString(16) + ') within the remember scope(' + this.id.toString(16) + ')')
         }
-        let reused = reuseKey ? this.nodeRef?.reuse(reuseKey, id) : undefined
+        let reused = reuseKey ? (reuseKey.endsWith('@Component') ? this.nodeRef?.getCurrentNodeWhenReuse() : this.nodeRef)?.reuse(reuseKey, id) : undefined
         const scope = reused ? reused as ScopeImpl<Value> : ScopeImpl.create<Value>(id, paramCount, compute, cleanup, reuseKey)
         scope.manager = manager
         if (reused) {
@@ -1382,7 +1405,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
 
     private recycleOrDispose(child: ManagedScope): void {
         const key = child.reuseKey
-        const node = this._nodeRef
+        const node = child.node?.getParentNodeWhenRecycle(this._nodeRef) ?? this._nodeRef;
         const recycled = key && node && !node.disposed && node.recycle(key, child, child.id)
         if (recycled) {
             // if parent node is also disposed, the recycled scopes would dispose in the ReusablePool
@@ -1419,7 +1442,9 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
             error = cause as Error
         }
         // dispose parent after its children to allow recycling a child tree
-        if (this.node) { this.node!.disposing = true }
+        if (this.node) {
+            this.node!.disposing = true
+        }
         for (let child = this.child; child; child = child!.next) {
             this.recycleOrDispose(child!!)
         }

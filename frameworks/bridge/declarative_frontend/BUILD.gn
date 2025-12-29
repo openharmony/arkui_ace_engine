@@ -248,7 +248,7 @@ template("declarative_js_engine") {
       ":shape",
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
-      ":x_node",
+      "ark_node:x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
       "ark_component/components:module_group",
     ]
@@ -357,7 +357,6 @@ template("declarative_js_engine") {
       "jsview/js_flex_impl.cpp",
       "jsview/js_foreach.cpp",
       "jsview/js_form_link.cpp",
-      "jsview/js_gauge.cpp",
       "jsview/js_gesture.cpp",
       "jsview/js_grid.cpp",
       "jsview/js_grid_col.cpp",
@@ -465,6 +464,7 @@ template("declarative_js_engine") {
       "jsview/js_toggle.cpp",
       "jsview/js_toolbaritem.cpp",
       "jsview/js_touch_handler.cpp",
+      "jsview/js_union_container.cpp",
       "jsview/js_utils.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
@@ -512,10 +512,7 @@ template("declarative_js_engine") {
       "jsview/models/ellipse_model_impl.cpp",
       "jsview/models/flex_model_impl.cpp",
       "jsview/models/for_each_model_impl.cpp",
-      "jsview/models/gauge_model_impl.cpp",
       "jsview/models/gesture_model_impl.cpp",
-      "jsview/models/grid_col_model_impl.cpp",
-      "jsview/models/grid_container_model_impl.cpp",
       "jsview/models/grid_item_model_impl.cpp",
       "jsview/models/grid_model_impl.cpp",
       "jsview/models/grid_row_model_impl.cpp",
@@ -614,7 +611,6 @@ template("declarative_js_engine") {
     if (defined(config.rich_components_support) &&
         config.rich_components_support) {
       sources += [
-        "jsview/js_camera.cpp",
         "jsview/js_piece.cpp",
         "jsview/js_rating.cpp",
         "jsview/models/rating_model_impl.cpp",
@@ -838,7 +834,7 @@ template("declarative_js_engine_ng") {
       ":shape",
       ":statemanagement",
       ":windowsizelayoutbreakpoint",
-      ":x_node",
+      "ark_node:x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
       "ark_component/components:module_group",
     ]
@@ -953,7 +949,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_flex_impl.cpp",
       "jsview/js_foreach.cpp",
       "jsview/js_form_link.cpp",
-      "jsview/js_gauge.cpp",
       "jsview/js_gesture.cpp",
       "jsview/js_grid.cpp",
       "jsview/js_grid_col.cpp",
@@ -1054,6 +1049,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_toggle.cpp",
       "jsview/js_toolbaritem.cpp",
       "jsview/js_utils.cpp",
+      "jsview/js_union_container.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
       "jsview/js_view_abstract_bridge.cpp",
@@ -1337,15 +1333,6 @@ ohos_abc("windowsizelayoutbreakpoint") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   deps = [ ":run_ark_breakpoint_build" ]
-}
-
-ohos_abc("x_node") {
-  sources = [ "engine/jsXNode.js" ]
-  output_name = "node"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
 }
 
 ohos_abc("prefetcher") {

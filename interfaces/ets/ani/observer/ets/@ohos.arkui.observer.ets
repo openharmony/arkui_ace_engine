@@ -19,7 +19,8 @@ import UIAbilityContext from 'application.UIAbilityContext';
 import transfer from '@ohos.transfer';
 import type { Callback } from '@ohos.base';
 import hilog from '@ohos.hilog'
- 
+import { Size } from '@ohos.arkui.node'
+
  export default namespace uiObserver {
     loadLibrary("observer_ani");
     export native function createUIObserver(id: number): UIObserver;
@@ -123,11 +124,21 @@ import hilog from '@ohos.hilog'
         public native offWillDraw(callback?: Callback<void>): void;
         public native onDidLayout(callback: Callback<void>): void;
         public native offDidLayout(callback?: Callback<void>): void;
+
+        public native onRouterPageSizeChange(callback: Callback<RouterPageInfo>): void;
+        public native offRouterPageSizeChange(callback?: Callback<RouterPageInfo>): void;
+        public native onNavDestinationSizeChange(callback: Callback<NavDestinationInfo>): void;
+        public native offNavDestinationSizeChange(callback?: Callback<NavDestinationInfo>): void;
+        public native onNavDestinationSizeChangeByUniqueId(
+            navigationUniqueId: int, callback: Callback<NavDestinationInfo>): void;
+        public native offNavDestinationSizeChangeByUniqueId(
+            navigationUniqueId: int, callback?: Callback<NavDestinationInfo>): void;
     }
 
     export interface NavigationInfo {
         navigationId: string;
         pathStack: NavPathStack;
+        uniqueId?: int;
     }
     export class WindowSizeLayoutBreakpointInfo {
         widthBreakpoint: WidthBreakpoint;
@@ -137,6 +148,7 @@ import hilog from '@ohos.hilog'
     export class NavigationInfoImpl implements NavigationInfo {
         navigationId: string;
         pathStack: NavPathStack;
+        uniqueId?: int;
         static transferStatic(input: Any): Object {
             let dynamicValue = ESValue.wrap(input);
             let staticValue = new NavigationInfoImpl();
@@ -150,6 +162,11 @@ import hilog from '@ohos.hilog'
             let navPathStack = dynamicValue.getProperty("pathStack");
             if (navPathStack.typeOf() !== 'undefined' && navPathStack.typeOf() !== 'null')  {
                 // pathStack needs analysis to static NavPathStack
+            }
+            let uniqueId =dynamicValue.getProperty('uniqueId');
+            if (uniqueId.typeOf() !== 'undefined' && uniqueId.typeOf() !== 'null' && uniqueId.isNumber()) {
+                let id = uniqueId.toNumber();
+                staticValue.uniqueId = Double.toInt(id);
             }
             return staticValue;
         }
@@ -165,6 +182,9 @@ import hilog from '@ohos.hilog'
             }
             dynamicValue.setProperty('navigationId', ESValue.wrap(staticValue.navigationId));
             dynamicValue.setProperty('pathStack', ESValue.wrap(staticValue.pathStack));
+            if (staticValue.uniqueId != undefined && staticValue.uniqueId != null) {
+                dynamicValue.setProperty('uniqueId', ESValue.wrap(staticValue.uniqueId));
+            }
             return dynamicValue as Any;
         }
     }
@@ -183,6 +203,15 @@ import hilog from '@ohos.hilog'
         ON_BACKPRESS = 100
     }
 
+    export class SizeInner implements Size {
+        width: number;
+        height: number;
+        constructor(width: number, height: number) {
+            this.width = width;
+            this.height = height;
+        }
+    }
+
     export interface NavDestinationInfo {
         navigationId: ResourceStr;
         name: ResourceStr;
@@ -192,6 +221,7 @@ import hilog from '@ohos.hilog'
         navDestinationId: string;
         uniqueId?: int;
         mode?: NavDestinationMode;
+        size?: Size;
     }
 
     export class NavDestinationInfoImpl implements NavDestinationInfo {
@@ -203,6 +233,7 @@ import hilog from '@ohos.hilog'
         navDestinationId: string;
         uniqueId?: int;
         mode?: NavDestinationMode;
+        size?: Size;
         static castToNavDestinationInfo(value: number): NavDestinationState {
             if (value === 0) {
                 return NavDestinationState.ON_SHOWN;
@@ -340,6 +371,7 @@ import hilog from '@ohos.hilog'
         path: string;
         state: RouterPageState;
         pageId: string;
+        size?: Size;
 
         static castToRouterPageState(value: number): RouterPageState {
             if (value === 0) {

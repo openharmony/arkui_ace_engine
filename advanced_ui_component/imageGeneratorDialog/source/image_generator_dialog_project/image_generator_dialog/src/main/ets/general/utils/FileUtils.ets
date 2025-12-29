@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import { image } from '@kit.ImageKit';
 import { fileUri, fileIo as fs } from '@kit.CoreFileKit';
 import { Constants } from '../common/CommonConstants';

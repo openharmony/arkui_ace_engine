@@ -393,6 +393,14 @@ public:
             theme->selectMenuAdditionY_ = pattern->GetAttr<Dimension>("select_menu_addition_y", 0.0_vp);
             theme->menuFontWeight_ = FontWeight(static_cast<int32_t>(
                 pattern->GetAttr<double>("select_font_weight", static_cast<double>(SELECT_FONT_WEIGHT))));
+
+            // When the leftRow node is the last node, the space that follows (there is no content in rightRow).
+            theme->menuLeftRowEndSpace_ = pattern->GetAttr<Dimension>("menu_left_row_end_space",
+                theme->iconContentPadding_);
+            theme->menuHeaderFontWeight_ = FontWeight(static_cast<int32_t>(
+                pattern->GetAttr<double>("menu_header_font_weight", static_cast<double>(FontWeight::BOLD))));
+            theme->menuSelectedIconAlign_ = HorizontalAlign(static_cast<int32_t>(
+                pattern->GetAttr<double>("menu_selected_icon_align", static_cast<double>(HorizontalAlign::START))));
         }
 
         void ParseAttribute(const RefPtr<SelectTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
@@ -561,6 +569,9 @@ public:
         theme->checkMarkFontSize_ = checkMarkFontSize_;
         theme->checkMarkFontWeight_ = checkMarkFontWeight_;
         theme->checkMarkColor_ = checkMarkColor_;
+        theme->menuHeaderFontWeight_ = menuHeaderFontWeight_;
+        theme->menuSelectedIconAlign_ = menuSelectedIconAlign_;
+        theme->menuLeftRowEndSpace_ = menuLeftRowEndSpace_;
         theme->contentMargin_ = contentMargin_;
         theme->expandDisplay_ = expandDisplay_;
         theme->maxPaddingStart_ = maxPaddingStart_;
@@ -1001,6 +1012,21 @@ public:
     const Color& GetCheckMarkColor() const
     {
         return checkMarkColor_;
+    }
+
+    FontWeight GetMenuHeaderFontWeight() const
+    {
+        return menuHeaderFontWeight_;
+    }
+
+    HorizontalAlign GetMenuSelectedIconAlign() const
+    {
+        return menuSelectedIconAlign_;
+    }
+
+    const Dimension& GetMenuLeftRowEndSpace() const
+    {
+        return menuLeftRowEndSpace_;
     }
 
     FontWeight GetCheckMarkFontWeight() const
@@ -1723,11 +1749,14 @@ private:
     FontWeight fontWeight_ { FontWeight::NORMAL };
     FontWeight checkMarkFontWeight_ { FontWeight::REGULAR };
     TextDecoration textDecoration_ { TextDecoration::NONE };
+    FontWeight menuHeaderFontWeight_ { FontWeight::BOLD };
+    HorizontalAlign menuSelectedIconAlign_ { HorizontalAlign::START };
 
     std::size_t optionSize_ { 0 };
     Dimension rrectSize_;
     Dimension iconSize_;
     Dimension normalPadding_;
+    Dimension menuLeftRowEndSpace_;
 
     Dimension popupRRectSize_;
     Dimension popupBorderWidth_;

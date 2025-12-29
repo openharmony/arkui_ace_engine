@@ -399,6 +399,9 @@ void JSPatternLock::SetActivateCircleStyle(const JSCallbackInfo& info)
         PatternLockModel::GetInstance()->SetActiveCircleRadius(Dimension(0.0f, DimensionUnit::VP));
         PatternLockModel::GetInstance()->SetEnableWaveEffect(true);
         PatternLockModel::GetInstance()->SetEnableForeground(false);
+        if (SystemProperties::ConfigChangePerform()) {
+            PatternLockModel::GetInstance()->CreateWithResourceObj(PatternLockResourceType::ACTIVECIRCLECOLOR, nullptr);
+        }
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);

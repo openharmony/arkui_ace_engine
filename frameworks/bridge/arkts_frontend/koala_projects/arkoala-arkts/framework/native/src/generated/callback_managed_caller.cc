@@ -4817,6 +4817,40 @@ void callManagedCallback_Union_CustomBuilder_DragItemInfo_VoidSync(Ark_VMContext
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedCallback_Union_DrawingRenderingContext_Undefined_Void(Ark_Int32 resourceId, Opt_DrawingRenderingContext value0)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_Union_DrawingRenderingContext_Undefined_Void);
+    argsSerializer.writeInt32(resourceId);
+    if (runtimeType(value0) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto value0TmpValue = value0.value;
+        DrawingRenderingContext_serializer::write(argsSerializer, value0TmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedCallback_Union_DrawingRenderingContext_Undefined_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Opt_DrawingRenderingContext value0)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_Callback_Union_DrawingRenderingContext_Undefined_Void);
+    argsSerializer.writeInt32(resourceId);
+    if (runtimeType(value0) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto value0TmpValue = value0.value;
+        DrawingRenderingContext_serializer::write(argsSerializer, value0TmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void(Ark_Int32 resourceId, Opt_Object value0)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -8354,6 +8388,38 @@ void callManagedToggleModifierBuilderSync(Ark_VMContext vmContext, Ark_Int32 res
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedTouchTestDoneCallback(Ark_Int32 resourceId, Ark_BaseGestureEvent event, Array_GestureRecognizer recognizers)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_TouchTestDoneCallback);
+    argsSerializer.writeInt32(resourceId);
+    BaseGestureEvent_serializer::write(argsSerializer, event);
+    argsSerializer.writeInt32(recognizers.length);
+    for (int recognizersCounterI = 0; recognizersCounterI < recognizers.length; recognizersCounterI++) {
+        const Ark_GestureRecognizer recognizersTmpElement = recognizers.array[recognizersCounterI];
+        GestureRecognizer_serializer::write(argsSerializer, recognizersTmpElement);
+    }
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedTouchTestDoneCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_BaseGestureEvent event, Array_GestureRecognizer recognizers)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_TouchTestDoneCallback);
+    argsSerializer.writeInt32(resourceId);
+    BaseGestureEvent_serializer::write(argsSerializer, event);
+    argsSerializer.writeInt32(recognizers.length);
+    for (int recognizersCounterI = 0; recognizersCounterI < recognizers.length; recognizersCounterI++) {
+        const Ark_GestureRecognizer recognizersTmpElement = recognizers.array[recognizersCounterI];
+        GestureRecognizer_serializer::write(argsSerializer, recognizersTmpElement);
+    }
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedTransitionFinishCallback(Ark_Int32 resourceId, Ark_Boolean transitionIn)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -8759,6 +8825,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_Tuple_I32_I32_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Tuple_I32_I32_Void);
         case Kind_Callback_UIExtensionProxy_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_UIExtensionProxy_Void);
         case Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_CustomBuilder_DragItemInfo_Void);
+        case Kind_Callback_Union_DrawingRenderingContext_Undefined_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_DrawingRenderingContext_Undefined_Void);
         case Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void);
         case Kind_Callback_VisibilityChangeReason_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_VisibilityChangeReason_Void);
         case Kind_Callback_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Void);
@@ -8885,6 +8952,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_TextTimerModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedTextTimerModifierBuilder);
         case Kind_TimerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTimerCallback);
         case Kind_ToggleModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedToggleModifierBuilder);
+        case Kind_TouchTestDoneCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTouchTestDoneCallback);
         case Kind_TransitionFinishCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTransitionFinishCallback);
         case Kind_Type_CommonMethod_onDragStart: return reinterpret_cast<Ark_NativePointer>(callManagedType_CommonMethod_onDragStart);
         case Kind_Type_NavigationAttribute_customNavContentTransition: return reinterpret_cast<Ark_NativePointer>(callManagedType_NavigationAttribute_customNavContentTransition);
@@ -9090,6 +9158,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_Tuple_I32_I32_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Tuple_I32_I32_VoidSync);
         case Kind_Callback_UIExtensionProxy_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_UIExtensionProxy_VoidSync);
         case Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_CustomBuilder_DragItemInfo_VoidSync);
+        case Kind_Callback_Union_DrawingRenderingContext_Undefined_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_DrawingRenderingContext_Undefined_VoidSync);
         case Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Union_Object_Idlize_Stdlib_Null_Undefined_VoidSync);
         case Kind_Callback_VisibilityChangeReason_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_VisibilityChangeReason_VoidSync);
         case Kind_Callback_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_VoidSync);
@@ -9216,6 +9285,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_TextTimerModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedTextTimerModifierBuilderSync);
         case Kind_TimerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTimerCallbackSync);
         case Kind_ToggleModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedToggleModifierBuilderSync);
+        case Kind_TouchTestDoneCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTouchTestDoneCallbackSync);
         case Kind_TransitionFinishCallback: return reinterpret_cast<Ark_NativePointer>(callManagedTransitionFinishCallbackSync);
         case Kind_Type_CommonMethod_onDragStart: return reinterpret_cast<Ark_NativePointer>(callManagedType_CommonMethod_onDragStartSync);
         case Kind_Type_NavigationAttribute_customNavContentTransition: return reinterpret_cast<Ark_NativePointer>(callManagedType_NavigationAttribute_customNavContentTransitionSync);

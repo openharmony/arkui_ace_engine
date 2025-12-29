@@ -436,7 +436,8 @@ HWTEST_F(UIExtensionComponentTestTwoNg, RegisterReceivePageModeRequestCallbackTe
      */
     pattern->RegisterReceivePageModeRequestCallback();
     AAFwk::Want want;
-    auto ret = pattern->businessDataUECConsumeCallbacks_.at(UIContentBusinessCode::SEND_PAGE_MODE_REQUEST)(want);
+    auto ret =
+        pattern->businessDataUECConsumeCallbacks_.at(UIContentBusinessCode::SEND_PAGE_MODE_REQUEST)(want);
     EXPECT_EQ(ret, -1);
 
     std::string value = "testuec";

@@ -18,7 +18,8 @@
 
 import { ArkThemeScopeManager } from "#arktheme"
 import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
@@ -43,13 +44,22 @@ export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setEffectComponentOptionsAttribute(): void {
+    setEffectComponentOptionsAttribute(options?: EffectComponentOptions): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
-        ArkUIGeneratedNativeModule._EffectComponentInterface_setEffectComponentOptions(this.peer.ptr)
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            EffectComponentOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._EffectComponentInterface_setEffectComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export interface EffectComponentAttribute extends CommonMethod {
-    setEffectComponentOptions(): this {
+    setEffectComponentOptions(options?: EffectComponentOptions): this {
         throw new Error("Unimplemented method setEffectComponentOptions")
     }
     attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -58,12 +68,20 @@ export interface EffectComponentAttribute extends CommonMethod {
 }
 export class ArkEffectComponentStyle extends ArkCommonMethodStyle implements EffectComponentAttribute {
     attributeModifier_value?: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined
-    setEffectComponentOptions(): this {
+    setEffectComponentOptions(options?: EffectComponentOptions): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
+}
+export enum EffectLayer {
+    NONE = 0,
+    CHARGE_MOTION = 1,
+    CHARGE_TEXT = 2
+}
+export interface EffectComponentOptions {
+    effectLayer?: EffectLayer;
 }
 
 export class ArkEffectComponentComponent extends ArkCommonMethodComponent implements EffectComponentAttribute {
@@ -73,10 +91,10 @@ export class ArkEffectComponentComponent extends ArkCommonMethodComponent implem
         }
         return (this.peer as ArkEffectComponentPeer)
     }
-    public setEffectComponentOptions(): this {
+    public setEffectComponentOptions(options?: EffectComponentOptions): this {
         if (this.checkPriority("setEffectComponentOptions")) {
-            this.getPeer()?.setEffectComponentOptionsAttribute()
-            this.applyOptionsFinish('EffectComponentAttribute');
+            const options_casted = options as (EffectComponentOptions | undefined)
+            this.getPeer()?.setEffectComponentOptionsAttribute(options_casted)
             return this
         }
         return this
@@ -114,3 +132,27 @@ export function EffectComponentImpl(
     })
 }
 
+export class EffectComponentOptions_serializer {
+    public static write(buffer: SerializerBase, value: EffectComponentOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForEffectLayer  = value.effectLayer
+        if (valueHolderForEffectLayer !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEffectLayerTmpValue  = (valueHolderForEffectLayer as EffectLayer)
+            valueSerializer.writeInt32(valueHolderForEffectLayerTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): EffectComponentOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const effectLayerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let effectLayerTmpBuf : EffectLayer | undefined = undefined
+        if ((effectLayerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            effectLayerTmpBuf = EffectLayer.fromValue(valueDeserializer.readInt32())
+        }
+        const effectLayerTmpResult : EffectLayer | undefined = effectLayerTmpBuf
+        let value : EffectComponentOptions = ({effectLayer: effectLayerTmpResult} as EffectComponentOptions)
+        return value
+    }
+}

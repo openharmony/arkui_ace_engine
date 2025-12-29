@@ -286,6 +286,90 @@ HWTEST_F(ScrollableTestNg, IsInHotZone001, TestSize.Level1)
     EXPECT_TRUE(Negative(scrollPn->IsInHotZone(PointF(700.0, 0.0))));
 }
 
+/**
+ * @tc.name: IsInHotZone002
+ * @tc.desc: Test IsInHotZone with needExpandHotZone parameter, axis vertical
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, IsInHotZone002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize ScrollablePattern and set frame size
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto pipeLine = PipelineBase::GetCurrentContext();
+    auto frameNode = scrollPn->GetHost();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(700.0, 1200.0));
+    frameNode->SetGeometryNode(geometryNode);
+    scrollPn->SetAxis(Axis::VERTICAL);
+
+    /**
+     * @tc.steps: step2. test IsInHotZone with needExpandHotZone parameter
+     * @tc.expected: in the expanded top hot zone area, return value is positive
+     */
+    EXPECT_TRUE(NearZero(scrollPn->IsInHotZone(PointF(80.0, 250.0), true)));
+    EXPECT_TRUE(Positive(scrollPn->IsInHotZone(PointF(0.0, 0.0 - 10.0), true)));
+    EXPECT_TRUE(Positive(scrollPn->IsInHotZone(PointF(0.0 - 10.0, 0.0 - 10.0), true)));
+    EXPECT_TRUE(Positive(scrollPn->IsInHotZone(PointF(0.0 + 10.0, 0.0 - 10.0), true)));
+    EXPECT_TRUE(Positive(scrollPn->IsInHotZone(PointF(0.0, 0.0 + 10.0), true)));
+    EXPECT_TRUE(Positive(scrollPn->IsInHotZone(PointF(0.0 - 10.0, 0.0 + 10.0), true)));
+    EXPECT_TRUE(Positive(scrollPn->IsInHotZone(PointF(0.0 + 10.0, 0.0 + 10.0), true)));
+
+    /**
+     * @tc.steps: step3. test IsInHotZone with needExpandHotZone parameter
+     * @tc.expected: in the expanded bottom hot zone area, return value is negative
+     */
+    EXPECT_TRUE(Negative(scrollPn->IsInHotZone(PointF(0.0, 1200.0 - 10.0), true)));
+    EXPECT_TRUE(Negative(scrollPn->IsInHotZone(PointF(0.0 - 10.0, 1200.0 - 10.0), true)));
+    EXPECT_TRUE(Negative(scrollPn->IsInHotZone(PointF(0.0 + 10.0, 1200.0 - 10.0), true)));
+    EXPECT_TRUE(Negative(scrollPn->IsInHotZone(PointF(0.0, 1200.0 + 10.0), true)));
+    EXPECT_TRUE(Negative(scrollPn->IsInHotZone(PointF(0.0 - 10.0, 1200.0 + 10.0), true)));
+    EXPECT_TRUE(Negative(scrollPn->IsInHotZone(PointF(0.0 + 10.0, 1200.0 + 10.0), true)));
+}
+
+/**
+ * @tc.name: IsInHotZone003
+ * @tc.desc: Test IsInHotZone with needExpandHotZone parameter, axis horizontal
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, IsInHotZone003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize ScrollablePattern and set frame size
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto pipeLine = PipelineBase::GetCurrentContext();
+    auto frameNode = scrollPn->GetHost();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(1200.0, 700.0));
+    frameNode->SetGeometryNode(geometryNode);
+    scrollPn->SetAxis(Axis::HORIZONTAL);
+
+    /**
+     * @tc.steps: step2. test IsInHotZone with needExpandHotZone parameter
+     * @tc.expected: in the expanded top hot zone area, return value is positive
+     */
+    EXPECT_TRUE(NearZero(scrollPn->IsInHotZone(PointF(250.0, 80.0), true)));
+    EXPECT_TRUE(Positive(scrollPn->IsInHotZone(PointF(0.0 - 10.0, 0.0), true)));
+    EXPECT_TRUE(Positive(scrollPn->IsInHotZone(PointF(0.0 - 10.0, 0.0 - 10.0), true)));
+    EXPECT_TRUE(Positive(scrollPn->IsInHotZone(PointF(0.0 - 10.0, 0.0 + 10.0), true)));
+    EXPECT_TRUE(Positive(scrollPn->IsInHotZone(PointF(0.0 + 10.0, 0.0), true)));
+    EXPECT_TRUE(Positive(scrollPn->IsInHotZone(PointF(0.0 + 10.0, 0.0 - 10.0), true)));
+    EXPECT_TRUE(Positive(scrollPn->IsInHotZone(PointF(0.0 + 10.0, 0.0 + 10.0), true)));
+
+    /**
+     * @tc.steps: step3. test IsInHotZone with needExpandHotZone parameter
+     * @tc.expected: in the expanded bottom hot zone area, return value is negative
+     */
+    EXPECT_TRUE(Negative(scrollPn->IsInHotZone(PointF(1200.0 - 10.0, 0.0), true)));
+    EXPECT_TRUE(Negative(scrollPn->IsInHotZone(PointF(1200.0 - 10.0, 0.0 - 10.0), true)));
+    EXPECT_TRUE(Negative(scrollPn->IsInHotZone(PointF(1200.0 - 10.0, 0.0 + 10.0), true)));
+    EXPECT_TRUE(Negative(scrollPn->IsInHotZone(PointF(1200.0 + 10.0, 0.0), true)));
+    EXPECT_TRUE(Negative(scrollPn->IsInHotZone(PointF(1200.0 + 10.0, 0.0 - 10.0), true)));
+    EXPECT_TRUE(Negative(scrollPn->IsInHotZone(PointF(1200.0 + 10.0, 0.0 + 10.0), true)));
+}
+
 HWTEST_F(ScrollableTestNg, IsVertical, TestSize.Level1)
 {
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();

@@ -84,7 +84,7 @@ static ani_status GetBoolFromAni(ani_env* env, ani_object obj, const char* name,
         return status;
     }
     ani_boolean boolValue = ANI_FALSE;
-    status = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(refValue), "unboxed", ":z", &boolValue);
+    status = env->Object_CallMethodByName_Boolean(static_cast<ani_object>(refValue), "toBoolean", nullptr, &boolValue);
     if (status != ANI_OK) {
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "Unbox bool value failed");
         return status;

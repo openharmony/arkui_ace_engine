@@ -1253,7 +1253,7 @@ public:
         return isSubPipeline_;
     }
 
-    void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline)
+    virtual void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline)
     {
         parentPipeline_ = pipeline;
     }
@@ -1595,6 +1595,11 @@ public:
     virtual void SetTouchAccelarate(bool isEnable) {}
     virtual void SetTouchPassThrough(bool isEnable) {}
     virtual void SetEnableSwipeBack(bool isEnable) {}
+    virtual void SetIsRecycleInvisibleImageMemory(bool isEnable) {}
+    virtual std::optional<bool> GetIsRecycleInvisibleImageMemory() const
+    {
+        return std::nullopt;
+    }
     virtual void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
 
     bool IsSystmColorChange()
@@ -1671,6 +1676,11 @@ public:
     {
         return statisticEventReporter_;
     }
+    virtual void UpdateDrawLayoutChildObserver(
+        int32_t uniqueId, bool isClearLayoutObserver, bool isClearDrawObserver) {};
+    virtual void UpdateDrawLayoutChildObserver(
+        const std::string& inspectorKey, bool isClearLayoutObserver, bool isClearDrawObserver) {};
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

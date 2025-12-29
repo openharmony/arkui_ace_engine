@@ -38,7 +38,7 @@ namespace {
 constexpr char PIXEL_MAP_CONSTRUCTOR[] = "C{@ohos.multimedia.image.image.PixelMap}:";
 constexpr char PIXEL_MAP_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.PixelMapDrawableDescriptor";
 constexpr char ARRAY_GET[] = "i:C{std.core.Object}";
-constexpr char ANIMATED_CONSTRUCTOR[] = "C{escompat.Array}C{@ohos.arkui.drawableDescriptor.AnimationOptions}:";
+constexpr char ANIMATED_CONSTRUCTOR[] = "C{std.core.Array}C{@ohos.arkui.drawableDescriptor.AnimationOptions}:";
 constexpr char ANIMATED_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.AnimatedDrawableDescriptor";
 constexpr char LAYERED_CONSTRUCTOR[] =
     "C{@ohos.arkui.drawableDescriptor.DrawableDescriptor}C{@ohos.arkui.drawableDescriptor.DrawableDescriptor}C{@ohos."
@@ -52,6 +52,7 @@ constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
 constexpr char LAYERED_DRAWABLE_DESCRIPTOR_NAME[] = "LayeredDrawableDescriptor";
 constexpr char ANIMATED_DRAWABLE_DESCRIPTOR_NAME[] = "AnimatedDrawableDescriptor";
 constexpr char PIXELMAP_DRAWABLE_DESCRIPTOR_NAME[] = "PixelMapDrawableDescriptor";
+constexpr char DEFAULT_MASK[] = "ohos_icon_mask";
 
 enum class DrawableType {
     BASE,
@@ -399,6 +400,14 @@ void CreateLayeredDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, an
     if (!isMaskUndefined) {
         auto mask = Media::PixelMapTaiheAni::GetNativePixelMap(env, maskAni);
         drawable->SetMask(PixelMap::Create(mask));
+    } else {
+        std::unique_ptr<uint8_t[]> maskData;
+        size_t maskLen = 0;
+        std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
+        auto state = resMgr->GetMediaDataByName(DEFAULT_MASK, maskLen, maskData);
+        if (state == Global::Resource::SUCCESS && maskLen > 0) {
+            drawable->SetMaskData(maskData.release(), maskLen);
+        }
     }
 }
 
@@ -459,7 +468,7 @@ void CreateAnimatedDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, a
     ANI_CALL(env, Array_GetLength(pixelmapsAni, &size), return);
     std::vector<RefPtr<PixelMap>> results;
     ani_class arrayClass;
-    ANI_CALL(env, FindClass("escompat.Array", &arrayClass), return);
+    ANI_CALL(env, FindClass("std.core.Array", &arrayClass), return);
     ani_method getDataMethod;
     ANI_CALL(env, Class_FindMethod(arrayClass, "$_get", ARRAY_GET, &getDataMethod), return);
     for (size_t index = 0; index < size; index++) {

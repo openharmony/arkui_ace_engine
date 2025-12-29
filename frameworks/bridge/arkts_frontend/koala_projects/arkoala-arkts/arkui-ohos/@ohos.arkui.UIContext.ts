@@ -60,7 +60,7 @@ import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
 
 export class UIInspector {
-    public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
+    public createComponentObserver(id: string | int): inspector.ComponentObserver {
         throw Error("createComponentObserver not implemented in UIInspector!")
     }
 }
@@ -160,6 +160,9 @@ export class Router {
     }
     public getLength(): string {
         throw Error("getLength not implemented in Router!");
+    }
+    public getStackSize(): int {
+        throw Error("getStackSize not implemented in Router!")
     }
 
     public getParams(): Object {
@@ -753,6 +756,10 @@ export class UIContext {
         throw Error("closeBindSheet not implemented in UIContext!")
     }
 
+    public recycleInvisibleImageMemory(enabled: boolean): void {
+        throw Error("recycleInvisibleImageMemory not implemented in UIContext!")
+    }
+
     public bindTabsToScrollable(tabsController: TabsController, scroller: Scroller): void {
         throw Error("bindTabsToScrollable not implemented in UIContext!")
     }
@@ -770,9 +777,13 @@ export class UIContext {
         childScroller: Scroller): void {
         throw Error("unbindTabsFromNestedScrollable not implemented in UIContext!")
     }
-    
+
     public getPageInfoByUniqueId(id: int): PageInfo {
-        throw Error("getPageInfoByUniqueId not implemented in UIContext!")
+        throw Error("getPageInfoByUniqueId(int) not implemented in UIContext!")
+    }
+
+    public getPageInfoByUniqueId(id: number): PageInfo {
+        throw Error("getPageInfoByUniqueId(number) not implemented in UIContext!")
     }
 }
 export abstract class FrameCallback {
@@ -995,6 +1006,44 @@ export class UIObserver {
     public offDidLayout(callback?: Callback<void>): void {
         if (this.observerImpl) {
             this.observerImpl!.offDidLayout(callback);
+        }
+    }
+
+    public onRouterPageSizeChange(callback: Callback<uiObserver.RouterPageInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onRouterPageSizeChange(callback);
+        }
+    }
+
+    public offRouterPageSizeChange(callback?: Callback<uiObserver.RouterPageInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offRouterPageSizeChange(callback);
+        }
+    }
+
+    public onNavDestinationSizeChange(callback: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationSizeChange(callback);
+        }
+    }
+
+    public offNavDestinationSizeChange(callback?: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationSizeChange(callback);
+        }
+    }
+
+    public onNavDestinationSizeChangeByUniqueId(
+        navigationUniqueId: int, callback: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationSizeChangeByUniqueId(navigationUniqueId, callback);
+        }
+    }
+
+    public offNavDestinationSizeChangeByUniqueId(
+        navigationUniqueId: int, callback?: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationSizeChangeByUniqueId(navigationUniqueId, callback);
         }
     }
 }

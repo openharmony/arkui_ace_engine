@@ -670,9 +670,6 @@ template("ace_core_source_set") {
       ]
       if (enable_player_framework) {
         deps += [ "$ace_root/frameworks/core/components/video:ace_core_components_video_$platform" ]
-        if (enable_camera_framework) {
-          deps += [ "$ace_root/frameworks/core/components/camera:ace_core_components_camera_$platform" ]
-        }
       }
     }
 

@@ -87,8 +87,9 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     onTouchTestDoneFrameNodeList_.clear();
     ResponseLinkResult responseLinkResult;
 
-    bool isRealTouch = (touchPoint.sourceType == SourceType::TOUCH && !touchPoint.passThrough &&
-                        touchPoint.convertInfo.first == UIInputEventType::NONE && !touchPoint.IsPenHoverEvent());
+    bool isRealTouch =
+        (touchPoint.sourceTool == SourceTool::FINGER && !touchPoint.passThrough &&
+            touchPoint.convertInfo.first == UIInputEventType::NONE && touchPoint.sourceType == SourceType::TOUCH);
     hitTestRecordInfo_ = { isRealTouch, touchPoint.screenX, touchPoint.screenY, touchPoint.id, touchPoint.time,
         touchPoint.type };
     // For root node, the parent local point is the same as global point.
@@ -2834,6 +2835,7 @@ std::string EventManager::GetLastHitTestNodeInfosForTouch(bool isTopMost)
             for (const auto& info: hitInfo.second.hitNodeInfos) {
                 std::unique_ptr<JsonValue> id = JsonUtil::Create(true);
                 id->Put("id", info.nodeId);
+                id->Put("tag", info.tag.c_str());
                 hitNodeInfos->Put(id);
             }
         }
@@ -2864,26 +2866,41 @@ void EventManager::AddHitTestInfoRecord(const RefPtr<NG::FrameNode>& frameNode)
         nodeInfos.positionX = (*hitTestRecordInfo_).screenX;
         nodeInfos.positionY = (*hitTestRecordInfo_).screenY;
         nodeInfos.timeStamp = static_cast<uint64_t>((*hitTestRecordInfo_).timeStamp.time_since_epoch().count());
-        nodeInfos.hitNodeInfos = { { frameNode->GetId() } };
+        nodeInfos.hitNodeInfos = { { frameNode->GetId(), frameNode->GetTag() } };
         touchHitTestInfos_[fingerId] = nodeInfos;
     } else {
-        NodeGeneralInfo nodeGeneralInfo = { frameNode->GetId() };
+        NodeGeneralInfo nodeGeneralInfo = { frameNode->GetId(), frameNode->GetTag() };
         touchHitTestInfos_[fingerId].hitNodeInfos.emplace_back(nodeGeneralInfo);
     }
 }
 
-void EventManager::LogHitTestInfoRecord(int32_t fingerId)
+void EventManager::LogHitTestInfoRecord(const TouchEvent& touchPoint)
 {
+    CHECK_NULL_VOID(touchPoint.sourceTool == SourceTool::FINGER && !touchPoint.passThrough &&
+        touchPoint.convertInfo.first == UIInputEventType::NONE && touchPoint.sourceType == SourceType::TOUCH);
     if (SystemProperties::GetDebugEnabled()) {
+        // hilog oneline length limit is 1024
+        constexpr size_t lengthLimit = 900;
         auto json = GetLastHitTestNodeInfosForTouch(false);
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "LogHitTestInfoRecord fingerId:%{public}d json:%{public}s",
-            fingerId, json.c_str());
+        if (json.length() <= lengthLimit) {
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, "LogHitTestInfoRecord fingerId:%{public}d json:%{public}s", touchPoint.id,
+                json.c_str());
+            return;
+        }
+        auto jsonChar = json.c_str();
+        for (size_t i = 0; i < json.length(); i += lengthLimit) {
+            TAG_LOGD(AceLogTag::ACE_UIEVENT,
+                "LogHitTestInfoRecord fingerId:%{public}d .%{public}zu:json:[%{public}.*s]", touchPoint.id, i,
+                (int)lengthLimit, jsonChar + i);
+        }
     }
 }
 
 void EventManager::ClearHitTestInfoRecord(const TouchEvent& touchPoint)
 {
     CHECK_NULL_VOID(static_cast<int32_t>(touchPoint.pointers.size()) == 1);
+    CHECK_NULL_VOID(touchPoint.sourceTool == SourceTool::FINGER && !touchPoint.passThrough &&
+        touchPoint.convertInfo.first == UIInputEventType::NONE && touchPoint.sourceType == SourceType::TOUCH);
     touchHitTestInfos_.clear();
 }
 } // namespace OHOS::Ace

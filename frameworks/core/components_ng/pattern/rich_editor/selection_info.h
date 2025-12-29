@@ -148,6 +148,8 @@ struct TextStyleResult {
     std::optional<TextBackgroundStyle> textBackgroundStyle;
     float lineThicknessScale = 1.0f;
     bool compressLeadingPunctuation = false;
+    double strokeWidth = 0.0;
+    std::string strokeColor;
 };
 
 struct ImageStyleResult {

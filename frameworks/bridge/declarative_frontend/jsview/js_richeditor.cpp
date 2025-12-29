@@ -92,7 +92,7 @@ enum class RenderingStrategy {
     MULTIPLE_OPACITY
 };
 
-CalcDimension JSRichEditor::ParseLengthMetrics(const JSRef<JSObject>& obj)
+CalcDimension JSRichEditor::ParseLengthMetrics(const JSRef<JSObject>& obj, bool validateNonNegative)
 {
     CalcDimension size;
     auto value = 0.0;
@@ -105,11 +105,12 @@ CalcDimension JSRichEditor::ParseLengthMetrics(const JSRef<JSObject>& obj)
     if (!unitObj->IsNull() && unitObj->IsNumber()) {
         unit = static_cast<DimensionUnit>(unitObj->ToNumber<int32_t>());
     }
-    if (value >= 0 && unit != DimensionUnit::PERCENT) {
+    if ((value >= 0 || !validateNonNegative) && unit != DimensionUnit::PERCENT) {
         size = CalcDimension(value, unit);
     }
     return size;
 }
+
 std::optional<NG::MarginProperty> JSRichEditor::ParseMarginAttr(JsiRef<JSVal> marginAttr)
 {
     std::optional<NG::MarginProperty> marginProp = std::nullopt;
@@ -233,6 +234,8 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     textStyleObj->SetProperty<std::string>("fontFeature", UnParseFontFeatureSetting(textStyleResult.fontFeature));
     textStyleObj->SetPropertyObject("textShadow", CreateJsTextShadowObjectArray(textStyleResult));
     SetJsTextBackgroundStyle(textStyleObj, textStyleResult);
+    textStyleObj->SetProperty<double>("strokeWidth", textStyleResult.strokeWidth);
+    textStyleObj->SetProperty<std::string>("strokeColor", textStyleResult.strokeColor);
 
     return textStyleObj;
 }
@@ -773,6 +776,8 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     textStyleObj->SetPropertyObject("decoration", decorationObj);
     textStyleObj->SetPropertyObject("textShadow", CreateJsTextShadowObjectArray(textSpanResult.GetTextStyle()));
     SetJsTextBackgroundStyle(textStyleObj, textSpanResult.GetTextStyle());
+    textStyleObj->SetProperty<double>("strokeWidth", textSpanResult.GetTextStyle().strokeWidth);
+    textStyleObj->SetProperty<std::string>("strokeColor", textSpanResult.GetTextStyle().strokeColor);
     onIMEInputCompleteObj->SetPropertyObject("spanPosition", spanPositionObj);
     onIMEInputCompleteObj->SetProperty<std::u16string>("value", textSpanResult.GetValue());
     onIMEInputCompleteObj->SetProperty<std::u16string>("previewText", textSpanResult.GetPreviewText());
@@ -999,6 +1004,8 @@ void JSRichEditor::CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::R
     textStyleObj->SetPropertyObject("decoration", decorationObj);
     textStyleObj->SetPropertyObject("textShadow", CreateJsTextShadowObjectArray(spanResult.GetTextStyle()));
     SetJsTextBackgroundStyle(textStyleObj, spanResult.GetTextStyle());
+    textStyleObj->SetProperty<double>("strokeWidth", spanResult.GetTextStyle().strokeWidth);
+    textStyleObj->SetProperty<std::string>("strokeColor", spanResult.GetTextStyle().strokeColor);
 }
 
 void JSRichEditor::CreateImageStyleObj(
@@ -2140,6 +2147,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
             options.style = style;
             options.useThemeFontColor = updateSpanStyle_.useThemeFontColor;
             options.useThemeDecorationColor = updateSpanStyle_.useThemeDecorationColor;
+            options.strokeColorFollowFontColor = updateSpanStyle_.strokeColorFollowFontColor;
         }
         auto paraStyleObj = JSObjectCast(spanObject->GetProperty("paragraphStyle"));
         struct UpdateParagraphStyle style;
@@ -2637,7 +2645,7 @@ void JSRichEditorController::UpdateSpanStyle(const JSCallbackInfo& info)
     auto richEditorTextStyle = JSObjectCast(jsObject->GetProperty("textStyle"));
     auto richEditorImageStyle = JSObjectCast(jsObject->GetProperty("imageStyle"));
     auto richEditorSymbolSpanStyle = JSObjectCast(jsObject->GetProperty("symbolStyle"));
-    updateSpanStyle_.ResetStyle();
+    updateSpanStyle_.ResetStyle(); // When adding new attributes, the reset method needs to be modified accordingly.
     if (!richEditorTextStyle->IsUndefined()) {
         ParseJsTextStyle(richEditorTextStyle, textStyle, updateSpanStyle_);
     }
@@ -2875,16 +2883,13 @@ void JSRichEditorBaseController::ParseJsTextStyle(
         updateSpanStyle.updateFontWeight = ConvertStrToFontWeight(weight);
         style.SetFontWeight(ConvertStrToFontWeight(weight));
     }
-    JSRef<JSVal> fontFamily = styleObject->GetProperty("fontFamily");
-    std::vector<std::string> family;
-    if (!fontFamily->IsNull() && JSContainerBase::ParseJsFontFamilies(fontFamily, family)) {
-        updateSpanStyle.updateFontFamily = family;
-        style.SetFontFamilies(family);
-    }
+    ParseJsFontFamilyTextStyle(styleObject, style, updateSpanStyle);
     ParseJsHalfLeadingTextStyle(styleObject, style, updateSpanStyle);
     ParseTextDecoration(styleObject, style, updateSpanStyle);
     ParseTextShadow(styleObject, style, updateSpanStyle);
     ParseTextBackgroundStyle(styleObject, style, updateSpanStyle);
+    ParseJsStrokeWidthTextStyle(styleObject, style, updateSpanStyle);
+    ParseJsStrokeColorTextStyle(styleObject, style, updateSpanStyle);
 }
 
 void JSRichEditorBaseController::ParseJsLineHeightLetterSpacingTextStyle(const JSRef<JSObject>& styleObject,
@@ -2947,6 +2952,17 @@ void JSRichEditorBaseController::ParseJsFontFeatureTextStyle(const JSRef<JSObjec
         auto fontFeatures = theme->GetTextStyle().GetFontFeatures();
         updateSpanStyle.updateFontFeature = fontFeatures;
         style.SetFontFeatures(fontFeatures);
+    }
+}
+
+void JSRichEditorBaseController::ParseJsFontFamilyTextStyle(const JSRef<JSObject>& styleObject,
+    TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
+{
+    JSRef<JSVal> fontFamily = styleObject->GetProperty("fontFamily");
+    std::vector<std::string> family;
+    if (!fontFamily->IsNull() && JSContainerBase::ParseJsFontFamilies(fontFamily, family)) {
+        updateSpanStyle.updateFontFamily = family;
+        style.SetFontFamilies(family);
     }
 }
 
@@ -3036,6 +3052,44 @@ void JSRichEditorBaseController::ParseTextBackgroundStyle(
     updateSpanStyle.updateTextBackgroundStyle = textBackgroundValue;
 }
 
+void JSRichEditorBaseController::ParseJsStrokeWidthTextStyle(const JSRef<JSObject>& styleObject,
+    TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
+{
+    if (!styleObject->HasProperty("strokeWidth")) {
+        return;
+    }
+    JSRef<JSVal> strokeWidthObject = styleObject->GetProperty("strokeWidth");
+    if (!strokeWidthObject->IsNull()) {
+        CalcDimension length = JSRichEditor::ParseLengthMetrics(strokeWidthObject, false);
+        style.SetStrokeWidth(length);
+        updateSpanStyle.updateStrokeWidth = length;
+    }
+}
+ 
+void JSRichEditorBaseController::ParseJsStrokeColorTextStyle(const JSRef<JSObject>& styleObject,
+    TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
+{
+    JSRef<JSVal> strokeColorObject = styleObject->GetProperty("strokeColor");
+    Color strokeColor;
+    RefPtr<ResourceObject> colorResObj;
+    if (strokeColorObject->IsNull() ||
+        !JSRichEditor::ParseJsColorWithResource(strokeColorObject, strokeColor, colorResObj)) {
+        updateSpanStyle.strokeColorFollowFontColor = true;
+        style.SetStrokeColor(style.GetTextColor());
+        if (updateSpanStyle.updateTextColor.has_value()) {
+            NG::StyleManager::AddStrokeColorResource(style, style.GetResource(NG::StyleManager::TEXT_COLOR_KEY));
+            NG::StyleManager::AddStrokeColorResource(updateSpanStyle,
+                updateSpanStyle.GetResource(NG::StyleManager::TEXT_COLOR_KEY));
+        }
+        return;
+    }
+ 
+    style.SetStrokeColor(strokeColor);
+    updateSpanStyle.updateStrokeColor = strokeColor;
+    NG::StyleManager::AddStrokeColorResource(style, colorResObj);
+    NG::StyleManager::AddStrokeColorResource(updateSpanStyle, colorResObj);
+}
+
 void JSRichEditorBaseController::GetTypingStyle(const JSCallbackInfo& info)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -3089,6 +3143,12 @@ JSRef<JSObject> JSRichEditorBaseController::CreateTypingStyleResult(const struct
     if (typingStyle.updateTextBackgroundStyle.has_value()) {
         tyingStyleObj->SetPropertyObject("textBackgroundStyle",
             JSRichEditor::CreateJsTextBackgroundStyle(typingStyle.updateTextBackgroundStyle.value()));
+    }
+    if (typingStyle.updateStrokeWidth.has_value()) {
+        tyingStyleObj->SetProperty<double>("strokeWidth", typingStyle.updateStrokeWidth.value().ConvertToVp());
+    }
+    if (typingStyle.updateStrokeColor.has_value()) {
+        tyingStyleObj->SetProperty<std::string>("strokeColor", typingStyle.updateStrokeColor.value().ColorToString());
     }
 
     return tyingStyleObj;

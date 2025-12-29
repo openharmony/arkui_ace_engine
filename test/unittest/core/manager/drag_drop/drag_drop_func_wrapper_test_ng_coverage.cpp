@@ -21,6 +21,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/base/mock_drag_window.h"
+#include "test/mock/base/mock_subwindow.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_interaction_interface.h"
 #include "test/mock/core/common/mock_udmf.h"
@@ -1916,5 +1917,33 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, UpdateDragDropInitiatingStatus003, T
     ASSERT_NE(frameNode, nullptr);
     DragDropGlobalController::GetInstance().UpdateDragDropInitiatingStatus(frameNode, DragDropInitiatingStatus::MOVING);
     EXPECT_EQ(DragDropGlobalController::GetInstance().currentDragNode_, frameNode);
+}
+
+/**
+ * @tc.name: GetDragDropManagerForDragAnimation001
+ * @tc.desc: Test GetDragDropManagerForDragAnimation context equals nodeContext
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, GetDragDropManagerForDragAnimation001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto manager = DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
+        pipelineContext, pipelineContext, nullptr);
+    ASSERT_EQ(dragDropManager, manager);
+    
+    auto subwindow = AceType::MakeRefPtr<MockSubwindow>();
+    subwindow->SetReceiveDragEventEnabled(true);
+    manager = DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
+        pipelineContext, pipelineContext, subwindow);
+    ASSERT_EQ(dragDropManager, manager);
+
+    subwindow->SetReceiveDragEventEnabled(false);
+    manager = DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
+        pipelineContext, pipelineContext, subwindow);
+    ASSERT_EQ(dragDropManager, manager);
 }
 } // namespace OHOS::Ace::NG

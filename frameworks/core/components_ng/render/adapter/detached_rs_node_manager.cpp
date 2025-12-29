@@ -26,8 +26,9 @@ void DetachedRsNodeManager::PostDestructorTask(std::shared_ptr<Rosen::RSNode> rs
     CHECK_NULL_VOID(rsNode);
     auto rsUIContext = rsNode->GetRSUIContext();
     CHECK_NULL_VOID(rsUIContext);
-    bool isDetached = rsUIContext->HasDetachedFromUI();
-    CHECK_NULL_VOID(isDetached && taskExecutor_);
+    // pipelineCount is the number of the pipelinecontext which is binded to the rsUIContext.
+    auto pipelineCount = rsUIContext->GetUiPiplineNum();
+    CHECK_NULL_VOID(pipelineCount == 0 && taskExecutor_);
     {
         std::lock_guard<std::mutex> lock(mutex_);
         CHECK_NULL_VOID(rsUIContexts_.find(rsUIContext.get()) == rsUIContexts_.end());
@@ -54,7 +55,12 @@ void DetachedRsNodeManager::FlushImplicitTransaction(std::shared_ptr<Rosen::RSUI
         LOGE("DetachedRsNodeManager fail, transition is nullptr");
         return;
     }
-    transition->FlushImplicitTransaction();
+    auto pipelineCount = rsUIContext->GetUiPiplineNum();
+    if (pipelineCount == 0) {
+        transition->FlushImplicitTransaction();
+    } else {
+        LOGE("DetachedRsNodeManager fail, pipelineCount is not empty");
+    }
 }
 
 void DetachedRsNodeManager::RemoveRSUIContext(std::shared_ptr<Rosen::RSUIContext> rsUIContext)

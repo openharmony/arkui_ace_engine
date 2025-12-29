@@ -262,6 +262,8 @@ public:
     {
         return window_->IsReceiveDragEventEnabled();
     }
+    bool GetDestroyInHide() override;
+    void SetDestroyInHide(bool destroyInHide) override;
 
 private:
     RefPtr<StackElement> GetStack();
@@ -311,6 +313,8 @@ private:
 
     void InitDialogWindowRSUIDirector(const RefPtr<Platform::AceContainer>& container);
     void InitWindowRSUIDirector(const RefPtr<Platform::AceContainer>& container);
+    void ResizeWindow(double width, double height);
+    void ResizeWindowForToast(const NG::ToastInfo& toastInfo);
 
     static int32_t id_;
     int32_t windowId_ = 0;
@@ -333,6 +337,7 @@ private:
     bool isClosing_ = false;
     bool needAvoidKeyboard_ = false;
     bool ifNeedSetCurrentWindow_ = true;
+    bool destroyInHide_ = false;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
     int32_t callbackId_ = 0;
     sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;

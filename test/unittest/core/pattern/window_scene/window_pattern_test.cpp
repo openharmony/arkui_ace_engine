@@ -32,6 +32,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
@@ -145,6 +146,32 @@ HWTEST_F(WindowPatternTest, AddPersistentImage, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSnapshotWindowProperty
+ * @tc.desc: UpdateSnapshotWindowProperty Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, UpdateSnapshotWindowProperty, TestSize.Level1)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+    sceneSession_->enableRemoveStartingWindow_ = false;
+    sceneSession_->appBufferReady_ = false;
+    sceneSession_->surfaceNode_->bufferAvailable_ = false;
+    auto snapshotWindowNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene_);
+    windowScene_->snapshotWindow_ = AceType::RawPtr(snapshotWindowNode);
+    ASSERT_NE(windowScene_->snapshotWindow_, nullptr);
+
+    sceneSession_->isPersistentImageFit_ = true;
+    windowScene_->UpdateSnapshotWindowProperty();
+    EXPECT_EQ(sceneSession_->IsPersistentImageFit(), true);
+
+    sceneSession_->isPersistentImageFit_ = false;
+    windowScene_->UpdateSnapshotWindowProperty();
+    EXPECT_EQ(sceneSession_->IsPersistentImageFit(), false);
+}
+
+/**
  * @tc.name: AddBackgroundColorDelayed
  * @tc.desc: add background color delayed
  * @tc.type: FUNC
@@ -169,6 +196,30 @@ HWTEST_F(WindowPatternTest, AddBackgroundColorDelayed, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DelayAddAppWindowForDmaResume
+ * @tc.desc: delay add app window for dma resume
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, DelayAddAppWindowForDmaResume, TestSize.Level1)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+    sceneSession_->collaboratorType_ = 0;
+    windowScene_->dmaReclaimEnabled_ = false;
+    windowScene_->DelayAddAppWindowForDmaResume(0);
+    EXPECT_EQ(windowScene_->dmaReclaimEnabled_, false);
+
+    windowScene_->dmaReclaimEnabled_ = true;
+    sceneSession_->collaboratorType_ = static_cast<int32_t>(Rosen::CollaboratorType::RESERVE_TYPE);
+    windowScene_->DelayAddAppWindowForDmaResume(0);
+    EXPECT_EQ(windowScene_->dmaReclaimEnabled_, true);
+
+    sceneSession_->collaboratorType_ = 0;
+    windowScene_->DelayAddAppWindowForDmaResume(0);
+    EXPECT_EQ(windowScene_->dmaReclaimEnabled_, true);
+}
+
+/**
  * @tc.name: CreateSnapshotWindow
  * @tc.desc: CreateSnapshotWindow Test
  * @tc.type: FUNC
@@ -181,12 +232,35 @@ HWTEST_F(WindowPatternTest, CreateSnapshotWindow, TestSize.Level0)
     windowScene_->CreateSnapshotWindow();
     auto key = Rosen::defaultStatus;
     sceneSession_->scenePersistence_->SetHasSnapshot(true, key);
+    sceneSession_->isPersistentImageFit_ = true;
+    sceneSession_->lastLayoutRect_ = {
+        .posX_ = 100,
+        .posY_ = 100,
+        .width_ = 100,
+        .height_ = 100,
+    };
+    sceneSession_->layoutRect_ = {
+        .posX_ = 100,
+        .posY_ = 100,
+        .width_ = 100,
+        .height_ = 100,
+    };
+    windowScene_->CreateSnapshotWindow();
+    EXPECT_EQ(windowScene_->isBlankForSnapshot_, false);
+
+    sceneSession_->layoutRect_ = {
+        .posX_ = 100,
+        .posY_ = 100,
+        .width_ = 200,
+        .height_ = 200,
+    };
     windowScene_->CreateSnapshotWindow();
 
     sceneSession_->scenePersistence_->isSavingSnapshot_ = true;
     sceneSession_->freeMultiWindow_.store(true);
+    sceneSession_->isPersistentImageFit_ = false;
     windowScene_->CreateSnapshotWindow();
-    EXPECT_EQ(windowScene_->isBlankForSnapshot_, false);
+    EXPECT_EQ(windowScene_->isBlankForSnapshot_, true);
 }
 
 /**
@@ -265,7 +339,14 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow, TestSize.Level0)
     EXPECT_NE(ssm_->GetPreLoadStartingWindow(sessionInfo), nullptr);
     windowScene_->WindowPattern::CreateStartingWindow();
     EXPECT_EQ(ssm_->GetPreLoadStartingWindow(sessionInfo), nullptr);
+
     ssm_->preLoadStartingWindowMap_.clear();
+    sceneSession_->SetPreloadingStartingWindow(true);
+    windowScene_->WindowPattern::CreateStartingWindow();
+    EXPECT_EQ(sceneSession_->GetPreloadingStartingWindow(), true);
+    ASSERT_NE(windowScene_->startingWindow_, nullptr);
+    auto layoutProperty = windowScene_->startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
 }
 
 /**

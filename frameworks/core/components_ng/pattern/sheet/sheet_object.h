@@ -132,9 +132,20 @@ public:
         return sheetMaxWidth_;
     }
 
+    float GetMinimizeSheetWidth() const
+    {
+        return sheetWidth_;
+    }
+
+    float GetMinimizeSheetMaxWidth() const
+    {
+        return sheetMaxWidth_;
+    }
+
     virtual bool CheckIfUpdateObject(SheetType newType)
     {
-        return (newType == SheetType::SHEET_SIDE) || (newType == SheetType::SHEET_CONTENT_COVER);
+        return (newType == SheetType::SHEET_SIDE) || (newType == SheetType::SHEET_CONTENT_COVER) ||
+            (newType == SheetType::SHEET_MINIMIZE);
     }
 
     virtual bool IsSheetObjectBase() const

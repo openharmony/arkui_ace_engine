@@ -410,7 +410,7 @@ public:
     {
         return {};
     }
-    virtual bool FreeScrollBy(const OffsetF& delta)
+    virtual bool FreeScrollBy(const OffsetF& delta, bool canOverScroll = false)
     {
         return false;
     }
@@ -776,7 +776,7 @@ public:
 
     PositionMode GetPositionMode();
 
-    void HandleMoveEventInComp(const PointF& point);
+    void HandleMoveEventInComp(const PointF& point, bool needExpandHotZone = false);
     void HandleLeaveHotzoneEvent();
     void SetHotZoneScrollCallback(std::function<void(void)>&& func)
     {
@@ -936,6 +936,8 @@ public:
     void ProcessScrollOverDrag(double velocity, bool isNestScroller);
 
     void SetCanOverScroll(bool val);
+    
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
 
 protected:
     void SuggestOpIncGroup(bool flag);
@@ -1185,7 +1187,6 @@ private:
     void SetOnHiddenChangeForParent();
     virtual void ResetForExtScroll() {};
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
-    void ContentChangeReport(RefPtr<FrameNode>& keyNode);
 
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -1266,7 +1267,7 @@ private:
     RefPtr<VelocityMotion> fixedVelocityMotion_;
     std::function<void(void)> hotZoneScrollCallback_;
     void UnRegister2DragDropManager(FrameNode* frameNode);
-    float IsInHotZone(const PointF& point);
+    float IsInHotZone(const PointF& point, bool needExpandHotZone = false);
     void HotZoneScroll(const float offset);
     void StopHotzoneScroll();
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);

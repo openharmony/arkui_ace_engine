@@ -19,9 +19,9 @@
 #include <memory>
 
 #include "compatible/components/component_loader.h"
-#include "base/utils/utils.h"
-
 #include "interfaces/inner_api/ace/utils.h"
+
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -41,7 +41,7 @@ std::unique_ptr<ComponentLoader> DynamicModuleHelper::GetLoaderByName(const char
         return std::move(compatibleLib_);
     }
     void* handle = LOADLIB(COMPATIABLE_LIB.c_str());
-    auto* createSym = reinterpret_cast<ComponentLoaderFunc>(LOADSYM(handle, DYNAMIC_MODULE_CREATE));
+    auto* createSym = reinterpret_cast<ComponentLoaderFunc>(LOADSYM(handle, COMPATIABLE_COMPONENT_LOADER));
     CHECK_NULL_RETURN(createSym, nullptr);
     ComponentLoader* module = createSym(name);
     CHECK_NULL_RETURN(module, nullptr);
@@ -51,7 +51,7 @@ std::unique_ptr<ComponentLoader> DynamicModuleHelper::GetLoaderByName(const char
 
 DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
 {
-// Double-checked locking pattern for better performance
+    // Double-checked locking pattern for better performance
     {
         std::lock_guard<std::mutex> lock(moduleMapMutex_);
         auto iter = moduleMap_.find(name);

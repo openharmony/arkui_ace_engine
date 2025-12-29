@@ -32,6 +32,7 @@ public:
     using SetWebDetachCallback = std::function<void(int32_t)>;
     using OnControllerAttachedCallback = std::function<void()>;
     using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
     ~WebPattern() override;
 
@@ -105,6 +106,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableSelectedDataDetector, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ZoomControlAccess, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, GestureFocusMode, GestureFocusMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableAutoFill, bool);
     using NativeVideoPlayerConfigType = std::tuple<bool, bool>;
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
@@ -160,6 +162,7 @@ public:
     }
 
     void SetSetWebDetachCallback(SetWebDetachCallback&& callback) {}
+    void SetPermissionClipboardCallback(PermissionClipboardCallback&& Callback) {}
     void SetEmulateTouchFromMouseEvent(bool emulateTouchFromMouseEvent) {}
     void UpdateDataDetectorConfig(const TextDetectConfig& config) {}
     void SetJsProxyCallback(JsProxyCallback&& jsProxyCallback) {}
@@ -254,6 +257,7 @@ private:
     void OnBackToTopUpdate(bool isBackToTop) {}
     void OnEnableSelectedDataDetectorUpdate(bool enable) {}
     void OnZoomControlAccessUpdate(bool zoomControlAccess) {}
+    void OnEnableAutoFillUpdate(bool enable) {}
     void OnGestureFocusModeUpdate(GestureFocusMode mode) {}
     void OnEnableImageAnalyzerUpdate(bool isEnabled) {}
 

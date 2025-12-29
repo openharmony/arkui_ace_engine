@@ -49,6 +49,7 @@ public:
     virtual void TranslateMatrix(double tx, double ty) {}
     virtual void SetLineDashParam(const std::vector<double>& segments) {}
     virtual void ResetStates() {}
+    virtual void SetVisibility(bool visibility) {}
 
     void SetPaintMethod(CanvasPaintMethod* paintMethod)
     {

@@ -68,7 +68,6 @@
 #include "bridge/declarative_frontend/jsview/js_form_button.h"
 #endif
 #include "bridge/declarative_frontend/jsview/js_form_link.h"
-#include "bridge/declarative_frontend/jsview/js_gauge.h"
 #include "bridge/declarative_frontend/jsview/js_grid.h"
 #include "bridge/declarative_frontend/jsview/js_grid_col.h"
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
@@ -163,6 +162,7 @@
 #include "bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "bridge/declarative_frontend/jsview/js_toggle.h"
 #include "bridge/declarative_frontend/jsview/js_toolbaritem.h"
+#include "bridge/declarative_frontend/jsview/js_union_container.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "bridge/declarative_frontend/jsview/js_water_flow.h"
@@ -231,12 +231,6 @@
 #include "bridge/declarative_frontend/jsview/js_richtext.h"
 #include "bridge/declarative_frontend/jsview/js_web.h"
 #include "bridge/declarative_frontend/jsview/js_web_controller.h"
-#endif
-
-#ifndef WEARABLE_PRODUCT
-#if defined(CAMERA_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
-#include "bridge/declarative_frontend/jsview/js_camera.h"
-#endif
 #endif
 
 #if defined(WINDOW_SCENE_SUPPORTED)
@@ -517,7 +511,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Rating", JSRating::JSBind },
     { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
-    { "Gauge", JSGauge::JSBind },
     { "Marquee", JSMarquee::JSBind },
     { "Swiper", JSSwiper::JSBind },
     { "Indicator", JSIndicator::JSBind },
@@ -698,9 +691,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "EffectComponent", JSEffectComponent::JSBind },
 #endif
 #ifndef WEARABLE_PRODUCT
-#if defined(CAMERA_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
-    { "Camera", JSCamera::JSBind },
-#endif
     { "Piece", JSPiece::JSBind },
     { "Rating", JSRating::JSBind },
 #if defined(PLAYER_FRAMEWORK_EXISTS)
@@ -715,7 +705,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
     { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
-    { "Gauge", JSGauge::JSBind },
     { "MagnifierController", JSMagnifierController::JSBind },
     { "Marquee", JSMarquee::JSBind },
     { "Menu", JSMenu::JSBind },
@@ -844,7 +833,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "SwipeRecognizer", JSSwipeRecognizer::JSBind },
     { "PinchRecognizer", JSPinchRecognizer::JSBind },
     { "RotationRecognizer", JSRotationRecognizer::JSBind },
-    { "TouchRecognizer", JSTouchRecognizer::JSBind }
+    { "TouchRecognizer", JSTouchRecognizer::JSBind },
+    { "UnionContainer", JSUnionContainer::JSBind },
 };
 
 void RegisterBindFuncs(BindingTarget globalObj, bool isCustomEnvSupported)

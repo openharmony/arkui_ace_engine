@@ -17,9 +17,10 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/jsview/models/grid_container_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/box/box_component_helper.h"
+#include "core/components_ng/pattern/grid_container/grid_container_model.h"
 #include "core/gestures/long_press_gesture.h"
 
 // avoid windows build error about macro defined in winuser.h
@@ -596,7 +597,12 @@ void ViewAbstractModelImpl::SetUseAlign(
 
 void ViewAbstractModelImpl::SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset, GridSizeType type)
 {
-    auto info = GridContainerModelImpl::GetContainer();
+    static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("grid-container");
+    CHECK_NULL_VOID(loader);
+    static GridContainerModel* instance =
+        loader ? reinterpret_cast<GridContainerModel*>(loader->CreateModel()) : nullptr;
+    CHECK_NULL_VOID(instance);
+    auto info = instance->GetGridContainer();
     if (info != nullptr) {
         auto builder = ViewStackProcessor::GetInstance()->GetBoxComponent()->GetGridColumnInfoBuilder();
         builder->SetParent(info);

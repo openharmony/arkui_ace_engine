@@ -501,7 +501,9 @@ HWTEST_F(WebPatternPartTwoTest, NotifyFillRequestSuccess003, TestSize.Level1)
     EXPECT_CALL(*nodeWrap, GetValue()).WillOnce(ReturnRef(value));
     EXPECT_CALL(*viewDataWrap, GetPageUrl()).WillOnce(ReturnRef(pageUrl));
     EXPECT_CALL(*viewDataWrap, GetOtherAccount()).WillOnce(Return(true));
-    webPattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED);
+    auto triggerType = AceAutoFillTriggerType::MANUAL_REQUEST;
+    webPattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED, triggerType);
+    EXPECT_EQ(webPattern->autoFillMenuType_, WebMenuType::TYPE_UNKNOWN_MENU);
 #endif
 }
 
@@ -963,6 +965,9 @@ HWTEST_F(WebPatternPartTwoTest, RequestPasswordAutoFill001, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     WebMenuType menuType = WebMenuType::TYPE_CONTEXTMENU;
     webPattern->isEditableOnContextMenu_ = false;
+    webPattern->RequestPasswordAutoFill(menuType);
+    EXPECT_EQ(webPattern->isEditableOnContextMenu_, false);
+    webPattern->isEditableOnContextMenu_ = true;
     webPattern->RequestPasswordAutoFill(menuType);
     EXPECT_EQ(webPattern->isEditableOnContextMenu_, false);
     menuType = WebMenuType::TYPE_QUICKMENU;

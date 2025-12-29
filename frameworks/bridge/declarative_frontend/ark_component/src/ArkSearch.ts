@@ -922,6 +922,23 @@ class SearchCompressLeadingPunctuationModifier extends ModifierWithKey<boolean> 
   }
 }
 
+class SearchTextDirectionModifier extends ModifierWithKey<TextDirection> {
+  constructor(value: TextDirection) {
+    super(value);
+  }
+  static identity = Symbol('searchTextDirection');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetTextDirection(node);
+    } else {
+      getUINativeModule().search.setTextDirection(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class SearchIncludeFontPaddingModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -1281,6 +1298,10 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     arkSelectedDragPreviewStyle.color = value?.color;
     modifierWithKey(this._modifiersWithKeys, SearchSelectedDragPreviewStyleModifier.identity,
         SearchSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
+    return this;
+  }
+  textDirection(value: TextDirection): this {
+    modifierWithKey(this._modifiersWithKeys, SearchTextDirectionModifier.identity, SearchTextDirectionModifier, value);
     return this;
   }
 }

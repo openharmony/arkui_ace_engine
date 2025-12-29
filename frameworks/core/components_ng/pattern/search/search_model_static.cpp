@@ -208,7 +208,7 @@ void SearchModelStatic::SetSearchButtonFontColor(FrameNode* frameNode, const std
     CHECK_NULL_VOID(buttonFrameNode);
     auto searchTheme = SearchModelStatic::GetTheme(frameNode);
     CHECK_NULL_VOID(searchTheme);
-    SearchModelNG::SetSearchButtonFontColor(frameNode, searchTheme->GetSearchButtonTextColor());
+    SearchModelNG::SetSearchButtonFontColor(frameNode, searchTheme->GetSearchButtonTextColor(), true);
 }
 
 void SearchModelStatic::SetSearchButtonAutoDisable(FrameNode* frameNode, const std::optional<bool>& needToDisable)
@@ -344,6 +344,19 @@ void SearchModelStatic::SetTextAlign(FrameNode* frameNode, const std::optional<T
     textFieldLayoutProperty->UpdateTextAlignChanged(true);
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, textFieldChild);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelStatic::SetTextDirection(FrameNode* frameNode, const std::optional<TextDirection>& valueOpt)
+{
+    if (valueOpt.has_value()) {
+        SearchModelNG::SetTextDirection(frameNode, valueOpt.value());
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextFieldLayoutProperty, TextDirection, PROPERTY_UPDATE_MEASURE_SELF, textFieldChild);
 }
 
 void SearchModelStatic::SetCancelDefaultIcon(FrameNode* frameNode)

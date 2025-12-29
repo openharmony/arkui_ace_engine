@@ -1608,6 +1608,12 @@ HWTEST_F(SheetPresentationTestFiveNg, UpdateSheetObject001, TestSize.Level1)
      */
     sheetPattern->UpdateSheetObject(SheetType::SHEET_CENTER);
     EXPECT_EQ(sheetObject->sheetType_, SheetType::SHEET_CENTER);
+    /**
+     * @tc.steps: step3. set newType is SheetType::SHEET_MINIMIZE, UpdateSheetObject.
+     * @tc.expected: sheetType_ = SheetType::SHEET_MINIMIZE.
+     */
+    sheetPattern->UpdateSheetObject(SheetType::SHEET_MINIMIZE);
+    EXPECT_EQ(sheetObject->sheetType_, SheetType::SHEET_CENTER);
     SheetPresentationTestFiveNg::TearDownTestCase();
 }
 

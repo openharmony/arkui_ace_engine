@@ -15,7 +15,7 @@
 
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ArkCustomComponent } from "./ArkCustomComponent"
-import { SyntaxItemPeer } from "./base/RepeatImpl"
+import { SyntaxItemPeer } from './base/SyntaxNodeBase'
 import { ArkComponentRoot } from "./ArkComponentRoot"
 import { ArkColumnPeer } from "#generated";
 import { ObserveSingleton } from "./stateManagement/base/observeSingleton";
@@ -25,12 +25,13 @@ import { RecordData } from "@ohos.base"
 import { ArkCommonMethodComponent, ArkCommonPeer, CommonMethod } from 'arkui/component/common';
 import { memo_skip } from '@koalaui/runtime/annotations';
 import { int32 } from '@koalaui/common';
+import { IExtendableComponent } from "./component/extendableComponent";
 
 /** base class for user's structs */
 export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent {
     private peer?: PeerNode
-    protected initializers?: () => T_Options
-
+    protected _initializers?: () => T_Options
+    reuseForceAddRefFlag: boolean = false;
     private themeScopeId?: int32
 
     setPeer(peer: PeerNode): void {
@@ -41,7 +42,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     }
 
     setInitializers(initializers?: () => T_Options): void {
-        this.initializers = initializers
+        this._initializers = initializers
     }
 
     setThemeScopeId(themeScopeId: int32): void {
@@ -75,7 +76,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         reuseKey?: string
     ): void {
         if (reuseKey) {
-            ArkStructBase._instantiateReusable(reuseKey!, factory, content, initializers);
+            ArkStructBase._instantiateReusable<T, T_Options>(reuseKey!, factory, content, initializers);
             return
         }
         const receiver = remember(() => {
@@ -108,13 +109,25 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     updateStructWithMemoParameter(
         @memo_skip
         initializers?: () => T_Options): void {
-            this.__updateStruct(initializers?.());
+            // ** parameter is not reliable any more in reuse scenarios.. **
+            this.__updateStruct(this._initializers?.() as T_Options | undefined);
     }
 
     /** @memo:intrinsic */
-    buildArkComponentRoot(initializers?: () => T_Options) {
+    buildArkComponentRoot(initializers?: () => T_Options, callFromReuse: boolean = false) {
         ArkComponentRoot(this, (node: PeerNode) => {
-            this.updateStructWithMemoParameter(initializers);
+            if (callFromReuse) {
+                // reuse component should manually update dependency
+                this.reuseForceAddRefFlag = !this.reuseForceAddRefFlag;
+                if (this.reuseForceAddRefFlag) {
+                    // switch branch to force update dependency
+                    this.updateStructWithMemoParameter(initializers);
+                } else {
+                    this.updateStructWithMemoParameter(initializers);
+                }
+            } else {
+                this.updateStructWithMemoParameter(initializers);
+            }
             const savedRenderingComponent = OBSERVE.renderingComponent
             OBSERVE.renderingComponent = 
             this.isV2()
@@ -142,7 +155,8 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     _buildWrapper(
         /** @memo */
         content?: () => void,
-        initializers?: () => T_Options
+        initializers?: () => T_Options,
+        callFromReuse: boolean = false
     ): void {
         this.callStyles();
         const hasCommonStyles = remember(() => this.hasCommonStyles)
@@ -151,10 +165,10 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
             const receiver = remember(() => new ArkCommonMethodComponent());
             NodeAttach(() => ArkCommonPeer.create(receiver), (_: ArkCommonPeer) => {
                 this.applyStyles(receiver);
-                this.buildArkComponentRoot(initializers);
+                this.buildArkComponentRoot(initializers, callFromReuse);
             })
         } else {
-            this.buildArkComponentRoot(initializers);
+            this.buildArkComponentRoot(initializers, callFromReuse);
         }
     }
 
@@ -174,6 +188,8 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
                 node.setOnRecycle(() =>
                     instance.__aboutToRecycle_Internal()
                 )
+                node.component = instance as IExtendableComponent
+                node.isCustomComponent = true
                 return instance
             });
             node.setOnReuse(
@@ -182,8 +198,8 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
                 }
             )
             component.setInitializers(initializers);
-            component._buildWrapper(content, initializers);
-        }, reuseId)
+            component._buildWrapper(content, initializers, true);
+        }, reuseId + '@Component')
     }
 
     isV2(): boolean {

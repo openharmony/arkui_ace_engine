@@ -21,6 +21,16 @@
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_param.h"
 #include "core/components_ng/pattern/custom/custom_node_static.h"
+#include "generated/arkoala_api_generated.h"
+
+const OH_AnyAPI* GetAnyImpl(int kind, int version, std::string *result = nullptr);
+
+static const GENERATED_ArkUIBasicNodeAPI* GetArkUIBasicNodeAPI()
+{
+    return reinterpret_cast<const GENERATED_ArkUIBasicNodeAPI *>(
+        GetAnyImpl(static_cast<int>(GENERATED_Ark_APIVariantKind::GENERATED_BASIC),
+            GENERATED_ARKUI_BASIC_NODE_API_VERSION, nullptr));
+}
 
 namespace OHOS::Ace::Ani {
 
@@ -45,6 +55,11 @@ ani_status NativeCustomComponent::BindNativeCustomComponent(ani_env *env)
             "_CustomNode_SetBuildFunction",
             nullptr,
             reinterpret_cast<void*>(CustomNodeSetBuildFunction)
+        },
+        ani_native_function {
+            "_CustomNode_AddChild",
+            nullptr,
+            reinterpret_cast<void*>(CustomNodeAddChild)
         },
     };
 
@@ -237,6 +252,15 @@ ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused
         return reinterpret_cast<ani_long>(customNode);
     }
     return 0;
+}
+
+void NativeCustomComponent::CustomNodeAddChild(ani_env* env, [[maybe_unused]] ani_object obj,
+    ani_long parent, ani_long child)
+{
+    Ark_NodeHandle parentNode = reinterpret_cast<Ark_NodeHandle>(parent);
+    Ark_NodeHandle childNode = reinterpret_cast<Ark_NodeHandle>(child);
+    GetArkUIBasicNodeAPI()->addChild(parentNode, childNode);
+    GetArkUIBasicNodeAPI()->markDirty(parentNode, 0);
 }
 
 } // namespace OHOS::Ace::Ani

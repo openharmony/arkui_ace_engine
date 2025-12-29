@@ -108,7 +108,8 @@ void ScrollableController::ScrollByMultiThread(double pixelX, double pixelY, boo
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    if (pattern->GetAxis() == Axis::FREE && pattern->FreeScrollBy(OffsetF { -pixelX, -pixelY })) {
+    if (pattern->GetAxis() == Axis::FREE) {
+        pattern->FreeScrollBy(OffsetF { -pixelX, -pixelY });
         return;
     }
     auto host = pattern->GetHost();
@@ -123,7 +124,8 @@ void ScrollableController::ScrollByMultiThread(double pixelX, double pixelY, boo
         auto offset = pattern->GetAxis() == Axis::VERTICAL ? pixelY : pixelX;
         ACE_SCOPED_TRACE("ScrollBy, offset:%f, id:%d, tag:%s", static_cast<float>(-offset),
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
-        if (pattern->GetAxis() == Axis::FREE && pattern->FreeScrollBy(OffsetF { -pixelX, -pixelY })) {
+        if (pattern->GetAxis() == Axis::FREE) {
+            pattern->FreeScrollBy(OffsetF { -pixelX, -pixelY });
             return;
         }
         pattern->SetIsOverScroll(false);

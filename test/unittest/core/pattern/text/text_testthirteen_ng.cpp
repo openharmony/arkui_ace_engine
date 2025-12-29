@@ -17,6 +17,7 @@
 
 #include "foundation/arkui/ace_engine/test/mock/core/render/mock_paragraph.h"
 #include "gtest/gtest.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "text_base.h"
 #include "ui/base/ace_type.h"
@@ -147,6 +148,11 @@ HWTEST_F(TextThirteenTestNg, DumpSimplifyInfo_001, TestSize.Level1)
     textNode->SetLayoutProperty(layoutProperty);
     auto pattern = textNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
 
     /**
      * @tc.steps: step2. Create a json.

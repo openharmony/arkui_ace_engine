@@ -253,6 +253,11 @@ struct FontStyle {
         resMap_[key] = {resObj, std::move(updateFunc)};
     }
 
+    size_t RemoveResource(const std::string& key)
+    {
+        return resMap_.erase(key);
+    }
+
     void CopyResource(const std::unique_ptr<FontStyle>& source)
     {
         resMap_ = source->resMap_;

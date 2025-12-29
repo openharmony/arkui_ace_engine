@@ -565,6 +565,7 @@ void AceContainer::Destroy()
     RegisterContainerHandler(nullptr);
     resRegister_.Reset();
     assetManager_.Reset();
+    UnRegisterUIExtDataConsumer();
 }
 
 void AceContainer::DestroyView()
@@ -3580,10 +3581,20 @@ void AceContainer::UpdateColorMode(uint32_t colorMode,
     NotifyConfigToSubContainers(parsedConfig, configuration);
 }
 
+bool AceContainer::GetWhiteListStatus()
+{
+    auto appContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+    // If appContext is null, keep the original logic unchanged.
+    CHECK_NULL_RETURN(appContext, true);
+    // Check if the application is in the white list for configuration updates.
+    auto appConfigUpdateReason = appContext->GetConfigUpdateReason();
+    return appConfigUpdateReason == OHOS::AppExecFwk::ConfigUpdateReason::CONFIG_UPDATE_REASON_IN_WHITE_LIST;
+}
+
 void AceContainer::CheckForceVsync(const ParsedConfig& parsedConfig)
 {
     // the application is in the background and the dark and light colors are switched.
-    if (pipelineContext_ && !pipelineContext_->GetOnShow() && !parsedConfig.colorMode.empty()) {
+    if (pipelineContext_ && !pipelineContext_->GetOnShow() && !parsedConfig.colorMode.empty() && GetWhiteListStatus()) {
         pipelineContext_->SetBackgroundColorModeUpdated(true);
         auto window = pipelineContext_->GetWindow();
         if (window) {

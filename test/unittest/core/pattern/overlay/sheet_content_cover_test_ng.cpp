@@ -382,15 +382,17 @@ HWTEST_F(SheetContentCoverObjectTestNG, DirtyLayoutProcess002, TestSize.Level1)
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithmT);
     ASSERT_NE(layoutAlgorithmWrapper, nullptr);
     /**
-     * @tc.steps: step. DirtyLayoutProcess.
+     * @tc.steps: step. DirtyLayoutProcess with update position branch.
      * @tc.expected: GetTransformTranslate()->x.ConvertToPx() = 0.0f,
      *               GetTransformTranslate()->y.ConvertToPx() = 0.0f,
      *               GetTransformTranslate()->z.ConvertToPx() = 0.0f.
      */
+    sheetPattern->isOnAppearing_ = false;
+    sheetPattern->isOnDisappearing_ = false;
     object->DirtyLayoutProcess(layoutAlgorithmWrapper);
-    EXPECT_EQ(renderContext->GetTransformTranslate()->x.ConvertToPx(), 0.0f);
-    EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), 0.0f);
-    EXPECT_EQ(renderContext->GetTransformTranslate()->z.ConvertToPx(), 0.0f);
+    EXPECT_TRUE(NearZero(renderContext->GetTransformTranslate()->x.ConvertToPx()));
+    EXPECT_TRUE(NearZero(renderContext->GetTransformTranslate()->y.ConvertToPx()));
+    EXPECT_TRUE(NearZero(renderContext->GetTransformTranslate()->z.ConvertToPx()));
 }
 
 /**

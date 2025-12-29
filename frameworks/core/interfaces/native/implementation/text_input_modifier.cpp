@@ -977,6 +977,13 @@ void SetKeyboardAppearanceImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<KeyboardAppearance>(value);
     TextFieldModelStatic::SetKeyboardAppearance(frameNode, convValue);
 }
+void SetTextDirectionImpl(Ark_NativePointer node,
+                          const Opt_TextDirection* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelStatic::SetTextDirection(frameNode, Converter::OptConvertPtr<TextDirection>(value));
+}
 void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
                                        const Opt_Boolean* value)
 {
@@ -1150,6 +1157,7 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::SetIncludeFontPaddingImpl,
         TextInputAttributeModifier::SetFallbackLineSpacingImpl,
         TextInputAttributeModifier::SetSelectedDragPreviewStyleImpl,
+        TextInputAttributeModifier::SetTextDirectionImpl,
         TextInputAttributeModifier::SetInputFilterImpl,
         TextInputAttributeModifier::SetCustomKeyboardImpl,
         TextInputAttributeModifier::SetShowCounterImpl,

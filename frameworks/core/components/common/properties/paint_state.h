@@ -124,6 +124,10 @@ struct TextMetrics {
     double ideographicBaseline = 0;
 };
 
+struct RenderingContextOptions {
+    bool antialias = false;
+};
+
 enum class ContextType {
     RENDER_2D,
     RENDER_3D,

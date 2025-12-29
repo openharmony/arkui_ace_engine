@@ -441,6 +441,49 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         jsEngine->DrawChildrenInspectorCallback(componentId);
     };
 
+    const auto& layoutChildrenInspectorCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                                      const std::string& componentId) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->LayoutChildrenInspectorCallback(componentId);
+    };
+ 
+    auto layoutInspectorUniqueIdCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](int32_t uniqueId) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->LayoutInspectorCallback(uniqueId);
+    };
+ 
+    auto drawInspectorUniqueIdCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](int32_t uniqueId) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->DrawInspectorCallback(uniqueId);
+    };
+ 
+    auto drawChildrenInspectorUniqueIdCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                                     int32_t uniqueId) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->DrawChildrenInspectorCallback(uniqueId);
+    };
+ 
+    auto layoutChildrenInspectorUniqueIdCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+                                                       int32_t uniqueId) {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return;
+        }
+        jsEngine->LayoutChildrenInspectorCallback(uniqueId);
+    };
+
     const auto& requestAnimationCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
                                                const std::string& callbackId, uint64_t timeStamp) {
         auto jsEngine = weakEngine.Upgrade();
@@ -519,7 +562,9 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
             resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
             timerCallback, mediaQueryCallback, layoutInspectorCallback, drawInspectorCallback,
-            drawChildrenInspectorCallback, requestAnimationCallback,
+            drawChildrenInspectorCallback, layoutChildrenInspectorCallback, layoutInspectorUniqueIdCallback,
+            drawInspectorUniqueIdCallback, drawChildrenInspectorUniqueIdCallback,
+            layoutChildrenInspectorUniqueIdCallback, requestAnimationCallback,
             jsCallback, onWindowDisplayModeChangedCallBack, onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack,
             onRestoreAbilityStateCallBack, onNewWantCallBack, onMemoryLevelCallBack, onStartContinuationCallBack,
             onCompleteContinuationCallBack, onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack,
@@ -529,7 +574,9 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
             resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
             timerCallback, mediaQueryCallback, layoutInspectorCallback, drawInspectorCallback,
-            drawChildrenInspectorCallback, requestAnimationCallback,
+            drawChildrenInspectorCallback, layoutChildrenInspectorCallback, layoutInspectorUniqueIdCallback,
+            drawInspectorUniqueIdCallback, drawChildrenInspectorUniqueIdCallback,
+            layoutChildrenInspectorUniqueIdCallback, requestAnimationCallback,
             jsCallback, onWindowDisplayModeChangedCallBack, onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack,
             onRestoreAbilityStateCallBack, onNewWantCallBack, onMemoryLevelCallBack, onStartContinuationCallBack,
             onCompleteContinuationCallBack, onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack,
@@ -1183,10 +1230,69 @@ void DeclarativeFrontend::OnDrawChildrenCompleted(const std::string& componentId
     }
 }
 
+void DeclarativeFrontend::OnLayoutChildrenCompleted(const std::string& componentId)
+{
+    if (delegate_) {
+        delegate_->OnLayoutChildrenCompleted(componentId);
+    }
+}
+
 bool DeclarativeFrontend::IsDrawChildrenCallbackFuncExist(const std::string& componentId)
 {
     if (delegate_) {
         return delegate_->IsDrawChildrenCallbackFuncExist(componentId);
+    }
+    return false;
+}
+
+bool DeclarativeFrontend::IsLayoutChildrenCallbackFuncExist(const std::string& componentId)
+{
+    if (delegate_) {
+        return delegate_->IsLayoutChildrenCallbackFuncExist(componentId);
+    }
+    return false;
+}
+
+void DeclarativeFrontend::OnLayoutCompleted(int32_t uniqueId)
+{
+    if (delegate_) {
+        delegate_->OnLayoutCompleted(uniqueId);
+    }
+}
+
+void DeclarativeFrontend::OnDrawCompleted(int32_t uniqueId)
+{
+    if (delegate_) {
+        delegate_->OnDrawCompleted(uniqueId);
+    }
+}
+
+void DeclarativeFrontend::OnDrawChildrenCompleted(int32_t uniqueId)
+{
+    if (delegate_) {
+        delegate_->OnDrawChildrenCompleted(uniqueId);
+    }
+}
+
+void DeclarativeFrontend::OnLayoutChildrenCompleted(int32_t uniqueId)
+{
+    if (delegate_) {
+        delegate_->OnLayoutChildrenCompleted(uniqueId);
+    }
+}
+
+bool DeclarativeFrontend::IsDrawChildrenCallbackFuncExist(int32_t uniqueId)
+{
+    if (delegate_) {
+        return delegate_->IsDrawChildrenCallbackFuncExist(uniqueId);
+    }
+    return false;
+}
+
+bool DeclarativeFrontend::IsLayoutChildrenCallbackFuncExist(int32_t uniqueId)
+{
+    if (delegate_) {
+        return delegate_->IsLayoutChildrenCallbackFuncExist(uniqueId);
     }
     return false;
 }

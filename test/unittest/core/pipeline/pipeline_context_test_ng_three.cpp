@@ -70,6 +70,54 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg501, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetNeedRenderNodeByUniqueId001
+ * @tc.desc: Test the function SetNeedRenderNodeByUniqueId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, SetNeedRenderNodeByUniqueId001, TestSize.Level1)
+{
+    /**
+     *@tc.steps1: initialize parameters.
+     *@tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_TRUE(context_->needRenderNodeByUniqueId_.empty());
+    /**
+     *@tc.steps2: Call the function SetNeedRenderNodeByUniqueId.
+     *@tc.expected: The return value is same as the expectation.
+     */
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    auto frameNode = FrameNode::CreateFrameNode(TEST_TAG, 3, pattern);
+    context_->SetNeedRenderNodeByUniqueId(WeakPtr<FrameNode>(frameNode));
+    EXPECT_EQ(context_->needRenderNodeByUniqueId_.count(WeakPtr<FrameNode>(frameNode)), 1);
+}
+
+/**
+ * @tc.name: needRenderForLayoutChildrenNodes001
+ * @tc.desc: Test the function needRenderForLayoutChildrenNodes_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, needRenderForLayoutChildrenNodes001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_TRUE(context_->needRenderForLayoutChildrenNodes_.empty());
+    /**
+     *@tc.steps2: Call the function SetNeedRenderNodeByUniqueId.
+     *@tc.expected: The return value is same as the expectation.
+     */
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    auto frameNode = FrameNode::CreateFrameNode(TEST_TAG, 3, pattern);
+    context_->SetNeedRenderForLayoutChildrenNode(WeakPtr<FrameNode>(frameNode));
+    EXPECT_EQ(context_->needRenderForLayoutChildrenNodes_.count(WeakPtr<FrameNode>(frameNode)), 1);
+    context_->InspectLayoutChildren();
+    EXPECT_EQ(context_->needRenderForLayoutChildrenNodes_.count(WeakPtr<FrameNode>(frameNode)), 0);
+}
+
+/**
  * @tc.name: PipelineContextTestNg502
  * @tc.desc: Test Dump All UINode Info.
  * @tc.type: FUNC

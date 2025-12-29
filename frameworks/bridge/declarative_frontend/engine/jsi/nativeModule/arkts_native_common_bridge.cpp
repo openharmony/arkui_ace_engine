@@ -10286,6 +10286,21 @@ ArkUINativeModuleValue CommonBridge::ClearGestures(ArkUIRuntimeCallInfo* runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue CommonBridge::SetIsRecycleInvisibleImageMemory(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    bool isRecycle = false;
+    if (firstArg->IsBoolean()) {
+        isRecycle = firstArg->ToBoolean(vm)->Value();
+    }
+    context->SetIsRecycleInvisibleImageMemory(isRecycle);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue CommonBridge::GetWindowName(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

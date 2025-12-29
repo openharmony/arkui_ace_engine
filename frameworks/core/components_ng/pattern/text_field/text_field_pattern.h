@@ -1088,6 +1088,7 @@ public:
     void UpdateShowCountBorderStyle();
     void StripNextLine(std::wstring& data);
     bool IsShowHandle();
+    void HandleButtonFocusEvent(const RefPtr<TextInputResponseArea>& responseArea);
     std::string GetCancelButton();
     std::string GetCancelImageText();
     std::string GetPasswordIconPromptInformation(bool show);
@@ -1112,6 +1113,9 @@ public:
 
     float GetUnderlineWidth() const
     {
+        if (IsTV()) {
+            return static_cast<float>(underlineWidth_.ConvertToPx());
+        }
         return static_cast<float>(underlineWidth_.Value());
     }
 
@@ -1692,6 +1696,21 @@ public:
         isFocusedBeforeClick_ = isFocusedBeforeClick;
     }
 
+    void UpdateFoucsOffsetIfNeed(RoundRect& paintRect)
+    {
+        auto textFieldTheme = GetTheme();
+        auto focusPaintPadding = textFieldTheme->GetIconFocusPadding().ConvertToPx();
+        RectF rect = paintRect.GetRect();
+        auto x = rect.GetX();
+        auto y = rect.GetY();
+        auto width = rect.Width();
+        auto height = rect.Height();
+        paintRect.SetRect({x - focusPaintPadding, y - focusPaintPadding,
+            width + 2 * focusPaintPadding, height + 2 * focusPaintPadding});
+        float cornerRadius = width / 2 + focusPaintPadding;
+        paintRect.SetCornerRadius(cornerRadius);
+    }
+
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     virtual void ProcessSelection();
     void AfterLayoutProcessCleanResponse(
@@ -1811,6 +1830,14 @@ public:
         }
         placeholderColorInfo_.append("[" + info + "]");
     }
+
+    // tv function
+    bool IsTV() const
+    {
+        auto theme = GetTheme();
+        CHECK_NULL_RETURN(theme, false);
+        return theme->GetHoverAndPressBgColorEnabled();
+    }
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1867,6 +1894,9 @@ private:
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     void GetTextSelectRectsInRangeAndWillChange();
+    void reportOnWillDeleteEvent();
+    void reportOnDidInsertEvent();
+    void reportOnDidDeleteEvent();
     bool BeforeIMEInsertValue(const std::u16string& insertValue, int32_t offset);
     void AfterIMEInsertValue(const std::u16string& insertValue);
     bool BeforeIMEDeleteValue(const std::u16string& deleteValue, TextDeleteDirection direction, int32_t offset);
@@ -2158,6 +2188,19 @@ private:
 #if defined(ENABLE_STANDARD_INPUT)
     void UpdateCaretInfoStandard(bool forceUpdate);
 #endif
+    void SetFocusStyleForTV();
+    void ClearFocusStyleForTV();
+    void UpdateHoverStyleForTV(bool isHover);
+    void UpdatePressStyleForTV(bool isPressed);
+    void SetShowErrorForTV();
+    void SetThemeAttrForTV();
+    void InitDisableColorForTV();
+    void ApplyUnderlineThemeForTV();
+    void ProcessFocusStyleForTV();
+    void GetInnerFocusPaintRectForTV(RoundRect& paintRect);
+    void PaintCancelRectForTV();
+    void PaintPasswordRectForTV();
+    void SetThemeBorderAttrForTV();
 
     RectF frameRect_;
     RectF textRect_;
@@ -2380,6 +2423,7 @@ private:
     TextOverflow lastTextOverflow_ = TextOverflow::ELLIPSIS;
     RelatedLPXInfo lpxInfo_;
     std::string placeholderColorInfo_;
+    bool needResetFocusColor_ = true;
 
 #if defined(CROSS_PLATFORM)
     std::shared_ptr<TextEditingValue> editingValue_;

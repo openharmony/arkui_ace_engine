@@ -37,6 +37,7 @@ class GridColumnInfo;
 namespace OHOS::Rosen {
 class RSSyncTransactionController;
 class RSSyncTransactionHandler;
+class RSTransaction;
 } // namespace OHOS::Rosen
 namespace OHOS::Ace::NG {
 class DragDropSpringLoadingDetector;
@@ -693,6 +694,18 @@ public:
 
     void DispatchLastDragEventVoluntarily(bool isTrans);
 
+#ifdef ENABLE_ROSEN_BACKEND
+    void InitSyncTransaction();
+
+    void ResetSyncTransaction();
+
+    void OpenSyncTransaction();
+
+    void CloseSyncTransaction();
+
+    std::shared_ptr<Rosen::RSTransaction> GetRSTransaction();
+#endif
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -839,6 +852,10 @@ private:
     bool isPullThrow_ = false;
     int32_t BundlecurrentPullId_ = -1;
     DragBundleInfo dragBundleInfo_;
+#ifdef ENABLE_ROSEN_BACKEND
+    OHOS::Rosen::RSSyncTransactionController* transactionController_ = nullptr;
+    std::shared_ptr<Rosen::RSSyncTransactionHandler> transactionHandler_ = nullptr;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

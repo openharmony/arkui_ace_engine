@@ -61,7 +61,7 @@ constexpr double DEFAULT_MAX_ROTATION_ANGLE = 360.0;
 } // namespace
 namespace GestureOpsAccessor {
 Ark_NativePointer CreateTapGestureImpl(const Ark_Number* fingers, const Ark_Number* count,
-    const Ark_Number* distanceThreshold, Ark_Boolean isFingerCountLimited)
+    const Ark_Float64 distanceThreshold, Ark_Boolean isFingerCountLimited)
 {
     int32_t fingerValue = Converter::Convert<int32_t>(*fingers);
     if (fingerValue > DEFAULT_MAX_FINGERS || fingerValue < DEFAULT_TAP_FINGER) {
@@ -69,8 +69,9 @@ Ark_NativePointer CreateTapGestureImpl(const Ark_Number* fingers, const Ark_Numb
     }
     int32_t countValue = Converter::Convert<int32_t>(*count);
     countValue = countValue < DEFAULT_TAP_COUNT ? DEFAULT_TAP_COUNT : countValue;
-    float distanceThresholdValue = Converter::Convert<float>(*distanceThreshold);
-    distanceThresholdValue = distanceThresholdValue < 0 ? DEFAULT_TAP_DISTANCE : distanceThresholdValue;
+    double distanceThresholdValue = Converter::Convert<double>(distanceThreshold);
+    distanceThresholdValue = distanceThresholdValue < 0 || std::isnan(distanceThresholdValue) ? DEFAULT_TAP_DISTANCE
+                                                                                              : distanceThresholdValue;
     distanceThresholdValue = Dimension(distanceThresholdValue, DimensionUnit::VP).ConvertToPx();
     bool isFingerCountLimitedValue = Converter::Convert<bool>(isFingerCountLimited);
     auto tapGestureObject =

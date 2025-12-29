@@ -430,6 +430,9 @@ public:
     virtual void DumpSimplifyInfoOnlyForParamConfig(
         std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig())
     {}
+    virtual void AddExtraInfoWithParamConfig(
+        std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig())
+    {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) {}
@@ -873,6 +876,9 @@ public:
     {
         return nullptr;
     }
+    virtual void OnDetachFromMainRenderTree() {}
+    virtual void OnAttachToMainRenderTree() {}
+    virtual void OnOffscreenProcessResource() {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

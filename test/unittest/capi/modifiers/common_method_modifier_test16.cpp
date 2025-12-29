@@ -177,9 +177,18 @@ public:
         return isReceiveDragEventEnabled_;
     }
 
+    bool GetDestroyInHide() override {
+        return destroyInHide_;
+    }
+
+    void SetDestroyInHide(bool destroyInHide) override {
+        destroyInHide_ = destroyInHide;
+    }
+
 private:
     int32_t childContainerId_ = -1;
     bool isReceiveDragEventEnabled_ = true;
+    bool destroyInHide_ = false;
 
     void CheckOffsetOption(const NG::MenuParam& menuParam)
     {

@@ -25,6 +25,8 @@ export struct PhotoSelect {
   private static DEFAULT_COUNT: number = 4;
   @Param @Require imageInfoArr: Array<imageGeneration.ImageItem>;
   @Param @Require imageMatrixArr: number[][];
+  @Event setImgCounts?: (count: number) => void;
+
   private getSelectPhotoLength(): number {
     let result = 0;
     for (let i = 0; i < this.imageInfoArr.length; i++) {
@@ -120,6 +122,10 @@ export struct PhotoSelect {
       this.imageInfoArr[i] = images[i];
       this.imageMatrixArr[i] = matrixTmp[i];
     }
+
+    if (this.setImgCounts) {
+      this.setImgCounts(images.length);
+    }
   }
 
   private enablePhotoPicker(index: number): boolean {
@@ -159,6 +165,9 @@ export struct PhotoSelect {
       }
       imageInfo.zIndex = this.getMaxZIndex() + 1;
       this.imageInfoArr[i] = imageInfo;
+      if (this.setImgCounts) {
+        this.setImgCounts(i + 1);
+      }
     }
   }
 

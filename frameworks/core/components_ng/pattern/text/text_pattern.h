@@ -313,6 +313,7 @@ public:
     }
 
     void OnVisibleChange(bool isVisible) override;
+    void OnVisibleAreaChange(bool isVisible);
 
     std::list<RefPtr<SpanItem>> GetSpanItemChildren()
     {

@@ -1,0 +1,12 @@
+{
+  "devices": {
+    "general": [
+      "default"
+    ]
+  },
+  "development": {
+    "addedSysCaps": [
+      "SystemCapability.ArkUI.ArkUI.Full"
+    ]
+  }
+}

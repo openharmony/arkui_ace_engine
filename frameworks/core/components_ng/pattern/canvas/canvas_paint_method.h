@@ -79,7 +79,7 @@ public:
         onModifierUpdate_();
     }
 
-    void SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback)
+    void SetRSCanvasCallback(std::function<void(std::shared_ptr<RSCanvas>, double, double)>& callback)
     {
         canvasCallback_ = callback;
     }
@@ -87,7 +87,13 @@ public:
     void FireRSCanvasCallback(double width, double height)
     {
         CHECK_NULL_VOID(canvasCallback_);
-        canvasCallback_(rsCanvas_.get(), width, height);
+        canvasCallback_(rsCanvas_, width, height);
+    }
+
+    void SetVisibility(bool isVisible_)
+    {
+        CHECK_NULL_VOID(canvasRenderContext_);
+        canvasRenderContext_->SetVisibility(isVisible_);
     }
 
     void CloseImageBitmap(const std::string& src);
@@ -127,6 +133,7 @@ public:
     void SetTransformMatrix(const TransformParam& param);
     void TransformMatrix(const TransformParam& param);
     void TranslateMatrix(double tx, double ty);
+    void ClearRecordingCanvas();
 
     TransformParam GetTransformInner();
     LineDashParam GetLineDashInner() const;
@@ -138,7 +145,7 @@ private:
 #endif
 
     OnModifierUpdateFunc onModifierUpdate_;
-    std::function<void(RSCanvas*, double, double)> canvasCallback_ = nullptr;
+    std::function<void(std::shared_ptr<RSCanvas>, double, double)> canvasCallback_ = nullptr;
     WeakPtr<FrameNode> frameNode_;
     bool needMarkDirty_ = true;
     // To record the host custom component name of the current canvas.

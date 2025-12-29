@@ -1108,6 +1108,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest019, TestSize.Level1)
     ViewAbstract::SetLightUpEffect(RATIO);
     ViewAbstract::SetUseEffect(false, EffectType::DEFAULT);
     ViewAbstract::SetRenderGroup(false);
+    // can't check renderContext
+    ViewAbstract::SetAdaptiveGroup(false, true);
+    ViewAbstract::BindColorPicker(ColorPlaceholder::FOREGROUND);
     ViewAbstract::SetRenderFit(RenderFit::BOTTOM);
     ViewAbstract::UpdateSafeAreaExpandOpts(safeAreaExpandOpts);
     ViewAbstract::UpdateSafeAreaExpandOpts(AceType::RawPtr(FRAME_NODE_REGISTER), safeAreaExpandOpts);
@@ -1157,6 +1160,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest020, TestSize.Level1)
     ViewAbstract::SetUseEffect(true, EffectType::DEFAULT);
     ViewAbstract::SetUseEffect(true, EffectType::WINDOW_EFFECT);
     ViewAbstract::SetRenderGroup(false);
+    ViewAbstract::SetAdaptiveGroup(false, false);
     ViewAbstract::SetRenderFit(RenderFit::BOTTOM);
     ViewAbstract::UpdateSafeAreaExpandOpts(safeAreaExpandOpts);
     ViewAbstract::SetObscured(reasonsVector);

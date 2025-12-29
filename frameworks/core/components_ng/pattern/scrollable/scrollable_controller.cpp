@@ -108,7 +108,8 @@ void ScrollableController::ScrollBy(double pixelX, double pixelY, bool smooth)
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("ScrollBy, offset:%f, id:%d, tag:%s", static_cast<float>(-offset),
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
-    if (pattern->GetAxis() == Axis::FREE && pattern->FreeScrollBy(OffsetF { -pixelX, -pixelY })) {
+    if (pattern->GetAxis() == Axis::FREE) {
+        pattern->FreeScrollBy(OffsetF { -pixelX, -pixelY });
         return;
     }
     pattern->SetIsOverScroll(false);

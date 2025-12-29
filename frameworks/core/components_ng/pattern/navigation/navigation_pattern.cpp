@@ -595,6 +595,52 @@ void NavigationPattern::OnModifyDone()
     UpdateToobarFocusColor();
     UpdateDividerBackgroundColor();
     NavigationModifyDoneToolBarManager();
+    ProcessHideNavBarChangeInForceSplit();
+}
+
+void NavigationPattern::ProcessHideNavBarChangeInForceSplit()
+{
+    if (!navBarVisibilityChange_) {
+        return;
+    }
+    auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    if (!IsForceSplitSupported(context) || !forceSplitSuccess_) {
+        return;
+    }
+    auto relatedPage = AceType::DynamicCast<NavDestinationGroupNode>(host->GetRelatedPageDestNode());
+    CHECK_NULL_VOID(relatedPage);
+    auto preRelatedIsVisible = IsRelatedDestinationShouldVisible();
+    auto preRelatedAtTop = IsRelatedDestinationAtTop();
+    RecognizeHomePageIfNeeded();
+    auto task = [weakPattern = WeakClaim(this), weakRelatedPage = WeakPtr(relatedPage),
+        preRelatedIsVisible, preRelatedAtTop]() {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto relatedPage = weakRelatedPage.Upgrade();
+        CHECK_NULL_VOID(relatedPage);
+        auto curRelatedIsVisible = pattern->IsRelatedDestinationShouldVisible();
+        auto curRelatedAtTop = pattern->IsRelatedDestinationAtTop();
+        if (!curRelatedAtTop && preRelatedAtTop) {
+            pattern->NotifyDestinationLifecycle(
+                relatedPage, NavDestinationLifecycle::ON_INACTIVE, NavDestinationActiveReason::TRANSITION);
+        }
+        if (!curRelatedIsVisible && preRelatedIsVisible) {
+            pattern->NotifyDestinationLifecycle(
+                relatedPage, NavDestinationLifecycle::ON_HIDE, NavDestVisibilityChangeReason::TRANSITION);
+        }
+        if (curRelatedIsVisible && !preRelatedIsVisible) {
+            pattern->NotifyDestinationLifecycle(
+                relatedPage, NavDestinationLifecycle::ON_SHOW, NavDestVisibilityChangeReason::TRANSITION);
+        }
+        if (curRelatedAtTop && !preRelatedAtTop) {
+            pattern->NotifyDestinationLifecycle(
+                relatedPage, NavDestinationLifecycle::ON_ACTIVE, NavDestinationActiveReason::TRANSITION);
+        }
+    };
+    context->AddAfterLayoutTask(std::move(task));
 }
 
 void NavigationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
@@ -3047,7 +3093,9 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
                 newTopNavDestination->SetIsOnAnimation(false);
             }
             if (!preIsHomeDest) {
-                preTopNavDestination->CleanContent();
+                // skip clean, Otherwise, it will affect the custom component's lifeCycle aboutTodisappear in
+                // navDestinationContent.
+                preTopNavDestination->CleanContent(false, false, true);
                 auto parent = preTopNavDestination->GetParent();
                 CHECK_NULL_VOID(parent);
                 parent->RemoveChild(preTopNavDestination);
@@ -3184,11 +3232,19 @@ void NavigationPattern::UpdateDividerBackgroundColor()
 {
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(navigationGroupNode);
-    auto dividerNode = GetDividerNode();
-    CHECK_NULL_VOID(dividerNode);
+    auto layoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto colorDefined = layoutProperty->GetDefinedDividerColor();
     auto theme = NavigationGetTheme(navigationGroupNode->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
-    dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+    Color defaultColor = theme->GetNavigationDividerColor();
+    Color dividerColor = defaultColor;
+    if (colorDefined) {
+        dividerColor = layoutProperty->GetDividerColor().value_or(defaultColor);
+    }
+    auto dividerNode = GetDividerNode();
+    CHECK_NULL_VOID(dividerNode);
+    dividerNode->GetRenderContext()->UpdateBackgroundColor(dividerColor);
     dividerNode->MarkDirtyNode();
 }
 

@@ -33,6 +33,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
+#include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log.h"
@@ -86,7 +87,6 @@
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/common/resource/resource_configuration.h"
-#include "base/i18n/localization.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -106,6 +106,7 @@ namespace {
 const std::string RESOURCE_TOKEN_PATTERN = "(app|sys|\\[.+?\\])\\.(\\S+?)\\.(\\S+)";
 const std::string RESOURCE_NAME_PATTERN = "\\[(.+?)\\]";
 constexpr int32_t DIRECTION_COUNT = 4;
+constexpr int32_t FLOAT_PRECISION = 6;
 constexpr char JS_TEXT_MENU_ID_CLASS_NAME[] = "TextMenuItemId";
 constexpr int NUM1 = 1;
 constexpr int NUM2 = 2;
@@ -401,10 +402,8 @@ std::string TryLocalizeNumberStr(const std::string& numStr, int32_t precision)
         return numStr;
     }
 
-    std::string result = numStr;
-    std::string backup = numStr;
-
-    return localization->LocalizeNumber(result, precision) ? result : backup;
+    std::string result;
+    return localization->LocalizeNumber(numStr, result, precision) ? result : numStr;
 }
 
 std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray> params, int32_t containCount)
@@ -436,12 +435,12 @@ std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray
     } else if (type == "f") {
         if (item->IsNumber()) {
             std::string numStr = std::to_string(item->ToNumber<float>());
-            return TryLocalizeNumberStr(numStr, -1);
+            return TryLocalizeNumberStr(numStr, FLOAT_PRECISION);
         } else if (item->IsObject()) {
             double result = 0.0;
             JSViewAbstract::ParseJsDouble(item, result);
             std::string numStr = std::to_string(result);
-            return TryLocalizeNumberStr(numStr, -1);
+            return TryLocalizeNumberStr(numStr, FLOAT_PRECISION);
         }
     }
     return std::string();
@@ -5288,9 +5287,8 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args)
     if (ParseJsColor(args, borderColor, borderColorResObj)) {
         if (SystemProperties::ConfigChangePerform() && borderColorResObj) {
             ViewAbstractModel::GetInstance()->SetBorderColor(borderColorResObj);
-        } else {
-            ViewAbstractModel::GetInstance()->SetBorderColor(borderColor);
         }
+        ViewAbstractModel::GetInstance()->SetBorderColor(borderColor);
     } else if (args->IsObject()) {
         CommonColor commonColor;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
@@ -9720,6 +9718,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("renderGroup", &JSViewAbstract::JSRenderGroup);
     JSClass<JSViewAbstract>::StaticMethod("excludeFromRenderGroup", &JSViewAbstract::JSExcludeFromRenderGroup);
     JSClass<JSViewAbstract>::StaticMethod("renderFit", &JSViewAbstract::JSRenderFit);
+    JSClass<JSViewAbstract>::StaticMethod("useUnion", &JSViewAbstract::JSUseUnion);
 
     JSClass<JSViewAbstract>::StaticMethod("freeze", &JSViewAbstract::JsSetFreeze);
 
@@ -11430,6 +11429,7 @@ void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
         return;
     }
+    ViewAbstractModel::GetInstance()->ResetColorPicker();
     if (!SystemProperties::ConfigChangePerform()) {
         ParseJsColor(info[0], foregroundColor);
         ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
@@ -11629,12 +11629,17 @@ void JSViewAbstract::JsPrivacySensitive(const JSCallbackInfo& info)
 
 void JSViewAbstract::JSRenderGroup(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1) {
+    const auto argLen = info.Length();
+    if (argLen == 0 || argLen > 2) {
         return;
     }
     bool isRenderGroup = false;
     if (info[0]->IsBoolean()) {
         isRenderGroup = info[0]->ToBoolean();
+    }
+    if (argLen == 2 && info[1]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetAdaptiveGroup(isRenderGroup, info[1]->ToBoolean());
+        return;
     }
     ViewAbstractModel::GetInstance()->SetRenderGroup(isRenderGroup);
 }
@@ -11667,6 +11672,19 @@ void JSViewAbstract::JSRenderFit(const JSCallbackInfo& info)
     }
     // how content fills the node duration implicit animation
     ViewAbstractModel::GetInstance()->SetRenderFit(renderFit);
+}
+
+void JSViewAbstract::JSUseUnion(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    JSRef<JSVal> argUnion = info[0];
+    bool useUnion = false;
+    if (argUnion->IsBoolean()) {
+        useUnion = argUnion->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetUseUnion(useUnion);
 }
 
 bool JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName)

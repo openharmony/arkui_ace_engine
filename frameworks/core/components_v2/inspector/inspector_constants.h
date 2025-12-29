@@ -680,5 +680,8 @@ ACE_EXPORT extern const char CONTAINER_PICKER_ETS_TAG[];
 
 // UndefinedNode
 ACE_EXPORT extern const char UNDEFINED_NODE_ETS_TAG[];
+
+// UnionContainer
+ACE_EXPORT extern const char UNION_CONTAINER_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

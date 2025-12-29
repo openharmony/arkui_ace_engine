@@ -841,4 +841,52 @@ HWTEST_F(GridAttrTestTwoNg, ResetLayoutPolicy, TestSize.Level1)
     EXPECT_TRUE(layoutProperty_->GetLayoutPolicyProperty().value().IsHeightNoMatch());
     CreateDone();
 }
+
+/*
+ * @tc.name: ResetColumnsTemplate
+ * @tc.desc: GridModelNG ResetColumnsTemplate test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestTwoNg, ResetColumnsTemplate, TestSize.Level1)
+{
+    GridModelNG gridModel = CreateGrid();
+    gridModel.SetColumnsTemplate("1fr");
+    gridModel.SetScrollBarMode(DisplayMode::ON);
+    CreateFixedItems(20);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Reset columnsTemplate.
+     * @tc.expected: Grid scrollBar will be free.
+     */
+    layoutProperty_->ResetColumnsTemplate();
+    layoutProperty_->OnColumnsTemplateUpdate("");
+    pattern_->OnModifyDone();
+    FlushUITasks(frameNode_);
+    RefPtr<ScrollBar> scrollBar = pattern_->GetScrollBar();
+    EXPECT_FALSE(scrollBar);
+}
+
+/*
+ * @tc.name: ResetRowsTemplate
+ * @tc.desc: GridModelNG ResetRowsTemplate test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestTwoNg, ResetRowsTemplate, TestSize.Level1)
+{
+    GridModelNG gridModel = CreateGrid();
+    gridModel.SetRowsTemplate("1fr");
+    gridModel.SetScrollBarMode(DisplayMode::ON);
+    CreateFixedItems(20);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Reset rowsTemplate.
+     * @tc.expected: Grid scrollBar will be free.
+     */
+    layoutProperty_->ResetRowsTemplate();
+    layoutProperty_->OnRowsTemplateUpdate("");
+    pattern_->OnModifyDone();
+    FlushUITasks(frameNode_);
+    RefPtr<ScrollBar> scrollBar = pattern_->GetScrollBar();
+    EXPECT_FALSE(scrollBar);
+}
 } // namespace OHOS::Ace::NG

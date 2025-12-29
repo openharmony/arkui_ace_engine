@@ -483,7 +483,7 @@ void updatePopupCommonParamPart2(const Ark_PopupCommonOptions& src, RefPtr<Popup
         popupParam->SetTargetOffset(popupOffset);
     }
     auto widthOpt = Converter::OptConvert<CalcDimension>(src.width);
-    Validator::ValidateNonNegative(widthOpt);
+    Validator::ValidatePositive(widthOpt);
     if (widthOpt.has_value()) {
         popupParam->SetChildWidth(widthOpt.value());
     }
@@ -543,6 +543,17 @@ void updatePopupCommonParam(const Ark_PopupCommonOptions& src, RefPtr<PopupParam
     updatePopupCommonParamPart2(src, popupParam);
 }
 
+void initPopupParam(RefPtr<PopupParam>& popupParam)
+{
+    CHECK_NULL_VOID(popupParam);
+    g_setPopupDefaultBlurStyle(popupParam);
+    auto defaultPopupShadowStyle = g_getPopupDefaultShadow();
+    Shadow shadow;
+    g_getShadowFromTheme(defaultPopupShadowStyle, shadow);
+    popupParam->SetShadow(shadow);
+    popupParam->SetIsShadowStyle(true);
+}
+
 } // OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
@@ -579,9 +590,19 @@ void OpenPopupImpl(Ark_VMContext vmContext,
         ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
         return;
     }
+    auto context = frameNode->GetContext();
+    if (!context) {
+        ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    ContainerScope scope(context->GetInstanceId());
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     CHECK_NULL_VOID(popupParam);
-    popupParam = Converter::Convert<RefPtr<PopupParam>>(options->value);
+    if (options && options->tag != INTEROP_TAG_UNDEFINED) {
+        popupParam = Converter::Convert<RefPtr<PopupParam>>(options->value);
+    } else {
+        initPopupParam(popupParam);
+    }
     popupParam->SetIsShow(true);
     popupParam->SetUseCustomComponent(true);
     int targetId = INVALID_ID;
@@ -611,6 +632,12 @@ void UpdatePopupImpl(Ark_VMContext vmContext,
         ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
         return;
     }
+    auto context = frameNode->GetContext();
+    if (!context) {
+        ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    ContainerScope scope(context->GetInstanceId());
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     auto oldParam = AceType::MakeRefPtr<PopupParam>();
     auto result = ViewAbstractModelStatic::GetPopupParam(oldParam, frameNode);
@@ -656,6 +683,12 @@ void ClosePopupImpl(Ark_VMContext vmContext,
         ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
         return;
     }
+    auto context = frameNode->GetContext();
+    if (!context) {
+        ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    ContainerScope scope(context->GetInstanceId());
     auto result = ViewAbstractModelStatic::ClosePopup(frameNode);
     if (result == ERROR_CODE_INTERNAL_ERROR) {
         result = ERROR_CODE_NO_ERROR;
@@ -675,6 +708,12 @@ void OpenMenuImpl(Ark_VMContext vmContext,
         ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
         return;
     }
+    auto context = frameNode->GetContext();
+    if (!context) {
+        ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    ContainerScope scope(context->GetInstanceId());
     MenuParam menuParam = Converter::Convert<MenuParam>(options->value);
     g_bindMenuOptionsParamCallbacks(options->value, menuParam, AceType::WeakClaim(frameNode.GetRawPtr()));
     auto pipelineContext = frameNode->GetContext();
@@ -755,6 +794,12 @@ void CloseMenuImpl(Ark_VMContext vmContext,
         ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
         return;
     }
+    auto context = frameNode->GetContext();
+    if (!context) {
+        ReturnPromise(outputArgumentForReturningPromise, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    ContainerScope scope(context->GetInstanceId());
     auto result = ViewAbstractModelStatic::CloseMenu(frameNode);
     if (result == ERROR_CODE_INTERNAL_ERROR) {
         result = ERROR_CODE_NO_ERROR;

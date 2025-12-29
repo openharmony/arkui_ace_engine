@@ -39,6 +39,10 @@ struct Index {
           .width('100%').fontSize('20vp')
           .margin({ bottom: 15})
           .onClick(()=>{ router.pushUrl({url: 'pages/popupAvoidKeyboard/Index'}) })
+        Button($r('app.string.AccessibilityModal'))
+          .width('100%').fontSize('20vp')
+          .margin({ bottom: 15})
+          .onClick(()=>{ router.pushUrl({url: 'pages/accessibilityModal/Index'}) })
       }
       .width('100%')
     }

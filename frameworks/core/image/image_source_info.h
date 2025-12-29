@@ -62,7 +62,11 @@ public:
     static bool IsSVGSource(const std::string& imageSrc, SrcType srcType, InternalResource::ResourceId resourceId);
     static SrcType ResolveURIType(const std::string& uri);
     static bool IsValidBase64Head(const std::string& uri, const std::string& pattern);
-    static bool IsUriOfDataAbilityEncoded(const std::string& uri, const std::string& pattern);
+    static bool IsFileMediaThumbnailUri(const std::string& uri);
+    static bool IsFileMediaAstcUri(const std::string& uri);
+    static bool IsFileMediaUri(const std::string& uri);
+    static bool IsDataAbilityThumbnailUri(const std::string& uri);
+    static bool IsDataAbilityMediaUri(const std::string& uri);
     static ImageSourceInfo CreateImageSourceInfoWithHost(const RefPtr<NG::FrameNode>& host);
 
     // operators
@@ -120,6 +124,9 @@ public:
     {
         return localColorMode_;
     }
+    
+    void UpdateLocalColorMode(ColorMode localColorMode);
+
     bool IsFromReset()
     {
         return isFromReset_;

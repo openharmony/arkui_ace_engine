@@ -21,13 +21,14 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
 void GaugeModelNG::Create(float value, float min, float max)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::GAUGE_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", GAUGE_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::GAUGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GaugePattern>(); });
+        GAUGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GaugePattern>(); });
     stack->Push(frameNode);
 
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, Value, value);
@@ -79,6 +80,16 @@ void GaugeModelNG::SetStrokeWidth(const Dimension& strokeWidth)
 }
 
 void GaugeModelNG::SetDescription(const RefPtr<AceType>& customNode)
+{
+    auto customDescriptionNode = AceType::DynamicCast<NG::UINode>(customNode);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto gaugePattern = frameNode->GetPattern<GaugePattern>();
+    CHECK_NULL_VOID(gaugePattern);
+    gaugePattern->SetDescriptionNode(customDescriptionNode);
+}
+
+void GaugeModelNG::SetDescriptionStatic(const RefPtr<AceType>& customNode)
 {
     auto customDescriptionNode = AceType::DynamicCast<NG::UINode>(customNode);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -167,6 +178,24 @@ void GaugeModelNG::ResetIndicatorSpace()
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(GaugePaintProperty, IndicatorSpace, PROPERTY_UPDATE_RENDER);
 }
 
+void GaugeModelNG::CreateFrameNode(float value, float min, float max)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", GAUGE_ETS_TAG, nodeId);
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(GAUGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GaugePattern>(); });
+    stack->Push(frameNode);
+
+    ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, Value, value);
+    ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, Max, max);
+    ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, Min, min);
+    if (SystemProperties::ConfigChangePerform()) {
+        SetUseGradient(frameNode.GetRawPtr(), false);
+        SetUseSpecialDefaultIndicator(frameNode.GetRawPtr(), false);
+    }
+}
+
 void GaugeModelNG::SetValue(FrameNode* frameNode, float value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, Value, value, frameNode);
@@ -188,6 +217,16 @@ void GaugeModelNG::SetGaugeStrokeWidth(FrameNode* frameNode, const Dimension& st
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, StrokeWidth, strokeWidth, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, StrokeWidth, strokeWidth, frameNode);
+}
+
+void GaugeModelNG::SetIsShowLimitValue(FrameNode* frameNode, bool isShowLimitValue)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowLimitValue, isShowLimitValue, frameNode);
+}
+
+void GaugeModelNG::SetIsShowDescription(FrameNode* frameNode, bool isShowDescription)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowDescription, isShowDescription, frameNode);
 }
 
 void GaugeModelNG::SetShadowOptions(FrameNode* frameNode, const GaugeShadowOptions& shadowOptions)
@@ -383,6 +422,13 @@ void GaugeModelNG::SetUseGradient(bool useGradient)
 void GaugeModelNG::SetUseGradient(FrameNode* frameNode, bool useGradient)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, UseJsLinearGradient, useGradient, frameNode);
+}
+
+void GaugeModelNG::SetUseSpecialDefaultIndicator(FrameNode* frameNode, bool useSpecialDefaultIndicator)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, UseSpecialDefaultIndicator, useSpecialDefaultIndicator, frameNode);
+    }
 }
 
 void GaugeModelNG::SetUseSpecialDefaultIndicator(bool useSpecialDefaultIndicator)

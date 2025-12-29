@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "base/log/log.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/custom/custom_node_static.h"
@@ -80,6 +81,34 @@ RefPtr<UINode> GetTargetNode(const RefPtr<AceType>& node, const std::string& tag
     return current;
 }
 
+RefPtr<UINode> GetTargetNavDestinationNode(const RefPtr<AceType>& node, bool isInner)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto current = AceType::DynamicCast<UINode>(node);
+    for (; current; current = isInner ? current->GetFirstChild() : current->GetParent()) {
+        if (current->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            continue;
+        }
+        auto parent = current->GetParent();
+        CHECK_NULL_CONTINUE(parent);
+        const auto& parentTag = parent->GetTag();
+        // NavDestination in stack or home NavDestination in forceSplit mode.
+        if (parentTag == V2::NAVIGATION_CONTENT_ETS_TAG || parentTag == V2::PRIMARY_CONTENT_NODE_ETS_TAG) {
+            break;
+        }
+        if (parentTag != V2::NAVIGATION_VIEW_ETS_TAG) {
+            continue;
+        }
+        auto destNode = AceType::DynamicCast<NavDestinationGroupNode>(current);
+        CHECK_NULL_CONTINUE(destNode);
+        // related NavDestination in forceSplit mode.
+        if (destNode->GetNavDestinationType() == NavDestinationType::RELATED) {
+            break;
+        }
+    }
+    return current;
+}
+
 void QueryNavigationInfo(ani_long node, ArkUINavigationInfo& info)
 {
     auto customNode = reinterpret_cast<CustomNode*>(node);
@@ -96,6 +125,7 @@ void QueryNavigationInfo(ani_long node, ArkUINavigationInfo& info)
 
     info.navigationId = result->navigationId;
     info.navPathStack = reinterpret_cast<ani_ref>(ptr);
+    info.uniqueId = result->uniqueId;
     return;
 }
 
@@ -103,20 +133,18 @@ void QueryRouterPageInfo(ani_long node, ArkUIRouterPageInfo& info)
 {
     auto customNode = reinterpret_cast<CustomNode*>(node);
     CHECK_NULL_VOID(customNode);
-
-    auto curNode = GetTargetNode(AceType::Claim(customNode), V2::PAGE_ETS_TAG, false, false);
-    auto pageNode = AceType::DynamicCast<FrameNode>(curNode);
-    CHECK_NULL_VOID(pageNode);
-    auto pattern = pageNode->GetPattern<PagePattern>();
-    CHECK_NULL_VOID(pattern);
-    auto pageInfo = pattern->GetPageInfo();
-
-    info.index = pageInfo->GetPageIndex();
-    info.name = pageInfo->GetPageUrl();
-    info.pageId = std::to_string(pageInfo->GetPageId());
-    info.path = pageInfo->GetPagePath();
-    info.state = static_cast<ani_size>(pattern->GetPageState());
-    return;
+    auto pageInfo = NG::UIObserverHandler::GetInstance().GetRouterPageState(
+        AceType::WeakClaim(customNode).Upgrade());
+    CHECK_NULL_VOID(pageInfo);
+    info.index = pageInfo->index;
+    info.name = pageInfo->name;
+    info.path = pageInfo->path;
+    info.state = static_cast<ani_size>(pageInfo->state);
+    info.pageId = pageInfo->pageId;
+    if (pageInfo->size.has_value()) {
+        info.width = pageInfo->size.value().Width();
+        info.height = pageInfo->size.value().Height();
+    }
 }
 
 bool QueryRouterPageInfo1(ArkUI_Int32 uniqueId, ArkUIRouterPageInfo& info)
@@ -129,6 +157,10 @@ bool QueryRouterPageInfo1(ArkUI_Int32 uniqueId, ArkUIRouterPageInfo& info)
     info.path = routerPageResult->path;
     info.state = static_cast<ani_size>(routerPageResult->state);
     info.pageId = routerPageResult->pageId;
+    if (routerPageResult->size.has_value()) {
+        info.width = routerPageResult->size.value().Width();
+        info.height = routerPageResult->size.value().Height();
+    }
     return true;
 }
 
@@ -160,7 +192,25 @@ void GetNavDestinationInfo(RefPtr<UINode> node, ArkUINavDestinationInfo& info)
     info.navigationId = pattern->GetNavigationId();
     info.state = static_cast<ani_size>(state);
     info.mode = static_cast<ani_size>(mode);
-    return;
+    auto size = pattern->GetCurrentNavDestinationSize();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE) && size.has_value()) {
+        info.width = size.value().Width();
+        info.height = size.value().Height();
+    }
+    info.navPathStack = nullptr;
+    auto navigationStack = pattern->GetNavigationStack().Upgrade();
+    CHECK_NULL_VOID(navigationStack);
+    if (navigationStack->IsStaticStack()) {
+        auto navigationStackExtend = navigationStack->GetNavigationStackExtend();
+        if (navigationStackExtend) {
+            info.param = navigationStackExtend->GetSerializedParamByIndex(host->GetIndex());
+        } else {
+            NavPathStackPeer* ptr = new NavPathStackPeer(navigationStack);
+            info.navPathStack = reinterpret_cast<ani_ref>(ptr);
+        }
+    } else {
+        info.param = pattern->GetSerializedParam();
+    }
 }
 
 void QueryNavDestinationInfo(ani_long node, ArkUINavDestinationInfo& info)
@@ -173,19 +223,16 @@ void QueryNavDestinationInfo(ani_long node, ArkUINavDestinationInfo& info)
     CHECK_NULL_VOID(current);
 
     GetNavDestinationInfo(current, info);
-    return;
 }
 
 void QueryNavDestinationInfo0(ani_long node, ArkUINavDestinationInfo& info, ani_int isInner)
 {
     auto customNode = reinterpret_cast<CustomNode*>(node);
     CHECK_NULL_VOID(customNode);
-    auto current =
-        GetTargetNode(AceType::Claim(customNode), V2::NAVDESTINATION_VIEW_ETS_TAG, static_cast<bool>(isInner), true);
+    auto current = GetTargetNavDestinationNode(AceType::Claim(customNode), static_cast<bool>(isInner));
     CHECK_NULL_VOID(current);
 
     GetNavDestinationInfo(current, info);
-    return;
 }
 
 bool QueryNavDestinationInfo1(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& info)
@@ -200,6 +247,10 @@ bool QueryNavDestinationInfo1(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& inf
     info.navigationId = navDestinationResult->navigationId;
     info.state = static_cast<ani_size>(navDestinationResult->state);
     info.mode = static_cast<ani_size>(navDestinationResult->mode);
+    if (navDestinationResult->size.has_value()) {
+        info.width = navDestinationResult->size.value().Width();
+        info.height = navDestinationResult->size.value().Height();
+    }
     return true;
 }
 

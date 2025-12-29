@@ -87,6 +87,29 @@ private:
     static RefPtr<CustomNode> customNode_;
     static RefPtr<PipelineContext> context_;
 };
+
+class PipelineContextFourTestNg : public testing::Test {
+    public:
+    static void ResetEventFlag(int32_t testFlag);
+
+    static bool GetEventFlag(int32_t testFlag);
+
+    static void SetUpTestSuite();
+
+    static void TearDownTestSuite();
+
+    static void CreateCycleDirtyNode(int cycle, bool& flagUpdate);
+
+    static void AssertValidContext();
+
+private:
+    static ElementIdType frameNodeId_;
+    static ElementIdType customNodeId_;
+    static RefPtr<FrameNode> frameNode_;
+    static RefPtr<CustomNode> customNode_;
+    static RefPtr<PipelineContext> context_;
+};
+
 } // namespace NG
 } // namespace OHOS::Ace
 #endif // TEST_UNITTEST_CORE_PIPELINE_PIPELINE_CONTEXT_TEST_NG_H

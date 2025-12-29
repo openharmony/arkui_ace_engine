@@ -43,6 +43,7 @@ public:
     static void SetCaretColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void ResetCaretColor(FrameNode* frameNode);
     static void SetTextAlign(FrameNode* frameNode, const std::optional<TextAlign>& valueOpt);
+    static void SetTextDirection(FrameNode* frameNode, const std::optional<TextDirection>& valueOpt);
     static void SetDividerColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);

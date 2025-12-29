@@ -2068,4 +2068,46 @@ HWTEST_F(OverlayManagerTestUpdateNg, UpdateSheetRender001, TestSize.Level1)
     EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
 }
 
+/**
+ * @tc.name: UpdateSheetRenderStrategy
+ * @tc.desc: Test OverlayManager::UpdateSheetRender render strategy update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestUpdateNg, UpdateSheetRenderStrategy, TestSize.Level1)
+{
+        /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    OverlayManagerTestUpdateNg::SetSheetTheme(sheetTheme);
+    SheetStyle sheetStyle;
+    sheetStyle.radiusRenderStrategy = RenderStrategy::OFFSCREEN;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+    auto renderContext = sheetNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    /**
+     * @tc.steps: step3. Change the SheetTheme shadow.
+     * @tc.expected: the strategy is updated successfully from radius render strategy
+     */
+    overlayManager->UpdateSheetRender(sheetNode, sheetStyle, false);
+    EXPECT_EQ(renderContext->propRenderStrategy_.has_value(), true);
+    EXPECT_EQ(renderContext->propRenderStrategy_.value(), RenderStrategy::OFFSCREEN);
+}
 } // namespace OHOS::Ace::NG

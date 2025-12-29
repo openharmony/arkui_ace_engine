@@ -88,6 +88,7 @@ public:
     void SaveBaseInfo(const std::string& info) override;
     void SendBaseInfo(int32_t processId) override;
     void SaveGetPixelMapFunction(GetPixelMapFunction&& function) override;
+    void SaveGetImagesByIdFunction(GetImagesByIdFunction&& function) override;
     void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager,
         int32_t instanceId) override;
     void SaveGetCurrentInstanceIdCallback(std::function<int32_t()>&& callback) override;
@@ -106,7 +107,14 @@ public:
     void SendTranslateResult(int32_t nodeId, std::string res) override;
     void ResetTranslate(int32_t nodeId) override;
     void GetPixelMap() override;
+    void GetMultiImagesById(const std::vector<int32_t>& arkUIIds,
+        const std::map<int32_t, std::vector<int32_t>>& arkWebs) override;
     void SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps) override;
+    void SendArkUIImagesById(int32_t windowId,
+        const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>& componentImages,
+        MultiImageQueryErrorCode arkUIErrorCode) override;
+    void SendArkWebImagesById(int32_t windowId, const std::map<int32_t, std::map<int32_t,
+        std::shared_ptr<Media::PixelMap>>>& webImages, MultiImageQueryErrorCode arkWebErrorCode) override;
     void GetVisibleInspectorTree(ParamConfig config = ParamConfig()) override;
     void SendCommand(const std::string& command) override;
     void SaveSendCommandFunction(SendCommandFunction&& function) override;

@@ -80,6 +80,7 @@ std::string DatePickerAccessibilityProperty::GetShowTimePickerText() const
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
     auto parentNode = frameNode->GetParentFrameNode();
+    CHECK_NULL_RETURN(parentNode, "");
     auto timeNode = AceType::DynamicCast<FrameNode>(parentNode->GetChildAtIndex(1));
     CHECK_NULL_RETURN(timeNode, "");
     auto timePickerRowPattern = timeNode->GetPattern<NG::TimePickerRowPattern>();

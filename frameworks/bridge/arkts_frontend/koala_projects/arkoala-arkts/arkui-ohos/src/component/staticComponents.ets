@@ -108,8 +108,7 @@ export class ArkCustomComponentRootPeer extends PeerNode {
     setChildPeerPtr(childPeerPtr: KPointer): void {
         this.childPeerPtr = childPeerPtr;
         if (this.component instanceof ArkCustomComponent && (this.component as ArkCustomComponent).isCustomLayout) {
-            ArkUINativeModule._AddChild(this.peer.ptr, childPeerPtr);
-            ArkUINativeModule._MarkDirty(this.peer.ptr, 0);
+            ArkUIAniCustomNodeModule._CustomNode_AddChild(this.peer.ptr, childPeerPtr);
         }
     }
 }

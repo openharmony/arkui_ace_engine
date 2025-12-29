@@ -825,6 +825,12 @@ public:
     {
         vsyncListener_ = vsync;
     }
+
+    void UpdateDrawLayoutChildObserver(
+        int32_t uniqueId, bool isClearLayoutObserver, bool isClearDrawObserver) override {};
+    void UpdateDrawLayoutChildObserver(
+        const std::string& inspectorKey, bool isClearLayoutObserver, bool isClearDrawObserver) override {};
+
 protected:
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
     void FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) override;

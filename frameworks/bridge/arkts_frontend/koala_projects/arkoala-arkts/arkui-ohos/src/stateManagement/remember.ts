@@ -18,31 +18,31 @@ import {
     memoize,
     MutableState,
     rememberDisposable,
-    StateManagerImpl,
+    StateManager,
     GlobalStateManager,
     StateToScopes,
+    Dependency,
     __id,
 } from '@koalaui/runtime';
-import { StateContext } from 'arkui.incremental.runtime.state';
 import { MemoState } from './memorize/state';
 import { IObservedObject } from './decorator';
 import { ObserveSingleton } from './base/observeSingleton';
 import { NullableObject } from './base/types';
-import { functionOverValue } from '@koalaui/common';
+import { functionOverValue, unsafeCast } from '@koalaui/common';
 
 export class CascadeMemoState<Value> implements MemoState<Value> {
-    private manager: StateManagerImpl | undefined = undefined;
+    private manager: StateManager | undefined = undefined;
     private _value: Value;
     public dependencies: StateToScopes | undefined = undefined;
 
-    constructor(manager: StateContext) {
+    constructor(manager: StateManager) {
         this.dependencies = new StateToScopes();
-        this.manager = manager as StateManagerImpl;
+        this.manager = manager;
     }
 
     get value(): Value {
-        const manager = GlobalStateManager.instance as StateManagerImpl;
-        const scope = manager?.current;
+        const manager = GlobalStateManager.instance;
+        const scope = unsafeCast<Dependency | undefined>(manager?.currentScope);
         this.manager?.scheduleCallback(() => {
             this.dependencies?.register(scope);
         });
@@ -64,7 +64,7 @@ export function memorizeUpdatedState<T>(factory: () => T): MemoState<T> {
     return memoize<CascadeMemoState<T>>(() => {
         const receiver = rememberDisposable<CascadeMemoState<T>>(
             () => {
-                return new CascadeMemoState<T>(__context() as StateContext);
+                return new CascadeMemoState<T>(__context() as StateManager);
             },
             (state: CascadeMemoState<T> | undefined) => {
                 state?.dispose();
@@ -77,7 +77,8 @@ export function memorizeUpdatedState<T>(factory: () => T): MemoState<T> {
 
 /** @memo:intrinsic */
 export function rememberVariable<Value>(initial: (() => Value) | Value): MutableVariable<Value> {
-    const scope = (__context() as StateManagerImpl).scopeEx<BuilderVariable<Value>>(
+    const manager = __context() as StateManager;
+    const scope = manager.scopeEx<BuilderVariable<Value>>(
         __id(), 0, undefined, undefined, undefined, true);
     if (scope.unchanged) {
         return scope.cached;
@@ -85,7 +86,7 @@ export function rememberVariable<Value>(initial: (() => Value) | Value): Mutable
     const isFunction: boolean = functionOverValue<Value>(initial);
     const value: Value = isFunction ? (initial as (() => Value))() : (initial as Value);
 
-    return scope.recache(new BuilderVariable<Value>((__context() as StateManagerImpl).mutableState<Value>(value)));
+    return scope.recache(new BuilderVariable<Value>(manager.mutableState<Value>(value)));
 }
 
 export interface MutableVariable<T> {

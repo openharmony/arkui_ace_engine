@@ -21,6 +21,7 @@
 #include "base/log/jank_frame_report.h"
 #include "core/common/container.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
@@ -130,6 +131,10 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window,
         if (!rsUIDirector_->GetRSUIContext() || isGlobalPipeline) {
             rsUIDirector_->Init(true, true);
         }
+        auto rsUIcontext = rsUIDirector_->GetRSUIContext();
+        if (rsUIcontext) {
+            rsUIcontext->AttachFromUI();
+        }
         rsUIDirector_->SetUITaskRunner(
             [taskExecutor, id](const std::function<void()>& task, uint32_t delay) {
                 ContainerScope scope(id);
@@ -228,6 +233,17 @@ void RosenWindow::PostVsyncTimeoutDFXTask(const RefPtr<TaskExecutor>& taskExecut
 #endif
 }
 
+void RosenWindow::ReportFirstVsync()
+{
+    isFirstRequestVsync_ = false;
+    LOGI("ArkUI requests first Vsync.");
+    auto pipeline = PipelineContext::GetContextByContainerId(id_);
+    CHECK_NULL_VOID(pipeline);
+    auto contentChangeMgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(contentChangeMgr);
+    contentChangeMgr->OnPageTransitionEnd(pipeline->GetRootElement());
+}
+
 void RosenWindow::RequestFrame()
 {
     if (!forceVsync_ && !onShow_) {
@@ -240,8 +256,7 @@ void RosenWindow::RequestFrame()
     if (rsWindow_) {
         isRequestVsync_ = true;
         if (isFirstRequestVsync_) {
-            isFirstRequestVsync_ = false;
-            LOGI("ArkUI requests first Vsync.");
+            ReportFirstVsync();
         }
         rsWindow_->RequestVsync(vsyncCallback_);
         lastRequestVsyncTime_ = static_cast<uint64_t>(GetSysTimestamp());

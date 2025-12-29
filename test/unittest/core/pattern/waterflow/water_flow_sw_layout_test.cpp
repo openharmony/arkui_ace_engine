@@ -2368,4 +2368,72 @@ HWTEST_F(WaterFlowSWTest, ItemFillPolicySWTest003, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 4), 0);
     EXPECT_EQ(GetChildY(frameNode_, 5), ITEM_MAIN_SIZE);
 }
+
+/**
+ * @tc.name: WaterFlowSWNaNTest001
+ * @tc.desc: Test NaN value handling in measurement results for SlidingWindow layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, WaterFlowSWNaNTest001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+
+    CreateWaterFlowItems(60);
+
+    // Create scenario that causes NaN measurement result
+    auto item = GetChildFrameNode(frameNode_, 3);
+    auto layoutProperty = item->GetLayoutProperty();
+
+    // Set invalid constraint size that may cause NaN in measurement
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(std::numeric_limits<float>::quiet_NaN()),
+                CalcLength(std::numeric_limits<float>::quiet_NaN())));
+
+    CreateDone();
+    FlushUITasks();
+
+    // Verify other items are not affected
+    EXPECT_EQ(GetChildHeight(frameNode_, 4), 100.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 5), 200.0f);
+}
+
+/**
+ * @tc.name: WaterFlowSWNaNTest002
+ * @tc.desc: Test onGetItemMainSizeByIndex returns NaN and gets converted to 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, WaterFlowSWNaNTest002, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+
+    CreateWaterFlowItems(60);
+
+    // Create custom Section with onGetItemMainSizeByIndex returning NaN for specific index
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    std::vector<WaterFlowSections::Section> sections = {
+        {.itemsCount = 60, .crossCount = 3, .onGetItemMainSizeByIndex = [](int32_t index) -> float {
+            if (index == 5) {
+                return std::numeric_limits<float>::quiet_NaN();  // Index 5 returns NaN
+            }
+            // Other indices return normal values
+            return (index & 1) ? 200.0f : 100.0f;
+        }}
+    };
+    secObj->ChangeData(0, 0, sections);
+
+    CreateDone();
+    FlushUITasks();
+
+    EXPECT_EQ(pattern_->layoutInfo_->Mode(), WaterFlowLayoutMode::SLIDING_WINDOW);
+
+    // Verify other item heights are normal
+    EXPECT_EQ(GetChildHeight(frameNode_, 4), 100.0f);  // Even index
+    EXPECT_EQ(GetChildHeight(frameNode_, 5), 0.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 6), 100.0f);  // Even index
+    EXPECT_EQ(GetChildHeight(frameNode_, 7), 200.0f);  // Odd index
+}
 } // namespace OHOS::Ace::NG

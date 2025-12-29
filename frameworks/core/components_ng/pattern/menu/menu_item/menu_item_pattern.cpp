@@ -158,6 +158,20 @@ void UpdateIconSrc(RefPtr<FrameNode>& node, const Dimension& horizontalSize,
         iconRenderProperty->UpdateSvgFillColor(color);
     }
 }
+
+static inline RefPtr<FrameNode> GetChildNodeFromRow(const RefPtr<FrameNode> parent, const std::string& tag)
+{
+    CHECK_NULL_RETURN(parent, nullptr);
+    for (const auto& child : parent->GetChildren()) {
+        auto node = AceType::DynamicCast<FrameNode, UINode>(child);
+        CHECK_NULL_RETURN(node, nullptr);
+        if (node->GetTag() == tag) {
+            return node;
+        }
+    }
+    return nullptr;
+}
+
 } // namespace
 
 void MenuItemPattern::OnMountToParentDone()
@@ -290,7 +304,8 @@ void MenuItemPattern::UpdateLeftRow(RefPtr<FrameNode>& leftRow)
 {
     CHECK_NULL_VOID(leftRow);
     auto selectTheme = GetCurrentSelectTheme();
-    if (!selectTheme || !selectTheme->IsTV()) {
+    // The selected icon of default menu is displayed at the start, needs to be added in the left row.
+    if (selectTheme && selectTheme->GetMenuSelectedIconAlign() == HorizontalAlign::START) {
         AddSelectIcon(leftRow);
     }
     UpdateIcon(leftRow, true);
@@ -313,7 +328,8 @@ void MenuItemPattern::UpdateRightRow(RefPtr<FrameNode>& rightRow)
     UpdateIcon(rightRow, false);
     AddExpandIcon(rightRow);
     auto selectTheme = GetCurrentSelectTheme();
-    if (selectTheme && selectTheme->IsTV()) {
+    // The selected icon position configured at the end. Now tv is shown at the end.
+    if (selectTheme && selectTheme->GetMenuSelectedIconAlign() == HorizontalAlign::END) {
         AddSelectIcon(rightRow);
     }
 }
@@ -668,6 +684,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     auto customNode = BuildSubMenuCustomNode();
     CHECK_NULL_VOID(customNode);
     UpdateSubmenuExpandingMode(customNode);
+    detachedProxy_ = customNode;
     if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
         auto frameNode = GetSubMenu(customNode);
         if (!frameNode) {
@@ -686,9 +703,8 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     auto outterMenuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(outterMenuLayoutProps);
     param.isShowInSubWindow = outterMenuLayoutProps->GetShowInSubWindowValue(false);
-    if (!ParseMenuBlurStyleEffect(param, menuNode->GetRenderContext())) {
-        return;
-    }
+    if (!ParseMenuBlurStyleEffect(param, menuNode->GetRenderContext())) { return; }
+
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
     ParseMenuRadius(param);
     auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), param);
@@ -920,6 +936,7 @@ void MenuItemPattern::OnExpandChanged(const RefPtr<FrameNode>& expandableNode)
         menuPattern->AddEmbeddedMenuItem(host);
     } else {
         HideEmbedded();
+        detachedProxy_ = nullptr;
     }
 }
 
@@ -1140,6 +1157,33 @@ void MenuItemPattern::CloseMenu()
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->UpdateMenuAnimation(menuWrapper);
     menuWrapperPattern->HideMenu();
+}
+
+void MenuItemPattern::HandleCloseSubMenu()
+{
+    CHECK_NULL_VOID(embeddedMenu_);
+    auto menuPattern = embeddedMenu_->GetPattern<MenuPattern>();
+    if (menuPattern) {
+        menuPattern->DoCloseSubMenus();
+    }
+    DoCloseSubMenu();
+}
+
+void MenuItemPattern::DoCloseSubMenu()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChild(embeddedMenu_, true);
+    embeddedMenu_ = nullptr;
+    isExpanded_ = false;
+    this->detachedProxy_ = nullptr;
+    auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    CHECK_NULL_VOID(rightRow);
+    auto imageNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildren().back());
+    CHECK_NULL_VOID(imageNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    imageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
 }
 
 void MenuItemPattern::RegisterOnClick()
@@ -2012,7 +2056,7 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
     renderContext->SetVisible(isSelected_);
 
     auto selectTheme = GetCurrentSelectTheme();
-    if (selectTheme && selectTheme->IsTV()) {
+    if (selectTheme && selectTheme->GetMenuSelectedIconAlign() == HorizontalAlign::END) {
         // The select icon is displayed at the end of the row on TV.
         selectIcon_->MountToParent(row);
     } else {
@@ -2101,6 +2145,42 @@ bool MenuItemPattern::ISNeedAddExpandIcon(RefPtr<FrameNode>& row)
     }
 }
 
+void MenuItemPattern::UpdateLabelIfSelectOverlayExtensionMenu(std::string& label)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto topLevelMenuPattern = GetMenuPattern(true);
+    CHECK_NULL_VOID(topLevelMenuPattern && topLevelMenuPattern->IsSelectOverlayExtensionMenu());
+    RefPtr<FrameNode> rightRow =
+        host->GetChildAtIndex(1) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
+    CHECK_NULL_VOID(rightRow);
+    auto labelNode = GetChildNodeFromRow(rightRow, V2::TEXT_ETS_TAG);
+    CHECK_NULL_VOID(labelNode);
+    auto textProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textProperty);
+    if (textProperty->GetContent() && !textProperty->GetContent()->empty()) {
+        label = UtfUtils::Str16DebugToStr8(textProperty->GetContent().value());
+    }
+}
+
+void MenuItemPattern::UpdateContentIfSelectOverlayExtensionMenu(std::string& content)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto topLevelMenuPattern = GetMenuPattern(true);
+    CHECK_NULL_VOID(topLevelMenuPattern && topLevelMenuPattern->IsSelectOverlayExtensionMenu());
+    RefPtr<FrameNode> leftRow =
+        host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
+    CHECK_NULL_VOID(leftRow);
+    auto contentNode = GetChildNodeFromRow(leftRow, V2::TEXT_ETS_TAG);
+    CHECK_NULL_VOID(contentNode);
+    auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textProperty);
+    if (textProperty->GetContent() && !textProperty->GetContent()->empty()) {
+        content = UtfUtils::Str16DebugToStr8(textProperty->GetContent().value());
+    }
+}
+
 void MenuItemPattern::AddClickableArea()
 {
     if (expandingMode_ == SubMenuExpandingMode::EMBEDDED &&
@@ -2128,6 +2208,8 @@ void MenuItemPattern::AddClickableArea()
         CHECK_NULL_VOID(menuProperty);
         std::string content = menuProperty->GetContent().value_or("");
         std::string label = menuProperty->GetLabel().value_or("");
+        UpdateContentIfSelectOverlayExtensionMenu(content);
+        UpdateLabelIfSelectOverlayExtensionMenu(label);
         auto accessibilityProperty = clickableArea->GetAccessibilityProperty<AccessibilityProperty>();
         CHECK_NULL_VOID(accessibilityProperty);
         accessibilityProperty->SetAccessibilityText(content + "," + label);
@@ -3453,11 +3535,7 @@ void MenuItemPattern::ApplyOptionThemeStyles()
     SetFontWeight(selectTheme->GetMenuFontWeight());
     SetBorderColor(GetBorderColor());
     SetBorderWidth(GetBorderWidth());
-    if (IsSelectOption() && showDefaultSelectedIcon_ && !selectTheme->GetMenuBlendBgColor()) {
-        SetBgColor(Color::TRANSPARENT);
-        return;
-    }
-    SetBgColor(selectTheme->GetBackgroundColor());
+    SetBgColor(Color::TRANSPARENT);
 }
 
 RefPtr<SelectTheme> MenuItemPattern::GetCurrentSelectTheme()

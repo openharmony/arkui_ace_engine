@@ -82,6 +82,14 @@ bool SelectableUtils::IsGatherSelectedItemsAnimationEnabled(RefPtr<FrameNode>& f
     return pattern->GetEditModeOptions().enableGatherSelectedItemsAnimation;
 }
 
+void SelectableUtils::BindContextMenu(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SelectableItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->BindContextMenu();
+}
+
 void SelectableUtils::PublishMenuStatus(bool isShowing, const RefPtr<FrameNode>& menuNode)
 {
     if (isShowing) {

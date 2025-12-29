@@ -28,6 +28,7 @@ const std::string STATUS_TRUE = "true";
 static std::string g_setComponentType = "";
 const std::string STATUS_FALSE = "false";
 std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> g_customAccessibilityNode = nullptr;
+std::shared_ptr<NWeb::NWebAgentManager> g_nwebAgentManager = nullptr;
 std::map<std::string, std::string> htmlElementToSurfaceMap = { { "existhtmlElementId", "existSurfaceId" },
     { "existhtmlElementIdOther", "existSurfaceIdOther" } };
 std::map<std::string, std::string> surfaceToHtmlElementMap = { { "existSurfaceId", "existhtmlElementId" },
@@ -292,32 +293,38 @@ std::string FileSelectorParamOhos::GetDefaultFileName()
 {
     return "";
 }
+
 std::vector<std::string> FileSelectorParamOhos::GetAcceptType()
 {
     return {};
 }
+
 bool FileSelectorParamOhos::IsCapture()
 {
     return false;
 }
+
 std::string FileSelectorParamOhos::GetDefaultPath()
 {
     return "";
 }
+
 std::vector<std::string> FileSelectorParamOhos::GetDescriptions()
 {
     return {};
 }
+
 bool FileSelectorParamOhos::IsAcceptAllOptionExcluded()
 {
     return false;
 }
+
 AcceptFileTypeLists FileSelectorParamOhos::GetAccepts()
 {
     AcceptFileTypeLists result;
-
     return result;
 }
+
 void FileSelectorResultOhos::HandleFileList(std::vector<std::string>& result) {}
 void WebPermissionRequestOhos::Deny() const {}
 std::string WebPermissionRequestOhos::GetOrigin() const
@@ -1355,6 +1362,12 @@ std::string WebDelegate::GetWebInfoType()
 }
 void WebDelegate::SetSurfaceId(const std::string& surfaceId) {}
 void WebDelegate::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked) {}
+
+std::shared_ptr<OHOS::NWeb::NWebAgentManager> WebDelegate::GetNWebAgentManager()
+{
+    return g_nwebAgentManager;
+}
+
 std::string WebDelegate::SpanstringConvertHtml(const std::vector<uint8_t>& content)
 {
     return "";
@@ -1445,6 +1458,8 @@ bool WebDelegate::IsBlanklessFrameValid() const
     return blanklessFrameWidth_ != 0 && blanklessFrameHeight_ != 0 && resizeWidth != 0 && resizeHeight != 0 &&
            blanklessFrameWidth_ == resizeWidth && blanklessFrameHeight_ / resizeHeight_ >= WEB_SNAPSHOT_SIZE_TOLERANCE;
 }
+
+void WebDelegate::CallBlanklessCallback(int32_t state, const std::string& reason) {}
 
 void WebDelegate::UpdateEnableImageAnalyzer(bool enable) {}
 

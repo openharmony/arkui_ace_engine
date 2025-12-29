@@ -183,4 +183,9 @@ std::string ImageLoadingContext::GetImageSizeInfo() const
 {
     return "";
 }
+
+bool ImageLoadingContext::IsNetworkImageCached() const
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

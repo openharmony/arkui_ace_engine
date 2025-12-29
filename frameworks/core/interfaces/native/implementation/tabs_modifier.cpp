@@ -232,6 +232,14 @@ void SetBarWidthImpl(Ark_NativePointer node,
     Validator::ValidateNonNegative(valueOpt);
     TabsModelStatic::SetTabBarWidth(frameNode, valueOpt);
 }
+void SetBarHeight0Impl(Ark_NativePointer node, const Opt_Length* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto valueOpt = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(valueOpt);
+    TabsModelStatic::SetTabBarHeight(frameNode, valueOpt);
+}
 void SetAnimationCurveImpl(Ark_NativePointer node,
                            const Opt_Union_Curve_ICurve* value)
 {
@@ -623,9 +631,7 @@ void SetBarModeImpl(Ark_NativePointer node,
     }
     TabsModelStatic::SetTabBarMode(frameNode, mode);
 }
-void SetBarHeightImpl(Ark_NativePointer node,
-                      const Opt_Length* height,
-                      const Opt_Boolean* noMinHeightLimit)
+void SetBarHeight1Impl(Ark_NativePointer node, const Opt_Length* height, const Opt_Boolean* noMinHeightLimit)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -672,6 +678,7 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::SetBarPositionImpl,
         TabsAttributeModifier::SetScrollableImpl,
         TabsAttributeModifier::SetBarWidthImpl,
+        TabsAttributeModifier::SetBarHeight0Impl,
         TabsAttributeModifier::SetAnimationCurveImpl,
         TabsAttributeModifier::SetAnimationDurationImpl,
         TabsAttributeModifier::SetAnimationModeImpl,
@@ -695,7 +702,7 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::SetOnContentWillChangeImpl,
         TabsAttributeModifier::SetOnContentDidScrollImpl,
         TabsAttributeModifier::SetBarModeImpl,
-        TabsAttributeModifier::SetBarHeightImpl,
+        TabsAttributeModifier::SetBarHeight1Impl,
         TabsAttributeModifier::SetBarBackgroundBlurStyle1Impl,
         TabsAttributeModifier::SetCachedMaxCountImpl,
     };

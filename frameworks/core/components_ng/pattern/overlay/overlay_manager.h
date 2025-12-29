@@ -787,6 +787,10 @@ public:
     }
     bool CheckTargetIdIsValid(int32_t targetId);
 
+    void UpdateImageGeneratorSheetKey(const RefPtr<UINode>& sheetNode, int32_t rootId);
+    bool CloseImageGeneratorSheet();
+    void UpdateImageGeneratorSheetScale(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle,
+        int32_t targetId, std::function<void(const int32_t)>&& onWillDismiss, std::function<void()>&& sheetSpringBack);
 private:
     RefPtr<PipelineContext> GetPipelineContext() const;
     void SetSheetProperty(
@@ -937,8 +941,7 @@ private:
     void UpdateMenuVisibility(const RefPtr<FrameNode>& menu);
     void RemoveMenuNotInSubWindow(
         const WeakPtr<FrameNode>& menuWK, const WeakPtr<UINode>& rootWeak, const WeakPtr<OverlayManager>& overlayWeak);
-    bool CreateSheetKey(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t targetId,
-        SheetKey& sheetKey);
+    bool CreateSheetKey(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t targetId, SheetKey& sheetKey);
 
     bool CheckTopModalNode(const RefPtr<FrameNode>& topModalNode, int32_t targetId);
     void HandleModalShow(std::function<void(const std::string&)>&& callback,
@@ -991,7 +994,7 @@ private:
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
     int32_t RemoveOverlayManagerNode();
     void UpdateMenuAnimationOptions(const RefPtr<FrameNode>& menu, AnimationOption& option);
-    void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool isShow);
     RefPtr<FrameNode> GetLastChildNotRemovingForAtm(const RefPtr<UINode>& atomicNode);
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
@@ -1076,6 +1079,7 @@ private:
     int32_t oldTargetId_ = -1;
     std::unordered_set<int32_t> onDisappearFilterIds_;
     std::unordered_map<int32_t, std::function<void(const MenuLifeCycleEvent&)>> menuLifeCycleCallbackMap_;
+    std::optional<SheetKey> imageGeneratorSheetKey_ = std::nullopt;
 };
 } // namespace OHOS::Ace::NG
 

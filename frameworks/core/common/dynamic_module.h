@@ -46,6 +46,10 @@ public:
     {
         return nullptr;
     }
+    virtual const void* GetCustomModifier()
+    {
+        return nullptr;
+    }
 };
 
 } // namespace OHOS::Ace

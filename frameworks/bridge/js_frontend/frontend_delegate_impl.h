@@ -46,7 +46,16 @@ using MediaQueryCallback = std::function<void(const std::string& callbackId, con
 using LayoutInspectorCallback = std::function<void(const std::string& componedId)>;
 using DrawInspectorCallback = std::function<void(const std::string& componedId)>;
 using DrawChildrenInspectorCallback = std::function<void(const std::string& componedId)>;
+using LayoutChildrenInspectorCallback = std::function<void(const std::string& componedId)>;
 using IsDrawChildrenCallbackFuncExistCallback = std::function<bool(const std::string& componedId)>;
+using IsLayoutChildrenCallbackFuncExistCallback = std::function<bool(const std::string& componedId)>;
+ 
+using LayoutInspectorUniqueIdCallback = std::function<void(int32_t uniqueId)>;
+using DrawInspectorUniqueIdCallback = std::function<void(int32_t uniqueId)>;
+using DrawChildrenInspectorUniqueIdCallback = std::function<void(int32_t uniqueId)>;
+using LayoutChildrenInspectorUniqueIdCallback = std::function<void(int32_t uniqueId)>;
+using IsDrawChildrenCallbackFuncExistUniqueIdCallback = std::function<bool(int32_t uniqueId)>;
+using IsLayoutChildrenCallbackFuncExistUniqueIdCallback = std::function<bool(int32_t uniqueId)>;
 using DestroyPageCallback = std::function<void(int32_t pageId)>;
 using DestroyApplicationCallback = std::function<void(const std::string& packageName)>;
 using UpdateApplicationStateCallback = std::function<void(const std::string& packageName, Frontend::State state)>;

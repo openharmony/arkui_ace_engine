@@ -134,6 +134,13 @@ Ark_Boolean IsFingerCountLimitImpl(Ark_GestureRecognizer peer)
     CHECK_NULL_RETURN(recognizer, {});
     return Converter::ArkValue<Ark_Boolean>(recognizer->GetLimitFingerCount());
 }
+void PreventBeginImpl(Ark_GestureRecognizer peer)
+{
+    CHECK_NULL_VOID(peer);
+    auto recognizer = peer->GetRecognizer().Upgrade();
+    CHECK_NULL_VOID(recognizer);
+    recognizer->SetPreventBegin(true);
+}
 } // GestureRecognizerAccessor
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
 {
@@ -151,6 +158,7 @@ const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
         GestureRecognizerAccessor::IsValidImpl,
         GestureRecognizerAccessor::GetFingerCountImpl,
         GestureRecognizerAccessor::IsFingerCountLimitImpl,
+        GestureRecognizerAccessor::PreventBeginImpl,
     };
     return &GestureRecognizerAccessorImpl;
 }

@@ -769,7 +769,7 @@ export class FrameNode implements MaterializedBase {
             const error = Error("The parameter 'positionByLocal' is invalid: it cannot be null. Provide a valid position object with x and y properties.");
             throw new BusinessError(401, error);
         }
-        if (this.nodePtr_ == undefined) {
+        if (this.nodePtr_ === undefined) {
             const error = Error("The current FrameNode has been disposed.");
             throw new BusinessError(10026, error);
         }
@@ -778,9 +778,15 @@ export class FrameNode implements MaterializedBase {
         ArkUIAniModule._Common_Sync_InstanceId(instanceId);
         channels = FrameNodeExtender.convertPositionToWindow(this, positionByLocal);
         ArkUIAniModule._Common_Restore_InstanceId();
-        if (channels.length < 3 || channels[0] === 0) {
-            const error = new Error("The current FrameNode is not on the main tree.");
-            throw new BusinessError(10028, error);
+        if (channels.length < 3) {
+            if(channels[0] === 0) {
+                const error = new Error("The parameter has error!");
+                throw new BusinessError(401, error);
+            }
+            if(channels[0] === 2) {
+                const error = new Error("The current FrameNode is not on the main tree.");
+                throw new BusinessError(10028, error);
+            }
         }
         const x = channels[1];
         const y = channels[2];
@@ -795,7 +801,7 @@ export class FrameNode implements MaterializedBase {
             const error = Error("The parameter 'positionByWindow' is invalid: it cannot be null. Provide a valid position object with x and y properties.");
             throw new BusinessError(401, error);
         }
-        if (this.nodePtr_ == undefined) {
+        if (this.nodePtr_ === undefined) {
             const error = Error("The current FrameNode has been disposed.");
             throw new BusinessError(10026, error);
         }
@@ -804,9 +810,15 @@ export class FrameNode implements MaterializedBase {
         ArkUIAniModule._Common_Sync_InstanceId(instanceId);
         channels = FrameNodeExtender.convertPositionFromWindow(this, positionByWindow);
         ArkUIAniModule._Common_Restore_InstanceId();
-        if (channels.length < 3 || channels[0] === 0) {
-            const error = new Error("The current FrameNode is not on the main tree.");
-            throw new BusinessError(10028, error);
+        if (channels.length < 3) {
+            if(channels[0] === 0) {
+                const error = new Error("The parameter has error!");
+                throw new BusinessError(401, error);
+            }
+            if(channels[0] === 2) {
+                const error = new Error("The current FrameNode is not on the main tree.");
+                throw new BusinessError(10028, error);
+            }
         }
         const x = channels[1];
         const y = channels[2];
@@ -2034,7 +2046,7 @@ export class NodeAdapter implements MaterializedBase {
         let result = new Array<FrameNode>();
         let nodes = ArkUIAniModule._NodeAdapter_GetAllItems(this.peer!.ptr!);
         if (nodes !== undefined) {
-            nodes.forEach((nodeId: number, index: number, arr: Array<number>) => {
+            nodes.forEach((nodeId: number, index: int, arr: Array<number>) => {
                 if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
                     let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId);
                     result.push(frameNode!);

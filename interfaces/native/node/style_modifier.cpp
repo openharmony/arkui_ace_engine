@@ -987,6 +987,7 @@ const ArkUI_AttributeItem* GetBackgroundColor(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
     g_numberValues[0].u32 = modifier->getBackgroundColor(node->uiNodeHandle);
+    g_attributeItem.size = NUM_1;
     return &g_attributeItem;
 }
 
@@ -1398,6 +1399,7 @@ const ArkUI_AttributeItem* GetTranslate(ArkUI_NodeHandle node)
     g_numberValues[NUM_0].f32 = translate[NUM_0];
     g_numberValues[NUM_1].f32 = translate[NUM_1];
     g_numberValues[NUM_2].f32 = translate[NUM_2];
+    g_attributeItem.size = NUM_3;
     return &g_attributeItem;
 }
 
@@ -2039,6 +2041,7 @@ const ArkUI_AttributeItem* GetBlur(ArkUI_NodeHandle node)
 {
     auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getBlur(node->uiNodeHandle);
     g_numberValues[0].f32 = resultValue;
+    g_attributeItem.size = NUM_1;
     return &g_attributeItem;
 }
 
@@ -2178,6 +2181,7 @@ const ArkUI_AttributeItem* GetOpacity(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
     g_numberValues[0].f32 = modifier->getOpacity(node->uiNodeHandle);
+    g_attributeItem.size = NUM_1;
     return &g_attributeItem;
 }
 
@@ -2614,6 +2618,7 @@ const ArkUI_AttributeItem* GetClip(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
     g_numberValues[0].i32 = modifier->getClip(node->uiNodeHandle);
+    g_attributeItem.size = NUM_1;
     return &g_attributeItem;
 }
 
@@ -2691,23 +2696,27 @@ const ArkUI_AttributeItem* GetClipShape(ArkUI_NodeHandle node)
         g_numberValues[NUM_8].f32 = options.bottomRightRadius;
         g_numberValues[NUM_9].f32 = options.offsetX;
         g_numberValues[NUM_10].f32 = options.offsetY;
+        g_attributeItem.size = NUM_11;
     } else if (type == static_cast<ArkUI_Int32>(BasicShapeType::CIRCLE)) {
         g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_ClipType::ARKUI_CLIP_TYPE_CIRCLE);
         g_numberValues[NUM_1].f32 = options.width;
         g_numberValues[NUM_2].f32 = options.height;
         g_numberValues[NUM_3].f32 = options.offsetX;
         g_numberValues[NUM_4].f32 = options.offsetY;
+        g_attributeItem.size = NUM_5;
     } else if (type == static_cast<ArkUI_Int32>(BasicShapeType::ELLIPSE)) {
         g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_ClipType::ARKUI_CLIP_TYPE_ELLIPSE);
         g_numberValues[NUM_1].f32 = options.width;
         g_numberValues[NUM_2].f32 = options.height;
         g_numberValues[NUM_3].f32 = options.offsetX;
         g_numberValues[NUM_4].f32 = options.offsetY;
+        g_attributeItem.size = NUM_5;
     } else if (type == static_cast<ArkUI_Int32>(BasicShapeType::PATH)) {
         g_numberValues[NUM_0].i32 = static_cast<ArkUI_Int32>(ArkUI_ClipType::ARKUI_CLIP_TYPE_PATH);
         g_numberValues[NUM_1].f32 = options.width;
         g_numberValues[NUM_2].f32 = options.height;
         g_attributeItem.string = options.commands;
+        g_attributeItem.size = NUM_3;
     } else {
         return nullptr;
     }
@@ -2742,6 +2751,7 @@ const ArkUI_AttributeItem* GetTransform(ArkUI_NodeHandle node)
     for (int i = 0; i < NUM_16; i++) {
         g_numberValues[i].f32 = values[i];
     }
+    g_attributeItem.size = NUM_16;
     return &g_attributeItem;
 }
 
@@ -2830,6 +2840,7 @@ const ArkUI_AttributeItem* GetShadow(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
     g_numberValues[0].i32 = modifier->getShadow(node->uiNodeHandle);
+    g_attributeItem.size = NUM_1;
     return &g_attributeItem;
 }
 
@@ -3636,6 +3647,7 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
         g_numberValues[NUM_1].f32 = options.value;
         g_numberValues[NUM_2].f32 = options.maxValue;
         g_numberValues[NUM_3].u32 = options.color;
+        g_attributeItem.size = NUM_4;
         return &g_attributeItem;
     }
     switch (static_cast<BasicShapeType>(options.type)) {
@@ -3652,6 +3664,7 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
             g_numberValues[NUM_9].f32 = options.bottomLeftRadius;
             g_numberValues[NUM_10].f32 = options.topRightRadius;
             g_numberValues[NUM_11].f32 = options.bottomRightRadius;
+            g_attributeItem.size = NUM_12;
             break;
         case BasicShapeType::CIRCLE:
             g_numberValues[NUM_0].u32 = options.fill;
@@ -3660,6 +3673,7 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
             g_numberValues[NUM_3].i32 = static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_CIRCLE);
             g_numberValues[NUM_4].f32 = options.width;
             g_numberValues[NUM_5].f32 = options.height;
+            g_attributeItem.size = NUM_6;
             break;
         case BasicShapeType::ELLIPSE:
             g_numberValues[NUM_0].u32 = options.fill;
@@ -3668,6 +3682,7 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
             g_numberValues[NUM_3].i32 = static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_ELLIPSE);
             g_numberValues[NUM_4].f32 = options.width;
             g_numberValues[NUM_5].f32 = options.height;
+            g_attributeItem.size = NUM_6;
             break;
         case BasicShapeType::PATH:
             g_numberValues[NUM_0].u32 = options.fill;
@@ -3676,6 +3691,7 @@ const ArkUI_AttributeItem* GetMask(ArkUI_NodeHandle node)
             g_numberValues[NUM_3].i32 = static_cast<ArkUI_Int32>(ArkUI_MaskType::ARKUI_MASK_TYPE_PATH);
             g_numberValues[NUM_4].f32 = options.width;
             g_numberValues[NUM_5].f32 = options.height;
+            g_attributeItem.size = NUM_6;
             g_attributeItem.string = options.commands;
             break;
         default:
@@ -3715,6 +3731,7 @@ const ArkUI_AttributeItem* GetBlendMode(ArkUI_NodeHandle node)
     GetFullImpl()->getNodeModifiers()->getCommonModifier()->getBlendMode(node->uiNodeHandle, &options);
     g_numberValues[NUM_0].i32 = options.blendMode;
     g_numberValues[NUM_1].i32 = options.blendApplyType;
+    g_attributeItem.size = NUM_2;
     return &g_attributeItem;
 }
 
@@ -3915,6 +3932,7 @@ const ArkUI_AttributeItem* GetGrayscale(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
     g_numberValues[0].f32 = modifier->getGrayScale(node->uiNodeHandle);
+    g_attributeItem.size = NUM_1;
     return &g_attributeItem;
 }
 
@@ -3942,6 +3960,7 @@ const ArkUI_AttributeItem* GetInvert(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
     g_numberValues[0].f32 = modifier->getInvert(node->uiNodeHandle);
+    g_attributeItem.size = NUM_1;
     return &g_attributeItem;
 }
 
@@ -3968,6 +3987,7 @@ const ArkUI_AttributeItem* GetSepia(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
     g_numberValues[0].f32 = modifier->getSepia(node->uiNodeHandle);
+    g_attributeItem.size = NUM_1;
     return &g_attributeItem;
 }
 
@@ -4418,6 +4438,7 @@ const ArkUI_AttributeItem* GetRenderFit(ArkUI_NodeHandle node)
         auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
         g_numberValues[0].i32 = modifier->getRenderFit(node->uiNodeHandle);
     }
+    g_attributeItem.size = NUM_1;
     return &g_attributeItem;
 }
 
@@ -4462,6 +4483,7 @@ const ArkUI_AttributeItem* GetOutlineColor(ArkUI_NodeHandle node)
     g_numberValues[NUM_1].u32 = colors[NUM_1];
     g_numberValues[NUM_2].u32 = colors[NUM_2];
     g_numberValues[NUM_3].u32 = colors[NUM_3];
+    g_attributeItem.size = NUM_4;
     return &g_attributeItem;
 }
 
@@ -4523,6 +4545,7 @@ const ArkUI_AttributeItem* GetRenderGroup(ArkUI_NodeHandle node)
 {
     auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getRenderGroup(node->uiNodeHandle);
     g_numberValues[0].i32 = resultValue;
+    g_attributeItem.size = NUM_1;
     return &g_attributeItem;
 }
 
@@ -4547,6 +4570,7 @@ const ArkUI_AttributeItem* GetColorBlend(ArkUI_NodeHandle node)
 {
     auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getColorBlend(node->uiNodeHandle);
     g_numberValues[0].u32 = resultValue;
+    g_attributeItem.size = NUM_1;
     return &g_attributeItem;
 }
 
@@ -20633,7 +20657,7 @@ int32_t SetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
     static Setter* setters[] = { SetGridColumnsTemplate, SetGridRowsTemplate, SetGridColumnsGap, SetGridRowsGap,
         SetGridNodeAdapter, SetGridCachedCount, SetGridFocusWrapMode, SetGridSyncLoad, SetGridAlignItems,
         SetGridLayoutOptions, SetGridColumnTemplateItemFillPolicy, SetGridEditMode, SetGridSupportAnimation,
-        SetGridMultiSelectable, SetGridSupportLazyLoadingEmptyBranch };
+        SetGridMultiSelectable, nullptr, SetGridSupportLazyLoadingEmptyBranch };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;

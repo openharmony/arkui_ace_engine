@@ -311,7 +311,7 @@ void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const N
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show menu again");
         return;
     }
-    auto subwindow = GetOrCreateMenuSubWindow(containerId);
+    auto subwindow = GetOrCreateMenuSubWindow(containerId, menuParam.reuse);
     CHECK_NULL_VOID(subwindow);
     if (!HasDialogOrPopup(subwindow->GetChildContainerId())) {
         subwindow->SetReceiveDragEventEnabled(false);
@@ -331,7 +331,7 @@ void SubwindowManager::ShowMenuNG(std::function<void()>&& buildFunc, std::functi
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "subwindow can not show menu again");
         return;
     }
-    auto subwindow = GetOrCreateMenuSubWindow(containerId);
+    auto subwindow = GetOrCreateMenuSubWindow(containerId, menuParam.reuse);
     CHECK_NULL_VOID(subwindow);
     if (!HasDialogOrPopup(subwindow->GetChildContainerId())) {
         subwindow->SetReceiveDragEventEnabled(false);
@@ -483,6 +483,9 @@ void SubwindowManager::ShowPopupNG(const RefPtr<NG::FrameNode>& targetNode, cons
         subwindow->InitContainer();
         CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
         manager->AddSubwindowBySearchKey(searchKey, subwindow);
+    }
+    if (!subwindow->GetIsReceiveDragEventEnabled()) {
+        subwindow->SetReceiveDragEventEnabled(true);
     }
     subwindow->ShowPopupNG(targetNode->GetId(), popupInfo, std::move(onWillDismiss), interactiveDismiss);
 }
@@ -820,6 +823,9 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
     auto subwindow = GetOrCreateSubWindowByType(SubwindowType::TYPE_DIALOG, dialogProps.isModal);
     CHECK_NULL_RETURN(subwindow, nullptr);
+    if (!subwindow->GetIsReceiveDragEventEnabled()) {
+        subwindow->SetReceiveDragEventEnabled(true);
+    }
     return subwindow->ShowDialogNG(dialogProps, std::move(buildFunc));
 }
 RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNGWithNode(const DialogProperties& dialogProps,
@@ -828,6 +834,9 @@ RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNGWithNode(const DialogPropert
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show dialog ng enter");
     auto subwindow = GetOrCreateSubWindowByType(SubwindowType::TYPE_DIALOG, dialogProps.isModal);
     CHECK_NULL_RETURN(subwindow, nullptr);
+    if (!subwindow->GetIsReceiveDragEventEnabled()) {
+        subwindow->SetReceiveDragEventEnabled(true);
+    }
     return subwindow->ShowDialogNGWithNode(dialogProps, customNode);
 }
 void SubwindowManager::CloseDialogNG(const RefPtr<NG::FrameNode>& dialogNode)
@@ -1938,7 +1947,7 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateSubWindowByType(SubwindowType win
     return subWindow;
 }
 
-RefPtr<Subwindow> SubwindowManager::GetOrCreateMenuSubWindow(int32_t instanceId)
+RefPtr<Subwindow> SubwindowManager::GetOrCreateMenuSubWindow(int32_t instanceId, bool reuse)
 {
     SubwindowKey searchKey = GetCurrentSubwindowKey(instanceId, SubwindowType::TYPE_MENU);
     auto subwindow = GetSubwindowBySearchKey(searchKey);
@@ -1948,9 +1957,22 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateMenuSubWindow(int32_t instanceId)
         subwindow->InitContainer();
         CHECK_NULL_RETURN(subwindow->GetIsRosenWindowCreate(), nullptr);
         AddSubwindowBySearchKey(searchKey, subwindow);
-    } else if (subwindow->GetDetachState() == MenuWindowState::DETACHING) {
+    } else if (subwindow->GetDetachState() == MenuWindowState::DETACHING || !reuse) {
         TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "recreate subwindow");
+        // Remove the subwindow to avoid reuse
         RemoveSubwindowBySearchKey(searchKey);
+        if (subwindow->GetShown()) {
+            subwindow->SetDestroyInHide(true);
+        } else {
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_RETURN(taskExecutor, nullptr);
+            taskExecutor->PostTask(
+                [subwindow] {
+                    CHECK_NULL_VOID(subwindow);
+                    subwindow->DestroyWindow();
+                },
+                TaskExecutor::TaskType::UI, "ArkUISubwindowGetOrCreateMenuSubWindow");
+        }
         subwindow = Subwindow::CreateSubwindow(instanceId);
         CHECK_NULL_RETURN(subwindow, nullptr);
         subwindow->InitContainer();

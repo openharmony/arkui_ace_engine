@@ -1651,10 +1651,10 @@ export class ColorMetricsStop_serializer {
             valueSerializer.writeInt8((0).toByte())
             const valueHolderForOffsetForIdx0  = valueHolderForOffset as string
             valueSerializer.writeString(valueHolderForOffsetForIdx0)
-        } else if (valueHolderForOffset instanceof number) {
+        } else if (valueHolderForOffset instanceof double) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForOffsetForIdx1  = valueHolderForOffset as number
-            valueSerializer.writeNumber(valueHolderForOffsetForIdx1)
+            const valueHolderForOffsetForIdx1  = valueHolderForOffset as double
+            valueSerializer.writeFloat64(valueHolderForOffsetForIdx1)
         } else if (valueHolderForOffset instanceof Resource) {
             valueSerializer.writeInt8((2).toByte())
             const valueHolderForOffsetForIdx2  = valueHolderForOffset as Resource
@@ -1665,17 +1665,17 @@ export class ColorMetricsStop_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const colorTmpResult : ColorMetrics = ColorMetrics_serializer.read(valueDeserializer)
         const offsetTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let offsetTmpBuf : string | number | Resource | undefined
-        if (offsetTmpBufUnionSelector == (0).toInt()) {
+        let offsetTmpBuf : string | double | Resource | undefined
+        if (offsetTmpBufUnionSelector == (0).toByte()) {
             offsetTmpBuf = (valueDeserializer.readString() as string)
-        } else if (offsetTmpBufUnionSelector == (1).toInt()) {
-            offsetTmpBuf = (valueDeserializer.readNumber() as number)
-        } else if (offsetTmpBufUnionSelector == (2).toInt()) {
+        } else if (offsetTmpBufUnionSelector == (1).toByte()) {
+            offsetTmpBuf = valueDeserializer.readFloat64()
+        } else if (offsetTmpBufUnionSelector == (2).toByte()) {
             offsetTmpBuf = Resource_serializer.read(valueDeserializer)
         } else {
             throw new Error("One of the branches for offsetTmpBuf has to be chosen through deserialisation.")
         }
-        const offsetTmpResult : Length = (offsetTmpBuf as string | number | Resource)
+        const offsetTmpResult : Length = (offsetTmpBuf as string | double | Resource)
         let value : ColorMetricsStop = ({color: colorTmpResult, offset: offsetTmpResult} as ColorMetricsStop)
         return value
     }

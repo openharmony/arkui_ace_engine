@@ -59,6 +59,7 @@ enum SheetType {
     SHEET_BOTTOMLANDSPACE,
     SHEET_BOTTOM_FREE_WINDOW,
     SHEET_BOTTOM_OFFSET,
+    SHEET_MINIMIZE,
 };
 
 enum class SheetAccessibilityDetents {
@@ -208,6 +209,14 @@ struct SheetStyle {
     std::optional<bool> placementOnTarget;
     std::optional<bool> showInSubWindow;
     std::optional<ModalTransition> modalTransition;
+    std::optional<RenderStrategy> radiusRenderStrategy;
+
+    SheetStyle() = default;
+    // constructor for image generator dialog
+    SheetStyle(SheetHeight sheetHeight, std::optional<bool> showCloseIcon, std::optional<SheetType> sheetType,
+        std::optional<Color> backgroundColor, std::optional<Color>maskColor, std::optional<Dimension> width):
+        sheetHeight(sheetHeight), showCloseIcon(showCloseIcon), sheetType(sheetType),
+        backgroundColor(backgroundColor), maskColor(maskColor), width(width) {}
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
@@ -227,7 +236,8 @@ struct SheetStyle {
                 hoverModeArea == sheetStyle.hoverModeArea && radius == sheetStyle.radius &&
                 detentSelection == sheetStyle.detentSelection && sheetEffectEdge == sheetStyle.sheetEffectEdge &&
                 placement == sheetStyle.placement && placementOnTarget == sheetStyle.placementOnTarget &&
-                showInSubWindow == sheetStyle.showInSubWindow && modalTransition == sheetStyle.modalTransition);
+                showInSubWindow == sheetStyle.showInSubWindow && modalTransition == sheetStyle.modalTransition &&
+                radiusRenderStrategy == sheetStyle.radiusRenderStrategy);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
@@ -274,6 +284,8 @@ struct SheetStyle {
         placementOnTarget = sheetStyle.placementOnTarget.has_value() ?
             sheetStyle.placementOnTarget : placementOnTarget;
         modalTransition = sheetStyle.modalTransition.has_value() ? sheetStyle.modalTransition : modalTransition;
+        radiusRenderStrategy =
+            sheetStyle.radiusRenderStrategy.has_value() ? sheetStyle.radiusRenderStrategy : radiusRenderStrategy;
     }
 
     // Register the set/get method of the resource.

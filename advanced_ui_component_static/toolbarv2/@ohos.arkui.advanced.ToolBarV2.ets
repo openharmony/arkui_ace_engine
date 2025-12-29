@@ -302,17 +302,17 @@ export struct ToolBarV2 {
   @Computed
   get getMenus(): MenuElement[] {
     let menuContent: MenuElement[] = [] as MenuElement[];
-    this.toolBarList.forEach((value: ToolBarV2Item, index: number) => {
+    this.toolBarList.forEach((value: ToolBarV2Item, index: int) => {
       if (index >= TOOLBAR_MAX_LENGTH - 1) {
         menuContent.push({
-          value: this.toolBarList[Double.toInt(index)].content.text,
+          value: this.toolBarList[index].content.text,
           action: () => {
-            let callback: ToolBarV2ItemAction | undefined = this.toolBarList[Double.toInt(index)].action;
+            let callback: ToolBarV2ItemAction | undefined = this.toolBarList[index].action;
             if (callback) {
-              callback(Double.toInt(index));
+              callback(index);
             }
           },
-          enabled: this.toolBarList[Double.toInt(index)].state !== ToolBarV2ItemState.DISABLE,
+          enabled: this.toolBarList[index].state !== ToolBarV2ItemState.DISABLE,
         });
       }
     })

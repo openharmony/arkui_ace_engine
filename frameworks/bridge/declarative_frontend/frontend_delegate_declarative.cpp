@@ -126,6 +126,11 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
     const MediaQueryCallback& mediaQueryCallback, const LayoutInspectorCallback& layoutInpsectorCallback,
     const DrawInspectorCallback& drawInpsectorCallback,
     const DrawChildrenInspectorCallback& drawChildrenInspectorCallback,
+    const LayoutChildrenInspectorCallback& layoutChildrenInspectorCallback,
+    const LayoutInspectorUniqueIdCallback& layoutInspectorUniqueIdCallback,
+    const DrawInspectorUniqueIdCallback& drawInspectorUniqueIdCallback,
+    const DrawChildrenInspectorUniqueIdCallback& drawChildrenInspectorUniqueIdCallback,
+    const LayoutChildrenInspectorUniqueIdCallback& layoutChildrenInspectorUniqueIdCallback,
     const RequestAnimationCallback& requestAnimationCallback,
     const JsCallback& jsCallback, const OnWindowDisplayModeChangedCallBack& onWindowDisplayModeChangedCallBack,
     const OnConfigurationUpdatedCallBack& onConfigurationUpdatedCallBack,
@@ -141,6 +146,11 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
       destroyApplication_(destroyApplicationCallback), updateApplicationState_(updateApplicationStateCallback),
       timer_(timerCallback), mediaQueryCallback_(mediaQueryCallback), layoutInspectorCallback_(layoutInpsectorCallback),
       drawInspectorCallback_(drawInpsectorCallback), drawChildrenInspectorCallback_(drawChildrenInspectorCallback),
+      layoutChildrenInspectorCallback_(layoutChildrenInspectorCallback),
+      layoutInspectorUniqueIdCallback_(layoutInspectorUniqueIdCallback),
+      drawInspectorUniqueIdCallback_(drawInspectorUniqueIdCallback),
+      drawChildrenInspectorUniqueIdCallback_(drawChildrenInspectorUniqueIdCallback),
+      layoutChildrenInspectorUniqueIdCallback_(layoutChildrenInspectorUniqueIdCallback),
       requestAnimationCallback_(requestAnimationCallback),
       jsCallback_(jsCallback), onWindowDisplayModeChanged_(onWindowDisplayModeChangedCallBack),
       onConfigurationUpdated_(onConfigurationUpdatedCallBack), onSaveAbilityState_(onSaveAbilityStateCallBack),
@@ -2123,6 +2133,13 @@ void FrontendDelegateDeclarative::UpdateCustomDialog(
     auto context = nodePtr->GetContextWithCheck();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
+    auto parent = NG::DialogManager::GetInstance().GetDialogNodeByContentNode(nodePtr);
+    if (parent) {
+        auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(parent);
+        if (currentOverlay) {
+            overlayManager = currentOverlay;
+        }
+    }
     context->GetTaskExecutor()->PostTask(
         [dialogProperties, node, callback, weak = WeakPtr<NG::OverlayManager>(overlayManager)]() mutable {
             auto overlayManager = weak.Upgrade();
@@ -2647,12 +2664,129 @@ void FrontendDelegateDeclarative::OnDrawChildrenCompleted(const std::string& com
         TaskExecutor::TaskType::JS, "ArkUIInspectorDrawChildrenCompleted");
 }
 
+void FrontendDelegateDeclarative::OnLayoutChildrenCompleted(const std::string& componentId)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    if (!engine->IsLayoutChildrenCallbackFuncExist(componentId)) {
+        return;
+    }
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), componentId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->layoutChildrenInspectorCallback_(componentId);
+        },
+        TaskExecutor::TaskType::JS, "ArkUIInspectorDrawChildrenCompleted");
+}
+
 bool FrontendDelegateDeclarative::IsDrawChildrenCallbackFuncExist(const std::string& componentId)
 {
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_RETURN(engine, false);
 
     return engine->IsDrawChildrenCallbackFuncExist(componentId);
+}
+
+bool FrontendDelegateDeclarative::IsLayoutChildrenCallbackFuncExist(const std::string& componentId)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, false);
+
+    return engine->IsLayoutChildrenCallbackFuncExist(componentId);
+}
+
+void FrontendDelegateDeclarative::OnLayoutCompleted(int32_t uniqueId)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    if (!engine->IsLayoutCallBackFuncExist(uniqueId)) {
+        return;
+    }
+
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), uniqueId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->layoutInspectorUniqueIdCallback_(uniqueId);
+        },
+        TaskExecutor::TaskType::JS, "ArkUIInspectorLayoutUniqueIdCompleted");
+}
+
+void FrontendDelegateDeclarative::OnDrawCompleted(int32_t uniqueId)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    if (!engine->IsDrawCallBackFuncExist(uniqueId)) {
+        return;
+    }
+
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), uniqueId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->drawInspectorUniqueIdCallback_(uniqueId);
+        },
+        TaskExecutor::TaskType::JS, "ArkUIInspectorDrawUniqueIdCompleted");
+}
+
+void FrontendDelegateDeclarative::OnDrawChildrenCompleted(int32_t uniqueId)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    if (!engine->IsDrawChildrenCallbackFuncExist(uniqueId)) {
+        return;
+    }
+
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), uniqueId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->drawChildrenInspectorUniqueIdCallback_(uniqueId);
+        },
+        TaskExecutor::TaskType::JS, "ArkUIInspectorDrawChildrenUniqueIdCompleted");
+}
+
+void FrontendDelegateDeclarative::OnLayoutChildrenCompleted(int32_t uniqueId)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    if (!engine->IsLayoutChildrenCallbackFuncExist(uniqueId)) {
+        return;
+    }
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this), uniqueId] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->layoutChildrenInspectorUniqueIdCallback_(uniqueId);
+        },
+        TaskExecutor::TaskType::JS, "ArkUIInspectorDrawChildrenUniqueIdCompleted");
+}
+
+bool FrontendDelegateDeclarative::IsDrawChildrenCallbackFuncExist(int32_t uniqueId)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, false);
+
+    return engine->IsDrawChildrenCallbackFuncExist(uniqueId);
+}
+
+bool FrontendDelegateDeclarative::IsLayoutChildrenCallbackFuncExist(int32_t uniqueId)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, false);
+
+    return engine->IsLayoutChildrenCallbackFuncExist(uniqueId);
 }
 
 void FrontendDelegateDeclarative::OnPageReady(

@@ -129,6 +129,18 @@ void ImageLoadingContext::SetOnProgressCallback(
     onProgressCallback_ = onProgress;
 }
 
+bool ImageLoadingContext::IsNetworkImageCached() const
+{
+    const auto& sourceInfo = GetSourceInfo();
+
+    if (sourceInfo.GetSrcType() != SrcType::NETWORK) {
+        return false;
+    }
+
+    return SystemProperties::GetDownloadByNetworkEnabled() &&
+           DownloadManager::GetInstance()->IsContains(sourceInfo.GetSrc());
+}
+
 void ImageLoadingContext::OnDataLoading()
 {
     auto obj = ImageProvider::QueryImageObjectFromCache(src_);

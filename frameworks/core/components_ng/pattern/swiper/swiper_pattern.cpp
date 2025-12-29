@@ -59,6 +59,7 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -80,6 +81,14 @@ const std::string FADE_PROPERTY_NAME = "fade";
 const std::string SPRING_PROPERTY_NAME = "spring";
 const std::string INDICATOR_PROPERTY_NAME = "indicator";
 const std::string TRANSLATE_PROPERTY_NAME = "translate";
+constexpr char SWIPER_COMMAND_CHANGE[] = "change";
+constexpr char SWIPER_COMMAND_FORWARD[] = "forward";
+constexpr char SWIPER_COMMAND_BACKWARD[] = "backward";
+constexpr char SWIPER_COMMAND_INDEX[] = "index";
+constexpr char SWIPER_SCROLL_DIRECTION_FORWARD[] = "forward";
+constexpr char SWIPER_SCROLL_DIRECTION_BACKWARD[] = "backward";
+constexpr char SWIPER_SCROLL_DIRECTION_BIDIRECTIONAL[] = "bidirectional";
+constexpr char SWIPER_SCROLL_DIRECTION_UNABLE[] = "unable";
 constexpr uint16_t CAPTURE_PIXEL_ROUND_VALUE = static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
                                               static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
                                               static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END) |
@@ -178,6 +187,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     if (props->GetIsCustomAnimation().value_or(false)) {
         algo->SetUseCustomAnimation(true);
         algo->SetCustomAnimationToIndex(customAnimationToIndex_);
+        algo->SetCustomAnimationPrevIndex(customAnimationPrevIndex_);
         algo->SetIndexsInAnimation(indexsInAnimation_);
         algo->SetNeedUnmountIndexs(needUnmountIndexs_);
         return algo;
@@ -3508,14 +3518,6 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
         isTouchPad_ = true;
     }
 
-    PointF dragPoint(
-        static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
-    NGGestureRecognizer::Transform(dragPoint, GetHost(), true, info.GetIsPostEventResult(), info.GetPostEventNodeId());
-    if (IsOutOfHotRegion(dragPoint)) {
-        isTouchPad_ = false;
-        return;
-    }
-
     auto mainDelta = static_cast<float>(info.GetMainDelta());
     ProcessDelta(mainDelta, contentMainSize_, mainDeltaSum_);
     mainDeltaSum_ += mainDelta;
@@ -5245,17 +5247,6 @@ std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetSecondItemInfoInVisibleArea
         SwiperItemInfo { itemPosition_.begin()->second.startPos, itemPosition_.begin()->second.endPos });
 }
 
-bool SwiperPattern::IsOutOfHotRegion(const PointF& dragPoint) const
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, true);
-    auto context = host->GetRenderContext();
-    CHECK_NULL_RETURN(context, true);
-
-    auto hotRegion = context->GetPaintRectWithoutTransform();
-    return !hotRegion.IsInRegion(dragPoint + OffsetF(hotRegion.GetX(), hotRegion.GetY()));
-}
-
 void SwiperPattern::UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode)
 {
     CHECK_NULL_VOID(indicatorNode);
@@ -6512,6 +6503,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
     FireSelectedEvent(fromIndex, toIndex);
     FireUnselectedEvent(fromIndex, toIndex);
     FireAnimationStartEvent(fromIndex, toIndex, info);
+    customAnimationPrevIndex_ = fromIndex;
 
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -6533,6 +6525,7 @@ void SwiperPattern::OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, 
     customAnimationToIndex_.reset();
     needUnmountIndexs_.insert(fromIndex);
     indexsInAnimation_.erase(toIndex);
+    customAnimationPrevIndex_ = toIndex;
 
     if (!hasOnChanged) {
         const auto props = GetLayoutProperty<SwiperLayoutProperty>();
@@ -7455,6 +7448,141 @@ void SwiperPattern::FromJson(const std::unique_ptr<JsonValue>& json)
     Pattern::FromJson(json);
 }
 
+SwiperCommand SwiperPattern::ParseCommand(const std::string& command)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    if (json->IsNull()) {
+        return SwiperCommand::INVALID;
+    }
+
+    auto cmdType = json->GetString("cmd");
+    if (cmdType != SWIPER_COMMAND_CHANGE) {
+        return SwiperCommand::INVALID;
+    }
+
+    auto paramObj = json->GetObject("params");
+    if (!paramObj->Contains("type") || !paramObj->GetValue("type")->IsString()) {
+        return SwiperCommand::INVALID;
+    }
+
+    auto changeType = paramObj->GetString("type");
+    CHECK_EQUAL_RETURN(changeType, SWIPER_COMMAND_FORWARD, SwiperCommand::FORWARD);
+    CHECK_EQUAL_RETURN(changeType, SWIPER_COMMAND_BACKWARD, SwiperCommand::BACKWARD);
+    CHECK_EQUAL_RETURN(changeType, SWIPER_COMMAND_INDEX, SwiperCommand::INDEX);
+    return SwiperCommand::INVALID;
+}
+
+int32_t SwiperPattern::ParseIndexFromCommand(const std::string& command)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    auto paramObj = json->GetObject("params");
+    int32_t defaultErr = -1;
+    if (!paramObj->Contains("index") || !paramObj->GetValue("index")->IsString()) {
+        return defaultErr;
+    }
+
+    auto originIndex = paramObj->GetString("index");
+    if (!StringUtils::IsNumber(originIndex)) {
+        return defaultErr;
+    }
+
+    return StringUtils::StringToInt(originIndex, defaultErr);
+}
+
+int32_t SwiperPattern::OnInjectionEvent(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    auto pattern = host->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, RET_FAILED);
+    auto scrollAbility = GetScrollAbility();
+    CHECK_EQUAL_RETURN(scrollAbility, SWIPER_SCROLL_DIRECTION_UNABLE, RET_FAILED);
+
+    int32_t totalCount = TotalCount();
+    auto commandType = ParseCommand(command);
+    switch (commandType) {
+        case SwiperCommand::FORWARD: {
+            if (scrollAbility == SWIPER_SCROLL_DIRECTION_BACKWARD) {
+                ReportComponentChangeEvent(false, commandType);
+                return RET_FAILED;
+            }
+            ShowNext();
+            break;
+        }
+        case SwiperCommand::BACKWARD: {
+            if (scrollAbility == SWIPER_SCROLL_DIRECTION_FORWARD) {
+                ReportComponentChangeEvent(false, commandType);
+                return RET_FAILED;
+            }
+
+            if (IsAutoLinear() && static_cast<int32_t>(itemPosition_.size()) == totalCount) {
+                ChangeIndex(0, true);
+            } else {
+                ShowPrevious();
+            }
+            break;
+        }
+        case SwiperCommand::INDEX: {
+            int32_t index = ParseIndexFromCommand(command);
+            if (index < 0 || index >= totalCount) {
+                ReportComponentChangeEvent(false, commandType);
+                return RET_FAILED;
+            }
+            ChangeIndex(index, true);
+            break;
+        }
+        default: {
+            ReportComponentChangeEvent(false, commandType);
+            return RET_FAILED;
+        }
+    }
+    ReportComponentChangeEvent(true, commandType);
+    return RET_SUCCESS;
+}
+
+void SwiperPattern::ReportComponentChangeEvent(bool result, SwiperCommand type)
+{
+    auto json = JsonUtil::Create();
+    switch (type) {
+        case SwiperCommand::FORWARD: {
+            json->Put("event", "forward");
+            if (result) {
+                json->Put("result", "success");
+            } else {
+                json->Put("result", "fail");
+                json->Put("reason", "ForwardEnd");
+            }
+            break;
+        }
+        case SwiperCommand::BACKWARD: {
+            json->Put("event", "backward");
+            if (result) {
+                json->Put("result", "success");
+            } else {
+                json->Put("result", "fail");
+                json->Put("reason", "BackwardHead");
+            }
+            break;
+        }
+        case SwiperCommand::INDEX: {
+            json->Put("event", "index");
+            if (result) {
+                json->Put("result", "success");
+            } else {
+                json->Put("result", "fail");
+                json->Put("reason", "InvalidIndex");
+            }
+            break;
+        }
+        default: {
+            json->Put("event", "change");
+            json->Put("result", "fail");
+            json->Put("reason", "InvalidCommand");
+        }
+    }
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("swiperResult", json->ToString().c_str());
+}
+
 GestureState SwiperPattern::GetGestureState()
 {
     auto gestureState = gestureState_;
@@ -7585,6 +7713,52 @@ void SwiperPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     BuildItemPositionInfo(json);
     BuildPanDirectionInfo(json);
     BuildAxisInfo(json);
+}
+
+void SwiperPattern::DumpSimplifyInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config)
+{
+    CHECK_EQUAL_VOID(config.interactionInfo, false);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    json->Put("scrollAbility", GetScrollAbility());
+    json->Put("scrollAxis", direction_ == Axis::HORIZONTAL ? "horizontal" : "vertical");
+    json->Put("isLoop", IsLoop());
+}
+
+const char* SwiperPattern::GetScrollAbility()
+{
+    int32_t totalCount = TotalCount();
+    bool isLoop = IsLoop();
+    if (IsDisableSwipe() || IsVisibleChildrenSizeLessThanSwiper() || totalCount <= 1) {
+        return SWIPER_SCROLL_DIRECTION_UNABLE;
+    }
+
+    if (IsAutoLinear()) {
+        // In Auto-Linear mode, when the Swiper scrolls to the end and makes all child elements visible with only the
+        // first element displayed partly, it can scroll back to the head but showPrevious function is no effect.
+        if (isLoop && static_cast<int32_t>(itemPosition_.size()) == totalCount) {
+            return SWIPER_SCROLL_DIRECTION_FORWARD;
+        }
+
+        if (!isLoop && IsAtStart()) {
+            return SWIPER_SCROLL_DIRECTION_FORWARD;
+        } else if (!isLoop && (IsAtEnd() || currentIndex_ == totalCount - 1)) {
+            return SWIPER_SCROLL_DIRECTION_BACKWARD;
+        } else {
+            return SWIPER_SCROLL_DIRECTION_BIDIRECTIONAL;
+        }
+    }
+
+    auto displayCount = GetDisplayCount();
+    if (!isLoop && currentIndex_ == 0) {
+        return SWIPER_SCROLL_DIRECTION_FORWARD;
+    } else if (!isLoop && currentIndex_ >= totalCount - displayCount) {
+        return SWIPER_SCROLL_DIRECTION_BACKWARD;
+    } else {
+        return SWIPER_SCROLL_DIRECTION_BIDIRECTIONAL;
+    }
 }
 
 void SwiperPattern::BuildOffsetInfo(std::unique_ptr<JsonValue>& json)

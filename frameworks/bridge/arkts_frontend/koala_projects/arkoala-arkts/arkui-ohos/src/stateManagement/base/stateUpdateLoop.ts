@@ -50,6 +50,9 @@ export class StateUpdateLoop {
         taskSet.clear();
         StateUpdateLoop.activeTasks.delete(peerId);
     }
+    public static clearFreezeTaskWhenReuse(peerId: int32): void {
+        StateUpdateLoop.activeTasks.get(peerId)?.clear();
+    }
     public static get len(): number {
         return StateUpdateLoop.callbacks.length;
     }

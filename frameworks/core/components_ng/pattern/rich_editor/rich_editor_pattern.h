@@ -929,6 +929,7 @@ public:
     void CalculateDefaultHandleHeight(float& height) override;
     bool IsSingleHandle();
     bool IsHandlesShow() override;
+    bool IsHandleMoving();
     void SetCustomKeyboardNode(const RefPtr<UINode>& customKeyboardNode);
     void ProcessCloseKeyboard(const RefPtr<FrameNode>& currentNode);
     bool GetCustomKeyboardIsMatched(int32_t customKeyboard);
@@ -1432,7 +1433,7 @@ public:
     void SetContentPattern(const RefPtr<RichEditorContentPattern>& contentPattern);
     RefPtr<FrameNode> GetContentHost() const override;
 
-    float GetCaretWidth();
+    float GetCaretWidth() const;
     void UpdateCaretStyleByTypingStyle(bool isReset);
     void MarkAISpanStyleChanged() override;
     void HandleOnAskCelia() override;
@@ -1538,6 +1539,8 @@ private:
     void StopTwinkling();
     void UpdateFontFeatureTextStyle(
         RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle& updateSpanStyle, TextStyle& textStyle);
+    void UpdateStrokeColor(
+        RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle& updateSpanStyle, TextStyle& textStyle);
     void UpdateDecoration(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle& updateSpanStyle, TextStyle& textStyle);
     void UpdateTextStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void UpdateSymbolStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
@@ -1602,6 +1605,7 @@ private:
     std::string GetPlaceHolderInJson() const;
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
     std::string GetCustomKeyboardInJson() const;
+    std::string GetCursorInfoInJson() const;
     Color GetSelectedDragPreviewStyleColor() const;
     void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const override;
     void ResetSelectionAfterAddSpan(bool isPaste);

@@ -14,13 +14,24 @@
  */
 
 declare class SendableMap<K, V> {
+    constructor(entries?: readonly (readonly [K, V])[] | null);
+    [Symbol.iterator](): IterableIterator<[K, V]>
+    set(key: K, value: V): this;
     keys(): IterableIterator<K>;
     values(): IterableIterator<V>;
 };
 declare class SendableSet<T> {
+    constructor(values?: readonly T[] | null);
+    [Symbol.iterator](): IterableIterator<T>;
+    add(value: T): this;
     values(): IterableIterator<T>;
 };
-declare class SendableArray {};
+declare class SendableArray<T> {
+    constructor(...items: T[]);
+    constructor(items: T[]);
+    [Symbol.iterator](): IterableIterator<T>;
+    entries(): IterableIterator<[number, T]>;
+};
 
 class SendableType {
     public static isArray<T extends object>(o: T): boolean {

@@ -28,6 +28,7 @@
 #include "core/components/web/web_property.h" // Unscoped enum types
 #include "core/components_ng/pattern/list/list_item_group_pattern.h" // Unscoped enum types
 #include "core/components_ng/pattern/slider/slider_model.h" // Inner types
+#include "core/components_ng/property/accessibility_property.h"
 
 #include "converter_union.h"
 #include "generated/converter_generated.h"
@@ -55,6 +56,7 @@ enum class TabsCacheMode;
 struct PickerIndicatorStyle;
 struct TextDetectConfig;
 struct TextMetrics;
+struct RenderingContextOptions;
 
 namespace NG {
 // SORTED_SECTION
@@ -72,6 +74,7 @@ struct BarItem;
 struct KeyboardOptions;
 struct NavDestinationTransition;
 struct NavigationBackgroundOptions;
+struct NavigationTextOptions;
 struct NavigationBarOptions;
 struct NavigationOptions;
 struct NavigationTitlebarOptions;
@@ -238,6 +241,8 @@ namespace Converter {
             int64_t id_;
             std::vector<ParamType> params_;
     };
+    std::optional<Dimension> OptConvertFromArkNumResStr(
+        const Ark_Union_F64_ResourceStr& src, DimensionUnit defaultUnit = DimensionUnit::FP);
     Dimension ConvertFromString(const std::string& str, DimensionUnit unit = DimensionUnit::FP);
     template<typename T, typename NumberType = Ark_Int32>
     ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkNumStrRes(
@@ -248,6 +253,9 @@ namespace Converter {
         DimensionUnit defaultUnit = DimensionUnit::FP);
     std::optional<Dimension> OptConvertFromArkLengthResource(const Ark_Resource& src,
         DimensionUnit defaultUnit = DimensionUnit::VP);
+    std::optional<Dimension> OptConvertFromResourceStr(const Ark_ResourceStr& src, DimensionUnit defaultUnit);
+    std::optional<Dimension> OptConvertFromF64ResourceStr(
+        const Opt_Union_F64_ResourceStr& src, DimensionUnit defaultUnit);
 
     template<typename T, typename P>
     ACE_FORCE_EXPORT void AssignCast(std::optional<T>& dst, const P& src)
@@ -385,6 +393,7 @@ namespace Converter {
     // Implementation is in cpp
     void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_Number *colors);
     void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_F64 *colors);
+    void AssignGradientMetricsColors(Gradient *gradient, const Opt_Array_Tuple_ColorMetrics_F64 *colorMetrics);
     void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient>& linear,
         const GradientDirection &direction);
     // if src is not string or number, return directly. If src is invalid string, use defaultValue.
@@ -606,7 +615,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_Float64& src);
     template<> Dimension Convert(const Ark_Int32& src);
     template<> Dimension Convert(const Ark_LengthMetrics& src);
-    template<> ACE_FORCE_EXPORT  Dimension Convert(const Ark_Number& src);
+    template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_Number& src);
     template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_String& src);
     template<> DimensionOffset Convert(const Ark_Offset& src);
     template<> DimensionOffset Convert(const Ark_Position& src);
@@ -645,6 +654,7 @@ namespace Converter {
     template<> NG::NavToolbarItemStatus Convert(const Ark_ToolbarItemStatus& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src);
+    template<> NG::NavigationTextOptions Convert(const Ark_NavigationTitleOptions& src);
     template<> NG::NavigationBackgroundOptions Convert(const Ark_NavigationToolbarOptions& src);
     template<> NG::NavigationBarOptions Convert(const Ark_NavigationTitleOptions& src);
     template<> NG::NavigationBarOptions Convert(const Ark_NavigationToolbarOptions& src);
@@ -684,6 +694,7 @@ namespace Converter {
     template<> RectF Convert(const Ark_Frame& src);
     template<> RectHeightStyle Convert(const Ark_text_RectHeightStyle& src);
     template<> RectWidthStyle Convert(const Ark_text_RectWidthStyle& src);
+    template<> NG::AccessibilityActionOptions Convert(const Ark_AccessibilityActionOptions& src);
     template<> RefPtr<BasicShape> Convert(const Ark_CircleShape& src);
     template<> RefPtr<BasicShape> Convert(const Ark_EllipseShape& src);
     template<> RefPtr<BasicShape> Convert(const Ark_PathShape& src);
@@ -693,6 +704,7 @@ namespace Converter {
     template<> RefPtr<Curve> Convert(const Ark_curves_ICurve& src);
     template<> RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src);
     template<> RefPtr<PixelMap> Convert(const Ark_image_PixelMap& src);
+    template<> RenderingContextOptions Convert(const Ark_RenderingContextOptions& src);
     template<> ResponseRegion Convert(const Ark_ResponseRegion &src);
     template<> RotateOptions Convert(const Ark_RotateOptions& src);
     template<> ScaleOpt Convert(const Ark_ScaleOptions& src);

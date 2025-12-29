@@ -73,6 +73,8 @@ public:
     static void SetEnableModeChangeAnimation(FrameNode* frameNode, bool isEnable);
     static void SetRecoverable(FrameNode* frameNode, const std::optional<bool>& recoverable);
     static void SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable);
+    static void UpdateDefineColor(FrameNode* frameNode, bool isDefined);
+
 private:
     static bool navBarWidthDoubleBind_;
 };

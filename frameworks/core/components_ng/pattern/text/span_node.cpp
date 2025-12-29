@@ -1344,6 +1344,14 @@ void SpanItem::EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(textLineStyle, EllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode, EllipsisMode);
     WRITE_TLV_INHERIT(textLineStyle, TextVerticalAlign, TLV_SPAN_TEXT_LINE_STYLE_TEXTVERTICALALIGN, TextVerticalAlign,
         ParagraphVerticalAlign);
+
+    if (textLineStyle->HasTextDirection()) {
+        TLVUtil::WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_TEXTDIRECTION);
+        TLVUtil::WriteTextDirection(buff, textLineStyle->propTextDirection.value());
+    } else {
+        TLVUtil::WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_TEXTDIRECTION);
+        TLVUtil::WriteTextDirection(buff, TextDirection::INHERIT);
+    }
 }
 
 RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor)
@@ -1404,6 +1412,8 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateEllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode);
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateTextVerticalAlign, TLV_SPAN_TEXT_LINE_STYLE_TEXTVERTICALALIGN,
                 TextVerticalAlign);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateTextDirection, TLV_SPAN_TEXT_LINE_STYLE_TEXTDIRECTION,
+                TextDirection);
 
             case TLV_SPAN_BACKGROUND_BACKGROUNDCOLOR: {
                 if (!sameSpan->backgroundStyle.has_value()) {
@@ -1444,6 +1454,9 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
     }
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         sameSpan->textLineStyle->ResetTextVerticalAlign();
+    }
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        sameSpan->textLineStyle->ResetTextDirection();
     }
     return sameSpan;
 }
@@ -1926,5 +1939,6 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
             spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString().c_str());
     }
     json->Put("LineThicknessScale", std::to_string(textStyle->GetLineThicknessScale()).c_str());
+    json->Put("TextDirection", StringUtils::ToString(textStyle->GetTextDirection()).c_str());
 }
 } // namespace OHOS::Ace::NG

@@ -301,8 +301,8 @@ export function makeRecordfromObj(obj: Object): Record<string, Any> {
     let record: Record<string, Any> = {};
     const keys = Object.keys(obj);
     const values = Object.values(obj);
-    keys.forEach((key: string, index: number) => {
-        record[key] = values[index as int32];
+    keys.forEach((key: string, index: int) => {
+        record[key] = values[index];
     })
     return record;
 }

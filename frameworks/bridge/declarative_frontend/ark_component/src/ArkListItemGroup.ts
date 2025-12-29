@@ -44,6 +44,7 @@ class ListItemGroupDividerModifier extends ModifierWithKey<DividerStyle> {
   checkObjectDiff(): boolean {
     return !(this.stageValue?.strokeWidth === this.value?.strokeWidth &&
       this.stageValue?.color === this.value?.color &&
+      !isResource(this.stageValue?.color) && !isResource(this.value?.color) &&
       this.stageValue?.startMargin === this.value?.startMargin &&
       this.stageValue?.endMargin === this.value?.endMargin);
   }

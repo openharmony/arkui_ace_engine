@@ -35,9 +35,10 @@ void DebugBoundaryPainter::PaintDebugBoundary(RSCanvas& canvas, const OffsetF& o
     pen.SetColor(BOUNDARY_COLOR);
     auto marginOffset = contentOffset_ - offset;
     canvas.AttachPen(pen);
-    RSRect paintRect = RSRect(-marginOffset.GetX(), -marginOffset.GetY(),
-        frameMarginSize_.Width() - HALF_STROKE_WIDTH_OFFSET - marginOffset.GetX(),
-        frameMarginSize_.Height() - HALF_STROKE_WIDTH_OFFSET - marginOffset.GetY());
+    RSRect paintRect = RSRect(-marginOffset.GetX() - paddingOffset_.GetX(),
+        -marginOffset.GetY() - paddingOffset_.GetY(),
+        frameMarginSize_.Width() - HALF_STROKE_WIDTH_OFFSET - marginOffset.GetX() - paddingOffset_.GetX(),
+        frameMarginSize_.Height() - HALF_STROKE_WIDTH_OFFSET - marginOffset.GetY() - paddingOffset_.GetY());
     canvas.DrawRect(paintRect);
     canvas.DetachPen();
 }
@@ -46,8 +47,8 @@ void DebugBoundaryPainter::PaintDebugMargin(RSCanvas& canvas, const OffsetF& off
 {
     RSBrush brush;
     auto marginOffset = contentOffset_ - offset;
-    auto startPointX = -marginOffset.GetX();
-    auto startPointY = -marginOffset.GetY();
+    auto startPointX = -marginOffset.GetX() - paddingOffset_.GetX();
+    auto startPointY = -marginOffset.GetY() - paddingOffset_.GetY();
     auto verticalRectHeight = contentSize_.Height();
     auto marginTop = contentOffset_.GetY() - offset.GetY();
     auto marginBottom = frameMarginSize_.Height() - contentSize_.Height() - marginTop;
@@ -76,8 +77,8 @@ void DebugBoundaryPainter::PaintDebugCorner(RSCanvas& canvas, const OffsetF& off
 {
     RSPen pen;
     auto marginOffset = contentOffset_ - offset;
-    auto startPointX = -marginOffset.GetX();
-    auto startPointY = -marginOffset.GetY();
+    auto startPointX = -marginOffset.GetX() - paddingOffset_.GetX();
+    auto startPointY = -marginOffset.GetY() - paddingOffset_.GetY();
     pen.SetColor(BOUNDARY_CORNER_COLOR);
     pen.SetWidth(BOUNDARY_STROKE_WIDTH);
     canvas.AttachPen(pen);

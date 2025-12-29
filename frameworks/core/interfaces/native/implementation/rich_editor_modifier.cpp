@@ -85,6 +85,8 @@ void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstract
         ? Converter::ArkValue<Opt_String>(UnParseFontFeatureSetting(fontFeatures), ctx)
         : Converter::ArkValue<Opt_String>(Ark_Empty(), ctx);
     dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(textStyle.textBackgroundStyle, ctx);
+    dst.strokeWidth = ArkValue<Opt_Float64>(textStyle.strokeWidth);
+    dst.strokeColor = ArkUnion<Opt_ResourceColor, Ark_String>(textStyle.strokeColor, ctx);
 }
 
 void AssignArkValue(Ark_RichEditorUrlStyle& dst, const std::u16string& src, ConvContext *ctx)
@@ -744,6 +746,14 @@ void SetStopBackPressImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     RichEditorModelNG::SetStopBackPress(frameNode, convValue.value_or(true));
 }
+void SetSingleLineImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    RichEditorModelNG::SetSingleLine(frameNode, convValue.value_or(false));
+}
 void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
                                        const Opt_Boolean* value)
 {
@@ -758,7 +768,7 @@ void SetIncludeFontPaddingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    RichEditorModelNG::SetIncludeFontPadding(frameNode, convValue.value_or(true));
+    RichEditorModelStatic::SetIncludeFontPadding(frameNode, convValue);
 }
 void SetFallbackLineSpacingImpl(Ark_NativePointer node,
                                 const Opt_Boolean* value)
@@ -766,7 +776,7 @@ void SetFallbackLineSpacingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
-    RichEditorModelNG::SetFallbackLineSpacing(frameNode, convValue.value_or(true));
+    RichEditorModelStatic::SetFallbackLineSpacing(frameNode, convValue);
 }
 void SetBindSelectionMenuImpl(Ark_NativePointer node,
                               const Opt_RichEditorSpanType* spanType,
@@ -895,6 +905,7 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
         RichEditorAttributeModifier::SetMaxLinesImpl,
         RichEditorAttributeModifier::SetKeyboardAppearanceImpl,
         RichEditorAttributeModifier::SetStopBackPressImpl,
+        RichEditorAttributeModifier::SetSingleLineImpl,
         RichEditorAttributeModifier::SetCompressLeadingPunctuationImpl,
         RichEditorAttributeModifier::SetIncludeFontPaddingImpl,
         RichEditorAttributeModifier::SetFallbackLineSpacingImpl,

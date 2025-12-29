@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "baseUrl": "./",
+        "paths": {
+            "std": ["node_modules/@panda/sdk/ets/stdlib/std"],
+            "escompat": ["node_modules/@panda/sdk/ets/stdlib/escompat"],
+            "#stateMgmtTool": ["tools/arkts/stateMgmtTool.ts"],
+            "@koalaui/compat": ["../../../../incremental/compat/src/arkts"],
+            "@koalaui/runtime": ["./mock/env_mock"],
+            "#generated": ["mock/interop.ts"],
+            "@koalaui/common" : ["mock/koalaui-common.ts"],
+
+            "#interop": ["mock/interop.ts"],
+            "@interopStorage": ["mock"],
+            "#StateMgmtConsole": ["./mock/env_mock"],
+            "arkui.ani": ["./mock/env_mock"],
+            "@factoryInternal": ["./mock"],
+            "@uicontext": ["./mock"],
+            "@ohos.app.ability.contextConstant": ["./mock/contextConstant"]
+        }
+    }
+}

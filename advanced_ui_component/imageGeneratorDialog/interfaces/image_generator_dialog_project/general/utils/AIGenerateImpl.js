@@ -20,105 +20,110 @@ export class AIGenerateImpl {
     constructor() {
         this.stopTask = false;
         this.sessionId = 0;
+        this.currentImageSessionId = 0;
     }
     static getInstance() {
         return AIGenerateImpl.instance;
     }
     ;
-    setSelfTextGenerateModal(v17) {
-        this.TextModal = v17;
+    getCurrentImageSessionId() {
+        return this.currentImageSessionId;
     }
     ;
-    setSelfImageGenerateModal(u17) {
-        this.ImageModal = u17;
+    setSelfTextGenerateModal(modal) {
+        this.TextModal = modal;
+    }
+    ;
+    setSelfImageGenerateModal(modal) {
+        this.ImageModal = modal;
     }
     ;
     delay() {
-        return new Promise(t17 => setTimeout(t17, 1000));
+        return new Promise(resolve => setTimeout(resolve, 1000));
     }
-    async TextAIGenerate(p17) {
+    async TextAIGenerate(callback) {
         this.stopTask = false;
-        let q17 = this.sessionId;
+        let retSessionId = this.sessionId;
         this.sessionId++;
         if (this.TextModal !== undefined) {
             console.info(TAG, `Complete the text polishing task using a user-defined model.`);
-            let r17 = (s17) => {
-                if (s17.partialFail !== undefined) {
-                    console.error(TAG, `Error in requestTextGeneration: ${s17.partialFail}.`);
-                    p17.onError();
+            let userTextModalCallback = (ret) => {
+                if (ret.partialFail !== undefined) {
+                    console.error(TAG, `Error in requestTextGeneration: ${ret.partialFail}.`);
+                    callback.onError();
                 }
                 else {
-                    if (p17.onResult) {
-                        p17.onResult(s17);
+                    if (callback.onResult) {
+                        callback.onResult(ret);
                     }
                 }
             };
-            this.TextModal.requestTextGeneration(q17, AIGenerateOptions.getInstance().userPrompt, r17);
-            p17.onReady();
+            this.TextModal.requestTextGeneration(retSessionId, AIGenerateOptions.getInstance().userPrompt, userTextModalCallback);
+            callback.onReady();
         }
         else {
             console.info(TAG, `Complete the text polishing task using Celia model.`);
-            this.mockPoolingTask(p17);
+            this.mockPoolingTask(callback);
         }
-        return q17;
+        return retSessionId;
     }
     ;
-    async mockPoolingTask(k17) {
-        let l17 = ['mockThink：', 'mockResult：'];
-        let m17 = {
+    async mockPoolingTask(callback) {
+        let mockString = ['mockThink：', 'mockResult：'];
+        let mockReturn = {
             type: 0,
             reasoningContent: undefined,
             content: undefined,
         };
-        k17.onReady();
+        callback.onReady();
         setTimeout(async () => {
-            for (let o17 = 0; o17 < 10; o17++) {
+            for (let temp = 0; temp < 10; temp++) {
                 if (this.stopTask) {
                     return;
                 }
-                m17.reasoningContent = l17[0] +
+                mockReturn.reasoningContent = mockString[0] +
                     AIGenerateOptions.getInstance().userPrompt.slice(0, Math.floor(Math.random() * AIGenerateOptions.getInstance().userPrompt.length));
-                if (k17.onResult) {
-                    k17.onResult(m17);
+                if (callback.onResult) {
+                    callback.onResult(mockReturn);
                 }
                 await this.delay();
             }
-            m17.type = 1;
-            m17.reasoningContent = undefined;
-            m17.content = undefined;
+            mockReturn.type = 1;
+            mockReturn.reasoningContent = undefined;
+            mockReturn.content = undefined;
             console.info(TAG, `The thinking process of the text polishing task has been completed.`);
-            if (k17.onResult) {
-                k17.onResult(m17);
+            if (callback.onResult) {
+                callback.onResult(mockReturn);
             }
-            m17.type = 0;
-            for (let n17 = 0; n17 < 5; n17++) {
+            mockReturn.type = 0;
+            for (let temp = 0; temp < 5; temp++) {
                 if (this.stopTask) {
                     return;
                 }
-                m17.content = l17[1] +
+                mockReturn.content = mockString[1] +
                     AIGenerateOptions.getInstance().userPrompt.slice(0, Math.floor(Math.random() * AIGenerateOptions.getInstance().userPrompt.length));
-                if (k17.onResult) {
-                    k17.onResult(m17);
+                if (callback.onResult) {
+                    callback.onResult(mockReturn);
                 }
                 await this.delay();
             }
-            m17.type = 1;
-            m17.reasoningContent = undefined;
-            m17.content = undefined;
+            mockReturn.type = 1;
+            mockReturn.reasoningContent = undefined;
+            mockReturn.content = undefined;
             console.info(TAG, `The text polishing task generation process has been completed.`);
-            if (k17.onResult) {
-                k17.onResult(m17);
+            if (callback.onResult) {
+                callback.onResult(mockReturn);
             }
         }, 1000);
         return;
     }
-    async ImageAIGenerate(d17) {
-        let e17 = this.sessionId;
+    async ImageAIGenerate(callback) {
+        let retSessionId = this.sessionId;
         this.sessionId++;
-        let f17;
+        let getResultFromAIGenerate;
         if (this.ImageModal !== undefined) {
             console.info(TAG, `Complete the image generation task using a user-defined model.`);
-            let h17 = {
+            let taskParams = {
                 images: AIGenerateOptions.getInstance().images,
                 positionImage: AIGenerateOptions.getInstance().layoutImage?.image,
                 selectPath: AIGenerateOptions.getInstance().shapePath,
@@ -126,60 +131,61 @@ export class AIGenerateImpl {
                 style: AIGenerateOptions.getInstance().style,
                 imageSize: AIGenerateOptions.getInstance().resolution,
             };
-            let i17 = (j17) => {
-                if (j17.partialFail !== undefined) {
-                    console.error(TAG, `Error in requestImageGeneration: ${j17.partialFail}.`);
-                    d17.onError();
+            let userImageModalCallback = (ret) => {
+                if (ret.partialFail !== undefined) {
+                    console.error(TAG, `Error in requestImageGeneration: ${ret.partialFail}.`);
+                    callback.onError();
                 }
                 else {
-                    if (j17.type === imageGeneration.PartialResultType.PARTIAL) {
+                    if (ret.type === imageGeneration.PartialResultType.PARTIAL) {
                         console.info(TAG, `The image generation task returns an image.`);
-                        f17.push(j17.imageData);
+                        getResultFromAIGenerate.push(ret.imageData);
                     }
-                    else if (j17.type === imageGeneration.PartialResultType.COMPLETED) {
-                        f17.push(j17.imageData);
+                    else if (ret.type === imageGeneration.PartialResultType.COMPLETED) {
+                        getResultFromAIGenerate.push(ret.imageData);
                         console.info(TAG, `The task of generating the image has been completed.`);
-                        if (d17.onComplete) {
-                            d17.onComplete(f17);
+                        if (callback.onComplete) {
+                            callback.onComplete(getResultFromAIGenerate);
                         }
                     }
                 }
             };
-            this.ImageModal.requestImageGeneration(e17, h17, i17);
-            d17.onReady();
+            this.currentImageSessionId = retSessionId;
+            this.ImageModal.requestImageGeneration(retSessionId, taskParams, userImageModalCallback);
+            callback.onReady();
         }
         else {
             console.info(TAG, `Complete the image generation task using Celia model.`);
-            d17.onReady();
-            AIGenerateOptions.getInstance().images?.forEach(async (g17) => {
-                f17.push(g17.url.toString());
+            callback.onReady();
+            AIGenerateOptions.getInstance().images?.forEach(async (image) => {
+                getResultFromAIGenerate.push(image.url.toString());
                 console.info(TAG, `The image generation task returns an image.`);
                 await this.delay();
             });
             setTimeout(() => {
                 console.info(TAG, `The task of generating the image has been completed.`);
-                if (d17.onComplete) {
-                    d17.onComplete(f17);
+                if (callback.onComplete) {
+                    callback.onComplete(getResultFromAIGenerate);
                 }
             }, 10000);
         }
-        return e17;
+        return retSessionId;
     }
     ;
-    async cancelTextGenerateTask(c17) {
-        console.info(TAG, `Text task sessionId: ${c17} cancel.`);
+    async cancelTextGenerateTask(sessionId) {
+        console.info(TAG, `Text task sessionId: ${sessionId} cancel.`);
         if (this.TextModal !== undefined) {
-            this.TextModal.cancelTextGeneration(Number(c17));
+            this.TextModal.cancelTextGeneration(Number(sessionId));
         }
         else {
             this.stopTask = true;
         }
     }
     ;
-    async cancelImageGenerateTask(b17) {
-        console.info(TAG, `Image task sessionId: ${b17} cancel.`);
+    async cancelImageGenerateTask(sessionId) {
+        console.info(TAG, `Image task sessionId: ${sessionId} cancel.`);
         if (this.ImageModal !== undefined) {
-            this.ImageModal.cancelImageGeneration(Number(b17));
+            this.ImageModal.cancelImageGeneration(Number(sessionId));
         }
         else {
         }

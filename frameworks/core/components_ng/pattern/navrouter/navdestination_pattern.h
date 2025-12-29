@@ -315,7 +315,7 @@ public:
         }
         return std::nullopt;
     }
-    void NotifyNavDestinationSizeChange();
+    void NotifyNavDestinationSizeChange(const std::optional<SizeF>& size, int64_t notifyId);
 
 private:
     struct HideBarOnSwipeContext {
@@ -381,6 +381,7 @@ private:
     RefPtr<TouchEventImpl> touchListener_ = nullptr;
     std::string serializedParam_ = "";
     bool needNotifySizeChangeWhenVisible_ = false;
+    int64_t lastSizeChangeNotifyId_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

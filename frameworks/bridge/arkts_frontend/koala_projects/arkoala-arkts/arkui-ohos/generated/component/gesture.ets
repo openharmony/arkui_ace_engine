@@ -113,6 +113,10 @@ export class GestureRecognizer implements MaterializedBase {
     public isFingerCountLimit(): boolean {
         return this.isFingerCountLimit_serialize()
     }
+    public preventBegin(): void {
+        this.preventBegin_serialize()
+        return
+    }
     getTag_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._GestureRecognizer_getTag(this.peer!.ptr)
         return retval
@@ -158,6 +162,9 @@ export class GestureRecognizer implements MaterializedBase {
     isFingerCountLimit_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._GestureRecognizer_isFingerCountLimit(this.peer!.ptr)
         return retval
+    }
+    preventBegin_serialize(): void {
+        ArkUIGeneratedNativeModule._GestureRecognizer_preventBegin(this.peer!.ptr)
     }
 }
 export class PanGestureOptionsInternal {
@@ -771,6 +778,9 @@ export class BaseGestureEvent_serializer {
         let ptr : KPointer = valueDeserializer.readPointer()
         // instructive change start
         let type = ArkUIGeneratedNativeModule._GestureOps_getGestureEventType(ptr)
+        if (type === -1) {
+            return BaseGestureEventInternal.fromPtr(ptr)
+        }
         let recognizerType = GestureControl.GestureType.fromValue(type as int32)
         switch(recognizerType) {
             case GestureControl.GestureType.TAP_GESTURE:

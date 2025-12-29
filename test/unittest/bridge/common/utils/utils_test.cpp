@@ -17,6 +17,7 @@
 
 #define private public
 #define protected public
+#include "frameworks/bridge/common/utils/module_buffer_reader.h"
 #include "frameworks/bridge/common/utils/transform_convertor.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -497,4 +498,35 @@ HWTEST_F(UtilsTest, transformConvertorTest008, TestSize.Level1)
     
     EXPECT_EQ(transformConvertor.operationList_.size(), 1);
 }
+
+/**
+ * @tc.name: moduleBufferReaderTest001
+ * @tc.desc: test func SetBufferReaderImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsTest, moduleBufferReaderTest001, TestSize.Level1)
+{
+    ModuleBufferReader::GetInstance().SetBufferReaderImpl(
+        [](const std::string&, uint8_t**, size_t*) -> bool { return true; });
+    auto result = ModuleBufferReader::GetInstance().ReadModuleBuffer("request", nullptr, nullptr);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: moduleBufferReaderTest002
+ * @tc.desc: test func ReadModuleBuffer
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsTest, moduleBufferReaderTest002, TestSize.Level1)
+{
+    auto result = ModuleBufferReader::GetInstance().ReadModuleBuffer("request", nullptr, nullptr);
+    EXPECT_EQ(result, false);
+
+    // set impl.
+    ModuleBufferReader::GetInstance().SetBufferReaderImpl(
+        [](const std::string&, uint8_t**, size_t*) -> bool { return true; });
+    result = ModuleBufferReader::GetInstance().ReadModuleBuffer("request", nullptr, nullptr);
+    EXPECT_EQ(result, true);
+}
+
 } // namespace OHOS::Ace::Framework

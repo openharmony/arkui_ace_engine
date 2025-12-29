@@ -1034,6 +1034,16 @@ void WebModelStatic::SetPermissionRequestEventId(
     webEventHub->SetOnPermissionRequestEvent(std::move(uiCallback));
 }
 
+void WebModelStatic::SetPermissionClipboard(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetPermissionClipboardCallback(std::move(uiCallback));
+}
+
 void WebModelStatic::SetScreenCaptureRequestEventId(
     FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
 {
@@ -1491,6 +1501,14 @@ void WebModelStatic::SetEnableImageAnalyzer(FrameNode* frameNode, bool isEnabled
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->UpdateEnableImageAnalyzer(isEnabled);
+}
+
+void WebModelStatic::SetEnableAutoFill(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateEnableAutoFill(isEnabled);
 }
 
 void WebModelStatic::NotifyPopupWindowResultStatic(int32_t webId, bool result)

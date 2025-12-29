@@ -59,6 +59,11 @@ void RenderContext::RequestNextFrame(bool isOffScreenNode) const
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(WeakPtr<FrameNode>(node));
         }
+        {
+            auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetNeedRenderNodeByUniqueId(WeakPtr<FrameNode>(node));
+        }
         if (node->IsObservedByDrawChildren()) {
             auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
             CHECK_NULL_VOID(pipeline);

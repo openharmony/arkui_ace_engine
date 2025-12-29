@@ -638,6 +638,7 @@ public:
     void ProcessColorModeUpdate(
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void CheckForceVsync(const ParsedConfig& parsedConfig);
+    bool GetWhiteListStatus();
     void OnFrontUpdated(const ConfigurationChange& configurationChange, const std::string& configuration);
     void UpdateConfiguration(
         const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel = false);

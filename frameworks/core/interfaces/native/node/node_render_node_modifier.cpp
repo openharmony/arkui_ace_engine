@@ -1539,31 +1539,10 @@ ArkUI_Int32 GetRenderNode(ArkUINodeHandle node, ArkUIRenderNodeHandle* renderNod
 void DetachRsNode(FrameNode* node)
 {
     ViewAbstract::CheckMainThread();
-    CHECK_NULL_VOID(node && node->GetRenderContext());
-    auto rsContext = AceType::DynamicCast<RosenRenderContext>(node->GetRenderContext());
+    CHECK_NULL_VOID(node);
+    auto rsContext = node->GetRenderContext();
     CHECK_NULL_VOID(rsContext);
-    auto rsNode = rsContext->GetRSNode();
-    CHECK_NULL_VOID(rsNode);
-    auto parentRsNode = rsNode->GetParent();
-    CHECK_NULL_VOID(parentRsNode);
-    parentRsNode->RemoveChild(rsNode);
-}
-
-void DetachRsNodeDuringDispose(ArkUINodeHandle node)
-{
-    ViewAbstract::CheckMainThread();
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto& adoptedChildren = frameNode->GetAdoptedChildren();
-    if (frameNode->IsAdopted()) {
-        DetachRsNode(frameNode);
-    } else if (adoptedChildren.size() > 0) {
-        for (auto& adoptedChild : adoptedChildren) {
-            adoptedChild->SetIsAdopted(false);
-            adoptedChild->SetAdoptParent(nullptr);
-            DetachRsNode(adoptedChild.GetRawPtr());
-        }
-    }
+    rsContext->RemoveFromTree();
 }
 
 ArkUI_Int32 RemoveAdoptedChild(ArkUINodeHandle node, ArkUINodeHandle child)
@@ -1688,7 +1667,6 @@ const ArkUINDKRenderNodeModifier* GetNDKRenderNodeModifier()
         .adoptChild = AdoptChild,
         .getRenderNode = GetRenderNode,
         .removeAdoptedChild = RemoveAdoptedChild,
-        .detachRsNodeDuringDispose = DetachRsNodeDuringDispose,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

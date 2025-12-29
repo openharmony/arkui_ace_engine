@@ -293,6 +293,22 @@ void ScrollPattern::OnScrollEndCallback()
 #endif
 }
 
+bool ScrollPattern::FreeOverScrollWithDelta(Axis axis, double delta)
+{
+    CHECK_NULL_RETURN(freeScroll_, false);
+    const OffsetF offset = freeScroll_->GetOffset();
+    OffsetF newPos = offset + (axis == Axis::HORIZONTAL ? OffsetF(delta, 0) : OffsetF(0, delta));
+    return (axis == Axis::HORIZONTAL) ?
+        !NearEqual(freeScroll_->ClampPosition(newPos).GetX(), newPos.GetX()) :
+        !NearEqual(freeScroll_->ClampPosition(newPos).GetY(), newPos.GetY());
+}
+
+void ScrollPattern::ProcessFreeScrollOverDrag(const OffsetF velocity)
+{
+    CHECK_NULL_VOID(freeScroll_);
+    freeScroll_->Fling(velocity);
+}
+
 void ScrollPattern::ResetPosition()
 {
     currentOffset_ = 0.0;
@@ -344,6 +360,10 @@ OverScrollOffset ScrollPattern::GetOverScrollOffset(double delta) const
 
 bool ScrollPattern::IsOutOfBoundary(bool useCurrentDelta)
 {
+    if (freeScroll_) {
+        const OffsetF offset = freeScroll_->GetOffset();
+        return !NearEqual(freeScroll_->ClampPosition(offset), offset);
+    }
     if (Positive(scrollableDistance_)) {
         return Positive(currentOffset_) || LessNotEqual(currentOffset_, -scrollableDistance_);
     } else {
@@ -788,6 +808,7 @@ void ScrollPattern::ScrollTo(float position)
     SetAnimateCanOverScroll(GetCanStayOverScroll());
     JumpToPosition(-position - contentStartOffset_, SCROLL_FROM_JUMP);
     SetIsOverScroll(GetCanStayOverScroll());
+    ContentChangeReport(GetHost());
 }
 
 void ScrollPattern::DoJump(float position, int32_t source)
@@ -1797,11 +1818,12 @@ RefPtr<NGGestureRecognizer> ScrollPattern::GetOverrideRecognizer()
     return gestureGroup_;
 }
 
-bool ScrollPattern::FreeScrollBy(const OffsetF& delta)
+bool ScrollPattern::FreeScrollBy(const OffsetF& delta, bool canOverScroll)
 {
     CHECK_NULL_RETURN(freeScroll_, false);
-    freeScroll_->UpdateOffset(delta);
-    return true;
+    freeScroll_->UpdateOffset(delta, canOverScroll);
+    const OffsetF newPos = freeScroll_->GetOffset() + delta;
+    return NearEqual(freeScroll_->ClampPosition(newPos), newPos);
 }
 bool ScrollPattern::FreeScrollPage(bool reverse, bool smooth)
 {

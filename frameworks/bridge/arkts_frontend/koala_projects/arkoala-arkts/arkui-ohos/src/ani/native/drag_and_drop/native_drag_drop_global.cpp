@@ -233,7 +233,7 @@ void DragSetAllowDrop([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object
         return;
     }
 
-    if (!AniUtils::IsClassObject(env, array, "escompat.Array")) {
+    if (!AniUtils::IsClassObject(env, array, "std.core.Array")) {
         modifier->getDragAniModifier()->setDragAllowDrop(frameNode, nullptr, 0);
         return;
     }
@@ -305,7 +305,7 @@ void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obje
         if (isUndef != ANI_TRUE) {
             ani_object value = static_cast<ani_object>(onlyForLifting);
             ani_boolean onlyForLiftingValue;
-            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "unboxed", ":z", &onlyForLiftingValue)) {
+            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "toBoolean", ":z", &onlyForLiftingValue)) {
                 info.onlyForLifting = static_cast<bool>(onlyForLiftingValue);
             }
         }
@@ -317,7 +317,7 @@ void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obje
         if (isUndef != ANI_TRUE) {
             ani_object value = static_cast<ani_object>(delayCreating);
             ani_boolean delayCreatingValue;
-            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "unboxed", ":z", &delayCreatingValue)) {
+            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "toBoolean", ":z", &delayCreatingValue)) {
                 info.delayCreating = static_cast<bool>(delayCreatingValue);
             }
         }
@@ -383,7 +383,7 @@ bool ParseDragPreviewMode(ani_env* env, ArkUIDragPreviewOption& previewOptions, 
         return true;
     }
     bool isAuto = false;
-    if (AniUtils::IsClassObject(env, modeObj, "escompat.Array")) {
+    if (AniUtils::IsClassObject(env, modeObj, "std.core.Array")) {
         ani_size length;
         ani_array arrayObj = static_cast<ani_array>(modeObj);
         if (ANI_OK != env->Array_GetLength(arrayObj, &length)) {

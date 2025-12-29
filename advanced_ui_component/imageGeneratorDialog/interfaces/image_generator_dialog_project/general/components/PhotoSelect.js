@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (v20, w20, x20, y20) {
-    var z20 = arguments.length, a21 = z20 < 3 ? w20 : y20 === null ? y20 = Object.getOwnPropertyDescriptor(w20, x20) : y20, b21;
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-        a21 = Reflect.decorate(v20, w20, x20, y20);
+        r = Reflect.decorate(decorators, target, key, desc);
     else
-        for (var c21 = v20.length - 1; c21 >= 0; c21--)
-            if (b21 = v20[c21])
-                a21 = (z20 < 3 ? b21(a21) : z20 > 3 ? b21(w20, x20, a21) : b21(w20, x20)) || a21;
-    return z20 > 3 && a21 && Object.defineProperty(w20, x20, a21), a21;
+        for (var i = decorators.length - 1; i >= 0; i--)
+            if (d = decorators[i])
+                r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
@@ -31,47 +31,49 @@ import { Constants } from '../common/CommonConstants';
 import { FileUtils } from '../utils/FileUtils';
 const tag = 'PhotoSelect';
 export class PhotoSelect extends ViewV2 {
-    constructor(p20, q20, r20, s20 = -1, t20, u20) {
-        super(p20, s20, u20);
-        this.initParam("imageInfoArr", (q20 && "imageInfoArr" in q20) ? q20.imageInfoArr : undefined);
-        this.initParam("imageMatrixArr", (q20 && "imageMatrixArr" in q20) ? q20.imageMatrixArr : undefined);
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
+        this.initParam("imageInfoArr", (params && "imageInfoArr" in params) ? params.imageInfoArr : undefined);
+        this.initParam("imageMatrixArr", (params && "imageMatrixArr" in params) ? params.imageMatrixArr : undefined);
+        this.setImgCounts = "setImgCounts" in params ? params.setImgCounts : () => { };
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(o20) {
-        this.resetParam("imageInfoArr", (o20 && "imageInfoArr" in o20) ? o20.imageInfoArr : undefined);
-        this.resetParam("imageMatrixArr", (o20 && "imageMatrixArr" in o20) ? o20.imageMatrixArr : undefined);
+    resetStateVarsOnReuse(params) {
+        this.resetParam("imageInfoArr", (params && "imageInfoArr" in params) ? params.imageInfoArr : undefined);
+        this.resetParam("imageMatrixArr", (params && "imageMatrixArr" in params) ? params.imageMatrixArr : undefined);
+        this.setImgCounts = "setImgCounts" in params ? params.setImgCounts : (count) => { };
     }
     getSelectPhotoLength() {
-        let m20 = 0;
-        for (let n20 = 0; n20 < this.imageInfoArr.length; n20++) {
-            if (!this.invalidImageInfo(n20)) {
-                m20++;
+        let result = 0;
+        for (let i = 0; i < this.imageInfoArr.length; i++) {
+            if (!this.invalidImageInfo(i)) {
+                result++;
             }
         }
-        return m20;
+        return result;
     }
     openPhotoPicker() {
         if (this.getSelectPhotoLength() >= 4) {
             return;
         }
-        let k20 = new photoAccessHelper.PhotoViewPicker();
-        k20.select({
+        let photoPicker = new photoAccessHelper.PhotoViewPicker();
+        photoPicker.select({
             MIMEType: photoAccessHelper.PhotoViewMIMETypes.IMAGE_TYPE,
             isOriginalSupported: true,
             maxSelectNumber: PhotoSelect.DEFAULT_COUNT - this.getSelectPhotoLength(),
             combinedMediaTypeFilter: ['image|*|image/jpeg,image/png,image/heic,image/bmp,image/webp']
-        }).then((l20) => {
-            this.handleSelectedUri(l20.photoUris);
+        }).then((result) => {
+            this.handleSelectedUri(result.photoUris);
         });
     }
-    deleteImageInfo(j20) {
-        if (j20 < 0 || j20 > PhotoSelect.DEFAULT_COUNT) {
-            console.log(tag, `invalid index: ${j20}`);
+    deleteImageInfo(index) {
+        if (index < 0 || index > PhotoSelect.DEFAULT_COUNT) {
+            console.log(tag, `invalid index: ${index}`);
             return;
         }
-        this.imageInfoArr[j20].url = Constants.NOT_SELECTED_NAME;
-        this.imageInfoArr[j20].image?.release();
-        this.imageMatrixArr[j20] = [
+        this.imageInfoArr[index].url = Constants.NOT_SELECTED_NAME;
+        this.imageInfoArr[index].image?.release();
+        this.imageMatrixArr[index] = [
             1, 0, 0, 0,
             0, 1, 0, 0,
             0, 0, 1, 0,
@@ -79,109 +81,115 @@ export class PhotoSelect extends ViewV2 {
         ];
         this.resortImageList();
     }
-    moveImageInfo(a20, b20) {
-        if (a20 === b20) {
+    moveImageInfo(start, end) {
+        if (start === end) {
             return;
         }
-        let c20 = [];
-        for (let i20 = 0; i20 < this.imageInfoArr.length; i20++) {
-            c20.push(this.imageInfoArr[a20].zIndex ?? 0);
+        let zIndexArr = [];
+        for (let i = 0; i < this.imageInfoArr.length; i++) {
+            zIndexArr.push(this.imageInfoArr[start].zIndex ?? 0);
         }
-        if (a20 > b20) {
-            let g20 = this.imageInfoArr[a20];
-            this.imageInfoArr.splice(a20, 1);
-            this.imageInfoArr.splice(b20, 0, g20);
-            let h20 = this.imageMatrixArr[a20];
-            this.imageMatrixArr.splice(a20, 1);
-            this.imageMatrixArr.splice(b20, 0, h20);
+        if (start > end) {
+            let imageInfo = this.imageInfoArr[start];
+            this.imageInfoArr.splice(start, 1);
+            this.imageInfoArr.splice(end, 0, imageInfo);
+            let matrixInfo = this.imageMatrixArr[start];
+            this.imageMatrixArr.splice(start, 1);
+            this.imageMatrixArr.splice(end, 0, matrixInfo);
         }
         else {
-            let e20 = this.imageInfoArr[a20];
-            this.imageInfoArr.splice(a20, 1);
-            this.imageInfoArr.splice(b20 - 1, 0, e20);
-            let f20 = this.imageMatrixArr[a20];
-            this.imageMatrixArr.splice(a20, 1);
-            this.imageMatrixArr.splice(b20 - 1, 0, f20);
+            let imageInfo = this.imageInfoArr[start];
+            this.imageInfoArr.splice(start, 1);
+            this.imageInfoArr.splice(end - 1, 0, imageInfo);
+            let matrixInfo = this.imageMatrixArr[start];
+            this.imageMatrixArr.splice(start, 1);
+            this.imageMatrixArr.splice(end - 1, 0, matrixInfo);
         }
         this.resortImageList();
-        for (let d20 = 0; d20 < c20.length; d20++) {
-            this.imageInfoArr[d20].zIndex = c20[d20];
+        for (let i = 0; i < zIndexArr.length; i++) {
+            this.imageInfoArr[i].zIndex = zIndexArr[i];
         }
     }
     resortImageList() {
-        let w19 = [];
-        let x19 = [];
-        for (let z19 = 0; z19 < this.imageInfoArr.length; z19++) {
-            if (!this.invalidImageInfo(z19)) {
-                w19.push(this.imageInfoArr[z19]);
-                x19.push(this.imageMatrixArr[z19]);
+        let images = [];
+        let matrixTmp = [];
+        for (let i = 0; i < this.imageInfoArr.length; i++) {
+            if (!this.invalidImageInfo(i)) {
+                images.push(this.imageInfoArr[i]);
+                matrixTmp.push(this.imageMatrixArr[i]);
             }
-            this.imageInfoArr[z19] = { image: undefined, url: Constants.NOT_SELECTED_NAME };
-            this.imageMatrixArr[z19] = [
+            this.imageInfoArr[i] = { image: undefined, url: Constants.NOT_SELECTED_NAME };
+            this.imageMatrixArr[i] = [
                 1, 0, 0, 0,
                 0, 1, 0, 0,
                 0, 0, 1, 0,
                 0, 0, 0, 1
             ];
         }
-        for (let y19 = 0; y19 < w19.length; y19++) {
-            this.imageInfoArr[y19] = w19[y19];
-            this.imageMatrixArr[y19] = x19[y19];
+        for (let i = 0; i < images.length; i++) {
+            this.imageInfoArr[i] = images[i];
+            this.imageMatrixArr[i] = matrixTmp[i];
+        }
+        if (this.setImgCounts) {
+            this.setImgCounts(images.length);
         }
     }
-    enablePhotoPicker(v19) {
-        if (!this.invalidImageInfo(v19)) {
+    enablePhotoPicker(index) {
+        if (!this.invalidImageInfo(index)) {
             return false;
         }
-        if (v19 === 0) {
+        if (index === 0) {
             return true;
         }
-        return !this.invalidImageInfo(v19 - 1);
+        return !this.invalidImageInfo(index - 1);
     }
     getMaxZIndex() {
-        let t19 = 0;
-        for (let u19 = 0; u19 < this.imageInfoArr.length; u19++) {
-            if (!this.invalidImageInfo(u19)) {
-                t19 = this.imageInfoArr[u19].zIndex ?? 0;
+        let maxZIndex = 0;
+        for (let i = 0; i < this.imageInfoArr.length; i++) {
+            if (!this.invalidImageInfo(i)) {
+                maxZIndex = this.imageInfoArr[i].zIndex ?? 0;
             }
             else {
-                return t19;
+                return maxZIndex;
             }
         }
-        return t19;
+        return maxZIndex;
     }
-    handleSelectedUri(p19) {
-        for (let q19 = 0, r19 = 0; q19 < this.imageInfoArr.length && r19 < p19.length; q19++, r19++) {
-            if (!this.invalidImageInfo(q19)) {
-                r19--;
+    handleSelectedUri(selectedUris) {
+        for (let i = 0, j = 0; i < this.imageInfoArr.length && j < selectedUris.length; i++, j++) {
+            if (!this.invalidImageInfo(i)) {
+                j--;
                 continue;
             }
-            let s19 = FileUtils.createPixelMap(p19[r19]);
-            if (s19 === undefined) {
-                q19--;
+            let imageInfo = FileUtils.createPixelMap(selectedUris[j]);
+            if (imageInfo === undefined) {
+                i--;
                 console.log(tag, 'parse selected uri error');
                 return;
             }
-            s19.zIndex = this.getMaxZIndex() + 1;
-            this.imageInfoArr[q19] = s19;
+            imageInfo.zIndex = this.getMaxZIndex() + 1;
+            this.imageInfoArr[i] = imageInfo;
+            if (this.setImgCounts) {
+                this.setImgCounts(i + 1);
+            }
         }
     }
-    invalidImageInfo(o19) {
-        if (o19 < 0 || o19 > PhotoSelect.DEFAULT_COUNT) {
-            console.log(tag, `invalid index: ${o19}`);
+    invalidImageInfo(index) {
+        if (index < 0 || index > PhotoSelect.DEFAULT_COUNT) {
+            console.log(tag, `invalid index: ${index}`);
             return true;
         }
-        return this.imageInfoArr[o19].url === Constants.NOT_SELECTED_NAME;
+        return this.imageInfoArr[index].url === Constants.NOT_SELECTED_NAME;
     }
-    previewImageInfo(e19, f19 = null) {
-        this.observeComponentCreation2((g19, h19) => {
+    previewImageInfo(index, parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (!this.invalidImageInfo(e19)) {
+            if (!this.invalidImageInfo(index)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((m19, n19) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
                     }, Column);
-                    this.observeComponentCreation2((k19, l19) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create();
                         Stack.alignContent(Alignment.Top);
                         Stack.width(56);
@@ -189,8 +197,8 @@ export class PhotoSelect extends ViewV2 {
                         Stack.borderRadius(12);
                         Stack.clip(true);
                     }, Stack);
-                    this.observeComponentCreation2((i19, j19) => {
-                        Image.create((this.imageInfoArr[e19]).image);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Image.create((this.imageInfoArr[index]).image);
                         Image.syncLoad(true);
                         Image.draggable(false);
                         Image.borderRadius(12);
@@ -207,15 +215,15 @@ export class PhotoSelect extends ViewV2 {
         }, If);
         If.pop();
     }
-    MyMagicCanvasSquaredBuilder(a18, b18 = null) {
-        this.observeComponentCreation2((c18, d18) => {
+    MyMagicCanvasSquaredBuilder(index, parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (this.invalidImageInfo(a18)) {
+            if (this.invalidImageInfo(index)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((c19, d19) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create();
                         Stack.onClick(() => {
-                            if (!this.enablePhotoPicker(a18)) {
+                            if (!this.enablePhotoPicker(index)) {
                                 return;
                             }
                             this.openPhotoPicker();
@@ -225,7 +233,7 @@ export class PhotoSelect extends ViewV2 {
                         Stack.borderRadius(12);
                         Stack.clip(true);
                     }, Stack);
-                    this.observeComponentCreation2((a19, b19) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
                         Column.backgroundColor({ "id": 125831008, "type": 10001, params: ['sys.color.comp_background_tertiary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                         Column.height(56);
@@ -233,11 +241,11 @@ export class PhotoSelect extends ViewV2 {
                         Column.borderRadius(12);
                     }, Column);
                     Column.pop();
-                    this.observeComponentCreation2((w18, x18) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (this.enablePhotoPicker(a18)) {
+                        if (this.enablePhotoPicker(index)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((y18, z18) => {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create({ "id": 125831481, "type": 40000, params: ['sys.symbol.plus'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                                     SymbolGlyph.height(24);
                                     SymbolGlyph.width(24);
@@ -259,7 +267,7 @@ export class PhotoSelect extends ViewV2 {
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((u18, v18) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create();
                         Stack.align(Alignment.Center);
                         Stack.alignContent(Alignment.Top);
@@ -268,7 +276,7 @@ export class PhotoSelect extends ViewV2 {
                         Stack.borderRadius(12);
                         Stack.clip(true);
                     }, Stack);
-                    this.observeComponentCreation2((s18, t18) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
                         Column.backgroundColor({ "id": 125831008, "type": 10001, params: ['sys.color.comp_background_tertiary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                         Column.height(56);
@@ -276,21 +284,21 @@ export class PhotoSelect extends ViewV2 {
                         Column.borderRadius(12);
                     }, Column);
                     Column.pop();
-                    this.observeComponentCreation2((q18, r18) => {
-                        Image.create((this.imageInfoArr[a18]).image);
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Image.create((this.imageInfoArr[index]).image);
                         Image.borderRadius(12);
                         Image.draggable(false);
                         Image.syncLoad(true);
                     }, Image);
-                    this.observeComponentCreation2((o18, p18) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
                         Row.width('100%');
                         Row.justifyContent(FlexAlign.End);
                     }, Row);
-                    this.observeComponentCreation2((m18, n18) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create();
                     }, Stack);
-                    this.observeComponentCreation2((k18, l18) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
                         Column.borderRadius('50%');
                         Column.backgroundColor('#66000000');
@@ -299,13 +307,13 @@ export class PhotoSelect extends ViewV2 {
                         Column.margin(4);
                     }, Column);
                     Column.pop();
-                    this.observeComponentCreation2((i18, j18) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create('xx');
                         Image.fillColor(Color.White);
                         Image.width(16);
                         Image.height(16);
                         Image.onClick(() => {
-                            this.deleteImageInfo(a18);
+                            this.deleteImageInfo(index);
                         });
                         Image.draggable(false);
                         Image.margin(4);
@@ -319,7 +327,7 @@ export class PhotoSelect extends ViewV2 {
                     }, Image);
                     Stack.pop();
                     Row.pop();
-                    this.observeComponentCreation2((g18, h18) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
                         Row.linearGradient({
                             angle: 180,
@@ -329,8 +337,8 @@ export class PhotoSelect extends ViewV2 {
                         Row.width(56);
                         Row.hitTestBehavior(HitTestMode.Transparent);
                     }, Row);
-                    this.observeComponentCreation2((e18, f18) => {
-                        Text.create('图' + (a18 + 1));
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create('图' + (index + 1));
                         Text.fontColor('#FFFFFF');
                         Text.fontWeight(FontWeight.Medium);
                         Text.fontSize(12);
@@ -355,31 +363,31 @@ export class PhotoSelect extends ViewV2 {
         If.pop();
     }
     initialRender() {
-        this.observeComponentCreation2((y17, z17) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.width(56);
             Column.height(260);
             Column.margin({ bottom: 6 });
             Column.justifyContent(FlexAlign.Center);
         }, Column);
-        this.observeComponentCreation2((q17, r17) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             List.create();
-            List.onItemDragStart((w17, x17) => {
+            List.onItemDragStart((event, index) => {
                 if (this.getSelectPhotoLength() <= 1) {
                     return;
                 }
-                if (this.invalidImageInfo(x17)) {
+                if (this.invalidImageInfo(index)) {
                     return;
                 }
                 return { builder: () => {
-                        this.previewImageInfo.call(this, x17);
+                        this.previewImageInfo.call(this, index);
                     } };
             });
-            List.onItemDrop((s17, t17, u17, v17) => {
-                if (!v17 || u17 < 0 || u17 >= this.imageInfoArr.length) {
+            List.onItemDrop((event, itemIndex, insertIndex, isSuccess) => {
+                if (!isSuccess || insertIndex < 0 || insertIndex >= this.imageInfoArr.length) {
                     return;
                 }
-                this.moveImageInfo(t17, u17);
+                this.moveImageInfo(itemIndex, insertIndex);
             });
             List.listDirection(Axis.Horizontal);
             List.width('100%');
@@ -387,50 +395,50 @@ export class PhotoSelect extends ViewV2 {
             List.alignListItem(ListItemAlign.Center);
             List.lanes(4, '12px');
         }, List);
-        this.observeComponentCreation2((z16, a17) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             ForEach.create();
-            const b17 = (e17, f17) => {
-                const g17 = e17;
+            const forEachItemGenFunction = (_item, index) => {
+                const item = _item;
                 {
-                    const h17 = (o17, p17) => {
-                        ViewStackProcessor.StartGetAccessRecordingFor(o17);
-                        ListItem.create(j17, true);
-                        if (!p17) {
+                    const itemCreation = (elmtId, isInitialRender) => {
+                        ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
+                        ListItem.create(deepRenderFunction, true);
+                        if (!isInitialRender) {
                             ListItem.pop();
                         }
                         ViewStackProcessor.StopGetAccessRecording();
                     };
-                    const i17 = (m17, n17) => {
-                        ListItem.create(j17, true);
+                    const itemCreation2 = (elmtId, isInitialRender) => {
+                        ListItem.create(deepRenderFunction, true);
                         ListItem.height(56);
                         ListItem.width(56);
                     };
-                    const j17 = (k17, l17) => {
-                        h17(k17, l17);
-                        this.MyMagicCanvasSquaredBuilder.bind(this)(f17);
+                    const deepRenderFunction = (elmtId, isInitialRender) => {
+                        itemCreation(elmtId, isInitialRender);
+                        this.MyMagicCanvasSquaredBuilder.bind(this)(index);
                         ListItem.pop();
                     };
-                    this.observeComponentCreation2(i17, ListItem);
+                    this.observeComponentCreation2(itemCreation2, ListItem);
                     ListItem.pop();
                 }
             };
-            this.forEachUpdateFunction(z16, this.imageInfoArr, b17, (c17, d17) => {
-                return '' + d17 + (c17?.url ?? 'imageGeneration') + this.enablePhotoPicker(d17);
+            this.forEachUpdateFunction(elmtId, this.imageInfoArr, forEachItemGenFunction, (item, index) => {
+                return '' + index + (item?.url ?? 'imageGeneration') + this.enablePhotoPicker(index);
             }, true, true);
         }, ForEach);
         ForEach.pop();
         List.pop();
         Column.pop();
     }
-    updateStateVars(y16) {
-        if (y16 === undefined) {
+    updateStateVars(params) {
+        if (params === undefined) {
             return;
         }
-        if ("imageInfoArr" in y16) {
-            this.updateParam("imageInfoArr", y16.imageInfoArr);
+        if ("imageInfoArr" in params) {
+            this.updateParam("imageInfoArr", params.imageInfoArr);
         }
-        if ("imageMatrixArr" in y16) {
-            this.updateParam("imageMatrixArr", y16.imageMatrixArr);
+        if ("imageMatrixArr" in params) {
+            this.updateParam("imageMatrixArr", params.imageMatrixArr);
         }
     }
     rerender() {
@@ -444,3 +452,6 @@ __decorate([
 __decorate([
     Param
 ], PhotoSelect.prototype, "imageMatrixArr", void 0);
+__decorate([
+    Event
+], PhotoSelect.prototype, "setImgCounts", void 0);

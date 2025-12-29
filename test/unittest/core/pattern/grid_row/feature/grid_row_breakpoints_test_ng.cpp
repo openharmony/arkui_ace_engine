@@ -218,6 +218,9 @@ HWTEST_F(GridRowBreakPointsTestNG, ProcessGridSizeType_WhenReferenceIsNotWindowS
 
     V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
     // Assuming CalcBreakPoint returns 3 for windowWidth = 1000
+    /**
+     * @tc.expected: breakpoint is LG
+     */
     EXPECT_EQ(result, V2::GridSizeType::LG);
 }
 
@@ -241,6 +244,9 @@ HWTEST_F(GridRowBreakPointsTestNG, ProcessGridSizeType_WindowSize01, TestSize.Le
     container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
     EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
     V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    /**
+     * @tc.expected: breakpoint is XS
+     */
     EXPECT_EQ(result, V2::GridSizeType::XS);
 }
 

@@ -15,6 +15,9 @@
 
 #include "test/unittest/core/pattern/grid/grid_test_ng.h"
 
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
 #include "core/components_ng/pattern/scrollable/selectable_utils.h"
@@ -107,5 +110,73 @@ HWTEST_F(SelectableItemUtilsTestNG, IsGatherSelectedItemsAnimationEnabled, TestS
     GridModelNG::SetEditModeOptions(AceType::RawPtr(frameNode_), options);
     EXPECT_TRUE(SelectableUtils::IsGatherSelectedItemsAnimationEnabled(gridItemNode));
     EXPECT_TRUE(GridModelNG::GetEditModeOptions(AceType::RawPtr(frameNode_)).enableGatherSelectedItemsAnimation);
+}
+
+/**
+ * @tc.name: BindContextMenu
+ * @tc.desc: Test BindContextMenu function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectableItemUtilsTestNG, BindContextMenu, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(10);
+    CreateDone();
+
+    // GridItem without LongPress
+    auto gridItemNode = GetChildFrameNode(frameNode_, 0);
+    SelectableUtils::BindContextMenu(AceType::RawPtr(gridItemNode));
+
+    std::function<void()> buildFunc = []() {};
+    std::function<void()> previewBuildFunc = []() {};
+    NG::MenuParam menuParam;
+    menuParam.isShowHoverImage = true;
+    menuParam.hoverScaleInterruption = true;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    ViewAbstractModelNG::BindContextMenuWithLongPress(gridItemNode, buildFunc, menuParam, previewBuildFunc, true);
+    auto eventHub = gridItemNode->GetEventHub<SelectableItemEventHub>();
+    auto gestureHub = eventHub->GetGestureEventHub();
+    auto longPressEventActuator = gestureHub->GetLongPressEventActuator();
+    EXPECT_NE(longPressEventActuator, nullptr);
+    EXPECT_NE(longPressEventActuator->longPressEvent_, nullptr);
+
+    // GridItem with LongPress
+    SelectableUtils::BindContextMenu(AceType::RawPtr(gridItemNode));
+    auto actuator = AceType::DynamicCast<LongPressEventActuatorWithMultiSelect>(longPressEventActuator);
+    EXPECT_NE(actuator->multiSelectHandler_, nullptr);
+
+    /**
+     * @tc.steps: step1. Init overlayManager.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    frameNode_->AttachContext(AceType::RawPtr(pipelineContext), true);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step2. selected items
+     */
+    for (int32_t i = 0; i < 10; i++) {
+        auto gridItemNode = GetChildFrameNode(frameNode_, i);
+        auto selectableItemPattern = gridItemNode->GetPattern<SelectableItemPattern>();
+        selectableItemPattern->SetSelected(true);
+    }
+
+    /**
+     * @tc.steps: step3. ShowGatherNodeAnimation
+     */
+    auto itemNode = GetChildFrameNode(frameNode_, 0);
+    itemNode->AttachContext(AceType::RawPtr(pipelineContext), true);
+    EXPECT_TRUE(DragAnimationHelper::ShowGatherNodeAnimation(itemNode));
+    SelectableUtils::GetInstance().PublishMenuStatus(true, itemNode);
+    EXPECT_TRUE(overlayManager->GetHasGatherNode());
+
+    /**
+     * @tc.steps: step4. RemoveGatherNode
+     */
+    SelectableUtils::GetInstance().PublishMenuStatus(false, nullptr);
+    EXPECT_FALSE(overlayManager->GetHasGatherNode());
 }
 } // namespace OHOS::Ace::NG

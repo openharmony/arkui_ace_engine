@@ -46,7 +46,6 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string TEST_TEXT = "test text";
 
-
 class MockFrameNode : public FrameNode {
     DECLARE_ACE_TYPE(MockFrameNode, FrameNode);
 
@@ -173,8 +172,8 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree004, Te
 
     accessibilityNextFocusInspectorKey = "";
     accessibilityProperty.SetAccessibilityNextFocusInspectorKey(accessibilityNextFocusInspectorKey);
-    EXPECT_EQ(accessibilityNextFocusInspectorKey,
-        accessibilityProperty.accessibilityNextFocusInspectorKey_.value_or(""));
+    EXPECT_EQ(
+        accessibilityNextFocusInspectorKey, accessibilityProperty.accessibilityNextFocusInspectorKey_.value_or(""));
 
     std::string text = "test";
     accessibilityProperty.SetAccessibilityTextWithEvent(text);
@@ -200,7 +199,7 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree005, Te
 
     uint32_t action = 1;
     accessibilityProperty.accessibilityActions_ = 1;
-    accessibilityProperty.actionsImpl_ = [](uint32_t type){};
+    accessibilityProperty.actionsImpl_ = [](uint32_t type) {};
     bool actionsDefined = accessibilityProperty.ActionsDefined(action);
     EXPECT_TRUE(actionsDefined);
     actionsDefined = accessibilityProperty.ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_CLICK));
@@ -226,7 +225,7 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree006, Te
 
     uint32_t action = 2;
     accessibilityProperty.accessibilityActions_ = 2;
-    accessibilityProperty.actionsImpl_ = [](uint32_t type){};
+    accessibilityProperty.actionsImpl_ = [](uint32_t type) {};
     bool actionsDefined = accessibilityProperty.ActionsDefined(action);
     EXPECT_TRUE(actionsDefined);
     actionsDefined = accessibilityProperty.ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_LONG_CLICK));
@@ -252,7 +251,7 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree007, Te
 
     uint32_t action = 16;
     accessibilityProperty.accessibilityActions_ = 16;
-    accessibilityProperty.actionsImpl_ = [](uint32_t type){};
+    accessibilityProperty.actionsImpl_ = [](uint32_t type) {};
     bool actionsDefined = accessibilityProperty.ActionsDefined(action);
     EXPECT_TRUE(actionsDefined);
     actionsDefined = accessibilityProperty.ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_PASTE));
@@ -272,7 +271,7 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree008, Te
 
     uint32_t action = 4;
     accessibilityProperty.accessibilityActions_ = 4;
-    accessibilityProperty.actionsImpl_ = [](uint32_t type){};
+    accessibilityProperty.actionsImpl_ = [](uint32_t type) {};
     bool actionsDefined = accessibilityProperty.ActionsDefined(action);
     EXPECT_TRUE(actionsDefined);
     actionsDefined = accessibilityProperty.ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_CUT));
@@ -292,7 +291,7 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree009, Te
 
     uint32_t action = 8;
     accessibilityProperty.accessibilityActions_ = 8;
-    accessibilityProperty.actionsImpl_ = [](uint32_t type){};
+    accessibilityProperty.actionsImpl_ = [](uint32_t type) {};
     bool actionsDefined = accessibilityProperty.ActionsDefined(action);
     EXPECT_TRUE(actionsDefined);
     actionsDefined = accessibilityProperty.ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_COPY));
@@ -310,8 +309,8 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree010, Te
 {
     AccessibilityProperty accessibilityProperty;
     RectF origRect;
-    auto node = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto node =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     auto ret = accessibilityProperty.UpdateHoverTestRect(node);
     EXPECT_EQ(origRect, ret);
 }
@@ -325,8 +324,8 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree011, Te
 {
     AccessibilityProperty accessibilityProperty;
     PointF parentPoint(1, 1);
-    auto node = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto node =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     AccessibilityHoverTestPath path;
     std::unique_ptr<AccessibilityProperty::HoverTestDebugTraceInfo> debugInfo = nullptr;
     bool ancestorGroupFlag;
@@ -378,8 +377,8 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree013, Te
 {
     AccessibilityProperty accessibilityProperty;
     NG::PointF parentPoint(1, 1);
-    auto node = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, 13, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto node =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 13, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     AccessibilityHoverTestPath path;
     auto debugInfo = std::make_unique<AccessibilityProperty::HoverTestDebugTraceInfo>();
     bool ancestorGroupFlag = false;
@@ -405,13 +404,13 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree014, Te
 {
     AccessibilityProperty accessibilityProperty;
     NG::PointF parentPoint(150, 160);
-    auto node = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, 13, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto node =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 13, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     AccessibilityHoverTestPath path;
     auto debugInfo = std::make_unique<AccessibilityProperty::HoverTestDebugTraceInfo>();
     bool ancestorGroupFlag = false;
     node->isAccessibilityVirtualNode_ = true;
-    
+
     auto eventHub = node->GetEventHub<EventHub>();
     eventHub->enabled_ = false;
 
@@ -422,7 +421,7 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree014, Te
 
     PointF selfPoint = parentPoint;
     mockRenderContext->GetPointWithRevert(selfPoint);
-    
+
     auto property = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     property->accessibilityLevel_ = AccessibilityProperty::Level::YES_STR;
     property->accessibilityHoverPriority_ = true;
@@ -440,8 +439,8 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree015, Te
 {
     AccessibilityProperty accessibilityProperty;
     AccessibilityHoverTestPath path;
-    auto node = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, 13, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto node =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 13, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     NG::PointF hoverPoint(1, 1);
     auto debugInfo = std::make_unique<AccessibilityProperty::HoverTestDebugTraceInfo>();
     AccessibilityProperty::RecursiveParam recursiveParam;
@@ -455,10 +454,10 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree015, Te
     auto frameNode = AceType::DynamicCast<FrameNode>(virtualNode);
     EXPECT_NE(frameNode, nullptr);
 
-    bool ret = AccessibilityProperty::HoverTestRecursive(hoverPoint, frameNode, path, debugInfo,
-            recursiveParam.ancestorGroupFlag);
+    bool ret = AccessibilityProperty::HoverTestRecursive(
+        hoverPoint, frameNode, path, debugInfo, recursiveParam.ancestorGroupFlag);
     EXPECT_FALSE(ret);
-    
+
     auto result = accessibilityProperty.ProcessHoverTestRecursive(hoverPoint, node, path, debugInfo, recursiveParam);
     EXPECT_EQ(result, true);
 }
@@ -471,21 +470,18 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree015, Te
 HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree016, TestSize.Level1)
 {
     AccessibilityProperty accessibilityProperty;
-    
-    accessibilityProperty.SetSpecificSupportActionCallback([&]() {
-        accessibilityProperty.AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
-    });
+
+    accessibilityProperty.SetSpecificSupportActionCallback(
+        [&]() { accessibilityProperty.AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD); });
     auto supportAceActions = accessibilityProperty.GetSupportAction();
-    auto ret = std::any_of(supportAceActions.begin(),
-        supportAceActions.end(),
+    auto ret = std::any_of(supportAceActions.begin(), supportAceActions.end(),
         [](const AceAction& action) { return action == AceAction::ACTION_SCROLL_BACKWARD; });
     EXPECT_EQ(ret, false);
 
     accessibilityProperty.ResetSupportAction();
 
     supportAceActions = accessibilityProperty.GetSupportAction();
-    ret = std::any_of(supportAceActions.begin(),
-        supportAceActions.end(),
+    ret = std::any_of(supportAceActions.begin(), supportAceActions.end(),
         [](const AceAction& action) { return action == AceAction::ACTION_SCROLL_BACKWARD; });
     EXPECT_EQ(ret, true);
 }
@@ -563,7 +559,7 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree021, Te
     auto debugInfo = std::make_unique<AccessibilityProperty::HoverTestDebugTraceInfo>();
     bool ancestorGroupFlag = false;
     node->SetAccessibilityNodeVirtual();
-    
+
     auto eventHub = node->GetEventHub<EventHub>();
     eventHub->enabled_ = false;
 
@@ -635,7 +631,7 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree023, Te
 {
     auto node = CreateMockFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(node, nullptr);
-    
+
     auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
     node->renderContext_ = mockRenderContext;
     RectF rect(100, 100, 100, 100);
@@ -691,8 +687,7 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree024, Te
     paintWrapper->FlushRender();
 
     mockRenderContext->UpdateAccessibilityFocus(true);
-    EXPECT_CALL(*mockRenderContext, PaintAccessibilityFocus(_))
-        .Times(1);
+    EXPECT_CALL(*mockRenderContext, PaintAccessibilityFocus(_)).Times(1);
     paintWrapper->FlushRender();
 
     AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(screenEnableBackup);

@@ -28,7 +28,7 @@ import { ArkColorsImpl } from './ArkColorsImpl';
 import { ArkCustomComponent } from 'arkui/ArkCustomComponent';
 import { ArkThemeWhiteList } from './ArkThemeWhiteList';
 import { ArkCommonMethodComponent } from 'arkui/component/common';
-import { GlobalStateManager, StateManagerImpl, IncrementalNode, ComputableState } from "@koalaui/runtime";
+import { GlobalStateManager, IncrementalNode, ComputableState } from "@koalaui/runtime";
 import { findPeerNode } from "arkui/PeerNode";
 import { KPointer } from '@koalaui/interop';
 import { ThemeOps } from 'arkui/component/idlize';
@@ -416,7 +416,8 @@ export class ArkThemeScopeManager {
         this.defaultTheme?.bindToScope(0);
 
         // keep for backward compatibility
-        ArkThemeNativeHelper.sendThemeToNative(this.defaultTheme!, 0); // 0 means default Theme scope id
+        const darkSetStatus: boolean = !!cloneTheme?.darkColors;
+        ArkThemeNativeHelper.sendThemeToNative(this.defaultTheme!, 0, darkSetStatus); // 0 means default Theme scope id
         // new approach to apply theme in native side
         ArkThemeNativeHelper.setDefaultTheme(cloneTheme);
 
@@ -522,8 +523,8 @@ export class ArkThemeScopeManager {
         scope.componentsInScope()?.forEach((item) => this.notifyScopeThemeChanged(item, theme, scope.isColorModeChanged()));
 
         if (scope.isColorModeChanged()) {
-            const stateManager = GlobalStateManager.instance as StateManagerImpl;
-            const memoScope = stateManager.current?.parent;
+            const stateManager = GlobalStateManager.instance;
+            const memoScope = stateManager.currentScope?.parent;
             memoScope?.forceCompleteRerender();
         }
     }
@@ -564,8 +565,8 @@ export class ArkThemeScopeManager {
     }
 
     public applyParentThemeScopeId(component: ArkCommonMethodComponent): void {
-        const stateManager = GlobalStateManager.instance as StateManagerImpl;
-        const scope = stateManager.current;
+        const stateManager = GlobalStateManager.instance;
+        const scope = stateManager.currentScope;
         const parentRef = scope?.parent?.nodeRef;
         const parentPeer = parentRef ? findPeerNode(parentRef) : undefined;
         if (parentPeer && parentPeer.peer && component.getPeer()) {

@@ -1350,6 +1350,28 @@ HWTEST_F(RichEditorParagraphManagetTestNg, GetGlyphPositionAtCoordinate001, Test
 }
 
 /**
+ * @tc.name: CalLineIndex001
+ * @tc.desc: Test the paragraph manager CalLineIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, CalLineIndex001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(1));
+
+    richEditorPattern->paragraphs_.CalLineIndex();
+    EXPECT_TRUE(richEditorPattern->paragraphs_.hasLineIndex);
+}
+
+/**
  * @tc.name: GetParagraphInfo001
  * @tc.desc: test GetParagraphInfo
  * @tc.type: FUNC

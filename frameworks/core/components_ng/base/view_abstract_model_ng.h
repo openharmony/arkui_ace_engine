@@ -936,6 +936,11 @@ public:
         ViewAbstract::SetRenderGroup(isRenderGroup);
     }
 
+    void SetAdaptiveGroup(bool isRenderGroup, bool adaptive) override
+    {
+        ViewAbstract::SetAdaptiveGroup(isRenderGroup, adaptive);
+    }
+
     void SetExcludeFromRenderGroup(bool exclude) override
     {
         ViewAbstract::SetExcludeFromRenderGroup(exclude);
@@ -1132,6 +1137,11 @@ public:
     void SetUseEffect(bool useEffect, EffectType effectType) override
     {
         ViewAbstract::SetUseEffect(useEffect, effectType);
+    }
+
+    void SetUseUnion(bool useUnion) override
+    {
+        ViewAbstract::SetUseUnion(useUnion);
     }
 
     void SetUseShadowBatching(bool useShadowBatching) override
@@ -1738,6 +1748,11 @@ public:
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
+    }
+
+    void ResetColorPicker() override
+    {
+        ViewAbstract::BindColorPicker(ColorPlaceholder::FOREGROUND, ColorPickStrategy::NONE);
     }
 
     void SetForegroundEffect(float radius) override

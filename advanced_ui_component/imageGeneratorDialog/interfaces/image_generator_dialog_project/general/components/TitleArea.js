@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (u9, v9, w9, x9) {
-    var y9 = arguments.length, z9 = y9 < 3 ? v9 : x9 === null ? x9 = Object.getOwnPropertyDescriptor(v9, w9) : x9, a10;
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-        z9 = Reflect.decorate(u9, v9, w9, x9);
+        r = Reflect.decorate(decorators, target, key, desc);
     else
-        for (var b10 = u9.length - 1; b10 >= 0; b10--)
-            if (a10 = u9[b10])
-                z9 = (y9 < 3 ? a10(z9) : y9 > 3 ? a10(v9, w9, z9) : a10(v9, w9)) || z9;
-    return y9 > 3 && z9 && Object.defineProperty(v9, w9, z9), z9;
+        for (var i = decorators.length - 1; i >= 0; i--)
+            if (d = decorators[i])
+                r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
@@ -29,36 +29,36 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 import promptAction from "@ohos.promptAction";
 import { ImageGenerateState } from "../types/Declaration";
 export class HomeTitle extends ViewV2 {
-    constructor(o9, p9, q9, r9 = -1, s9, t9) {
-        super(o9, r9, t9);
-        this.initParam("titleName", (p9 && "titleName" in p9) ? p9.titleName : '__NA__');
-        this.initParam("currentGenerateState", (p9 && "currentGenerateState" in p9) ? p9.currentGenerateState : ImageGenerateState.CONFIGURATION);
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
+        this.initParam("titleName", (params && "titleName" in params) ? params.titleName : '__NA__');
+        this.initParam("currentGenerateState", (params && "currentGenerateState" in params) ? params.currentGenerateState : ImageGenerateState.CONFIGURATION);
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(n9) {
-        this.resetParam("titleName", (n9 && "titleName" in n9) ? n9.titleName : '__NA__');
-        this.resetParam("currentGenerateState", (n9 && "currentGenerateState" in n9) ? n9.currentGenerateState : ImageGenerateState.CONFIGURATION);
+    resetStateVarsOnReuse(params) {
+        this.resetParam("titleName", (params && "titleName" in params) ? params.titleName : '__NA__');
+        this.resetParam("currentGenerateState", (params && "currentGenerateState" in params) ? params.currentGenerateState : ImageGenerateState.CONFIGURATION);
     }
     initialRender() {
-        this.observeComponentCreation2((l9, m9) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.height(64);
             Column.width('100%');
             Column.padding({ left: 16, right: 16, top: 8 });
         }, Column);
-        this.observeComponentCreation2((j9, k9) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.height(56);
-            Row.width(618);
+            Row.width('100%');
         }, Row);
-        this.observeComponentCreation2((h9, i9) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.height('100%');
             Row.width('50%');
             Row.alignItems(VerticalAlign.Center);
             Row.justifyContent(FlexAlign.Start);
         }, Row);
-        this.observeComponentCreation2((f9, g9) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.titleName);
             Text.fontFamily("HarmonyHeiTi");
             Text.fontColor("#000000");
@@ -67,35 +67,35 @@ export class HomeTitle extends ViewV2 {
         }, Text);
         Text.pop();
         Row.pop();
-        this.observeComponentCreation2((d9, e9) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.alignItems(VerticalAlign.Center);
             Row.justifyContent(FlexAlign.End);
             Row.height('100%');
             Row.width('50%');
         }, Row);
-        this.observeComponentCreation2((v8, w8) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.currentGenerateState === ImageGenerateState.CONFIGURATION) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((b9, c9) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         __Common__.create();
                         __Common__.margin({ right: 8 });
                     }, __Common__);
                     {
-                        this.observeComponentCreation2((x8, y8) => {
-                            if (y8) {
-                                let z8 = new TitleMenu(this, { name: 'menu one' }, undefined, x8, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/TitleArea.ets", line: 41, col: 13 });
-                                ViewV2.create(z8);
-                                let a9 = () => {
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new TitleMenu(this, { name: 'menu one' }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/TitleArea.ets", line: 41, col: 13 });
+                                ViewV2.create(componentCall);
+                                let paramsLambda = () => {
                                     return {
                                         name: 'menu one'
                                     };
                                 };
-                                z8.paramsGenerator_ = a9;
+                                componentCall.paramsGenerator_ = paramsLambda;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(x8, {
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
                                     name: 'menu one'
                                 });
                             }
@@ -111,19 +111,19 @@ export class HomeTitle extends ViewV2 {
         }, If);
         If.pop();
         {
-            this.observeComponentCreation2((r8, s8) => {
-                if (s8) {
-                    let t8 = new TitleMenu(this, { name: 'x_icon' }, undefined, r8, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/TitleArea.ets", line: 44, col: 11 });
-                    ViewV2.create(t8);
-                    let u8 = () => {
+            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                if (isInitialRender) {
+                    let componentCall = new TitleMenu(this, { name: 'x_icon' }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/TitleArea.ets", line: 44, col: 11 });
+                    ViewV2.create(componentCall);
+                    let paramsLambda = () => {
                         return {
                             name: 'x_icon'
                         };
                     };
-                    t8.paramsGenerator_ = u8;
+                    componentCall.paramsGenerator_ = paramsLambda;
                 }
                 else {
-                    this.updateStateVarsOfChildByElmtId(r8, {
+                    this.updateStateVarsOfChildByElmtId(elmtId, {
                         name: 'x_icon'
                     });
                 }
@@ -133,15 +133,15 @@ export class HomeTitle extends ViewV2 {
         Row.pop();
         Column.pop();
     }
-    updateStateVars(q8) {
-        if (q8 === undefined) {
+    updateStateVars(params) {
+        if (params === undefined) {
             return;
         }
-        if ("titleName" in q8) {
-            this.updateParam("titleName", q8.titleName);
+        if ("titleName" in params) {
+            this.updateParam("titleName", params.titleName);
         }
-        if ("currentGenerateState" in q8) {
-            this.updateParam("currentGenerateState", q8.currentGenerateState);
+        if ("currentGenerateState" in params) {
+            this.updateParam("currentGenerateState", params.currentGenerateState);
         }
     }
     rerender() {
@@ -155,16 +155,16 @@ __decorate([
     Param
 ], HomeTitle.prototype, "currentGenerateState", void 0);
 class TitleMenu extends ViewV2 {
-    constructor(k8, l8, m8, n8 = -1, o8, p8) {
-        super(k8, n8, p8);
-        this.initParam("name", (l8 && "name" in l8) ? l8.name : '__NA__');
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
+        this.initParam("name", (params && "name" in params) ? params.name : '__NA__');
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(j8) {
-        this.resetParam("name", (j8 && "name" in j8) ? j8.name : '__NA__');
+    resetStateVarsOnReuse(params) {
+        this.resetParam("name", (params && "name" in params) ? params.name : '__NA__');
     }
     initialRender() {
-        this.observeComponentCreation2((h8, i8) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create('');
             Image.width(40);
             Image.height(40);
@@ -177,12 +177,12 @@ class TitleMenu extends ViewV2 {
             });
         }, Image);
     }
-    updateStateVars(g8) {
-        if (g8 === undefined) {
+    updateStateVars(params) {
+        if (params === undefined) {
             return;
         }
-        if ("name" in g8) {
-            this.updateParam("name", g8.name);
+        if ("name" in params) {
+            this.updateParam("name", params.name);
         }
     }
     rerender() {

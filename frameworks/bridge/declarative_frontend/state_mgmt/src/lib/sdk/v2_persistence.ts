@@ -27,11 +27,30 @@ interface TypeConstructorWithArgs<T> {
   new(...args: any): T;
 }
 
-class ConnectOptions<T extends object> {
+type CollectionType<S> =
+  | Array<S>
+  | Map<string | number, S>
+  | Set<S>
+  | SendableArray<S>
+  | SendableMap<string | number, S>
+  | SendableSet<S>
+
+interface ConnectOptions<T extends object> {
+  // (Mandatory) Specified type.
   type: TypeConstructorWithArgs<T>;
+  // (Optional) Input key. If no key is specified, the name of the type is used as the key.
   key?: string;
+  // Default constructor. You are advised to set this parameter.
   defaultCreator?: StorageDefaultCreator<T>;
+  // (Optional) Encryption parameter.
   areaMode?: number;
+}
+
+interface ConnectOptionsCollections<T extends CollectionType<S>, S extends object> extends ConnectOptions<T> {
+  // Default constructor. You are advised to set this parameter.
+  defaultCreator: StorageDefaultCreator<T>;
+  // Default constructor for collection items. You are advised to set this parameter whenever using collection of application defined class (S) .
+  defaultSubCreator: StorageDefaultCreator<S>;
 }
 
 const enum AreaMode {
@@ -64,8 +83,10 @@ class StorageHelper {
     this.oldTypeValues_ = new Map<string, string>();
   }
 
-  protected getConnectedKey<T>(type: TypeConstructorWithArgs<T>,
-    keyOrDefaultCreator?: string | StorageDefaultCreator<T>): string | undefined {
+  protected getConnectedKey<T>(
+    type: TypeConstructorWithArgs<T>,
+    keyOrDefaultCreator?: string | StorageDefaultCreator<T>
+  ): string | undefined {
     if (keyOrDefaultCreator === null || keyOrDefaultCreator === undefined) {
       stateMgmtConsole.applicationWarn(StorageHelper.NULL_OR_UNDEFINED_KEY + ', try to use the type name as key');
     }
@@ -84,22 +105,26 @@ class StorageHelper {
     return keyOrType;
   }
 
-  protected checkTypeByName<T>(key: string, type: TypeConstructorWithArgs<T>, oldType: string): void {
+  protected throwIfTypeNameMismatch<T>(type: TypeConstructorWithArgs<T>, oldType?: string, key?: string): void {
     if (this.getTypeName(type) !== oldType) {
       throw new Error(`The type mismatches when use the key '${key}' in storage`);
     }
   }
 
-  protected checkTypeByInstanceOf<T>(key: string, type: TypeConstructorWithArgs<T>, ins: T): void {
-    this.checkTypeIsFunc(type);
+  protected throwIfNotInstanceOf<T>(value: T, type: TypeConstructorWithArgs<T>, key: string): void {
+    if (typeof type !== 'function') {
+      throw new Error(StorageHelper.INVALID_TYPE);
+    }
 
-    if (!(ins instanceof type)) {
+    if (!(value instanceof type)) {
       throw new Error(`The type mismatches when use the key '${key}' in storage`);
     }
   }
 
   protected getTypeName<T>(type: TypeConstructorWithArgs<T>): string | undefined {
-    this.checkTypeIsFunc(type);
+    if (typeof type !== 'function') {
+      throw new Error(StorageHelper.INVALID_TYPE);
+    }
 
     let name: string | undefined = type.name;
     while (name === undefined) {
@@ -140,12 +165,6 @@ class StorageHelper {
 
     return true;
   }
-
-  private checkTypeIsFunc<T>(type: TypeConstructorWithArgs<T>): void {
-    if (typeof type !== 'function') {
-      throw new Error(StorageHelper.INVALID_TYPE);
-    }
-  }
 }
 
 class AppStorageV2Impl extends StorageHelper {
@@ -166,9 +185,11 @@ class AppStorageV2Impl extends StorageHelper {
     return AppStorageV2Impl.instance_;
   }
 
-  public connect<T extends object>(type: TypeConstructorWithArgs<T>, keyOrDefaultCreator?: string | StorageDefaultCreator<T>,
-    defaultCreator?: StorageDefaultCreator<T>): T | undefined {
-    const key: string = this.getConnectedKey(type, keyOrDefaultCreator);
+  public connect<T extends object>(type: TypeConstructorWithArgs<T>,
+    keyOrDefaultCreator?: string | StorageDefaultCreator<T>,
+    defaultCreator?: StorageDefaultCreator<T>
+  ): T | undefined {
+    const key = this.getConnectedKey(type, keyOrDefaultCreator);
 
     if (!this.isKeyValid(key)) {
       return undefined;
@@ -185,14 +206,14 @@ class AppStorageV2Impl extends StorageHelper {
 
       const defaultValue: T = defaultCreator();
 
-      this.checkTypeByInstanceOf(key, type, defaultValue);
+      this.throwIfNotInstanceOf(defaultValue, type, key);
 
       this.memorizedValues_.set(key, defaultValue);
       this.oldTypeValues_.set(key, this.getTypeName(type));
       return defaultValue;
     }
 
-    this.checkTypeByName(key, type, this.oldTypeValues_.get(key));
+    this.throwIfTypeNameMismatch(type, this.oldTypeValues_.get(key), key);
 
     const existedValue: T = this.memorizedValues_.get(key);
     return existedValue;
@@ -217,7 +238,7 @@ class AppStorageV2Impl extends StorageHelper {
     return Array.from(this.memorizedValues_.keys());
   }
 
-  private removeFromMemory(key: string): void {
+  protected removeFromMemory(key: string): void {
     const isDeleted: boolean = this.memorizedValues_.delete(key);
 
     if (!isDeleted) {
@@ -262,24 +283,24 @@ class PersistenceV2Impl extends StorageHelper {
   public static readonly MIN_PERSISTENCE_ID = 0x1020000000000;
   public static nextPersistId_ = PersistenceV2Impl.MIN_PERSISTENCE_ID;
 
-  private static readonly NOT_SUPPORT_TYPE_MESSAGE_: string = 'Not support! Can only use the class object in Persistence';
-  private static readonly NOT_SUPPORT_AREAMODE_MESSAGE_: string = 'AreaMode Value Error! value range can only in EL1-EL5';
-  private static readonly KEYS_DUPLICATE_: string = 'ERROR, Duplicate key used when connect';
-  private static readonly KEYS_ARR_: string = '___keys_arr';
-  private static readonly MAX_DATA_LENGTH_: number = 8000;
-  private static readonly NOT_SUPPORT_TYPES_: Array<any> =
-    [Array, Set, Map, WeakSet, WeakMap, Date, Boolean, Number, String, Symbol, BigInt, RegExp, Function, Promise, ArrayBuffer];
-  private static storage_: IStorage;
-  private static instance_: PersistenceV2Impl = undefined;
+  protected static readonly NOT_SUPPORT_TYPE_MESSAGE_: string = 'Not support! Can only use the class object in Persistence';
+  protected static readonly NOT_SUPPORT_AREAMODE_MESSAGE_: string = 'AreaMode Value Error! value range can only in EL1-EL5';
+  protected static readonly KEYS_DUPLICATE_: string = 'ERROR, Duplicate key used when connect';
+  protected static readonly KEYS_ARR_: string = '___keys_arr';
+  // not supported by globalConnect() and connect()
+  protected static readonly NOT_SUPPORT_TYPES_: Array<any> =
+    [WeakSet, WeakMap, Boolean, Number, String, Symbol, BigInt, RegExp, Function, Promise, ArrayBuffer];
+  protected static storage_: IStorage;
+  protected static instance_: PersistenceV2Impl = undefined;
 
   // the map is used to store the persisted value in memory, can reuse when re-connect if the key exists
-  private map_: Map<string, any>;
-  private globalMap_: Map<string, any>;
-  private globalMapAreaMode_: Map<string, number>;
-  private keysArr_: Set<string>;
-  private globalKeysArr_: Array<Set<string>>;
-  private cb_: PersistErrorCallback = undefined;
-  private idToKey_: Map<number, string>;
+  protected map_: Map<string, any>;
+  protected globalMap_: Map<string, any>;
+  protected globalMapAreaMode_: Map<string, number>;
+  protected keysArr_: Set<string>;
+  protected globalKeysArr_: Array<Set<string>>;
+  protected cb_: PersistErrorCallback = undefined;
+  protected idToKey_: Map<number, string>;
 
   constructor() {
     super();
@@ -303,30 +324,54 @@ class PersistenceV2Impl extends StorageHelper {
     PersistenceV2Impl.storage_ = storage;
   }
 
-  public connect<T extends object>(type: TypeConstructorWithArgs<T>, keyOrDefaultCreator?: string | StorageDefaultCreator<T>,
-    defaultCreator?: StorageDefaultCreator<T>): T | undefined {
-    this.checkTypeIsClassObject(type);
+  public connect<T extends object>(
+    type: TypeConstructorWithArgs<T>,
+    keyOrDefaultCreator?: string | StorageDefaultCreator<T>,
+    defaultCreator?: StorageDefaultCreator<T>
+  ): T | undefined;
+  public connect<T extends CollectionType<S>, S extends object>(
+    type: TypeConstructorWithArgs<T>,
+    key: string,
+    defaultCreator: StorageDefaultCreator<T>,
+    defaultSubCreator: StorageDefaultCreator<S>
+  ): T | undefined;
+  public connect<T extends CollectionType<S>, S extends object>(
+    type: TypeConstructorWithArgs<T>,
+    defaultCreator: StorageDefaultCreator<T>,
+    defaultSubCreator: StorageDefaultCreator<S>
+  ): T | undefined;
 
-    const key: string | undefined = this.getRightKey(type, keyOrDefaultCreator);
+  public connect<T extends object, S extends object>(
+    type: TypeConstructorWithArgs<T>,
+    keyOrDefaultCreator?: string | StorageDefaultCreator<T>,
+    defaultORSubCreator?: StorageDefaultCreator<T> | StorageDefaultCreator<S>,
+    defaultSubCreator?: StorageDefaultCreator<S>
+  ): T | undefined {
+    this.throwIfTypeIsNotSupported(type);
+
+    const key = this.getRightKey(type, keyOrDefaultCreator);
     if (!this.isKeyValid(key)) {
       return undefined;
     }
 
     if (typeof keyOrDefaultCreator === 'function') {
-      defaultCreator = keyOrDefaultCreator;
+      [defaultORSubCreator, defaultSubCreator] = [keyOrDefaultCreator, defaultORSubCreator as StorageDefaultCreator<S>];
     }
 
     // In memory
     if (this.globalMap_.has(key)) {
       throw new Error(PersistenceV2Impl.KEYS_DUPLICATE_);
     }
+
     if (this.map_.has(key)) {
       const existedValue: T = this.map_.get(key);
-      this.checkTypeByName(key, type, this.oldTypeValues_.get(key));
+      this.throwIfTypeNameMismatch(type, this.oldTypeValues_.get(key), key);
       return existedValue;
     }
 
-    let observedValue: T | undefined = this.getConnectDefaultValue(key, type, defaultCreator);
+    let observedValue: T | undefined = this.getConnectDefaultValue(
+      key, type, defaultORSubCreator as StorageDefaultCreator<T>
+    );
     if (!observedValue) {
       return undefined;
     }
@@ -336,14 +381,14 @@ class PersistenceV2Impl extends StorageHelper {
 
     // Not in memory, but in disk
     if (PersistenceV2Impl.storage_.has(key)) {
-      let [value, error] = this.getValueFromDisk(key, id, observedValue, type);
+      let [value, error] = this.getValueFromDisk(key, id, observedValue, type, defaultSubCreator);
       if (!error) {
           // No error, return valid  object
           return value;
       } else {
           // Default object partially restored, create new clean default object
           this.disconnectValue(key);
-          observedValue = this.getConnectDefaultValue(key, type, defaultCreator);
+          observedValue = this.getConnectDefaultValue(key, type, defaultORSubCreator as StorageDefaultCreator<T>);
       }
     }
 
@@ -351,10 +396,18 @@ class PersistenceV2Impl extends StorageHelper {
     return this.setValueToDisk(key, id, observedValue, type);
   }
 
-  public globalConnect<T extends object>(connectOptions: ConnectOptions<T>): T | undefined {
-    this.checkTypeIsClassObject(connectOptions.type);
+  public globalConnect<T extends object>(
+    connectOptions : ConnectOptions<T>) : T | undefined;
+  public globalConnect<T extends CollectionType<S>, S extends object>(
+    connectOptions : ConnectOptionsCollections<T, S>) : T | undefined;
 
-    const key: string | undefined = this.getRightGlobalKey(connectOptions.type, connectOptions.key);
+  public globalConnect<T extends object, S extends object>(
+    connectOptions : ConnectOptions<T> | ConnectOptionsCollections<T extends CollectionType<S> ? T : never, S>
+  ) : T | undefined {
+    const type = connectOptions.type as TypeConstructorWithArgs<any>;
+    this.throwIfTypeIsNotSupported(type);
+
+    const key: string | undefined = this.getRightGlobalKey(type, connectOptions.key);
     if (!this.isKeyValid(key)) {
       return undefined;
     }
@@ -366,12 +419,13 @@ class PersistenceV2Impl extends StorageHelper {
     // In memory, return if globalMap_ exist
     if (this.globalMap_.has(key)) {
       const existedValue: T = this.globalMap_.get(key);
-      this.checkTypeByName(key, connectOptions.type, this.oldTypeValues_.get(key));
+      this.throwIfTypeNameMismatch(type, this.oldTypeValues_.get(key), key);
       return existedValue;
     }
 
-    let observedValue: T | undefined = this.getConnectDefaultValue(key,
-      connectOptions.type, connectOptions.defaultCreator);
+    let observedValue: T | undefined =
+      this.getConnectDefaultValue(key, type, connectOptions.defaultCreator);
+
     if (!observedValue) {
       return undefined;
     }
@@ -383,19 +437,30 @@ class PersistenceV2Impl extends StorageHelper {
     const areaMode: number = this.getAreaMode(connectOptions.areaMode);
     this.globalMapAreaMode_.set(key, areaMode);
     if (PersistenceV2Impl.storage_.has(key, areaMode)) {
-      let [value, error] = this.getValueFromDisk(key, id, observedValue, connectOptions.type, areaMode);
+      let defaultSubCreator;
+      if ('defaultSubCreator' in connectOptions) {
+          defaultSubCreator = (connectOptions as ConnectOptionsCollections<CollectionType<S>, S>).defaultSubCreator;
+      } else {
+          defaultSubCreator = undefined;
+      }
+      let [value, error] = this.getValueFromDisk(
+        key, id, observedValue,
+        type,
+        defaultSubCreator,
+        areaMode
+      );
       if (!error) {
           // No error, return valid  object
           return value;
       } else {
           // Create new clean default object
           this.disconnectValue(key);
-          observedValue = this.getConnectDefaultValue(key, connectOptions.type, connectOptions.defaultCreator);
+          observedValue = this.getConnectDefaultValue(key, type, connectOptions.defaultCreator);
       }
     }
 
     // Neither in memory or in disk
-    return this.setValueToDisk(key, id, observedValue, connectOptions.type, areaMode);
+    return this.setValueToDisk(key, id, observedValue, type, areaMode);
   }
 
   public keys(): Array<string> {
@@ -434,7 +499,9 @@ class PersistenceV2Impl extends StorageHelper {
       return;
     }
 
-    this.checkTypeIsClassObject(keyOrType);
+    if (typeof keyOrType !== 'string') {
+      this.throwIfTypeIsNotSupported(keyOrType);
+    }
 
     const key: string = this.getKeyOrTypeName(keyOrType);
 
@@ -451,7 +518,9 @@ class PersistenceV2Impl extends StorageHelper {
       return;
     }
 
-    this.checkTypeIsClassObject(keyOrType);
+    if (typeof keyOrType !== 'string') {
+      this.throwIfTypeIsNotSupported(keyOrType);
+    }
 
     const key: string = this.getKeyOrTypeName(keyOrType);
 
@@ -463,14 +532,18 @@ class PersistenceV2Impl extends StorageHelper {
       // find in global path
       const areaMode = this.globalMapAreaMode_.get(key);
       try {
-        PersistenceV2Impl.storage_.set(key, JSONCoder.stringify(this.globalMap_.get(key)), areaMode);
+        const data = this.globalMap_.get(key);
+        const stringified = DataCoder.stringify(data);
+        PersistenceV2Impl.storage_.set(key, stringified, areaMode);
       } catch (err) {
         this.errorHelper(key, PersistError.Serialization, err);
       }
     } else if (this.map_.has(key)) {
       // find in module path
       try {
-        PersistenceV2Impl.storage_.set(key, JSONCoder.stringify(this.map_.get(key)));
+        const data = this.map_.get(key);
+        const stringified = DataCoder.stringify(data);
+        PersistenceV2Impl.storage_.set(key, stringified);
       } catch (err) {
         this.errorHelper(key, PersistError.Serialization, err);
       }
@@ -487,7 +560,7 @@ class PersistenceV2Impl extends StorageHelper {
     this.writeAllChangedToFile(persistKeys);
   }
 
-  private connectNewValue(key: string, newValue: any, typeName: string, areaMode?: number | undefined): void {
+  protected connectNewValue(key: string, newValue: any, typeName: string, areaMode?: number | undefined): void {
     if (typeof areaMode === 'number') {
       this.globalMap_.set(key, newValue);
     } else {
@@ -498,7 +571,7 @@ class PersistenceV2Impl extends StorageHelper {
     this.storeKeyToPersistenceV2(key, areaMode);
   }
 
-  private disconnectValue(key: string): void {
+  protected disconnectValue(key: string): void {
     const keyType: MapType = this.getKeyMapType(key);
     let areaMode: number | undefined = undefined;
     if (keyType === MapType.GLOBAL_MAP) {
@@ -513,16 +586,28 @@ class PersistenceV2Impl extends StorageHelper {
     this.removeFromPersistenceV2(key, areaMode);
   }
 
-  private checkTypeIsClassObject<T>(keyOrType: string | TypeConstructorWithArgs<T>) {
-    if ((typeof keyOrType !== 'string' && typeof keyOrType !== 'function') ||
-      PersistenceV2Impl.NOT_SUPPORT_TYPES_.includes(keyOrType as any)) {
+  protected throwIfTypeIsNotSupported<T>(type: TypeConstructorWithArgs<T>): void {
+    if (typeof type !== 'function') {
+      throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
+    }
+
+    if (PersistenceV2Impl.NOT_SUPPORT_TYPES_.includes(type as any)) {
       throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
     }
   }
 
-  private getRightKey<T extends object>(type: TypeConstructorWithArgs<T>,
-    keyOrDefaultCreator?: string | StorageDefaultCreator<T>) {
-    const key: string = this.getConnectedKey(type, keyOrDefaultCreator);
+  protected throwIfNotSupported(value: object): void {
+    const classes = PersistenceV2Impl.NOT_SUPPORT_TYPES_;
+    if (classes.some(clazz => (value instanceof clazz))) {
+      throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
+    }
+  }
+
+  protected getRightKey<T extends object>(
+    type: TypeConstructorWithArgs<T>,
+    keyOrDefaultCreator?: string | StorageDefaultCreator<T>
+  ): string | undefined {
+    const key = this.getConnectedKey(type, keyOrDefaultCreator);
 
     if (key === undefined) {
       throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
@@ -536,8 +621,7 @@ class PersistenceV2Impl extends StorageHelper {
     return key;
   }
 
-  private getRightGlobalKey<T extends object>(type: TypeConstructorWithArgs<T>,
-    key: string | undefined): string {
+  protected getRightGlobalKey<T extends object>(type: TypeConstructorWithArgs<T>, key?: string): string {
     if (key === undefined || key === null) {
       stateMgmtConsole.applicationWarn(StorageHelper.NULL_OR_UNDEFINED_KEY + ', try to use the type name as key');
       key = this.getTypeName(type);
@@ -553,7 +637,7 @@ class PersistenceV2Impl extends StorageHelper {
     return key;
   }
 
-  private getAreaMode(areaMode: number | undefined): number {
+  protected getAreaMode(areaMode: number | undefined): number {
     if (typeof areaMode === 'undefined') {
       return AreaMode.EL2;
     }
@@ -564,7 +648,7 @@ class PersistenceV2Impl extends StorageHelper {
     }
   }
 
-  private getKeyMapType(key: string): MapType {
+  protected getKeyMapType(key: string): MapType {
     if (this.globalMap_.has(key)) {
       return MapType.GLOBAL_MAP;
     } else if (this.map_.has(key)) {
@@ -574,8 +658,10 @@ class PersistenceV2Impl extends StorageHelper {
     }
   }
 
-  private getConnectDefaultValue<T extends object>(key: string, type: TypeConstructorWithArgs<T>,
-    defaultCreator?: StorageDefaultCreator<T>): T | undefined {
+  protected getConnectDefaultValue<T extends object>(
+    key: string, type: TypeConstructorWithArgs<T>,
+    defaultCreator?: StorageDefaultCreator<T>
+  ): T | undefined {
     if (!PersistenceV2Impl.storage_) {
       this.errorHelper(key, PersistError.Unknown, `The storage is null`);
       return undefined;
@@ -587,17 +673,19 @@ class PersistenceV2Impl extends StorageHelper {
 
     const observedValue: T = defaultCreator();
 
-    this.checkTypeByInstanceOf(key, type, observedValue);
+    this.throwIfNotInstanceOf(observedValue, type, key);
 
-    if (this.isNotClassObject(observedValue)) {
-      throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
-    }
+    this.throwIfNotSupported(observedValue);
 
     return observedValue;
   }
 
-  private getValueFromDisk<T extends object>(key: string, id: number, observedValue: T,
-    type: TypeConstructorWithArgs<T>, areaMode?: number | undefined): [T | undefined, boolean] {
+  protected getValueFromDisk<T extends object, S extends object>(
+    key: string, id: number, observedValue: T,
+    type: TypeConstructorWithArgs<T>,
+    defaultSubCreator?: StorageDefaultCreator<S>,
+    areaMode?: number
+  ): [T | undefined, boolean] {
     let newObservedValue: T;
     let json: string = "";
 
@@ -609,23 +697,33 @@ class PersistenceV2Impl extends StorageHelper {
     }
 
     try {
-      // Adding ref for persistence
-      ObserveV2.getObserve().startRecordDependencies(this, id);
-      newObservedValue = JSONCoder.parseTo(observedValue, json) as T;
-      ObserveV2.getObserve().stopRecordDependencies();
+      if (json.startsWith(DataCoder.FORMAT_TAG)) {
+        const parsedValue = DataCoder.parse(json) as T;
+        // Adding ref for persistence
+        ObserveV2.getObserve().startRecordDependencies(this, id);
+        newObservedValue = DataCoder.restoreTo(observedValue, parsedValue, defaultSubCreator) as T;
+        ObserveV2.getObserve().stopRecordDependencies();
+      } else {
+        // Adding ref for persistence
+        ObserveV2.getObserve().startRecordDependencies(this, id);
+        newObservedValue = JSONCoder.parseTo(observedValue, json) as T;
+        ObserveV2.getObserve().stopRecordDependencies();
+      }
     } catch (err) {
       ObserveV2.getObserve().stopRecordDependencies();
       this.errorHelper(key, PersistError.Serialization, err);
       return [undefined, true];
     }
 
-    this.checkTypeByInstanceOf(key, type, newObservedValue);
+    this.throwIfNotInstanceOf(newObservedValue, type, key);
+
     this.connectNewValue(key, newObservedValue, this.getTypeName(type), areaMode);
     return [newObservedValue, false];
   }
 
-  private setValueToDisk<T extends object>(key: string, id: number, observedValue: T,
-    type: TypeConstructorWithArgs<T>, areaMode?: number | undefined): T | undefined {
+  protected setValueToDisk<T extends object>(key: string, id: number, observedValue: T,
+    type: TypeConstructorWithArgs<T>, areaMode?: number | undefined
+  ): T | undefined {
     ObserveV2.getObserve().startRecordDependencies(this, id);
     // Map is a proxy object. When it is connected for the first time, map.has is used to add dependencies,
     // and map.set is used to trigger writing to disk.
@@ -643,7 +741,7 @@ class PersistenceV2Impl extends StorageHelper {
     return observedValue;
   }
 
-  private writeAllChangedToFile(persistKeys: Array<number>): void {
+  protected writeAllChangedToFile(persistKeys: Array<number>): void {
     for (let i = 0; i < persistKeys.length; ++i) {
       const id: number = persistKeys[i];
       const key: string = this.idToKey_.get(id);
@@ -655,19 +753,14 @@ class PersistenceV2Impl extends StorageHelper {
           const value: object = keyType === MapType.GLOBAL_MAP ? this.globalMap_.get(key) : this.map_.get(key);
 
           ObserveV2.getObserve().startRecordDependencies(this, id);
-          const json: string = JSONCoder.stringify(value);
+          const json = DataCoder.stringify(value);
           ObserveV2.getObserve().stopRecordDependencies();
 
-          if (this.isOverSizeLimit(json)) {
-            stateMgmtConsole.applicationError(
-              `Cannot store the key '${key}'! The length of data must be less than ${PersistenceV2Impl.MAX_DATA_LENGTH_}`);
+          if (keyType === MapType.GLOBAL_MAP) {
+            const areaMode = this.globalMapAreaMode_.get(key);
+            PersistenceV2Impl.storage_.set(key, json, areaMode);
           } else {
-            if (keyType === MapType.GLOBAL_MAP) {
-              const areaMode = this.globalMapAreaMode_.get(key);
-              PersistenceV2Impl.storage_.set(key, json, areaMode);
-            } else {
-              PersistenceV2Impl.storage_.set(key, json);
-            }
+            PersistenceV2Impl.storage_.set(key, json);
           }
         }
       } catch (err) {
@@ -681,28 +774,7 @@ class PersistenceV2Impl extends StorageHelper {
     }
   }
 
-  private isOverSizeLimit(json: string): boolean {
-    if (typeof json !== 'string') {
-      return false;
-    }
-
-    return json.length >= PersistenceV2Impl.MAX_DATA_LENGTH_;
-  }
-
-  private isNotClassObject(value: object): boolean {
-    return Array.isArray(value) || this.isNotSupportType(value);
-  }
-
-  private isNotSupportType(value: object): boolean {
-    for (let i = 0; i < PersistenceV2Impl.NOT_SUPPORT_TYPES_.length; ++i) {
-      if (value instanceof PersistenceV2Impl.NOT_SUPPORT_TYPES_[i]) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private storeKeyToPersistenceV2(key: string, areaMode?: number | undefined): void {
+  protected storeKeyToPersistenceV2(key: string, areaMode?: number | undefined): void {
     try {
       if (typeof areaMode === 'number') {
         if (this.globalKeysArr_[areaMode].has(key)) {
@@ -738,7 +810,7 @@ class PersistenceV2Impl extends StorageHelper {
     }
   }
 
-  private removeForModulePath(key: string): void {
+  protected removeForModulePath(key: string): void {
     PersistenceV2Impl.storage_.delete(key);
     // The first call for module path
     if (!this.keysArr_.has(key)) {
@@ -749,7 +821,7 @@ class PersistenceV2Impl extends StorageHelper {
     this.storeKeysArrToStorage(this.keysArr_);
   }
 
-  private getRemoveFlagForGlobalPath(key: string): boolean {
+  protected getRemoveFlagForGlobalPath(key: string): boolean {
     let removeFlag = false;
     // first call for global path
     for (let i = 0; i < this.globalKeysArr_.length; i++) {
@@ -764,7 +836,7 @@ class PersistenceV2Impl extends StorageHelper {
     return removeFlag;
   }
 
-  private removeFromPersistenceV2(key: string, areaMode: number | undefined): void {
+  protected removeFromPersistenceV2(key: string, areaMode: number | undefined): void {
     try {
       // check for global path
       if (typeof areaMode === 'number') {
@@ -789,7 +861,7 @@ class PersistenceV2Impl extends StorageHelper {
     }
   }
 
-  private getKeysArrFromStorage(areaMode?: number | undefined): Set<string> {
+  protected getKeysArrFromStorage(areaMode?: number | undefined): Set<string> {
     if (typeof areaMode === 'number' && !PersistenceV2Impl.storage_.has(PersistenceV2Impl.KEYS_ARR_, areaMode)) {
       return this.globalKeysArr_[areaMode];
     }
@@ -800,11 +872,11 @@ class PersistenceV2Impl extends StorageHelper {
     return new Set(JSON.parse(jsonKeysArr));
   }
 
-  private storeKeysArrToStorage(keysArr: Set<string>, areaMode?: number | undefined): void {
+  protected storeKeysArrToStorage(keysArr: Set<string>, areaMode?: number | undefined): void {
     PersistenceV2Impl.storage_.set(PersistenceV2Impl.KEYS_ARR_, JSON.stringify(Array.from(keysArr)), areaMode);
   }
 
-  private errorHelper(key: string, reason: PersistError, message: string) {
+  protected errorHelper(key: string, reason: PersistError, message: string): void {
     if (this.cb_ && typeof this.cb_ === 'function') {
       this.cb_(key, reason, message);
       return;

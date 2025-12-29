@@ -254,6 +254,16 @@ public:
             }
             theme->autoFillIconPrimaryColor_ = pattern->GetAttr<Color>("auto_fill_icon_primary_color", Color());
             theme->autoFillIconEmphasizeColor_ = pattern->GetAttr<Color>("auto_fill_icon_emphasize_color", Color());
+            theme->underlineBorderRadius_ =
+                Radius(pattern->GetAttr<Dimension>("textfield_underline_border_radius", 0.0_vp));
+            theme->underlineFocusBgColor_ = pattern->GetAttr<Color>("underline_bg_color_focused", Color());
+            theme->textInputNormalBgColor_ = pattern->GetAttr<Color>("text_input_normal_color", Color());
+            theme->passwordIconSize_ = pattern->GetAttr<Dimension>("text_input_password_icon_size", 20.0_vp);
+            theme->cancelIconPadding_ = pattern->GetAttr<Dimension>("text_input_cancel_icon_padding", 14.0_vp);
+            theme->passwordIconPadding_ = pattern->GetAttr<Dimension>("text_input_password_icon_padding", 10.0_vp);
+            theme->iconOffsetPadding_ = pattern->GetAttr<Dimension>("text_input_icon_offset_padding", 0.0_vp);
+            theme->iconFocusPadding_ = pattern->GetAttr<Dimension>("text_input_icon_focus_padding", 0.0_vp);
+            theme->errorUnderlineWidth_ = pattern->GetAttr<Dimension>("error_under_line_width", 0.0_vp);
         }
     };
 
@@ -890,6 +900,46 @@ public:
         return formatStr.empty() ? defaultFormatStr : formatStr;
     }
 
+    const Radius& GetUnderlineBorderRadius() const
+    {
+        return underlineBorderRadius_;
+    }
+
+    const Color& GetUnderlineFocusBgColor() const
+    {
+        return underlineFocusBgColor_;
+    }
+
+    const Color& GetTextInputNormalBgColor() const
+    {
+        return textInputNormalBgColor_;
+    }
+
+    const Dimension& GetIconOffsetPadding() const
+    {
+        return iconOffsetPadding_;
+    }
+
+    const Dimension& GetIconFocusPadding() const
+    {
+        return iconFocusPadding_;
+    }
+
+    const Dimension& GetErrorUnderlineWidth() const
+    {
+        return errorUnderlineWidth_;
+    }
+
+    const Dimension& GetTypingUnderlineWidth() const
+    {
+        return typingUnderlineWidth_;
+    }
+
+    const Color& GetUnderlineColorTyping() const
+    {
+        return typingUnderlineColor_;
+    }
+
 protected:
     TextFieldTheme() = default;
     void SetThemeConstants(const RefPtr<ThemeConstants>& themeConstants)
@@ -972,9 +1022,9 @@ private:
     Dimension iconHotZoneSize_;
     Dimension inlineBorderWidth_ = 2.0_vp;
     Dimension cancelIconSize_;
-    Dimension passwordIconSize_ = 20.0_vp;
-    Dimension cancelIconPadding_ = 14.0_vp;
-    Dimension passwordIconPadding_ = 10.0_vp;
+    Dimension passwordIconSize_;
+    Dimension cancelIconPadding_;
+    Dimension passwordIconPadding_;
 
     // UX::insert cursor offset up by 24vp
     Dimension insertCursorOffset_ = 24.0_vp;
@@ -1046,6 +1096,14 @@ private:
     Color autoFillIconEmphasizeColor_;
     Dimension autoFillIconSize_ = 24.0_vp;
     WeakPtr<ThemeConstants> themeConstants_;
+    Color underlineFocusBgColor_;
+    Radius underlineBorderRadius_;
+    Color textInputNormalBgColor_;
+    Dimension iconOffsetPadding_;
+    Dimension iconFocusPadding_;
+    Dimension errorUnderlineWidth_;
+    Dimension typingUnderlineWidth_ = 1.0_vp;
+    Color typingUnderlineColor_ = Color::WHITE;
 };
 
 } // namespace OHOS::Ace

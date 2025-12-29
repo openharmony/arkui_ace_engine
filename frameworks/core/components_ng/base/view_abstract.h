@@ -384,6 +384,7 @@ public:
     static void SetZIndex(int32_t value);
     // renderGroup
     static void SetRenderGroup(bool isRenderGroup);
+    static void SetAdaptiveGroup(bool isRenderGroup, bool useAdaptiveFilter);
     // exclude self and children from renderGroup
     static void SetExcludeFromRenderGroup(bool exclude);
     // renderFit, i.e. gravity
@@ -633,6 +634,8 @@ public:
 
     // useEffect
     static void SetUseEffect(bool useEffect, EffectType effectType);
+    // useUnion
+    static void SetUseUnion(bool useUnion);
 
     static void SetFreeze(bool freeze);
     static void SetAttractionEffect(const AttractionEffect& effect);
@@ -785,6 +788,7 @@ public:
     static void SetExcludeFromRenderGroup(FrameNode* frameNode, bool exclude);
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
+    static void SetUseUnion(FrameNode* frameNode, bool useUnion);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj);
     static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);

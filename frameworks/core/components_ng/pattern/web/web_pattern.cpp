@@ -893,25 +893,42 @@ RefPtr<FrameNode> WebPattern::CreatePreviewImageFrameNode(bool isImage)
     return previewNode;
 }
 
-void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height)
+bool WebPattern::CheckCreateImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "blankless WebPattern::CreateSnapshotImageFrameNode");
     if (snapshotImageNodeId_.has_value()) {
         TAG_LOGE(AceLogTag::ACE_WEB, "blankless already create snapshot image node!");
-        return;
+        if (delegate_) {
+            delegate_->CallBlanklessCallback(1, std::string("frame insertion has already completed")); // 1 LOADING_FAILED
+        }
+        return false;
     }
-    if (!IsSnapshotPathValid(snapshotPath)) {
+    if (snapshotPath.empty() || !IsSnapshotPathValid(snapshotPath)) {
         TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot path is invalid!");
-        return;
+        if (delegate_) {
+            delegate_->CallBlanklessCallback(1, std::string("Snapshot storage path is empty or invalid")); // 1 LOADING_FAILED
+        }
+        return false;
     }
 
     if (delegate_) {
         delegate_->RecordBlanklessFrameSize(width, height);
         if (!delegate_->IsBlanklessFrameValid()) {
             TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot size is invalid!");
-            return;
+            delegate_->CallBlanklessCallback(1, std::string("Snapshot file size is invalid")); // 1 LOADING_FAILED
+            return false;
         }
     }
+
+    return true;
+}
+
+void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "blankless WebPattern::CreateSnapshotImageFrameNode");
+    if (!CheckCreateImageFrameNode(snapshotPath, width, height)) {
+        return;
+    }
+
     snapshotImageNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     auto snapshotNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, snapshotImageNodeId_.value(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -946,6 +963,9 @@ void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath, u
     }
     CHECK_NULL_VOID(snapshotReporter_);
     snapshotReporter_->OnAppear();
+    if (delegate_) {
+        delegate_->CallBlanklessCallback(0, std::string("")); // 0 LOADING_SUCCESS
+    }
 }
 
 void WebPattern::RemoveSnapshotFrameNode(bool isAnimate)
@@ -1007,6 +1027,9 @@ void WebPattern::RealRemoveSnapshotFrameNode()
 
     CHECK_NULL_VOID(snapshotReporter_);
     snapshotReporter_->OnDisappear();
+    if (delegate_) {
+        delegate_->CallBlanklessCallback(2, std::string("")); // 2 LOADING_REMOVE
+    }
 }
 
 void WebPattern::InitSnapshotGesture(const RefPtr<GestureEventHub>& gestureHub)
@@ -4311,6 +4334,7 @@ void WebPattern::OnModifyDone()
             }
         }
         RecordWebEvent(true);
+        RegisterWebDomNativeInterface();
 
         UpdateJavaScriptOnDocumentStartByOrder();
         UpdateJavaScriptOnDocumentEndByOrder();
@@ -4550,7 +4574,65 @@ void WebPattern::DumpSimplifyInfoOnlyForParamConfig(
     std::shared_ptr<JsonValue>& json, ParamConfig config)
 {
     ACE_SCOPED_TRACE("WebPattern::DumpSimplifyInfoOnlyForParamConfig");
-    TAG_LOGI(AceLogTag::ACE_WEB, "web-dom-tree config.withWeb:%{public}d", config.withWeb);
+    TAG_LOGI(AceLogTag::ACE_WEB, "add attrs config.withWeb:%{public}d", config.withWeb);
+    if (config.withWeb && webDomDocument_->IsValid()) {
+        json->Put(WEB_DOM_JSON_URL, webDomDocument_->GetUrl().c_str());
+        json->Put(WEB_DOM_JSON_TITLE, webDomDocument_->GetTitle().c_str());
+    }
+}
+
+void WebPattern::AddExtraInfoWithParamConfig(
+    std::shared_ptr<JsonValue>& json, ParamConfig config)
+{
+    ACE_SCOPED_TRACE("WebPattern::AddExtraInfoWithParamConfig");
+    TAG_LOGI(AceLogTag::ACE_WEB, "add children config.withWeb:%{public}d", config.withWeb);
+    if (config.withWeb && webDomDocument_->IsValid()) {
+        auto offset = GetCoordinatePoint().value_or(OffsetF());
+        webDomDocument_->UpdateOffset(offset);
+        json->PutRef(WEB_DOM_JSON_CHILDREN, webDomDocument_->ExportToJson());
+    }
+}
+
+void WebPattern::RegisterWebDomNativeInterface()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RegisterWebDomNativeInterface");
+    CHECK_NULL_VOID(delegate_);
+    delegate_->RegisterNativeJavaScriptProxy(
+        WEB_NATIVE_OBJ_DOM,
+        {WEB_NATIVE_FUNC_INIT, WEB_NATIVE_FUNC_INCR, WEB_NATIVE_FUNC_SCROLL},
+        {
+            [weak = AceType::WeakClaim(this)](const std::vector<std::string>& param) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern report web dom init");
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (param.size() != WEB_NATIVE_PARAM_SIZE) {
+                    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern dom init parmas size error");
+                    return;
+                }
+                pattern->webDomDocument_->CreateFromJsonString(param[WEB_NATIVE_PARAM_INDEX]);
+            },
+            [weak = AceType::WeakClaim(this)](const std::vector<std::string>& param) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern report web dom update");
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (param.size() != WEB_NATIVE_PARAM_SIZE) {
+                    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern dom update size error");
+                    return;
+                }
+                pattern->webDomDocument_->CreateFromJsonString(param[WEB_NATIVE_PARAM_INDEX]);
+            },
+            [weak = AceType::WeakClaim(this)](const std::vector<std::string>& param) {
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern report web dom scroll");
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (param.size() != WEB_NATIVE_PARAM_SIZE) {
+                    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern dom scroll size error"); 
+                    return;
+                }
+                pattern->webDomDocument_->UpdateScrollInfoFromJsonString(param[WEB_NATIVE_PARAM_INDEX]);
+            },
+        },
+        true, "", false);
 }
 
 void WebPattern::RecordWebEvent(bool isInit)
@@ -4905,6 +4987,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
     if (!ParseTouchInfo(info, touchInfos)) {
         return;
     }
+    lastTouchDownTime_ = GetCurrentTimestamp();
     for (auto& touchPoint : touchInfos) {
         if (fromOverlay) {
             touchPoint.x -= webOffset_.GetX();
@@ -5307,9 +5390,6 @@ void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreate
             result = action(menuItem);
         }
         CHECK_NULL_RETURN(webPattern, result);
-        if (!result && webPattern->IsQuickMenuShow()) {
-            webPattern->webSelectOverlay_->HideMenu(true);
-        }
         return result;
     };
     if (onPrepareMenuCallback) {
@@ -5382,6 +5462,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
 
 void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY, bool isMove)
 {
+    SetTextSelectionEnable(true);
     showMagnifierFingerId_ =
         isMove ? showMagnifierFingerId_ : touchEventInfo_.GetChangedTouches().front().GetFingerId();
     if (magnifierController_) {
@@ -5393,6 +5474,7 @@ void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY, bool isMove
 void WebPattern::HideMagnifier()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "HideMagnifier");
+    SetTextSelectionEnable(false);
     showMagnifierFingerId_ = -1;
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
@@ -9230,6 +9312,13 @@ void WebPattern::GetTranslateText(std::string extraData, std::function<void(std:
         }, TaskExecutor::TaskType::UI, "ArkUIWebGetTranslateText");
 }
 
+void WebPattern::GetImagesByIDs(const std::vector<int32_t>& imageIds, int32_t windowId,
+    const std::function<void(int32_t, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>&,
+    MultiImageQueryErrorCode)>& arkWebfinishCallback)
+{
+    return;
+}
+
 void WebPattern::SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids)
 {
     return;
@@ -9298,6 +9387,13 @@ void WebPattern::UninitRotationEventCallback()
     rotationEndCallbackId_ = 0;
 }
 
+void WebPattern::NotifyOverlayRotation()
+{
+    if (webSelectOverlay_) {
+        webSelectOverlay_->OnOrientationChanged();
+    }
+}
+
 void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
 {
     if (type != WindowSizeChangeReason::ROTATION) {
@@ -9307,6 +9403,7 @@ void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
         TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::AdjustRotationRenderFit not support");
         return;
     }
+    NotifyOverlayRotation();
 
     if (delegate_ && renderFit_ == RenderFit::TOP_LEFT &&
         renderMode_ == RenderMode::ASYNC_RENDER && layoutMode_ != WebLayoutMode::FIT_CONTENT) {
@@ -9393,6 +9490,32 @@ bool WebPattern::IsAccessibilityUsedByEventReport()
         return webAccessibilityEventReport_->GetEventReportEnable();
     }
     return false;
+}
+
+
+RefPtr<WebAgentEventReporter> WebPattern::GetAgentEventReporter()
+{
+    if (!webAgentEventReporter_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::GetAgentEventReporter, create new agent report instance");
+        webAgentEventReporter_ = AceType::MakeRefPtr<WebAgentEventReporter>(WeakClaim(this));
+    }
+    return webAgentEventReporter_;
+}
+
+void WebPattern::ReportSelectedText()
+{
+    if (UiSessionManager::GetInstance()->GetSelectTextEventRegistered()) {
+        CHECK_NULL_VOID(delegate_);
+        auto text = delegate_->GetLastSelectionText();
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::ReportSelectedText %{public}zu", text.size());
+        UiSessionManager::GetInstance()->ReportSelectTextEvent(text);
+    }
+}
+
+std::pair<int32_t, RectF> WebPattern::GetScrollAreaInfoFromDocument(int32_t id)
+{
+    CHECK_NULL_RETURN(webDomDocument_, std::make_pair(-1, RectF()));
+    return webDomDocument_->GetScrollAreaInfoById(id);
 }
 
 RefPtr<WebDataDetectorAdapter> WebPattern::GetDataDetectorAdapter()

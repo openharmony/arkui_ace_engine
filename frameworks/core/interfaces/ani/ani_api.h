@@ -88,6 +88,7 @@ typedef struct webview_WebviewControllerPeer {
     std::function<void(const std::string&)> setHapPathFunc = nullptr;
     std::function<void(int32_t)> setWebDetachFunc = nullptr;
     std::function<void(void*, void*, std::function<void(void*)>)> defaultOnShowFileSelectorFunc = nullptr;
+    std::function<void(void*, std::function<void()>)> defaultPermissionClipboardFunc = nullptr;
 } WebviewControllerPeer;
 
 typedef struct NodeAdapterInfo {
@@ -176,6 +177,7 @@ struct ArkUIDragInfo {
 struct ArkUINavigationInfo {
     std::string navigationId;
     ani_ref navPathStack;
+    std::optional<ani_int> uniqueId;
 };
 
 struct ArkUINavDestinationInfo {
@@ -186,6 +188,10 @@ struct ArkUINavDestinationInfo {
     std::string navigationId;
     ani_size state;
     ani_size mode;
+    std::optional<std::string> param;
+    std::optional<ani_double> width;
+    std::optional<ani_double> height;
+    ani_ref navPathStack;
 };
 
 struct ArkUIRouterPageInfo {
@@ -194,6 +200,8 @@ struct ArkUIRouterPageInfo {
     std::string path;
     ani_size state;
     std::string pageId;
+    std::optional<ani_double> width;
+    std::optional<ani_double> height;
 };
 
 struct AniOverlayOptions {
@@ -574,6 +582,7 @@ struct ArkUIAniCommonModifier {
     void (*setImageCacheCount)(ani_int value, ani_int instanceId);
     void (*setImageRawDataCacheSize)(ani_int value, ani_int instanceId);
     void (*applyThemeScopeId)(ani_env* env, ani_long ptr, ani_int themeScopeId);
+    void (*setIsRecycleInvisibleImageMemory)(ani_boolean isRecycle, ani_int instanceId);
     void (*getBaseEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
     void (*getKeyEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
     ani_boolean (*setClickEventPreventDefault)(ani_long nativePtr);

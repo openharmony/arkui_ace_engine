@@ -31,6 +31,7 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "core/common/ime/constant.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -96,6 +97,7 @@ constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
 constexpr Dimension SCROLL_BAR_MIN_HEIGHT = 4.0_vp;
 constexpr float MINFONTSCALE = 0.85f;
 constexpr float MAXFONTSCALE = 3.20f;
+constexpr double UNDERLINE_COLOR_ALPHA = 0.5;
 #if defined(ENABLE_STANDARD_INPUT)
 constexpr Dimension AVOID_OFFSET = 24.0_vp;
 #endif
@@ -1182,6 +1184,10 @@ void TextFieldPattern::HandleFocusEvent()
 
 void TextFieldPattern::SetFocusStyle()
 {
+    if (IsTV()) {
+        SetFocusStyleForTV();
+        return;
+    }
     if (IsUnderlineMode() || IsInlineMode()) {
         return;
     }
@@ -1220,6 +1226,10 @@ void TextFieldPattern::SetFocusStyle()
 
 void TextFieldPattern::ClearFocusStyle()
 {
+    if (IsTV()) {
+        ClearFocusStyleForTV();
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -1268,6 +1278,10 @@ void TextFieldPattern::ProcessAutoFillOnFocus()
 
 void TextFieldPattern::ProcessFocusStyle()
 {
+    if (IsTV()) {
+        ProcessFocusStyleForTV();
+        return;
+    }
     bool needTwinkling = true;
     if (IsNormalInlineState()) {
         ApplyInlineTheme();
@@ -1455,6 +1469,10 @@ void TextFieldPattern::HandleSelect(CaretMoveIntent direction)
 
 void TextFieldPattern::InitDisableColor()
 {
+    if (IsTV()) {
+        InitDisableColorForTV();
+        return;
+    }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto theme = GetTheme();
@@ -4619,6 +4637,10 @@ void TextFieldPattern::OnHover(bool isHover, const HoverInfo& info)
 
 void TextFieldPattern::UpdateHoverStyle(bool isHover)
 {
+    if (IsTV()) {
+        UpdateHoverStyleForTV(isHover);
+        return;
+    }
     if (!hoverAndPressBgColorEnabled_) {
         return;
     }
@@ -4652,6 +4674,10 @@ void TextFieldPattern::UpdateHoverStyle(bool isHover)
 
 void TextFieldPattern::UpdatePressStyle(bool isPressed)
 {
+    if (IsTV()) {
+        UpdatePressStyleForTV(isPressed);
+        return;
+    }
     if (!hoverAndPressBgColorEnabled_) {
         return;
     }
@@ -5465,6 +5491,21 @@ bool TextFieldPattern::BeforeIMEInsertValue(const std::u16string& insertValue, i
     return eventHub->FireOnWillInsertValueEvent(insertValueInfo);
 }
 
+void TextFieldPattern::reportOnDidInsertEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto statisticEventReporter = pipeline->GetStatisticEventReporter();
+    CHECK_NULL_VOID(statisticEventReporter);
+    if (eventHub->HasOnDidInsertValueEvent() && host->GetHostTag() == V2::SEARCH_Field_ETS_TAG){
+            statisticEventReporter->SendEvent(StatisticEventType::SEARCH_ONDIDINSERT);
+    }
+}
+
 void TextFieldPattern::AfterIMEInsertValue(const std::u16string& insertValue)
 {
     auto host = GetHost();
@@ -5475,6 +5516,7 @@ void TextFieldPattern::AfterIMEInsertValue(const std::u16string& insertValue)
     auto offset = selectController_->GetCaretIndex();
     insertValueInfo.insertOffset = offset;
     insertValueInfo.insertValue = insertValue;
+    reportOnDidInsertEvent();
     return eventHub->FireOnDidInsertValueEvent(insertValueInfo);
 }
 
@@ -6963,6 +7005,21 @@ void TextFieldPattern::DeleteForward(int32_t length)
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
+void TextFieldPattern::reportOnWillDeleteEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto statisticEventReporter = pipeline->GetStatisticEventReporter();
+    CHECK_NULL_VOID(statisticEventReporter);
+    if (eventHub->HasOnWillDeleteValueEvent() && host->GetHostTag() == V2::SEARCH_Field_ETS_TAG){
+            statisticEventReporter->SendEvent(StatisticEventType::SEARCH_ONWILLDELETE);
+    }
+}
+
 bool TextFieldPattern::BeforeIMEDeleteValue(
     const std::u16string& deleteValue, TextDeleteDirection direction, int32_t offset)
 {
@@ -6974,7 +7031,23 @@ bool TextFieldPattern::BeforeIMEDeleteValue(
     deleteValueInfo.deleteOffset = offset;
     deleteValueInfo.deleteValue = deleteValue;
     deleteValueInfo.direction = direction;
+    reportOnWillDeleteEvent();
     return eventHub->FireOnWillDeleteEvent(deleteValueInfo);
+}
+
+void TextFieldPattern::reportOnDidDeleteEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto statisticEventReporter = pipeline->GetStatisticEventReporter();
+    CHECK_NULL_VOID(statisticEventReporter);
+    if (eventHub->HasOnDidDeleteValueEvent() && host->GetHostTag() == V2::SEARCH_Field_ETS_TAG){
+            statisticEventReporter->SendEvent(StatisticEventType::SEARCH_ONDIDDELETE);
+    }
 }
 
 void TextFieldPattern::AfterIMEDeleteValue(const std::u16string& deleteValue, TextDeleteDirection direction)
@@ -6987,6 +7060,7 @@ void TextFieldPattern::AfterIMEDeleteValue(const std::u16string& deleteValue, Te
     deleteValueInfo.deleteOffset = selectController_->GetCaretIndex();
     deleteValueInfo.deleteValue = deleteValue;
     deleteValueInfo.direction = direction;
+    reportOnDidDeleteEvent();
     return eventHub->FireOnDidDeleteValueEvent(deleteValueInfo);
 }
 
@@ -7946,6 +8020,10 @@ void TextFieldPattern::AddCounterNode()
 
 void TextFieldPattern::SetShowError()
 {
+    if (IsTV()) {
+        SetShowErrorForTV();
+        return;
+    }
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto passWordMode = IsInPasswordMode();
@@ -8025,6 +8103,10 @@ void TextFieldPattern::UpdateErrorTextMargin()
 
 void TextFieldPattern::ApplyUnderlineTheme()
 {
+    if (IsTV()) {
+        ApplyUnderlineThemeForTV();
+        return;
+    }
     if (!IsUnderlineMode()) {
         return;
     }
@@ -9231,6 +9313,9 @@ void TextFieldPattern::CloseHandleAndSelect()
 {
     CloseSelectOverlay(true);
     showSelect_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool TextFieldPattern::IsShowUnit() const
@@ -9524,6 +9609,10 @@ void TextFieldPattern::GetIconPaintRect(const RefPtr<TextInputResponseArea>& res
 
 void TextFieldPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
+    if (IsTV()) {
+        GetInnerFocusPaintRectForTV(paintRect);
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (focusIndex_ == FocuseIndex::CANCEL) {
@@ -9594,6 +9683,10 @@ void TextFieldPattern::GetTextInputFocusPaintRect(RoundRect& paintRect)
 
 void TextFieldPattern::PaintCancelRect()
 {
+    if (IsTV()) {
+        PaintCancelRectForTV();
+        return;
+    }
     RoundRect focusRect;
     GetInnerFocusPaintRect(focusRect);
     auto host = GetHost();
@@ -9615,6 +9708,10 @@ void TextFieldPattern::PaintResponseAreaRect()
 
 void TextFieldPattern::PaintPasswordRect()
 {
+    if (IsTV()) {
+        PaintPasswordRectForTV();
+        return;
+    }
     RoundRect focusRect;
     GetInnerFocusPaintRect(focusRect);
     auto host = GetHost();
@@ -9872,6 +9969,10 @@ void TextFieldPattern::ResetContextAttr()
 
 void TextFieldPattern::SetThemeBorderAttr()
 {
+    if (IsTV()) {
+        SetThemeBorderAttrForTV();
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -9943,6 +10044,10 @@ PaddingProperty TextFieldPattern::GetPaddingByUserValue()
 
 void TextFieldPattern::SetThemeAttr()
 {
+    if (IsTV()) {
+        SetThemeAttrForTV();
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -12835,6 +12940,463 @@ void TextFieldPattern::ScrollToVisible(const TextScrollOptions& options)
                 pattern->selectOverlay_->UpdateSecondHandleOffset();
             }
         });
+    }
+}
+
+void TextFieldPattern::HandleButtonFocusEvent(const RefPtr<TextInputResponseArea>& responseArea)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(textFieldOverlayModifier_);
+    RoundRect mouseRect;
+    CHECK_NULL_VOID(responseArea);
+    responseArea->CreateIconRect(mouseRect, false);
+    float cornerRadius = mouseRect.GetRect().Width() / 2;
+    mouseRect.SetCornerRadius(cornerRadius);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    std::vector<RoundRect> roundRectVector;
+    roundRectVector.push_back(mouseRect);
+    auto bgColor = textFieldTheme->GetBgColor();
+    if (HasFocus() && !needResetFocusColor_) {
+        auto focusBgColor = textFieldTheme->GetFocusBgColor();
+        textFieldOverlayModifier_->SetHoverColorAndRects(roundRectVector, focusBgColor.GetValue());
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    } else {
+        textFieldOverlayModifier_->SetHoverColorAndRects(roundRectVector, bgColor.GetValue());
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    needResetFocusColor_ = true;
+}
+
+void TextFieldPattern::SetFocusStyleForTV()
+{
+    if (IsInlineMode()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+
+    if (!paintProperty->HasBackgroundColor()) {
+        auto defaultBGColor = textFieldTheme->GetBgColor();
+        if (paintProperty->GetBackgroundColorValue(defaultBGColor) == defaultBGColor) {
+            if(IsUnderlineMode()) {
+                renderContext->UpdateBackgroundColor(textFieldTheme->GetUnderlineFocusBgColor());
+            } else {
+                renderContext->UpdateBackgroundColor(
+                    textFieldTheme->GetTextInputNormalBgColor().BlendColor(textFieldTheme->GetFocusBgColor()));
+                isFocusBGColorSet_ = true;
+            }
+        }
+    }
+    if(IsUnderlineMode()) {
+        auto radius = textFieldTheme->GetUnderlineBorderRadius();
+        BorderRadiusProperty borderRadius(radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX());
+        renderContext->UpdateBorderRadius(borderRadius);
+    } else {
+        auto defaultTextColor = textFieldTheme->GetTextColor();
+        if (layoutProperty->GetTextColorValue(defaultTextColor) == defaultTextColor &&
+            !paintProperty->HasTextColorFlagByUser()) {
+            layoutProperty->UpdateTextColor(textFieldTheme->GetFocusTextColor());
+            isFocusTextColorSet_ = true;
+        }
+        auto defaultPlaceholderColor = textFieldTheme->GetPlaceholderColor();
+        if (layoutProperty->GetPlaceholderTextColorValue(defaultPlaceholderColor) == defaultPlaceholderColor) {
+            layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetFocusPlaceholderColor());
+            isFocusPlaceholderColorSet_ = true;
+        }
+    }
+}
+
+void TextFieldPattern::ClearFocusStyleForTV()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+
+    if (isFocusBGColorSet_ && !paintProperty->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    }
+    if (isFocusTextColorSet_ && !paintProperty->HasTextColorFlagByUser()) {
+        layoutProperty->UpdateTextColor(textFieldTheme->GetTextColor());
+    }
+    if (isFocusPlaceholderColorSet_ && !paintProperty->GetPlaceholderColorFlagByUserValue(false)) {
+        layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetPlaceholderColor());
+    }
+    isFocusBGColorSet_ = false;
+    isFocusTextColorSet_ = false;
+    isFocusPlaceholderColorSet_ = false;
+    if(IsUnderlineMode() && !paintProperty->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    }
+}
+
+void TextFieldPattern::UpdateHoverStyleForTV(bool isHover)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inputEventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputEventHub);
+    auto hoverEffect = inputEventHub->GetHoverEffect();
+    if (hoverEffect != HoverEffectType::UNKNOWN) {
+        return;
+    }
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto theme = GetTheme();
+    CHECK_NULL_VOID(theme);
+    auto defaultThemeBgColor = theme->GetBgColor();
+    auto textFieldBgColor = paintProperty->GetBackgroundColorValue(defaultThemeBgColor);
+    auto bgColor = textFieldBgColor;
+    if (textFieldBgColor == defaultThemeBgColor) {
+        bgColor = IsUnderlineMode() ? Color::TRANSPARENT : defaultThemeBgColor;
+    }
+    auto hoverColor = bgColor.BlendColor(theme->GetHoverColor());
+    if (!HasFocus()) {
+        if (isHover) {
+            if(IsUnderlineMode()) {
+                auto radius = theme->GetUnderlineBorderRadius();
+                BorderRadiusProperty borderRadius(radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX());
+                renderContext->UpdateBorderRadius(borderRadius);
+            }
+            PlayAnimationHoverAndPress(hoverColor);
+        } else {
+            PlayAnimationHoverAndPress(bgColor);
+        }
+    }
+}
+
+void TextFieldPattern::UpdatePressStyleForTV(bool isPressed)
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto theme = GetTheme();
+    CHECK_NULL_VOID(theme);
+    auto defaultThemeBgColor = theme->GetBgColor();
+    auto textFieldBgColor = paintProperty->GetBackgroundColorValue(defaultThemeBgColor);
+    auto bgColor = textFieldBgColor;
+    auto pressColor = Color();
+    if (textFieldBgColor == defaultThemeBgColor) {
+        if (IsUnderlineMode()) {
+            bgColor = Color::TRANSPARENT;
+        } else {
+            bgColor = HasFocus() ? defaultThemeBgColor.BlendColor(theme->GetFocusBgColor()) : defaultThemeBgColor;
+        }
+    }
+    pressColor = bgColor.BlendColor(theme->GetPressColor());
+    if(IsUnderlineMode()) {
+        pressColor = HasFocus() ? theme->GetFocusBgColor().BlendColor(theme->GetHoverColor())
+            : bgColor.BlendColor(theme->GetPressColor());
+    }
+    if (isPressed) {
+        if(IsUnderlineMode()) {
+            auto radius = theme->GetUnderlineBorderRadius();
+            BorderRadiusProperty borderRadius(radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX());
+            renderContext->UpdateBorderRadius(borderRadius);
+        }
+        PlayAnimationHoverAndPress(pressColor);
+    } else {
+        PlayAnimationHoverAndPress(bgColor);
+    }
+}
+
+void TextFieldPattern::SetShowErrorForTV()
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto passWordMode = IsInPasswordMode();
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    auto renderContext = tmpHost->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto isUnderLine = IsUnderlineMode();
+    auto errorText = layoutProperty->GetErrorTextValue(u"");
+    if (IsShowError()) { // update error state
+        if (isUnderLine) {
+            underlineColor_ = userUnderlineColor_.error.value_or(textFieldTheme->GetErrorUnderlineColor());
+            underlineWidth_ = textFieldTheme->GetErrorUnderlineWidth();
+        } else if (passWordMode) {
+            if (!paintProperty->HasBorderWidthFlagByUser()) {
+                BorderColorProperty borderColor;
+                borderColor.SetColor(Color::TRANSPARENT);
+                renderContext->UpdateBorderColor(borderColor);
+                paintProperty->UpdateInnerBorderWidth(textFieldTheme->GetErrorTextInputBorderWidth());
+                paintProperty->UpdateInnerBorderColor(textFieldTheme->GetPasswordErrorBorderColor());
+            } else {
+                BorderColorProperty borderColor;
+                borderColor.SetColor(textFieldTheme->GetPasswordErrorBorderColor());
+                renderContext->UpdateBorderColor(borderColor);
+            }
+            renderContext->UpdateBackgroundColor(textFieldTheme->GetPasswordErrorInputColor());
+            layoutProperty->UpdateTextColor(textFieldTheme->GetPasswordErrorTextColor());
+            if (!layoutProperty->HasPlaceholderTextColor()) {
+                layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetPlaceholderColor());
+            }
+        }
+    }
+    UpdateErrorTextMargin();
+}
+
+void TextFieldPattern::SetThemeAttrForTV()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto theme = GetTheme();
+    CHECK_NULL_VOID(theme);
+    SetThemeBorderAttr();
+    if (!paintProperty->HasBackgroundColor()) {
+        auto backgroundColor = isFocusBGColorSet_ ? theme->GetFocusBgColor() : theme->GetBgColor();
+        backgroundColor = IsUnderlineMode() ? Color::TRANSPARENT : backgroundColor;
+        if(IsDisabled()) {
+            backgroundColor = backgroundColor.BlendOpacity(theme->GetDisableOpacityRatio());
+        }
+        renderContext->UpdateBackgroundColor(backgroundColor);
+    } else {
+        renderContext->UpdateBackgroundColor(paintProperty->GetBackgroundColorValue());
+    }
+
+    if (!paintProperty->HasMarginByUser()) {
+        MarginProperty margin;
+        margin.SetEdges(CalcLength(0.0_vp));
+        layoutProperty->UpdateMargin(margin);
+    } else {
+        layoutProperty->UpdateMargin(paintProperty->GetMarginByUserValue());
+    }
+
+    if (!paintProperty->HasPaddingByUser()) {
+        auto themePadding = IsUnderlineMode() ? GetUnderlinePadding(theme, false, false) : theme->GetPadding();
+        PaddingProperty padding;
+        padding.top = CalcLength(CalcLength(themePadding.Top()).GetDimension());
+        padding.bottom = CalcLength(CalcLength(themePadding.Bottom()).GetDimension());
+        padding.left = CalcLength(CalcLength(themePadding.Left()).GetDimension());
+        padding.right = CalcLength(CalcLength(themePadding.Right()).GetDimension());
+        layoutProperty->UpdatePadding(padding);
+    } else {
+        layoutProperty->UpdatePadding(GetPaddingByUserValue());
+    }
+
+    if (!paintProperty->HasTextColorFlagByUser()) {
+        auto textColor = isFocusTextColorSet_ ? theme->GetFocusTextColor() : theme->GetTextColor();
+        layoutProperty->UpdateTextColor(textColor);
+    } else {
+        layoutProperty->UpdateTextColor(paintProperty->GetTextColorFlagByUserValue());
+    }
+    inlineFocusState_ = false;
+}
+
+void TextFieldPattern::InitDisableColorForTV()
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto theme = GetTheme();
+    CHECK_NULL_VOID(theme);
+    if (IsUnderlineMode()) {
+        underlineWidth_ = theme->GetTypingUnderlineWidth();
+        Color underlineColor = HasFocus() ? userUnderlineColor_.typing.value_or(
+            theme->GetUnderlineColorTyping().BlendOpacity(UNDERLINE_COLOR_ALPHA))
+            : userUnderlineColor_.normal.value_or(theme->GetUnderlineColor());
+        if (IsShowError()) {
+            underlineColor = userUnderlineColor_.error.value_or(theme->GetErrorUnderlineColor());
+        }
+        if (userUnderlineColor_.disable) {
+            underlineColor_ = IsDisabled() ? userUnderlineColor_.disable.value() : underlineColor;
+        } else {
+            underlineColor_ = IsDisabled() ? theme->GetDisableUnderlineColor() : underlineColor;
+        }
+    }
+    layoutProperty->UpdateIsDisabled(IsDisabled());
+}
+
+void TextFieldPattern::ApplyUnderlineThemeForTV()
+{
+    if (!IsUnderlineMode()) {
+        return;
+    }
+    SetThemeAttr();
+    auto theme = GetTheme();
+    CHECK_NULL_VOID(theme);
+    if (IsShowError()) {
+        underlineColor_ = userUnderlineColor_.error.value_or(theme->GetErrorUnderlineColor());
+    } else {
+        underlineColor_ = HasFocus() ? userUnderlineColor_.typing.value_or(
+            theme->GetUnderlineColorTyping().BlendOpacity(UNDERLINE_COLOR_ALPHA))
+            : userUnderlineColor_.normal.value_or(theme->GetUnderlineColor());
+    }
+    underlineWidth_ = theme->GetTypingUnderlineWidth();
+}
+
+void TextFieldPattern::ProcessFocusStyleForTV()
+{
+    bool needTwinkling = true;
+    if (IsNormalInlineState()) {
+        ApplyInlineTheme();
+        inlineFocusState_ = true;
+        if (!contentController_->IsEmpty()) {
+            inlineSelectAllFlag_ = (blurReason_ != BlurReason::WINDOW_BLUR &&
+            requestFocusReason_ != RequestFocusReason::DRAG_SELECT);
+            if (inlineSelectAllFlag_) {
+                needTwinkling = false;
+            }
+        }
+        ProcessResponseArea();
+    }
+    if (needTwinkling) {
+        StartTwinkling();
+    }
+    NotifyOnEditChanged(true);
+    if (!IsShowError() && IsUnderlineMode()) {
+        auto textFieldTheme = GetTheme();
+        CHECK_NULL_VOID(textFieldTheme);
+        underlineColor_ = userUnderlineColor_.typing.value_or(
+            textFieldTheme->GetUnderlineColorTyping().BlendOpacity(UNDERLINE_COLOR_ALPHA));
+        underlineWidth_ = textFieldTheme->GetTypingUnderlineWidth();
+    }
+}
+
+void TextFieldPattern::GetInnerFocusPaintRectForTV(RoundRect& paintRect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (focusIndex_ == FocuseIndex::CANCEL) {
+        CHECK_NULL_VOID(cleanNodeResponseArea_);
+        GetIconPaintRect(cleanNodeResponseArea_, paintRect);
+        cleanNodeResponseArea_->CreateIconRect(paintRect, true);
+        float cornerRadius = paintRect.GetRect().Width() / 2;
+        paintRect.SetCornerRadius(cornerRadius);
+        UpdateFoucsOffsetIfNeed(paintRect);
+    } else if (focusIndex_ == FocuseIndex::UNIT) {
+        if (IsShowPasswordIcon()) {
+            CHECK_NULL_VOID(responseArea_);
+            GetIconPaintRect(responseArea_, paintRect);
+            responseArea_->CreateIconRect(paintRect, true);
+            float cornerRadius = paintRect.GetRect().Width() / 2;
+            paintRect.SetCornerRadius(cornerRadius);
+            UpdateFoucsOffsetIfNeed(paintRect);
+        }
+        if (IsShowUnit()) {
+            CHECK_NULL_VOID(responseArea_);
+            auto unitResponseArea = AceType::DynamicCast<UnitResponseArea>(responseArea_);
+            CHECK_NULL_VOID(unitResponseArea);
+            auto unitNode = unitResponseArea->GetFrameNode();
+            CHECK_NULL_VOID(unitNode);
+            auto unitRect = unitNode->GetGeometryNode()->GetFrameRect();
+            paintRect.SetRect(unitRect);
+        }
+    } else {
+        GetTextInputFocusPaintRect(paintRect);
+    }
+}
+
+void TextFieldPattern::PaintCancelRectForTV()
+{
+    RoundRect focusRect;
+    GetInnerFocusPaintRect(focusRect);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(cleanNodeResponseArea_);
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+    CHECK_NULL_VOID(cleanNodeResponseArea);
+    needResetFocusColor_ = false;
+    HandleButtonFocusEvent(cleanNodeResponseArea);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->PaintInnerFocusState(focusRect);
+}
+
+void TextFieldPattern::PaintPasswordRectForTV()
+{
+    RoundRect focusRect;
+    GetInnerFocusPaintRect(focusRect);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(responseArea_);
+    auto passwordResponseArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
+    CHECK_NULL_VOID(passwordResponseArea);
+    needResetFocusColor_ = false;
+    HandleButtonFocusEvent(passwordResponseArea);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->PaintInnerFocusState(focusRect);
+}
+
+void TextFieldPattern::SetThemeBorderAttrForTV()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto theme = GetTheme();
+    CHECK_NULL_VOID(theme);
+
+    paintProperty->ResetInnerBorderColor();
+    paintProperty->ResetInnerBorderWidth();
+    if (!paintProperty->HasBorderColorFlagByUser()) {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(theme->GetTextInputColor());
+        if(IsDisabled()) {
+            borderColor.SetColor(theme->GetTextInputColor().BlendOpacity(theme->GetDisableOpacityRatio()));
+        }
+        renderContext->UpdateBorderColor(borderColor);
+    } else {
+        renderContext->UpdateBorderColor(paintProperty->GetBorderColorFlagByUserValue());
+    }
+
+    if (!paintProperty->HasBorderRadiusFlagByUser()) {
+        auto radius = theme->GetBorderRadius();
+        BorderRadiusProperty borderRadius(radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX());
+        auto ultimatelyRadius = IsUnderlineMode() ?  ZERO_BORDER_RADIUS_PROPERTY : borderRadius;
+        renderContext->UpdateBorderRadius(ultimatelyRadius);
+    } else {
+        renderContext->UpdateBorderRadius(paintProperty->GetBorderRadiusFlagByUserValue());
+    }
+
+    if (!paintProperty->HasBorderWidthFlagByUser()) {
+        BorderWidthProperty borderWidth;
+        if (IsTextArea() || IsUnderlineMode()) {
+            borderWidth.SetBorderWidth(BORDER_DEFAULT_WIDTH);
+        } else {
+            borderWidth.SetBorderWidth(theme->GetTextInputWidth());
+        }
+        renderContext->UpdateBorderWidth(borderWidth);
+        layoutProperty->UpdateBorderWidth(borderWidth);
+    } else {
+        renderContext->UpdateBorderWidth(paintProperty->GetBorderWidthFlagByUserValue());
+        layoutProperty->UpdateBorderWidth(paintProperty->GetBorderWidthFlagByUserValue());
     }
 }
 } // namespace OHOS::Ace::NG

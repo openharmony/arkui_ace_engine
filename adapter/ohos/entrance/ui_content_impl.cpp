@@ -51,6 +51,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/module_buffer_reader.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -1960,6 +1961,7 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
     CapabilityRegistry::Register();
     ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
     XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
+    Framework::ModuleBufferReader::GetInstance().SetBufferReaderImpl(ReadHspModuleBuffer);
 
     auto task = [] {
         std::unordered_map<std::string, std::string> payload;
@@ -3089,6 +3091,11 @@ bool UIContentImpl::ProcessBackPressed()
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
+    taskExecutor->PostTask(
+        []() {
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "backpressed");
+        },
+        TaskExecutor::TaskType::UI, "ArkUIReportBackPressedEvent");
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     if (pipeline) {
         auto uiExtMgr = pipeline->GetUIExtensionManager();
@@ -5860,6 +5867,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     };
     UiSessionManager::GetInstance()->SaveRegisterForWebFunction(webCallback);
     SetupGetPixelMapCallback(taskExecutor);
+    SetupGetImagesByIdCallback(taskExecutor);
     RegisterGetCurrentPageName(taskExecutor);
     InitSendCommandFunctionsCallbacks(taskExecutor);
     sendCommandCallbackInner(taskExecutor);
@@ -5946,6 +5954,26 @@ void UIContentImpl::SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& task
             TaskExecutor::TaskType::UI, "UiSessionGetHitTestInfos");
     };
     UiSessionManager::GetInstance()->SaveGetHitTestInfoCallback(getHitTestInfoCallback);
+}
+
+void UIContentImpl::SetupGetImagesByIdCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto getImagesById = [weakTaskExecutor = taskExecutor](const std::vector<int32_t>& arkUIIds,
+        const std::map<int32_t, std::vector<int32_t>>& arkWebs) {
+            auto taskExecutor = weakTaskExecutor.Upgrade();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [arkUIIds, arkWebs]() {
+                    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                    CHECK_NULL_VOID(pipeline);
+                    auto uiTranslateManager = pipeline->GetUiTranslateManagerImpl();
+                    CHECK_NULL_VOID(uiTranslateManager);
+                    auto windowId = pipeline->GetWindowId();
+                    uiTranslateManager->GetMultiImagesById(windowId, arkUIIds, arkWebs);
+                },
+                TaskExecutor::TaskType::UI, "UiSessionGetImagesById");
+        };
+    UiSessionManager::GetInstance()->SaveGetImagesByIdFunction(getImagesById);
 }
 
 void UIContentImpl::SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6035,7 +6063,8 @@ void UIContentImpl::InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor
     UiSessionManager::GetInstance()->SaveForSendCommandFunction(sendCommand);
 }
 
-bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
+bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data,
+    uint8_t subSystemId, const UIExtOptions& options)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
@@ -6045,13 +6074,13 @@ bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uin
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     taskExecutor->PostTask(
-        [instanceId = instanceId_, code, data, subSystemId]() {
+        [instanceId = instanceId_, code, data, subSystemId, options]() {
             auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
             CHECK_NULL_VOID(context);
             auto uiExtManager = context->GetUIExtensionManager();
             CHECK_NULL_VOID(uiExtManager);
             uiExtManager->UpdateWMSUIExtProperty(static_cast<Ace::NG::UIContentBusinessCode>(code),
-                data, static_cast<Ace::NG::RSSubsystemId>(subSystemId));
+                data, static_cast<Ace::NG::RSSubsystemId>(subSystemId), options);
         }, TaskExecutor::TaskType::UI, "ArkUISendUIExtProprty");
     return true;
 }

@@ -15,7 +15,7 @@
 
 #include "core/components_ng/property/measure_utils.h"
 
-#include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -117,8 +117,7 @@ PaddingPropertyF ConvertToPaddingPropertyF(const PaddingProperty& padding, const
     auto right = ConvertToPx(padding.right, scaleProperty, percentReference);
     auto top = ConvertToPx(padding.top, scaleProperty, percentReference);
     auto bottom = ConvertToPx(padding.bottom, scaleProperty, percentReference);
-    bool versionSatisfy =
-        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
+    bool versionSatisfy = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
     if (roundPixel && versionSatisfy) {
         if (left.has_value()) {
             left = floor(left.value());
@@ -223,7 +222,7 @@ BorderWidthPropertyF ConvertToBorderWidthPropertyF(
     auto right = ConvertToPx(borderWidth.rightDimen, scaleProperty, percentReference);
     auto top = ConvertToPx(borderWidth.topDimen, scaleProperty, percentReference);
     auto bottom = ConvertToPx(borderWidth.bottomDimen, scaleProperty, percentReference);
-    if (roundPixel && AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (roundPixel && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         if (left.has_value()) {
             left = (GreatNotEqualCustomPrecision(left.value(), 1.0f) || NearEqual(left.value(), 0.0f))
                        ? floor(left.value())

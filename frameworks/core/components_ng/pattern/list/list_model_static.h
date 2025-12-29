@@ -80,6 +80,7 @@ public:
     static void SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength);
     static void SetLaneMaxLength(FrameNode* frameNode, const Dimension& laneMaxLength);
     static void SetEditMode(FrameNode* frameNode, bool editMode);
+    static void SetEditModeOptions(FrameNode* frameNode, const EditModeOptions& editModeOptions);
     static void SetMultiSelectable(FrameNode* frameNode, const std::optional<bool>& selectable);
     static void SetStackFromEnd(FrameNode* frameNode, const std::optional<bool>& isStackFromEnd);
     static void SetEdgeEffect(

@@ -65,7 +65,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_form_button.h"
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_form_link.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_gauge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_col.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_container.h"
@@ -141,6 +140,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_union_container.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow.h"
@@ -499,7 +499,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSSideBar::JSBind(globalObj);
     JSDataPanel::JSBind(globalObj);
     JSBadge::JSBind(globalObj);
-    JSGauge::JSBind(globalObj);
     JSMagnifierController::JSBind(globalObj);
     JSMarquee::JSBind(globalObj);
     JSMenu::JSBind(globalObj);
@@ -603,6 +602,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSPinchRecognizer::JSBind(globalObj);
     JSRotationRecognizer::JSBind(globalObj);
     JSTouchRecognizer::JSBind(globalObj);
+    JSUnionContainer::JSBind(globalObj);
 }
 
 void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)

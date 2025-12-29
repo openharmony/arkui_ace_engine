@@ -236,7 +236,8 @@ std::optional<ani_string> AniUtils::StdStringToANIString(ani_env *env, std::stri
     return result_string;
 }
 
-ani_object WrapBusinessError(ani_env* env, const char *msg)
+// Do not use this function directly to create a BusinessError object.
+static ani_object WrapBusinessError(ani_env* env, const char *msg)
 {
     ani_class cls {};
     ani_method method {};
@@ -334,7 +335,7 @@ bool AniUtils::GetBigIntValue(ani_env* env, ani_object object, int64_t& longValu
     CHECK_NULL_RETURN(env, false);
     auto status = ANI_OK;
     ani_long value;
-    if ((status = env->Object_CallMethodByName_Long(object, "unboxed", ":l", &value)) != ANI_OK) {
+    if ((status = env->Object_CallMethodByName_Long(object, "toLong", ":l", &value)) != ANI_OK) {
         return false;
     }
     longValue = value;
@@ -368,7 +369,7 @@ bool AniUtils::GetOptionalDouble(ani_env* env, ani_ref value, double& result)
         return false;
     }
     ani_double aniResult;
-    if (env->Object_CallMethodByName_Double(static_cast<ani_object>(value), "unboxed", ":d", &aniResult) != ANI_OK) {
+    if (env->Object_CallMethodByName_Double(static_cast<ani_object>(value), "toDouble", ":d", &aniResult) != ANI_OK) {
         return false;
     }
     result = static_cast<double>(aniResult);

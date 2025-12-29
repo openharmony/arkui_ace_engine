@@ -1027,6 +1027,135 @@ HWTEST_F(CalendarPickerPatternTestNg, OnColorConfigurationUpdate002, TestSize.Le
 }
 
 /**
+ * @tc.name: OnColorConfigurationUpdate003
+ * @tc.desc: Test CalendarPickerPattern OnColorConfigurationUpdate when ConfigChangePerform is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, OnColorConfigurationUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CalendarPicker.
+     * @tc.expected: step1. Create success.
+     */
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto host = pickerPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Set a custom color and record it.
+     */
+    Color customColor = Color::RED;
+    layoutProperty->UpdateColor(customColor);
+    layoutProperty->UpdateNormalTextColorSetByUser(true);
+
+    /**
+     * @tc.steps: step3. Set g_isConfigChangePerform to false.
+     */
+    g_isConfigChangePerform = false;
+
+    /**
+     * @tc.steps: step4. Call OnColorConfigurationUpdate function.
+     * @tc.expected: The color should remain unchanged since ConfigChangePerform is false.
+     */
+    pickerPattern->OnColorConfigurationUpdate();
+    Color color = layoutProperty->GetColor().value();
+    EXPECT_EQ(color, customColor);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate004
+ * @tc.desc: Test CalendarPickerPattern OnColorConfigurationUpdate when NormalTextColorSetByUser is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, OnColorConfigurationUpdate004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CalendarPicker.
+     * @tc.expected: step1. Create success.
+     */
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto host = pickerPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Set a custom color and mark it as user-set.
+     */
+    Color customColor = Color::BLUE;
+    layoutProperty->UpdateColor(customColor);
+    layoutProperty->UpdateNormalTextColorSetByUser(true);
+
+    /**
+     * @tc.steps: step3. Set g_isConfigChangePerform to true.
+     */
+    g_isConfigChangePerform = true;
+
+    /**
+     * @tc.steps: step4. Call OnColorConfigurationUpdate function.
+     * @tc.expected: The color should remain unchanged since it was set by user.
+     */
+    pickerPattern->OnColorConfigurationUpdate();
+    Color color = layoutProperty->GetColor().value();
+    EXPECT_EQ(color, customColor);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate005
+ * @tc.desc: Test CalendarPickerPattern OnColorConfigurationUpdate when dialog is shown.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, OnColorConfigurationUpdate005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CalendarPicker.
+     * @tc.expected: step1. Create success.
+     */
+    CreateCalendarPicker();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set dialog show state to true.
+     */
+    pickerPattern->SetDialogShow(true);
+
+    /**
+     * @tc.steps: step3. Set g_isConfigChangePerform to true.
+     */
+    g_isConfigChangePerform = true;
+
+    /**
+     * @tc.steps: step4. Set selected_ to YEAR before calling the function.
+     */
+    pickerPattern->selected_ = CalendarPickerSelectedType::YEAR;
+
+    /**
+     * @tc.steps: step5. Call OnColorConfigurationUpdate function.
+     * @tc.expected: The selected_ should remain YEAR since dialog is shown and the function returns early.
+     */
+    pickerPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(pickerPattern->selected_, CalendarPickerSelectedType::YEAR);
+}
+
+/**
  * @tc.name: OnFontScaleConfigurationUpdate001
  * @tc.desc: Test CalendarPickerPattern OnFontScaleConfigurationUpdate.
  * @tc.type: FUNC

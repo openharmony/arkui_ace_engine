@@ -214,6 +214,170 @@ export class ArkColorsImpl implements Colors {
         if (src.interactiveClick !== undefined) dst.interactiveClick = src.interactiveClick!;
     }
 
+
+    static assignCustom(dst: CustomColors, src: CustomColors): void {
+        if (src.brand !== undefined) {
+            dst.brand = src.brand!;
+        }
+        if (src.warning !== undefined) {
+            dst.warning = src.warning!;
+        }
+        if (src.alert !== undefined) {
+            dst.alert = src.alert!;
+        }
+        if (src.confirm !== undefined) {
+            dst.confirm = src.confirm!;
+        }
+
+        if (src.fontPrimary !== undefined) {
+            dst.fontPrimary = src.fontPrimary!;
+        }
+        if (src.fontSecondary !== undefined) {
+            dst.fontSecondary = src.fontSecondary!;
+        }
+        if (src.fontTertiary !== undefined) {
+            dst.fontTertiary = src.fontTertiary!;
+        }
+        if (src.fontFourth !== undefined) {
+            dst.fontFourth = src.fontFourth!;
+        }
+        if (src.fontEmphasize !== undefined) {
+            dst.fontEmphasize = src.fontEmphasize!;
+        }
+
+        if (src.fontOnPrimary !== undefined) {
+            dst.fontOnPrimary = src.fontOnPrimary!;
+        }
+        if (src.fontOnSecondary !== undefined) {
+            dst.fontOnSecondary = src.fontOnSecondary!;
+        }
+        if (src.fontOnTertiary !== undefined) {
+            dst.fontOnTertiary = src.fontOnTertiary!;
+        }
+        if (src.fontOnFourth !== undefined) {
+            dst.fontOnFourth = src.fontOnFourth!;
+        }
+
+        if (src.iconPrimary !== undefined) {
+            dst.iconPrimary = src.iconPrimary!;
+        }
+        if (src.iconSecondary !== undefined) {
+            dst.iconSecondary = src.iconSecondary!;
+        }
+        if (src.iconTertiary !== undefined) {
+            dst.iconTertiary = src.iconTertiary!;
+        }
+        if (src.iconFourth !== undefined) {
+            dst.iconFourth = src.iconFourth!;
+        }
+        if (src.iconEmphasize !== undefined) {
+            dst.iconEmphasize = src.iconEmphasize!;
+        }
+        if (src.iconSubEmphasize !== undefined) {
+            dst.iconSubEmphasize = src.iconSubEmphasize!;
+        }
+
+        if (src.iconOnPrimary !== undefined) {
+            dst.iconOnPrimary = src.iconOnPrimary!;
+        }
+        if (src.iconOnSecondary !== undefined) {
+            dst.iconOnSecondary = src.iconOnSecondary!;
+        }
+        if (src.iconOnTertiary !== undefined) {
+            dst.iconOnTertiary = src.iconOnTertiary!;
+        }
+        if (src.iconOnFourth !== undefined) {
+            dst.iconOnFourth = src.iconOnFourth!;
+        }
+
+        if (src.backgroundPrimary !== undefined) {
+            dst.backgroundPrimary = src.backgroundPrimary!;
+        }
+        if (src.backgroundSecondary !== undefined) {
+            dst.backgroundSecondary = src.backgroundSecondary!;
+        }
+        if (src.backgroundTertiary !== undefined) {
+            dst.backgroundTertiary = src.backgroundTertiary!;
+        }
+        if (src.backgroundFourth !== undefined) {
+            dst.backgroundFourth = src.backgroundFourth!;
+        }
+        if (src.backgroundEmphasize !== undefined) {
+            dst.backgroundEmphasize = src.backgroundEmphasize!;
+        }
+
+        if (src.compForegroundPrimary !== undefined) {
+            dst.compForegroundPrimary = src.compForegroundPrimary!;
+        }
+        if (src.compBackgroundPrimary !== undefined) {
+            dst.compBackgroundPrimary = src.compBackgroundPrimary!;
+        }
+        if (src.compBackgroundPrimaryTran !== undefined) {
+            dst.compBackgroundPrimaryTran = src.compBackgroundPrimaryTran!;
+        }
+        if (src.compBackgroundPrimaryContrary !== undefined) {
+            dst.compBackgroundPrimaryContrary = src.compBackgroundPrimaryContrary!;
+        }
+        if (src.compBackgroundGray !== undefined) {
+            dst.compBackgroundGray = src.compBackgroundGray!;
+        }
+        if (src.compBackgroundSecondary !== undefined) {
+            dst.compBackgroundSecondary = src.compBackgroundSecondary!;
+        }
+        if (src.compBackgroundTertiary !== undefined) {
+            dst.compBackgroundTertiary = src.compBackgroundTertiary!;
+        }
+        if (src.compBackgroundEmphasize !== undefined) {
+            dst.compBackgroundEmphasize = src.compBackgroundEmphasize!;
+        }
+        if (src.compBackgroundNeutral !== undefined) {
+            dst.compBackgroundNeutral = src.compBackgroundNeutral!;
+        }
+        if (src.compEmphasizeSecondary !== undefined) {
+            dst.compEmphasizeSecondary = src.compEmphasizeSecondary!;
+        }
+        if (src.compEmphasizeTertiary !== undefined) {
+            dst.compEmphasizeTertiary = src.compEmphasizeTertiary!;
+        }
+        if (src.compDivider !== undefined) {
+            dst.compDivider = src.compDivider!;
+        }
+        if (src.compCommonContrary !== undefined) {
+            dst.compCommonContrary = src.compCommonContrary!;
+        }
+        if (src.compBackgroundFocus !== undefined) {
+            dst.compBackgroundFocus = src.compBackgroundFocus!;
+        }
+        if (src.compFocusedPrimary !== undefined) {
+            dst.compFocusedPrimary = src.compFocusedPrimary!;
+        }
+        if (src.compFocusedSecondary !== undefined) {
+            dst.compFocusedSecondary = src.compFocusedSecondary!;
+        }
+        if (src.compFocusedTertiary !== undefined) {
+            dst.compFocusedTertiary = src.compFocusedTertiary!;
+        }
+
+        if (src.interactiveHover !== undefined) {
+            dst.interactiveHover = src.interactiveHover!;
+        }
+        if (src.interactivePressed !== undefined) {
+            dst.interactivePressed = src.interactivePressed!;
+        }
+        if (src.interactiveFocus !== undefined) {
+            dst.interactiveFocus = src.interactiveFocus!;
+        }
+        if (src.interactiveActive !== undefined) {
+            dst.interactiveActive = src.interactiveActive!;
+        }
+        if (src.interactiveSelect !== undefined) {
+            dst.interactiveSelect = src.interactiveSelect!;
+        }
+        if (src.interactiveClick !== undefined) {
+            dst.interactiveClick = src.interactiveClick!;
+        }
+    }
+
     static expandByBrandColor(colors: CustomColors) {
         if (colors!.brand) {
             const brandColors: BrandColors = ArkColorsImpl.makeBrandColors(colors.brand);

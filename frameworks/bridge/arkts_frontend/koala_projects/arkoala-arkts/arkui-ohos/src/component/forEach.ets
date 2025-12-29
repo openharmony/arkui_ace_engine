@@ -18,7 +18,7 @@
 
 import { int32, hashCodeFromString } from '@koalaui/common'
 import { pointer } from '@koalaui/interop'
-import { memoEntry2, __context, NodeAttach, remember } from '@koalaui/runtime'
+import { memoEntry2, __context, __id, NodeAttach, remember } from '@koalaui/runtime'
 import { SyntaxItemPeer, ForEachNodePeer } from '../base/SyntaxNodeBase'
 import { DynamicNode, OnMoveHandler, ItemDragEventHandler, ForEachOps } from '#generated'
 import { PeerNode } from '../PeerNode'
@@ -83,6 +83,7 @@ function forEachAttach<T>(receiver: ArkForEachComponent<T>, manager: ForEachMana
     let duplicateIndex = new Array<int32>()
     let diffIndex = new Array<int32>()
     let key2Index = new Map<int32, int32>()
+    const forEachId = __id();
     /** @memo */
     const createAndUpdate = (): void => {
         const array: Array<T> = receiver.arr();
@@ -99,29 +100,30 @@ function forEachAttach<T>(receiver: ArkForEachComponent<T>, manager: ForEachMana
         }
         const keyGen = (e: T, idx: int32): int32 => receiver.keyGenerator
             ? hashCodeFromString(receiver.keyGenerator!(e, idx)) : hashCodeFromString(defaultKey(e, idx))
-        array.forEach((item: T, idx: number) => {
-            const key: int32 = keyGen(item, idx.toInt())
+        array.forEach((item: T, idx: int) => {
+            const key: int32 = keyGen(item, idx)
             newKeys.push(key)
             if (manager.keys.indexOf(key) === -1) {
-                diffIndex.push(idx.toInt())
+                diffIndex.push(idx)
             }
         })
-        newKeys.forEach((key: int32, idx: number) => {
+        newKeys.forEach((key: int32, idx: int) => {
             if (key2Index.has(key)) {
-                duplicateIndex.push(idx.toInt())
+                duplicateIndex.push(idx)
             } else {
-                key2Index.set(key, idx.toInt())
+                key2Index.set(key, idx)
             }
         })
 
         /** @memo */
         const action = (e: T, idx: int32): void => {
+            const tag = newKeys[idx] + forEachId + '@ForEach'
             NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
                 receiver.itemGenerator(e, idx);
                 if (diffIndex.indexOf(idx) !== -1) {
                     manager.additionalChild.push(node.getPeerPtr())
                 }
-            }, 'for_each_item_' + newKeys[idx])
+            }, tag);
         }
         key2Index.forEach((idx: int32, key: int32) => {
             memoEntry2<T, int32, void>(__context(), key, action, array[idx], idx);

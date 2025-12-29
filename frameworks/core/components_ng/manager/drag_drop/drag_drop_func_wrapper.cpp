@@ -425,7 +425,13 @@ void DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(
             }
         }
     }
-    option.options.material = imageContext->GetSystemMaterial();
+    auto material = imageContext->GetSystemMaterial();
+    CHECK_NULL_VOID(material);
+    if (Ace::AceType::TypeId(AceType::RawPtr(material)) == Ace::UiMaterial::TypeId()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Not support uiMaterial.");
+        return;
+    }
+    option.options.material = material;
 }
 
 void DragDropFuncWrapper::UpdatePreviewOptionDefaultAttr(DragPreviewOption& option, bool isMultiSelectionEnabled)
@@ -1522,26 +1528,17 @@ bool DragDropFuncWrapper::IsTextCategoryComponent(const std::string& frameTag)
 }
 
 RefPtr<DragDropManager> DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
-    const RefPtr<PipelineBase>& context, const RefPtr<PipelineBase>& nodeContext,
-    const RefPtr<Subwindow>& subWindow, bool isExpandDisplay, int32_t instanceId)
+    const RefPtr<PipelineBase>& context, const RefPtr<PipelineBase>& nodeContext, const RefPtr<Subwindow>& subWindow)
 {
     auto pipeline = AceType::DynamicCast<PipelineContext>(context);
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dragDropManager = pipeline->GetDragDropManager();
+    bool isReceiveDragEnabled = subWindow ? subWindow->GetIsReceiveDragEventEnabled() : false;
     auto nodePipeline = AceType::DynamicCast<PipelineContext>(nodeContext);
-    CHECK_NULL_RETURN(nodePipeline, dragDropManager);
-    if (nodePipeline == pipeline || isExpandDisplay) {
+    if (nodePipeline == pipeline || isReceiveDragEnabled) {
         return dragDropManager;
     }
-    auto mainContainerId = instanceId >= MIN_SUBCONTAINER_ID ?
-        SubwindowManager::GetInstance()->GetParentContainerId(instanceId) : instanceId;
-    auto container = Container::GetContainer(mainContainerId);
-    CHECK_NULL_RETURN(container, dragDropManager);
-    if (!container->IsSceneBoardWindow()) {
-        return dragDropManager;
-    }
-    CHECK_NULL_RETURN(subWindow, dragDropManager);
-    subWindow->SetWindowTouchable(false);
+    CHECK_NULL_RETURN(nodePipeline, nullptr);
     auto pixelMapOffset = dragDropManager->GetPixelMapOffset();
     dragDropManager = nodePipeline->GetDragDropManager();
     dragDropManager->SetPixelMapOffset(pixelMapOffset);

@@ -771,6 +771,10 @@ export enum AnimationPropertyType {
     SCALE = 2,
     OPACITY = 3
 }
+export enum ColorSpace {
+    SRGB = 0,
+    DISPLAY_P3 = 1
+}
 export enum AxisType {
     VERTICAL_AXIS = 0,
     HORIZONTAL_AXIS = 1,

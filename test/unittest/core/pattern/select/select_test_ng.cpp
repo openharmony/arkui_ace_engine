@@ -97,6 +97,8 @@ RefPtr<Theme> GetTheme(ThemeType type)
         return AceType::MakeRefPtr<SelectTheme>();
     } else if (type == ScrollBarTheme::TypeId()) {
         return AceType::MakeRefPtr<ScrollBarTheme>();
+    } else if (type == TextTheme::TypeId()) {
+        return AceType::MakeRefPtr<TextTheme>();
     } else {
         return nullptr;
     }
@@ -1310,13 +1312,11 @@ HWTEST_F(SelectTestNg, SelectPattern001, TestSize.Level1)
     ASSERT_NE(themeManager, nullptr);
 
     // Create a single theme object that you will control for this test.
-    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
-    const Color themeBgColor = Color::BLUE;
-    selectTheme->backgroundColor_ = themeBgColor;
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        return GetTheme(type);
+    });
     EXPECT_CALL(*themeManager, GetTheme(_, _))
-        .WillRepeatedly(Return(selectTheme));
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     /**
      * @tc.steps: step2. Call Create() of select model and get select frame node and select pattern.
      * @tc.expected: Objects are created and gotten successfully and select pattern should not be null.
@@ -1330,18 +1330,20 @@ HWTEST_F(SelectTestNg, SelectPattern001, TestSize.Level1)
      * @tc.expected: Objects are gotten successfully and option pattern should not be null.
      */
     auto options = pattern->GetOptions();
-    auto optionPattern = options.front()->GetPattern<MenuItemPattern>();
+    auto optionNode = options.front();
+    ASSERT_NE(optionNode, nullptr);
+    auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(optionPattern, nullptr);
+    auto optionPaintProperty = optionNode->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(optionPaintProperty, nullptr);
+    optionPaintProperty->ResetOptionBgColor();
     /**
      * @tc.steps: step4. Set and update background color of option.
      * @tc.expected: Objects are gotten successfully and option pattern should not be null.
      */
-    ASSERT_NE(pattern, nullptr);
-    pattern->SetSelectedOptionBgColor(Color::BLACK);
-    pattern->OnColorConfigurationUpdate();
+    optionPattern->OnColorConfigurationUpdate();
     auto selectColor = optionPattern->GetBgColor();
-    EXPECT_EQ(selectColor, selectTheme->GetBackgroundColor());
-    ViewStackProcessor::GetInstance()->ClearStack();
+    EXPECT_EQ(selectColor, Color::TRANSPARENT);
 }
 
 /**

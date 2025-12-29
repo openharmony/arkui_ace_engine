@@ -148,7 +148,8 @@ void JsiPaEngine::RegisterUncaughtExceptionHandler()
 {
     ACE_SCOPED_TRACE("JsiPaEngine::RegisterUncaughtExceptionHandler");
     JsEnv::UncaughtExceptionInfo uncaughtExceptionInfo;
-    uncaughtExceptionInfo.uncaughtTask = [](std::string summary, const JsEnv::ErrorObject errorObj) {
+    uncaughtExceptionInfo.uncaughtTask = [](std::string summary, const JsEnv::ErrorObject errorObj, napi_env env,
+        napi_value exception) {
         std::string packageName = AceApplicationInfo::GetInstance().GetPackageName();
         JsErrorObject errorInfo = {
             .name = errorObj.name,

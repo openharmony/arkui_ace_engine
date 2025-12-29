@@ -79,6 +79,7 @@ public:
         baseline = std::nullopt;
         type = std::nullopt;
         quality = std::nullopt;
+        antialias = false;
     }
 
     void TearDown()
@@ -114,6 +115,7 @@ public:
     bool isCalled3 = false;
     bool isCalled4 = false;
     bool request = false;
+    bool antialias = false;
     Rect rect = Rect(-1, -1, -1, 1);
     double value = -1;
     std::vector<double> segments;
@@ -148,7 +150,7 @@ public:
     std::optional<Ace::TextBaseline> baseline = std::nullopt;
     std::optional<std::string> type = std::nullopt;
     std::optional<double> quality = std::nullopt;
-    std::function<void(RSCanvas*, double, double)> rsCallback;
+    std::function<void(std::shared_ptr<RSCanvas>, double, double)> rsCallback;
 };
 
 } // namespace OHOS::Ace::NG

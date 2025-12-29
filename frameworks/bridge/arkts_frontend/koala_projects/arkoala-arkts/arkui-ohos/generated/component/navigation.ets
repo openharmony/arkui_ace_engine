@@ -1439,6 +1439,18 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NavigationAttribute_setEnableDragBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setDividerAttribute(value: NavigationDividerStyle | null): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== null) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            NavigationDividerStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._NavigationAttribute_setDivider(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setEnableModeChangeAnimationAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1839,6 +1851,9 @@ export interface NavigationAttribute extends CommonMethod {
     enableDragBar(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableDragBar")
     }
+    divider(value: NavigationDividerStyle | null): this {
+        throw new Error("Unimplemented method divider")
+    }
     enableModeChangeAnimation(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableModeChangeAnimation")
     }
@@ -1887,6 +1902,7 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     systemBarStyle_value?: window.SystemBarStyle | undefined
     recoverable_value?: boolean | undefined
     enableDragBar_value?: boolean | undefined
+    divider_value?: NavigationDividerStyle | null
     enableModeChangeAnimation_value?: boolean | undefined
     setNavigationOptions(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): this {
         return this
@@ -1948,6 +1964,9 @@ export class ArkNavigationStyle extends ArkCommonMethodStyle implements Navigati
     enableDragBar(value: boolean | undefined): this {
         return this
     }
+    divider(value: NavigationDividerStyle | null): this {
+        return this
+    }
     enableModeChangeAnimation(value: boolean | undefined): this {
         return this
     }
@@ -1994,6 +2013,12 @@ export interface NavigationModuleInfo {
     moduleName: string;
     pagePath: string;
     isUserCreateStack?: boolean;
+}
+
+export interface NavigationDividerStyle {
+    color?: ResourceColor;
+    startMargin?: Length;
+    endMargin?: Length;
 }
 
 export class ArkNavigationComponent extends ArkCommonMethodComponent implements NavigationAttribute {
@@ -2164,6 +2189,14 @@ export class ArkNavigationComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("enableDragBar")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableDragBarAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public divider(value: NavigationDividerStyle | null): this {
+        if (this.checkPriority("divider")) {
+            const value_casted = value as (NavigationDividerStyle | null)
+            this.getPeer()?.setDividerAttribute(value_casted)
             return this
         }
         return this
@@ -2635,6 +2668,133 @@ export class NavPathInfo_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return NavPathInfoInternal.fromPtr(ptr)
+    }
+}
+export class NavigationDividerStyle_serializer {
+    public static write(buffer: SerializerBase, value: NavigationDividerStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForColor  = value.color
+        if (valueHolderForColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorTmpValue  = valueHolderForColor!
+            if (valueHolderForColorTmpValue instanceof Color) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
+            } else if (valueHolderForColorTmpValue instanceof number) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
+                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+            } else if (valueHolderForColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
+                valueSerializer.writeString(valueHolderForColorTmpValueForIdx2)
+            } else if (valueHolderForColorTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForColorTmpValueForIdx3  = valueHolderForColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForStartMargin  = value.startMargin
+        if (valueHolderForStartMargin !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStartMarginTmpValue  = valueHolderForStartMargin!
+            if (valueHolderForStartMarginTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForStartMarginTmpValueForIdx0  = valueHolderForStartMarginTmpValue as string
+                valueSerializer.writeString(valueHolderForStartMarginTmpValueForIdx0)
+            } else if (valueHolderForStartMarginTmpValue instanceof number) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForStartMarginTmpValueForIdx1  = valueHolderForStartMarginTmpValue as number
+                valueSerializer.writeNumber(valueHolderForStartMarginTmpValueForIdx1)
+            } else if (valueHolderForStartMarginTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForStartMarginTmpValueForIdx2  = valueHolderForStartMarginTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForStartMarginTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEndMargin  = value.endMargin
+        if (valueHolderForEndMargin !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEndMarginTmpValue  = valueHolderForEndMargin!
+            if (valueHolderForEndMarginTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForEndMarginTmpValueForIdx0  = valueHolderForEndMarginTmpValue as string
+                valueSerializer.writeString(valueHolderForEndMarginTmpValueForIdx0)
+            } else if (valueHolderForEndMarginTmpValue instanceof number) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForEndMarginTmpValueForIdx1  = valueHolderForEndMarginTmpValue as number
+                valueSerializer.writeNumber(valueHolderForEndMarginTmpValueForIdx1)
+            } else if (valueHolderForEndMarginTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForEndMarginTmpValueForIdx2  = valueHolderForEndMarginTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForEndMarginTmpValueForIdx2)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): NavigationDividerStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        const colorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let colorTmpBuf : ResourceColor | undefined = undefined
+        if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let colorTmpBuf_ : Color | int32 | string | Resource | undefined
+            if (colorTmpBuf_UnionSelector == (0).toChar()) {
+                colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
+            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
+                colorTmpBuf_ = valueDeserializer.readInt32()
+            } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
+                colorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
+                colorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
+            }
+            colorTmpBuf = (colorTmpBuf_ as Color | int32 | string | Resource)
+        }
+        const colorTmpResult : ResourceColor | undefined = colorTmpBuf
+        const startMarginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let startMarginTmpBuf : Length | undefined = undefined
+        if ((startMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const startMarginTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let startMarginTmpBuf_ : string | Double | Resource | undefined
+            if (startMarginTmpBuf_UnionSelector == (0).toChar()) {
+                startMarginTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (startMarginTmpBuf_UnionSelector == (1).toChar()) {
+                startMarginTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (startMarginTmpBuf_UnionSelector == (2).toChar()) {
+                startMarginTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for startMarginTmpBuf_ has to be chosen through deserialisation.")
+            }
+            startMarginTmpBuf = (startMarginTmpBuf_ as string | Double | Resource)
+        }
+        const startMarginTmpResult : Length | undefined = startMarginTmpBuf
+        const endMarginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let endMarginTmpBuf : Length | undefined = undefined
+        if ((endMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const endMarginTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let endMarginTmpBuf_ : string | number | Resource | undefined
+            if (endMarginTmpBuf_UnionSelector == (0).toChar()) {
+                endMarginTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (endMarginTmpBuf_UnionSelector == (1).toChar()) {
+                endMarginTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (endMarginTmpBuf_UnionSelector == (2).toChar()) {
+                endMarginTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for endMarginTmpBuf_ has to be chosen through deserialisation.")
+            }
+            endMarginTmpBuf = (endMarginTmpBuf_ as string | number | Resource)
+        }
+        const endMarginTmpResult : Length | undefined = endMarginTmpBuf
+        let value : NavigationDividerStyle = ({color: colorTmpResult, startMargin: startMarginTmpResult, endMargin: endMarginTmpResult} as NavigationDividerStyle)
+        return value
     }
 }
 export class PopInfo_serializer {

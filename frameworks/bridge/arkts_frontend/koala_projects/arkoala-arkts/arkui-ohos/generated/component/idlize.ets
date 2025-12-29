@@ -1279,6 +1279,15 @@ export class ContentModifierHelper {
         return
     }
 }
+export class ContextMenu {
+    static close_serialize(): void {
+        ArkUIGeneratedNativeModule._ContextMenu_close()
+    }
+    public static close(): void {
+        ContextMenu.close_serialize()
+        return
+    }
+}
 export class CustomDialogControllerExtenderInternal {
     public static fromPtr(ptr: KPointer): CustomDialogControllerExtender {
         return new CustomDialogControllerExtender(false, ptr)
@@ -2099,7 +2108,7 @@ export class FrameNodeExtender {
     }
 }
 export class GestureOps {
-    static createTapGesture_serialize(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: boolean): KPointer {
+    static createTapGesture_serialize(fingers: number, count: number, distanceThreshold: double, isFingerCountLimited: boolean): KPointer {
         console.log("zcb createTapGesture_serialize");
         const retval  = ArkUIGeneratedNativeModule._GestureOps_createTapGesture(fingers, count, distanceThreshold, isFingerCountLimited ? 1 : 0)
         return retval
@@ -2201,10 +2210,10 @@ export class GestureOps {
         const retval  = ArkUIGeneratedNativeModule._GestureOps_isScrollableComponent(event)
         return retval
     }
-    public static createTapGesture(fingers: number, count: number, distanceThreshold: number, isFingerCountLimited: boolean): KPointer {
+    public static createTapGesture(fingers: number, count: number, distanceThreshold: double, isFingerCountLimited: boolean): KPointer {
         const fingers_casted = fingers as (number)
         const count_casted = count as (number)
-        const distanceThreshold_casted = distanceThreshold as (number)
+        const distanceThreshold_casted = distanceThreshold as (double)
         const isFingerCountLimited_casted = isFingerCountLimited as (boolean)
         return GestureOps.createTapGesture_serialize(fingers_casted, count_casted, distanceThreshold_casted, isFingerCountLimited_casted)
     }
@@ -4686,7 +4695,7 @@ export class SystemOps {
     }
 }
 export class ThemeOps {
-    static sendThemeToNative_serialize(colorArray: Array<ResourceColor>, elmtId: int32): void {
+    static sendThemeToNative_serialize(colorArray: Array<ResourceColor>, darkColorArray: Array<ResourceColor>, elmtId: int32, darkSetStatus: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((colorArray.length).toInt())
         for (let colorArrayCounterI = 0; colorArrayCounterI < colorArray.length; colorArrayCounterI++) {
@@ -4695,10 +4704,10 @@ export class ThemeOps {
                 thisSerializer.writeInt8((0).toByte())
                 const colorArrayTmpElementForIdx0  = colorArrayTmpElement as Color
                 thisSerializer.writeInt32(colorArrayTmpElementForIdx0.getOrdinal())
-            } else if (colorArrayTmpElement instanceof number) {
+            } else if (colorArrayTmpElement instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const colorArrayTmpElementForIdx1  = colorArrayTmpElement as number
-                thisSerializer.writeNumber(colorArrayTmpElementForIdx1)
+                const colorArrayTmpElementForIdx1  = colorArrayTmpElement as int32
+                thisSerializer.writeInt32(colorArrayTmpElementForIdx1)
             } else if (colorArrayTmpElement instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const colorArrayTmpElementForIdx2  = colorArrayTmpElement as string
@@ -4709,7 +4718,28 @@ export class ThemeOps {
                 Resource_serializer.write(thisSerializer, colorArrayTmpElementForIdx3)
             }
         }
-        ArkUIGeneratedNativeModule._ThemeOps_sendThemeToNative(thisSerializer.asBuffer(), thisSerializer.length(), elmtId)
+        thisSerializer.writeInt32((darkColorArray.length).toInt())
+        for (let darkColorArrayCounterI = 0; darkColorArrayCounterI < darkColorArray.length; darkColorArrayCounterI++) {
+            const darkColorArrayTmpElement : ResourceColor = darkColorArray[darkColorArrayCounterI]
+            if (darkColorArrayTmpElement instanceof Color) {
+                thisSerializer.writeInt8((0).toByte())
+                const darkColorArrayTmpElementForIdx0  = darkColorArrayTmpElement as Color
+                thisSerializer.writeInt32(darkColorArrayTmpElementForIdx0.getOrdinal())
+            } else if (darkColorArrayTmpElement instanceof int32) {
+                thisSerializer.writeInt8((1).toByte())
+                const darkColorArrayTmpElementForIdx1  = darkColorArrayTmpElement as int32
+                thisSerializer.writeInt32(darkColorArrayTmpElementForIdx1)
+            } else if (darkColorArrayTmpElement instanceof string) {
+                thisSerializer.writeInt8((2).toByte())
+                const darkColorArrayTmpElementForIdx2  = darkColorArrayTmpElement as string
+                thisSerializer.writeString(darkColorArrayTmpElementForIdx2)
+            } else if (darkColorArrayTmpElement instanceof Resource) {
+                thisSerializer.writeInt8((3).toByte())
+                const darkColorArrayTmpElementForIdx3  = darkColorArrayTmpElement as Resource
+                Resource_serializer.write(thisSerializer, darkColorArrayTmpElementForIdx3)
+            }
+        }
+        ArkUIGeneratedNativeModule._ThemeOps_sendThemeToNative(thisSerializer.asBuffer(), thisSerializer.length(), elmtId, darkSetStatus ? 1 : 0)
         thisSerializer.release()
     }
     static setDefaultTheme_serialize(colorArray: Array<ResourceColor>, isDark: boolean): void {
@@ -4721,10 +4751,10 @@ export class ThemeOps {
                 thisSerializer.writeInt8((0).toByte())
                 const colorArrayTmpElementForIdx0  = colorArrayTmpElement as Color
                 thisSerializer.writeInt32(colorArrayTmpElementForIdx0.getOrdinal())
-            } else if (colorArrayTmpElement instanceof number) {
+            } else if (colorArrayTmpElement instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const colorArrayTmpElementForIdx1  = colorArrayTmpElement as number
-                thisSerializer.writeNumber(colorArrayTmpElementForIdx1)
+                const colorArrayTmpElementForIdx1  = colorArrayTmpElement as int32
+                thisSerializer.writeInt32(colorArrayTmpElementForIdx1)
             } else if (colorArrayTmpElement instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const colorArrayTmpElementForIdx2  = colorArrayTmpElement as string
@@ -4738,19 +4768,21 @@ export class ThemeOps {
         ArkUIGeneratedNativeModule._ThemeOps_setDefaultTheme(thisSerializer.asBuffer(), thisSerializer.length(), isDark ? 1 : 0)
         thisSerializer.release()
     }
-    static createAndBindTheme_serialize(themeScopeId: int32, themeId: int32, colorArray: Array<ResourceColor>, colorMode: ThemeColorMode, onThemeScopeDestroy: (() => void)): void {
+
+    static createAndBindTheme_serialize(themeScopeId: int32, themeId: int32, colorArray: Array<ResourceColor>, darkColorArray: Array<ResourceColor>, colorMode: ThemeColorMode, onThemeScopeDestroy: (() => void), darkSetStatus: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((colorArray.length).toInt())
         for (let colorArrayCounterI = 0; colorArrayCounterI < colorArray.length; colorArrayCounterI++) {
-            const colorArrayTmpElement : ResourceColor = colorArray[colorArrayCounterI]
+            const colorArrayTmpElement : ResourceColor = colorArray[colorArrayCounterI] as ResourceColor;
+
             if (colorArrayTmpElement instanceof Color) {
                 thisSerializer.writeInt8((0).toByte())
                 const colorArrayTmpElementForIdx0  = colorArrayTmpElement as Color
                 thisSerializer.writeInt32(colorArrayTmpElementForIdx0.getOrdinal())
-            } else if (colorArrayTmpElement instanceof number) {
+            } else if (colorArrayTmpElement instanceof int32) {
                 thisSerializer.writeInt8((1).toByte())
-                const colorArrayTmpElementForIdx1  = colorArrayTmpElement as number
-                thisSerializer.writeNumber(colorArrayTmpElementForIdx1)
+                const colorArrayTmpElementForIdx1  = colorArrayTmpElement as int32
+                thisSerializer.writeInt32(colorArrayTmpElementForIdx1)
             } else if (colorArrayTmpElement instanceof string) {
                 thisSerializer.writeInt8((2).toByte())
                 const colorArrayTmpElementForIdx2  = colorArrayTmpElement as string
@@ -4761,17 +4793,40 @@ export class ThemeOps {
                 Resource_serializer.write(thisSerializer, colorArrayTmpElementForIdx3)
             }
         }
+        thisSerializer.writeInt32((darkColorArray.length).toInt())
+        for (let darkColorArrayCounterI = 0; darkColorArrayCounterI < darkColorArray.length; darkColorArrayCounterI++) {
+            const darkColorArrayTmpElement : ResourceColor = darkColorArray[darkColorArrayCounterI]
+            if (darkColorArrayTmpElement instanceof Color) {
+                thisSerializer.writeInt8((0).toByte())
+                const darkColorArrayTmpElementForIdx0  = darkColorArrayTmpElement as Color
+                thisSerializer.writeInt32(darkColorArrayTmpElementForIdx0.getOrdinal())
+            } else if (darkColorArrayTmpElement instanceof int32) {
+                thisSerializer.writeInt8((1).toByte())
+                const darkColorArrayTmpElementForIdx1  = darkColorArrayTmpElement as int32
+                thisSerializer.writeInt32(darkColorArrayTmpElementForIdx1)
+            } else if (darkColorArrayTmpElement instanceof string) {
+                thisSerializer.writeInt8((2).toByte())
+                const darkColorArrayTmpElementForIdx2  = darkColorArrayTmpElement as string
+                thisSerializer.writeString(darkColorArrayTmpElementForIdx2)
+            } else if (darkColorArrayTmpElement instanceof Resource) {
+                thisSerializer.writeInt8((3).toByte())
+                const darkColorArrayTmpElementForIdx3  = darkColorArrayTmpElement as Resource
+                Resource_serializer.write(thisSerializer, darkColorArrayTmpElementForIdx3)
+            }
+        }
         thisSerializer.holdAndWriteCallback(onThemeScopeDestroy)
-        ArkUIGeneratedNativeModule._ThemeOps_createAndBindTheme(themeScopeId, themeId, thisSerializer.asBuffer(), thisSerializer.length(), colorMode.valueOf())
+        ArkUIGeneratedNativeModule._ThemeOps_createAndBindTheme(themeScopeId, themeId, thisSerializer.asBuffer(), thisSerializer.length(), colorMode.valueOf(), darkSetStatus ? 1 : 0)
         thisSerializer.release()
     }
     static applyThemeScopeIdToNode_serialize(ptr: KPointer, themeScopeId: int32): void {
         ArkUIGeneratedNativeModule._ThemeOps_applyThemeScopeIdToNode(ptr, themeScopeId)
     }
-    public static sendThemeToNative(colorArray: Array<ResourceColor>, elmtId: int32): void {
+    public static sendThemeToNative(colorArray: Array<ResourceColor>, darkColorArray: Array<ResourceColor>, elmtId: int32, darkSetStatus: boolean): void {
         const colorArray_casted = colorArray as (Array<ResourceColor>)
+        const darkColorArray_casted = darkColorArray as (Array<ResourceColor>)
         const elmtId_casted = elmtId as (int32)
-        ThemeOps.sendThemeToNative_serialize(colorArray_casted, elmtId_casted)
+        const darkSetStatus_casted = darkSetStatus as (boolean)
+        ThemeOps.sendThemeToNative_serialize(colorArray_casted, darkColorArray_casted, elmtId_casted, darkSetStatus_casted)
         return
     }
     public static setDefaultTheme(colorArray: Array<ResourceColor>, isDark: boolean): void {
@@ -4780,13 +4835,15 @@ export class ThemeOps {
         ThemeOps.setDefaultTheme_serialize(colorArray_casted, isDark_casted)
         return
     }
-    public static createAndBindTheme(themeScopeId: int32, themeId: int32, colorArray: Array<ResourceColor>, colorMode: ThemeColorMode, onThemeScopeDestroy: (() => void)): void {
+    public static createAndBindTheme(themeScopeId: int32, themeId: int32, colorArray: Array<ResourceColor>, darkColorArray: Array<ResourceColor>, colorMode: ThemeColorMode, onThemeScopeDestroy: (() => void), darkSetStatus: boolean): void {
         const themeScopeId_casted = themeScopeId as (int32)
         const themeId_casted = themeId as (int32)
         const colorArray_casted = colorArray as (Array<ResourceColor>)
+        const darkColorArray_casted = darkColorArray as (Array<ResourceColor>)
         const colorMode_casted = colorMode as (ThemeColorMode)
         const onThemeScopeDestroy_casted = onThemeScopeDestroy as ((() => void))
-        ThemeOps.createAndBindTheme_serialize(themeScopeId_casted, themeId_casted, colorArray_casted, colorMode_casted, onThemeScopeDestroy_casted)
+        const darkSetStatus_casted = darkSetStatus as (boolean)
+        ThemeOps.createAndBindTheme_serialize(themeScopeId_casted, themeId_casted, colorArray_casted, darkColorArray_casted, colorMode_casted, onThemeScopeDestroy_casted, darkSetStatus_casted)
         return
     }
     public static applyThemeScopeIdToNode(ptr: int64, themeScopeId: int32): void {

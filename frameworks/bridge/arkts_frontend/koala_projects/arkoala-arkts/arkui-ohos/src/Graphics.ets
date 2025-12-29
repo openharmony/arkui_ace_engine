@@ -25,6 +25,7 @@ import { default as common2D } from "@ohos.graphics.common2D"
 import { default as drawing } from "@ohos.graphics.drawing"
 import { BusinessError } from '@ohos.base';
 import { SystemOps } from './framework';
+import { ColorSpace } from './component/enums';
 export interface Size {
     width: double;
     height: double;
@@ -116,6 +117,7 @@ export class ColorMetrics {
     private green_: int32;
     private blue_: int32;
     private alpha_: int32;
+    private colorSpace_: ColorSpace = ColorSpace.SRGB;
     private resourceId_: int32 = -1;
     static readonly WHITE: int32 = 0xffffffff;
     static readonly BLACK: int32 = 0xff000000;
@@ -130,7 +132,7 @@ export class ColorMetrics {
     static readonly YELLOW: int32 = 0xffffff00;
     static readonly TRANSPARENT: string = '#00000000';
     get color(): string {
-        return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha / MAX_CHANNEL_VALUE})`;
+        return `rgba(${this.red}, ${this.green}, ${this.blue}, ${(this.alpha as double) / MAX_CHANNEL_VALUE})`;
     }
     get red(): int32 {
         return this.red_!;
@@ -181,6 +183,20 @@ export class ColorMetrics {
         }
         return new ColorMetrics(red, green, blue, alpha_casted);
     }
+    public static colorWithSpace(colorSpace: ColorSpace, red: double, green: double, blue: double, alpha?: double): ColorMetrics {
+        const red_casted = Math.round(red * MAX_CHANNEL_VALUE);
+        const green_casted = Math.round(green * MAX_CHANNEL_VALUE);
+        const blue_casted = Math.round(blue * MAX_CHANNEL_VALUE);
+        let alpha_casted = alpha as (double | undefined);
+        if (alpha !== undefined && alpha !== null) {
+            alpha_casted = Math.round(alpha * MAX_CHANNEL_VALUE);
+        } else {
+            alpha_casted = MAX_CHANNEL_VALUE;
+        }
+        const colorMetrics = new ColorMetrics(red_casted, green_casted, blue_casted, alpha_casted);
+        colorMetrics.setColorSpace(colorSpace);
+        return colorMetrics;
+    }
     private static rgbOrRGBA(format: string): ColorMetrics {
         const rgbPattern = new RegExp('^rgb\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)$', 'i');
         const rgbaPattern = new RegExp('^rgba\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+(\\.\\d+)?)\\s*\\)$', 'i');
@@ -227,7 +243,7 @@ export class ColorMetrics {
                 colorMetrics.setResourceId(resourceId as int32);
             }
             return colorMetrics;
-        } else if (typeof color === 'int') {
+        } else if (color instanceof int32) {
             return ColorMetrics.numeric(color as int32);
         } else if (typeof color === 'string') {
             let colorValue = color as string;
@@ -270,7 +286,7 @@ export class ColorMetrics {
             b = parseInt(hexFormat.slice(7), 16);
         }
 
-        return ColorMetrics.rgba(r, g, b, a);
+        return new ColorMetrics(r, g, b, a);
     }
     private toNumeric(): number {
         return (this.alpha_! << 24) + (this.red_! << 16) + (this.green_! << 8) + this.blue_!;
@@ -294,6 +310,14 @@ export class ColorMetrics {
     }
     getResourceId(): int32 {
         return this.resourceId_;
+    }
+    setColorSpace(colorSpace: ColorSpace): void {
+        if (ColorSpace.DISPLAY_P3 === colorSpace || ColorSpace.SRGB === colorSpace) {
+            this.colorSpace_ = colorSpace;
+        }
+    }
+    getColorSpace(): ColorSpace {
+        return this.colorSpace_;
     }
 }
 export class ShapeMask {

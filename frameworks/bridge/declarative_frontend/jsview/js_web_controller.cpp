@@ -278,6 +278,7 @@ JSWebController::JSWebController()
 std::shared_ptr<WebJSValue> JSWebController::GetJavaScriptResult(const std::string& objectName,
     const std::string& objectMethod, const std::vector<std::shared_ptr<WebJSValue>>& args)
 {
+    ContainerScope scope(instanceId_);
     std::vector<JSRef<JSVal>> argv = {};
     std::shared_ptr<WebJSValue> jsResult = std::make_shared<WebJSValue>(WebJSValue::Type::NONE);
     auto iter = objectorMap_.find(objectName);

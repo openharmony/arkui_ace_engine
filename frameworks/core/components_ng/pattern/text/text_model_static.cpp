@@ -97,6 +97,16 @@ void TextModelStatic::SetTextAlign(FrameNode* frameNode, const std::optional<Ace
     }
 }
 
+void TextModelStatic::SetTextDirection(FrameNode* frameNode, const std::optional<TextDirection>& valueOpt)
+{
+    if (valueOpt.has_value()) {
+        TextModelNG::SetTextDirection(frameNode, valueOpt.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+            TextLayoutProperty, TextDirection, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+    }
+}
+
 void TextModelStatic::SetTextOverflow(FrameNode* frameNode, const std::optional<Ace::TextOverflow>& value)
 {
     if (value.has_value()) {

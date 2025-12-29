@@ -51,7 +51,6 @@ import { ThemeColorMode } from "arkui/component/common"
 import { ArkThemeNativeHelper } from "arkui/theme/ArkThemeNativeHelper"
 import { ArkThemeScopeManager } from "arkui/theme/ArkThemeScopeManager"
 
-import { StateManagerImpl } from '@koalaui/runtime';
 import { MutableStateMeta } from '../stateManagement/base/mutableStateMeta';
 import { NavPathInfo, NavPathStackInternal, NavigationOptions, NavigationInterception } from "../component/navigation";
 
@@ -104,11 +103,11 @@ export function compatibleComponent(
         if (staticComponent === undefined) {
             staticComponent = (ExtendableComponent.current) as (ExtendableComponent | undefined);
         }
-        let current = (GlobalStateManager.instance as StateManagerImpl).current;
-        (GlobalStateManager.instance as StateManagerImpl).current = undefined;
+        let current = GlobalStateManager.instance.currentScope;
+        GlobalStateManager.instance.currentScope = undefined;
         const viewInterop = staticComponent ? createInteropView(staticComponent) : ESValue.instantiateEmptyObject();
         const result = init(viewInterop);
-        (GlobalStateManager.instance as StateManagerImpl).current = current;
+        GlobalStateManager.instance.currentScope = current;
         const dynamicComponent = result.component;
         const nodePtr = ArkUIAniModule._PopViewStackProcessor();
         ArkUIAniModule._DeleteViewStackProcessor(ptr);
@@ -128,7 +127,7 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
     content?: () => void
 ): [() => void, number] {
     const instantiateImpl = /** @memo */ (): void => {
-        BaseCustomComponent._invokeImpl(undefined, factory, options, undefined, content);
+        BaseCustomComponent._invokeImpl<T, T_Options>(undefined, factory, options, undefined, content);
     };
 
     const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
@@ -140,8 +139,6 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
     ArkThemeScopeManager.getInstance().applyColorModeFromThemeScope();
     
     const node = manager.updatableNode(new IncrementalNode(), (context: StateContext) => {
-        const frozen = manager.frozen;
-        manager.frozen = true;
         ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
         let r = OBSERVE.renderingComponent;
         OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
@@ -150,7 +147,6 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
         setNeedCreate(needCreate);
         OBSERVE.renderingComponent = r;
         ArkUIAniModule._Common_Restore_InstanceId();
-        manager.frozen = frozen;
     });
 
     const inc = node.value;
@@ -355,16 +351,18 @@ export function registerCreateStaticObservedCallback(): void {
     registerCallback.invoke(makeObservedcallback);
 }
 
+abstract class DummyBaseCustom extends BaseCustomComponent<undefined> {}
+
 export function registerCompatibleStaticComponentCallback(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerCompatibleStaticComponentCallback');
-    registerCallback.invoke(compatibleStaticComponent);
+    registerCallback.invoke(compatibleStaticComponent<DummyBaseCustom, undefined>);
 }
 
 export function registerMakeBuilderParameterStaticProxy(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerMakeBuilderParameterStaticProxy');
-    registerCallback.invoke(makeBuilderParameterStaticProxy);
+    registerCallback.invoke(makeBuilderParameterStaticProxy<Object>);
 }
 
 export function registerTransferCompatibleBuilderCallback(): void {
@@ -398,8 +396,8 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
 
         let component: ESValue;
         let createCompatibleNode: ESValue;
-        let current = (GlobalStateManager.instance as StateManagerImpl).current;
-        (GlobalStateManager.instance as StateManagerImpl).current = undefined;
+        let current = GlobalStateManager.instance.currentScope;
+        GlobalStateManager.instance.currentScope = undefined;
         switch (args.length) {
             case 0:
                 createCompatibleNode = global.getProperty('createCompatibleNodeWithFuncVoid');
@@ -458,7 +456,7 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
         }
         const viewPUCreate = global.getProperty('viewPUCreate');
         viewPUCreate.invoke(component);
-        (GlobalStateManager.instance as StateManagerImpl).current = current;
+        GlobalStateManager.instance.currentScope = current;
         return {
             component: component,
             name: 'compatibleWrappedBuilder',
@@ -536,15 +534,12 @@ export function transferCompatibleBuilder<T extends Function>(
             manager = GlobalStateManager.instance;
         }
         const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
-            const frozen = manager.frozen;
-            manager.frozen = true;
             ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
             let r = OBSERVE.renderingComponent;
             OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
             memoEntry<void>(context, 0, func);
             OBSERVE.renderingComponent = r;
             ArkUIAniModule._Common_Restore_InstanceId();
-            manager.frozen = frozen;
         });
 
         const ptr = node.value.peer.ptr;
@@ -580,15 +575,12 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
             manager = GlobalStateManager.instance;
         }
         const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
-            const frozen = manager.frozen;
-            manager.frozen = true;
             ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
             let r = OBSERVE.renderingComponent;
             OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
             memoEntry1<T, void>(context, 0, builder, args);
             OBSERVE.renderingComponent = r;
             ArkUIAniModule._Common_Restore_InstanceId();
-            manager.frozen = frozen;
         });
         const ptr = node.value.peer.ptr;
         uiContext.getDetachedRootEntryManager().detachedRoots_.set(ptr, new DetachedRootEntryImpl<PeerNode>(node));
@@ -1034,7 +1026,7 @@ function transferCompatibleDynamicBuilder(builder: (...args: FixedArray<Any>) =>
 export function registerCreateCompatibleStaticState(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerCreateCompatibleStaticState');
-    registerCallback.invoke(createCompatibleStaticState);
+    registerCallback.invoke(createCompatibleStaticState<undefined>);
 }
 
 function createCompatibleStaticState<T>(dynamicValue: Object): ProvideDecoratedVariable<T> {

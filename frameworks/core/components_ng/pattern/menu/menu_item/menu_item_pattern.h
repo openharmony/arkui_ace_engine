@@ -457,6 +457,9 @@ public:
     {
         leftRowMinWidth_ = width;
     }
+    mutable RefPtr<UINode> detachedProxy_ = nullptr;
+    void HandleCloseSubMenu();
+    void DoCloseSubMenu();
 
 protected:
     void RegisterOnKeyEvent();
@@ -491,6 +494,8 @@ friend class ServiceCollaborationMenuAceHelper;
     void UpdateIcon(RefPtr<FrameNode>& row, bool isStart);
     void AddExpandIcon(RefPtr<FrameNode>& row);
     bool ISNeedAddExpandIcon(RefPtr<FrameNode>& row);
+    void UpdateLabelIfSelectOverlayExtensionMenu(std::string& label);
+    void UpdateContentIfSelectOverlayExtensionMenu(std::string& content);
     void AddClickableArea();
     void SetRowAccessibilityLevel();
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);

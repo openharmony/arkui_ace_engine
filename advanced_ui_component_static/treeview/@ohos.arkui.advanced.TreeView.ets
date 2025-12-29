@@ -1424,62 +1424,66 @@ export struct TreeView {
 
     /* Move the dragged node. */
     .onDragMove((event: DragEvent, extraParams?: string) => {
-      if (this.isMultiPress) {
-        hilog.error(LOG_CODE, TAG, 'drag error, a item has been dragged');
-        return;
-      }
-      let nodeHeight: number = LIST_ITEM_HEIGHT;
-      /* flag the position of the focus on the node. */
-      let flag: Flag = Math.floor(
-        event.getWindowY() /
-          (nodeHeight / FLAG_NUMBER)) %
-        FLAG_NUMBER ? Flag.DOWN_FLAG : Flag.UP_FLAG;
-
-      /* Record the node position to which the dragged node moves. */
-      let index: number;
-      let insertIndexInterface: InsertIndexInterface = new InsertIndexInterface();
-      if (extraParams != null) {
-        let params = JSON.parse<InsertIndexInterface>(extraParams.toString(), Type.of(insertIndexInterface));
-        if (params != null) {
-          index = params.insertIndex;
-        }
-      }
-      /* Handle the situation where the focus(index) exceeds the list area. */
-      let isOverBorder: boolean = false;
-      if (index >= this.listNodeDataSource.totalCount()) {
-        flag = Flag.DOWN_FLAG;
-        index = this.listNodeDataSource.totalCount() - 1;
-        this.listNodeDataSource.getData(index as int)?.setIsOverBorder(true);
-        isOverBorder = true;
-      } else {
-        this.listNodeDataSource.getData(index as int)?.setIsOverBorder(false);
-      }
-      let currentNodeInfo: NodeInfo | undefined = this.listNodeDataSource.getData(index as int);
-      let currentNodeId: int | undefined = currentNodeInfo?.getNodeCurrentNodeId();
-
-      /**
-       * handle a situation that "draggingCurrentNodeId" is parent of "insertNodeCurrentNodeId";
-       * do not perform some functions.
-       */
-      if (index !== this.listNodeDataSource.getLastPassIndex() && this.listNodeDataSource.getIsInnerDrag()) {
-        let isParentNodeOfInsertNode: boolean = this.listNodeDataSource.getIsParentOfInsertNode(currentNodeId);
-        if (isParentNodeOfInsertNode) {
-          this.listNodeDataSource.setPassIndex(index);
-          if (currentNodeId !== undefined) {
-            this.listNodeDataSource.clearTimeOutAboutDelayHighLightAndExpand(
-              this.listNodeDataSource.findIndex(currentNodeId));
-          }
-          this.listNodeDataSource.setFlag(Flag.NONE);
+      try {
+        if (this.isMultiPress) {
+          hilog.error(LOG_CODE, TAG, 'drag error, a item has been dragged');
           return;
         }
-      }
-      this.listNodeDataSource.setLastPassIndex(index);
-      /* Set the visibility of the flag line. */
-      this.listNodeDataSource.setVisibility(flag, index - 1, isOverBorder, this.allParentNode);
-      /* Automatically HighLight one second delay and expand after two second delay. */
-      if (currentNodeId !== undefined && currentNodeId !== this.listNodeDataSource.getDraggingCurrentNodeId() as int) {
-        this.listNodeDataSource.delayHighLightAndExpandNode(this.listNodeDataSource.findIndex(currentNodeId),
-          currentNodeId, index);
+        let nodeHeight: number = LIST_ITEM_HEIGHT;
+        /* flag the position of the focus on the node. */
+        let flag: Flag = Math.floor(
+          event.getWindowY() /
+            (nodeHeight / FLAG_NUMBER)) %
+          FLAG_NUMBER ? Flag.DOWN_FLAG : Flag.UP_FLAG;
+
+        /* Record the node position to which the dragged node moves. */
+        let index: number;
+        let insertIndexInterface: InsertIndexInterface = new InsertIndexInterface();
+        if (extraParams != null) {
+          let params = JSON.parse<InsertIndexInterface>(extraParams.toString(), Type.of(insertIndexInterface));
+          if (params != null) {
+            index = params.insertIndex;
+          }
+        }
+        /* Handle the situation where the focus(index) exceeds the list area. */
+        let isOverBorder: boolean = false;
+        if (index >= this.listNodeDataSource.totalCount()) {
+          flag = Flag.DOWN_FLAG;
+          index = this.listNodeDataSource.totalCount() - 1;
+          this.listNodeDataSource.getData(index as int)?.setIsOverBorder(true);
+          isOverBorder = true;
+        } else {
+          this.listNodeDataSource.getData(index as int)?.setIsOverBorder(false);
+        }
+        let currentNodeInfo: NodeInfo | undefined = this.listNodeDataSource.getData(index as int);
+        let currentNodeId: int | undefined = currentNodeInfo?.getNodeCurrentNodeId();
+
+        /**
+         * handle a situation that "draggingCurrentNodeId" is parent of "insertNodeCurrentNodeId";
+         * do not perform some functions.
+         */
+        if (index !== this.listNodeDataSource.getLastPassIndex() && this.listNodeDataSource.getIsInnerDrag()) {
+          let isParentNodeOfInsertNode: boolean = this.listNodeDataSource.getIsParentOfInsertNode(currentNodeId);
+          if (isParentNodeOfInsertNode) {
+            this.listNodeDataSource.setPassIndex(index);
+            if (currentNodeId !== undefined) {
+              this.listNodeDataSource.clearTimeOutAboutDelayHighLightAndExpand(
+                this.listNodeDataSource.findIndex(currentNodeId));
+            }
+            this.listNodeDataSource.setFlag(Flag.NONE);
+            return;
+          }
+        }
+        this.listNodeDataSource.setLastPassIndex(index);
+        /* Set the visibility of the flag line. */
+        this.listNodeDataSource.setVisibility(flag, index - 1, isOverBorder, this.allParentNode);
+        /* Automatically HighLight one second delay and expand after two second delay. */
+        if (currentNodeId !== undefined && currentNodeId !== this.listNodeDataSource.getDraggingCurrentNodeId() as int) {
+          this.listNodeDataSource.delayHighLightAndExpandNode(this.listNodeDataSource.findIndex(currentNodeId),
+            currentNodeId, index);
+        }
+      } catch (error) {
+        console.log(`Succeeded in send event, eventInfo is ${JSON.stringify(error)}`)
       }
     })
 
@@ -4970,8 +4974,7 @@ export struct TreeViewInner {
             .width('100%')
             .height(this.item.getNodeHeight())
             .padding({ start: LengthMetrics.vp(this.item.getNodeLeftPadding()) } as LocalizedPadding)
-
-            // .bindContextMenu(this.builder, ResponseType.RightClick)
+            .bindContextMenu(this.builder, ResponseType.RightClick)
           }.focusable(true)
         }
         .opacity(this.listNodeDataSource.getListItemOpacity(this.item))
@@ -5007,13 +5010,13 @@ export struct TreeViewInner {
           event.stopPropagation();
         })
         .padding({ top: LengthMetrics.vp(0), bottom: LengthMetrics.vp(0) } as LocalizedPadding)
-        // .bindPopup(this.item.getPopUpInfo().popUpIsShow as boolean, {
-        //   builder: this.popupBuilder,
-        //   placement: Placement.BottomLeft,
-        //   popupColor: this.propColor(this.item),
-        //   autoCancel: true,
-        //   enableArrow: this.item.getPopUpInfo().popUpEnableArrow,
-        // } as CustomPopupOptions)
+        .bindPopup(this.item.getPopUpInfo().popUpIsShow as boolean, {
+            builder: this.popupBuilder,
+            placement: Placement.BottomLeft,
+            popupColor: this.propColor(this.item),
+            autoCancel: true,
+            enableArrow: this.item.getPopUpInfo().popUpEnableArrow,
+          } as CustomPopupOptions)
         .onAreaChange((oldValue: Area, newValue: Area) => {
           let columnWidthNum: number = Number.parseInt(newValue.width.toString());
           this.columnWidth = columnWidthNum;

@@ -1442,7 +1442,6 @@ HWTEST_F(ImagePatternTestNg, RecycleImageData001, TestSize.Level0)
      * @tc.steps: step2. set isShow true and call RecycleImageData.
      * @tc.expected: Returned value is false.
      */
-    imagePattern->isShow_ = true;
     EXPECT_FALSE(imagePattern->RecycleImageData());
 }
 
@@ -1474,7 +1473,6 @@ HWTEST_F(ImagePatternTestNg, RecycleImageData002, TestSize.Level0)
      * @tc.steps: step2. set isShow false and call RecycleImageData.
      * @tc.expected: Returned value is false.
      */
-    imagePattern->isShow_ = false;
     imagePattern->OnRecycle();
     EXPECT_FALSE(imagePattern->RecycleImageData());
 }
@@ -1507,7 +1505,6 @@ HWTEST_F(ImagePatternTestNg, RecycleImageData003, TestSize.Level0)
      * @tc.steps: step2. set isShow false and call RecycleImageData.
      * @tc.expected: Returned value is false.
      */
-    imagePattern->isShow_ = false;
     EXPECT_FALSE(imagePattern->RecycleImageData());
 }
 
@@ -1539,11 +1536,10 @@ HWTEST_F(ImagePatternTestNg, RecycleImageData004, TestSize.Level0)
      * @tc.steps: step2. set isShow false and call RecycleImageData.
      * @tc.expected: Returned value is true.
      */
-    imagePattern->isShow_ = false;
     imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
         LoadNotifier(nullptr, nullptr, nullptr));
-    EXPECT_TRUE(imagePattern->RecycleImageData());
+    EXPECT_FALSE(imagePattern->RecycleImageData());
 }
 
 /**
@@ -2945,5 +2941,75 @@ HWTEST_F(ImagePatternTestNg, ImagePatternLoadImageDataIfNeed001, TestSize.Level0
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     imagePattern->LoadImageDataIfNeed();
+}
+
+/**
+ * @tc.name: TestImageSourceInfoGetSrcType001
+ * @tc.desc: Verify srcType is correctly mapped from ImageSourceInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, TestImageSourceInfoGetSrcType001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    ImageSourceInfo info("http://example.com/test.png");
+    auto imageDfxConfig = imagePattern->CreateImageDfxConfig(info);
+    EXPECT_EQ(imageDfxConfig.srcType_, static_cast<int32_t>(info.GetSrcType()));
+}
+
+/**
+ * @tc.name: RecycleImageData005
+ * @tc.desc: RecycleImageData005
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, RecycleImageData005, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageInfoConfig.pixelMap = pixMap;
+    image.Create(imageInfoConfig);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    /**
+     * @tc.steps: step2. set isShow false and call RecycleImageData.
+     * @tc.expected: Returned value is true.
+     */
+    imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    EXPECT_FALSE(imagePattern->RecycleImageData());
+}
+
+/**
+ * @tc.name: ImagePatternOnThemeScopeUpdate001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ImagePatternOnThemeScopeUpdate001, TestSize.Level0)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->isFullyInitializedFromTheme_ = true;
+    int32_t themeScopedId = 1;
+    auto result = imagePattern->OnThemeScopeUpdate(themeScopedId);
+    ASSERT_FALSE(imagePattern->isFullyInitializedFromTheme_);
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG

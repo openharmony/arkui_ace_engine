@@ -843,6 +843,7 @@ private:
     RefPtr<NavDestinationGroupNode> GetNonTopForceSplitHomeDestination();
     RefPtr<NavDestinationGroupNode> GetVisibleRelatedDestination();
     RefPtr<NavDestinationGroupNode> GetTopRelatedDestination();
+    void ProcessHideNavBarChangeInForceSplit();
     //-------for force split------- end  ------
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;

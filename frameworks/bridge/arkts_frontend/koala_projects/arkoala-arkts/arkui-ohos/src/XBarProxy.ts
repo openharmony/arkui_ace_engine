@@ -36,11 +36,13 @@ const CUSTOM_BUTTOEN_BAR_CLASS: string = "@ohos.window.titlebar.component.System
 const DEFAULT_TITLE_BAR_CLASS: string = "@ohos.window.titlebar.component.defalut.System__Reserved_$$$__UI__TitleBar__Component"
 const DEFAULT_BUTTOEN_BAR_CLASS: string = "@ohos.window.titlebar.component.defalut.System__Reserved_$$$__UI__ButtonBar__Component"
 
+abstract class DummyCustomComponent extends CustomComponent<DummyCustomComponent, undefined> {}
+
 export class XBarProxy {
     // static titleBarComponentMap: Map<KLong, CustomComponent> = new Map();
     static initializeXBarProxy(): void {
-        console.log(`[createXBarCustomComponent]initializeXBarProxy`)
-        ArkUIAniModule._XBar_Set_ComponentCreateFunc(createXBarCustomComponent)
+        console.log(`[createXBarCustomComponent]initializeXBarProxy`);
+        ArkUIAniModule._XBar_Set_ComponentCreateFunc(createXBarCustomComponent<DummyCustomComponent, undefined>)
     }
 
     public static CallNative(xBarType: int32, callType: string, message: string): void {
@@ -114,8 +116,6 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
         manager = GlobalStateManager.instance;
     }
     const node = manager.updatableNode(new IncrementalNode(), (context: StateContext) => {
-        const frozen = manager.frozen;
-        manager.frozen = true;
         ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
         let r = OBSERVE.renderingComponent;
         OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
@@ -124,7 +124,6 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
         setNeedCreate(needCreate);
         OBSERVE.renderingComponent = r;
         ArkUIAniModule._Common_Restore_InstanceId();
-        manager.frozen = frozen;
     });
     console.log(`[createXBarCustomComponent]updatableNode`)
     const inc = node.value;

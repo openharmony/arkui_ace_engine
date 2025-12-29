@@ -3672,6 +3672,8 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     if (textVerticalAlign.has_value()) {
         textStyle.textVerticalAlign =static_cast<int32_t>(textVerticalAlign.value());
     }
+    textStyle.strokeWidth = node->GetStrokeWidthValue(Dimension()).ConvertToVp();
+    textStyle.strokeColor = node->GetStrokeColorValue(Color::BLACK).ColorToString();
     return textStyle;
 }
 
@@ -4811,6 +4813,15 @@ void TextPattern::GetGlobalOffset(Offset& offset)
     offset = Offset(globalOffset.GetX(), globalOffset.GetY());
 }
 
+void TextPattern::OnVisibleAreaChange(bool isVisible)
+{
+    if (!isVisible) {
+        PauseSymbolAnimation();
+    } else {
+        ResumeSymbolAnimation();
+    }
+}
+
 void TextPattern::OnVisibleChange(bool isVisible)
 {
     if (!isVisible) {
@@ -4821,12 +4832,10 @@ void TextPattern::OnVisibleChange(bool isVisible)
         if (textDetectEnable_) {
             GetDataDetectorAdapter()->aiDetectDelayTask_.Cancel();
         }
-        PauseSymbolAnimation();
     } else {
         if (CanStartAITask()) {
             GetDataDetectorAdapter()->StartAITask();
         }
-        ResumeSymbolAnimation();
     }
 }
 
@@ -5021,6 +5030,14 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
 
 void TextPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
     if (IsSetObscured()) {
@@ -5030,6 +5047,12 @@ void TextPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
     auto textValue = UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u""));
     if (!textValue.empty()) {
         json->Put("content", textValue.c_str());
+        json->Put(
+            "fontColor", textLayoutProp->GetTextColorValue(theme->GetTextStyle().GetTextColor()).ToString().c_str());
+        json->Put("fontFamily",
+            textLayoutProp->HasFontFamily() ? GetFontFamilyInJson(textLayoutProp->GetFontFamily()).c_str() : "Na");
+        json->Put("fontSize", GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str());
+        json->Put("fontWeight", GetFontWeightInJson(textLayoutProp->GetFontWeight()).c_str());
     } else {
         CHECK_NULL_VOID(pManager_);
         auto paragraphs = pManager_->GetParagraphs();
@@ -5045,7 +5068,30 @@ void TextPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
             }
         }
         json->Put("content", text.c_str());
+        for (const auto& item : spans_) {
+            if (item && item->spanItemType == SpanItemType::NORMAL) {
+                auto& fontStyle = item->fontStyle;
+                json->Put("fontColor",
+                    fontStyle && fontStyle->HasTextColor()
+                        ? fontStyle->GetTextColorValue().ColorToString().c_str()
+                        : textLayoutProp->GetTextColorValue(theme->GetTextStyle().GetTextColor()).ToString().c_str());
+                json->Put("fontFamily", fontStyle && fontStyle->HasFontFamily()
+                                            ? GetFontFamilyInJson(fontStyle->GetFontFamilyValue()).c_str()
+                                            : (textLayoutProp->HasFontFamily()
+                                                    ? GetFontFamilyInJson(textLayoutProp->GetFontFamily()).c_str()
+                                                    : "Na"));
+                json->Put("fontSize", fontStyle && fontStyle->HasFontSize()
+                                          ? fontStyle->GetFontSizeValue().ToString().c_str()
+                                          : GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str());
+                json->Put("fontWeight", fontStyle && fontStyle->HasFontWeight()
+                                            ? GetFontWeightInJson(fontStyle->GetFontWeightValue()).c_str()
+                                            : GetFontWeightInJson(textLayoutProp->GetFontWeight()).c_str());
+                break;
+            }
+        }
     }
+    json->Put("ForegroundColor",
+        renderContext->GetForegroundColor() ? renderContext->GetForegroundColorValue().ToString().c_str() : "Na");
 }
 
 void TextPattern::DumpAdvanceInfo()
@@ -7271,7 +7317,7 @@ void TextPattern::RegisterVisibleAreaChangeCallback()
         auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->OnVisibleChange(visible);
+            pattern->OnVisibleAreaChange(visible);
         };
         std::vector<double> ratioList = {0.0};
         pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);

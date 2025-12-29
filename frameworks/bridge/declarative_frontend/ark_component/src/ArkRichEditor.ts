@@ -566,6 +566,23 @@ class RichEditorFallbackLineSpacingModifier extends ModifierWithKey<Optional<boo
   }
 }
 
+class RichEditorSingleLineModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorSingleLine');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetSingleLine(node);
+    } else {
+      getUINativeModule().richEditor.setSingleLine(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEditorAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -651,7 +668,7 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
     return this;
   }
   bindSelectionMenu(spanType: RichEditorSpanType, content: CustomBuilder, responseType: ResponseType, options?: SelectionMenuOptions): RichEditorAttribute {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
   selectedDragPreviewStyle(value: SelectedDragPreviewStyle): this {
     let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();
@@ -738,6 +755,10 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   }
   fallbackLineSpacing(enable: Optional<boolean>): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorFallbackLineSpacingModifier.identity, RichEditorFallbackLineSpacingModifier, enable);
+    return this;
+  }
+  singleLine(value: boolean): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorSingleLineModifier.identity, RichEditorSingleLineModifier, value);
     return this;
   }
 }

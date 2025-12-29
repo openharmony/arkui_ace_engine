@@ -36,6 +36,12 @@ std::string StatisticEventReporter::ConvertToEventName(StatisticEventType eventT
             return "FA_APP_START";
         case StatisticEventType::CALL_SET_CACHE_RANGE:
             return "CALL_SET_CACHE_RANGE";
+        case StatisticEventType::SEARCH_ONDIDINSERT:
+            return "SEARCH_ONDIDINSERT";
+        case StatisticEventType::SEARCH_ONWILLDELETE:
+            return "SEARCH_ONWILLDELETE";
+        case StatisticEventType::SEARCH_ONDIDDELETE:
+            return "SEARCH_ONDIDDELETE";
         default:
             return "";
     }

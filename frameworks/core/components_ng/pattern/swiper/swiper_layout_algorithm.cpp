@@ -426,6 +426,10 @@ void SwiperLayoutAlgorithm::MeasureTabsCustomAnimation(LayoutWrapper* layoutWrap
         removeIndexs.insert(index);
     }
 
+    if (removeIndexs.empty() && customAnimationPrevIndex_) {
+        layoutWrapper->RemoveChildInRenderTree(customAnimationPrevIndex_.value());
+    }
+
     for (const auto& index : removeIndexs) {
         needUnmountIndexs_.erase(index);
     }

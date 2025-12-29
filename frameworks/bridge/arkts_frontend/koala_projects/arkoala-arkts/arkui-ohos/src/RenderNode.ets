@@ -386,7 +386,7 @@ export class RenderNode implements MaterializedBase {
             const error = Error("The parameter 'child' is invalid: its corresponding FrameNode cannot be adopted.");
             throw new BusinessError(100025, error);
         }
-        this.childrenList.splice(childrenListStartPosition, 0, child);
+        this.childrenList.splice(childrenListStartPosition.toInt(), 0, child);
         child.parentRenderNode = new WeakRef<RenderNode>(this);
         return
     }

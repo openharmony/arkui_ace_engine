@@ -25,6 +25,7 @@
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 
 namespace OHOS {
@@ -175,7 +176,8 @@ public:
     void SendPageModeToProvider(const int32_t nodeId, const std::string& pageMode);
     void SendPageModeRequestToHost(const RefPtr<PipelineContext>& pipeline);
     void TransferAccessibilityRectInfo();
-    void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
+    void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data,
+        RSSubsystemId subSystemId, const UIExtOptions& options = UIExtOptions());
     void UpdateWMSUIExtPropertyByPersistentId(UIContentBusinessCode code, const AAFwk::Want& data,
         const std::unordered_set<int32_t>& persistentIds, RSSubsystemId subSystemId);
     void SetInstanceId(int32_t id)

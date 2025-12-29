@@ -28,7 +28,7 @@ import { ResourceColor, Dimension, Font, ResourceStr } from "./component/units"
 import { Color, CopyOptions, TextAlign } from "./component/enums"
 import { Resource } from "global.resource"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
-import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle } from "./component/textCommon"
+import { CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance, SelectedDragPreviewStyle, TextDirection } from "./component/textCommon"
 import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback } from "./component/textInput"
 import { PasteEvent, KeyboardOptions } from "./component/richEditor"
 import { ColorMetrics } from "arkui.Graphics"
@@ -133,6 +133,8 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
     _onWillChange_0_0value?: ((value0: EditableTextChangeValue) => boolean) | undefined
     _keyboardAppearance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
+    _textDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textDirection_0_0value?: TextDirection | undefined
     _compressLeadingPunctuation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _compressLeadingPunctuation_0_0value?: boolean | undefined
     _includeFontPadding_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -1038,6 +1040,24 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
+        if (this._textDirection_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textDirection_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextDirectionAttribute((this._textDirection_0_0value as TextDirection | undefined));
+                    this._textDirection_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textDirection_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textDirection_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextDirectionAttribute((undefined as TextDirection | undefined));
+                }
+            }
+        }
         if (this._searchButton_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._searchButton_0_flag) {
@@ -1733,6 +1753,19 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
                 }
             }
         }
+        if (modifier._textDirection_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textDirection_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textDirection(modifier._textDirection_0_0value);
+                    break;
+                }
+                default: {
+                    this.textDirection((undefined as TextDirection | undefined));
+                }
+            }
+        }
         if (modifier._searchButton_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._searchButton_0_flag) {
@@ -2309,6 +2342,17 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         } else
         {
             this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    textDirection(value: TextDirection | undefined): this {
+        if (((this._textDirection_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textDirection_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textDirection_0_0value = value
+        } else
+        {
+            this._textDirection_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

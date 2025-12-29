@@ -228,6 +228,7 @@ const GENERATED_ArkUICommonShapeAccessor* GetCommonShapeAccessor();
 const GENERATED_ArkUIConsoleMessageAccessor* GetConsoleMessageAccessor();
 const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAccessor();
 const GENERATED_ArkUIContentTransitionEffectAccessor* GetContentTransitionEffectAccessor();
+const GENERATED_ArkUIContextMenuAccessor* GetContextMenuAccessor();
 const GENERATED_ArkUIControllerHandlerAccessor* GetControllerHandlerAccessor();
 const GENERATED_ArkUICopyEventAccessor* GetCopyEventAccessor();
 const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor();
@@ -554,6 +555,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetConsoleMessageAccessor,
         GetContentModifierHelperAccessor,
         GetContentTransitionEffectAccessor,
+        GetContextMenuAccessor,
         GetControllerHandlerAccessor,
         GetCopyEventAccessor,
         GetCustomDialogControllerAccessor,

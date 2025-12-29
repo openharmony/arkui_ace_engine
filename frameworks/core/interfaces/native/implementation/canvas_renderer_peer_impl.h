@@ -196,11 +196,6 @@ public:
         anti_ = anti;
     }
 
-    bool GetAnti()
-    {
-        return anti_;
-    }
-
     double GetDensity(bool useSystemDensity = false)
     {
         if (useSystemDensity) {

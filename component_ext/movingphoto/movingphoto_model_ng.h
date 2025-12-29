@@ -19,6 +19,7 @@
 #include "movingphoto_event_hub.h"
 #include "movingphoto_controller.h"
 #include "movingphoto_utils.h"
+#include "movingphoto_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -51,6 +52,28 @@ public:
     void SetWaterMask(bool enabled);
     void SetXmagePosition();
 
+    static RefPtr<MovingPhotoNode> CreateMovingPhotoNode(int32_t nodeId, const std::u16string& content);
+    static void SetImageSrc(MovingPhotoNode* framenode, const std::string& src);
+    static void SetMuted(MovingPhotoNode* framenode, bool muted);
+    static void SetHdrBrightness(MovingPhotoNode* framenode, float hdrBrightness);
+    static void SetObjectFit(MovingPhotoNode* framenode, ImageFit objectFit);
+    static void SetOnComplete(MovingPhotoNode* framenode, MovingPhotoEventFunc&& onComplete);
+    static void SetOnStart(MovingPhotoNode* framenode, MovingPhotoEventFunc&& onStart);
+    static void SetOnStop(MovingPhotoNode* framenode, MovingPhotoEventFunc&& onStop);
+    static void SetOnPause(MovingPhotoNode* framenode, MovingPhotoEventFunc&& onPause);
+    static void SetOnFinish(MovingPhotoNode* framenode, MovingPhotoEventFunc&& onFinish);
+    static void SetOnError(MovingPhotoNode* framenode, MovingPhotoEventFunc&& onError);
+    static void SetOnPrepared(MovingPhotoNode* framenode, MovingPhotoEventFunc&& onPrepared);
+    static void AutoPlayPeriod(MovingPhotoNode* framenode, int64_t startTime, int64_t endTime);
+    static void AutoPlay(MovingPhotoNode* framenode, bool isAutoPlay);
+    static void RepeatPlay(MovingPhotoNode* framenode, bool isRepeatPlay);
+    static void EnableAnalyzer(MovingPhotoNode* framenode, bool enabled);
+    static void SetImageAIOptions(MovingPhotoNode* framenode, void* options);
+    static void SetMovingPhotoFormat(MovingPhotoNode* framenode, MovingPhotoFormat format);
+    static void SetDynamicRangeMode(MovingPhotoNode* framenode, DynamicRangeMode rangeMode);
+    static void SetWaterMask(MovingPhotoNode* framenode, bool enabled);
+    static void SetXmagePosition(MovingPhotoNode* framenode);
+    static void SetMovingPhotoController(MovingPhotoNode *framenode, const RefPtr<MovingPhotoController> &controller);
 private:
     static std::unique_ptr<MovingPhotoModelNG> instance_;
     static std::mutex mutex_;

@@ -20,6 +20,39 @@
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
+namespace {
+void WriteWebImagesStruct(const std::map<int32_t, std::map<int32_t,
+    std::shared_ptr<OHOS::Media::PixelMap>>>& webImages, OHOS::MessageParcel& messageData)
+{
+    for (const auto& mapIter : webImages) {
+        if (!messageData.WriteInt32(mapIter.first)) {
+            LOGW("SendArkWebImagesById write webImages id failed");
+            return;
+        }
+        size_t webImagesMapSize = mapIter.second.size();
+        if (!messageData.WriteUint64(webImagesMapSize)) {
+            LOGW("SendArkWebImagesById write webImagesMapSize failed");
+            return;
+        }
+        for (const auto& webImageIdIter : mapIter.second) {
+            if (!messageData.WriteInt32(webImageIdIter.first)) {
+                LOGW("SendArkWebImagesById write webImages result id failed");
+                return;
+            }
+            bool nextPixelMapIsAvailable = webImageIdIter.second != nullptr;
+            if (!messageData.WriteBool(nextPixelMapIsAvailable)) {
+                LOGW("SendArkWebImagesById write nextPixelMapIsAvailable failed");
+                return;
+            }
+            if (nextPixelMapIsAvailable && !webImageIdIter.second->Marshalling(messageData)) {
+                LOGW("SendArkWebImagesById write webImage nextPixelMap failed");
+                return;
+            }
+        }
+    }
+}
+} // namespace
+
 namespace OHOS::Ace {
 void UiReportProxy::ReportClickEvent(const std::string& data)
 {
@@ -386,6 +419,81 @@ void UiReportProxy::SendShowingImage(std::vector<std::pair<int32_t, std::shared_
     }
     if (Remote()->SendRequest(SEND_IMAGES, messageData, reply, option) != ERR_NONE) {
         LOGW("SendShowingImage send request failed");
+    }
+}
+
+void UiReportProxy::SendArkUIImagesById(int32_t windowId,
+    const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>& componentImages,
+    MultiImageQueryErrorCode arkUIErrorCode)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendArkUIImagesById write interface token failed");
+        return;
+    }
+    if (!messageData.WriteInt32(windowId)) {
+        LOGW("SendArkUIImagesById write windowId failed");
+        return;
+    }
+    size_t componentImagesSize = componentImages.size();
+    if (!messageData.WriteUint64(componentImagesSize)) {
+        LOGW("SendArkUIImagesById write componentImagesSize failed");
+        return;
+    }
+    for (const auto& mapIter : componentImages) {
+        if (!messageData.WriteInt32(mapIter.first)) {
+            LOGW("SendArkUIImagesById write componentImages id failed");
+            return;
+        }
+        bool nextPixelMapIsAvailable = mapIter.second != nullptr;
+        if (!messageData.WriteBool(nextPixelMapIsAvailable)) {
+            LOGW("SendArkUIImagesById write nextPixelMapIsAvailable failed");
+            return;
+        }
+        if (nextPixelMapIsAvailable && !mapIter.second->Marshalling(messageData)) {
+            LOGW("SendArkUIImagesById write nextPixelMap failed");
+            return;
+        }
+    }
+    if (!messageData.WriteInt32(static_cast<int32_t>(arkUIErrorCode))) {
+        LOGW("SendArkUIImagesById write arkUIErrorCode failed");
+        return;
+    }
+    if (Remote()->SendRequest(SEND_ARKUI_IMAGES_BY_ID, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendArkUIImagesById send request failed");
+        return;
+    }
+}
+
+void UiReportProxy::SendArkWebImagesById(int32_t windowId, const std::map<int32_t, std::map<int32_t,
+    std::shared_ptr<Media::PixelMap>>>& webImages, MultiImageQueryErrorCode arkWebErrorCode)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendArkWebImagesById write interface token failed");
+        return;
+    }
+    if (!messageData.WriteInt32(windowId)) {
+        LOGW("SendArkWebImagesById write windowId failed");
+        return;
+    }
+    size_t webImagesSize = webImages.size();
+    if (!messageData.WriteUint64(webImagesSize)) {
+        LOGW("SendArkWebImagesById write webImagesSize failed");
+        return;
+    }
+    WriteWebImagesStruct(webImages, messageData);
+    if (!messageData.WriteInt32(static_cast<int32_t>(arkWebErrorCode))) {
+        LOGW("SendArkWebImagesById write arkWebErrorCode failed");
+        return;
+    }
+    if (Remote()->SendRequest(SEND_ARKWEB_IMAGES_BY_ID, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendArkWebImagesById send request failed");
+        return;
     }
 }
 

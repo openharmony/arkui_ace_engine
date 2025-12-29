@@ -34,7 +34,8 @@
 // For types with distinct names on ets and jni
 #define KOALA_INTEROP_TYPEDEF_LS(func, lang, CPP_TYPE, ETS_SIG_TYPE, ETS_CODE_TYPE, JNI_SIG_TYPE, JNI_CODE_TYPE) \
   if (std::strcmp(func, "sigType") == 0 && std::strcmp(lang, "ets") == 0) if (type == (CPP_TYPE)) return ETS_SIG_TYPE; \
-  if (std::strcmp(func, "codeType") == 0 && std::strcmp(lang, "ets") == 0) if (type == (CPP_TYPE)) return ETS_CODE_TYPE; \
+  if (std::strcmp(func, "codeType") == 0 && std::strcmp(lang, "ets") == 0) \
+  if (type == (CPP_TYPE)) return ETS_CODE_TYPE; \
   if (std::strcmp(func, "sigType") == 0 && std::strcmp(lang, "jni") == 0) if (type == (CPP_TYPE)) return JNI_SIG_TYPE; \
   if (std::strcmp(func, "codeType") == 0 && std::strcmp(lang, "jni") == 0) if (type == (CPP_TYPE)) return JNI_CODE_TYPE;
 

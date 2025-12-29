@@ -40,7 +40,9 @@ ace_unittest("layout_algorithm_test_ng") {
   type = "new"
   module_name = "Component-Layout"
   module_output = "layout"
-  sources = [ "layout_algorithm_test_ng.cpp" ]
+  sources = [
+    "layout_algorithm_test_ng.cpp",
+  ]
 }
 
 ace_unittest("layout_wrapper_build_test_ng") {
@@ -69,18 +71,50 @@ ace_unittest("overflow_test_ng") {
   sources = [ "vertical_overflow_handler_test_ng.cpp" ]
 }
 
+ace_unittest("overflow_collector_test_ng") {
+  type = "new"
+  module_name = "Component-Layout"
+  module_output = "layout"
+  sources = [ "overflow_collector_test_ng.cpp" ]
+}
+
+ace_unittest("layout_algorithm_overflow_test_ng") {
+  type = "new"
+  module_name = "Component-Layout"
+  module_output = "layout"
+  sources = [ "layout_algorithm_overflow_test_ng.cpp" ]
+}
+
+ace_unittest("vertical_overflow_handler_horizontal_test_ng") {
+  type = "new"
+  module_name = "Component-Layout"
+  module_output = "layout"
+  sources = [ "vertical_overflow_handler_horizontal_test_ng.cpp" ]
+}
+
+ace_unittest("pixel_round_test_ng") {
+  type = "new"
+  module_name = "Component-Layout"
+  module_output = "layout"
+  sources = ["pixel_round_test_ng.cpp" ]
+}
+
 group("core_layout_unittest") {
   testonly = true
   deps = [
     ":drawing_layout_utils_test_ng",
-    ":layout_algorithm_test_ng",
     ":layout_property_test_ng",
     ":layout_wrapper_build_test_ng",
     ":layout_wrapper_node_test_ng",
     ":layout_wrapper_test_ng",
+    ":layout_algorithm_test_ng",
     ":overflow_test_ng",
+    ":overflow_collector_test_ng",
+    ":layout_algorithm_overflow_test_ng",
+    ":vertical_overflow_handler_horizontal_test_ng",
     "box:box_layout_algorithm_test_ng",
-    "safe_area:ignore_layout_safe_area_test_ng",
     "safe_area:safeArea_test_expandSafeArea_ng",
+    "safe_area:ignore_layout_safe_area_test_ng",
+    ":pixel_round_test_ng", 
   ]
 }

@@ -82,6 +82,8 @@
       OHOS::Ace::SystemProperties::*;
       OHOS::Ace::ThemeConstants::*;
       OHOS::Ace::UIContentImpl::*;
+      OHOS::Ace::ProgressComponent::ProgressComponent*;
+      OHOS::Ace::ProgressComponent::InitStyle*;
       OHOS::Ace::MemoryMonitor::*;
       OHOS::Ace::PerfMonitor::*;
       OHOS::Ace::DumpLog::*;
@@ -147,7 +149,10 @@
       OHOS::Ace::DividerModel::*;
       OHOS::Ace::EllipseModel::*;
       OHOS::Ace::ForEachModel::*;
-      OHOS::Ace::GaugeModel::*;
+      OHOS::Ace::NG::GaugeModelNG::*;
+      "OHOS::Ace::GaugeModel::GetInstance()";
+      "OHOS::Ace::GaugeModel::instance_";
+      "OHOS::Ace::GaugeModel::mutex_";
       OHOS::Ace::GridColModel::*;
       OHOS::Ace::GridModel::*;
       OHOS::Ace::GridItemModel::*;
@@ -376,19 +381,8 @@
       OHOS::Ace::NG::ImagePainter::DrawImage*;
       OHOS::Ace::NG::Modifier::*;
       OHOS::Ace::NG::ArkTSUtils::*;
-      OHOS::Ace::NG::TextPattern::*;
+      "OHOS::Ace::NG::TextPattern::TextPattern()";
       OHOS::Ace::NG::ViewAbstractModelStatic::*;
-      OHOS::Ace::NG::SelectOverlayClient::*;
-      OHOS::Ace::V2::HYPERLINK_ETS_TAG;
-      OHOS::Ace::V2::SYMBOL_ETS_TAG;
-      OHOS::Ace::NG::InputEventActuator::*;
-      OHOS::Ace::NG::GetHyperlinkDynamicModifier;
-      OHOS::Ace::NG::GetCJUIHyperlinkModifier;
-      OHOS::Ace::NG::TextAccessibilityProperty::*;
-      OHOS::Ace::NG::GeneratedModifier::*;
-
-      OHOS::Ace::PipelineBase::*;
-      OHOS::Ace::FontManager::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
@@ -442,11 +436,14 @@
       vtable?for?OHOS::Ace::NG::HyperlinkModelNG;
       vtable?for?OHOS::Ace::NG::HyperlinkModelStatic;
       vtable?for?OHOS::Ace::NG::HyperlinkPattern;
-      vtable?for?OHOS::Ace::NG::TextLayoutProperty;
       vtable?for?OHOS::Ace::NG::TextAccessibilityProperty;
       vtable?for?OHOS::Ace::Framework::HyperlinkModelImpl;
       vtable?for?OHOS::Ace::HyperlinkComponent;
       vtable?for?OHOS::Ace::FlexElement;
+      vtable?for?OHOS::Ace::NG::GaugeModelNG;
+      vtable?for?OHOS::Ace::GaugeModel;
+      vtable?for?OHOS::Ace::Framework::GaugeModelImpl;
+      vtable?for?OHOS::Ace::NG::TextLayoutProperty;
 
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;
@@ -474,6 +471,7 @@
       VTT?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
       VTT?for?OHOS::Ace::NG::OffscreenCanvasPattern;
       VTT?for?OHOS::Ace::NG::ParallelPagePattern;
+      VTT?for?OHOS::Ace::NG::TextLayoutProperty;
       VTT?for?OHOS::Ace::NG::ViewAdvancedRegister;
       VTT?for?OHOS::Ace::NG::ContainerModalView;
       VTT?for?OHOS::Ace::NG::Pattern;
@@ -547,6 +545,8 @@
       OHOS::Ace::Kit::OverlayManager::*;
       OHOS::Ace::Kit::UIContext::*;
       OHOS::Ace::Theme::*;
+      OHOS::Ace::TokenTheme::*;
+      OHOS::Ace::TimeEventProxy::*;
       OHOS::Ace::TokenColors::*;
       OHOS::Ace::NG::ListModelNG::*;
       OHOS::Ace::NG::ListItemModelNG::*;
@@ -592,11 +592,13 @@
       OHOS::Ace::PatternResourceManager::*;
 
       OHOS::Ace::NG::Validator::*;
+      OHOS::Ace::NG::CreateProxyNode*;
       OHOS::Ace::NG::Converter::ResourceConverter::*;
       OHOS::Ace::NG::CommonViewModelNG::CreateFrameNode*;
       *OHOS::Ace::NG::Converter::Convert*;
       *OHOS::Ace::NG::Converter::AssignCast*;
       *OHOS::Ace::NG::Converter::AssignArkValue*;
+      *OHOS::Ace::NG::Converter::OptConvertFromArkNumStrRes*;
 
       OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
       "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";
@@ -684,6 +686,14 @@
       OHOS::Ace::RenderText::*;
       OHOS::Ace::Framework::ViewStackProcessor::*;
       OHOS::Ace::ComposedElement::*;
+      OHOS::Ace::V2::ColumnComposedElement::*;
+      OHOS::Ace::RenderFlexItem::Create*;
+      OHOS::Ace::ScreenSystemManager::GetScreenWidth*;
+      OHOS::Ace::ScreenSystemManager::lock;
+      OHOS::Ace::GridContainerInfo::GetSizeType*;
+      OHOS::Ace::GridContainerInfo::GetColumns*;
+      OHOS::Ace::GridContainerInfo::GetGutterWidth*;
+      OHOS::Ace::Framework::DOMDiv::*;
       OHOS::Ace::V2::InspectorComposedElement::*;
       OHOS::Ace::Declaration::*;
       OHOS::Ace::Edge::NONE;
@@ -696,17 +706,23 @@
       OHOS::Ace::TouchEventTarget::SetCoordinateOffset*;
       OHOS::Ace::DOM_CLICK;
       OHOS::Ace::DOM_CATCH_BUBBLE_CLICK;
+      OHOS::Ace::ScreenSystemManager::GetInstance*;
       virtual?thunk?to?OHOS::Ace::Framework::DOMNode::*;
       virtual?thunk?to?OHOS::Ace::RenderElement::*;
       virtual?thunk?to?OHOS::Ace::Element::*;
       virtual?thunk?to?OHOS::Ace::V2::InspectorComposedElement::*;
       virtual?thunk?to?OHOS::Ace::Declaration::*;
+      virtual?thunk?to?OHOS::Ace::Framework::DOMDiv::*;
       VTT?for?OHOS::Ace::SoleChildElement;
       VTT?for?OHOS::Ace::ComposedElement;
       VTT?for?OHOS::Ace::ClickRecognizer;
+      VTT?for?OHOS::Ace::FocusNode;
+      VTT?for?OHOS::Ace::Framework::DOMDiv;
+      VTT?for?OHOS::Ace::V2::ColumnComposedElement;
       vtable?for?OHOS::Ace::SoleChildElement;
       vtable?for?OHOS::Ace::ClickRecognizer;
       non-virtual?thunk?to?OHOS::Ace::V2::InspectorComposedElement::*;
+      non-virtual?thunk?to?OHOS::Ace::V2::ColumnComposedElement::ToJsonObject*;
       VTT?for?OHOS::Ace::NG::NavigationStack;
 
       OHOS::Ace::LinearColor::TRANSPARENT;

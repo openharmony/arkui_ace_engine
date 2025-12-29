@@ -49,6 +49,7 @@
 #include "core/interfaces/native/implementation/rect_shape_peer.h"
 #include "core/interfaces/native/implementation/symbol_glyph_modifier_peer.h"
 #include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
+#include "core/interfaces/native/implementation/text_modifier_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -258,6 +259,31 @@ void AssignGradientColors(Gradient *gradient,
         auto color = OptConvert<Color>(colors->array[i].value0);
         auto position = Convert<float>(colors->array[i].value1);
         if (color.has_value()) {
+            NG::GradientColor gradientColor;
+            position = std::clamp(position, 0.0f, 1.0f);
+            gradientColor.SetColor(color.value());
+            gradientColor.SetHasValue(true);
+            gradientColor.SetDimension(CalcDimension(position * Converter::PERCENT_100, DimensionUnit::PERCENT));
+            gradient->AddColor(gradientColor);
+        }
+    }
+}
+
+void AssignGradientMetricsColors(Gradient *gradient,
+    const Opt_Array_Tuple_ColorMetrics_F64 *colorMetrics)
+{
+    std::optional<ColorSpace> referenceColorSpace = std::nullopt;
+    for (int32_t i = 0; i < colorMetrics->value.length; i++) {
+        auto color =  Converter::OptConvert<Color>(colorMetrics->value.array[i].value0);
+        auto position = Convert<float>(colorMetrics->value.array[i].value1);
+        if (color.has_value()) {
+            ColorSpace currentColorSpace = color.value().GetColorSpace();
+            if (!referenceColorSpace.has_value()) {
+                referenceColorSpace = currentColorSpace;
+            } else if (currentColorSpace != referenceColorSpace.value()) {
+                gradient->ClearColors();
+                return;
+            }
             NG::GradientColor gradientColor;
             position = std::clamp(position, 0.0f, 1.0f);
             gradientColor.SetColor(color.value());
@@ -2208,6 +2234,17 @@ RefPtr<PixelMap> Convert(const Ark_image_PixelMap& src)
 }
 
 template<>
+RenderingContextOptions Convert(const Ark_RenderingContextOptions& src)
+{
+    RenderingContextOptions result;
+    auto antialiasOpt = Converter::OptConvert<Ark_Boolean>(src.antialias);
+    if (antialiasOpt) {
+        result.antialias = antialiasOpt.value();
+    }
+    return result;
+}
+
+template<>
 void AssignCast(std::optional<float>& dst, const Ark_String& src)
 {
     auto value = Convert<std::string>(src);
@@ -2316,6 +2353,44 @@ bool ConvertFromString(const std::string& str, DimensionUnit unit, Dimension& di
     return true;
 }
 
+std::optional<Dimension> OptConvertFromArkResourceStr(const Ark_ResourceStr& src, DimensionUnit defaultUnit)
+{
+    std::optional<Dimension> dimension;
+    Converter::VisitUnion(src,
+        [&dimension, defaultUnit](const Ark_String& value) {
+            std::optional<std::string> optStr = Converter::OptConvert<std::string>(value);
+            if (optStr.has_value()) {
+                Dimension value;
+                auto result = ConvertFromString(optStr.value(), defaultUnit, value);
+                if (result) {
+                    dimension = value;
+                }
+            }
+        },
+        [&dimension, defaultUnit](const Ark_Resource& value) {
+            dimension = OptConvertFromArkResource(value, defaultUnit);
+        },
+        []() {});
+    return dimension;
+}
+
+std::optional<Dimension> OptConvertFromArkNumResStr(const Ark_Union_F64_ResourceStr& src, DimensionUnit defaultUnit)
+{
+    std::optional<Dimension> dimension;
+    Converter::VisitUnion(src,
+        [&dimension, defaultUnit](const Ark_Float64& value) {
+            std::optional<float> optValue = Converter::OptConvert<float>(value);
+            if (optValue.has_value()) {
+                dimension = Dimension(optValue.value(), defaultUnit);
+            }
+        },
+        [&dimension, defaultUnit](const Ark_ResourceStr& value) {
+            dimension = OptConvertFromArkResourceStr(value, defaultUnit);
+        },
+        []() {});
+    return dimension;
+}
+
 std::optional<Dimension> OptConvertFromArkResource(const Ark_Resource& src, DimensionUnit defaultUnit)
 {
     ResourceConverter converter(src);
@@ -2412,16 +2487,66 @@ std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, Dimensio
 {
     std::optional<Dimension> dimension = std::nullopt;
     Converter::VisitUnion(src,
-        [&dimension](const Ark_Float64& value) {
-            dimension = Converter::Convert<Dimension>(value);
+        [&dimension, defaultUnit](const Ark_Float64& value) {
+            std::optional<float> optValue = Converter::OptConvert<float>(value);
+            if (optValue.has_value()) {
+                dimension = Dimension(optValue.value(), defaultUnit);
+            }
         },
-        [&dimension](const Ark_String& value) {
-            dimension = Converter::Convert<Dimension>(value);
+        [&dimension, defaultUnit](const Ark_String& value) {
+            std::optional<std::string> optStr = Converter::OptConvert<std::string>(value);
+            if (optStr.has_value()) {
+                Dimension value;
+                auto result = ConvertFromString(optStr.value(), defaultUnit, value);
+                if (result) {
+                    dimension = value;
+                }
+            }
         },
         [&dimension, defaultUnit](const Ark_Resource& value) {
             dimension = OptConvertFromArkLengthResource(value, defaultUnit);
         },
         [&dimension]() {});
+    return dimension;
+}
+
+std::optional<Dimension> OptConvertFromResourceStr(const Ark_ResourceStr& src, DimensionUnit defaultUnit)
+{
+    std::optional<Dimension> dimension;
+    Converter::VisitUnion(src,
+        [&dimension, defaultUnit](const Ark_String& value) {
+            std::optional<std::string> optStr = Converter::OptConvert<std::string>(value);
+            if (optStr.has_value()) {
+                Dimension value;
+                auto result = ConvertFromString(optStr.value(), defaultUnit, value);
+                if (result) {
+                    dimension = value;
+                }
+            }
+        },
+        [&dimension, defaultUnit](const Ark_Resource& value) {
+            dimension = OptConvertFromArkResource(value, defaultUnit);
+        },
+        []() {});
+
+    return dimension;
+}
+
+std::optional<Dimension> OptConvertFromF64ResourceStr(const Opt_Union_F64_ResourceStr& src, DimensionUnit defaultUnit)
+{
+    std::optional<Dimension> dimension;
+    Converter::VisitUnion(src,
+        [&dimension, defaultUnit](const Ark_Float64& value) {
+            std::optional<float> optValue = Converter::OptConvert<float>(value);
+            if (optValue.has_value()) {
+                dimension = Dimension(optValue.value(), defaultUnit);
+            }
+        },
+        [&dimension, defaultUnit](const Ark_ResourceStr& value) {
+            dimension = OptConvertFromResourceStr(value, defaultUnit);
+        },
+        []() {});
+
     return dimension;
 }
 
@@ -3726,7 +3851,24 @@ void AssignCast(std::optional<NavigationTitlebarOptions>& dst, const Ark_Navigat
     dst = NavigationTitlebarOptions();
     dst->bgOptions = Converter::Convert<NavigationBackgroundOptions>(value);
     dst->brOptions = Converter::Convert<NavigationBarOptions>(value);
+    dst->textOptions = Converter::Convert<NavigationTextOptions>(value);
     dst->enableHoverMode = Converter::OptConvert<bool>(value.enableHoverMode).value_or(false);
+}
+
+template<>
+NG::NavigationTextOptions Convert(const Ark_NavigationTitleOptions& src)
+{
+    NG::NavigationTextOptions textOptions;
+    if (src.mainTitleModifier.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        textOptions.mainTitleApplyFunc = src.mainTitleModifier.value->textApply;
+        PeerUtils::DestroyPeer(src.mainTitleModifier.value);
+    }
+
+    if (src.subTitleModifier.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        textOptions.subTitleApplyFunc = src.subTitleModifier.value->textApply;
+        PeerUtils::DestroyPeer(src.subTitleModifier.value);
+    }
+    return textOptions;
 }
 
 template<>
@@ -3923,6 +4065,7 @@ void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src)
     uint8_t blue = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.blue_));
     uint8_t alpha = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.alpha_));
     dst = Color::FromARGB(alpha, red, green, blue);
+    dst->SetColorSpace(static_cast<ColorSpace>(src.colorSpace_));
 }
 
 template<>

@@ -407,10 +407,62 @@ class FormComponentModifier extends ArkFormComponentComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class GaugeModifier extends ArkGaugeComponent {
+
+class LazyArkGaugeComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkGaugeComponent.module === undefined) {
+      LazyArkGaugeComponent.module = globalThis.requireNapi('arkui.components.arkgauge');
+    }
+    this.lazyComponent = LazyArkGaugeComponent.module.createComponent(nativePtr, classType);
+    console.log('LazyArkGaugeComponent lazyload nativeModule');
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  value(value) {
+    this.lazyComponent.value(value);
+    return this;
+  }
+  startAngle(angle) {
+    this.lazyComponent.startAngle(angle);
+    return this;
+  }
+  endAngle(angle) {
+    this.lazyComponent.endAngle(angle);
+    return this;
+  }
+  colors(colors) {
+    this.lazyComponent.colors(colors);
+    return this;
+  }
+  strokeWidth(length) {
+    this.lazyComponent.strokeWidth(length);
+    return this;
+  }
+  description(value) {
+    throw new Error('Method not implemented.');
+  }
+  trackShadow(value) {
+    this.lazyComponent.trackShadow(value);
+    return this;
+  }
+  indicator(value) {
+    this.lazyComponent.indicator(value);
+    return this;
+  }
+  contentModifier(value) {
+    this.lazyComponent.contentModifier(value);
+    return this;
+  }
+}
+
+class GaugeModifier extends LazyArkGaugeComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

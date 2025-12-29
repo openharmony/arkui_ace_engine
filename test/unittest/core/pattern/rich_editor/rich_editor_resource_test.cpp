@@ -283,6 +283,9 @@ HWTEST_F(RichEditorStyleManagerTest, AddSymbolColorResToSpanNodeTest001, TestSiz
     symbolColorList.push_back(Color());
     symbolColorList.push_back(Color());
 
+    /**
+     * @tc.steps: step1. test symbol in new flow
+     */
     g_isConfigChangePerform = true;
     StyleManager::AddSymbolColorResource(textStyle, resObjArr);
     textStyle.SetSymbolColorList(symbolColorList);
@@ -294,6 +297,9 @@ HWTEST_F(RichEditorStyleManagerTest, AddSymbolColorResToSpanNodeTest001, TestSiz
 
     spanNode = AceType::MakeRefPtr<SpanNode>(1);
 
+    /**
+     * @tc.steps: step2. test symbol in old flow
+     */
     g_isConfigChangePerform = false;
     StyleManager::AddSymbolColorResource(spanNode, textStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 3);
@@ -451,6 +457,13 @@ HWTEST_F(RichEditorStyleManagerTest, UpdatePropertyTest001, TestSize.Level0) {
 
     richEditorPattern->OnColorModeChange(0);
     richEditorPattern->UpdatePlaceholderFontColor(color);
+
+    // test update placeholder textColor
+    auto layoutProperty = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto placeholderTextColor = layoutProperty->GetPlaceholderTextColor();
+    EXPECT_TRUE(placeholderTextColor.has_value());
+    EXPECT_EQ(placeholderTextColor.value(), color);
 }
 
 }

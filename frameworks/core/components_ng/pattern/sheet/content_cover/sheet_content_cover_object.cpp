@@ -291,6 +291,7 @@ std::function<void()> SheetContentCoverObject::GetSheetTransitionFinishEvent(boo
             pattern->OnDisappear();
             overlayManager->FireAutoSave(sheet);
             overlayManager->RemoveSheet(sheet);
+            pattern->FireCallback("false");
         };
     }
 }

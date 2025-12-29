@@ -19,7 +19,7 @@ import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { StateMgmtDFX } from '../tools/stateMgmtDFX';
-export class LocalDecoratedVariable<T> extends DecoratedV2VariableBase implements ILocalDecoratedVariable<T> {
+export class LocalDecoratedVariable<T> extends DecoratedV2VariableBase<T> implements ILocalDecoratedVariable<T> {
     public readonly backing_: IBackingValue<T>;
     constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T) {
         super('@Local', owningView, varName);
@@ -43,5 +43,9 @@ export class LocalDecoratedVariable<T> extends DecoratedV2VariableBase implement
             return;
         }
         this.backing_.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
+    }
+
+    resetOnReuse(newValue: T): void {
+        this.set(newValue);
     }
 }

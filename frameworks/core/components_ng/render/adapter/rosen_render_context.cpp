@@ -32,6 +32,7 @@
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
+#include "render_service_client/core/ui/rs_union_node.h"
 #include "rosen_render_context.h"
 
 #include "base/geometry/calc_dimension.h"
@@ -581,10 +582,43 @@ void RosenRenderContext::CreateNodeByType(
             }
             break;
         }
+        case ContextType::UNION: {
+            rsNode_ = Rosen::RSUnionNode::Create(false, isTextureExportNode, rsContext);
+            break;
+        }
         case ContextType::EXTERNAL:
             break;
         default:
             break;
+    }
+}
+
+void RosenRenderContext::SetEffectLayer(const ContextParam& param)
+{
+    std::shared_ptr<Rosen::RSUIContext> rsContext;
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        auto pipeline = GetPipelineContext();
+        rsContext = GetRSUIContext(pipeline);
+        if (!rsContext) {
+            TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN, "rsnode create before rosenwindow");
+            rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
+            rsUIDirector_->Init(true, true);
+            rsContext = rsUIDirector_->GetRSUIContext();
+        }
+    }
+    if (param.type == RenderContext::ContextType::EFFECT) {
+        auto isTextureExportNodeEffect = ViewStackProcessor::GetInstance()->IsExportTexture();
+        rsNode_ = Rosen::RSEffectNode::Create(false, isTextureExportNodeEffect, rsContext);
+    } else if (param.type == RenderContext::ContextType::COMPOSITE_COMPONENT) {
+        auto isTextureExportNodeComponent = ViewStackProcessor::GetInstance()->IsExportTexture();
+        Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param.surfaceName.value_or(""),
+            .isTextureExportNode = isTextureExportNodeComponent };
+        rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true, rsContext);
+    }
+
+    if (rsNode_) {
+        SetSkipCheckInMultiInstance();
+        SetRSNode(rsNode_);
     }
 }
 
@@ -817,14 +851,20 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
+    OffsetF paddingOffset;
+    auto&& padding = geometryNode->GetPadding();
+    if (padding && useContentRectForRSFrame_ && !adjustRSFrameByContentRect_ && host->GetTag() == V2::IMAGE_ETS_TAG) {
+        paddingOffset = OffsetF { padding->left.value_or(0), padding->top.value_or(0) };
+    }
     auto paintTask = [contentSize = geometryNode->GetFrameSize(), frameSize = geometryNode->GetMarginFrameSize(),
                          offset = geometryNode->GetMarginFrameOffset(), frameOffset = geometryNode->GetFrameOffset(),
-                         flag](RSCanvas& rsCanvas) mutable {
+                         flag, paddingOffset](RSCanvas& rsCanvas) mutable {
         if (!flag) {
             return;
         }
         DebugBoundaryPainter painter(contentSize, frameSize);
         painter.SetFrameOffset(frameOffset);
+        painter.SetPaddingOffset(paddingOffset);
         painter.DrawDebugBoundaries(rsCanvas, offset);
     };
 
@@ -3118,6 +3158,13 @@ void RosenRenderContext::OnUseEffectTypeUpdate(EffectType effectType)
     OnUseEffectUpdate(useEffect);
 }
 
+void RosenRenderContext::OnUseUnionUpdate(bool useUnion)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetUseUnion(useUnion);
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnUseShadowBatchingUpdate(bool useShadowBatching)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -3767,7 +3814,10 @@ float RosenRenderContext::OnePixelValueRounding(float value)
 float RosenRenderContext::OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor)
 {
     float fractials = fmod(value, 1.0f);
-    if (fractials < 0.0f) {
+    if (NearEqual(fractials, 0.0f)) {
+        return value;
+    }
+    if (LessNotEqual(fractials, 0.0f)) {
         ++fractials;
     }
     if (forceCeil) {
@@ -4557,7 +4607,7 @@ bool RosenRenderContext::AddNodeToRsTree()
     auto parentNode = node->GetParentFrameNode();
     CHECK_NULL_RETURN(parentNode, false);
     parentNode->MarkNeedSyncRenderTree();
-    parentNode->RebuildRenderContextTree();
+    parentNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     return true;
 }
 
@@ -4669,9 +4719,10 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     std::unordered_map<Rosen::RSNode::SharedPtr, bool> childNodeMap;
     auto nowRSNodes = GetChildrenRSNodes(childNodesNew, childNodeMap);
     std::vector<Rosen::RSNode::SharedPtr> childNodes;
-    for (auto child : rsNode_->GetChildren()) {
-        if (child.lock()) {
-            childNodes.emplace_back(child.lock());
+    for (auto&& child : rsNode_->GetChildren()) {
+        auto childSptr = child.lock();
+        if (childSptr) {
+            childNodes.emplace_back(childSptr);
         }
     }
     if (nowRSNodes == childNodes) {
@@ -4683,11 +4734,12 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     }
     // save a copy of previous children because for loop will delete child
     auto preChildNodes = rsNode_->GetChildren();
-    for (auto node : preChildNodes) {
-        if (node.lock() == nullptr) {
+    for (auto&& node : preChildNodes) {
+        auto nodePtr = node.lock();
+        if (nodePtr == nullptr) {
             continue;
         }
-        auto iter = childNodeMap.find(node.lock());
+        auto iter = childNodeMap.find(nodePtr);
         if (iter == childNodeMap.end()) {
             rsNode_->RemoveChildByNodeSelf(node);
         } else {
@@ -4696,15 +4748,16 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     }
     for (size_t index = 0; index != nowRSNodes.size(); ++index) {
         auto node = rsNode_->GetChildByIndex(index);
-        if (node != nowRSNodes[index]) {
-            auto iter = childNodeMap.find(nowRSNodes[index]);
+        const auto& newNode = nowRSNodes[index];
+        if (node != newNode) {
+            auto iter = childNodeMap.find(newNode);
             if (iter == childNodeMap.end()) {
                 continue;
             }
             if (iter->second) {
-                rsNode_->MoveChild(nowRSNodes[index], index);
+                rsNode_->MoveChild(newNode, index);
             } else {
-                rsNode_->AddChild(nowRSNodes[index], index);
+                rsNode_->AddChild(newNode, index);
             }
         }
     }
@@ -5176,6 +5229,8 @@ void RosenRenderContext::OnMagnifierUpdate(const MagnifierParams& magnifierParam
     rsMagnifierParams->cornerRadius_ = magnifierParams.cornerRadius_;
     rsMagnifierParams->offsetX_ = magnifierParams.offsetX_;
     rsMagnifierParams->offsetY_ = magnifierParams.offsetY_;
+    rsMagnifierParams->zoomOffsetX_ = magnifierParams.zoomOffsetX_;
+    rsMagnifierParams->zoomOffsetY_ = magnifierParams.zoomOffsetY_;
     rsMagnifierParams->shadowOffsetX_ = magnifierParams.shadowOffsetX_;
     rsMagnifierParams->shadowOffsetY_ = magnifierParams.shadowOffsetY_;
     rsMagnifierParams->shadowSize_ = magnifierParams.shadowSize_;
@@ -6786,6 +6841,12 @@ void RosenRenderContext::OnRenderGroupUpdate(bool isRenderGroup)
     rsNode_->MarkNodeGroup(isRenderGroup);
 }
 
+void RosenRenderContext::UpdateAdaptiveGroup(bool isRenderGroup, bool useAdaptiveFilter)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkNodeGroup(isRenderGroup, true, false, useAdaptiveFilter);
+}
+
 void RosenRenderContext::UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -8040,5 +8101,13 @@ void RosenRenderContext::SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegi
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetNeedUseCmdlistDrawRegion(needUseCmdlistDrawRegion);
+}
+
+void RosenRenderContext::SetUnionSpacing(float spacing)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto unionNode = rsNode_->ReinterpretCastTo<Rosen::RSUnionNode>();
+    CHECK_NULL_VOID(unionNode);
+    unionNode->SetUnionSpacing(spacing);
 }
 } // namespace OHOS::Ace::NG

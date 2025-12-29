@@ -195,7 +195,7 @@ static bool GetOptionsRegion(ani_env* env, ani_object options, ArkUIComponentSna
     return true;
 }
 
-static bool ParseColorModeOptions(
+static void ParseColorModeOptions(
     ani_env* env, ani_object colorModeObject, ArkUIComponentSnapshotOptions& snapShotOptions)
 {
     ani_ref colorSpaceRef;
@@ -227,28 +227,33 @@ static bool ParseColorModeOptions(
         }
         snapShotOptions.colorSpaceModeOptions.isAuto = isAuto;
     }
-
-    return true;
 }
 
 static bool GetOptionsColorMode(ani_env* env, ani_object options, ArkUIComponentSnapshotOptions& snapShotOptions)
 {
     ani_ref colorModeRef;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "colorMode", &colorModeRef)) {
-        HILOGE("AceComponentSnapshot, The \"colorMode\" attribute cannot be obtained from the parameter.");
+        HILOGD("AceComponentSnapshot, The \"colorMode\" attribute cannot be obtained from the parameter.");
         return false;
     }
     ani_boolean isColorModeUndefined = true;
     env->Reference_IsUndefined(colorModeRef, &isColorModeUndefined);
     if (isColorModeUndefined) {
-        HILOGE("AceComponentSnapshot, The \"colorMode\" attribute is undefined.");
+        HILOGD("AceComponentSnapshot, The \"colorMode\" attribute is undefined.");
+        return false;
+    }
+    ani_boolean isNull = false;
+    env->Reference_IsNull(colorModeRef, &isNull);
+    if (isNull) {
+        HILOGD("AceComponentSnapshot, The \"colorMode\" attribute is null.");
         return false;
     }
 
-    return ParseColorModeOptions(env, static_cast<ani_object>(colorModeRef), snapShotOptions);
+    ParseColorModeOptions(env, static_cast<ani_object>(colorModeRef), snapShotOptions);
+    return true;
 }
 
-static bool ParseDynamicRangeModeOptions(
+static void ParseDynamicRangeModeOptions(
     ani_env* env, ani_object dynamicRangeModeObject, ArkUIComponentSnapshotOptions& snapShotOptions)
 {
     ani_ref dynamicRangeModeRef;
@@ -282,25 +287,30 @@ static bool ParseDynamicRangeModeOptions(
         }
         snapShotOptions.dynamicRangeModeOptions.isAuto = isAuto;
     }
-
-    return true;
 }
 
 static bool GetOptionsDynamicRangeMode(ani_env* env, ani_object options, ArkUIComponentSnapshotOptions& snapShotOptions)
 {
     ani_ref dynamicRangeModeRef;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "dynamicRangeMode", &dynamicRangeModeRef)) {
-        HILOGE("AceComponentSnapshot, The \"dynamicRangeMode\" attribute cannot be obtained from the parameter.");
+        HILOGD("AceComponentSnapshot, The \"dynamicRangeMode\" attribute cannot be obtained from the parameter.");
         return false;
     }
     ani_boolean isDynamicRangeModeUndefined = true;
     env->Reference_IsUndefined(dynamicRangeModeRef, &isDynamicRangeModeUndefined);
     if (isDynamicRangeModeUndefined) {
-        HILOGE("AceComponentSnapshot, The \"dynamicRangeMode\" attribute is undefined.");
+        HILOGD("AceComponentSnapshot, The \"dynamicRangeMode\" attribute is undefined.");
+        return false;
+    }
+    ani_boolean isNull = false;
+    env->Reference_IsNull(dynamicRangeModeRef, &isNull);
+    if (isNull) {
+        HILOGD("AceComponentSnapshot, The \"dynamicRangeMode\" attribute is null.");
         return false;
     }
 
-    return ParseDynamicRangeModeOptions(env, static_cast<ani_object>(dynamicRangeModeRef), snapShotOptions);
+    ParseDynamicRangeModeOptions(env, static_cast<ani_object>(dynamicRangeModeRef), snapShotOptions);
+    return true;
 }
 
 static bool GetOptions(ani_env* env, ani_object options, ArkUIComponentSnapshotOptions& snapShotOptions)
@@ -452,7 +462,7 @@ void CreateFromBuilderWithCallback(ani_env* env, [[maybe_unused]] ani_object ani
 
     // not support auto mode for colorMode and dynamicRangeMode
     if (param.options.colorSpaceModeOptions.isAuto || param.options.dynamicRangeModeOptions.isAuto) {
-        HILOGE("AceComponentSnapshot, SnapshotOptions's colorMode or dynamicRangeMode auto mode is not supported.");
+        HILOGD("AceComponentSnapshot, isAuto(true) is not supported for offscreen node snapshots.");
         ani_object result = {};
         ArkUIComponentSnapshotAsync asyncCtx;
         CreateCallbackFunc(env, asyncCtx, callbackObj, destroyCallbackObj, result);
@@ -482,7 +492,7 @@ ani_object CreateFromBuilderWithPromise(ani_env* env, [[maybe_unused]] ani_objec
 
     // not support auto mode for colorMode and dynamicRangeMode
     if (param.options.colorSpaceModeOptions.isAuto || param.options.dynamicRangeModeOptions.isAuto) {
-        HILOGE("AceComponentSnapshot, SnapshotOptions's colorMode or dynamicRangeMode auto mode is not supported.");
+        HILOGD("AceComponentSnapshot, isAuto(true) is not supported for offscreen node snapshots.");
         ani_object result = {};
         ArkUIComponentSnapshotAsync asyncCtx;
         CreateCallbackFunc(env, asyncCtx, nullptr, destroyCallbackObj, result);
@@ -513,7 +523,7 @@ ani_object CreateFromComponentWithPromise(ani_env* env, [[maybe_unused]] ani_obj
 
     // not support auto mode for colorMode and dynamicRangeMode
     if (param.options.colorSpaceModeOptions.isAuto || param.options.dynamicRangeModeOptions.isAuto) {
-        HILOGE("AceComponentSnapshot, SnapshotOptions's colorMode or dynamicRangeMode auto mode is not supported.");
+        HILOGD("AceComponentSnapshot, isAuto(true) is not supported for offscreen node snapshots.");
         ani_object result = {};
         ArkUIComponentSnapshotAsync asyncCtx;
         CreateCallbackFunc(env, asyncCtx, nullptr, destroyCallbackObj, result);

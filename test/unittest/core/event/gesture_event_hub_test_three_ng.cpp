@@ -1049,4 +1049,141 @@ HWTEST_F(GestureEventHubTestNg, TryDoDragStartAnimation_001, TestSize.Level1)
     ret = guestureEventHub->TryDoDragStartAnimation(context, subWindow, info, data);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: PrepareDragStartInfo_001
+ * @tc.desc: Test PrepareDragStartInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, PrepareDragStartInfo_001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create GestureEventHub.
+    * @tc.expected: gestureEventHub is not null.
+    */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto frameNodeGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(frameNodeGeometryNode, nullptr);
+    frameNodeGeometryNode->SetFrameSize(SizeF(100, 50));
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+   /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    ASSERT_NE(event, nullptr);
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    DragPreviewOption previewOption;
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION;
+    frameNode->SetDragPreviewOptions(previewOption);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    auto menuWrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(menuWrapperNode, nullptr);
+    dragDropManager->SetMenuWrapperNode(menuWrapperNode);
+
+    /**
+     * @tc.steps: step3. call PrepareDragStartInfo.
+     */
+    PreparedInfoForDrag data;
+    data.dragPreviewRect = RectF(OffsetF(100, 200), SizeF(100, 200));
+    guestureEventHub->PrepareDragStartInfo(pipeline, data, frameNode);
+    EXPECT_EQ(data.originPreviewRect.Width(), 100);
+}
+
+/**
+ * @tc.name: PrepareDragStartInfo_002
+ * @tc.desc: Test PrepareDragStartInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, PrepareDragStartInfo_002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create GestureEventHub.
+    * @tc.expected: gestureEventHub is not null.
+    */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+   /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    ASSERT_NE(event, nullptr);
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    DragPreviewOption previewOption;
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION;
+    frameNode->SetDragPreviewOptions(previewOption);
+
+    auto pipeline = frameNode->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(imageNode, nullptr);
+    auto imageNodeGeometryNode = imageNode->GetGeometryNode();
+    ASSERT_NE(imageNodeGeometryNode, nullptr);
+    imageNodeGeometryNode->SetFrameSize(SizeF(100, 50));
+    columnNode->AddChild(imageNode);
+    auto overlayManager = pipeline->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->pixmapColumnNodeWeak_ = AceType::WeakClaim(AceType::RawPtr(columnNode));;
+    overlayManager->hasPixelMap_ = true;
+
+    /**
+     * @tc.steps: step3. call PrepareDragStartInfo.
+     */
+    PreparedInfoForDrag data;
+    data.dragPreviewRect = RectF(OffsetF(100, 200), SizeF(100, 200));
+    guestureEventHub->PrepareDragStartInfo(pipeline, data, frameNode);
+    EXPECT_EQ(data.originPreviewRect.Width(), 100);
+}
+
+/**
+ * @tc.name: PrepareDragStartInfo_003
+ * @tc.desc: Test PrepareDragStartInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, PrepareDragStartInfo_003, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create GestureEventHub.
+    * @tc.expected: gestureEventHub is not null.
+    */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 102, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+   /**
+     * @tc.steps: step2. updates event and pipeline attributes.
+     */
+    auto event = guestureEventHub->eventHub_.Upgrade();
+    ASSERT_NE(event, nullptr);
+    event->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    DragPreviewOption previewOption;
+    previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION;
+    frameNode->SetDragPreviewOptions(previewOption);
+
+    auto pipeline = frameNode->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+
+    /**
+     * @tc.steps: step3. call PrepareDragStartInfo.
+     */
+    PreparedInfoForDrag data;
+    data.dragPreviewRect = RectF(OffsetF(100, 200), SizeF(100, 200));
+    guestureEventHub->PrepareDragStartInfo(pipeline, data, frameNode);
+    EXPECT_EQ(data.originPreviewRect.Width(), 100);
+}
 } // namespace OHOS::Ace::NG

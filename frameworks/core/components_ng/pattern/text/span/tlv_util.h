@@ -155,6 +155,9 @@ constexpr uint8_t TLV_TEXTVERTICALALIGN_TAG = 0xA2;
 
 constexpr uint8_t TLV_IMAGESPANATTRIBUTE_SUPPORTSVG2_TAG = 0xA3;
 
+constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_TEXTDIRECTION = 0xA4;
+constexpr uint8_t TLV_TEXTDIRECTION_TAG = 0xA5;
+
 #define TLV_DEFINE_ENUM_TYPE(type, tag) \
 public:                                                                     \
     static void Write##type(std::vector<uint8_t>& buff, type value)         \
@@ -241,6 +244,7 @@ public:
     TLV_DEFINE_ENUM_TYPE(VerticalAlign, TLV_VERTICALALIGN_TAG);
     TLV_DEFINE_ENUM_TYPE(ImageFit, TLV_IMAGEFIT_TAG);
     TLV_DEFINE_ENUM_TYPE(TextVerticalAlign, TLV_TEXTVERTICALALIGN_TAG);
+    TLV_DEFINE_ENUM_TYPE(TextDirection, TLV_TEXTDIRECTION_TAG);
 
     static void WriteString(std::vector<uint8_t>& buff, const std::string& value);
     static std::string ReadString(std::vector<uint8_t>& buff, int32_t& cursor);

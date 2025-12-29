@@ -226,6 +226,7 @@ public:
     void UpdateFrameNodeState(int32_t nodeId) override;
 
     void ReleaseCacheEvent();
+    void ReleaseUIExtCacheEvent();
     void UpdatePageMode(const std::string& pageMode) override
     {
         pageMode_ = std::make_optional(pageMode);
@@ -472,6 +473,8 @@ public:
 
     bool NeedChangeToReadableNode(const RefPtr<NG::FrameNode>& curFrameNode,
         RefPtr<NG::FrameNode>& readableNode) override;
+
+    void ResetBlockedEvent();
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
@@ -878,6 +881,12 @@ private:
         const int64_t elementId, const Accessibility::AccessibilityFocusMoveParam param,
         const int32_t requestId, Accessibility::AccessibilityElementOperatorCallback &callback);
 
+    void ActAccessibilityActionPreHandle(Accessibility::ActionType action,
+     const RefPtr<NG::FrameNode>& frameNode);
+    bool ActAccessibilityAction(Accessibility::ActionType action,
+        const std::map<std::string, std::string>& actionArguments,
+        RefPtr<NG::AccessibilityProperty> accessibilityProperty, const RefPtr<NG::FrameNode>& frameNode);
+
     std::string callbackKey_;
     uint32_t windowId_ = 0;
     std::unordered_map<uint32_t, std::shared_ptr<JsAccessibilityStateObserver>> stateObserver_;
@@ -922,6 +931,8 @@ private:
     NG::HoverTransparentCallbackController hoverTransparentCallbackController_;
 
     bool isIgnoreAllAction_ = false;
+
+    NG::AccessibilityEventBlockerInAction blockerInAction_;
 };
 
 } // namespace OHOS::Ace::Framework

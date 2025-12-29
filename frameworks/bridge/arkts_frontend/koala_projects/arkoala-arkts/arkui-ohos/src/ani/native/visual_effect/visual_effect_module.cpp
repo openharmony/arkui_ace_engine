@@ -55,7 +55,7 @@ ani_enum GetOrCreateMaterialEnumClass([[maybe_unused]] ani_env* env)
     ani_enum materialTypeEnum = nullptr;
     auto nmSpace = GetOrCreateMaterialNamespace(env);
     CHECK_NULL_RETURN(nmSpace, nullptr);
-    ANI_CALL(env, Namespace_FindEnum(nmSpace, "MaterialType", &materialTypeEnum), return nullptr);
+    ANI_CALL(env, FindEnum("@ohos.arkui.uiMaterial.uiMaterial.MaterialType", &materialTypeEnum), return nullptr);
     ani_ref globalMaterialTypeRef = nullptr;
     ANI_CALL(env, GlobalReference_Create(materialTypeEnum, &globalMaterialTypeRef), return nullptr);
     globalMaterialTypeEnum = static_cast<ani_enum>(globalMaterialTypeRef);

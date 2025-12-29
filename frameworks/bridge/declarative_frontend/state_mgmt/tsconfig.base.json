@@ -15,6 +15,9 @@
     "src/lib/common/ifelse_native.d.ts",
     "src/lib/common/ark_component.d.ts",
 
+    // declarations for types missing in runtime (for 3rd party libs compilation)
+    "src/lib/common/runtime-stubs.d.ts",
+
     // interop configure
     "src/lib/interop/interop_configure.ts",
     "src/lib/interop/interop_module.ts",
@@ -69,6 +72,7 @@
     "src/lib/puv2_common/puv2_updatefunc.ts",
     "src/lib/puv2_common/puv2_view_native_base.d.ts",
     "src/lib/puv2_common/puv2_view_base.ts",
+    "src/lib/puv2_common/pu_lifecycle.ts",
 
     // partial_update specific
     "src/lib/partial_update/pu_types_events.ts",
@@ -93,7 +97,9 @@
     "src/lib/v2/v2_computed.ts",
     "src/lib/v2/v2_view.ts",
     "src/lib/v2/v2_decorators.ts",
-    "src/lib/v2/v2_json_coder.ts",
+    "src/lib/v2/v2_data_coder/json2.ts",
+    "src/lib/v2/v2_data_coder/data_coder.ts",
+    "src/lib/v2/v2_data_coder/json_coder.ts",
     "src/lib/v2/v2_make_observed.ts",
     "src/lib/v2/v2_recycle_pool.ts",
     "src/lib/common/sendable_type.ts",
@@ -116,6 +122,7 @@
     // sdk
     "src/lib/sdk/v2_persistence.ts",
     "src/lib/sdk/ui_utils.ts",
+    "src/lib/sdk/observed_util.ts",
     "src/lib/sdk/business_error.ts",
 
     // common
@@ -133,12 +140,15 @@
     // init
     "src/index.ts",
   ],
+
   "compilerOptions": {
+    "allowJs": true,
     "module": "none",
     "target": "ES2016",
     "outDir": "./distRelease/",
     "outFile": "./distRelease/stateMgmt.js",
-    "rootDir": "./src/",
+    "rootDir": "./",
+    "moduleResolution": "node",
     "declaration": true,
     "noEmitOnError": true,
     "experimentalDecorators": true,

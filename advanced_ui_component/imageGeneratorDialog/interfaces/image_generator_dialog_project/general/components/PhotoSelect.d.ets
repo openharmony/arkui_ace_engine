@@ -23,6 +23,8 @@ export declare struct PhotoSelect {
     @Param
     @Require
     readonly imageMatrixArr: number[][];
+    @Event
+    setImgCounts?: (count: number) => void;
     private getSelectPhotoLength;
     private openPhotoPicker;
     private deleteImageInfo;
@@ -33,8 +35,8 @@ export declare struct PhotoSelect {
     private handleSelectedUri;
     private invalidImageInfo;
     @Builder
-    previewImageInfo(e19: number): void;
+    previewImageInfo(index: number): void;
     @Builder
-    MyMagicCanvasSquaredBuilder(a18: number): void;
+    MyMagicCanvasSquaredBuilder(index: number): void;
     build(): void;
 }

@@ -6227,6 +6227,11 @@ struct ArkUINavigationModifier {
         void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node));
     void (*setNavBackButtonText)(ArkUINodeHandle node, ArkUI_CharPtr text, ArkUI_VoidPtr textResource);
     void (*resetNavBackButtonText)(ArkUINodeHandle node);
+    void (*hideDivider)(ArkUINodeHandle node);
+    void (*setDividerColor)(ArkUINodeHandle node, ArkUI_CharPtr color, ArkUI_VoidPtr colorRes, ArkUI_Bool definedColor);
+    void (*setDividerStartMargin)(ArkUINodeHandle node, ArkUI_CharPtr start, ArkUI_VoidPtr startRes);
+    void (*setDividerEndMargin)(ArkUINodeHandle node, ArkUI_CharPtr end, ArkUI_VoidPtr endRes);
+    void (*resetDividerStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUINavRouterModifier {
@@ -6237,6 +6242,8 @@ struct ArkUINavRouterModifier {
 };
 
 struct ArkUIGaugeModifier {
+    void (*createModel)(ArkUI_Float32 value, ArkUI_Float32 min, ArkUI_Float32 max);
+    void (*setIsShowLimitValue)(ArkUINodeHandle node, ArkUI_Bool isShowLimitValue);
     void (*setGaugeValue)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*resetGaugeValue)(ArkUINodeHandle node);
     void (*setGaugeStartAngle)(ArkUINodeHandle node, ArkUI_Float32 value);
@@ -6269,6 +6276,10 @@ struct ArkUIGaugeModifier {
     void (*setGradientColors)(
         ArkUINodeHandle node, const struct ArkUIGradientType* gradient, ArkUI_Uint32 weightLength);
     void (*resetGradientColors)(ArkUINodeHandle node);
+    void (*setUseSpecialDefaultIndicator)(ArkUINodeHandle node, ArkUI_Bool useSpecial);
+    void (*setIsShowDescription)(ArkUINodeHandle node, ArkUI_Bool isShowDescription);
+    void (*setDescription)();
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
 };
 
 struct ArkUIBadgeModifier {
@@ -6564,7 +6575,8 @@ struct ArkUISearchModifier {
         ArkUINodeHandle node, const struct ArkUIIconOptionsStruct* value, ArkUIImageIconRes* imageIconRes);
     void (*resetSearchSearchIcon)(ArkUINodeHandle node);
     void (*setSearchSearchButton)(
-        ArkUINodeHandle node, const struct ArkUISearchButtonOptionsStruct* value, ArkUIImageIconRes* imageIconRes);
+        ArkUINodeHandle node, const struct ArkUISearchButtonOptionsStruct* value, ArkUIImageIconRes* imageIconRes,
+        bool isThemeColor);
     void (*resetSearchSearchButton)(ArkUINodeHandle node);
     void (*setSearchFontColor)(ArkUINodeHandle node, ArkUI_Uint32 value, void* resRawPtr);
     void (*resetSearchFontColor)(ArkUINodeHandle node);
@@ -7366,6 +7378,9 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorSelectedDragPreviewStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetRichEditorSelectedDragPreviewStyle)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getRichEditorSelectedDragPreviewStyle)(ArkUINodeHandle node);
+    void (*setRichEditorSingleLine)(ArkUINodeHandle node, ArkUI_Bool singleLine);
+    void (*resetRichEditorSingleLine)(ArkUINodeHandle node);
+    ArkUI_Bool (*getRichEditorSingleLine)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {
@@ -8014,7 +8029,6 @@ struct ArkUINDKRenderNodeModifier {
     ArkUI_Int32 (*adoptChild)(ArkUINodeHandle node, ArkUINodeHandle child);
     ArkUI_Int32 (*getRenderNode)(ArkUINodeHandle node, ArkUIRenderNodeHandle* renderNode, ArkUI_Int32* renderNodeId);
     ArkUI_Int32 (*removeAdoptedChild)(ArkUINodeHandle node, ArkUINodeHandle child);
-    void (*detachRsNodeDuringDispose)(ArkUINodeHandle node);
 };
 
 /**

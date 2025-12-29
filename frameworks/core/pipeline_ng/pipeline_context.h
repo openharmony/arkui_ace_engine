@@ -203,9 +203,9 @@ public:
 
     void ReportSelectedText();
 
-    const RefPtr<PageInfo> GetLastPageInfo();
+    const RefPtr<PageInfo> GetLastPageInfo() const;
 
-    std::string GetNavDestinationPageName(const RefPtr<PageInfo>& pageInfo);
+    std::string GetNavDestinationPageName(const RefPtr<PageInfo>& pageInfo) const;
 
     std::string GetCurrentPageName();
 
@@ -1218,8 +1218,9 @@ public:
 
     bool GetContainerControlButtonVisible() override;
 
-    std::string GetBundleName();
-    std::string GetModuleName();
+    std::string GetBundleName() const;
+    std::string GetModuleName() const;
+    std::string GetWindowName() const;
 
     void SaveTranslateManager(std::shared_ptr<UiTranslateManagerImpl> uiTranslateManager)
     {
@@ -1237,6 +1238,14 @@ public:
     }
 
     void SetEnableSwipeBack(bool isEnable) override;
+    void SetIsRecycleInvisibleImageMemory(bool isEnable) override
+    {
+        isRecycledInvisibleImageMemory_ = isEnable;
+    }
+    std::optional<bool> GetIsRecycleInvisibleImageMemory() const override
+    {
+        return isRecycledInvisibleImageMemory_;
+    }
 
     Offset GetHostParentOffsetToWindow() const
     {
@@ -1280,6 +1289,7 @@ public:
 
     void SetIsWindowSizeDragging(bool isDragging);
     void GetAllPixelMap();
+    std::shared_ptr<UiTranslateManagerImpl> GetUiTranslateManagerImpl();
     std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector();
     void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)
     {
@@ -1350,7 +1360,21 @@ public:
     {
         isCustomNodeDeleteInTransition_ = isCustomNodeDeleteInTransition;
     }
+    void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline) override;
     RefPtr<ContentChangeManager>& GetContentChangeManager();
+    void GetAppInfo(std::shared_ptr<JsonValue>& root) const;
+
+    void OnLayoutChildrenCompleted(const std::string& componentId);
+    void OnLayoutCompleted(int32_t uniqueId);
+    void OnDrawCompleted(int32_t uniqueId);
+    void OnDrawChildrenCompleted(int32_t uniqueId);
+    void OnLayoutChildrenCompleted(int32_t uniqueId);
+    void SetNeedRenderNodeByUniqueId(const WeakPtr<FrameNode>& node);
+    void SetNeedRenderForLayoutChildrenNode(const WeakPtr<NG::UINode>& node);
+    void UpdateDrawLayoutChildObserver(int32_t uniqueId, bool isClearLayoutObserver, bool isClearDrawObserver) override;
+    void UpdateDrawLayoutChildObserver(
+        const std::string& inspectorKey, bool isClearLayoutObserver, bool isClearDrawObserver) override;
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1439,6 +1463,7 @@ private:
     void ProcessDelayTasks();
 
     void InspectDrew();
+    void InspectLayoutChildren();
 
     void FlushBuildFinishCallbacks();
 
@@ -1515,6 +1540,7 @@ private:
     void UpdateDVSyncTime(uint64_t nanoTimestamp, const std::string& abilityName, uint64_t vsyncPeriod);
     void NotifyCoastingAxisEventOnHide();
     void ResSchedReportAxisEvent(const AxisEvent& event) const;
+    void ClearInspectorOffScreenNodes();
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
@@ -1717,6 +1743,9 @@ private:
     std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
     std::shared_ptr<ResSchedClickOptimizer> clickOptimizer_;
     RefPtr<ContentChangeManager> contentChangeMgr_;
+    std::set<WeakPtr<FrameNode>> needRenderNodeByUniqueId_;
+    std::set<WeakPtr<NG::UINode>> needRenderForLayoutChildrenNodes_;
+    std::optional<bool> isRecycledInvisibleImageMemory_ = std::nullopt;
 };
 
 /**

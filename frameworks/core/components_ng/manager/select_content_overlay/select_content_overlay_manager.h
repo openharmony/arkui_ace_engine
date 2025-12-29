@@ -53,7 +53,7 @@ public:
     bool CloseCurrent(bool animation, CloseReason reason);
     void CloseWithOverlayId(int32_t overlayId, CloseReason reason, bool animation);
     void ShowOptionMenu();
-    void HideOptionMenu(bool noAnimation = false);
+    void HideOptionMenu(bool noAnimation = false, bool showSubMenu = false);
     void ToggleOptionMenu();
     void DisableMenu();
     void EnableMenu();
@@ -107,7 +107,7 @@ public:
     void FocusFirstFocusableChildInMenu();
     void NotifyAccessibilityOwner();
     void UpdateIsSingleHandle(bool isSingleHandle);
-    static bool IsPasteOption(const RefPtr<UINode>& node);
+    static RefPtr<UINode> GetSecurityPasteButtonNode(const RefPtr<UINode>& node);
 
     int32_t GetTextSelectionHolderId();
     void SetTextSelectionHolderId(int32_t id);

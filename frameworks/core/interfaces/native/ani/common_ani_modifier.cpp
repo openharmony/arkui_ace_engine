@@ -480,8 +480,6 @@ ani_double Vp2px(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, 0);
     ContainerScope cope(instanceId);
     double density = PipelineBase::GetCurrentDensity();
     return value * density;
@@ -492,8 +490,6 @@ ani_double Px2vp(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, 0);
     ContainerScope cope(instanceId);
     double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
@@ -507,8 +503,6 @@ ani_double Fp2px(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, 0);
     ContainerScope cope(instanceId);
     double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
@@ -529,8 +523,6 @@ ani_double Px2fp(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, 0);
     ContainerScope cope(instanceId);
     double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
@@ -553,8 +545,6 @@ ani_double Lpx2px(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, 0);
     ContainerScope cope(instanceId);
     double density = PipelineBase::GetCurrentDensity();
     if (NearZero(density)) {
@@ -584,8 +574,6 @@ ani_double Px2lpx(ani_double value, ani_int instanceId)
     if (NearZero(value)) {
         return 0;
     }
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(context, 0);
     ContainerScope cope(instanceId);
     CHECK_NULL_RETURN(value, 0);
     auto container = Container::Current();
@@ -605,6 +593,15 @@ ani_double Px2lpx(ani_double value, ani_int instanceId)
         windowConfig.UpdateDesignWidthScale(width);
     }
     return value / windowConfig.designWidthScale;
+}
+
+void SetIsRecycleInvisibleImageMemory(ani_boolean isRecycle, ani_int instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    ContainerScope scope(instanceId);
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    context->SetIsRecycleInvisibleImageMemory(isRecycle);
 }
 
 std::optional<std::string> GetWindowName(ani_int instanceId)
@@ -1088,6 +1085,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .lpx2px = OHOS::Ace::NG::Lpx2px,
         .px2lpx = OHOS::Ace::NG::Px2lpx,
         .getWindowName = OHOS::Ace::NG::GetWindowName,
+        .setIsRecycleInvisibleImageMemory = OHOS::Ace::NG::SetIsRecycleInvisibleImageMemory,
         .getWindowId = OHOS::Ace::NG::GetWindowId,
         .getWindowHeightBreakpoint = OHOS::Ace::NG::GetWindowHeightBreakpoint,
         .getWindowWidthBreakpoint = OHOS::Ace::NG::GetWindowWidthBreakpoint,

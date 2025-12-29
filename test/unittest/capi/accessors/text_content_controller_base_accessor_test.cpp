@@ -38,6 +38,8 @@ public:
     MOCK_METHOD(void, DeleteText, (int32_t, int32_t), (override));
     MOCK_METHOD(SelectionInfo, GetSelection, (), (override));
     MOCK_METHOD(int32_t, AddText, (std::u16string, int32_t), (override));
+    MOCK_METHOD(std::u16string, GetText, (), (override));
+    MOCK_METHOD(void, ClearPreviewText, (), (override));
 };
 } // namespace
 
@@ -201,6 +203,47 @@ HWTEST_F(TextContentControllerBaseAccessorTest, AddTextTest, TestSize.Level1)
         AddText(UtfUtils::Str8ToStr16(text), offset)).Times(1).WillOnce(Return(offset));
     checkValue = Converter::OptConvert<int32_t>(accessor_->addText(peer_, &arkText, &arkOptions));
     EXPECT_EQ(checkValue, offset);
+}
+
+/**
+ * @tc.name: GetTextTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextContentControllerBaseAccessorTest, GetTextTestValidValues, TestSize.Level1)
+{
+    TextRange range = {
+        .start = 2,
+        .end = 5
+    };
+    auto arkRange = Converter::ArkValue<Opt_TextRange>(range);
+    EXPECT_CALL(*mockTextContentControllerBase_, GetText()).WillOnce(Return(u"Qwerty"));
+    auto checkValue = Converter::OptConvert<std::u16string>(accessor_->getText(peer_, &arkRange));
+    EXPECT_EQ(checkValue, u"ert");
+}
+
+/**
+ * @tc.name: GetTextTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextContentControllerBaseAccessorTest, GetTextTestInvalidValues, TestSize.Level1)
+{
+    auto arkRange = Converter::ArkValue<Opt_TextRange>(Ark_Empty());
+    EXPECT_CALL(*mockTextContentControllerBase_, GetText()).WillOnce(Return(u"Qwerty"));
+    auto checkValue = Converter::OptConvert<std::u16string>(accessor_->getText(peer_, &arkRange));
+    EXPECT_EQ(checkValue, u"Qwerty");
+}
+
+/**
+ * @tc.name: ClearPreviewTextTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextContentControllerBaseAccessorTest, ClearPreviewTextTest, TestSize.Level1)
+{
+    EXPECT_CALL(*mockTextContentControllerBase_, ClearPreviewText()).Times(1);
+    accessor_->clearPreviewText(peer_);
 }
 
 } // namespace OHOS::Ace::NG

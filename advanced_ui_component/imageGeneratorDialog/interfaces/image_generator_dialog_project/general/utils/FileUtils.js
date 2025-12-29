@@ -18,169 +18,169 @@ import fileUri from "@ohos.file.fileuri";
 import fs from "@ohos.file.fs";
 import { Constants } from '../common/CommonConstants';
 export class FileUtils {
-    static copyFileToDestination(r33, s33) {
+    static copyFileToDestination(sourceUri, destination) {
         try {
-            let u33 = new ArrayBuffer(Constants.FILE_BUFFER_SIZE);
-            let v33 = 0;
-            let w33 = fs.openSync(r33, fs.OpenMode.READ_ONLY);
-            let x33 = fs.readSync(w33.fd, u33, { offset: v33 });
-            let y33 = fs.openSync(`${s33}/${w33.name}`, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
-            while (x33 > 0) {
-                v33 += x33;
-                fs.writeSync(y33.fd, u33);
-                x33 = fs.readSync(w33.fd, u33, { offset: v33 });
+            let buf = new ArrayBuffer(Constants.FILE_BUFFER_SIZE);
+            let readSize = 0;
+            let file = fs.openSync(sourceUri, fs.OpenMode.READ_ONLY);
+            let readLen = fs.readSync(file.fd, buf, { offset: readSize });
+            let destinationDistribute = fs.openSync(`${destination}/${file.name}`, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
+            while (readLen > 0) {
+                readSize += readLen;
+                fs.writeSync(destinationDistribute.fd, buf);
+                readLen = fs.readSync(file.fd, buf, { offset: readSize });
             }
-            fs.closeSync(w33);
-            fs.closeSync(y33);
+            fs.closeSync(file);
+            fs.closeSync(destinationDistribute);
         }
-        catch (t33) {
-            console.error(FileUtils.tag, `copyFileToDestination failed. Code: ${t33.code}, message: ${t33.message}`);
+        catch (err) {
+            console.error(FileUtils.tag, `copyFileToDestination failed. Code: ${err.code}, message: ${err.message}`);
         }
     }
-    static createPixelMap(h33) {
-        let i33;
-        let j33 = undefined;
-        let k33 = undefined;
+    static createPixelMap(uri) {
+        let imageInfo;
+        let imageResource = undefined;
+        let file = undefined;
         try {
-            k33 = fs.openSync(h33, fs.OpenMode.READ_ONLY);
-            j33 = image.createImageSource(k33.fd);
-            let m33 = j33.getImageInfoSync().size;
-            let n33 = FileUtils.getDecodingOptions(m33);
-            let o33 = j33.createPixelMapSync(n33);
+            file = fs.openSync(uri, fs.OpenMode.READ_ONLY);
+            imageResource = image.createImageSource(file.fd);
+            let imageSize = imageResource.getImageInfoSync().size;
+            let decodingOptions = FileUtils.getDecodingOptions(imageSize);
+            let pixelMap = imageResource.createPixelMapSync(decodingOptions);
             try {
-                let q33 = j33.getImagePropertySync(image.PropertyKey.ORIENTATION);
-                FileUtils.matrixPixelMap(o33, q33);
+                let orientation = imageResource.getImagePropertySync(image.PropertyKey.ORIENTATION);
+                FileUtils.matrixPixelMap(pixelMap, orientation);
             }
-            catch (p33) {
+            catch (error) {
             }
-            i33 = { image: o33, url: h33 };
-            fs.closeSync(k33);
-            j33.release();
+            imageInfo = { image: pixelMap, url: uri };
+            fs.closeSync(file);
+            imageResource.release();
         }
-        catch (l33) {
-            fs?.close(k33);
-            j33?.release();
-            console.error(FileUtils.tag, `createPixelMap error: ${JSON.stringify(l33)}`);
+        catch (error) {
+            fs?.close(file);
+            imageResource?.release();
+            console.error(FileUtils.tag, `createPixelMap error: ${JSON.stringify(error)}`);
         }
-        return i33;
+        return imageInfo;
     }
-    static getDecodingOptions(p32) {
-        let q32 = p32.width;
-        let r32 = p32.height;
-        if (q32 > r32 * 3) {
-            let c33 = (q32 - 3 * r32) / 2;
-            let d33 = 0;
-            let e33 = Math.max(3 * vp2px(480), 3 * r32);
-            let f33 = Math.max(vp2px(480), r32);
-            let g33 = {
+    static getDecodingOptions(size) {
+        let width = size.width;
+        let height = size.height;
+        if (width > height * 3) {
+            let x = (width - 3 * height) / 2;
+            let y = 0;
+            let desiredWidth = Math.max(3 * vp2px(480), 3 * height);
+            let desireHeight = Math.max(vp2px(480), height);
+            let decodingOptions = {
                 index: 0,
                 editable: false,
                 desiredPixelFormat: image.PixelMapFormat.RGBA_8888,
-                desiredSize: { width: e33, height: f33 },
+                desiredSize: { width: desiredWidth, height: desireHeight },
                 desiredRegion: {
-                    x: c33,
-                    y: d33,
+                    x: x,
+                    y: y,
                     size: {
-                        width: 3 * r32,
-                        height: r32
+                        width: 3 * height,
+                        height: height
                     }
                 },
                 cropAndScaleStrategy: image.CropAndScaleStrategy.CROP_FIRST
             };
-            return g33;
+            return decodingOptions;
         }
-        if (r32 > q32 * 3) {
-            let x32 = (r32 - 3 * q32) / 2;
-            let y32 = 0;
-            let z32 = Math.max(vp2px(480), q32);
-            let a33 = Math.max(3 * vp2px(480), 3 * q32);
-            let b33 = {
+        if (height > width * 3) {
+            let y = (height - 3 * width) / 2;
+            let x = 0;
+            let desiredWidth = Math.max(vp2px(480), width);
+            let desireHeight = Math.max(3 * vp2px(480), 3 * width);
+            let decodingOptions = {
                 index: 0,
                 editable: false,
                 desiredPixelFormat: image.PixelMapFormat.RGBA_8888,
-                desiredSize: { width: z32, height: a33 },
+                desiredSize: { width: desiredWidth, height: desireHeight },
                 desiredRegion: {
-                    x: y32,
-                    y: x32,
+                    x: x,
+                    y: y,
                     size: {
-                        width: q32,
-                        height: 3 * q32
+                        width: width,
+                        height: 3 * width
                     }
                 },
                 cropAndScaleStrategy: image.CropAndScaleStrategy.CROP_FIRST
             };
-            return b33;
+            return decodingOptions;
         }
-        if (q32 * r32 <= 1024 * 1024 * 2) {
-            let w32 = {
+        if (width * height <= 1024 * 1024 * 2) {
+            let decodingOptions = {
                 index: 0,
                 editable: false,
                 desiredPixelFormat: image.PixelMapFormat.RGBA_8888,
-                desiredSize: { width: q32, height: r32 }
+                desiredSize: { width: width, height: height }
             };
-            return w32;
+            return decodingOptions;
         }
-        let s32 = q32 / vp2px(480);
-        let t32 = r32 / vp2px(480);
-        if (s32 > t32) {
-            let v32 = {
+        let widthScale = width / vp2px(480);
+        let heightScale = height / vp2px(480);
+        if (widthScale > heightScale) {
+            let decodingOptions = {
                 index: 0,
                 editable: false,
                 desiredPixelFormat: image.PixelMapFormat.RGBA_8888,
-                desiredSize: { width: q32 / t32, height: r32 / t32 }
+                desiredSize: { width: width / heightScale, height: height / heightScale }
             };
-            return v32;
+            return decodingOptions;
         }
         else {
-            let u32 = {
+            let decodingOptions = {
                 index: 0,
                 editable: false,
                 desiredPixelFormat: image.PixelMapFormat.RGBA_8888,
-                desiredSize: { width: q32 / s32, height: r32 / s32 }
+                desiredSize: { width: width / widthScale, height: height / widthScale }
             };
-            return u32;
+            return decodingOptions;
         }
     }
-    static matrixPixelMap(n32, o32) {
-        if (o32 == 'Top-right') {
-            n32.flipSync(true, false);
+    static matrixPixelMap(pixelMap, orientation) {
+        if (orientation == 'Top-right') {
+            pixelMap.flipSync(true, false);
         }
-        else if (o32 == 'Bottom-right') {
-            n32.rotateSync(180);
+        else if (orientation == 'Bottom-right') {
+            pixelMap.rotateSync(180);
         }
-        else if (o32 == 'Bottom-left') {
-            n32.flipSync(false, true);
+        else if (orientation == 'Bottom-left') {
+            pixelMap.flipSync(false, true);
         }
-        else if (o32 == 'Left-top') {
-            n32.flipSync(true, false);
-            n32.rotateSync(270);
+        else if (orientation == 'Left-top') {
+            pixelMap.flipSync(true, false);
+            pixelMap.rotateSync(270);
         }
-        else if (o32 == 'Right-top') {
-            n32.rotateSync(90);
+        else if (orientation == 'Right-top') {
+            pixelMap.rotateSync(90);
         }
-        else if (o32 == 'Right-bottom') {
-            n32.flipSync(true, false);
-            n32.rotateSync(90);
+        else if (orientation == 'Right-bottom') {
+            pixelMap.flipSync(true, false);
+            pixelMap.rotateSync(90);
         }
-        else if (o32 == 'Left-bottom') {
-            n32.rotateSync(270);
+        else if (orientation == 'Left-bottom') {
+            pixelMap.rotateSync(270);
         }
-        else if (o32 == 'Top-left') {
+        else if (orientation == 'Top-left') {
         }
     }
-    static saveFile(h32, i32) {
-        let j32 = h32.filesDir;
-        let k32 = fileUri.getUriFromPath(`${j32}/${Date.now().toString()}.${FileUtils.extensionValue}`);
+    static saveFile(context, buffer) {
+        let filesDir = context.filesDir;
+        let photoUri = fileUri.getUriFromPath(`${filesDir}/${Date.now().toString()}.${FileUtils.extensionValue}`);
         try {
-            let m32 = fs.openSync(k32, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
-            fs.writeSync(m32.fd, i32);
-            console.debug(FileUtils.tag, `saveFile uri: ${k32}}`);
-            fs.closeSync(m32);
+            let file = fs.openSync(photoUri, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
+            fs.writeSync(file.fd, buffer);
+            console.debug(FileUtils.tag, `saveFile uri: ${photoUri}}`);
+            fs.closeSync(file);
         }
-        catch (l32) {
-            console.error(FileUtils.tag, `saveFile error: ${JSON.stringify(l32)}`);
+        catch (error) {
+            console.error(FileUtils.tag, `saveFile error: ${JSON.stringify(error)}`);
         }
-        return k32;
+        return photoUri;
     }
 }
 FileUtils.tag = 'FileUtils';

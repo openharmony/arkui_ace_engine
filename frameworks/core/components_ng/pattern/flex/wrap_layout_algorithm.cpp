@@ -305,7 +305,7 @@ void WrapLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             collector.AccumulateFromWrapper(child);
         }
     }
-    if (IsContentOverflow(layoutWrapper, collector)) {
+    if (IsContentOverflow(layoutWrapper, collector) && SystemProperties::GetDebugBoundaryEnabled()) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_LAYOUT, "Content overflow in Flex container");
     }
     HandleContentOverflow(layoutWrapper);

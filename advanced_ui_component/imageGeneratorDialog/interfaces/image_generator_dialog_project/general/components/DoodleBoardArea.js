@@ -13,110 +13,113 @@
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (r8, s8, t8, u8) {
-    var v8 = arguments.length, w8 = v8 < 3 ? s8 : u8 === null ? u8 = Object.getOwnPropertyDescriptor(s8, t8) : u8, x8;
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-        w8 = Reflect.decorate(r8, s8, t8, u8);
+        r = Reflect.decorate(decorators, target, key, desc);
     else
-        for (var y8 = r8.length - 1; y8 >= 0; y8--)
-            if (x8 = r8[y8])
-                w8 = (v8 < 3 ? x8(w8) : v8 > 3 ? x8(s8, t8, w8) : x8(s8, t8)) || w8;
-    return v8 > 3 && w8 && Object.defineProperty(s8, t8, w8), w8;
+        for (var i = decorators.length - 1; i >= 0; i--)
+            if (d = decorators[i])
+                r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 import { Constants } from '../common/CommonConstants';
+import { CanvasLayoutDirection } from '../types/Declaration';
 import { ImageOperate } from './ImageOperate';
 export class DoodleBoardArea extends ViewV2 {
-    constructor(l8, m8, n8, o8 = -1, p8, q8) {
-        super(l8, o8, q8);
-        this.initParam("imageInfoArr", (m8 && "imageInfoArr" in m8) ? m8.imageInfoArr : undefined);
-        this.initParam("imageMatrixArr", (m8 && "imageMatrixArr" in m8) ? m8.imageMatrixArr : undefined);
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
+        this.initParam("imageInfoArr", (params && "imageInfoArr" in params) ? params.imageInfoArr : undefined);
+        this.initParam("imageMatrixArr", (params && "imageMatrixArr" in params) ? params.imageMatrixArr : undefined);
+        this.curLayoutDirection = CanvasLayoutDirection.DEFAULT;
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(k8) {
-        this.resetParam("imageInfoArr", (k8 && "imageInfoArr" in k8) ? k8.imageInfoArr : undefined);
-        this.resetParam("imageMatrixArr", (k8 && "imageMatrixArr" in k8) ? k8.imageMatrixArr : undefined);
+    resetStateVarsOnReuse(params) {
+        this.resetParam("imageInfoArr", (params && "imageInfoArr" in params) ? params.imageInfoArr : undefined);
+        this.resetParam("imageMatrixArr", (params && "imageMatrixArr" in params) ? params.imageMatrixArr : undefined);
+        this.resetConsumer("curLayoutDirection", CanvasLayoutDirection.DEFAULT);
     }
-    invalidImageInfo(j8) {
-        if (j8 < 0 || j8 >= DoodleBoardArea.DEFAULT_COUNT) {
+    invalidImageInfo(index) {
+        if (index < 0 || index >= DoodleBoardArea.DEFAULT_COUNT) {
             return true;
         }
-        return this.imageInfoArr[j8].url === Constants.NOT_SELECTED_NAME;
+        return this.imageInfoArr[index].url === Constants.NOT_SELECTED_NAME;
     }
-    getImageAspectRito(b8) {
-        let c8 = this.imageInfoArr[b8];
-        if (c8.rect === undefined) {
-            let h8 = c8.image?.getImageInfoSync().size.width;
-            let i8 = c8.image?.getImageInfoSync().size.height;
-            if (h8 !== undefined) {
-                return h8 / i8;
+    getImageAspectRito(index) {
+        let imageItem = this.imageInfoArr[index];
+        if (imageItem.rect === undefined) {
+            let ImageW = imageItem.image?.getImageInfoSync().size.width;
+            let ImageH = imageItem.image?.getImageInfoSync().size.height;
+            if (ImageW !== undefined) {
+                return ImageW / ImageH;
             }
             return 1;
         }
-        let d8 = this.imageInfoArr[b8].rect?.left;
-        let e8 = this.imageInfoArr[b8].rect?.right;
-        let f8 = this.imageInfoArr[b8].rect?.top;
-        let g8 = this.imageInfoArr[b8].rect?.bottom;
-        return (e8 - d8) / (g8 - f8);
+        let left = this.imageInfoArr[index].rect?.left;
+        let right = this.imageInfoArr[index].rect?.right;
+        let top = this.imageInfoArr[index].rect?.top;
+        let bottom = this.imageInfoArr[index].rect?.bottom;
+        return (right - left) / (bottom - top);
     }
-    getImageWidth(y7) {
-        if (this.imageInfoArr[y7].rect === undefined) {
+    getImageWidth(index) {
+        if (this.imageInfoArr[index].rect === undefined) {
             return '100%';
         }
-        let z7 = this.imageInfoArr[y7].rect?.left;
-        let a8 = this.imageInfoArr[y7].rect?.right;
-        return this.getUIContext().px2vp(a8 - z7);
+        let left = this.imageInfoArr[index].rect?.left;
+        let right = this.imageInfoArr[index].rect?.right;
+        return this.getUIContext().px2vp(right - left);
     }
-    setMatrix(w7, x7) {
-        this.imageMatrixArr[w7] = x7;
+    setMatrix(index, imageMatrixArr) {
+        this.imageMatrixArr[index] = imageMatrixArr;
     }
-    ImageBuilder(j7, k7 = null) {
-        this.observeComponentCreation2((l7, m7) => {
+    ImageBuilder(index, parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (this.imageInfoArr[j7].image) {
+            if (this.imageInfoArr[index].image) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((u7, v7) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         __Common__.create();
                         __Common__.position({ x: 0, y: 0 });
-                        __Common__.zIndex(this.imageInfoArr[j7].zIndex ?? undefined);
+                        __Common__.zIndex(this.imageInfoArr[index].zIndex ?? undefined);
                         __Common__.hitTestBehavior(HitTestMode.Transparent);
                     }, __Common__);
                     {
-                        this.observeComponentCreation2((n7, o7) => {
-                            if (o7) {
-                                let q7 = new ImageOperate(this, {
-                                    pixelMap: this.imageInfoArr[j7].image ?? ImageContent.EMPTY,
-                                    imageAspectRito: this.getImageAspectRito(j7),
-                                    preTransform: this.imageMatrixArr[j7],
-                                    imageWidth: this.getImageWidth(j7),
-                                    setMatrixCallback: (t7) => {
-                                        this.setMatrix(j7, t7);
+                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            if (isInitialRender) {
+                                let componentCall = new ImageOperate(this, {
+                                    pixelMap: this.imageInfoArr[index].image ?? ImageContent.EMPTY,
+                                    imageAspectRito: this.getImageAspectRito(index),
+                                    preTransform: this.imageMatrixArr[index],
+                                    imageWidth: this.getImageWidth(index),
+                                    setMatrixCallback: (imageMatrixArr) => {
+                                        this.setMatrix(index, imageMatrixArr);
                                     }
-                                }, undefined, n7, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/DoodleBoardArea.ets", line: 66, col: 7 });
-                                ViewV2.create(q7);
-                                let r7 = () => {
+                                }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/DoodleBoardArea.ets", line: 68, col: 7 });
+                                ViewV2.create(componentCall);
+                                let paramsLambda = () => {
                                     return {
-                                        pixelMap: this.imageInfoArr[j7].image ?? ImageContent.EMPTY,
-                                        imageAspectRito: this.getImageAspectRito(j7),
-                                        preTransform: this.imageMatrixArr[j7],
-                                        imageWidth: this.getImageWidth(j7),
-                                        setMatrixCallback: (s7) => {
-                                            this.setMatrix(j7, s7);
+                                        pixelMap: this.imageInfoArr[index].image ?? ImageContent.EMPTY,
+                                        imageAspectRito: this.getImageAspectRito(index),
+                                        preTransform: this.imageMatrixArr[index],
+                                        imageWidth: this.getImageWidth(index),
+                                        setMatrixCallback: (imageMatrixArr) => {
+                                            this.setMatrix(index, imageMatrixArr);
                                         }
                                     };
                                 };
-                                q7.paramsGenerator_ = r7;
+                                componentCall.paramsGenerator_ = paramsLambda;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(n7, {
-                                    pixelMap: this.imageInfoArr[j7].image ?? ImageContent.EMPTY,
-                                    imageAspectRito: this.getImageAspectRito(j7),
-                                    preTransform: this.imageMatrixArr[j7],
-                                    imageWidth: this.getImageWidth(j7),
-                                    setMatrixCallback: (p7) => {
-                                        this.setMatrix(j7, p7);
+                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                    pixelMap: this.imageInfoArr[index].image ?? ImageContent.EMPTY,
+                                    imageAspectRito: this.getImageAspectRito(index),
+                                    preTransform: this.imageMatrixArr[index],
+                                    imageWidth: this.getImageWidth(index),
+                                    setMatrixCallback: (imageMatrixArr) => {
+                                        this.setMatrix(index, imageMatrixArr);
                                     }
                                 });
                             }
@@ -133,21 +136,21 @@ export class DoodleBoardArea extends ViewV2 {
         If.pop();
     }
     initialRender() {
-        this.observeComponentCreation2((h7, i7) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
-            Stack.width(386);
-            Stack.height(386);
+            Stack.width(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 386 : 288);
+            Stack.height(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 386 : 288);
             Stack.borderRadius(24);
             Stack.borderWidth(2);
             Stack.borderColor('#33000000');
         }, Stack);
-        this.observeComponentCreation2((f7, g7) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
             Stack.borderRadius(24);
             Stack.width('100%');
             Stack.height('100%');
         }, Stack);
-        this.observeComponentCreation2((d7, e7) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create('xx');
             Image.scale({ x: 1.36, y: 1.36 });
             Image.width('100%');
@@ -156,7 +159,7 @@ export class DoodleBoardArea extends ViewV2 {
             Image.borderRadius(24);
             Image.hitTestBehavior(HitTestMode.Transparent);
         }, Image);
-        this.observeComponentCreation2((b7, c7) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.width('100%');
             Column.height('100%');
@@ -167,7 +170,7 @@ export class DoodleBoardArea extends ViewV2 {
             Column.borderRadius(24);
         }, Column);
         Column.pop();
-        this.observeComponentCreation2((z6, a7) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create('xx');
             Image.width('100%');
             Image.height('100%');
@@ -177,39 +180,39 @@ export class DoodleBoardArea extends ViewV2 {
             Image.hitTestBehavior(HitTestMode.Transparent);
         }, Image);
         Stack.pop();
-        this.observeComponentCreation2((x6, y6) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.width(386);
-            Column.height(386);
+            Column.width(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 386 : 288);
+            Column.height(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 386 : 288);
             Column.borderRadius(24);
             Column.clip(true);
         }, Column);
-        this.observeComponentCreation2((v6, w6) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
         }, Stack);
-        this.observeComponentCreation2((j6, k6) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.invalidImageInfo(0)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((t6, u6) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create();
                         Stack.alignContent(Alignment.Center);
                         Stack.width('100%');
                         Stack.height('100%');
                     }, Stack);
-                    this.observeComponentCreation2((r6, s6) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
                         Column.justifyContent(FlexAlign.Center);
                         Column.width('100%');
                         Column.height('100%');
                     }, Column);
-                    this.observeComponentCreation2((p6, q6) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Image.create('xx');
                         Image.width(160);
                         Image.height(160);
                         Image.draggable(false);
                     }, Image);
-                    this.observeComponentCreation2((n6, o6) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
                         Row.linearGradient({
                             direction: GradientDirection.Left,
@@ -218,7 +221,7 @@ export class DoodleBoardArea extends ViewV2 {
                         Row.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
                         Row.margin({ top: 8 });
                     }, Row);
-                    this.observeComponentCreation2((l6, m6) => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create("添加图片或涂鸦进行创作");
                         Text.blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN);
                         Text.fontFamily("HarmonyHeiTi");
@@ -239,28 +242,28 @@ export class DoodleBoardArea extends ViewV2 {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((b6, c6) => {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             ForEach.create();
-            const d6 = (g6, h6) => {
-                const i6 = g6;
-                this.ImageBuilder.bind(this)(h6);
+            const forEachItemGenFunction = (_item, index) => {
+                const item = _item;
+                this.ImageBuilder.bind(this)(index);
             };
-            this.forEachUpdateFunction(b6, this.imageInfoArr, d6, (e6, f6) => '' + f6 + (e6?.url ?? 'imageGeneration'), true, true);
+            this.forEachUpdateFunction(elmtId, this.imageInfoArr, forEachItemGenFunction, (item, index) => '' + index + (item?.url ?? 'imageGeneration'), true, true);
         }, ForEach);
         ForEach.pop();
         Stack.pop();
         Column.pop();
         Stack.pop();
     }
-    updateStateVars(a6) {
-        if (a6 === undefined) {
+    updateStateVars(params) {
+        if (params === undefined) {
             return;
         }
-        if ("imageInfoArr" in a6) {
-            this.updateParam("imageInfoArr", a6.imageInfoArr);
+        if ("imageInfoArr" in params) {
+            this.updateParam("imageInfoArr", params.imageInfoArr);
         }
-        if ("imageMatrixArr" in a6) {
-            this.updateParam("imageMatrixArr", a6.imageMatrixArr);
+        if ("imageMatrixArr" in params) {
+            this.updateParam("imageMatrixArr", params.imageMatrixArr);
         }
     }
     rerender() {
@@ -274,3 +277,6 @@ __decorate([
 __decorate([
     Param
 ], DoodleBoardArea.prototype, "imageMatrixArr", void 0);
+__decorate([
+    Consumer('globalLayoutDirection')
+], DoodleBoardArea.prototype, "curLayoutDirection", void 0);

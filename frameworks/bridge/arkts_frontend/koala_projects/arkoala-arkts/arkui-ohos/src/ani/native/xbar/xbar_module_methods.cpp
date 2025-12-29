@@ -34,12 +34,12 @@ ani_status CreateInt(ani_env* env, ani_int value, ani_object& rs)
 {
     ani_class cls;
     ani_status status;
-    if ((status = env->FindClass("Lstd/core/Int;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("std.core.Int", &cls)) != ANI_OK) {
         HILOGE("[ACE_APPBAR]Find Int class failed");
         return status;
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "I:V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "i:", &ctor)) != ANI_OK) {
         HILOGE("[ACE_APPBAR]Find Int ctor failed");
         return status;
     }
@@ -82,7 +82,7 @@ void ConvertComponentCreateFunc(ani_vm* vm, std::function<int64_t(const int32_t&
             return 0;
         }
         ani_long aniValue;
-        if (ANI_OK != env->Object_CallMethodByName_Long((ani_object)ret, "unboxed", ":l", &aniValue)) {
+        if (ANI_OK != env->Object_CallMethodByName_Long((ani_object)ret, "toLong", ":l", &aniValue)) {
             HILOGE("[ACE_APPBAR]Create app bar custom node failed");
             return 0;
         }

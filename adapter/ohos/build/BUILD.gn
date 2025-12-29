@@ -14,7 +14,10 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-component_modules = [ "hyperlink" ]
+component_modules = [
+  "gauge",
+  "hyperlink",
+]
 component_modules_libs = []
 
 foreach(module, component_modules) {
@@ -31,7 +34,6 @@ foreach(module, component_modules) {
     } else if (use_linux) {
       deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_linux" ]
     }
-        
     deps += [
       "$ace_root/build:libace_compatible",
       "$ace_root/frameworks/core:ace_container_scope"

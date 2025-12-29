@@ -4058,6 +4058,36 @@ void deserializeAndCallSyncCallback_Union_CustomBuilder_DragItemInfo_Void(Ark_VM
     Ark_Union_CustomBuilder_DragItemInfo value = static_cast<Ark_Union_CustomBuilder_DragItemInfo>(valueTmpBuf);
     callSyncMethod(vmContext, resourceId, value);
 }
+void deserializeAndCallCallback_Union_DrawingRenderingContext_Undefined_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_DrawingRenderingContext value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Union_DrawingRenderingContext_Undefined_Void))));
+    thisDeserializer.readPointer();
+    const auto value0TmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_DrawingRenderingContext value0TmpBuf = {};
+    value0TmpBuf.tag = value0TmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((value0TmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        value0TmpBuf.value = static_cast<Ark_DrawingRenderingContext>(DrawingRenderingContext_serializer::read(thisDeserializer));
+    }
+    Opt_DrawingRenderingContext value0 = value0TmpBuf;
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_Union_DrawingRenderingContext_Undefined_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_DrawingRenderingContext value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Union_DrawingRenderingContext_Undefined_Void))));
+    const auto value0TmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_DrawingRenderingContext value0TmpBuf = {};
+    value0TmpBuf.tag = value0TmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((value0TmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        value0TmpBuf.value = static_cast<Ark_DrawingRenderingContext>(DrawingRenderingContext_serializer::read(thisDeserializer));
+    }
+    Opt_DrawingRenderingContext value0 = value0TmpBuf;
+    callSyncMethod(vmContext, resourceId, value0);
+}
 void deserializeAndCallCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -7057,6 +7087,40 @@ void deserializeAndCallSyncToggleModifierBuilder(Ark_VMContext vmContext, KSeria
     Callback_Pointer_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
     callSyncMethod(vmContext, resourceId, parentNode, config, continuationResult);
 }
+void deserializeAndCallTouchTestDoneCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_BaseGestureEvent event, const Array_GestureRecognizer recognizers)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TouchTestDoneCallback))));
+    thisDeserializer.readPointer();
+    Ark_BaseGestureEvent event = static_cast<Ark_BaseGestureEvent>(BaseGestureEvent_serializer::read(thisDeserializer));
+    const Ark_Int32 recognizersTmpBufLength = thisDeserializer.readInt32();
+    Array_GestureRecognizer recognizersTmpBuf = {};
+    thisDeserializer.resizeArray<std::decay<decltype(recognizersTmpBuf)>::type,
+        std::decay<decltype(*recognizersTmpBuf.array)>::type>(&recognizersTmpBuf, recognizersTmpBufLength);
+    for (int recognizersTmpBufBufCounterI = 0; recognizersTmpBufBufCounterI < recognizersTmpBufLength; recognizersTmpBufBufCounterI++) {
+        recognizersTmpBuf.array[recognizersTmpBufBufCounterI] = static_cast<Ark_GestureRecognizer>(GestureRecognizer_serializer::read(thisDeserializer));
+    }
+    Array_GestureRecognizer recognizers = recognizersTmpBuf;
+    _call(_resourceId, event, recognizers);
+}
+void deserializeAndCallSyncTouchTestDoneCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_BaseGestureEvent event, const Array_GestureRecognizer recognizers)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TouchTestDoneCallback))));
+    Ark_BaseGestureEvent event = static_cast<Ark_BaseGestureEvent>(BaseGestureEvent_serializer::read(thisDeserializer));
+    const Ark_Int32 recognizersTmpBufLength = thisDeserializer.readInt32();
+    Array_GestureRecognizer recognizersTmpBuf = {};
+    thisDeserializer.resizeArray<std::decay<decltype(recognizersTmpBuf)>::type,
+        std::decay<decltype(*recognizersTmpBuf.array)>::type>(&recognizersTmpBuf, recognizersTmpBufLength);
+    for (int recognizersTmpBufBufCounterI = 0; recognizersTmpBufBufCounterI < recognizersTmpBufLength; recognizersTmpBufBufCounterI++) {
+        recognizersTmpBuf.array[recognizersTmpBufBufCounterI] = static_cast<Ark_GestureRecognizer>(GestureRecognizer_serializer::read(thisDeserializer));
+    }
+    Array_GestureRecognizer recognizers = recognizersTmpBuf;
+    callSyncMethod(vmContext, resourceId, event, recognizers);
+}
 void deserializeAndCallTransitionFinishCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -7438,6 +7502,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_Callback_Tuple_I32_I32_Void: return deserializeAndCallCallback_Tuple_I32_I32_Void(thisArray, thisLength);
         case Kind_Callback_UIExtensionProxy_Void: return deserializeAndCallCallback_UIExtensionProxy_Void(thisArray, thisLength);
         case Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void(thisArray, thisLength);
+        case Kind_Callback_Union_DrawingRenderingContext_Undefined_Void: return deserializeAndCallCallback_Union_DrawingRenderingContext_Undefined_Void(thisArray, thisLength);
         case Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return deserializeAndCallCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void(thisArray, thisLength);
         case Kind_Callback_VisibilityChangeReason_Void: return deserializeAndCallCallback_VisibilityChangeReason_Void(thisArray, thisLength);
         case Kind_Callback_Void: return deserializeAndCallCallback_Void(thisArray, thisLength);
@@ -7564,6 +7629,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_TextTimerModifierBuilder: return deserializeAndCallTextTimerModifierBuilder(thisArray, thisLength);
         case Kind_TimerCallback: return deserializeAndCallTimerCallback(thisArray, thisLength);
         case Kind_ToggleModifierBuilder: return deserializeAndCallToggleModifierBuilder(thisArray, thisLength);
+        case Kind_TouchTestDoneCallback: return deserializeAndCallTouchTestDoneCallback(thisArray, thisLength);
         case Kind_TransitionFinishCallback: return deserializeAndCallTransitionFinishCallback(thisArray, thisLength);
         case Kind_Type_CommonMethod_onDragStart: return deserializeAndCallType_CommonMethod_onDragStart(thisArray, thisLength);
         case Kind_Type_NavigationAttribute_customNavContentTransition: return deserializeAndCallType_NavigationAttribute_customNavContentTransition(thisArray, thisLength);
@@ -7770,6 +7836,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Callback_Tuple_I32_I32_Void: return deserializeAndCallSyncCallback_Tuple_I32_I32_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_UIExtensionProxy_Void: return deserializeAndCallSyncCallback_UIExtensionProxy_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return deserializeAndCallSyncCallback_Union_CustomBuilder_DragItemInfo_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Union_DrawingRenderingContext_Undefined_Void: return deserializeAndCallSyncCallback_Union_DrawingRenderingContext_Undefined_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return deserializeAndCallSyncCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_VisibilityChangeReason_Void: return deserializeAndCallSyncCallback_VisibilityChangeReason_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Void: return deserializeAndCallSyncCallback_Void(vmContext, thisArray, thisLength);
@@ -7896,6 +7963,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_TextTimerModifierBuilder: return deserializeAndCallSyncTextTimerModifierBuilder(vmContext, thisArray, thisLength);
         case Kind_TimerCallback: return deserializeAndCallSyncTimerCallback(vmContext, thisArray, thisLength);
         case Kind_ToggleModifierBuilder: return deserializeAndCallSyncToggleModifierBuilder(vmContext, thisArray, thisLength);
+        case Kind_TouchTestDoneCallback: return deserializeAndCallSyncTouchTestDoneCallback(vmContext, thisArray, thisLength);
         case Kind_TransitionFinishCallback: return deserializeAndCallSyncTransitionFinishCallback(vmContext, thisArray, thisLength);
         case Kind_Type_CommonMethod_onDragStart: return deserializeAndCallSyncType_CommonMethod_onDragStart(vmContext, thisArray, thisLength);
         case Kind_Type_NavigationAttribute_customNavContentTransition: return deserializeAndCallSyncType_NavigationAttribute_customNavContentTransition(vmContext, thisArray, thisLength);

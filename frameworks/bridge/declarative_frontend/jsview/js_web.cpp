@@ -23,6 +23,7 @@
 #include "pixel_map_napi.h"
 #include "securec.h"
 
+#include "base/error/error_code.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -81,7 +82,6 @@ const int32_t WEB_AUDIO_SESSION_TYPE_AMBIENT = 3;
 const std::vector<double> BLANK_SCREEN_DETECTION_DEFAULT_TIMING = { 1.0, 3.0, 5.0 };
 
 constexpr int32_t CREDENTIAL_UKEY = 4;
-constexpr int CAPABILITY_NOT_SUPPORTED_ERROR = 801;
 const char* CAPABILITY_NOT_SUPPORTED_ERROR_MSG = "Capability not supported.";
 const char* HUKS_CRYPTO_EXTENSION_CAPABILITY = "SystemCapability.Security.Huks.CryptoExtension";
 
@@ -537,8 +537,11 @@ public:
             std::string identity = args[0]->ToString();
             int32_t type = args[1]->ToNumber<int32_t>();
             if (type == CREDENTIAL_UKEY && !g_huksCryptoExtensionAbility) {
-                napi_throw_error(GetNapiEnv(), std::to_string(CAPABILITY_NOT_SUPPORTED_ERROR).c_str(),
-                                 CAPABILITY_NOT_SUPPORTED_ERROR_MSG);
+                napi_env env = GetNapiEnv();
+                if (env) {
+                    napi_throw_error(env, std::to_string(ERROR_CODE_SYSTEMCAP_ERROR).c_str(),
+                                     CAPABILITY_NOT_SUPPORTED_ERROR_MSG);
+                }
                 if (result_) {
                     result_->HandleCancel();
                 }
@@ -3196,6 +3199,15 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             };
     }
 
+    auto onMediaCastEnterFunction = controller->GetProperty("OnMediaCastEnter");
+    std::function<void()> onMediaCastEnterrCallback = nullptr;
+    if (onMediaCastEnterFunction->IsFunction()) {
+        onMediaCastEnterrCallback = [webviewController = controller,
+            func = JSRef<JSFunc>::Cast(onMediaCastEnterFunction)] () {
+                auto result = func->Call(webviewController);
+            };
+    }
+
     auto innerWebNativeMessageManagerFunction = controller->GetProperty("innerWebNativeMessageManager");
     std::function<void(const std::shared_ptr<BaseEventInfo>&)> webNativeMessageManagerFunctionCallback = nullptr;
     if (innerWebNativeMessageManagerFunction->IsFunction()) {
@@ -3238,6 +3250,7 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             auto result = func->Call(webviewController, 1, argv);
         };
     }
+    WebModel::GetInstance()->SetOnMediaCastEnter(std::move(onMediaCastEnterrCallback));
     WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
     WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
     WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
@@ -3247,9 +3260,18 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
     WebModel::GetInstance()->SetWebNativeMessageDisconnectFunction(
         std::move(webNativeMessageDisconnectFunctionCallback));
 
-    auto canIUseFunc = controller->GetProperty("canIUse");
+    auto canIUseFunc = controller->GetProperty("innerCanIUse");
     if (canIUseFunc->IsFunction()) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "WebviewController::canIUse");
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebviewController::innerCanIUse");
+        napi_env env = GetNapiEnv();
+        if (!env) {
+            return;
+        }
+        napi_handle_scope scope = nullptr;
+        auto napi_status = napi_open_handle_scope(env, &scope);
+        if (napi_status != napi_ok) {
+            return;
+        }
         auto func = JSRef<JSFunc>::Cast(canIUseFunc);
         JSRef<JSVal> syscap = JSRef<JSVal>::Make(ToJSValue(HUKS_CRYPTO_EXTENSION_CAPABILITY));
         JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -3259,6 +3281,7 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
         if (result->IsBoolean()) {
             g_huksCryptoExtensionAbility = result->ToBoolean();
         }
+        napi_close_handle_scope(env, scope);
     }
 }
 

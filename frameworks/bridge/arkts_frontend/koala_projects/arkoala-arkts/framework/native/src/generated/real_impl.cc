@@ -2199,6 +2199,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                             const Opt_FocusDrawLevel* value)
     {
     }
+    void SetOnTouchTestDoneImpl(Ark_NativePointer node,
+                                const Opt_TouchTestDoneCallback* value)
+    {
+    }
+    void SetAccessibilityStateDescriptionImpl(Ark_NativePointer node,
+                                              const Opt_Union_String_Resource* value)
+    {
+    }
+    void SetAccessibilityActionOptionsImpl(Ark_NativePointer node,
+                                           const Opt_AccessibilityActionOptions* value)
+    {
+    }
     void SetExpandSafeAreaImpl(Ark_NativePointer node,
                                const Opt_Array_SafeAreaType* types,
                                const Opt_Array_SafeAreaEdge* edges)
@@ -2726,7 +2738,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // EffectComponentModifier
     namespace EffectComponentInterfaceModifier {
-    void SetEffectComponentOptionsImpl(Ark_NativePointer node)
+    void SetEffectComponentOptionsImpl(Ark_NativePointer node,
+                                       const Opt_EffectComponentOptions* options)
     {
     }
     } // EffectComponentInterfaceModifier
@@ -3067,6 +3080,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetAlignItemsImpl(Ark_NativePointer node,
                            const Opt_GridItemAlignment* value)
+    {
+    }
+    void SetEditModeOptionsImpl(Ark_NativePointer node,
+                                const Opt_EditModeOptions* value)
     {
     }
     void SetOnScrollFrameBeginImpl(Ark_NativePointer node,
@@ -3639,6 +3656,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                              const Opt_Boolean* value)
     {
     }
+    void SetEditModeOptionsImpl(Ark_NativePointer node,
+                                const Opt_EditModeOptions* value)
+    {
+    }
     void SetOnScrollIndexImpl(Ark_NativePointer node,
                               const Opt_Callback_I32_I32_I32_Void* value)
     {
@@ -4180,6 +4201,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetEnableDragBarImpl(Ark_NativePointer node,
                               const Opt_Boolean* value)
+    {
+    }
+    void SetDividerImpl(Ark_NativePointer node,
+                        const Opt_NavigationDividerStyle* value)
     {
     }
     void SetEnableModeChangeAnimationImpl(Ark_NativePointer node,
@@ -4791,6 +4816,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                               const Opt_Boolean* value)
     {
     }
+    void SetSingleLineImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
+    {
+    }
     void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
                                            const Opt_Boolean* value)
     {
@@ -5349,6 +5378,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
                                          const Opt_SelectedDragPreviewStyle* value)
+    {
+    }
+    void SetTextDirectionImpl(Ark_NativePointer node,
+                              const Opt_TextDirection* value)
     {
     }
     void SetSearchButtonImpl(Ark_NativePointer node,
@@ -6665,6 +6698,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                          const Opt_SelectedDragPreviewStyle* value)
     {
     }
+    void SetTextDirectionImpl(Ark_NativePointer node,
+                              const Opt_TextDirection* value)
+    {
+    }
     void SetFontImpl(Ark_NativePointer node,
                      const Opt_Font* fontValue,
                      const Opt_FontSettingOptions* options)
@@ -6944,6 +6981,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
                                          const Opt_SelectedDragPreviewStyle* value)
+    {
+    }
+    void SetTextDirectionImpl(Ark_NativePointer node,
+                              const Opt_TextDirection* value)
     {
     }
     void SetInputFilterImpl(Ark_NativePointer node,
@@ -7321,6 +7362,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
                                          const Opt_SelectedDragPreviewStyle* value)
+    {
+    }
+    void SetTextDirectionImpl(Ark_NativePointer node,
+                              const Opt_TextDirection* value)
     {
     }
     void SetInputFilterImpl(Ark_NativePointer node,
@@ -8321,6 +8366,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                     const Opt_Boolean* value)
     {
     }
+    void SetEnableAutoFillImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+    {
+    }
     void SetOnMicrophoneCaptureStateChangeImpl(Ark_NativePointer node,
                                                const Opt_OnMicrophoneCaptureStateChangeCallback* value)
     {
@@ -8768,6 +8817,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnTouchInterceptImpl,
             CommonMethodModifier::SetOnSizeChangeImpl,
             CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
+            CommonMethodModifier::SetOnTouchTestDoneImpl,
+            CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
+            CommonMethodModifier::SetAccessibilityActionOptionsImpl,
             CommonMethodModifier::SetExpandSafeAreaImpl,
             CommonMethodModifier::SetIgnoreLayoutSafeAreaImpl,
             CommonMethodModifier::SetBackgroundImpl,
@@ -9084,6 +9136,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GridAttributeModifier::SetEnableScrollInteractionImpl,
             GridAttributeModifier::SetFrictionImpl,
             GridAttributeModifier::SetAlignItemsImpl,
+            GridAttributeModifier::SetEditModeOptionsImpl,
             GridAttributeModifier::SetOnScrollFrameBeginImpl,
             GridAttributeModifier::SetOnWillScrollImpl,
             GridAttributeModifier::SetOnDidScrollImpl,
@@ -9295,6 +9348,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ListAttributeModifier::SetChildrenMainSizeImpl,
             ListAttributeModifier::SetMaintainVisibleContentPositionImpl,
             ListAttributeModifier::SetStackFromEndImpl,
+            ListAttributeModifier::SetEditModeOptionsImpl,
             ListAttributeModifier::SetOnScrollIndexImpl,
             ListAttributeModifier::SetOnScrollVisibleContentChangeImpl,
             ListAttributeModifier::SetOnItemMoveImpl,
@@ -9482,6 +9536,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavigationAttributeModifier::SetSystemBarStyleImpl,
             NavigationAttributeModifier::SetRecoverableImpl,
             NavigationAttributeModifier::SetEnableDragBarImpl,
+            NavigationAttributeModifier::SetDividerImpl,
             NavigationAttributeModifier::SetEnableModeChangeAnimationImpl,
             NavigationAttributeModifier::SetBackButtonIcon1Impl,
             NavigationAttributeModifier::SetTitleImpl,
@@ -9723,6 +9778,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorAttributeModifier::SetMaxLinesImpl,
             RichEditorAttributeModifier::SetKeyboardAppearanceImpl,
             RichEditorAttributeModifier::SetStopBackPressImpl,
+            RichEditorAttributeModifier::SetSingleLineImpl,
             RichEditorAttributeModifier::SetCompressLeadingPunctuationImpl,
             RichEditorAttributeModifier::SetIncludeFontPaddingImpl,
             RichEditorAttributeModifier::SetFallbackLineSpacingImpl,
@@ -9923,6 +9979,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SearchAttributeModifier::SetIncludeFontPaddingImpl,
             SearchAttributeModifier::SetFallbackLineSpacingImpl,
             SearchAttributeModifier::SetSelectedDragPreviewStyleImpl,
+            SearchAttributeModifier::SetTextDirectionImpl,
             SearchAttributeModifier::SetSearchButtonImpl,
             SearchAttributeModifier::SetInputFilterImpl,
             SearchAttributeModifier::SetCustomKeyboardImpl,
@@ -10325,6 +10382,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAttributeModifier::SetIncludeFontPaddingImpl,
             TextAttributeModifier::SetFallbackLineSpacingImpl,
             TextAttributeModifier::SetSelectedDragPreviewStyleImpl,
+            TextAttributeModifier::SetTextDirectionImpl,
             TextAttributeModifier::SetFontImpl,
             TextAttributeModifier::SetFontWeightImpl,
             TextAttributeModifier::SetSelectionImpl,
@@ -10399,6 +10457,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAreaAttributeModifier::SetIncludeFontPaddingImpl,
             TextAreaAttributeModifier::SetFallbackLineSpacingImpl,
             TextAreaAttributeModifier::SetSelectedDragPreviewStyleImpl,
+            TextAreaAttributeModifier::SetTextDirectionImpl,
             TextAreaAttributeModifier::SetInputFilterImpl,
             TextAreaAttributeModifier::SetShowCounterImpl,
             TextAreaAttributeModifier::SetCustomKeyboardImpl,
@@ -10503,6 +10562,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextInputAttributeModifier::SetIncludeFontPaddingImpl,
             TextInputAttributeModifier::SetFallbackLineSpacingImpl,
             TextInputAttributeModifier::SetSelectedDragPreviewStyleImpl,
+            TextInputAttributeModifier::SetTextDirectionImpl,
             TextInputAttributeModifier::SetInputFilterImpl,
             TextInputAttributeModifier::SetCustomKeyboardImpl,
             TextInputAttributeModifier::SetShowCounterImpl,
@@ -10799,6 +10859,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
             WebAttributeModifier::SetOnTextSelectionChangeImpl,
             WebAttributeModifier::SetEnableImageAnalyzerImpl,
+            WebAttributeModifier::SetEnableAutoFillImpl,
             WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
             WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
             WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
@@ -12826,6 +12887,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // ContentTransitionEffectAccessor
+
+    namespace ContextMenuAccessor {
+    void CloseImpl()
+    {
+    }
+    } // ContextMenuAccessor
     namespace ControllerHandlerAccessor {
     void DestroyPeerImpl(Ark_ControllerHandler peer)
     {
@@ -13450,6 +13517,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     Array_String GetMimeTypesImpl(Ark_FileSelectorParam peer)
+    {
+        return {};
+    }
+    Ark_String GetSuggestedNameImpl(Ark_FileSelectorParam peer)
+    {
+        return {};
+    }
+    Ark_String GetDefaultPathImpl(Ark_FileSelectorParam peer)
+    {
+        return {};
+    }
+    Array_String GetDescriptionsImpl(Ark_FileSelectorParam peer)
+    {
+        return {};
+    }
+    Ark_Boolean IsAcceptAllOptionExcludedImpl(Ark_FileSelectorParam peer)
+    {
+        return {};
+    }
+    Array_Array_AcceptableFileType GetAcceptableFileTypesImpl(Ark_FileSelectorParam peer)
     {
         return {};
     }
@@ -14080,6 +14167,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_Boolean IsFingerCountLimitImpl(Ark_GestureRecognizer peer)
     {
         return {};
+    }
+    void PreventBeginImpl(Ark_GestureRecognizer peer)
+    {
     }
     } // GestureRecognizerAccessor
     namespace GestureStyleAccessor {
@@ -18621,7 +18711,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // TextTimerControllerAccessor
     namespace ThemeOpsAccessor {
     void SendThemeToNativeImpl(const Array_ResourceColor* colorArray,
-                               Ark_Int32 elmtId)
+                               const Array_ResourceColor* darkColorArray,
+                               Ark_Int32 elmtId,
+                               Ark_Boolean darkSetStatus)
     {
     }
     void SetDefaultThemeImpl(const Array_ResourceColor* colorArray,
@@ -20068,6 +20160,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ConsoleMessageAccessor::GetSourceIdImpl,
             ConsoleMessageAccessor::GetLineNumberImpl,
             ConsoleMessageAccessor::GetMessageLevelImpl,
+            ConsoleMessageAccessor::GetSourceImpl,
         };
         return &ConsoleMessageAccessorImpl;
     }
@@ -20127,6 +20220,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct ContentTransitionEffectPeer {
         virtual ~ContentTransitionEffectPeer() = default;
     };
+    const GENERATED_ArkUIContextMenuAccessor* GetContextMenuAccessor()
+    {
+        static const GENERATED_ArkUIContextMenuAccessor ContextMenuAccessorImpl {
+            ContextMenuAccessor::CloseImpl,
+        };
+        return &ContextMenuAccessorImpl;
+    }
     const GENERATED_ArkUIControllerHandlerAccessor* GetControllerHandlerAccessor()
     {
         static const GENERATED_ArkUIControllerHandlerAccessor ControllerHandlerAccessorImpl {
@@ -20458,6 +20558,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FileSelectorParamAccessor::GetAcceptTypeImpl,
             FileSelectorParamAccessor::IsCaptureImpl,
             FileSelectorParamAccessor::GetMimeTypesImpl,
+            FileSelectorParamAccessor::GetSuggestedNameImpl,
+            FileSelectorParamAccessor::GetDefaultPathImpl,
+            FileSelectorParamAccessor::GetDescriptionsImpl,
+            FileSelectorParamAccessor::IsAcceptAllOptionExcludedImpl,
+            FileSelectorParamAccessor::GetAcceptableFileTypesImpl,
         };
         return &FileSelectorParamAccessorImpl;
     }
@@ -20696,6 +20801,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureRecognizerAccessor::IsValidImpl,
             GestureRecognizerAccessor::GetFingerCountImpl,
             GestureRecognizerAccessor::IsFingerCountLimitImpl,
+            GestureRecognizerAccessor::PreventBeginImpl,
         };
         return &GestureRecognizerAccessorImpl;
     }
@@ -23118,6 +23224,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetConsoleMessageAccessor,
             GetContentModifierHelperAccessor,
             GetContentTransitionEffectAccessor,
+            GetContextMenuAccessor,
             GetControllerHandlerAccessor,
             GetCopyEventAccessor,
             GetCustomDialogControllerAccessor,

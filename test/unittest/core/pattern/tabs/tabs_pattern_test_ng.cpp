@@ -1536,4 +1536,91 @@ HWTEST_F(TabPatternTestNg, GetIsCustomAnimationTest001, TestSize.Level1)
 
     EXPECT_EQ(tabsPattern->GetIsCustomAnimation(), true);
 }
+
+/**
+ * @tc.name: UpdateTabBarOverlapTest001
+ * @tc.desc: Test UpdateTabBarOverlap without BarOverlap property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabPatternTestNg, UpdateTabBarOverlapTest001, TestSize.Level1)
+{
+    auto model = CreateTabs();
+    CreateTabContents();
+    GetTabs();
+    CreateTabsDone(model);
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+
+    layoutProperty_->ResetBarOverlap();
+
+    pattern_->UpdateTabBarOverlap(layoutProperty_);
+}
+
+/**
+ * @tc.name: UpdateTabBarOverlapTest002
+ * @tc.desc: Test UpdateTabBarOverlap with BarOverlap false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabPatternTestNg, UpdateTabBarOverlapTest002, TestSize.Level1)
+{
+    auto model = CreateTabs();
+    CreateTabContents();
+    GetTabs();
+    CreateTabsDone(model);
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+    ASSERT_NE(tabBarNode_, nullptr);
+    layoutProperty_->UpdateBarOverlap(false);
+
+    pattern_->UpdateTabBarOverlap(layoutProperty_);
+}
+
+/**
+ * @tc.name: UpdateTabBarOverlapTest003
+ * @tc.desc: Test UpdateTabBarOverlap with FOLLOWS_WINDOW_ACTIVE_STATE policy
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabPatternTestNg, UpdateTabBarOverlapTest003, TestSize.Level1)
+{
+    auto model = CreateTabs();
+    CreateTabContents();
+    GetTabs();
+    CreateTabsDone(model);
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+    ASSERT_NE(tabBarNode_, nullptr);
+
+    layoutProperty_->UpdateBarOverlap(true);
+
+    pattern_->UpdateTabBarOverlap(layoutProperty_);
+}
+
+/**
+ * @tc.name: UpdateTabBarOverlapTest004
+ * @tc.desc: Test UpdateTabBarOverlap with existing background effect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabPatternTestNg, UpdateTabBarOverlapTest004, TestSize.Level1)
+{
+    auto model = CreateTabs();
+    CreateTabContents();
+    GetTabs();
+    CreateTabsDone(model);
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+    ASSERT_NE(tabBarNode_, nullptr);
+
+    layoutProperty_->UpdateBarOverlap(true);
+
+    auto renderContext = tabBarNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EffectOption effectOption;
+    renderContext->UpdateBackgroundEffect(effectOption);
+
+    pattern_->UpdateTabBarOverlap(layoutProperty_);
+}
 } // namespace OHOS::Ace::NG

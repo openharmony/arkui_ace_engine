@@ -606,14 +606,19 @@ void UIExtensionPattern::OnConnect()
     }
     surfaceNode->CreateNodeInRenderThread();
     surfaceNode->SetForeground(usage_ == UIExtensionUsage::MODAL);
-    FireOnRemoteReadyCallback();
     auto focusHub = host->GetFocusHub();
+    bool isFocusedBeforeCallback = focusHub && focusHub->IsCurrentFocus();
+    FireOnRemoteReadyCallback();
+    bool isFocusedAfterCallback = focusHub && focusHub->IsCurrentFocus();
     if ((usage_ == UIExtensionUsage::MODAL) && focusHub && isModalRequestFocus_) {
         focusHub->RequestFocusImmediately();
     }
     bool isFocused = focusHub && focusHub->IsCurrentFocus();
     RegisterVisibleAreaChange();
-    DispatchFocusState(isFocused);
+    if (isFocusedBeforeCallback || !isFocusedAfterCallback) {
+        // If not focused before callback and get focused by callback, don't dispatch.
+        DispatchFocusState(isFocused);
+    }
     UpdateSessionViewportConfigFromContext();
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
@@ -2296,11 +2301,11 @@ void UIExtensionPattern::TransferAccessibilityRectInfo(bool isForce)
     SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, data, BusinessDataSendType::ASYNC);
 }
 
-void UIExtensionPattern::UpdateWMSUIExtProperty(
-    UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId)
+void UIExtensionPattern::UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data,
+    RSSubsystemId subSystemId, const UIExtOptions& options)
 {
-    if (state_ != AbilityState::FOREGROUND) {
-        UIEXT_LOGI("UEC UpdatWMSUIExtProperty state=%{public}s.", ToString(state_));
+    if (state_ != AbilityState::FOREGROUND && !options.isSendBackground) {
+        UIEXT_LOGI("UEC UpdateWMSUIExtProperty state=%{public}s.", ToString(state_));
         return;
     }
     SendBusinessData(code, data, BusinessDataSendType::ASYNC, subSystemId);

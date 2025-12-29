@@ -153,6 +153,17 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UtfConversionTest007
+ * @tc.desc: Test conversion with a start offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, DateTest001, TestSize.Level1)
+{
+    Date oneDay;
+    ASSERT_EQ(oneDay.year, DEFAULT_YEAR);
+}
+
+/**
  * @tc.name: BaseUtilsTest003
  * @tc.desc: Give a normal formula to ConvertDal2Rpn
  * @tc.type: FUNC

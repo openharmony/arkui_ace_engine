@@ -104,6 +104,12 @@ public:
         readyEventNew_ = std::move(readyEvent);
     }
 
+    void ResetOnReady()
+    {
+        readyEvent_ = nullptr;
+        readyEventNew_ = nullptr;
+    }
+
     void SetAntiAlias(bool isEnabled);
 
     void FillRect(const Rect& rect);
@@ -149,7 +155,7 @@ public:
     void UpdateFillRuleForPath2D(const CanvasFillRule rule);
     double GetWidth();
     double GetHeight();
-    void SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback);
+    void SetRSCanvasCallback(std::function<void(std::shared_ptr<RSCanvas>, double, double)>& callback);
     void SetInvalidate();
 
     LineDashParam GetLineDash() const;
@@ -219,6 +225,7 @@ public:
     void SetRSCanvasForDrawingContext();
 
 private:
+    void OnVisibleChange(bool isVisible) override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void FireOnContext2DAttach();
@@ -234,6 +241,11 @@ private:
     void OnModifyDone() override;
     void UpdateTextDefaultDirection();
     void FireReadyEvent() const;
+    void OnVisibleAreaChange(bool isVisible, double ratio);
+    void RegisterVisibleAreaChange();
+    void UnregisterVisibleAreaChange();
+    std::string GetDumpInfo();
+    void GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json);
 
     std::function<void()> onContext2DAttach_;
     std::function<void()> onContext2DDetach_;
@@ -255,6 +267,7 @@ private:
     std::function<void(CanvasUnit)> updateContextCB_;
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
     std::optional<bool> immediateRender_ = std::nullopt;
+    bool hasRegisteredVisibleAreaChange_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPattern);
 };

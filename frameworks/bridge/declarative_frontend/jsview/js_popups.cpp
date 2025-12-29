@@ -2505,7 +2505,7 @@ void JSViewAbstract::ParseSheetStyle(
     } else {
         JSViewAbstract::ParseBindSheetBorderRadius(radiusValue, sheetStyle);
     }
-
+    JSViewPopups::SetSheetRenderStrategy(paramObj, sheetStyle);
     ParseDetentSelection(paramObj, sheetStyle);
 
     NG::SheetHeight sheetStruct;
@@ -2528,6 +2528,22 @@ void JSViewAbstract::ParseSheetStyle(
     // parse ModalTransition
     auto modalTransitionValue = paramObj->GetProperty("modalTransition");
     ParseModalTransition(modalTransitionValue, sheetStyle.modalTransition, NG::ModalTransition::DEFAULT);
+}
+
+void JSViewPopups::SetSheetRenderStrategy(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
+{
+    auto radiusRenderStrategy = paramObj->GetProperty("radiusRenderStrategy");
+    if (!radiusRenderStrategy->IsNumber()) {
+        sheetStyle.radiusRenderStrategy = RenderStrategy::FAST;
+        return;
+    }
+    int32_t strategyValue = radiusRenderStrategy->ToNumber<int32_t>();
+    if (strategyValue < static_cast<int32_t>(RenderStrategy::FAST) ||
+        strategyValue > static_cast<int32_t>(RenderStrategy::OFFSCREEN)) {
+        sheetStyle.radiusRenderStrategy = RenderStrategy::FAST;
+        return;
+    }
+    sheetStyle.radiusRenderStrategy = static_cast<RenderStrategy>(radiusRenderStrategy->ToNumber<int32_t>());
 }
 
 void JSViewAbstract::ParseSheetSubWindowValue(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)

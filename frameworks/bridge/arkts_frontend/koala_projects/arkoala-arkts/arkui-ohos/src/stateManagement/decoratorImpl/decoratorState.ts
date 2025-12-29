@@ -25,7 +25,7 @@ import { WatchFunc } from './decoratorWatch';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
-import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
+import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '#interop';
 import { StateMgmtTool } from '../tools/arkts/stateMgmtTool';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { StateMgmtDFX } from '../tools/stateMgmtDFX';

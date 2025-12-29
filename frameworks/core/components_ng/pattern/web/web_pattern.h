@@ -57,6 +57,7 @@
 #include "core/components_ng/gestures/pinch_gesture.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
+#include "core/components_ng/pattern/web/web_agent_event_reporter.h"
 #include "core/components_ng/pattern/web/web_data_detector_adapter.h"
 #include "ui/rs_surface_node.h"
 #include "core/components_ng/pattern/web/web_select_overlay.h"
@@ -91,6 +92,7 @@ namespace OHOS::NWeb {
     enum class CursorType;
 }
 namespace OHOS::Ace::NG {
+class WebAgentEventReporter;
 class WebAccessibilityChildTreeCallback;
 class ViewDataCommon;
 class TransitionalNodeInfo;
@@ -185,6 +187,7 @@ public:
     using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using WebNodeInfoCallback = const std::function<void(std::shared_ptr<JsonValue>& jsonNodeArray, int32_t webId)>;
     using TextBlurCallback = std::function<void(int64_t, const std::string)>;
+    using OnMediaCastEnterCallback = std::function<void()>;
     using WebComponentClickCallback = std::function<void(int64_t, const std::string)>;
     using OnWebNativeMessageConnectCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using OnWebNativeMessageDisConnectCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
@@ -374,6 +377,16 @@ public:
     DefaultFileSelectorShowCallback GetDefaultFileSelectorShowCallback()
     {
         return defaultFileSelectorShowCallback_;
+    }
+
+    void SetOnMediaCastEnterCallback(OnMediaCastEnterCallback&& Callback)
+    {
+        onMediaCastEnterCallback_ = std::move(Callback);
+    }
+
+    OnMediaCastEnterCallback GetOnMediaCastEnterCallback()
+    {
+        return onMediaCastEnterCallback_;
     }
 
     PermissionClipboardCallback GetPermissionClipboardCallback() const
@@ -891,8 +904,12 @@ public:
     void OnColorConfigurationUpdate() override;
     void RecordWebEvent(bool isInit = false) override;
     bool RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback);
+
     void DumpSimplifyInfoOnlyForParamConfig(
         std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig()) override;
+    void AddExtraInfoWithParamConfig(
+        std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig()) override;
+    void RegisterWebDomNativeInterface();
 
     bool IsPreviewImageNodeExist() const
     {
@@ -973,6 +990,12 @@ public:
     void SetTextEventAccessibilityEnable(bool enable);
     bool IsAccessibilityUsedByEventReport();
 
+    // WebAgentEventReporter funcs
+    RefPtr<WebAgentEventReporter> GetAgentEventReporter();
+    // WebAgentEventReporter reference
+    void ReportSelectedText() override;
+    std::pair<int32_t, RectF> GetScrollAreaInfoFromDocument(int32_t id);
+
     // Data Detector funcs
     RefPtr<WebDataDetectorAdapter> GetDataDetectorAdapter();
 
@@ -987,6 +1010,7 @@ public:
         isAILinkMenuShow_ = isAILinkMenuShow;
     }
 
+    bool CheckCreateImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     void CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     void RemoveSnapshotFrameNode(bool isAnimate = false);
     void RealRemoveSnapshotFrameNode();
@@ -1017,11 +1041,19 @@ public:
     void WindowMaximize(WebWindowMaximizeReason reason);
     void OnStatusBarClick() override;
     void OnBackToTopUpdate(bool isBackToTop);
+    void GetImagesByIDs(const std::vector<int32_t>& imageIds, int32_t windowId,
+        const std::function<void(int32_t, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>&,
+        MultiImageQueryErrorCode)>& arkWebfinishCallback);
 
     bool IsTextSelectionEnable()
     {
         return isTextSelectionEnable_;
     }
+    void SetTextSelectionEnable(bool textSelectionEnable)
+    {
+        isTextSelectionEnable_ = textSelectionEnable;
+    }
+    void NotifyOverlayRotation();
 protected:
     void ModifyWebSrc(const std::string& webSrc)
     {
@@ -1035,6 +1067,7 @@ private:
     friend class WebSelectOverlay;
     friend class WebDataDetectorAdapter;
     friend class WebAccessibilityEventReport;
+    friend class WebAgentEventReporter;
 
     void FakePageNodeInfo();
     bool Pip(int status, int delegateId, int childId, int frameRoutingId, int width, int height);
@@ -1368,6 +1401,7 @@ private:
     uint32_t rotation_ = 0;
     SetWebIdCallback setWebIdCallback_ = nullptr;
     SetWebDetachCallback setWebDetachCallback_ = nullptr;
+    OnMediaCastEnterCallback onMediaCastEnterCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
     SetFaviconCallback setFaviconCallback_ = nullptr;
@@ -1576,6 +1610,9 @@ private:
 
     // properties for WebAccessibilityEventReport
     RefPtr<WebAccessibilityEventReport> webAccessibilityEventReport_ = nullptr;
+    // properties for WebAgentEventReporter
+    RefPtr<WebAgentEventReporter> webAgentEventReporter_ = nullptr;
+    int64_t lastTouchDownTime_ = 0;
 
     // properties for AI data detector
     bool isAILinkMenuShow_ = false;

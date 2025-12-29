@@ -19,6 +19,7 @@
 #include "ui/common/layout/constants.h"
 
 #include "base/log/ace_trace.h"
+#include "base/log/event_report.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -510,6 +511,30 @@ float TextContentModifier::AdjustParagraphX(const ParagraphManager::ParagraphInf
     return contentRect.GetX() + contentRect.Width() - leadingMarginWidth;
 }
 
+void TextContentModifier::ReportFaultEvent(RSCanvas& canvas, const RefPtr<ParagraphManager>& pManager,
+    const RefPtr<TextPattern>& textPattern, const std::u16string& paragraphContent)
+{
+    CHECK_NULL_VOID(pManager);
+    CHECK_NULL_VOID(textPattern);
+    auto host = textPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto lineCount = pManager->GetLineCount();
+    auto paragraphs = pManager->GetParagraphs();
+    auto paragraphsSize = paragraphs.size();
+    RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&canvas);
+    if (host->GetHostTag() == V2::TEXT_ETS_TAG && recordingCanvas != nullptr &&
+        recordingCanvas->GetDrawCmdList() != nullptr && recordingCanvas->GetDrawCmdList()->IsEmpty()) {
+        if (paragraphContent.length() != 0 && (paragraphContent.find(u'\n') == std::u16string::npos &&
+                                                  paragraphContent.find(u'\t') == std::u16string::npos &&
+                                                  paragraphContent.find(u' ') == std::u16string::npos)) {
+            TextErrorInfo errorInfo { host->GetId(), pManager->GetLongestLineWithIndent(),
+                pManager->GetMaxIntrinsicWidth(), pManager->GetMaxWidth(), pManager->GetHeight(), lineCount,
+                paragraphsSize };
+            EventReport::ReportTextDrawCmdListErrorEvent(errorInfo);
+        }
+    }
+}
+
 void TextContentModifier::DrawText(
     RSCanvas& canvas, const RefPtr<ParagraphManager>& pManager, const RefPtr<TextPattern>& textPattern)
 {
@@ -527,6 +552,7 @@ void TextContentModifier::DrawText(
         paintOffsetY += paragraph->GetHeight();
         paragraphContent += paragraph->GetParagraphText();
     }
+    ReportFaultEvent(canvas, pManager, textPattern, paragraphContent);
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(paragraphContent.length() == 1 && host->GetHostTag() == V2::TEXT_ETS_TAG);
@@ -1267,20 +1293,16 @@ TextDirection TextContentModifier::GetTextRaceDirection() const
     CHECK_NULL_RETURN(frameNode, TextDirection::LTR);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, TextDirection::LTR);
-    // 获取文本方向属性，默认为 INHERIT
+    // default INHERIT
     auto textDirection = layoutProperty->GetTextDirectionValue(TextDirection::INHERIT);
     auto layoutDirection = layoutProperty->GetLayoutDirection();
     
-    // textDirection 优先级高于 layoutDirection
     if (textDirection != TextDirection::INHERIT) {
         if (textDirection == TextDirection::AUTO) {
-            // textDirection 为 AUTO 时，返回文本自身字符方向
             return GetTextRaceDirectionByContent();
         }
-        // 直接返回明确的文本方向（LTR 或 RTL）
         return textDirection;
     }
-    // textDirection 为 INHERIT 时，继承原有的 layoutDirection 逻辑
     if (layoutDirection == TextDirection::AUTO) {
         return GetTextRaceDirectionByContent();
     }

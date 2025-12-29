@@ -914,6 +914,7 @@ HWTEST_F(TextTestFiveNg, EncodeTlv003, TestSize.Level1)
     spanItem->textLineStyle->UpdateWordBreak(WordBreak::NORMAL);
     spanItem->textLineStyle->UpdateLineBreakStrategy(LineBreakStrategy::GREEDY);
     spanItem->textLineStyle->UpdateEllipsisMode(EllipsisMode::HEAD);
+    spanItem->textLineStyle->UpdateTextDirection(TextDirection::RTL);
 
     TextBackgroundStyle textBackgroundStyle;
     textBackgroundStyle.backgroundColor = Color::BLACK;

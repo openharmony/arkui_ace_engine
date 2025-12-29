@@ -26,7 +26,7 @@ import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { DrawContext, LengthMetrics, ColorMetrics } from "arkui.Graphics"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, ResponseRegionSupportedTool, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction, TipsAnchorType } from "./enums"
 import { IntentionCode } from "@ohos.multimodalInput.intentionCode"
-import { Position_serializer, DirectionalEdgesT_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Bias, Font, Bias_serializer, Area_serializer, Font_serializer } from "./units"
+import { Position_serializer, DirectionalEdgesT_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, ResourceStr, AccessibilityOptions, Bias, Font, Bias_serializer, Area_serializer, Font_serializer } from "./units"
 import { Resource_serializer } from "./../framework/resource"
 import { Resource } from "global.resource"
 import { TextRange_serializer, TextRange } from "./textCommon"
@@ -39,6 +39,7 @@ import { CircleShape_serializer, EllipseShape_serializer, PathShape_serializer, 
 import { uiMaterial_Material_serializer } from "./../framework/ohos.arkui.uiMaterial"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback } from "./styledString"
+import { ArkThemeScopeManager } from "#arktheme"
 import { ComponentContent_serializer } from "./../ComponentContent"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -4793,6 +4794,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityFocusDrawLevel(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnTouchTestDoneAttribute(value: TouchTestDoneCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnTouchTestDone(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setSystemMaterialAttribute(value: uiMaterial.Material | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -4803,6 +4816,39 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setSystemMaterial(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setAccessibilityStateDescriptionAttribute(value: string | Resource | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityStateDescription(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setAccessibilityActionOptionsAttribute(value: AccessibilityActionOptions | undefined): void {
+        ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            AccessibilityActionOptions_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setAccessibilityActionOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setExpandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
@@ -6600,6 +6646,7 @@ export interface SweepGradientOptions {
     end?: double | string;
     rotation?: double | string;
     colors: Array<[ ResourceColor, double ]>;
+    metricsColors?: Array<[ ColorMetrics, double ]>;
     repeating?: boolean;
 }
 export interface RadialGradientOptions {
@@ -6919,6 +6966,7 @@ export type SizeChangeCallback = (oldValue: SizeOptions, newValue: SizeOptions) 
 export type GestureRecognizerJudgeBeginCallback = (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>) => GestureJudgeResult;
 export type ShouldBuiltInRecognizerParallelWithCallback = (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer;
 export type TransitionFinishCallback = (transitionIn: boolean) => void;
+export type TouchTestDoneCallback = (event: BaseGestureEvent, recognizers: Array<GestureRecognizer>) => void;
 export type PixelMap = image.PixelMap;
 export enum DragBehavior {
     COPY = 0,
@@ -7925,8 +7973,17 @@ export interface CommonMethod {
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
         throw new Error("Unimplemented method accessibilityFocusDrawLevel")
     }
+    onTouchTestDone(value: TouchTestDoneCallback | undefined): this {
+        throw new Error("Unimplemented method onTouchTestDone")
+    }
     systemMaterial(value: uiMaterial.Material | undefined): this {
         throw new Error("Unimplemented method systemMaterial")
+    }
+    accessibilityStateDescription(value: string | Resource | undefined): this {
+        throw new Error("Unimplemented method accessibilityStateDescription")
+    }
+    accessibilityActionOptions(value: AccessibilityActionOptions | undefined): this {
+        throw new Error("Unimplemented method accessibilityActionOptions")
     }
     customProperty(name: string, value: CustomProperty): this {
         throw new Error("Unimplemented method customProperty")
@@ -8243,7 +8300,10 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onTouchIntercept_value?: ((value0: TouchEvent) => HitTestMode) | undefined
     onSizeChange_value?: SizeChangeCallback | undefined
     accessibilityFocusDrawLevel_value?: FocusDrawLevel | undefined
+    onTouchTestDone_value?: TouchTestDoneCallback | undefined
     systemMaterial_value?: uiMaterial.Material | undefined
+    accessibilityStateDescription_value?: string | Resource | undefined
+    accessibilityActionOptions_value?: AccessibilityActionOptions | undefined
     width(value: Length | LayoutPolicy | undefined): this {
         return this
     }
@@ -8736,7 +8796,16 @@ export class ArkCommonMethodStyle implements CommonMethod {
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
         return this
     }
+    onTouchTestDone(value: TouchTestDoneCallback | undefined): this {
+        return this
+    }
     systemMaterial(value: uiMaterial.Material | undefined): this {
+        return this
+    }
+    accessibilityStateDescription(value: string | Resource | undefined): this {
+        return this
+    }
+    accessibilityActionOptions(value: AccessibilityActionOptions | undefined): this {
         return this
     }
     customProperty(name: string, value: CustomProperty): this {
@@ -9165,6 +9234,9 @@ export interface EdgeEffectOptions {
 export enum EffectEdge {
     START = 1,
     END = 2
+}
+export interface EditModeOptions {
+    enableGatherSelectedItemsAnimation?: boolean;
 }
 export interface BackgroundBrightnessOptions {
     rate: double;
@@ -10589,10 +10661,34 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public onTouchTestDone(value: TouchTestDoneCallback | undefined): this {
+        if (this.checkPriority("onTouchTestDone")) {
+            const value_casted = value as (TouchTestDoneCallback | undefined)
+            this.getPeer()?.setOnTouchTestDoneAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public systemMaterial(value: uiMaterial.Material | undefined): this {
         if (this.checkPriority("systemMaterial")) {
             const value_casted = value as (uiMaterial.Material | undefined)
             this.getPeer()?.setSystemMaterialAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public accessibilityStateDescription(value: string | Resource | undefined): this {
+        if (this.checkPriority("accessibilityStateDescription")) {
+            const value_casted = value as (string | Resource | undefined)
+            this.getPeer()?.setAccessibilityStateDescriptionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public accessibilityActionOptions(value: AccessibilityActionOptions | undefined): this {
+        if (this.checkPriority("accessibilityActionOptions")) {
+            const value_casted = value as (AccessibilityActionOptions | undefined)
+            this.getPeer()?.setAccessibilityActionOptionsAttribute(value_casted)
             return this
         }
         return this
@@ -12367,6 +12463,30 @@ export class EdgeEffectOptions_serializer {
         return value
     }
 }
+export class EditModeOptions_serializer {
+    public static write(buffer: SerializerBase, value: EditModeOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForEnableGatherSelectedItemsAnimation  = value.enableGatherSelectedItemsAnimation
+        if (valueHolderForEnableGatherSelectedItemsAnimation !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableGatherSelectedItemsAnimationTmpValue  = valueHolderForEnableGatherSelectedItemsAnimation!
+            valueSerializer.writeBoolean(valueHolderForEnableGatherSelectedItemsAnimationTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): EditModeOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const enableGatherSelectedItemsAnimationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableGatherSelectedItemsAnimationTmpBuf : boolean | undefined = undefined
+        if ((enableGatherSelectedItemsAnimationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableGatherSelectedItemsAnimationTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableGatherSelectedItemsAnimationTmpResult : boolean | undefined = enableGatherSelectedItemsAnimationTmpBuf
+        let value : EditModeOptions = ({enableGatherSelectedItemsAnimation: enableGatherSelectedItemsAnimationTmpResult} as EditModeOptions)
+        return value
+    }
+}
 export class ExpectedFrameRateRange_serializer {
     public static write(buffer: SerializerBase, value: ExpectedFrameRateRange): void {
         let valueSerializer : SerializerBase = buffer
@@ -13180,10 +13300,10 @@ export class PopupBorderLinearGradient_serializer {
                     valueSerializer.writeInt8((0).toByte())
                     const valueHolderForColorsTmpElement_0TmpValueForIdx0  = valueHolderForColorsTmpElement_0TmpValue as Color
                     valueSerializer.writeInt32(valueHolderForColorsTmpElement_0TmpValueForIdx0.getOrdinal())
-                } else if (valueHolderForColorsTmpElement_0TmpValue instanceof number) {
+                } else if (valueHolderForColorsTmpElement_0TmpValue instanceof int32) {
                     valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForColorsTmpElement_0TmpValueForIdx1  = valueHolderForColorsTmpElement_0TmpValue as number
-                    valueSerializer.writeNumber(valueHolderForColorsTmpElement_0TmpValueForIdx1)
+                    const valueHolderForColorsTmpElement_0TmpValueForIdx1  = valueHolderForColorsTmpElement_0TmpValue as int32
+                    valueSerializer.writeInt32(valueHolderForColorsTmpElement_0TmpValueForIdx1)
                 } else if (valueHolderForColorsTmpElement_0TmpValue instanceof string) {
                     valueSerializer.writeInt8((2).toByte())
                     const valueHolderForColorsTmpElement_0TmpValueForIdx2  = valueHolderForColorsTmpElement_0TmpValue as string
@@ -13219,7 +13339,7 @@ export class PopupBorderLinearGradient_serializer {
                 if (colorsTmpBufTempBufValue0TempBuf_UnionSelector == (0).toChar()) {
                     colorsTmpBufTempBufValue0TempBuf_ = Color.values()[valueDeserializer.readInt32()]
                 } else if (colorsTmpBufTempBufValue0TempBuf_UnionSelector == (1).toChar()) {
-                    colorsTmpBufTempBufValue0TempBuf = valueDeserializer.readInt32()
+                    colorsTmpBufTempBufValue0TempBuf_ = valueDeserializer.readInt32()
                 } else if (colorsTmpBufTempBufValue0TempBuf_UnionSelector == (2).toChar()) {
                     colorsTmpBufTempBufValue0TempBuf_ = (valueDeserializer.readString() as string)
                 } else if (colorsTmpBufTempBufValue0TempBuf_UnionSelector == (3).toChar()) {
@@ -17325,6 +17445,21 @@ export class SweepGradientOptions_serializer {
             const valueHolderForColorsTmpElement_1  = valueHolderForColorsTmpElement[1]
             valueSerializer.writeFloat64(valueHolderForColorsTmpElement_1)
         }
+        const valueHolderForMetricsColors  = value.metricsColors
+        if (valueHolderForMetricsColors !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMetricsColorsTmpValue  = valueHolderForMetricsColors!
+            valueSerializer.writeInt32((valueHolderForMetricsColorsTmpValue.length).toInt())
+            for (let valueHolderForMetricsColorsTmpValueCounterI = 0; valueHolderForMetricsColorsTmpValueCounterI < valueHolderForMetricsColorsTmpValue.length; valueHolderForMetricsColorsTmpValueCounterI++) {
+                const valueHolderForMetricsColorsTmpValueTmpElement : [ ColorMetrics, double ] = valueHolderForMetricsColorsTmpValue[valueHolderForMetricsColorsTmpValueCounterI]
+                const valueHolderForMetricsColorsTmpValueTmpElement_0  = valueHolderForMetricsColorsTmpValueTmpElement[0]
+                ColorMetrics_serializer.write(valueSerializer, valueHolderForMetricsColorsTmpValueTmpElement_0)
+                const valueHolderForMetricsColorsTmpValueTmpElement_1  = valueHolderForMetricsColorsTmpValueTmpElement[1]
+                valueSerializer.writeFloat64(valueHolderForMetricsColorsTmpValueTmpElement_1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForRepeating  = value.repeating
         if (valueHolderForRepeating !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -17427,13 +17562,26 @@ export class SweepGradientOptions_serializer {
             colorsTmpBuf[colorsTmpBufBufCounterI] = ([colorsTmpBufTempBufValue0, colorsTmpBufTempBufValue1] as [ ResourceColor, double ])
         }
         const colorsTmpResult : Array<[ ResourceColor, double ]> = colorsTmpBuf
+        const metricsColorsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let metricsColorsTmpBuf : Array<[ ColorMetrics, double ]> | undefined = undefined
+        if ((metricsColorsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const metricsColorsTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let metricsColorsTmpBuf_ : Array<[ ColorMetrics, double ]> = new Array<[ ColorMetrics, double ]>(metricsColorsTmpBuf_Length)
+            for (let metricsColorsTmpBuf_BufCounterI = 0; metricsColorsTmpBuf_BufCounterI < metricsColorsTmpBuf_Length; metricsColorsTmpBuf_BufCounterI++) {
+                const metricsColorsTmpBuf_TempBufValue0 : ColorMetrics = ColorMetrics_serializer.read(valueDeserializer)
+                const metricsColorsTmpBuf_TempBufValue1 : double = valueDeserializer.readFloat64()
+                metricsColorsTmpBuf_[metricsColorsTmpBuf_BufCounterI] = ([metricsColorsTmpBuf_TempBufValue0, metricsColorsTmpBuf_TempBufValue1] as [ ColorMetrics, double ])
+            }
+            metricsColorsTmpBuf = metricsColorsTmpBuf_
+        }
+        const metricsColorsTmpResult : Array<[ ColorMetrics, double ]> | undefined = metricsColorsTmpBuf
         const repeatingTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let repeatingTmpBuf : boolean | undefined = undefined
         if ((repeatingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             repeatingTmpBuf = valueDeserializer.readBoolean()
         }
         const repeatingTmpResult : boolean | undefined = repeatingTmpBuf
-        let value : SweepGradientOptions = ({center: centerTmpResult, start: startTmpResult, end: endTmpResult, rotation: rotationTmpResult, colors: colorsTmpResult, repeating: repeatingTmpResult} as SweepGradientOptions)
+        let value : SweepGradientOptions = ({center: centerTmpResult, start: startTmpResult, end: endTmpResult, rotation: rotationTmpResult, colors: colorsTmpResult, metricsColors: metricsColorsTmpResult, repeating: repeatingTmpResult} as SweepGradientOptions)
         return value
     }
 }

@@ -51,25 +51,7 @@ public:
         onNavBarStateChangeEvent_ = changeEvent;
     }
 
-    void FireNavBarStateChangeEvent(bool isVisible)
-    {
-        if (isVisible_.has_value()) {
-            if (isVisible_.value() != isVisible) {
-                if (onNavBarStateChangeEvent_) {
-                    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "NavBar Visible State Change %{public}s",
-                        isVisible ? "false -> true" : "true -> false");
-                    onNavBarStateChangeEvent_(isVisible);
-                }
-            }
-        } else {
-            if (onNavBarStateChangeEvent_) {
-                TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set NavBar Visible State as %{public}s",
-                    isVisible ? "true" : "false");
-                onNavBarStateChangeEvent_(isVisible);
-            }
-        }
-        isVisible_ = isVisible;
-    }
+    void FireNavBarStateChangeEvent(bool isVisible);
 
     void SetOnNavigationModeChange(OnNavigationModeChangeEvent&& modeChange)
     {

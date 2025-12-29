@@ -311,7 +311,7 @@ class ObservableArray<T> extends Array<T> {
         super.length = length
     }
 
-    override at(index: int): T | undefined {
+    override at(index: int): T {
         this.handler?.onAccess()
         return super.at(index)
     }
@@ -331,13 +331,13 @@ class ObservableArray<T> extends Array<T> {
         super.$_set(index, value)
     }
 
-    override copyWithin(target: int, start: int, end: int): this {
+    override copyWithin(target: int, start: int, end?: int): this {
         this.handler?.onModify()
         super.copyWithin(target, start, end)
         return this
     }
 
-    override fill(value: T, start: int, end: int): this {
+    override fill(value: T, start?: int, end?: int): this {
         const handler = this.handler
         if (handler) {
             handler.onModify()
@@ -355,7 +355,7 @@ class ObservableArray<T> extends Array<T> {
         return result
     }
 
-    override pushArray(...items: T[]): number {
+    override pushArray(...items: T[]): int {
         const handler = this.handler
         if (handler) {
             handler.onModify()
@@ -384,7 +384,7 @@ class ObservableArray<T> extends Array<T> {
         return this
     }
 
-    override splice(index: number, count: Number | undefined, ...items: T[]): Array<T> {
+    override splice(index: int, count: int | undefined, ...items: T[]): Array<T> {
         const handler = this.handler
         if (handler) {
             handler.onModify()
@@ -398,7 +398,7 @@ class ObservableArray<T> extends Array<T> {
         return super.splice(index, count, ...items)
     }
 
-    override unshift(...items: T[]): number {
+    override unshift(...items: T[]): int {
         const handler = this.handler
         if (handler) {
             handler.onModify()
@@ -414,7 +414,7 @@ class ObservableArray<T> extends Array<T> {
 
     // === methods with uncompatible implementation ===
 
-    override filter(predicate: (value: T, index: number, array: Array<T>) => boolean): Array<T> {
+    override filter(predicate: (value: T, index: int, array: Array<T>) => boolean): Array<T> {
         this.handler?.onAccess()
         return super.filter(predicate)
     }
@@ -424,7 +424,7 @@ class ObservableArray<T> extends Array<T> {
         return super.flat<U>(depth)
     }
 
-    override flatMap<U>(fn: (v: T, k: number, arr: Array<T>) => U): Array<U> {
+    override flatMap<U>(fn: (v: T, k: int, arr: Array<T>) => U): Array<U> {
         this.handler?.onAccess()
         return super.flatMap<U>(fn)
     }
@@ -436,62 +436,62 @@ class ObservableArray<T> extends Array<T> {
         return super.concat(...items)
     }
 
-    override find(predicate: (value: T, index: number, array: Array<T>) => boolean): T | undefined {
+    override find(predicate: (value: T, index: int, array: Array<T>) => boolean): T | undefined {
         this.handler?.onAccess()
         return super.find(predicate)
     }
 
-    override findIndex(predicate: (value: T, index: number, array: Array<T>) => boolean): number {
+    override findIndex(predicate: (value: T, index: int, array: Array<T>) => boolean): int {
         this.handler?.onAccess()
         return super.findIndex(predicate)
     }
 
-    override findLast(predicate: (elem: T, index: number, array: Array<T>) => boolean): T | undefined {
+    override findLast(predicate: (elem: T, index: int, array: Array<T>) => boolean): T | undefined {
         this.handler?.onAccess()
         return super.findLast(predicate)
     }
 
-    override every(predicate: (value: T, index: number, array: Array<T>) => boolean): boolean {
+    override every(predicate: (value: T, index: int, array: Array<T>) => boolean): boolean {
         this.handler?.onAccess()
         return super.every(predicate)
     }
 
-    override some(predicate: (value: T, index: number, array: Array<T>) => boolean): boolean {
+    override some(predicate: (value: T, index: int, array: Array<T>) => boolean): boolean {
         this.handler?.onAccess()
         return super.some(predicate)
     }
 
-    override findLastIndex(predicate: (element: T, index: number, array: Array<T>) => boolean): number {
+    override findLastIndex(predicate: (element: T, index: int, array: Array<T>) => boolean): int {
         this.handler?.onAccess()
         return super.findLastIndex(predicate)
     }
 
-    override reduce(callbackfn: (previousValue: T, currentValue: T, index: number, array: Array<T>) => T): T {
+    override reduce(callbackfn: (previousValue: T, currentValue: T, index: int, array: Array<T>) => T): T {
         this.handler?.onAccess()
         return super.reduce(callbackfn)
     }
 
-    override reduce<U = T>(callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U, initialValue: U): U {
+    override reduce<U = T>(callbackfn: (previousValue: U, currentValue: T, index: int, array: Array<T>) => U, initialValue: U): U {
         this.handler?.onAccess()
         return super.reduce<U>(callbackfn, initialValue)
     }
 
-    override reduceRight(callbackfn: (previousValue: T, currentValue: T, index: number, array: Array<T>) => T): T {
+    override reduceRight(callbackfn: (previousValue: T, currentValue: T, index: int, array: Array<T>) => T): T {
         this.handler?.onAccess()
         return super.reduceRight(callbackfn)
     }
 
-    override reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U, initialValue: U): U {
+    override reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, index: int, array: Array<T>) => U, initialValue: U): U {
         this.handler?.onAccess()
         return super.reduceRight<U>(callbackfn, initialValue)
     }
 
-    override forEach(callbackfn: (value: T, index: number, array: Array<T>) => void): void {
+    override forEach(callbackfn: (value: T, index: int, array: Array<T>) => void): void {
         this.handler?.onAccess()
         super.forEach(callbackfn)
     }
 
-    override slice(start: int, end: int): Array<T> {
+    override slice(start?: int, end?: int): Array<T> {
         this.handler?.onAccess()
         return super.slice(start, end)
     }
@@ -516,7 +516,7 @@ class ObservableArray<T> extends Array<T> {
         return super.toSpliced(start, delete, ...items)
     }
 
-    override includes(val: T, fromIndex?: Number): boolean {
+    override includes(val: T, fromIndex?: int): boolean {
         this.handler?.onAccess()
         return super.includes(val, fromIndex)
     }
@@ -556,7 +556,7 @@ class ObservableArray<T> extends Array<T> {
         return super.entries()
     }
 
-    override map<U>(callbackfn: (value: T, index: number, array: Array<T>) => U): Array<U> {
+    override map<U>(callbackfn: (value: T, index: int, array: Array<T>) => U): Array<U> {
         this.handler?.onAccess()
         return super.map<U>(callbackfn)
     }
@@ -798,7 +798,7 @@ class ObservableDate extends Date {
         return super.isDateValid()
     }
 
-    override valueOf(): number {
+    override valueOf(): long {
         this.handler?.onAccess()
         return super.valueOf()
     }
@@ -843,87 +843,67 @@ class ObservableDate extends Date {
         return super.toUTCString()
     }
 
-    override getDate(): number {
+    override getDate(): int {
         this.handler?.onAccess()
         return super.getDate()
     }
 
-    override setDate(value: byte) {
-        this.handler?.onModify()
-        super.setDate(value)
-    }
-
-    override setDate(value: number): number {
+    override setDate(value: int): long {
         this.handler?.onModify()
         return super.setDate(value)
     }
 
-    override getUTCDate(): number {
+    override getUTCDate(): int {
         this.handler?.onAccess()
         return super.getUTCDate()
     }
 
-    override setUTCDate(value: byte) {
-        this.handler?.onModify()
-        super.setUTCDate(value)
-    }
-
-    override setUTCDate(value: number): number {
+    override setUTCDate(value: int): long {
         this.handler?.onModify()
         return super.setUTCDate(value)
     }
 
-    override getDay(): number {
+    override getDay(): int {
         this.handler?.onAccess()
         return super.getDay()
     }
 
-    override setDay(value: byte) {
-        this.handler?.onModify()
-        super.setDay(value)
-    }
-
-    override getUTCDay(): number {
+    override getUTCDay(): int {
         this.handler?.onAccess()
         return super.getUTCDay()
     }
 
-    override setUTCDay(value: byte) {
-        this.handler?.onModify()
-        super.setUTCDay(value)
-    }
-
-    override setUTCDay(value: number): number {
+    override setUTCDay(value: int): long {
         this.handler?.onModify()
         return super.setUTCDay(value)
     }
 
-    override getMonth(): number {
+    override getMonth(): int {
         this.handler?.onAccess()
         return super.getMonth()
     }
 
-    override setMonth(value: int) {
+    override setMonth(value: int): long {
         this.handler?.onModify()
-        super.setMonth(value)
+        return super.setMonth(value)
     }
 
-    override setMonth(value: number, date?: number): number {
+    override setMonth(value: int, date: int): long {
         this.handler?.onModify()
         return super.setMonth(value, date)
     }
 
-    override getUTCMonth(): number {
+    override getUTCMonth(): int {
         this.handler?.onAccess()
         return super.getUTCMonth()
     }
 
-    override setUTCMonth(value: int) {
+    override setUTCMonth(value: int): long {
         this.handler?.onModify()
-        super.setUTCMonth(value)
+        return super.setUTCMonth(value)
     }
 
-    override setUTCMonth(value: number, date?: number): number {
+    override setUTCMonth(value: int, date: int): long {
         this.handler?.onModify()
         return super.setUTCMonth(value, date)
     }
@@ -938,172 +918,192 @@ class ObservableDate extends Date {
         super.setYear(value)
     }
 
-    override setYear(value: number) {
-        this.handler?.onModify()
-        super.setYear(value)
-    }
-
-    override getFullYear(): number {
+    override getFullYear(): int {
         this.handler?.onAccess()
         return super.getFullYear()
     }
 
-    override setFullYear(value: number, month?: number, date?: number): number {
+    override setFullYear(value: int): long {
+        this.handler?.onModify()
+        return super.setFullYear(value)
+    }
+
+    override setFullYear(value: int, month: int): long {
+        this.handler?.onModify()
+        return super.setFullYear(value, month)
+    }
+
+    override setFullYear(value: int, month: int, date: int): long {
         this.handler?.onModify()
         return super.setFullYear(value, month, date)
     }
 
-    override setFullYear(value: int) {
-        this.handler?.onModify()
-        super.setFullYear(value)
-    }
-
-    override getUTCFullYear(): number {
+    override getUTCFullYear(): int {
         this.handler?.onAccess()
         return super.getUTCFullYear()
     }
 
-    override setUTCFullYear(value: number, month?: number, date?: number): number {
+    override setUTCFullYear(value: int): long {
+        this.handler?.onModify()
+        return super.setUTCFullYear(value)
+    }
+
+    override setUTCFullYear(value: int, month: int): long {
+        this.handler?.onModify()
+        return super.setUTCFullYear(value, month)
+    }
+
+    override setUTCFullYear(value: int, month: int, date: int): long {
         this.handler?.onModify()
         return super.setUTCFullYear(value, month, date)
     }
 
-    override setUTCFullYear(value: int) {
-        this.handler?.onModify()
-        super.setUTCFullYear(value)
-    }
-
-    override getTime(): number {
+    override getTime(): long {
         this.handler?.onAccess()
         return super.getTime()
     }
 
-    override setTime(value: long) {
-        this.handler?.onModify()
-        super.setTime(value)
-    }
-
-    override setTime(value: number): number {
+    override setTime(value: long): long {
         this.handler?.onModify()
         return super.setTime(value)
     }
 
-    override getHours(): number {
+    override getHours(): int {
         this.handler?.onAccess()
         return super.getHours()
     }
 
-    override setHours(value: number, min?: number, sec?: number, ms?: number): number {
+    override setHours(value: int): long {
+        this.handler?.onModify()
+        return super.setHours(value)
+    }
+
+    override setHours(value: int, min: int): long {
+        this.handler?.onModify()
+        return super.setHours(value, min)
+    }
+
+    override setHours(value: int, min: int, sec: int): long {
+        this.handler?.onModify()
+        return super.setHours(value, min, sec)
+    }
+
+    override setHours(value: int, min: int, sec: int, ms: int): long {
         this.handler?.onModify()
         return super.setHours(value, min, sec, ms)
     }
 
-    override setHours(value: byte) {
-        this.handler?.onModify()
-        super.setHours(value)
-    }
-
-    override getUTCHours(): number {
+    override getUTCHours(): int {
         this.handler?.onAccess()
         return super.getUTCHours()
     }
 
-    override setUTCHours(value: number, min?: number, sec?: number, ms?: number): number {
+    override setUTCHours(value: int): long {
+        this.handler?.onModify()
+        return super.setUTCHours(value)
+    }
+
+    override setUTCHours(value: int, min: int): long {
+        this.handler?.onModify()
+        return super.setUTCHours(value, min)
+    }
+
+    override setUTCHours(value: int, min: int, sec: int): long {
+        this.handler?.onModify()
+        return super.setUTCHours(value, min, sec)
+    }
+
+    override setUTCHours(value: int, min: int, sec: int, ms: int): long {
         this.handler?.onModify()
         return super.setUTCHours(value, min, sec, ms)
     }
 
-    override setUTCHours(value: byte) {
-        this.handler?.onModify()
-        super.setUTCHours(value)
-    }
-
-    override getMilliseconds(): number {
+    override getMilliseconds(): int {
         this.handler?.onAccess()
         return super.getMilliseconds()
     }
 
-    override setMilliseconds(value: short) {
-        this.handler?.onModify()
-        super.setMilliseconds(value)
-    }
-
-    override setMilliseconds(value: number): number {
+    override setMilliseconds(value: int): long {
         this.handler?.onModify()
         return super.setMilliseconds(value)
     }
 
-    override getUTCMilliseconds(): number {
+    override getUTCMilliseconds(): int {
         this.handler?.onAccess()
         return super.getUTCMilliseconds()
     }
 
-    override setUTCMilliseconds(value: short) {
-        this.handler?.onModify()
-        super.setUTCMilliseconds(value)
-    }
-
-    override setUTCMilliseconds(value: number): number {
+    override setUTCMilliseconds(value: int): long {
         this.handler?.onModify()
         return super.setUTCMilliseconds(value)
     }
 
-    override getSeconds(): number {
+    override getSeconds(): int {
         this.handler?.onAccess()
         return super.getSeconds()
     }
 
-    override setSeconds(value: byte) {
+    override setSeconds(value: int): long {
         this.handler?.onModify()
-        super.setSeconds(value)
+        return super.setSeconds(value)
     }
 
-    override setSeconds(value: number, ms?: number): number {
+    override setSeconds(value: int, ms: int): long {
         this.handler?.onModify()
         return super.setSeconds(value, ms)
     }
 
-    override getUTCSeconds(): number {
+    override getUTCSeconds(): int {
         this.handler?.onAccess()
         return super.getUTCSeconds()
     }
 
-    override setUTCSeconds(value: byte) {
+    override setUTCSeconds(value: int): long {
         this.handler?.onModify()
-        super.setUTCSeconds(value)
+        return super.setUTCSeconds(value)
     }
 
-    override setUTCSeconds(value: number, ms?: number): number {
+    override setUTCSeconds(value: int, ms: int): long {
         this.handler?.onModify()
         return super.setUTCSeconds(value, ms)
     }
 
-    override getMinutes(): number {
+    override getMinutes(): int {
         this.handler?.onAccess()
         return super.getMinutes()
     }
 
-    override setMinutes(value: byte) {
+    override setMinutes(value: int): long {
         this.handler?.onModify()
-        super.setMinutes(value)
+        return super.setMinutes(value)
     }
 
-    override setMinutes(value: number, sec?: Number, ms?: number): number {
+    override setMinutes(value: int, sec: int): long {
+        this.handler?.onModify()
+        return super.setMinutes(value, sec)
+    }
+
+    override setMinutes(value: int, sec: int, ms: int): long {
         this.handler?.onModify()
         return super.setMinutes(value, sec, ms)
     }
 
-    override getUTCMinutes(): number {
+    override getUTCMinutes(): int {
         this.handler?.onAccess()
         return super.getUTCMinutes()
     }
 
-    override setUTCMinutes(value: byte) {
+    override setUTCMinutes(value: int): long {
         this.handler?.onModify()
-        super.setUTCMinutes(value)
+        return super.setUTCMinutes(value)
     }
 
-    override setUTCMinutes(value: number, sec?: Number, ms?: number): number {
+    override setUTCMinutes(value: int, sec: int): long {
+        this.handler?.onModify()
+        return super.setUTCMinutes(value, sec)
+    }
+
+    override setUTCMinutes(value: int, sec: int, ms: int): long {
         this.handler?.onModify()
         return super.setUTCMinutes(value, sec, ms)
     }
@@ -1114,7 +1114,7 @@ class MetadataClass {
     readonly trackedProperties: ReadonlySet<string> | undefined
 
     constructor(isObservedClass: boolean,
-                trackedProperties: ReadonlySet<string> | undefined) {
+        trackedProperties: ReadonlySet<string> | undefined) {
         this.isObservedClass = isObservedClass
         this.trackedProperties = trackedProperties
     }

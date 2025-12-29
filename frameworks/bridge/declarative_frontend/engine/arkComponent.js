@@ -5310,10 +5310,11 @@ class ArkComponent {
     }
     return this;
   }
-  onVisibleAreaChange(ratios, event) {
+  onVisibleAreaChange(ratios, event, measureFromViewport = false) {
     let onVisibleAreaChange = new ArkOnVisibleAreaChange();
     onVisibleAreaChange.ratios = ratios;
     onVisibleAreaChange.event = event;
+    onVisibleAreaChange.measureFromViewport = measureFromViewport;
     this._onVisibleAreaChange = onVisibleAreaChange;
     if (typeof ratios === 'undefined' || typeof event === 'undefined') {
       modifierWithKey(this._modifiersWithKeys, OnVisibleAreaChangeModifier.identity, OnVisibleAreaChangeModifier, undefined);
@@ -10836,6 +10837,24 @@ class RichEditorFallbackLineSpacingModifier extends ModifierWithKey {
 }
 RichEditorFallbackLineSpacingModifier.identity = Symbol('richEditorFallbackLineSpacing');
 
+class RichEditorSingleLineModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetSingleLine(node);
+    }
+    else {
+      getUINativeModule().richEditor.setSingleLine(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RichEditorSingleLineModifier.identity = Symbol('richEditorSingleLine');
+
 class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -10941,6 +10960,7 @@ class ArkRichEditorComponent extends ArkComponent {
     arkValue.supportAvoidance = options?.supportAvoidance;
     modifierWithKey(this._modifiersWithKeys, RichEditorCustomKeyboardModifier.identity,
       RichEditorCustomKeyboardModifier, arkValue);
+    return this;
   }
   onEditingChange(callback) {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnEditingChangeModifier.identity, RichEditorOnEditingChangeModifier, callback);
@@ -11027,6 +11047,10 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   fallbackLineSpacing(enable) {
     modifierWithKey(this._modifiersWithKeys, RichEditorFallbackLineSpacingModifier.identity, RichEditorFallbackLineSpacingModifier, enable);
+    return this;
+  }
+  singleLine(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorSingleLineModifier.identity, RichEditorSingleLineModifier, value);
     return this;
   }
 }
@@ -12407,6 +12431,7 @@ class ArkSearchComponent extends ArkComponent {
     arkValue.supportAvoidance = options?.supportAvoidance;
     modifierWithKey(this._modifiersWithKeys, SearchCustomKeyboardModifier.identity,
       SearchCustomKeyboardModifier, arkValue);
+    return this;
   }
   showUnit(event) {
     throw new Error('Method not implemented.');
@@ -16446,7 +16471,9 @@ class TextAreaBorderModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return this.value.checkObjectDiff(this.stageValue);
+    let emptyColor = new ArkBorderColor();
+    let hasBorderColor = !this.stageValue.arkColor.isEqual(emptyColor) || !this.value.arkColor.isEqual(emptyColor);
+    return hasBorderColor || this.value.checkObjectDiff(this.stageValue);
   }
 }
 TextAreaBorderModifier.identity = Symbol('textAreaBorder');
@@ -16495,6 +16522,16 @@ TextAreaBorderWidthModifier.identity = Symbol('textAreaBorderWidth');
 class TextAreaBorderColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
+  }
+  applyStage(node, component) {
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.value = this.stageValue;
+      this.applyPeer(node, true, component);
+      return true;
+    }
+    this.value = this.stageValue;
+    this.applyPeer(node, false, component);
+    return false;
   }
   applyPeer(node, reset) {
     if (reset) {
@@ -17202,6 +17239,7 @@ class ArkTextAreaComponent extends ArkComponent {
     arkValue.supportAvoidance = options?.supportAvoidance;
     modifierWithKey(this._modifiersWithKeys, TextAreaCustomKeyboardModifier.identity,
       TextAreaCustomKeyboardModifier, arkValue);
+    return this;
   }
   decoration(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaDecorationModifier.identity, TextAreaDecorationModifier, value);
@@ -18605,7 +18643,9 @@ class TextInputBorderModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return this.value.checkObjectDiff(this.stageValue);
+    let emptyColor = new ArkBorderColor();
+    let hasBorderColor = !this.stageValue.arkColor.isEqual(emptyColor) || !this.value.arkColor.isEqual(emptyColor);
+    return hasBorderColor || this.value.checkObjectDiff(this.stageValue);
   }
 }
 TextInputBorderModifier.identity = Symbol('textInputBorder');
@@ -18654,6 +18694,16 @@ TextInputBorderWidthModifier.identity = Symbol('textInputBorderWidth');
 class TextInputBorderColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
+  }
+  applyStage(node, component) {
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.value = this.stageValue;
+      this.applyPeer(node, true, component);
+      return true;
+    }
+    this.value = this.stageValue;
+    this.applyPeer(node, false, component);
+    return false;
   }
   applyPeer(node, reset) {
     if (reset) {
@@ -19411,6 +19461,7 @@ class ArkTextInputComponent extends ArkComponent {
     arkValue.supportAvoidance = options?.supportAvoidance;
     modifierWithKey(this._modifiersWithKeys, TextInputCustomKeyboardModifier.identity,
       TextInputCustomKeyboardModifier, arkValue);
+    return this;
   }
   decoration(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputDecorationModifier.identity, TextInputDecorationModifier, value);
@@ -26805,7 +26856,7 @@ class ArkNavDestinationComponent extends ArkComponent {
   }
   backButtonIcon(value, text) {
     let config = new ArkNavBackButton();
-    config.text = value;
+    config.icon = value;
     if (!isNull(text)) {
       config.text = text;
     }
@@ -27196,6 +27247,28 @@ class NavDestinationSystemBarStyleModifier extends ModifierWithKey {
   }
 }
 NavDestinationSystemBarStyleModifier.identity = Symbol('systemBarStyle');
+
+class NavigationDividerStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().navigation.resetDividerStyle(node);
+    } else {
+      getUINativeModule().navigation.setDividerStyle(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return (this.value.color !== this.stageValue.color) ||
+      (this.value.startMargin !== this.stageValue.startMargin) ||
+      (this.value.endMargin !== this.stageValue.endMargin);
+  }
+}
+
+NavigationDividerStyleModifier.identity = Symbol('DividerStyle');
 
 class NavDestinationOnShownModifier extends ModifierWithKey {
   constructor(value) {
@@ -28330,6 +28403,11 @@ class ArkNavigationComponent extends ArkComponent {
 
   systemBarStyle(style) {
     modifierWithKey(this._modifiersWithKeys, NavigationSystemBarStyleModifier.identity, NavigationSystemBarStyleModifier, style);
+    return this;
+  }
+
+  divider(style) {
+    modifierWithKey(this._modifiersWithKeys, NavigationDividerStyleModifier.identitiy, NavigationDividerStyleModifier, style);
     return this;
   }
 }
@@ -30581,217 +30659,6 @@ if (globalThis.IsolatedComponent !== undefined) {
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.CommonModifier(nativePtr, classType);
     });
-  };
-}
-
-/// <reference path='./import.ts' />
-class ArkGaugeComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  value(value) {
-    modifierWithKey(this._modifiersWithKeys, GaugeVauleModifier.identity, GaugeVauleModifier, value);
-    return this;
-  }
-  startAngle(angle) {
-    modifierWithKey(this._modifiersWithKeys, GaugeStartAngleModifier.identity, GaugeStartAngleModifier, angle);
-    return this;
-  }
-  endAngle(angle) {
-    modifierWithKey(this._modifiersWithKeys, GaugeEndAngleModifier.identity, GaugeEndAngleModifier, angle);
-    return this;
-  }
-  colors(colors) {
-    modifierWithKey(this._modifiersWithKeys, GaugeColorsModifier.identity, GaugeColorsModifier, colors);
-    return this;
-  }
-  strokeWidth(length) {
-    modifierWithKey(this._modifiersWithKeys, GaugeStrokeWidthModifier.identity, GaugeStrokeWidthModifier, length);
-    return this;
-  }
-  description(value) {
-    throw new Error('Method not implemented.');
-  }
-  trackShadow(value) {
-    modifierWithKey(this._modifiersWithKeys, GaugeTrackShadowModifier.identity, GaugeTrackShadowModifier, value);
-    return this;
-  }
-  indicator(value) {
-    modifierWithKey(this._modifiersWithKeys, GaugeIndicatorModifier.identity, GaugeIndicatorModifier, value);
-    return this;
-  }
-  contentModifier(value) {
-    modifierWithKey(this._modifiersWithKeys, GaugeContentModifier.identity, GaugeContentModifier, value);
-    return this;
-  }
-  setContentModifier(modifier) {
-    if (modifier === undefined || modifier === null) {
-      getUINativeModule().gauge.setContentModifierBuilder(this.nativePtr, false);
-      return;
-    }
-    this.needRebuild = false;
-    if (this.builder !== modifier.applyContent()) {
-      this.needRebuild = true;
-    }
-    this.builder = modifier.applyContent();
-    this.modifier = modifier;
-    getUINativeModule().gauge.setContentModifierBuilder(this.nativePtr, this);
-  }
-  makeContentModifierNode(context, gaugeConfiguration) {
-    gaugeConfiguration.contentModifier = this.modifier;
-    if (isUndefined(this.gaugeNode) || this.needRebuild) {
-      let xNode = globalThis.requireNapi('arkui.node');
-      this.gaugeNode = new xNode.BuilderNode(context);
-      this.gaugeNode.build(this.builder, gaugeConfiguration);
-      this.needRebuild = false;
-    } else {
-      this.gaugeNode.update(gaugeConfiguration);
-    }
-    return this.gaugeNode.getFrameNode();
-  }
-  privacySensitive(value) {
-    modifierWithKey(this._modifiersWithKeys, GaugePrivacySensitiveModifier.identity, GaugePrivacySensitiveModifier, value);
-    return this;
-  }
-}
-class GaugeIndicatorModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().gauge.resetGaugeIndicator(node, this.value);
-    }
-    else {
-      getUINativeModule().gauge.setGaugeIndicator(node, this.value.icon, this.value.space);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.icon, this.value.icon) ||
-      !isBaseOrResourceEqual(this.stageValue.space, this.value.space);
-  }
-}
-GaugeIndicatorModifier.identity = Symbol('gaugeIndicator');
-class GaugeContentModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset, component) {
-    let gaugeComponent = component;
-    gaugeComponent.setContentModifier(this.value);
-  }
-}
-GaugeContentModifier.identity = Symbol('gaugeContentModifier');
-class GaugeColorsModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().gauge.resetGaugeColors(node);
-    }
-    else {
-      getUINativeModule().gauge.setGaugeColors(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return true;
-  }
-}
-GaugeColorsModifier.identity = Symbol('gaugeColors');
-class GaugeVauleModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().gauge.resetGaugeVaule(node);
-    }
-    else {
-      getUINativeModule().gauge.setGaugeVaule(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-GaugeVauleModifier.identity = Symbol('gaugeVaule');
-class GaugeStartAngleModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().gauge.resetGaugeStartAngle(node);
-    }
-    else {
-      getUINativeModule().gauge.setGaugeStartAngle(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-GaugeStartAngleModifier.identity = Symbol('gaugeStartAngle');
-class GaugeEndAngleModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().gauge.resetGaugeEndAngle(node);
-    }
-    else {
-      getUINativeModule().gauge.setGaugeEndAngle(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-GaugeEndAngleModifier.identity = Symbol('gaugeEndAngle');
-class GaugeStrokeWidthModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().gauge.resetGaugeStrokeWidth(node);
-    }
-    else {
-      getUINativeModule().gauge.setGaugeStrokeWidth(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-GaugeStrokeWidthModifier.identity = Symbol('gaugeStrokeWidth');
-class GaugeTrackShadowModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().gauge.resetGaugeTrackShadow(node);
-    }
-    else {
-      getUINativeModule().gauge.setGaugeTrackShadow(node, this.value, this.value.radius, this.value.offsetX, this.value.offsetY);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-GaugeTrackShadowModifier.identity = Symbol('gaugeTrackShadow');
-class GaugePrivacySensitiveModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().gauge.resetGaugePrivacySensitive(node);
-    } else {
-      getUINativeModule().gauge.setGaugePrivacySensitive(node, this.value);
-    }
-  }
-}
-GaugePrivacySensitiveModifier.identity = Symbol('gaugePrivacySensitive');
-// @ts-ignore
-if (globalThis.Gauge !== undefined) {
-  globalThis.Gauge.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkGaugeComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.GaugeModifier(nativePtr, classType);
-    });
-  };
-  globalThis.Gauge.contentModifier = function (modifier) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-    let component = this.createOrGetNode(elmtId, () => {
-      return new ArkGaugeComponent(nativeNode);
-    });
-    component.setContentModifier(modifier);
   };
 }
 
@@ -36117,7 +35984,7 @@ class ListDividerModifier extends ModifierWithKey {
   checkObjectDiff() {
     let _a, _b, _c, _d, _e, _f, _g, _h;
     return !(((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.strokeWidth) === ((_b = this.value) === null || _b === void 0 ? void 0 : _b.strokeWidth) &&
-      ((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.color) === ((_d = this.value) === null || _d === void 0 ? void 0 : _d.color) &&
+      ((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.color) === ((_d = this.value) === null || _d === void 0 ? void 0 : _d.color) && !isResource(_c.color) && !isResource(_d.color) &&
       ((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.startMargin) === ((_f = this.value) === null || _f === void 0 ? void 0 : _f.startMargin) &&
       ((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.endMargin) === ((_h = this.value) === null || _h === void 0 ? void 0 : _h.endMargin));
   }
@@ -37097,7 +36964,7 @@ class ListItemGroupDividerModifier extends ModifierWithKey {
   checkObjectDiff() {
     let _a, _b, _c, _d, _e, _f, _g, _h;
     return !(((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.strokeWidth) === ((_b = this.value) === null || _b === void 0 ? void 0 : _b.strokeWidth) &&
-      ((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.color) === ((_d = this.value) === null || _d === void 0 ? void 0 : _d.color) &&
+      ((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.color) === ((_d = this.value) === null || _d === void 0 ? void 0 : _d.color) && !isResource(_c.color) && !isResource(_d.color) &&
       ((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.startMargin) === ((_f = this.value) === null || _f === void 0 ? void 0 : _f.startMargin) &&
       ((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.endMargin) === ((_h = this.value) === null || _h === void 0 ? void 0 : _h.endMargin));
   }
@@ -42003,6 +41870,23 @@ if (globalThis.Hyperlink === undefined) {
         getUINativeModule().hyperlink.create(params.address, params.content);
       } else {
         getUINativeModule().hyperlink.create('', '');
+      }
+    }
+  }
+}
+
+// @ts-ignore
+if (globalThis.Gauge === undefined) {
+  globalThis.Gauge = {
+    create: function(params) {
+      console.log('first create gauge nativeModule');
+      getUINativeModule().loadNativeModule('gauge');
+      let module = globalThis.requireNapi('arkui.components.arkgauge');
+      module.exportView();
+      if (params !== undefined) {
+        getUINativeModule().gauge.create(params.value ?? 0, params.min ?? 0, params.max ?? 100);
+      } else {
+        getUINativeModule().gauge.create(0, 0, 100);
       }
     }
   }

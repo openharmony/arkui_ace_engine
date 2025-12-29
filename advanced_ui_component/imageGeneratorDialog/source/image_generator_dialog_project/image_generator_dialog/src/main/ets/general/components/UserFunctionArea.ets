@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { CanvasLayoutDirection } from "../types/Declaration";
 import { AIGenerateOptions } from "../utils/AIGenerateOptions";
 import { styleItem } from "./CanvasFramework"
 
@@ -172,32 +173,98 @@ export struct StyleSelect {
 @ComponentV2
 struct UserInteractiveAreaTabBar {
   @Param index: number = 0
-  @Consumer('functionAreaSelectedIndex') selectedIndex: number = 0
   @Param name: string = '__NA__'
   @Param @Require icon?: Resource
+  @Consumer('functionAreaSelectedIndex') selectedIndex: number = 0
+  @Consumer('globalLayoutDirection') curLayoutDirection: CanvasLayoutDirection = CanvasLayoutDirection.DEFAULT;
 
   build() {
     Column() {
-      Column() {
-        Image(this.icon)
-          .width(24)
-          .height(24)
-          .opacity(this.index === this.selectedIndex ? 0.9 : 0.6)
+      if (this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL) {
+        Column() {
+          UserInteractiveAreaTabBarIcon({
+            iconSize: 48,
+            iconPadding: 12,
+            totalBorderRadius: 24,
+            index: this.index,
+            icon: this.icon
+          })
+            .margin({ bottom: 4 })
+          UserInteractiveAreaTabBarText({
+            name: this.name,
+            fontSize: 10,
+            fontWeight: 500,
+            index: this.index
+          })
+            .height(10)
+        }
+      } else {
+        Row() {
+          UserInteractiveAreaTabBarIcon({
+            iconSize: 16,
+            iconPadding: 1.33,
+            totalBorderRadius: 0,
+            index: this.index,
+            icon: this.icon
+          })
+            .margin({ right: 4 })
+          UserInteractiveAreaTabBarText({
+            name: this.name,
+            fontSize: 12,
+            fontWeight: 400,
+            index: this.index
+          })
+            .height(10)
+        }
+        .padding({ left: 10, right: 10 })
+        .width(64)
+        .height(28)
+        .borderRadius(8)
+        .backgroundColor(this.index === this.selectedIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.05)')
       }
-      .padding(12)
-      .width(48)
-      .height(48)
-      .margin({bottom: 4})
-      .borderRadius(24)
-      .backgroundColor(this.index === this.selectedIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.05)')
-      Column() {
-        Text(this.name)
-          .fontFamily('HarmonyHeiTi')
-          .fontColor(this.index === this.selectedIndex ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.6)')
-          .fontSize(10)
-          .fontWeight(500)
-      }
-      .height(10)
+    }
+  }
+}
+
+@ComponentV2
+struct UserInteractiveAreaTabBarIcon {
+  @Param index: number = 0
+  @Param iconSize: Length = 0;
+  @Param icon?: Resource = undefined;
+  @Param iconPadding: Length = 0;
+  @Param totalBorderRadius: Length = 0;
+  @Consumer('functionAreaSelectedIndex') selectedIndex: number = 0
+
+  build() {
+    Column() {
+      Image(this.icon)
+        .width('100%')
+        .height('100%')
+        .opacity(this.index === this.selectedIndex ? 0.9 : 0.6)
+    }
+    .padding(this.iconPadding)
+    .width(this.iconSize)
+    .height(this.iconSize)
+    .borderRadius(this.totalBorderRadius)
+    .backgroundColor(this.index === this.selectedIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.05)')
+  }
+}
+
+@ComponentV2
+struct UserInteractiveAreaTabBarText {
+  @Param index: number = 0
+  @Param name: string = '__NA__';
+  @Param fontSize: number = 0;
+  @Param fontWeight: number = 0;
+  @Consumer('functionAreaSelectedIndex') selectedIndex: number = 0
+
+  build() {
+    Column() {
+      Text(this.name)
+        .fontFamily('HarmonyHeiTi')
+        .fontColor(this.index === this.selectedIndex ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.6)')
+        .fontSize(10)
+        .fontWeight(500)
     }
   }
 }

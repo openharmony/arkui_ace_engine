@@ -102,6 +102,7 @@ public:
     {
         return insertStatus_;
     }
+    TextDirection GetTextDirection(const RefPtr<LayoutProperty>& layoutProperty);
 
 private:
     void PlayAutoFillIconShowAnimation(const AutoFillContentLengthMode& mode);

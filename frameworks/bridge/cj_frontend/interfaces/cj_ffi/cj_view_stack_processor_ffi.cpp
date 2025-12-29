@@ -45,4 +45,22 @@ void FfiOHOSAceFrameworkImplicitPopBeforeContinue()
 {
     CJViewStackProcessor::ImplicitPopBeforeContinue();
 }
+
+VectorToCFFIArray FfiOHOSAceFrameworkViewStackProcessorMoveDeletedElmtIds()
+{
+    std::vector<int64_t> result;
+    CJViewStackProcessor::MoveDeletedElmtIds(result);
+
+    auto temp = (int64_t*)malloc(sizeof(int64_t) * result.size());
+    if (temp == NULL) {
+        LOGE("FfiOHOSAceFrameworkViewStackProcessorMoveDeletedElmtIds fail, malloc fail");
+        return VectorToCFFIArray();
+    }
+    VectorToCFFIArray res { .size = result.size(), .buffer = temp, .free = reinterpret_cast<void (*)(int64_t*)>(free) };
+
+    for (size_t i = 0; i < result.size(); i++) {
+        res.buffer[i] = result[i];
+    }
+    return res;
+}
 }

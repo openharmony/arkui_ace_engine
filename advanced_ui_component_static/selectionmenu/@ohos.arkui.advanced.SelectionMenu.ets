@@ -464,6 +464,11 @@ struct SelectionMenuComponent {
           .borderRadius(this.theme.iconBorderRadius)
           .width(this.measureButtonWidth())
           .height(this.theme.buttonSize)
+        }, (item: EditorMenuOptions, index: int) => {
+          if (item.symbolStyle) {
+            return index + '__symbolStyle'
+          }
+          return index + '__' + JSON.stringify(item)
         })
       }
     }
@@ -624,6 +629,8 @@ struct SelectionMenuComponent {
                     expandedMenuOptionItem.action!()
                   }
                 })
+            }, (item: ExpandedMenuOptions, index: int) => {
+              return index + '__expandedMenu'
             })
           }
         }

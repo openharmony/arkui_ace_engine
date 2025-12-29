@@ -260,6 +260,7 @@ component_ext/arc_swiper/
 component_ext/BUILD.gn @arkui_architecture
 component_ext/ext_common/
 component_ext/movingphoto/ @arkuiadvancedcomponent
+component_ext/movingphoto_ani/ @arkuiadvancedcomponent
 
 [Examples]
 examples/ @arkuipopupwindow_all
@@ -505,12 +506,12 @@ frameworks/bridge/common/dom/dom_swiper.cpp @arkui_navigation
 frameworks/bridge/common/dom/dom_swiper.h @arkui_navigation
 frameworks/bridge/common/dom/dom_switch.cpp @arkuipopupwindow_all
 frameworks/bridge/common/dom/dom_switch.h @arkuipopupwindow_all
-frameworks/bridge/common/dom/dom_tab_bar.cpp @arkuiscroll
-frameworks/bridge/common/dom/dom_tab_bar.h @arkuiscroll
-frameworks/bridge/common/dom/dom_tab_content.cpp @arkuiscroll
-frameworks/bridge/common/dom/dom_tab_content.h @arkuiscroll
-frameworks/bridge/common/dom/dom_tabs.cpp @arkuiscroll
-frameworks/bridge/common/dom/dom_tabs.h @arkuiscroll
+frameworks/bridge/common/dom/dom_tab_bar.cpp @arkui_navigation
+frameworks/bridge/common/dom/dom_tab_bar.h @arkui_navigation
+frameworks/bridge/common/dom/dom_tab_content.cpp @arkui_navigation
+frameworks/bridge/common/dom/dom_tab_content.h @arkui_navigation
+frameworks/bridge/common/dom/dom_tabs.cpp @arkui_navigation
+frameworks/bridge/common/dom/dom_tabs.h @arkui_navigation
 frameworks/bridge/common/dom/dom_textarea.cpp @huawei_g_five
 frameworks/bridge/common/dom/dom_textarea.h @huawei_g_five
 frameworks/bridge/common/dom/dom_text.cpp @huawei_g_five
@@ -542,6 +543,8 @@ frameworks/bridge/common/manifest/ @arkui_framework_xnode
 frameworks/bridge/common/media_query/ @arkuilayout1
 frameworks/bridge/common/plugin_adapter/ @ArkUI_ability_group
 frameworks/bridge/common/utils/ @arkui_framework_xnode
+frameworks/bridge/common/utils/module_buffer_reader.h @arkui_framework_resource
+frameworks/bridge/common/utils/module_buffer_reader.cpp @arkui_framework_resource
 frameworks/bridge/declarative_frontend/ark_breakpoint/ @arkui_framework_resource
 frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/ark_component/src/ArkAlphabetIndexer.ts @arkuicodepulse
@@ -633,8 +636,8 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkStepper.ts @arkui_na
 frameworks/bridge/declarative_frontend/ark_component/src/ArkSwiper.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_component/src/ArkSymbolGlyph.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkSymbolSpan.ts @huawei_g_five
-frameworks/bridge/declarative_frontend/ark_component/src/ArkTabContent.ts @arkuicodepulse
-frameworks/bridge/declarative_frontend/ark_component/src/ArkTabs.ts @arkuicodepulse
+frameworks/bridge/declarative_frontend/ark_component/src/ArkTabContent.ts @arkui_navigation
+frameworks/bridge/declarative_frontend/ark_component/src/ArkTabs.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTextArea.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTextClock.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkTextInput.ts @huawei_g_five
@@ -722,8 +725,8 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/stepper_modifier.ts @ark
 frameworks/bridge/declarative_frontend/ark_modifier/src/swiper_modifier.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_modifier/src/symbol_glyph_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/symbol_span_modifier.ts @huawei_g_five
-frameworks/bridge/declarative_frontend/ark_modifier/src/tab_content_modifier.ts @arkuicodepulse
-frameworks/bridge/declarative_frontend/ark_modifier/src/tabs_modifier.ts @arkuicodepulse
+frameworks/bridge/declarative_frontend/ark_modifier/src/tab_content_modifier.ts @arkui_navigation
+frameworks/bridge/declarative_frontend/ark_modifier/src/tabs_modifier.ts @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_modifier/src/text_area_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/text_clock_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/text_input_modifier.ts @huawei_g_five
@@ -743,7 +746,7 @@ frameworks/bridge/declarative_frontend/ark_theme/ @arkui_framework_resource
 frameworks/bridge/declarative_frontend/BUILD.gn @arkui_architecture
 frameworks/bridge/declarative_frontend/declarative_frontend.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/declarative_frontend.h @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/engine/arkComponent.js
+frameworks/bridge/declarative_frontend/engine/arkComponent.js @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/arkModifier.js
 frameworks/bridge/declarative_frontend/engine/arkThemeControl.js @arkui_framework_resource
 frameworks/bridge/declarative_frontend/engine/arkTheme.js @arkui_framework_resource
@@ -809,8 +812,8 @@ frameworks/bridge/declarative_frontend/engine/functions/js_should_built_in_recog
 frameworks/bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/functions/js_swiper_function.cpp @arkui_navigation
 frameworks/bridge/declarative_frontend/engine/functions/js_swiper_function.h @arkui_navigation
-frameworks/bridge/declarative_frontend/engine/functions/js_tabs_function.cpp @arkuicodepulse
-frameworks/bridge/declarative_frontend/engine/functions/js_tabs_function.h @arkuicodepulse
+frameworks/bridge/declarative_frontend/engine/functions/js_tabs_function.cpp @arkui_navigation
+frameworks/bridge/declarative_frontend/engine/functions/js_tabs_function.h @arkui_navigation
 frameworks/bridge/declarative_frontend/engine/functions/js_touch_function.cpp @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/functions/js_touch_function.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/engine/functions/js_touch_intercept_function.cpp @ArkUI_Event
@@ -828,6 +831,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/jsi_animator_model_ng_build_im
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_animator_model_ng_impl.cpp @arkuicodepulse
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_bindings.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_bindings.inl @arkui_statemgmt
+frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_app_bar_register.cpp @ArkUI_ability_group
+frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_modal_view_register.cpp @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_group_js_bridge.cpp @arkui_framework_xnode
@@ -1025,10 +1030,10 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symb
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_glyph_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_span_bridge.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_span_bridge.h @huawei_g_five
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabcontent_bridge.cpp @arkuicodepulse
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabcontent_bridge.h @arkuicodepulse
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabs_bridge.cpp @arkuicodepulse
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabs_bridge.h @arkuicodepulse
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabcontent_bridge.cpp @arkui_navigation
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabcontent_bridge.h @arkui_navigation
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabs_bridge.cpp @arkui_navigation
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabs_bridge.h @arkui_navigation
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_area_bridge.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_area_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.cpp @huawei_g_five
@@ -1065,12 +1070,14 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_searcher.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_searcher.h @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_loader.cpp @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_loader.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/js_object_template.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/js_object_template.inl @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsPrefetcher.js
 frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsShape.js
-frameworks/bridge/declarative_frontend/engine/jsStateManagement.js
+frameworks/bridge/declarative_frontend/engine/jsStateManagement.js @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/js_types.cpp @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/js_types.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsUIContext.js
@@ -1379,12 +1386,12 @@ frameworks/bridge/declarative_frontend/jsview/js_symbol.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_symbol_modifier.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_symbol_span.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_symbol_span.h @huawei_g_five
-frameworks/bridge/declarative_frontend/jsview/js_tab_content.cpp @arkuicodepulse
-frameworks/bridge/declarative_frontend/jsview/js_tab_content.h @arkuicodepulse
-frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.cpp @arkuicodepulse
-frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h @arkuicodepulse
-frameworks/bridge/declarative_frontend/jsview/js_tabs.cpp @arkuicodepulse
-frameworks/bridge/declarative_frontend/jsview/js_tabs.h @arkuicodepulse
+frameworks/bridge/declarative_frontend/jsview/js_tab_content.cpp @arkui_navigation
+frameworks/bridge/declarative_frontend/jsview/js_tab_content.h @arkui_navigation
+frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.cpp @arkui_navigation
+frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h @arkui_navigation
+frameworks/bridge/declarative_frontend/jsview/js_tabs.cpp @arkui_navigation
+frameworks/bridge/declarative_frontend/jsview/js_tabs.h @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_textarea.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_textarea.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_text_clock.cpp @huawei_g_five
@@ -1409,6 +1416,8 @@ frameworks/bridge/declarative_frontend/jsview/js_touch_handler.cpp @ArkUI_Event
 frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/jsview/js_ui_extension.cpp @ArkUI_ability_group
 frameworks/bridge/declarative_frontend/jsview/js_ui_extension.h @ArkUI_ability_group
+frameworks/bridge/declarative_frontend/jsview/js_union_container.cpp @arkuicodepulse
+frameworks/bridge/declarative_frontend/jsview/js_union_container.h @arkuicodepulse
 frameworks/bridge/declarative_frontend/jsview/js_utils.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/jsview/js_utils.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/jsview/js_video_controller.cpp @arkuieco3
@@ -1487,6 +1496,8 @@ frameworks/bridge/declarative_frontend/jsview/models/divider_model_impl.cpp @ark
 frameworks/bridge/declarative_frontend/jsview/models/divider_model_impl.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/models/effect_component_model_impl.cpp
 frameworks/bridge/declarative_frontend/jsview/models/effect_component_model_impl.h
+frameworks/bridge/declarative_frontend/jsview/models/effect_component_pattern.cpp @arkuicodepulse
+frameworks/bridge/declarative_frontend/jsview/models/effect_component_pattern.h @arkuicodepulse
 frameworks/bridge/declarative_frontend/jsview/models/ellipse_model_impl.cpp @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/models/ellipse_model_impl.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/models/flex_model_impl.cpp @arkuilayout1
@@ -1608,10 +1619,10 @@ frameworks/bridge/declarative_frontend/jsview/models/stepper_model_impl.cpp @ark
 frameworks/bridge/declarative_frontend/jsview/models/stepper_model_impl.h @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/models/swiper_model_impl.cpp @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/models/swiper_model_impl.h @arkui_navigation
-frameworks/bridge/declarative_frontend/jsview/models/tab_content_model_impl.cpp @arkuicodepulse
-frameworks/bridge/declarative_frontend/jsview/models/tab_content_model_impl.h @arkuicodepulse
-frameworks/bridge/declarative_frontend/jsview/models/tabs_model_impl.cpp @arkuicodepulse
-frameworks/bridge/declarative_frontend/jsview/models/tabs_model_impl.h @arkuicodepulse
+frameworks/bridge/declarative_frontend/jsview/models/tab_content_model_impl.cpp @arkui_navigation
+frameworks/bridge/declarative_frontend/jsview/models/tab_content_model_impl.h @arkui_navigation
+frameworks/bridge/declarative_frontend/jsview/models/tabs_model_impl.cpp @arkui_navigation
+frameworks/bridge/declarative_frontend/jsview/models/tabs_model_impl.h @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/models/text_clock_model_impl.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/models/text_clock_model_impl.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/models/text_field_model_impl.cpp @huawei_g_five
@@ -1837,12 +1848,12 @@ frameworks/core/accessibility/js_inspector/inspect_swiper.cpp @arkui_navigation
 frameworks/core/accessibility/js_inspector/inspect_swiper.h @arkui_navigation
 frameworks/core/accessibility/js_inspector/inspect_switch.cpp @arkuipopupwindow_all
 frameworks/core/accessibility/js_inspector/inspect_switch.h @arkuipopupwindow_all
-frameworks/core/accessibility/js_inspector/inspect_tab_bar.cpp @arkuicodepulse
-frameworks/core/accessibility/js_inspector/inspect_tab_bar.h @arkuicodepulse
-frameworks/core/accessibility/js_inspector/inspect_tab_content.cpp @arkuicodepulse
-frameworks/core/accessibility/js_inspector/inspect_tab_content.h @arkuicodepulse
-frameworks/core/accessibility/js_inspector/inspect_tabs.cpp @arkuicodepulse
-frameworks/core/accessibility/js_inspector/inspect_tabs.h @arkuicodepulse
+frameworks/core/accessibility/js_inspector/inspect_tab_bar.cpp @arkui_navigation
+frameworks/core/accessibility/js_inspector/inspect_tab_bar.h @arkui_navigation
+frameworks/core/accessibility/js_inspector/inspect_tab_content.cpp @arkui_navigation
+frameworks/core/accessibility/js_inspector/inspect_tab_content.h @arkui_navigation
+frameworks/core/accessibility/js_inspector/inspect_tabs.cpp @arkui_navigation
+frameworks/core/accessibility/js_inspector/inspect_tabs.h @arkui_navigation
 frameworks/core/accessibility/js_inspector/inspect_textarea.cpp @huawei_g_five
 frameworks/core/accessibility/js_inspector/inspect_textarea.h @huawei_g_five
 frameworks/core/accessibility/js_inspector/inspect_text.cpp @huawei_g_five
@@ -2188,7 +2199,7 @@ frameworks/core/components/stage/ @ArkUI_Event
 frameworks/core/components/stepper/ @arkui_navigation
 frameworks/core/components/svg/ @arkui001
 frameworks/core/components/swiper/ @arkui_navigation
-frameworks/core/components/tab_bar/ @arkuicodepulse
+frameworks/core/components/tab_bar/ @arkui_navigation
 frameworks/core/components/test/unittest/theme/ @arkui_framework_resource
 frameworks/core/components/text/ @huawei_g_five
 frameworks/core/components/text_clock/ @huawei_g_five
@@ -2225,7 +2236,7 @@ frameworks/core/components_v2/indexer/ @arkuicodepulse
 frameworks/core/components_v2/list/ @arkuiscroll
 frameworks/core/components_v2/pattern_lock/ @arkui001
 frameworks/core/components_v2/swiper/ @arkui_navigation
-frameworks/core/components_v2/tabs/ @arkuicodepulse
+frameworks/core/components_v2/tabs/ @arkui_navigation
 frameworks/core/components_v2/water_flow/ @arkuiscroll
 frameworks/core/components_v2/inspector/actionsheetdialog_composed_element.cpp @arkuipopupwindow_all
 frameworks/core/components_v2/inspector/actionsheetdialog_composed_element.h @arkuipopupwindow_all
@@ -2363,10 +2374,10 @@ frameworks/core/components_v2/inspector/swiper_composed_element.cpp @arkui_navig
 frameworks/core/components_v2/inspector/swiper_composed_element.h @arkui_navigation
 frameworks/core/components_v2/inspector/switch_composed_element.cpp @arkuipopupwindow_all
 frameworks/core/components_v2/inspector/switch_composed_element.h @arkuipopupwindow_all
-frameworks/core/components_v2/inspector/tab_content_composed_element.cpp @arkuicodepulse
-frameworks/core/components_v2/inspector/tab_content_composed_element.h @arkuicodepulse
-frameworks/core/components_v2/inspector/tabs_composed_element.cpp @arkuicodepulse
-frameworks/core/components_v2/inspector/tabs_composed_element.h @arkuicodepulse
+frameworks/core/components_v2/inspector/tab_content_composed_element.cpp @arkui_navigation
+frameworks/core/components_v2/inspector/tab_content_composed_element.h @arkui_navigation
+frameworks/core/components_v2/inspector/tabs_composed_element.cpp @arkui_navigation
+frameworks/core/components_v2/inspector/tabs_composed_element.h @arkui_navigation
 frameworks/core/components_v2/inspector/textarea_composed_element.cpp @huawei_g_five
 frameworks/core/components_v2/inspector/textarea_composed_element.h @huawei_g_five
 frameworks/core/components_v2/inspector/text_clock_composed_element.cpp @huawei_g_five
@@ -2602,6 +2613,7 @@ frameworks/core/components_ng/pattern/scroll_bar/ @arkuiscroll
 frameworks/core/components_ng/pattern/scroll/ @arkuiscroll
 frameworks/core/components_ng/pattern/search/ @huawei_g_five
 frameworks/core/components_ng/pattern/security_component/ @harylee
+frameworks/core/components_ng/pattern/select_content_overlay/ @huawei_g_five
 frameworks/core/components_ng/pattern/select_overlay/ @huawei_g_five
 frameworks/core/components_ng/pattern/select/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/shape/ @arkuieco3
@@ -2633,7 +2645,7 @@ frameworks/core/components_ng/pattern/stepper/ @arkui_navigation
 frameworks/core/components_ng/pattern/swiper/ @arkui_navigation
 frameworks/core/components_ng/pattern/swiper_indicator/ @arkui_navigation
 frameworks/core/components_ng/pattern/symbol/ @huawei_g_five
-frameworks/core/components_ng/pattern/tabs/ @arkuicodepulse
+frameworks/core/components_ng/pattern/tabs/ @arkui_navigation
 frameworks/core/components_ng/pattern/text_area/ @huawei_g_five
 frameworks/core/components_ng/pattern/text/ @huawei_g_five
 frameworks/core/components_ng/pattern/text_clock/ @huawei_g_five
@@ -2647,6 +2659,7 @@ frameworks/core/components_ng/pattern/toast/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/toggle/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/toolbaritem/ @ArkUI_Event
 frameworks/core/components_ng/pattern/ui_extension/ @ArkUI_ability_group
+frameworks/core/components_ng/pattern/union_container/ @arkuicodepulse
 frameworks/core/components_ng/pattern/video/ @arkuieco3
 frameworks/core/components_ng/pattern/view_context/ @arkuicodepulse
 frameworks/core/components_ng/pattern/waterflow/ @arkuiscroll
@@ -2693,6 +2706,7 @@ frameworks/core/components_ng/property/safe_area_insets.h @arkuilayout1
 frameworks/core/components_ng/property/templates_parser.cpp @arkuiscroll
 frameworks/core/components_ng/property/templates_parser.h @arkuiscroll
 frameworks/core/components_ng/property/transition_property.h @arkuicodepulse
+frameworks/core/components_ng/property/union_container_options.h @arkuicodepulse
 frameworks/core/components_ng/render/adapter/animated_image.cpp @arkui001
 frameworks/core/components_ng/render/adapter/animated_image.h @arkui001
 frameworks/core/components_ng/render/adapter/background_modifier.h @ArkUI_Event
@@ -3041,10 +3055,10 @@ frameworks/core/interfaces/native/node/stepper_modifier.cpp @arkui_navigation
 frameworks/core/interfaces/native/node/stepper_modifier.h @arkui_navigation
 frameworks/core/interfaces/native/node/swiper_controller_modifier.cpp @arkui_navigation
 frameworks/core/interfaces/native/node/swiper_controller_modifier.h @arkui_navigation
-frameworks/core/interfaces/native/node/tab_content_modifier.cpp @arkuicodepulse
-frameworks/core/interfaces/native/node/tab_content_modifier.h @arkuicodepulse
-frameworks/core/interfaces/native/node/tabs_modifier.cpp @arkuicodepulse
-frameworks/core/interfaces/native/node/tabs_modifier.h @arkuicodepulse
+frameworks/core/interfaces/native/node/tab_content_modifier.cpp @arkui_navigation
+frameworks/core/interfaces/native/node/tab_content_modifier.h @arkui_navigation
+frameworks/core/interfaces/native/node/tabs_modifier.cpp @arkui_navigation
+frameworks/core/interfaces/native/node/tabs_modifier.h @arkui_navigation
 frameworks/core/interfaces/native/node/text_clock_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/node/text_clock_modifier.h @huawei_g_five
 frameworks/core/interfaces/native/node/text_timer_modifier.cpp @huawei_g_five
@@ -3066,6 +3080,8 @@ frameworks/core/interfaces/native/node/web_modifier.h @arkweb-committer-group
 frameworks/core/interfaces/native/implementation/base_event_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/axis_event_accessor.cpp @ArkUI_Event
 frameworks/core/interfaces/native/implementation/form_component_modifier.cpp @form_framework
+frameworks/core/interfaces/native/implementation/screen_modifier.cpp @window_scene
+frameworks/core/interfaces/native/implementation/window_scene_modifier.cpp @window_scene
 interfaces/native/BUILD.gn @arkui_architecture
 interfaces/native/drag_and_drop.h @ArkUI_Event
 interfaces/native/drawable_descriptor.h @arkui001
@@ -3221,9 +3237,9 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.a
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.UIContext.ts @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/ArkDragDrop.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/gesture.ts @ArkUI_Event
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/pasteButton.ts @harylee
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/saveButton.ts @harylee
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/securityComponent.ts @harylee
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/pasteButton.ets @harylee
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/saveButton.ets @harylee
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/securityComponent.ets @harylee
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/gesture.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/CommonMethodModifier.ts @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/common.ts @arkui_framework_xnode
@@ -3238,6 +3254,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/xbar/xbar_module_methods.h @ArkUI_ability_group
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/xbar/xbar_module_methods.cpp @ArkUI_ability_group
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_preview.h @ArkUI_Event
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/ui_extension/ @ArkUI_ability_group
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/drag_and_drop/ @ArkUI_Event
 frameworks\bridge\arkts_frontend\koala_projects\arkoala-arkts\arkui-ohos\src\ani\native\keyboard_avoid_mode\keyboard_avoid_mode_module.h @arkuilayout1
 frameworks\bridge\arkts_frontend\koala_projects\arkoala-arkts\arkui-ohos\src\ani\native\keyboard_avoid_mode\keyboard_avoid_mode_module.cpp @arkuilayout1
@@ -3253,6 +3270,7 @@ frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h @arkui_f
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ArkUIEntry.ts @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/theme/ @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Graphics.ts @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Graphics.ets @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/NodeController.ts @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/resources.ts @arkui_framework_resource
 frameworks/bridge/arkts_frontend/koala_projects/inner_api/ @arkui_framework_resource
@@ -3337,6 +3355,7 @@ frameworks/core/interfaces/native/implementation/global_scope_ohos_measure_utils
 frameworks/core/interfaces/native/implementation/global_scope_uicontext_text_menu_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/global_scope_uicontext_font_scale_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/edit_menu_options_accessor.cpp @huawei_g_five
+frameworks/core/interfaces/native/implementation/effect_component_modifier.cpp @arkuicodepulse
 frameworks/core/interfaces/native/implementation/text_menu_item_id_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/text_menu_item_id_peer.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/symbol_effect_accessor.cpp @huawei_g_five
@@ -3380,6 +3399,8 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani
 frameworks/core/interfaces/native/ani/text_based_ani_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/ani/text_based_ani_modifier.h @huawei_g_five
 frameworks/core/interfaces/native/implementation/symbol_glyph_modifier_peer.h @huawei_g_five
+frameworks/core/interfaces/native/utility/converter.cpp @arkuicodepulse
+frameworks/core/interfaces/native/utility/converter.h @arkuicodepulse
 
 [Web ArkTS1.2]
 frameworks/core/interfaces/native/ani/web_ani_modifier.cpp @arkweb-committer-group
@@ -3538,6 +3559,7 @@ test/mock/core/animation/mock_animation_proxy.h @arkuiscroll
 test/mock/core/animation/mock_implicit_animation.h @arkuiscroll
 test/mock/core/animation/mock_implicit_animation.cpp @arkuiscroll
 test/unittest/adapter/ @arkui_framework_xnode
+test/unittest/adapter/ohos/capability/html_to_spanstring_test.cpp @huawei_g_five
 test/unittest/core/accessibility/ @ArkUI_ability_group
 test/unittest/core/animation/ @arkuicodepulse
 test/unittest/core/base/ @arkui_framework_xnode
@@ -3686,7 +3708,7 @@ test/unittest/core/pattern/stage/ @arkui_navigation
 test/unittest/core/pattern/stepper/ @arkui_navigation
 test/unittest/core/pattern/swiper/ @arkui_navigation
 test/unittest/core/pattern/symbol/ @huawei_g_five
-test/unittest/core/pattern/tabs/ @arkuicodepulse
+test/unittest/core/pattern/tabs/ @arkui_navigation
 test/unittest/core/pattern/text/ @huawei_g_five
 test/unittest/core/pattern/text/mock/ @huawei_g_five
 test/unittest/core/pattern/text_clock/ @huawei_g_five
@@ -3698,6 +3720,7 @@ test/unittest/core/pattern/time_picker/ @arkui001
 test/unittest/core/pattern/toggle/ @arkuipopupwindow_all
 test/unittest/core/pattern/ui_extension/ @ArkUI_ability_group
 test/unittest/core/pattern/ui_extension/mock/ @ArkUI_ability_group
+test/unittest/core/pattern/union_container/ @arkuicodepulse
 test/unittest/core/pattern/video/ @arkuieco3
 test/unittest/core/pattern/view_context/ @arkuicodepulse
 test/unittest/core/pattern/waterflow/ @arkuiscroll
@@ -3760,13 +3783,12 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/sta
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/customComponent.ets @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/extendableComponent.ets @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/staticComponents.ets @arkui_statemgmt
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/conditionScope.ets @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/builder.ets @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets @arkui_statemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interopExtendableComponent.ets @arkui_statemgmt
 
 [RenderControl ArkTS1.2]
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/conditionScope.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/if.ets @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/forEach.ets @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/lazyForEach.ets @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/repeat.ets @arkuieco3

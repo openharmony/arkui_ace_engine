@@ -26,6 +26,9 @@
 #include "frameworks/core/event/key_event.h"
 #include "frameworks/core/event/mouse_event.h"
 #include "frameworks/core/event/touch_event.h"
+namespace {
+constexpr int32_t KEYCODE_INVALID = 65535;
+}
 namespace OHOS::Ace::NG {
 Reporter& Reporter::GetInstance()
 {
@@ -40,7 +43,8 @@ void ReporterImpl::HandleUISessionReporting(const JsonReport& report) const
     if (value->IsNull()) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_GESTURE, "UISession JsonString %{public}s", value->ToString().c_str());
+    TAG_LOGD(
+        AceLogTag::ACE_GESTURE, "UISession JsonString " SEC_PLD("%{public}s"), SEC_PARAM(value->ToString().c_str()));
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(report.GetId(), "event", value);
 }
 
@@ -163,6 +167,11 @@ void ReporterImpl::HandleInputEventInspectorReporting(const AxisEvent& event) co
 void ReporterImpl::HandleInputEventInspectorReporting(const KeyEvent& event) const
 {
     if (!LayoutInspector::GetInteractionEventStatus()) {
+        return;
+    }
+    // Block invalid keyCode 65535 (KEYCODE_INVALID) in certain scenarios to avoid subsequent exceptions
+    if (static_cast<int32_t>(event.code) == KEYCODE_INVALID) {
+        TAG_LOGE(AceLogTag::ACE_UIEVENT, "Report insepector message error, keyCode is %{public}d", KEYCODE_INVALID);
         return;
     }
     NG::KeyJsonReport keyReport;

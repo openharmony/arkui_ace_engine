@@ -4827,13 +4827,13 @@ class ImageAnalyzerController {
   }
 }
 
-var WebNavigationType;
+let WebNavigationType;
 (function (WebNavigationType) {
-  WebNavigationType[WebNavigationType['UNKNOWN'] = 0] = 'UNKNOWN';
-  WebNavigationType[WebNavigationType['MAIN_FRAME_NEW_ENTRY'] = 1] = 'MAIN_FRAME_NEW_ENTRY';
-  WebNavigationType[WebNavigationType['MAIN_FRAME_EXISTING_ENTRY'] = 2] = 'MAIN_FRAME_EXISTING_ENTRY';
-  WebNavigationType[WebNavigationType['NAVIGATION_TYPE_NEW_SUBFRAME'] = 4] = 'NAVIGATION_TYPE_NEW_SUBFRAME';
-  WebNavigationType[WebNavigationType['NAVIGATION_TYPE_AUTO_SUBFRAME'] = 5] = 'NAVIGATION_TYPE_AUTO_SUBFRAME';
+  WebNavigationType[WebNavigationType.UNKNOWN = 0] = 'UNKNOWN';
+  WebNavigationType[WebNavigationType.MAIN_FRAME_NEW_ENTRY = 1] = 'MAIN_FRAME_NEW_ENTRY';
+  WebNavigationType[WebNavigationType.MAIN_FRAME_EXISTING_ENTRY = 2] = 'MAIN_FRAME_EXISTING_ENTRY';
+  WebNavigationType[WebNavigationType.NAVIGATION_TYPE_NEW_SUBFRAME = 4] = 'NAVIGATION_TYPE_NEW_SUBFRAME';
+  WebNavigationType[WebNavigationType.NAVIGATION_TYPE_AUTO_SUBFRAME = 5] = 'NAVIGATION_TYPE_AUTO_SUBFRAME';
 })(WebNavigationType || (WebNavigationType = {}));
 
 let AxisModel;
@@ -4937,16 +4937,6 @@ let WebBypassVsyncCondition;
   WebBypassVsyncCondition[WebBypassVsyncCondition.NONE = 0] = 'NONE';
   WebBypassVsyncCondition[WebBypassVsyncCondition.SCROLLBY_FROM_ZERO_OFFSET = 1] = 'SCROLLBY_FROM_ZERO_OFFSET';
 })(WebBypassVsyncCondition || (WebBypassVsyncCondition = {}));
-
-let CommonState;
-(function (CommonState) {
-  CommonState[CommonState.UNINITIALIZED = 0] = 'UNINITIALIZED';
-  CommonState[CommonState.INITIALIZED = 1] = 'INITIALIZED';
-  CommonState[CommonState.APPEARING = 2] = 'APPEARING';
-  CommonState[CommonState.APPEARED = 3] = 'APPEARED';
-  CommonState[CommonState.DISAPPEARING = 4] = 'DISAPPEARING';
-  CommonState[CommonState.DISAPPEARED = 5] = 'DISAPPEARED';
-})(CommonState || (CommonState = {}));
 
 let EventQueryType;
 (function (EventQueryType) {
@@ -5118,3 +5108,20 @@ let ThreatType;
   ThreatType[ThreatType.THREAT_NONE = 4] = 'THREAT_NONE';
   ThreatType[ThreatType.THREAT_UNPROCESSED = 5] = 'THREAT_UNPROCESSED';
 })(ThreatType || (ThreatType = {}));
+
+let ConsoleMessageSource
+(function (ConsoleMessageSource) {
+  ConsoleMessageSource[ConsoleMessageSource.XML = 0] = 'XML';
+  ConsoleMessageSource[ConsoleMessageSource.JAVASCRIPT = 1] = 'JAVASCRIPT';
+  ConsoleMessageSource[ConsoleMessageSource.NETWORK = 2] = 'NETWORK';
+  ConsoleMessageSource[ConsoleMessageSource.CONSOLE_API = 3] = 'CONSOLE_API';
+  ConsoleMessageSource[ConsoleMessageSource.STORAGE = 4] = 'STORAGE';
+  ConsoleMessageSource[ConsoleMessageSource.RENDERING = 5] = 'RENDERING';
+  ConsoleMessageSource[ConsoleMessageSource.SECURITY = 6] = 'SECURITY';
+  ConsoleMessageSource[ConsoleMessageSource.OTHER = 7] = 'OTHER';
+  ConsoleMessageSource[ConsoleMessageSource.DEPRECATION = 8] = 'DEPRECATION';
+  ConsoleMessageSource[ConsoleMessageSource.WORKER = 9] = 'WORKER';
+  ConsoleMessageSource[ConsoleMessageSource.VIOLATION = 10] = 'VIOLATION';
+  ConsoleMessageSource[ConsoleMessageSource.INTERVENTION = 11] = 'INTERVENTION';
+  ConsoleMessageSource[ConsoleMessageSource.RECOMMENDATION = 12] = 'RECOMMENDATION';
+})(ConsoleMessageSource || (ConsoleMessageSource = {}));

@@ -49,7 +49,7 @@ bool ParseChange(ani_env* env, const ani_ref& change, const float defaultSize, i
         ani_boolean isUndefined = false;
         if (env->Array_Get(static_cast<ani_array>(childrenSize), j, &itemSize) != ANI_OK ||
             env->Reference_IsUndefined(itemSize, &isUndefined) != ANI_OK || isUndefined || ANI_OK !=
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(itemSize), "unboxed", ":d", &childSize) ||
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(itemSize), "toDouble", ":d", &childSize) ||
             Negative(childSize)) {
             newChildrenSize.emplace_back(-1.0f);
         } else {
@@ -80,7 +80,7 @@ void SyncChildrenSize(ani_env* env, const ani_object& obj, const ArkUIAniListMod
             modifier->syncChildrenSize(node, -1.0f);
             continue;
         }
-        env->Object_CallMethodByName_Double(static_cast<ani_object>(itemSize), "unboxed", ":d", &childSize);
+        env->Object_CallMethodByName_Double(static_cast<ani_object>(itemSize), "toDouble", ":d", &childSize);
         modifier->syncChildrenSize(node, childSize);
     }
     modifier->syncChildrenSizeOver(node);

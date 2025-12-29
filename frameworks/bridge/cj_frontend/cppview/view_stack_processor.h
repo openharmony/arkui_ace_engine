@@ -28,6 +28,7 @@ public:
     static int32_t GetElmtIdToAccountFor();
     static void StopGetAccessRecording();
     static void ImplicitPopBeforeContinue();
+    static void MoveDeletedElmtIds(std::vector<int64_t>& vec);
 };
 
 } // namespace OHOS::Ace::Framework

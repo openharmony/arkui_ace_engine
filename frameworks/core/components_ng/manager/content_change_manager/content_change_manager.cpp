@@ -106,14 +106,19 @@ void ContentChangeManager::OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, b
     changedSwiperNodes_.emplace(std::make_pair(WeakPtr(keyNode), hasTabsAncestor));
 }
 
-void ContentChangeManager::OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode)
+void ContentChangeManager::OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow)
 {
     if (!IsContentChangeDetectEnable() || !keyNode) {
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OnDialogChangeEnd");
     auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
-    keyNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, {false, false, false});
+    if (isShow) {
+        keyNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, {false, false, false});
+    } else {
+        simpleTree->Put("$type", keyNode->GetTag().c_str());
+    }
+    simpleTree->Put("show", isShow);
     UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::DIALOG, simpleTree->ToString());
 }
 

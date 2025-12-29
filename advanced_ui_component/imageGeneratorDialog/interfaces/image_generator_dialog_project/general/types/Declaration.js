@@ -13,16 +13,24 @@
  * limitations under the License.
  */
 
+export const LogTag = '[imageGenerator]';
 export var CanvasMode;
-(function (x12) {
-    x12[x12["GENERAL_MODE"] = 0] = "GENERAL_MODE";
-    x12[x12["DOODLE_MODE"] = 1] = "DOODLE_MODE";
+(function (CanvasMode) {
+    CanvasMode[CanvasMode["GENERAL_MODE"] = 0] = "GENERAL_MODE";
+    CanvasMode[CanvasMode["DOODLE_MODE"] = 1] = "DOODLE_MODE";
+    CanvasMode[CanvasMode["DEFAULT"] = 0] = "DEFAULT";
 })(CanvasMode || (CanvasMode = {}));
+export var CanvasLayoutDirection;
+(function (CanvasLayoutDirection) {
+    CanvasLayoutDirection[CanvasLayoutDirection["HORIZONTAL"] = 0] = "HORIZONTAL";
+    CanvasLayoutDirection[CanvasLayoutDirection["VERTICAL"] = 1] = "VERTICAL";
+    CanvasLayoutDirection[CanvasLayoutDirection["DEFAULT"] = 0] = "DEFAULT";
+})(CanvasLayoutDirection || (CanvasLayoutDirection = {}));
 export var ImageGenerateState;
-(function (w12) {
-    w12[w12["CONFIGURATION"] = 0] = "CONFIGURATION";
-    w12[w12["GENERATING"] = 1] = "GENERATING";
-    w12[w12["BEFORE_GENERATED"] = 2] = "BEFORE_GENERATED";
-    w12[w12["GENERATED"] = 3] = "GENERATED";
-    w12[w12["MINIMIZED"] = 4] = "MINIMIZED";
+(function (ImageGenerateState) {
+    ImageGenerateState[ImageGenerateState["CONFIGURATION"] = 0] = "CONFIGURATION";
+    ImageGenerateState[ImageGenerateState["GENERATING"] = 1] = "GENERATING";
+    ImageGenerateState[ImageGenerateState["BEFORE_GENERATED"] = 2] = "BEFORE_GENERATED";
+    ImageGenerateState[ImageGenerateState["GENERATED"] = 3] = "GENERATED";
+    ImageGenerateState[ImageGenerateState["MINIMIZED"] = 4] = "MINIMIZED";
 })(ImageGenerateState || (ImageGenerateState = {}));
