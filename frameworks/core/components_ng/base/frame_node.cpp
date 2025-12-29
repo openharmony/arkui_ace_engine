@@ -6184,6 +6184,7 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheS
 
 void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
+    FREE_NODE_CHECK(this, OnInspectorIdUpdate, id);
     renderContext_->UpdateNodeName(id);
     ElementRegister::GetInstance()->AddFrameNodeByInspectorId(id, AceType::WeakClaim(this), this->GetId());
     auto parent = GetAncestorNodeOfFrame(true);
