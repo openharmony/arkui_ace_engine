@@ -5403,6 +5403,7 @@ int32_t SetRichEditorDataDetectorConfig(ArkUI_NodeHandle node, const ArkUI_Attri
     arkUITextDetectConfig.entityDecorationType = dataDetectorConfig->decoration.type;
     arkUITextDetectConfig.entityDecorationColor = dataDetectorConfig->decoration.color;
     arkUITextDetectConfig.entityDecorationStyle = dataDetectorConfig->decoration.style;
+    arkUITextDetectConfig.onDetectResultUpdateUserData = dataDetectorConfig->onDetectResultUpdateUserData;
  
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorNapiDataDetectorConfigWithEvent(

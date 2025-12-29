@@ -40,7 +40,7 @@ bool GetRichEditorDetectEnable(ArkUINodeHandle node)
     return RichEditorModelNG::GetSelectDetectEnable(frameNode);
 }
 
-void ResetRichEditorDetectEnable(ArkUINodeHandle node)
+void NodeModifier::ResetRichEditorDetectEnable(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -81,16 +81,10 @@ void NodeModifier::SetRichEditorNapiDataDetectorConfigWithEvent(
     TextDetectConfig textDetectConfig;
     textDetectConfig.types = arkUITextDetectConfig->types;
     if (arkUITextDetectConfig->onResult) {
-        auto onResult = reinterpret_cast<void (*)(char*)>(arkUITextDetectConfig->onResult);
+        auto onResult = reinterpret_cast<void (*)(char*, int32_t)>(arkUITextDetectConfig->onResult);
         textDetectConfig.onResult = [onResult](const std::string& result) {
             if (onResult) {
-                const size_t bufSize = result.size() + 1;
-                char* resultChar = new char[bufSize];
-                if (strcpy_s(resultChar, bufSize, result.c_str()) != 0) {
-                    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "SetRichEditorDataDetectorConfigWithEvent error string strcpy fail");
-                    return;
-                }
-                onResult(resultChar);
+                onResult(result.c_str(), result.size(), arkUITextDetectConfig->onDetectResultUpdateUserData);
             }
         };
     }

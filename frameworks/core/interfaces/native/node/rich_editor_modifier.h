@@ -23,8 +23,6 @@ const ArkUIRichEditorModifier* GetRichEditorModifier();
 const CJUIRichEditorModifier* GetCJUIRichEditorModifier();
 void SetRichEditorNapiOnSelectionChange(ArkUINodeHandle node, void* callback);
 void ResetRichEditorOnSelectionChange(ArkUINodeHandle node);
-void SetRichEditorNapiOnPaste(ArkUINodeHandle node, void* callback);
-void ResetRichEditorOnPaste(ArkUINodeHandle node);
 void SetRichEditorDetectEnable(ArkUINodeHandle node, ArkUI_Uint32 value);
 void ResetRichEditorDetectEnable(ArkUINodeHandle node);
 void SetRichEditorNapiDataDetectorConfigWithEvent(

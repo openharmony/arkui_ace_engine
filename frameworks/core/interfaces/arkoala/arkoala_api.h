@@ -601,6 +601,7 @@ struct ArkUITextDetectConfigStruct {
     ArkUI_Uint32 entityDecorationColor;
     ArkUI_Int32 entityDecorationStyle;
     ArkUI_Bool entityEnablePreviewMenu;
+    void* onDetectResultUpdateUserData;
 };
 
 struct ArkUIImagePropertiesStruct {

@@ -543,7 +543,7 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
 
 const ComponentAsyncEventHandler richEditorNodeAsyncEventHandlers[] = {
     OHOS::Ace::NG::NodeModifier::SetRichEditorNapiOnSelectionChange,
-}
+};
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
     NodeModifier::SetRefreshOnStateChange,

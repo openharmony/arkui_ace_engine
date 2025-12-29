@@ -8249,10 +8249,10 @@ typedef enum {
      * through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .data[0].u32: color of the scroll bar thumb, in 0xARGB format. \n
+     * .value[0].u32: color of the scroll bar thumb, in 0xARGB format. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .data[0].u32: color of the scroll bar thumb, in 0xARGB format. \n
+     * .value[0].u32: color of the scroll bar thumb, in 0xARGB format. \n
      *
      * @since 24
      */

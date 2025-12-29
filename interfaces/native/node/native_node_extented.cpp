@@ -1658,6 +1658,7 @@ ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetTypes(
     ArkUI_TextDataDetectorConfig* config, const ArkUI_TextDataDetectorType* types, int32_t length)
 {
     CHECK_NULL_RETURN(config, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(types, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     
     ArkUI_TextDataDetectorType* newTypes = new ArkUI_TextDataDetectorType[length];
     for (int32_t i = 0; i < length; i++) {
@@ -1683,7 +1684,8 @@ ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetTypes(ArkUI_TextDataDetectorC
 }
  
 ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_RegisterOnDetectResultUpdateCallback(
-    ArkUI_TextDataDetectorConfig* config, void* userData, void (*callback)(char* result, void* userData))
+    ArkUI_TextDataDetectorConfig* config, void* userData,
+    void (*callback)(char* result, int32_t length, void* userData))
 {
     CHECK_NULL_RETURN(config, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(callback, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
