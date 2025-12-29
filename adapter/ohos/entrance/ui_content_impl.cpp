@@ -6408,6 +6408,23 @@ void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& 
     });
 }
 
+void UIContentImpl::SetXComponentDisplayConstraintEnabled(bool isEnable)
+{
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT,
+        "[%{public}s][%{public}s][%{public}d]: SetXComponentDisplayConstraintEnabled:"
+        "isEnable %{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, isEnable);
+    ContainerScope scope(instanceId_);
+    auto task = [id = instanceId_, isEnable]() {
+        auto container = AceEngine::Get().GetContainer(id);
+        CHECK_NULL_VOID(container);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->SetXComponentDisplayConstraintEnabled(isEnable);
+    };
+    ExecuteUITask(std::move(task), "ArkUISetXComponentDisplayConstraintEnabled");
+}
+
 void UIContentImpl::SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor)
 {
     auto getStateMgmtInfoCallback = [weakTaskExecutor = taskExecutor](const std::string& componentName,
