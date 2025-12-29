@@ -542,11 +542,16 @@ HWTEST_F(FormPatternTest, FormPatternTest_014, TestSize.Level1)
     uint32_t windowId = 0;
     int32_t treeId = 0;
     int64_t accessibilityId = 0;
-    pattern->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    bool ret = pattern->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
     EXPECT_NE(pattern->formManagerBridge_, nullptr);
+    EXPECT_EQ(ret, true);
 
     pattern->OnAccessibilityChildTreeDeregister();
     EXPECT_NE(pattern->formManagerBridge_, nullptr);
+
+    pattern->formManagerBridge_ = nullptr;
+    ret = pattern->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    EXPECT_EQ(ret, false);
 }
 
 /**
