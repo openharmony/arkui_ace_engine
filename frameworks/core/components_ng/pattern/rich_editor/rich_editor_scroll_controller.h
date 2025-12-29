@@ -346,7 +346,7 @@ private:
     TextSelector& textSelector_;
 
     float scrollOffset_ = 0.0f;
-    bool isAutoScrollRunning_;
+    bool isAutoScrollRunning_ = false;
     AutoScrollParam currentScrollParam_;
     CancelableCallback<void()> autoScrollTask_;
     OffsetF prevAutoScrollOffset_;
