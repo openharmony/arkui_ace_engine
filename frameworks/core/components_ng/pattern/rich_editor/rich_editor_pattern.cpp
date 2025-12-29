@@ -363,7 +363,12 @@ void RichEditorPattern::HandleStyledStringInsertion(RefPtr<SpanString> insertSty
     if (insertStyledString) {
         styledString_->InsertSpanString(changeStart, insertStyledString);
     } else {
+        bool isEmpty = styledString_->GetLength() == 0;
         styledString_->InsertString(changeStart, subValue);
+        if (isEmpty) {
+            styledString_->SplitSpansByNewLine();
+            styledString_->NotifySpanWatcher();
+        }
     }
     SetCaretPosition(changeStart + static_cast<int32_t>(subValue.length()), !needReplaceInTextPreview);
     IF_TRUE((!caretVisible_ || isSingleHandleMoving) && HasFocus(), StartTwinkling());
