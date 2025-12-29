@@ -440,7 +440,7 @@ HWTEST_F(AccessibilityFocusMoveTest, CheckAndGetReadableInfoToRootTest001, TestS
      */
     std::list<Accessibility::AccessibilityElementInfo> targetInfos;
     auto result = strategy.CheckAndGetReadableInfoToRoot(nullptr, targetInfos, windowId);
-    EXPECT_EQ(result.resultType, FocusMoveResultType::Search_FAIL);
+    EXPECT_EQ(result.resultType, FocusMoveResultType::SEARCH_FAIL);
 }
 
 /**
