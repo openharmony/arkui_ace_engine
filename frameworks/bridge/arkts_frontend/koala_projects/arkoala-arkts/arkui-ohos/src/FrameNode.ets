@@ -771,7 +771,7 @@ export class FrameNode implements MaterializedBase {
         }
         if (this.nodePtr_ === undefined) {
             const error = Error("The current FrameNode has been disposed.");
-            throw new BusinessError(10026, error);
+            throw new BusinessError(100026, error);
         }
         const instanceId = this.instanceId_!.toInt();
         let channels: Array<number> = [];
@@ -785,7 +785,7 @@ export class FrameNode implements MaterializedBase {
             }
             if(channels[0] === 2) {
                 const error = new Error("The current FrameNode is not on the main tree.");
-                throw new BusinessError(10028, error);
+                throw new BusinessError(100028, error);
             }
         }
         const x = channels[1];
@@ -803,7 +803,7 @@ export class FrameNode implements MaterializedBase {
         }
         if (this.nodePtr_ === undefined) {
             const error = Error("The current FrameNode has been disposed.");
-            throw new BusinessError(10026, error);
+            throw new BusinessError(100026, error);
         }
         const instanceId = this.instanceId_!.toInt();
         let channels: Array<number> = [];
@@ -817,7 +817,7 @@ export class FrameNode implements MaterializedBase {
             }
             if(channels[0] === 2) {
                 const error = new Error("The current FrameNode is not on the main tree.");
-                throw new BusinessError(10028, error);
+                throw new BusinessError(100028, error);
             }
         }
         const x = channels[1];

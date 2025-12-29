@@ -809,7 +809,7 @@ class FrameNode extends Disposable {
       throw { message: "The parameter 'positionByLocal' is invalid: it cannot be null. Provide a non-null position object.", code: 401 };
     }
     if (this.isDisposed()) {
-      throw { message: 'The current FrameNode has been disposed.', code: 10026 };
+      throw { message: 'The current FrameNode has been disposed.', code: 100026 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const offsetPosition = getUINativeModule().frameNode.convertPositionToWindow(
@@ -819,7 +819,7 @@ class FrameNode extends Disposable {
       throw { message: "The param 'x' or 'y' of the parameter 'positionByLocal' is invalid.", code: 401 };
     }
     if (offsetPosition[0] === 0) {
-      throw { message: 'The current FrameNode is not on the main tree.', code: 10028 };
+      throw { message: 'The current FrameNode is not on the main tree.', code: 100028 };
     }
     return { x: offsetPosition[1], y: offsetPosition[2] };
   }
@@ -831,7 +831,7 @@ class FrameNode extends Disposable {
       throw { message: "The parameter 'positionByWindow' is invalid: it cannot be null. Provide a non-null position object.", code: 401 };
     }
     if (this.isDisposed()) {
-      throw { message: 'The current FrameNode has been disposed.', code: 10026 };
+      throw { message: 'The current FrameNode has been disposed.', code: 100026 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const offsetPosition = getUINativeModule().frameNode.convertPositionFromWindow(
@@ -841,7 +841,7 @@ class FrameNode extends Disposable {
       throw { message: "The param 'x' or 'y' of the parameter 'positionByWindow' is invalid.", code: 401 };
     }
     if (offsetPosition[0] === 0) {
-      throw { message: 'The current FrameNode is not on the main tree.', code: 10028 };
+      throw { message: 'The current FrameNode is not on the main tree.', code: 100028 };
     }
     return { x: offsetPosition[1], y: offsetPosition[2] };
   }
