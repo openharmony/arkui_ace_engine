@@ -115,10 +115,7 @@ void SetItemConstraintSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        WaterFlowModelStatic::SetItemMinWidth(frameNode, std::nullopt);
-        WaterFlowModelStatic::SetItemMinHeight(frameNode, std::nullopt);
-        WaterFlowModelStatic::SetItemMaxWidth(frameNode, std::nullopt);
-        WaterFlowModelStatic::SetItemMaxHeight(frameNode, std::nullopt);
+        WaterFlowModelStatic::ResetItemLayoutConstraint(frameNode);
         return;
     }
     auto minWidth = Converter::OptConvert<CalcLength>(optValue->minWidth);
