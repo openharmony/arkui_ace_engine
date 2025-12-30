@@ -636,7 +636,6 @@ void WindowPattern::CreateStartingWindow()
         lastParentSize_ = { 0.0f, 0.0f };
         startingWindow_ = startingWindowLayoutHelper_->CreateStartingWindowNode(
             startingWindowInfo, sessionInfo.bundleName_, sessionInfo.moduleName_);
-        SetImagePatternSyncLoad(startingWindow_);
         return;
     }
     startingWindow_ = FrameNode::CreateFrameNode(
