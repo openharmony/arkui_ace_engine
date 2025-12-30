@@ -14719,6 +14719,8 @@ typedef struct Opt_ExpectedFrameRateRange {
 typedef struct Ark_FingerInfo {
     /* kind: Interface */
     Ark_Int32 id;
+    Opt_Float64 globalDisplayX;
+    Opt_Float64 globalDisplayY;
     Ark_Float64 globalX;
     Ark_Float64 globalY;
     Ark_Float64 localX;
@@ -16644,6 +16646,8 @@ typedef struct Ark_TouchObject {
     Opt_Float64 pressure;
     Opt_Float64 width;
     Opt_Float64 height;
+    Opt_Float64 globalDisplayX;
+    Opt_Float64 globalDisplayY;
 } Ark_TouchObject;
 typedef struct Opt_TouchObject {
     Ark_Tag tag;
@@ -26628,6 +26632,12 @@ typedef struct GENERATED_ArkUIAccessibilityHoverEventAccessor {
     Ark_Float64 (*getWindowY)(Ark_AccessibilityHoverEvent peer);
     void (*setWindowY)(Ark_AccessibilityHoverEvent peer,
                        Ark_Float64 windowY);
+    Opt_Float64 (*getGlobalDisplayX)(Ark_AccessibilityHoverEvent peer);
+    void (*setGlobalDisplayX)(Ark_AccessibilityHoverEvent peer,
+                              const Opt_Float64* globalDisplayX);
+    Opt_Float64 (*getGlobalDisplayY)(Ark_AccessibilityHoverEvent peer);
+    void (*setGlobalDisplayY)(Ark_AccessibilityHoverEvent peer,
+                              const Opt_Float64* globalDisplayY);
 } GENERATED_ArkUIAccessibilityHoverEventAccessor;
 
 typedef struct GENERATED_ArkUIActionSheetAccessor {
@@ -26759,6 +26769,12 @@ typedef struct GENERATED_ArkUIAxisEventAccessor {
     void (*setScrollStep)(Ark_AxisEvent peer,
                           const Opt_Int32* scrollStep);
     void (*propagation)(Ark_AxisEvent peer);
+    Opt_Float64 (*getGlobalDisplayX)(Ark_AxisEvent peer);
+    void (*setGlobalDisplayX)(Ark_AxisEvent peer,
+                              const Opt_Float64* globalDisplayX);
+    Opt_Float64 (*getGlobalDisplayY)(Ark_AxisEvent peer);
+    void (*setGlobalDisplayY)(Ark_AxisEvent peer,
+                              const Opt_Float64* globalDisplayY);
 } GENERATED_ArkUIAxisEventAccessor;
 
 typedef struct GENERATED_ArkUIBackgroundColorStyleAccessor {
@@ -27236,6 +27252,12 @@ typedef struct GENERATED_ArkUIClickEventAccessor {
     void (*setHand)(Ark_ClickEvent peer,
                     const Opt_InteractionHand* hand);
     void (*preventDefault)(Ark_ClickEvent peer);
+    Opt_Float64 (*getGlobalDisplayX)(Ark_ClickEvent peer);
+    void (*setGlobalDisplayX)(Ark_ClickEvent peer,
+                              const Opt_Float64* globalDisplayX);
+    Opt_Float64 (*getGlobalDisplayY)(Ark_ClickEvent peer);
+    void (*setGlobalDisplayY)(Ark_ClickEvent peer,
+                              const Opt_Float64* globalDisplayY);
 } GENERATED_ArkUIClickEventAccessor;
 
 typedef struct GENERATED_ArkUIClientAuthenticationHandlerAccessor {
@@ -27505,6 +27527,8 @@ typedef struct GENERATED_ArkUIDragEventAccessor {
                                  const Callback_Void* customDropAnimation);
     void (*enableInternalDropAnimation)(Ark_DragEvent peer,
                                         const Ark_String* configuration);
+    Ark_Float64 (*getGlobalDisplayX)(Ark_DragEvent peer);
+    Ark_Float64 (*getGlobalDisplayY)(Ark_DragEvent peer);
     Ark_DragBehavior (*getDragBehavior)(Ark_DragEvent peer);
     void (*setDragBehavior)(Ark_DragEvent peer,
                             Ark_DragBehavior dragBehavior);
@@ -27673,6 +27697,7 @@ typedef struct GENERATED_ArkUIFrameNodeExtenderAccessor {
                    const Ark_Vector2* position);
     void (*setNeedsLayout)(Ark_FrameNode peer);
     Ark_Vector2 (*getPositionToScreen)(Ark_FrameNode peer);
+    Ark_Vector2 (*getGlobalPositionOnDisplay)(Ark_FrameNode peer);
     Ark_Vector2 (*getPositionToWindowWithTransform)(Ark_FrameNode peer);
     Ark_Vector2 (*getPositionToParentWithTransform)(Ark_FrameNode peer);
     Ark_Vector2 (*getPositionToScreenWithTransform)(Ark_FrameNode peer);
@@ -27930,6 +27955,12 @@ typedef struct GENERATED_ArkUIHoverEventAccessor {
     void (*setDisplayY)(Ark_HoverEvent peer,
                         const Opt_Float64* displayY);
     void (*stopPropagation)(Ark_HoverEvent peer);
+    Opt_Float64 (*getGlobalDisplayX)(Ark_HoverEvent peer);
+    void (*setGlobalDisplayX)(Ark_HoverEvent peer,
+                              const Opt_Float64* globalDisplayX);
+    Opt_Float64 (*getGlobalDisplayY)(Ark_HoverEvent peer);
+    void (*setGlobalDisplayY)(Ark_HoverEvent peer,
+                              const Opt_Float64* globalDisplayY);
 } GENERATED_ArkUIHoverEventAccessor;
 
 typedef struct GENERATED_ArkUIHttpAuthHandlerAccessor {
@@ -28375,6 +28406,12 @@ typedef struct GENERATED_ArkUIMouseEventAccessor {
     Opt_Array_MouseButton (*getPressedButtons)(Ark_MouseEvent peer);
     void (*setPressedButtons)(Ark_MouseEvent peer,
                               const Opt_Array_MouseButton* pressedButtons);
+    Opt_Float64 (*getGlobalDisplayX)(Ark_MouseEvent peer);
+    void (*setGlobalDisplayX)(Ark_MouseEvent peer,
+                              const Opt_Float64* globalDisplayX);
+    Opt_Float64 (*getGlobalDisplayY)(Ark_MouseEvent peer);
+    void (*setGlobalDisplayY)(Ark_MouseEvent peer,
+                              const Opt_Float64* globalDisplayY);
 } GENERATED_ArkUIMouseEventAccessor;
 
 typedef struct GENERATED_ArkUIMutableStyledStringAccessor {

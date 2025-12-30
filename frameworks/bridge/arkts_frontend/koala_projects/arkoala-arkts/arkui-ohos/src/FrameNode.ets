@@ -475,6 +475,9 @@ export class FrameNode implements MaterializedBase {
     public getPositionToScreen(): NodePosition {
         return FrameNodeExtender.getPositionToScreen(this);
     }
+    public getGlobalPositionOnDisplay(): NodePosition {
+        return FrameNodeExtender.getGlobalPositionOnDisplay(this);
+    }
     public getPositionToWindow(): NodePosition {
         return FrameNodeExtender.getPositionToWindow(this);
     }

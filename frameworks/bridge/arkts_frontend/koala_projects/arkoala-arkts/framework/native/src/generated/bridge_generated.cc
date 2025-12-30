@@ -27288,6 +27288,60 @@ void impl_AccessibilityHoverEvent_setWindowY(Ark_NativePointer thisPtr, KDouble 
         GetAccessors()->getAccessibilityHoverEventAccessor()->setWindowY(self, windowY);
 }
 KOALA_INTEROP_DIRECT_V2(AccessibilityHoverEvent_setWindowY, Ark_NativePointer, KDouble)
+KInteropReturnBuffer impl_AccessibilityHoverEvent_getGlobalDisplayX(Ark_NativePointer thisPtr) {
+        Ark_AccessibilityHoverEvent self = reinterpret_cast<Ark_AccessibilityHoverEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getAccessibilityHoverEventAccessor()->getGlobalDisplayX(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeFloat64(retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(AccessibilityHoverEvent_getGlobalDisplayX, KInteropReturnBuffer, Ark_NativePointer)
+void impl_AccessibilityHoverEvent_setGlobalDisplayX(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_AccessibilityHoverEvent self = reinterpret_cast<Ark_AccessibilityHoverEvent>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto globalDisplayXValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Float64 globalDisplayXValueTempTmpBuf = {};
+        globalDisplayXValueTempTmpBuf.tag = globalDisplayXValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((globalDisplayXValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            globalDisplayXValueTempTmpBuf.value = thisDeserializer.readFloat64();
+        }
+        Opt_Float64 globalDisplayXValueTemp = globalDisplayXValueTempTmpBuf;;
+        GetAccessors()->getAccessibilityHoverEventAccessor()->setGlobalDisplayX(self, static_cast<Opt_Float64*>(&globalDisplayXValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(AccessibilityHoverEvent_setGlobalDisplayX, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_AccessibilityHoverEvent_getGlobalDisplayY(Ark_NativePointer thisPtr) {
+        Ark_AccessibilityHoverEvent self = reinterpret_cast<Ark_AccessibilityHoverEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getAccessibilityHoverEventAccessor()->getGlobalDisplayY(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeFloat64(retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(AccessibilityHoverEvent_getGlobalDisplayY, KInteropReturnBuffer, Ark_NativePointer)
+void impl_AccessibilityHoverEvent_setGlobalDisplayY(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_AccessibilityHoverEvent self = reinterpret_cast<Ark_AccessibilityHoverEvent>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto globalDisplayYValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Float64 globalDisplayYValueTempTmpBuf = {};
+        globalDisplayYValueTempTmpBuf.tag = globalDisplayYValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((globalDisplayYValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            globalDisplayYValueTempTmpBuf.value = thisDeserializer.readFloat64();
+        }
+        Opt_Float64 globalDisplayYValueTemp = globalDisplayYValueTempTmpBuf;;
+        GetAccessors()->getAccessibilityHoverEventAccessor()->setGlobalDisplayY(self, static_cast<Opt_Float64*>(&globalDisplayYValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(AccessibilityHoverEvent_setGlobalDisplayY, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ActionSheet_show(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_ActionSheetOptions optionsValueTemp = ActionSheetOptions_serializer::read(thisDeserializer);;
@@ -27823,6 +27877,60 @@ void impl_AxisEvent_setScrollStep(Ark_NativePointer thisPtr, KSerializerBuffer t
         GetAccessors()->getAxisEventAccessor()->setScrollStep(self, static_cast<Opt_Int32*>(&scrollStepValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(AxisEvent_setScrollStep, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_AxisEvent_getGlobalDisplayX(Ark_NativePointer thisPtr) {
+        Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getAxisEventAccessor()->getGlobalDisplayX(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeFloat64(retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(AxisEvent_getGlobalDisplayX, KInteropReturnBuffer, Ark_NativePointer)
+void impl_AxisEvent_setGlobalDisplayX(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto globalDisplayXValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Float64 globalDisplayXValueTempTmpBuf = {};
+        globalDisplayXValueTempTmpBuf.tag = globalDisplayXValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((globalDisplayXValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            globalDisplayXValueTempTmpBuf.value = thisDeserializer.readFloat64();
+        }
+        Opt_Float64 globalDisplayXValueTemp = globalDisplayXValueTempTmpBuf;;
+        GetAccessors()->getAxisEventAccessor()->setGlobalDisplayX(self, static_cast<Opt_Float64*>(&globalDisplayXValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(AxisEvent_setGlobalDisplayX, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_AxisEvent_getGlobalDisplayY(Ark_NativePointer thisPtr) {
+        Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getAxisEventAccessor()->getGlobalDisplayY(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeFloat64(retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(AxisEvent_getGlobalDisplayY, KInteropReturnBuffer, Ark_NativePointer)
+void impl_AxisEvent_setGlobalDisplayY(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto globalDisplayYValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Float64 globalDisplayYValueTempTmpBuf = {};
+        globalDisplayYValueTempTmpBuf.tag = globalDisplayYValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((globalDisplayYValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            globalDisplayYValueTempTmpBuf.value = thisDeserializer.readFloat64();
+        }
+        Opt_Float64 globalDisplayYValueTemp = globalDisplayYValueTempTmpBuf;;
+        GetAccessors()->getAxisEventAccessor()->setGlobalDisplayY(self, static_cast<Opt_Float64*>(&globalDisplayYValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(AxisEvent_setGlobalDisplayY, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_AxisEvent_propagation(Ark_NativePointer thisPtr) {
         Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
         GetAccessors()->getAxisEventAccessor()->propagation(self);
@@ -29487,6 +29595,60 @@ void impl_ClickEvent_setHand(Ark_NativePointer thisPtr, KSerializerBuffer thisAr
         GetAccessors()->getClickEventAccessor()->setHand(self, static_cast<Opt_InteractionHand*>(&handValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(ClickEvent_setHand, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_ClickEvent_getGlobalDisplayX(Ark_NativePointer thisPtr) {
+        Ark_ClickEvent self = reinterpret_cast<Ark_ClickEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getClickEventAccessor()->getGlobalDisplayX(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeFloat64(retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(ClickEvent_getGlobalDisplayX, KInteropReturnBuffer, Ark_NativePointer)
+void impl_ClickEvent_setGlobalDisplayX(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_ClickEvent self = reinterpret_cast<Ark_ClickEvent>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto globalDisplayXValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Float64 globalDisplayXValueTempTmpBuf = {};
+        globalDisplayXValueTempTmpBuf.tag = globalDisplayXValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((globalDisplayXValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            globalDisplayXValueTempTmpBuf.value = thisDeserializer.readFloat64();
+        }
+        Opt_Float64 globalDisplayXValueTemp = globalDisplayXValueTempTmpBuf;;
+        GetAccessors()->getClickEventAccessor()->setGlobalDisplayX(self, static_cast<Opt_Float64*>(&globalDisplayXValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(ClickEvent_setGlobalDisplayX, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_ClickEvent_getGlobalDisplayY(Ark_NativePointer thisPtr) {
+        Ark_ClickEvent self = reinterpret_cast<Ark_ClickEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getClickEventAccessor()->getGlobalDisplayY(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeFloat64(retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(ClickEvent_getGlobalDisplayY, KInteropReturnBuffer, Ark_NativePointer)
+void impl_ClickEvent_setGlobalDisplayY(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_ClickEvent self = reinterpret_cast<Ark_ClickEvent>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto globalDisplayYValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Float64 globalDisplayYValueTempTmpBuf = {};
+        globalDisplayYValueTempTmpBuf.tag = globalDisplayYValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((globalDisplayYValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            globalDisplayYValueTempTmpBuf.value = thisDeserializer.readFloat64();
+        }
+        Opt_Float64 globalDisplayYValueTemp = globalDisplayYValueTempTmpBuf;;
+        GetAccessors()->getClickEventAccessor()->setGlobalDisplayY(self, static_cast<Opt_Float64*>(&globalDisplayYValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(ClickEvent_setGlobalDisplayY, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ClickEvent_preventDefault(Ark_NativePointer thisPtr) {
         Ark_ClickEvent self = reinterpret_cast<Ark_ClickEvent>(thisPtr);
         GetAccessors()->getClickEventAccessor()->preventDefault(self);
@@ -30296,6 +30458,16 @@ void impl_DragEvent_enableInternalDropAnimation(Ark_NativePointer thisPtr, const
         GetAccessors()->getDragEventAccessor()->enableInternalDropAnimation(self, (const Ark_String*) (&configuration));
 }
 KOALA_INTEROP_V2(DragEvent_enableInternalDropAnimation, Ark_NativePointer, KStringPtr)
+Ark_Int32 impl_DragEvent_getGlobalDisplayX(Ark_NativePointer thisPtr) {
+        Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
+        return GetAccessors()->getDragEventAccessor()->getGlobalDisplayX(self);
+}
+KOALA_INTEROP_1(DragEvent_getGlobalDisplayX, Ark_Int32, Ark_NativePointer)
+Ark_Int32 impl_DragEvent_getGlobalDisplayY(Ark_NativePointer thisPtr) {
+        Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
+        return GetAccessors()->getDragEventAccessor()->getGlobalDisplayY(self);
+}
+KOALA_INTEROP_1(DragEvent_getGlobalDisplayY, Ark_Int32, Ark_NativePointer)
 Ark_Int32 impl_DragEvent_getDragBehavior(Ark_NativePointer thisPtr) {
         Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
         return GetAccessors()->getDragEventAccessor()->getDragBehavior(self);
@@ -30923,6 +31095,13 @@ KInteropReturnBuffer impl_FrameNodeExtender_getPositionToScreen(Ark_NativePointe
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FrameNodeExtender_getPositionToScreen, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNodeExtender_getGlobalPositionOnDisplay(Ark_NativePointer peer) {
+        const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getGlobalPositionOnDisplay(static_cast<Ark_FrameNode>(peer));
+        SerializerBase _retSerializer {};
+        Vector2_serializer::write(_retSerializer, retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNodeExtender_getGlobalPositionOnDisplay, KInteropReturnBuffer, Ark_NativePointer)
 KInteropReturnBuffer impl_FrameNodeExtender_getPositionToWindowWithTransform(Ark_NativePointer peer) {
         const auto &retValue = GetAccessors()->getFrameNodeExtenderAccessor()->getPositionToWindowWithTransform(static_cast<Ark_FrameNode>(peer));
         SerializerBase _retSerializer {};
@@ -31836,6 +32015,60 @@ void impl_HoverEvent_setDisplayY(Ark_NativePointer thisPtr, KSerializerBuffer th
         GetAccessors()->getHoverEventAccessor()->setDisplayY(self, static_cast<Opt_Float64*>(&displayYValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(HoverEvent_setDisplayY, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_HoverEvent_getGlobalDisplayX(Ark_NativePointer thisPtr) {
+        Ark_HoverEvent self = reinterpret_cast<Ark_HoverEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getHoverEventAccessor()->getGlobalDisplayX(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeFloat64(retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(HoverEvent_getGlobalDisplayX, KInteropReturnBuffer, Ark_NativePointer)
+void impl_HoverEvent_setGlobalDisplayX(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_HoverEvent self = reinterpret_cast<Ark_HoverEvent>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto globalDisplayXValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Float64 globalDisplayXValueTempTmpBuf = {};
+        globalDisplayXValueTempTmpBuf.tag = globalDisplayXValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((globalDisplayXValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            globalDisplayXValueTempTmpBuf.value = thisDeserializer.readFloat64();
+        }
+        Opt_Float64 globalDisplayXValueTemp = globalDisplayXValueTempTmpBuf;;
+        GetAccessors()->getHoverEventAccessor()->setGlobalDisplayX(self, static_cast<Opt_Float64*>(&globalDisplayXValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(HoverEvent_setGlobalDisplayX, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_HoverEvent_getGlobalDisplayY(Ark_NativePointer thisPtr) {
+        Ark_HoverEvent self = reinterpret_cast<Ark_HoverEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getHoverEventAccessor()->getGlobalDisplayY(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeFloat64(retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(HoverEvent_getGlobalDisplayY, KInteropReturnBuffer, Ark_NativePointer)
+void impl_HoverEvent_setGlobalDisplayY(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_HoverEvent self = reinterpret_cast<Ark_HoverEvent>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto globalDisplayYValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Float64 globalDisplayYValueTempTmpBuf = {};
+        globalDisplayYValueTempTmpBuf.tag = globalDisplayYValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((globalDisplayYValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            globalDisplayYValueTempTmpBuf.value = thisDeserializer.readFloat64();
+        }
+        Opt_Float64 globalDisplayYValueTemp = globalDisplayYValueTempTmpBuf;;
+        GetAccessors()->getHoverEventAccessor()->setGlobalDisplayY(self, static_cast<Opt_Float64*>(&globalDisplayYValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(HoverEvent_setGlobalDisplayY, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_HoverEvent_stopPropagation(Ark_NativePointer thisPtr) {
         Ark_HoverEvent self = reinterpret_cast<Ark_HoverEvent>(thisPtr);
         GetAccessors()->getHoverEventAccessor()->stopPropagation(self);
@@ -33584,6 +33817,60 @@ void impl_MouseEvent_setPressedButtons(Ark_NativePointer thisPtr, KSerializerBuf
         GetAccessors()->getMouseEventAccessor()->setPressedButtons(self, static_cast<Opt_Array_MouseButton*>(&pressedButtonsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(MouseEvent_setPressedButtons, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_MouseEvent_getGlobalDisplayX(Ark_NativePointer thisPtr) {
+        Ark_MouseEvent self = reinterpret_cast<Ark_MouseEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getMouseEventAccessor()->getGlobalDisplayX(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeFloat64(retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(MouseEvent_getGlobalDisplayX, KInteropReturnBuffer, Ark_NativePointer)
+void impl_MouseEvent_setGlobalDisplayX(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_MouseEvent self = reinterpret_cast<Ark_MouseEvent>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto globalDisplayXValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Float64 globalDisplayXValueTempTmpBuf = {};
+        globalDisplayXValueTempTmpBuf.tag = globalDisplayXValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((globalDisplayXValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            globalDisplayXValueTempTmpBuf.value = thisDeserializer.readFloat64();
+        }
+        Opt_Float64 globalDisplayXValueTemp = globalDisplayXValueTempTmpBuf;;
+        GetAccessors()->getMouseEventAccessor()->setGlobalDisplayX(self, static_cast<Opt_Float64*>(&globalDisplayXValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(MouseEvent_setGlobalDisplayX, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_MouseEvent_getGlobalDisplayY(Ark_NativePointer thisPtr) {
+        Ark_MouseEvent self = reinterpret_cast<Ark_MouseEvent>(thisPtr);
+        const auto &retValue = GetAccessors()->getMouseEventAccessor()->getGlobalDisplayY(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            _retSerializer.writeFloat64(retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(MouseEvent_getGlobalDisplayY, KInteropReturnBuffer, Ark_NativePointer)
+void impl_MouseEvent_setGlobalDisplayY(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_MouseEvent self = reinterpret_cast<Ark_MouseEvent>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto globalDisplayYValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Float64 globalDisplayYValueTempTmpBuf = {};
+        globalDisplayYValueTempTmpBuf.tag = globalDisplayYValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((globalDisplayYValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            globalDisplayYValueTempTmpBuf.value = thisDeserializer.readFloat64();
+        }
+        Opt_Float64 globalDisplayYValueTemp = globalDisplayYValueTempTmpBuf;;
+        GetAccessors()->getMouseEventAccessor()->setGlobalDisplayY(self, static_cast<Opt_Float64*>(&globalDisplayYValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(MouseEvent_setGlobalDisplayY, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_MutableStyledString_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const Ark_Int8 valueValueTempTmpBufUnionSelector = thisDeserializer.readInt8();

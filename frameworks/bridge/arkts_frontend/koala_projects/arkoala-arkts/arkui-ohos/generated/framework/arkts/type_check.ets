@@ -222,7 +222,7 @@ export class TypeChecker {
     static isAccessibilityActionOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof AccessibilityActionOptions
     }
-    static isAccessibilityHoverEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
+    static isAccessibilityHoverEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean): boolean {
         return value instanceof AccessibilityHoverEvent
     }
     static isAccessibilityHoverType(value: Object | string | number | undefined): boolean {
@@ -360,7 +360,7 @@ export class TypeChecker {
     static isAxisAction(value: Object | string | number | undefined): boolean {
         return value instanceof AxisAction
     }
-    static isAxisEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
+    static isAxisEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean): boolean {
         return value instanceof AxisEvent
     }
     static isAxisModel(value: Object | string | number | undefined): boolean {
@@ -648,7 +648,7 @@ export class TypeChecker {
     static isClickEffectLevel(value: Object | string | number | undefined): boolean {
         return value instanceof ClickEffectLevel
     }
-    static isClickEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
+    static isClickEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean): boolean {
         return value instanceof ClickEvent
     }
     static isClientAuthenticationHandler(value: Object | string | number | undefined): boolean {
@@ -1152,7 +1152,7 @@ export class TypeChecker {
     static isFillMode(value: Object | string | number | undefined): boolean {
         return value instanceof FillMode
     }
-    static isFingerInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
+    static isFingerInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean): boolean {
         return value instanceof FingerInfo
     }
     static isFinishCallbackType(value: Object | string | number | undefined): boolean {
@@ -1419,7 +1419,7 @@ export class TypeChecker {
     static isHoverEffect(value: Object | string | number | undefined): boolean {
         return value instanceof HoverEffect
     }
-    static isHoverEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
+    static isHoverEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
         return value instanceof HoverEvent
     }
     static isHoverEventParam(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
@@ -1899,7 +1899,7 @@ export class TypeChecker {
     static isMouseButton(value: Object | string | number | undefined): boolean {
         return value instanceof MouseButton
     }
-    static isMouseEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean): boolean {
+    static isMouseEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean): boolean {
         return value instanceof MouseEvent
     }
     static isMultiAppMode(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
@@ -3456,7 +3456,7 @@ export class TypeChecker {
     static isTouchEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof TouchEvent
     }
-    static isTouchObject(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean): boolean {
+    static isTouchObject(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean): boolean {
         return value instanceof TouchObject
     }
     static isTouchResult(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {

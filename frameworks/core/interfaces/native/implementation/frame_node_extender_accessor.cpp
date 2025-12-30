@@ -578,6 +578,20 @@ Ark_Vector2 GetPositionToScreenImpl(Ark_FrameNode peer)
     return Converter::ArkValue<Ark_Vector2>(offset);
 }
 
+Ark_Vector2 GetGlobalPositionOnDisplayImpl(Ark_FrameNode peer)
+{
+    if (!peer) {
+        LOGW("This frameNode nullptr when GetGlobalPositionOnDisplayImpl!");
+        return {};
+    }
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto offset = frameNode->GetGlobalPositionOnDisplay();
+    offset.SetX(PipelineBase::Px2VpWithCurrentDensity(offset.GetX()));
+    offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
+    return Converter::ArkValue<Ark_Vector2>(offset);
+}
+
 Ark_Vector2 GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -1226,6 +1240,7 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::LayoutImpl,
         FrameNodeExtenderAccessor::SetNeedsLayoutImpl,
         FrameNodeExtenderAccessor::GetPositionToScreenImpl,
+        FrameNodeExtenderAccessor::GetGlobalPositionOnDisplayImpl,
         FrameNodeExtenderAccessor::GetPositionToWindowWithTransformImpl,
         FrameNodeExtenderAccessor::GetPositionToParentWithTransformImpl,
         FrameNodeExtenderAccessor::GetPositionToScreenWithTransformImpl,
