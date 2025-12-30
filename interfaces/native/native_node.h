@@ -6033,6 +6033,91 @@ typedef enum {
     NODE_CHECKBOX_GROUP_SHAPE = 21005,
 
     /**
+     * @brief Defines type of the Enter key.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: type of the Enter key{@link ArkUI_EnterKeyType}. The default value is
+     * <b>ARKUI_ENTER_KEY_TYPE_NEW_LINE</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: type of the Enter key{@link ArkUI_EnterKeyType}. \n
+     *
+     * @since 24
+     */
+    NODE_RICH_EDITOR_ENTER_KEY_TYPE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RICH_EDITOR,
+ 
+    /**
+     * @brief Defines caret color attribute.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].u32: background color, in 0xARGB format. For example, 0xFFFF0000 indicates red. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32: background color, in 0xARGB format. \n
+     *
+     * @since 24
+     */
+    NODE_RICH_EDITOR_CARET_COLOR,
+ 
+    /**
+     * @brief Defines color of the scrollbar. This attribute can be set, reset, and obtained as required
+     * through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].u32: color of the scroll bar thumb, in 0xARGB format. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32: color of the scroll bar thumb, in 0xARGB format. \n
+     *
+     * @since 24
+     */
+    NODE_RICH_EDITOR_SCROLL_BAR_COLOR,
+ 
+    /**
+     * @brief Define bar state of the richEditor.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: bar state of the text area, specified using the {@link ArkUI_BarState}
+     * enum. The default value is <b>ARKUI_BAR_STATE_AUTO</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: bar state of the text area, specified using the {@link ArkUI_BarState}
+     * enum. \n
+     *
+     * @since 24
+     */
+    NODE_RICH_EDITOR_BAR_STATE,
+ 
+    /**
+     * @brief Enables selected data detector.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: Enable selected text recognition, default value true.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: Whether selected text recognition is enabled.\n
+     *
+     * @since 24
+     */
+    NODE_RICH_EDITOR_ENABLE_DATA_DETECTOR,
+ 
+    /**
+     * @brief Sets recognition configuration.
+     * This attribute can be set and reset as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the recognition configuration.
+     *     The parameter type is {@link ArkUI_TextDataDetectorConfig}.\n
+     * 
+     * @since 24
+     */
+    NODE_RICH_EDITOR_DATA_DETECTOR_CONFIG
+
+    /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
      * and obtained as required through APIs.
      *
@@ -8214,91 +8299,6 @@ typedef enum {
      * @since 23
      */
     NODE_PICKER_SELECTION_INDICATOR = 1018003,
-
-    /**
-     * @brief Defines type of the Enter key.
-     * This attribute can be set, reset, and obtained as required through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: type of the Enter key{@link ArkUI_EnterKeyType}. The default value is
-     * <b>ARKUI_ENTER_KEY_TYPE_NEW_LINE</b>. \n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: type of the Enter key{@link ArkUI_EnterKeyType}. \n
-     *
-     * @since 24
-     */
-    NODE_RICH_EDITOR_ENTER_KEY_TYPE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RICH_EDITOR,
- 
-    /**
-     * @brief Defines caret color attribute.
-     * This attribute can be set, reset, and obtained as required through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].u32: background color, in 0xARGB format. For example, 0xFFFF0000 indicates red. \n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].u32: background color, in 0xARGB format. \n
-     *
-     * @since 24
-     */
-    NODE_RICH_EDITOR_CARET_COLOR,
- 
-    /**
-     * @brief Defines color of the scrollbar. This attribute can be set, reset, and obtained as required
-     * through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].u32: color of the scroll bar thumb, in 0xARGB format. \n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].u32: color of the scroll bar thumb, in 0xARGB format. \n
-     *
-     * @since 24
-     */
-    NODE_RICH_EDITOR_SCROLL_BAR_COLOR,
- 
-    /**
-     * @brief Define bar state of the richEditor.
-     * This attribute can be set, reset, and obtained as required through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: bar state of the text area, specified using the {@link ArkUI_BarState}
-     * enum. The default value is <b>ARKUI_BAR_STATE_AUTO</b>. \n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: bar state of the text area, specified using the {@link ArkUI_BarState}
-     * enum. \n
-     *
-     * @since 24
-     */
-    NODE_RICH_EDITOR_BAR_STATE,
- 
-    /**
-     * @brief Enables selected data detector.
-     * This attribute can be set, reset, and obtained as required through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].i32: Enable selected text recognition, default value true.\n
-     * \n
-     * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: Whether selected text recognition is enabled.\n
-     *
-     * @since 24
-     */
-    NODE_RICH_EDITOR_ENABLE_DATA_DETECTOR,
- 
-    /**
-     * @brief Sets recognition configuration.
-     * This attribute can be set and reset as required through APIs.
-     *
-     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .object: the recognition configuration.
-     *     The parameter type is {@link ArkUI_TextDataDetectorConfig}.\n
-     * 
-     * @since 24
-     */
-    NODE_RICH_EDITOR_DATA_DETECTOR_CONFIG
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12

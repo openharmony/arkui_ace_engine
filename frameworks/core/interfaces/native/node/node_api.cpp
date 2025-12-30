@@ -1301,6 +1301,17 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             eventHandle = TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+        case ARKUI_RICH_EDITOR: {
+            // rich editor event type.
+            if (subKind >=
+                sizeof(RICH_EDITOR_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = RICH_EDITOR_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
         case ARKUI_REFRESH: {
             // refresh event type.
             if (subKind >= sizeof(REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
