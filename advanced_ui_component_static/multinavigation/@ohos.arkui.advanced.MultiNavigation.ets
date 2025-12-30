@@ -206,8 +206,8 @@ export class DeviceListenerManager {
 
   public initListener(): void {
     try {
-        this.portraitListener.on('change', this.onPortraitChange);
-        this.drawableWidthLargeListener.on('change', this.onDrawableWidthLargeChange);
+        this.portraitListener.onChange(this.onPortraitChange);
+        this.drawableWidthLargeListener.onChange(this.onDrawableWidthLargeChange);
     } catch(err) {
         console.log('multiNavigation initListener on err: ' + err);
     }
@@ -215,8 +215,8 @@ export class DeviceListenerManager {
 
   public finalizeListener() {
     try {
-        this.portraitListener.off('change', this.onPortraitChange);
-        this.drawableWidthLargeListener.off('change', this.onDrawableWidthLargeChange);
+        this.portraitListener.offChange(this.onPortraitChange);
+        this.drawableWidthLargeListener.offChange(this.onDrawableWidthLargeChange);
     } catch(err) {
         console.log('multiNavigation finalizeListener off err: ' + err);
     }
