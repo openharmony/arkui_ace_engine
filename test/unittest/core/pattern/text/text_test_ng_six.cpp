@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "test/mock/adapter/mock_uisession_manager.h"
 #include "test/mock/core/common/mock_font_manager.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pattern/mock_nestable_scroll_container.h"
@@ -24,6 +25,7 @@
 #include "text_base.h"
 
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
@@ -1499,5 +1501,621 @@ HWTEST_F(TextTestNgSix, HasUnsupportedTransform001, TestSize.Level1)
 
     renderContext->UpdateTransformMatrix(Matrix4());
     EXPECT_EQ(textSelectOverlay->HasUnsupportedTransform(), false);
+}
+
+/**
+ * @tc.name: TextHighlightSelectedContent001
+ * @tc.desc: Test TextHighlightSelectedContent with empty text and empty spans
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, TextHighlightSelectedContent001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    // Test with empty text and empty spans
+    textPattern->textForDisplay_ = u"";
+    auto result = textPattern->TextHighlightSelectedContent(0, 5);
+    EXPECT_EQ(result, u"");
+}
+
+/**
+ * @tc.name: TextHighlightSelectedContent002
+ * @tc.desc: Test TextHighlightSelectedContent with no spans (plain text)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, TextHighlightSelectedContent002, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    // Test with plain text (no spans)
+    textPattern->textForDisplay_ = u"Hello World";
+
+    // Normal selection
+    auto result1 = textPattern->TextHighlightSelectedContent(0, 5);
+    EXPECT_EQ(result1, u"Hello");
+
+    // Reversed selection (start > end)
+    auto result2 = textPattern->TextHighlightSelectedContent(5, 0);
+    EXPECT_EQ(result2, u"Hello");
+
+    // Out of bounds selection
+    auto result3 = textPattern->TextHighlightSelectedContent(0, 20);
+    EXPECT_EQ(result3, u"Hello World");
+
+    // Negative start
+    auto result4 = textPattern->TextHighlightSelectedContent(-5, 5);
+    EXPECT_EQ(result4, u"Hello");
+
+    // start == end
+    auto result5 = textPattern->TextHighlightSelectedContent(3, 3);
+    EXPECT_EQ(result5, u"");
+}
+
+/**
+ * @tc.name: TextHighlightSelectedContent003
+ * @tc.desc: Test TextHighlightSelectedContent with text spans only
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, TextHighlightSelectedContent003, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    // Clear any existing spans
+    textPattern->spans_.clear();
+
+    // Create text spans
+    auto span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->content = u"Hello ";
+    span1->position = 6; // End position of this span
+    span1->placeholderIndex = -1;
+    span1->spanItemType = SpanItemType::NORMAL;
+
+    auto span2 = AceType::MakeRefPtr<SpanItem>();
+    span2->content = u"World";
+    span2->position = 11; // End position of this span
+    span2->placeholderIndex = -1;
+    span2->spanItemType = SpanItemType::NORMAL;
+
+    textPattern->spans_.push_back(span1);
+    textPattern->spans_.push_back(span2);
+
+    // Select within first span
+    auto result1 = textPattern->TextHighlightSelectedContent(0, 3);
+    EXPECT_EQ(result1, u"Hel");
+
+    // Select across two spans
+    auto result2 = textPattern->TextHighlightSelectedContent(3, 8);
+    EXPECT_EQ(result2, u"lo Wo");
+
+    // Select entire text
+    auto result3 = textPattern->TextHighlightSelectedContent(0, 11);
+    EXPECT_EQ(result3, u"Hello World");
+
+    // Select within second span
+    auto result4 = textPattern->TextHighlightSelectedContent(7, 11);
+    EXPECT_EQ(result4, u"orld");
+}
+
+/**
+ * @tc.name: TextHighlightSelectedContent004
+ * @tc.desc: Test TextHighlightSelectedContent with image/custom spans
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, TextHighlightSelectedContent004, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    // Clear any existing spans
+    textPattern->spans_.clear();
+
+    // Create mixed spans: text + image + text
+    auto span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->content = u"Text";
+    span1->position = 4;
+    span1->placeholderIndex = -1;
+    span1->spanItemType = SpanItemType::NORMAL;
+
+    auto span2 = AceType::MakeRefPtr<SpanItem>(); // Image span
+    span2->content = u"";
+    span2->position = 5;         // Image takes 1 position
+    span2->placeholderIndex = 0; // placeholderIndex != -1 indicates image/custom span
+    span2->spanItemType = SpanItemType::CustomSpan;
+
+    auto span3 = AceType::MakeRefPtr<SpanItem>();
+    span3->content = u"After";
+    span3->position = 10;
+    span3->placeholderIndex = -1;
+    span3->spanItemType = SpanItemType::NORMAL;
+
+    textPattern->spans_.push_back(span1);
+    textPattern->spans_.push_back(span2);
+    textPattern->spans_.push_back(span3);
+
+    // Select including image span
+    auto result1 = textPattern->TextHighlightSelectedContent(0, 10);
+    EXPECT_EQ(result1, u"Text After");
+
+    // Select only image span
+    auto result2 = textPattern->TextHighlightSelectedContent(4, 5);
+    EXPECT_EQ(result2, u" ");
+
+    // Select from middle of first text to middle of last text (through image)
+    auto result3 = textPattern->TextHighlightSelectedContent(2, 8);
+    EXPECT_EQ(result3, u"xt Aft");
+}
+
+/**
+ * @tc.name: TextHighlightSelectedContent005
+ * @tc.desc: Test TextHighlightSelectedContent with symbol spans
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, TextHighlightSelectedContent005, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    // Clear any existing spans
+    textPattern->spans_.clear();
+
+    // Create spans with symbol type
+    auto span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->content = u"Before";
+    span1->position = 6;
+    span1->placeholderIndex = -1;
+    span1->spanItemType = SpanItemType::NORMAL;
+
+    auto span2 = AceType::MakeRefPtr<SpanItem>(); // Symbol span
+    span2->content = u"  ";
+    span2->position = 8; // Symbol takes 2 positions
+    span2->placeholderIndex = -1;
+    span2->spanItemType = SpanItemType::SYMBOL;
+    span2->length = 2; // Symbol length
+
+    auto span3 = AceType::MakeRefPtr<SpanItem>();
+    span3->content = u"After";
+    span3->position = 13;
+    span3->placeholderIndex = -1;
+    span3->spanItemType = SpanItemType::NORMAL;
+
+    textPattern->spans_.push_back(span1);
+    textPattern->spans_.push_back(span2);
+    textPattern->spans_.push_back(span3);
+
+    // Select including symbol span
+    auto result1 = textPattern->TextHighlightSelectedContent(0, 13);
+    EXPECT_EQ(result1, u"Before  After");
+
+    // Select only symbol span
+    auto result2 = textPattern->TextHighlightSelectedContent(6, 8);
+    EXPECT_EQ(result2, u"  ");
+}
+
+/**
+ * @tc.name: TextHighlightSelectedContent006
+ * @tc.desc: Test TextHighlightSelectedContent with complex span combinations
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, TextHighlightSelectedContent006, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    // Clear any existing spans
+    textPattern->spans_.clear();
+
+    // Create complex scenario: text + image + text + symbol + text
+    auto span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->content = u"Start";
+    span1->position = 5;
+    span1->placeholderIndex = -1;
+    span1->spanItemType = SpanItemType::NORMAL;
+
+    auto span2 = AceType::MakeRefPtr<SpanItem>(); // Image
+    span2->content = u" ";
+    span2->position = 6;
+    span2->placeholderIndex = 0;
+    span2->spanItemType = SpanItemType::CustomSpan;
+
+    auto span3 = AceType::MakeRefPtr<SpanItem>();
+    span3->content = u"Middle";
+    span3->position = 12;
+    span3->placeholderIndex = -1;
+    span3->spanItemType = SpanItemType::NORMAL;
+
+    auto span4 = AceType::MakeRefPtr<SpanItem>(); // Symbol
+    span4->content = u"  ";
+    span4->position = 15; // 3 symbol positions
+    span4->placeholderIndex = -1;
+    span4->spanItemType = SpanItemType::SYMBOL;
+    span4->length = 2;
+
+    auto span5 = AceType::MakeRefPtr<SpanItem>();
+    span5->content = u"End";
+    span5->position = 18;
+    span5->placeholderIndex = -1;
+    span5->spanItemType = SpanItemType::NORMAL;
+
+    textPattern->spans_.push_back(span1);
+    textPattern->spans_.push_back(span2);
+    textPattern->spans_.push_back(span3);
+    textPattern->spans_.push_back(span4);
+    textPattern->spans_.push_back(span5);
+
+    // Select entire content
+    auto result1 = textPattern->TextHighlightSelectedContent(0, 18);
+    EXPECT_EQ(result1, u"Start Middle  End");
+
+    // Select from middle of start to middle of end
+    auto result2 = textPattern->TextHighlightSelectedContent(2, 16);
+    EXPECT_EQ(result2, u"art Middle  E");
+
+    // Select only non-text elements
+    auto result3 = textPattern->TextHighlightSelectedContent(5, 15);
+    EXPECT_EQ(result3, u" Middle  ");
+}
+
+/**
+ * @tc.name: ReportSelectedText001
+ * @tc.desc: Test ReportSelectedText when SelectTextEvent is not registered
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, ReportSelectedText001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    // Mock UiSessionManager to return false for GetSelectTextEventRegistered
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetSelectTextEventRegistered()).WillRepeatedly(Return(false));
+
+    // Set text selector with some content
+    textPattern->textSelector_.Update(0, 5);
+    textPattern->textSelector_.lastReportContent_ = "previous content";
+
+    // Call the function
+    textPattern->ReportSelectedText();
+
+    // Verify lastReportContent_ is cleared
+    EXPECT_EQ(textPattern->textSelector_.lastReportContent_, "");
+}
+
+/**
+ * @tc.name: ReportSelectedText002
+ * @tc.desc: Test ReportSelectedText when SelectTextEvent is registered but host is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, ReportSelectedText002, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    // Mock UiSessionManager to return true
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetSelectTextEventRegistered()).WillRepeatedly(Return(true));
+
+    // Set text selector with some content
+    textPattern->textSelector_.Update(0, 5);
+    textPattern->textSelector_.lastReportContent_ = "previous content";
+
+    // Call the function - host is null, so should early return
+    textPattern->ReportSelectedText();
+
+    // Verify lastReportContent_ remains unchanged (should be cleared by the function)
+    EXPECT_EQ(textPattern->textSelector_.lastReportContent_, "");
+}
+
+/**
+ * @tc.name: ReportSelectedText003
+ * @tc.desc: Test ReportSelectedText when pipeline context is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, ReportSelectedText003, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    // Mock UiSessionManager
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetSelectTextEventRegistered()).WillRepeatedly(Return(true));
+
+    // Set text selector
+    textPattern->textSelector_.Update(0, 5);
+    textPattern->textSelector_.lastReportContent_ = "previous content";
+
+    // Call the function
+    textPattern->ReportSelectedText();
+
+    // Verify lastReportContent_ is cleared
+    EXPECT_EQ(textPattern->textSelector_.lastReportContent_, "");
+}
+
+/**
+ * @tc.name: ReportSelectedText004
+ * @tc.desc: Test ReportSelectedText when select overlay manager is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, ReportSelectedText004, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    // Mock UiSessionManager
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetSelectTextEventRegistered()).WillRepeatedly(Return(true));
+
+    // Set text selector
+    textPattern->textSelector_.Update(0, 5);
+    textPattern->textSelector_.lastReportContent_ = "previous content";
+
+    // Call the function
+    textPattern->ReportSelectedText();
+
+    // Verify lastReportContent_ is cleared
+    EXPECT_EQ(textPattern->textSelector_.lastReportContent_, "");
+}
+
+/**
+ * @tc.name: ReportSelectedText005
+ * @tc.desc: Test ReportSelectedText when holder ID doesn't match
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, ReportSelectedText005, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    // Mock UiSessionManager
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetSelectTextEventRegistered()).WillRepeatedly(Return(true));
+
+    // Create mock select overlay manager
+    auto overlayManager = SelectContentOverlayManager::GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->SetTextSelectionHolderId(999);
+
+    // Set text selector and prepare text content
+    textPattern->textSelector_.Update(0, 5);
+    textPattern->textForDisplay_ = u"Hello World";
+    textPattern->textSelector_.lastReportContent_ = "previous content";
+
+    // Call the function
+    textPattern->ReportSelectedText();
+
+    // Verify lastReportContent_ is cleared because IDs don't match
+    EXPECT_EQ(textPattern->textSelector_.lastReportContent_, "");
+}
+
+/**
+ * @tc.name: ReportSelectedText006
+ * @tc.desc: Test ReportSelectedText when content hasn't changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, ReportSelectedText006, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    // Mock UiSessionManager
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetSelectTextEventRegistered()).WillRepeatedly(Return(true));
+
+    // Create mock select overlay manager
+    auto overlayManager = SelectContentOverlayManager::GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->SetTextSelectionHolderId(textFrameNode->GetId());
+
+    // Set text selector and prepare text content
+    textPattern->textSelector_.Update(0, 5);
+    textPattern->textForDisplay_ = u"Hello World";
+
+    // Calculate expected result
+    auto expectedContent = UtfUtils::Str16DebugToStr8(textPattern->TextHighlightSelectedContent(0, 5));
+
+    // Call the function
+    textPattern->ReportSelectedText();
+
+    // Verify lastReportContent_ remains the same (no change)
+    EXPECT_EQ(textPattern->textSelector_.lastReportContent_, expectedContent);
+}
+
+/**
+ * @tc.name: ReportSelectedText007
+ * @tc.desc: Test ReportSelectedText when content has changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, ReportSelectedText007, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    // Mock UiSessionManager
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetSelectTextEventRegistered()).WillRepeatedly(Return(true));
+
+    // Create mock select overlay manager
+    auto overlayManager = SelectContentOverlayManager::GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->SetTextSelectionHolderId(textFrameNode->GetId());
+
+    // Set text selector and prepare text content
+    textPattern->textSelector_.Update(0, 5);
+    textPattern->textForDisplay_ = u"Hello World";
+
+    // Calculate expected result
+    auto expectedContent = UtfUtils::Str16DebugToStr8(textPattern->TextHighlightSelectedContent(0, 5));
+
+    // Set lastReportContent_ to different content
+    textPattern->textSelector_.lastReportContent_ = "old content";
+
+    // Call the function
+    textPattern->ReportSelectedText();
+
+    // Verify lastReportContent_ is updated
+    EXPECT_EQ(textPattern->textSelector_.lastReportContent_, expectedContent);
+}
+
+/**
+ * @tc.name: ReportSelectedText008
+ * @tc.desc: Test ReportSelectedText with empty selection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, ReportSelectedText008, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    // Mock UiSessionManager
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetSelectTextEventRegistered()).WillRepeatedly(Return(true));
+
+    // Create mock select overlay manager
+    auto overlayManager = SelectContentOverlayManager::GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->SetTextSelectionHolderId(textFrameNode->GetId());
+
+    // Set text selector with empty selection (start == end)
+    textPattern->textSelector_.Update(3, 3);
+    textPattern->textForDisplay_ = u"Hello World";
+    textPattern->textSelector_.lastReportContent_ = "previous";
+
+    // Call the function
+    textPattern->ReportSelectedText();
+
+    // Verify lastReportContent_ is updated to empty string
+    EXPECT_EQ(textPattern->textSelector_.lastReportContent_, "");
+}
+
+/**
+ * @tc.name: ReportSelectedText009
+ * @tc.desc: Test ReportSelectedText with spans content
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, ReportSelectedText009, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    // Mock UiSessionManager
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetSelectTextEventRegistered()).WillRepeatedly(Return(true));
+
+    // Create mock select overlay manager
+    auto overlayManager = SelectContentOverlayManager::GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->SetTextSelectionHolderId(textFrameNode->GetId());
+
+    // Setup spans for complex content
+    textPattern->spans_.clear();
+
+    auto span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->content = u"Hello ";
+    span1->position = 6;
+    span1->placeholderIndex = -1;
+    span1->spanItemType = SpanItemType::NORMAL;
+
+    auto span2 = AceType::MakeRefPtr<SpanItem>(); // Image span
+    span2->content = u" ";
+    span2->position = 7;
+    span2->placeholderIndex = 0;
+    span2->spanItemType = SpanItemType::CustomSpan;
+
+    auto span3 = AceType::MakeRefPtr<SpanItem>();
+    span3->content = u"World";
+    span3->position = 12;
+    span3->placeholderIndex = -1;
+    span3->spanItemType = SpanItemType::NORMAL;
+
+    textPattern->spans_.push_back(span1);
+    textPattern->spans_.push_back(span2);
+    textPattern->spans_.push_back(span3);
+
+    // Set text selector across all content
+    textPattern->textSelector_.Update(0, 12);
+    textPattern->textSelector_.lastReportContent_ = "";
+
+    // Call the function
+    textPattern->ReportSelectedText();
+
+    // Verify content is reported (image span becomes space)
+    EXPECT_EQ(textPattern->textSelector_.lastReportContent_, "Hello  World");
+}
+
+/**
+ * @tc.name: ReportSelectedText010
+ * @tc.desc: Test ReportSelectedText with reversed selection (start > end)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgSix, ReportSelectedText010, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    // Mock UiSessionManager
+    MockUiSessionManager* mockUiSessionManager =
+        reinterpret_cast<MockUiSessionManager*>(UiSessionManager::GetInstance());
+    EXPECT_CALL(*mockUiSessionManager, GetSelectTextEventRegistered()).WillRepeatedly(Return(true));
+
+    // Create mock select overlay manager
+    auto overlayManager = SelectContentOverlayManager::GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->SetTextSelectionHolderId(textFrameNode->GetId());
+
+    // Set text content
+    textPattern->textForDisplay_ = u"Hello World";
+
+    // Set reversed selector (start > end)
+    textPattern->textSelector_.Update(8, 3);
+    textPattern->textSelector_.lastReportContent_ = "";
+
+    // Call the function
+    textPattern->ReportSelectedText();
+
+    // Verify the correct content is selected (should handle reversed selection)
+    EXPECT_EQ(textPattern->textSelector_.lastReportContent_, "lo Wo");
 }
 } // namespace OHOS::Ace::NG

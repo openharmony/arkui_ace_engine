@@ -303,7 +303,7 @@ void PipelineContext::ReportSelectedText()
     CHECK_NULL_VOID(id != -1);
     auto node = AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(id));
     CHECK_NULL_VOID(node);
-    node->ReportSelectedText();
+    node->ReportSelectedText(true);
 }
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()

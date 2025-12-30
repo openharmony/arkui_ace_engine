@@ -769,7 +769,7 @@ public:
     };
     virtual void HighlightSpecifiedContent(
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) {};
-    virtual void ReportSelectedText() {};
+    virtual void ReportSelectedText(bool isRegister = false) {};
     virtual int32_t OnInjectionEvent(const std::string& command)
     {
         return RET_SUCCESS;

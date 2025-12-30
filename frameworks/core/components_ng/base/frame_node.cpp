@@ -8028,10 +8028,10 @@ void FrameNode::HighlightSpecifiedContent(
     pattern->HighlightSpecifiedContent(content, nodeIds, configs);
 }
 
-void FrameNode::ReportSelectedText()
+void FrameNode::ReportSelectedText(bool isRegister)
 {
     auto pattern = GetPattern();
     CHECK_NULL_VOID(pattern);
-    pattern->ReportSelectedText();
+    pattern->ReportSelectedText(isRegister);
 }
 } // namespace OHOS::Ace::NG
