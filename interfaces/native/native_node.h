@@ -6115,7 +6115,7 @@ typedef enum {
      * 
      * @since 24
      */
-    NODE_RICH_EDITOR_DATA_DETECTOR_CONFIG
+    NODE_RICH_EDITOR_DATA_DETECTOR_CONFIG,
 
     /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
@@ -9278,6 +9278,20 @@ typedef enum {
     NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CHECKBOX_GROUP,
 
     /**
+      * @brief Defines the event triggered when selection area or caret position is changed in
+      * <b>ARKUI_NODE_RICH_EDITOR</b> component.
+      *
+      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: start index of selection area. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: end index of selection area. \n
+      *
+      * @since 24
+      */
+    NODE_RICH_EDITOR_ON_SELECTION_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RICH_EDITOR,
+
+    /**
      * @brief Defines the event triggered when the index of the currently displayed element of this
      * <b>ARKUI_NODE_SWIPER</b> instance changes.
      *
@@ -10042,20 +10056,6 @@ typedef enum {
       * @since 23
       */
     NODE_PICKER_EVENT_ON_SCROLL_STOP = 1018001,
-
-    /**
-      * @brief Defines the event triggered when selection area or caret position is changed in
-      * <b>ARKUI_NODE_RICH_EDITOR</b> component.
-      *
-      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
-     * {@link ArkUI_NodeComponentEvent}. \n
-     * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: start index of selection area. \n
-     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: end index of selection area. \n
-      *
-      * @since 24
-      */
-    NODE_RICH_EDITOR_ON_SELECTION_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RICH_EDITOR,
 } ArkUI_NodeEventType;
 
 /**
