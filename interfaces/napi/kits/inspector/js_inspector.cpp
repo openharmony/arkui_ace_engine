@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "js_inspector.h"
+#include "base/log/log_wrapper.h"
+#include "core/common/ace_engine.h"
 #include "js_native_api_types.h"
 namespace OHOS::Ace::Napi {
 namespace {
@@ -164,12 +166,13 @@ std::list<napi_ref>::iterator ComponentObserver::FindCbList(napi_env env, napi_v
 
 void ComponentObserver::UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isClearDrawObserver)
 {
-    auto jsEngine = EngineHelper::GetCurrentEngineSafely();
-    CHECK_NULL_VOID(jsEngine);
-    auto delegate = EngineHelper::GetCurrentDelegate();
-    CHECK_NULL_VOID(delegate);
-    auto context = delegate->GetPipelineContext();
-    CHECK_NULL_VOID(context);
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto context = container->GetPipelineContext();
+    if (context == nullptr) {
+        LOGE("js_inspector can not get context by %{public}d", instanceId_);
+        return;
+    }
     if (uniqueId_ > 0) {
         context->UpdateDrawLayoutChildObserver(uniqueId_, isClearLayoutObserver, isClearDrawObserver);
     } else {
@@ -491,6 +494,7 @@ static napi_value JSCreateComponentObserver(napi_env env, napi_callback_info inf
     if (!observer) {
         return nullptr;
     }
+    observer->instanceId_ = ContainerScope::CurrentId();
     napi_value result = nullptr;
     observer->NapiSerializer(env, result);
     if (!result) {
