@@ -1749,4 +1749,35 @@ HWTEST_F(ScrollModelNGTestNg, SetOnZoomStop_TwoParameters, TestSize.Level1)
     eventHub->FireOnZoomStop();
     EXPECT_EQ(offset, -1.0f);
 }
+
+/**
+ * @tc.name: GetScrollSnapOptions
+ * @tc.desc: Test ScrollModelNG GetScrollSnapOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModelNGTestNg, GetScrollSnapOptions, TestSize.Level1)
+{
+    ScrollModelNG model;
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    auto snapOptions = model.GetScrollSnap(nullptr);
+    EXPECT_EQ(snapOptions.snapAlign, 0);
+    EXPECT_EQ(snapOptions.enableSnapToStart, 0);
+    EXPECT_EQ(snapOptions.enableSnapToEnd, 0);
+    EXPECT_TRUE(snapOptions.paginationParams.empty());
+
+    Dimension intervalSize(10.0);
+    std::vector<Dimension> snapPaginations = { Dimension(2.0), Dimension(4.0) };
+    std::pair<bool, bool> enableSnapToSide = std::make_pair(true, false);
+
+    /**
+     * @tc.steps: step2. Set the scrollSnapAlign to NONE
+     * @tc.expected: The scrollSnapUpdate_ return true
+     */
+    model.SetScrollSnap(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+    snapOptions = model.GetScrollSnap(scrollNode.GetRawPtr());
+    EXPECT_EQ(snapOptions.snapAlign, 0);
+    EXPECT_EQ(snapOptions.enableSnapToStart, 1);
+    EXPECT_EQ(snapOptions.enableSnapToEnd, 1);
+}
 } // namespace OHOS::Ace::NG
