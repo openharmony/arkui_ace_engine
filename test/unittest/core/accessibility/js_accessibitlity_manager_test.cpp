@@ -2905,6 +2905,30 @@ HWTEST_F(JsAccessibilityManagerTest, SendEventToAccessibilityWithNode004, TestSi
 }
 
 /**
+ * @tc.name: GetTreeId001
+ * @tc.desc: Test GetTreeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, GetTreeId001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        "framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    int32_t treeId = 666;
+    jsAccessibilityManager->treeId_ = treeId;
+    int32_t result = jsAccessibilityManager->GetTreeId();
+    EXPECT_EQ(result, treeId);
+    treeId = 777;
+    jsAccessibilityManager->treeId_ = treeId;
+    result = jsAccessibilityManager->GetTreeId(-1);
+    EXPECT_EQ(result, treeId);
+}
+
+/**
  * @tc.name: GetTransformDegreeRelativeToWindow001
  * @tc.desc: Test GetTransformDegreeRelativeToWindow
  * @tc.type: FUNC
