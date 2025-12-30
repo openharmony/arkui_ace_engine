@@ -37,16 +37,14 @@ DynamicModuleHelper& DynamicModuleHelper::GetInstance()
 
 std::unique_ptr<ComponentLoader> DynamicModuleHelper::GetLoaderByName(const char* name)
 {
-    if (compatibleLib_) {
-        return std::move(compatibleLib_);
+    if (compatibleLoaderFunc_) {
+        return std::unique_ptr<ComponentLoader>(compatibleLoaderFunc_(name));
     }
     void* handle = LOADLIB(COMPATIABLE_LIB.c_str());
     auto* createSym = reinterpret_cast<ComponentLoaderFunc>(LOADSYM(handle, COMPATIABLE_COMPONENT_LOADER));
     CHECK_NULL_RETURN(createSym, nullptr);
-    ComponentLoader* module = createSym(name);
-    CHECK_NULL_RETURN(module, nullptr);
-    compatibleLib_ = std::unique_ptr<ComponentLoader>(module);
-    return std::move(compatibleLib_);
+    compatibleLoaderFunc_ = createSym;
+    return std::unique_ptr<ComponentLoader>(compatibleLoaderFunc_(name));
 }
 
 DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
