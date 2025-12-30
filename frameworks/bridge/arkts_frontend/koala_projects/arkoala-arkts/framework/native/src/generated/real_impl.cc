@@ -8050,6 +8050,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Opt_Callback_OnWindowNewEvent_Void* value)
     {
     }
+    void SetOnWindowNewExtImpl(Ark_NativePointer node,
+                               const Opt_Callback_OnWindowNewExtEvent_Void* value)
+    {
+    }
     void SetOnWindowExitImpl(Ark_NativePointer node,
                              const Opt_Callback_Void* value)
     {
@@ -10780,6 +10784,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetOnSslErrorEventImpl,
             WebAttributeModifier::SetOnClientAuthenticationRequestImpl,
             WebAttributeModifier::SetOnWindowNewImpl,
+            WebAttributeModifier::SetOnWindowNewExtImpl,
             WebAttributeModifier::SetOnWindowExitImpl,
             WebAttributeModifier::SetMultiWindowAccessImpl,
             WebAttributeModifier::SetOnInterceptKeyEventImpl,

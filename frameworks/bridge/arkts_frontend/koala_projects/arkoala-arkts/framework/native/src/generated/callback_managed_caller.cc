@@ -3190,6 +3190,27 @@ void callManagedCallback_OnWindowNewEvent_VoidSync(Ark_VMContext vmContext, Ark_
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedCallback_OnWindowNewExtEvent_Void(Ark_Int32 resourceId, Ark_OnWindowNewExtEvent value0)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_OnWindowNewExtEvent_Void);
+    argsSerializer.writeInt32(resourceId);
+    OnWindowNewExtEvent_serializer::write(argsSerializer, value0);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedCallback_OnWindowNewExtEvent_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_OnWindowNewExtEvent value0)
+{
+    uint8_t dataBuffer[4096];
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_Callback_OnWindowNewExtEvent_Void);
+    argsSerializer.writeInt32(resourceId);
+    OnWindowNewExtEvent_serializer::write(argsSerializer, value0);
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
+}
 void callManagedCallback_Opt_Array_NavDestinationTransition_Void(Ark_Int32 resourceId, Opt_Array_NavDestinationTransition value)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -8764,6 +8785,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_OnTitleReceiveEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnTitleReceiveEvent_Void);
         case Kind_Callback_OnTouchIconUrlReceivedEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnTouchIconUrlReceivedEvent_Void);
         case Kind_Callback_OnWindowNewEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnWindowNewEvent_Void);
+        case Kind_Callback_OnWindowNewExtEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnWindowNewExtEvent_Void);
         case Kind_Callback_Opt_Array_NavDestinationTransition_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Opt_Array_NavDestinationTransition_Void);
         case Kind_Callback_Opt_Array_String_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Opt_Array_String_Void);
         case Kind_Callback_Opt_CustomBuilder_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Opt_CustomBuilder_Void);
@@ -9097,6 +9119,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_OnTitleReceiveEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnTitleReceiveEvent_VoidSync);
         case Kind_Callback_OnTouchIconUrlReceivedEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnTouchIconUrlReceivedEvent_VoidSync);
         case Kind_Callback_OnWindowNewEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnWindowNewEvent_VoidSync);
+        case Kind_Callback_OnWindowNewExtEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnWindowNewExtEvent_VoidSync);
         case Kind_Callback_Opt_Array_NavDestinationTransition_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Opt_Array_NavDestinationTransition_VoidSync);
         case Kind_Callback_Opt_Array_String_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Opt_Array_String_VoidSync);
         case Kind_Callback_Opt_CustomBuilder_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Opt_CustomBuilder_VoidSync);

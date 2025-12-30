@@ -148,6 +148,7 @@ typedef enum CallbackKind {
     Kind_Callback_OnTitleReceiveEvent_Void = -318085495,
     Kind_Callback_OnTouchIconUrlReceivedEvent_Void = 1657893064,
     Kind_Callback_OnWindowNewEvent_Void = -2052382574,
+    Kind_Callback_OnWindowNewExtEvent_Void = 1913668347,
     Kind_Callback_Opt_Array_NavDestinationTransition_Void = 406871767,
     Kind_Callback_Opt_Array_String_Void = -543655128,
     Kind_Callback_Opt_CustomBuilder_Void = 859020393,
