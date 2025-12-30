@@ -51,6 +51,7 @@ group("ace_packages") {
   deps = [
     "$ace_root/adapter/ohos/tools:tools_target",
     "$ace_root/advanced_ui_component:advanced_ui_component",
+    "$ace_root/advanced_ui_component_static:advanced_ui_component_static",
     "$ace_root/build:libace",
     "$ace_root/build:libace_compatible",
     "$ace_root/build:libace_compatible_components",
