@@ -2914,10 +2914,49 @@ class NavPathStack {
     return undefined;
   }
   replacePath(info, optionParam) {
-    if (!this.checkPathValid(info)) {
+    if (info === undefined || info === null) {
       return;
     }
-    this.doReplaceInner(info, optionParam);
+    let launchMode = LaunchMode.STANDARD;
+    let animated = true;
+    if (typeof optionParam === 'boolean') {
+      animated = optionParam;
+    } else if (optionParam !== undefined && optionParam !== null) {
+      if (typeof optionParam.animated === 'boolean') {
+        animated = optionParam.animated;
+      }
+      if (optionParam.launchMode !== undefined && optionParam.launchMode !== null) {
+        launchMode = optionParam.launchMode;
+      }
+    }
+    let index = -1;
+    if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON || launchMode === LaunchMode.POP_TO_SINGLETON) {
+      index = this.pathArray.findIndex(element => element.name === info.name);
+      if (index !== -1) {
+        this.pathArray[index].param = info.param;
+        this.pathArray[index].onPop = info.onPop;
+        this.pathArray[index].index = -1;
+        if (index !== this.pathArray.length - 1) {
+          let targetInfo = this.pathArray.splice(index, 1);
+          if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
+            this.pathArray.pop();
+          } else {
+            this.pathArray.splice(index);
+          }
+          this.pathArray.push(targetInfo[0]);
+        }
+      }
+    }
+    if (index === -1) {
+      if (this.pathArray.length !== 0) {
+        this.pathArray.pop();
+      }
+      this.pathArray.push(info);
+      this.pathArray[this.pathArray.length - 1].index = -1;
+    }
+    this.isReplace = 1;
+    this.animated = animated;
+    this.nativeStack?.onStateChanged();
   }
   replaceDestination(info, navigationOptions) {
     if (!this.checkPathValid(info)) {
