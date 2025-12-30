@@ -151,6 +151,10 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest001, TestSize.Level1)
      * @tc.steps: step2. call OnAccepted function and compare result.
      * @tc.expected: step2. result equals.
      */
+    panRecognizer->inputEventType_ = InputEventType::AXIS;
+    panRecognizer->OnAccepted();
+    EXPECT_EQ(panRecognizer->refereeState_, RefereeState::SUCCEED);
+    panRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
     panRecognizer->OnAccepted();
     EXPECT_EQ(panRecognizer->refereeState_, RefereeState::SUCCEED);
 
@@ -930,6 +934,40 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest013, TestSize.Level1)
     panRecognizer->ChangeDirection(panDirection);
     EXPECT_EQ(panRecognizer->direction_.type, PanDirection::VERTICAL);
     EXPECT_EQ(panRecognizer->newDirection_.type, PanDirection::VERTICAL);
+}
+
+/**
+ * @tc.name: PanRecognizerTest014
+ * @tc.desc: Test PanRecognizer function: GetGestureEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, PanRecognizerTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+
+    /**
+     * @tc.steps: step2. call ChangeDirection function
+     * @tc.steps: case1: type not same
+     * @tc.expected: step2. result equals.
+     */
+    AxisEvent axisEvent;
+    axisEvent.postEventNodeId = 100;
+    TouchEvent touchEvent;
+    touchEvent.postEventNodeId = 10;
+    panRecognizer->touchPoints_[0] = touchEvent;
+    panRecognizer->lastTouchEvent_ = touchEvent;
+    panRecognizer->lastAxisEvent_ = axisEvent;
+
+    panRecognizer->inputEventType_ = InputEventType::AXIS;
+    auto gestureEvent = panRecognizer->GetGestureEventInfo();
+    EXPECT_EQ(gestureEvent.GetPostEventNodeId(), 100);
+    panRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
+    gestureEvent = panRecognizer->GetGestureEventInfo();
+    EXPECT_EQ(gestureEvent.GetPostEventNodeId(), 10);
 }
 
 /**
