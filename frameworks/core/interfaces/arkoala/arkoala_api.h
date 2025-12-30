@@ -3463,6 +3463,8 @@ struct ArkUITextModifier {
     void (*setTextMarqueeOptions)(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value, void* spacingRawPtr);
     void (*resetTextMarqueeOptions)(ArkUINodeHandle node);
     ArkUITextMarqueeOptions (*getTextMarqueeOptions)(ArkUINodeHandle node);
+    void (*setTextMarqueeOptionsByNode)(ArkUINodeHandle node,
+        struct ArkUITextMarqueeOptions* value, void* spacingRawPtr);
     void (*setOnMarqueeStateChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnMarqueeStateChange)(ArkUINodeHandle node);
     void (*setImmutableFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);
