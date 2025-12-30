@@ -92,8 +92,10 @@ class ModifierUtils {
     modifier._changed;
     let myMap = modifier._modifiersWithKeys;
     if (modifier._classType === ModifierType.STATE) {
+      const nativePtrValid = !modifier._weakPtr.invalid();
+      const hostInstanceId = nativePtrValid ? getUINativeModule().frameNode.getNodeInstanceId(modifier.nativePtr) : -1;
       myMap.setOnChange((key, value) => {
-        this.putDirtyModifier(modifier, value);
+        this.putDirtyModifier(modifier, value, hostInstanceId);
       });
     } else {
       myMap.setOnChange((key, value) => {
@@ -101,7 +103,7 @@ class ModifierUtils {
       });
     }
   }
-  static putDirtyModifier(arkModifier, attributeModifierWithKey) {
+  static putDirtyModifier(arkModifier, attributeModifierWithKey, hostInstanceId) {
     attributeModifierWithKey.value = attributeModifierWithKey.stageValue;
     if (!arkModifier._weakPtr.invalid()) {
       attributeModifierWithKey.applyPeer(arkModifier.nativePtr,
@@ -116,10 +118,10 @@ class ModifierUtils {
     this.dirtyComponentSet.add(arkModifier);
     if (!this.dirtyFlag) {
       this.dirtyFlag = true;
-      this.requestFrame();
+      this.requestFrame(hostInstanceId);
     }
   }
-  static requestFrame() {
+  static requestFrame(hostInstanceId) {
     const frameCallback = () => {
       if (this.timeoutId !== -1) {
         clearTimeout(this.timeoutId);
@@ -145,6 +147,12 @@ class ModifierUtils {
       clearTimeout(this.timeoutId);
     }
     this.timeoutId = setTimeout(frameCallback, 100);
+    if (hostInstanceId > -1) {
+        __JSScopeUtil__.syncInstanceId(hostInstanceId);
+        getUINativeModule().frameNode.registerFrameCallback(frameCallback);
+        __JSScopeUtil__.restoreInstanceId();
+        return;
+    }
     getUINativeModule().frameNode.registerFrameCallback(frameCallback);
   }
 }

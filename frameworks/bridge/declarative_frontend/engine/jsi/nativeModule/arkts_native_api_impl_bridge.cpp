@@ -3377,6 +3377,8 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetConfigSize));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getId"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetId));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNodeInstanceId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetNodeInstanceId));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNodeType"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetNodeType));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getOpacity"),

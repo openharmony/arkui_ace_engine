@@ -1790,6 +1790,23 @@ ArkUINativeModuleValue FrameNodeBridge::GetId(ArkUIRuntimeCallInfo* runtimeCallI
     auto inspectorId = GetArkUINodeModifiers()->getFrameNodeModifier()->getInspectorId(nativeNode);
     return panda::StringRef::NewFromUtf8(vm, inspectorId);
 }
+
+ArkUINativeModuleValue FrameNodeBridge::GetNodeInstanceId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NumberRef::New(vm, -1));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg.IsNull() || firstArg->IsUndefined() || !firstArg->IsNativePointer(vm)) {
+        return panda::NumberRef::New(vm, -1);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NumberRef::New(vm, -1));
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NumberRef::New(vm, -1));
+    auto instanceId = frameNode->GetInstanceId();
+    return panda::NumberRef::New(vm, instanceId);
+}
+
 ArkUINativeModuleValue FrameNodeBridge::GetNodeType(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
