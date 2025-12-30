@@ -3258,6 +3258,8 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_preview.h @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/ui_extension/ @ArkUI_ability_group
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/drag_and_drop/ @ArkUI_Event
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/detached_free_root_node/detached_free_root_node.cpp @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/detached_free_root_node/detached_free_root_node.h @arkuieco3
 frameworks\bridge\arkts_frontend\koala_projects\arkoala-arkts\arkui-ohos\src\ani\native\keyboard_avoid_mode\keyboard_avoid_mode_module.h @arkuilayout1
 frameworks\bridge\arkts_frontend\koala_projects\arkoala-arkts\arkui-ohos\src\ani\native\keyboard_avoid_mode\keyboard_avoid_mode_module.cpp @arkuilayout1
 frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.cc @arkui_framework_resource
@@ -3296,6 +3298,8 @@ frameworks/core/interfaces/native/ani/component_snapshot_ani_modifier.cpp @ArkUI
 frameworks/core/interfaces/native/ani/component_snapshot_ani_modifier.h @ArkUI_Event
 frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.cpp @arkui_framework_xnode
 frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.h @arkui_framework_xnode
+frameworks/core/interfaces/native/ani/detached_free_root_ani_modifier.cpp @arkuieco3
+frameworks/core/interfaces/native/ani/detached_free_root_ani_modifier.h @arkuieco3
 frameworks/core/interfaces/native/ani/keyboard_avoid_mode_ani_modifier.h @arkuilayout1
 frameworks/core/interfaces/native/ani/keyboard_avoid_mode_ani_modifier.cpp @arkuilayout1
 frameworks/core/interfaces/native/ani/xbar_ani_modifier.h @ArkUI_ability_group
