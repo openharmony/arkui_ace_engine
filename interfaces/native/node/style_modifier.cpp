@@ -13813,6 +13813,12 @@ int32_t SetImageSpanSrc(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         fullImpl->getNodeModifiers()->getImageModifier()->setSrc(node->uiNodeHandle, item->string);
         return ERROR_CODE_NO_ERROR;
     } else {
+        if (item->object) {
+            auto drawableDescriptor = reinterpret_cast<ArkUI_DrawableDescriptor*>(item->object);
+            if (drawableDescriptor && drawableDescriptor->drawableDescriptor) {
+                fullImpl->getNodeModifiers()->getImageModifier()->setSyncLoad(node->uiNodeHandle, true);
+            }
+        }
         return SetImageSrc(node, item);
     }
 }
