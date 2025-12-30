@@ -207,9 +207,11 @@ UpdateParagraphStyle Convert(const Ark_RichEditorParagraphStyle& src)
 {
     UpdateParagraphStyle ret;
     ret.textAlign = Converter::OptConvert<TextAlign>(src.textAlign);
+    ret.textVerticalAlign = Converter::OptConvert<TextVerticalAlign>(src.textVerticalAlign);
     ret.leadingMargin = Converter::OptConvert<LeadingMargin>(src.leadingMargin);
     ret.wordBreak = Converter::OptConvert<WordBreak>(src.wordBreak);
     ret.lineBreakStrategy = Converter::OptConvert<LineBreakStrategy>(src.lineBreakStrategy);
+    ret.paragraphSpacing = Converter::OptConvert<Dimension>(src.paragraphSpacing);
     ret.textDirection = Converter::OptConvert<TextDirection>(src.textDirection);
     return ret;
 }
@@ -498,6 +500,7 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src,
 {
     dst.textAlign = Converter::ArkValue<Opt_TextAlign>(static_cast<TextAlign>(src.textAlign));
     // read pixel map is not supported
+    dst.textVerticalAlign = Converter::ArkValue<Opt_TextVerticalAlign>(src.textVerticalAlign);
     Ark_LeadingMarginPlaceholder arkLeadingMargin;
     arkLeadingMargin.pixelMap = image_PixelMapPeer::Create(src.leadingMarginPixmap);
     arkLeadingMargin.size.value0 = Converter::ArkValue<Ark_Dimension>(src.leadingMarginSize[0]);
@@ -520,6 +523,7 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const TextStyleResult& sr
 {
     dst.textAlign = Converter::ArkValue<Opt_TextAlign>(static_cast<TextAlign>(src.textAlign));
     // read pixel map is not supported
+    dst.textVerticalAlign = Converter::ArkValue<Opt_TextVerticalAlign>(src.textVerticalAlign);
     std::pair<const Dimension, const Dimension> pair = { Dimension::FromString(src.leadingMarginSize[0]),
         Dimension::FromString(src.leadingMarginSize[1]) };
     Ark_LeadingMarginPlaceholder arkLeadingMargin = {

@@ -1180,6 +1180,12 @@ double Convert(const Ark_Float64& src)
 }
 
 template<>
+size_t Convert(const Ark_Float64& src)
+{
+    return static_cast<size_t>(src);
+}
+
+template<>
 EdgesParam Convert(const Ark_Edges& src)
 {
     EdgesParam edges;
@@ -1769,6 +1775,9 @@ TextDetectConfig Convert(const Ark_TextDataDetectorConfig& src)
         if (auto style = decoration->style) {
             ret.entityDecorationStyle = style.value();
         }
+    }
+    if (auto enablePreviewMenu = OptConvert<bool>(src.enablePreviewMenu); enablePreviewMenu) {
+        ret.enablePreviewMenu = enablePreviewMenu.value();
     }
     return ret;
 }
@@ -3496,6 +3505,24 @@ std::vector<std::pair<PickerDate, PickerDate>> Convert(const Array_DateRange& sr
         dst.push_back(pickerDateRange);
     }
     return dst;
+}
+
+template<>
+TextDirection Convert(const Ark_TextDirection& src)
+{
+    switch (src) {
+        case ARK_TEXT_DIRECTION_LTR:
+            return TextDirection::LTR;
+        case ARK_TEXT_DIRECTION_RTL:
+            return TextDirection::RTL;
+        case ARK_TEXT_DIRECTION_DEFAULT:
+            return TextDirection::INHERIT;
+        case ARK_TEXT_DIRECTION_AUTO:
+            return TextDirection::AUTO;
+        default:
+            LOGE("Unexpected enum value in Ark_TextDirection: %{public}d", src);
+            return TextDirection::LTR;
+    }
 }
 
 template<>

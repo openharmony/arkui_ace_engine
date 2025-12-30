@@ -318,6 +318,14 @@ void SetTextAlignImpl(Ark_NativePointer node,
     auto textAlign = Converter::OptConvertPtr<TextAlign>(value);
     TextModelStatic::SetTextAlign(frameNode, textAlign);
 }
+void SetTextVerticalAlignImpl(Ark_NativePointer node,
+                              const Opt_TextVerticalAlign* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto textVerticalAlign = Converter::OptConvertPtr<TextVerticalAlign>(value);
+    TextModelNG::SetTextVerticalAlign(frameNode, textVerticalAlign.value_or(TextVerticalAlign::BASELINE));
+}
 void SetLineHeightImpl(Ark_NativePointer node,
                        const Opt_Union_F64_String_Resource* value)
 {
@@ -811,6 +819,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetFontStyleImpl,
         TextAttributeModifier::SetLineSpacingImpl,
         TextAttributeModifier::SetTextAlignImpl,
+        TextAttributeModifier::SetTextVerticalAlignImpl,
         TextAttributeModifier::SetLineHeightImpl,
         TextAttributeModifier::SetTextOverflowImpl,
         TextAttributeModifier::SetFontFamilyImpl,

@@ -18,7 +18,7 @@
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { SelectionOptions_serializer, RectResult_serializer, SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ClickEvent, HoverEvent, HapticFeedbackMode, ArkCommonMethodComponent, ArkCommonMethodStyle, ClickEvent_serializer, ShadowOptions_serializer, HoverEvent_serializer } from "./common"
-import { LayoutManager_serializer, PreviewText_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, MenuType, TextDirection, DecorationStyleResult, AccessibilitySpanOptions, TextRange_serializer, AccessibilitySpanOptions_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer } from "./textCommon"
+import { LayoutManager_serializer, PreviewText_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions, KeyboardAppearance, MenuType, TextVerticalAlign, TextChangeReason, TextDirection, DecorationStyleResult, AccessibilitySpanOptions, TextRange_serializer, AccessibilitySpanOptions_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer } from "./textCommon"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -91,6 +91,11 @@ export class RichEditorBaseController implements MaterializedBase {
         this.setTypingStyle_serialize(value_casted)
         return
     }
+    public setTypingParagraphStyle(style: RichEditorParagraphStyle | undefined): void {
+        const style_casted = style as (RichEditorParagraphStyle | undefined)
+        this.setTypingParagraphStyle_serialize(style_casted)
+        return
+    }
     public setSelection(selectionStart: int32, selectionEnd: int32, options?: SelectionOptions): void {
         const selectionStart_casted = selectionStart as (int32)
         const selectionEnd_casted = selectionEnd as (int32)
@@ -158,6 +163,18 @@ export class RichEditorBaseController implements MaterializedBase {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         RichEditorTextStyle_serializer.write(thisSerializer, value)
         ArkUIGeneratedNativeModule._RichEditorBaseController_setTypingStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setTypingParagraphStyle_serialize(style: RichEditorParagraphStyle | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (style !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const styleTmpValue  = style!
+            RichEditorParagraphStyle_serializer.write(thisSerializer, styleTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorBaseController_setTypingParagraphStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSelection_serialize(selectionStart: int32, selectionEnd: int32, options?: SelectionOptions): void {
@@ -406,6 +423,18 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RichEditorAttribute_setDataDetectorConfig(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableSelectedDataDetectorAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setEnableSelectedDataDetector(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setCaretColorAttribute(value: ResourceColor | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -618,6 +647,18 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RichEditorAttribute_setMaxLines(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableAutoSpacingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setEnableAutoSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setKeyboardAppearanceAttribute(value: KeyboardAppearance | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -640,6 +681,30 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RichEditorAttribute_setStopBackPress(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setScrollBarColorAttribute(value: ColorMetrics | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ColorMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setScrollBarColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setUndoStyleAttribute(value: UndoStyle | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as UndoStyle)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setUndoStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setSingleLineAttribute(value: boolean | undefined): void {
@@ -809,6 +874,10 @@ export enum RichEditorSpanType {
     BUILDER = 3,
     DEFAULT = 4
 }
+export enum UndoStyle {
+    CLEAR_STYLE = 0,
+    KEEP_STYLE = 1
+}
 export enum RichEditorResponseType {
     RIGHT_CLICK = 0,
     LONG_PRESS = 1,
@@ -841,6 +910,7 @@ export interface LeadingMarginPlaceholder {
 }
 export interface RichEditorParagraphStyle {
     textAlign?: TextAlign;
+    textVerticalAlign?: TextVerticalAlign;
     leadingMargin?: Dimension | LeadingMarginPlaceholder;
     wordBreak?: WordBreak;
     lineBreakStrategy?: LineBreakStrategy;
@@ -1031,6 +1101,7 @@ export interface RichEditorChangeValue {
     replacedSpans: Array<RichEditorTextSpanResult>;
     replacedImageSpans: Array<RichEditorImageSpanResult>;
     replacedSymbolSpans: Array<RichEditorTextSpanResult>;
+    changeReason?: TextChangeReason;
 }
 export interface RichEditorOptions {
     controller: RichEditorController;
@@ -1093,6 +1164,9 @@ export interface RichEditorAttribute extends CommonMethod {
     dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
         throw new Error("Unimplemented method dataDetectorConfig")
     }
+    enableSelectedDataDetector(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableSelectedDataDetector")
+    }
     caretColor(value: ResourceColor | undefined): this {
         throw new Error("Unimplemented method caretColor")
     }
@@ -1138,11 +1212,20 @@ export interface RichEditorAttribute extends CommonMethod {
     maxLines(value: int32 | undefined): this {
         throw new Error("Unimplemented method maxLines")
     }
+    enableAutoSpacing(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableAutoSpacing")
+    }
     keyboardAppearance(value: KeyboardAppearance | undefined): this {
         throw new Error("Unimplemented method keyboardAppearance")
     }
     stopBackPress(value: boolean | undefined): this {
         throw new Error("Unimplemented method stopBackPress")
+    }
+    scrollBarColor(value: ColorMetrics | undefined): this {
+        throw new Error("Unimplemented method scrollBarColor")
+    }
+    undoStyle(value: UndoStyle | undefined): this {
+        throw new Error("Unimplemented method undoStyle")
     }
     singleLine(value: boolean | undefined): this {
         throw new Error("Unimplemented method singleLine")
@@ -1186,6 +1269,7 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     enableDataDetector_value?: boolean | undefined
     enablePreviewText_value?: boolean | undefined
     dataDetectorConfig_value?: TextDataDetectorConfig | undefined
+    enableSelectedDataDetector_value?: boolean | undefined
     caretColor_value?: ResourceColor | undefined
     selectedBackgroundColor_value?: ResourceColor | undefined
     onEditingChange_value?: ((value0: boolean) => void) | undefined
@@ -1201,8 +1285,11 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     barState_value?: BarState | undefined
     maxLength_value?: int32 | undefined
     maxLines_value?: int32 | undefined
+    enableAutoSpacing_value?: boolean | undefined
     keyboardAppearance_value?: KeyboardAppearance | undefined
     stopBackPress_value?: boolean | undefined
+    scrollBarColor_value?: ColorMetrics | undefined
+    undoStyle_value?: UndoStyle | undefined
     singleLine_value?: boolean | undefined
     compressLeadingPunctuation_value?: boolean | undefined
     includeFontPadding_value?: boolean | undefined
@@ -1251,6 +1338,9 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
         return this
     }
+    enableSelectedDataDetector(value: boolean | undefined): this {
+        return this
+    }
     caretColor(value: ResourceColor | undefined): this {
         return this
     }
@@ -1296,10 +1386,19 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     maxLines(value: int32 | undefined): this {
         return this
     }
+    enableAutoSpacing(value: boolean | undefined): this {
+        return this
+    }
     keyboardAppearance(value: KeyboardAppearance | undefined): this {
         return this
     }
     stopBackPress(value: boolean | undefined): this {
+        return this
+    }
+    scrollBarColor(value: ColorMetrics | undefined): this {
+        return this
+    }
+    undoStyle(value: UndoStyle | undefined): this {
         return this
     }
     singleLine(value: boolean | undefined): this {
@@ -1523,6 +1622,14 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
+    public enableSelectedDataDetector(value: boolean | undefined): this {
+        if (this.checkPriority("enableSelectedDataDetector")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableSelectedDataDetectorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public caretColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("caretColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -1643,6 +1750,14 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
+    public enableAutoSpacing(value: boolean | undefined): this {
+        if (this.checkPriority("enableAutoSpacing")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableAutoSpacingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public keyboardAppearance(value: KeyboardAppearance | undefined): this {
         if (this.checkPriority("keyboardAppearance")) {
             const value_casted = value as (KeyboardAppearance | undefined)
@@ -1687,6 +1802,22 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         if (this.checkPriority("fallbackLineSpacing")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setFallbackLineSpacingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public scrollBarColor(value: ColorMetrics | undefined): this {
+        if (this.checkPriority("scrollBarColor")) {
+            const value_casted = value as (ColorMetrics | undefined)
+            this.getPeer()?.setScrollBarColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public undoStyle(value: UndoStyle | undefined): this {
+        if (this.checkPriority("undoStyle")) {
+            const value_casted = value as (UndoStyle | undefined)
+            this.getPeer()?.setUndoStyleAttribute(value_casted)
             return this
         }
         return this
@@ -2262,6 +2393,14 @@ export class RichEditorChangeValue_serializer {
             const valueHolderForReplacedSymbolSpansTmpElement : RichEditorTextSpanResult = valueHolderForReplacedSymbolSpans[valueHolderForReplacedSymbolSpansCounterI]
             RichEditorTextSpanResult_serializer.write(valueSerializer, valueHolderForReplacedSymbolSpansTmpElement)
         }
+        const valueHolderForChangeReason  = value.changeReason
+        if (valueHolderForChangeReason !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForChangeReasonTmpValue  = (valueHolderForChangeReason as TextChangeReason)
+            valueSerializer.writeInt32(valueHolderForChangeReasonTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): RichEditorChangeValue {
         let valueDeserializer : DeserializerBase = buffer
@@ -2284,7 +2423,13 @@ export class RichEditorChangeValue_serializer {
             replacedSymbolSpansTmpBuf[replacedSymbolSpansTmpBufBufCounterI] = RichEditorTextSpanResult_serializer.read(valueDeserializer)
         }
         const replacedSymbolSpansTmpResult : Array<RichEditorTextSpanResult> = replacedSymbolSpansTmpBuf
-        let value : RichEditorChangeValue = ({rangeBefore: rangeBeforeTmpResult, replacedSpans: replacedSpansTmpResult, replacedImageSpans: replacedImageSpansTmpResult, replacedSymbolSpans: replacedSymbolSpansTmpResult} as RichEditorChangeValue)
+        const changeReasonTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let changeReasonTmpBuf : TextChangeReason | undefined = undefined
+        if ((changeReasonTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            changeReasonTmpBuf = TextChangeReason.fromValue(valueDeserializer.readInt32())
+        }
+        const changeReasonTmpResult : TextChangeReason | undefined = changeReasonTmpBuf
+        let value : RichEditorChangeValue = ({rangeBefore: rangeBeforeTmpResult, replacedSpans: replacedSpansTmpResult, replacedImageSpans: replacedImageSpansTmpResult, replacedSymbolSpans: replacedSymbolSpansTmpResult, changeReason: changeReasonTmpResult} as RichEditorChangeValue)
         return value
     }
 }
@@ -2979,6 +3124,14 @@ export class RichEditorParagraphStyle_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForTextVerticalAlign  = value.textVerticalAlign
+        if (valueHolderForTextVerticalAlign !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextVerticalAlignTmpValue  = (valueHolderForTextVerticalAlign as TextVerticalAlign)
+            valueSerializer.writeInt32(valueHolderForTextVerticalAlignTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForLeadingMargin  = value.leadingMargin
         if (valueHolderForLeadingMargin !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -3048,6 +3201,12 @@ export class RichEditorParagraphStyle_serializer {
             textAlignTmpBuf = TextAlign.fromValue(valueDeserializer.readInt32())
         }
         const textAlignTmpResult : TextAlign | undefined = textAlignTmpBuf
+        const textVerticalAlignTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textVerticalAlignTmpBuf : TextVerticalAlign | undefined = undefined
+        if ((textVerticalAlignTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textVerticalAlignTmpBuf = TextVerticalAlign.fromValue(valueDeserializer.readInt32())
+        }
+        const textVerticalAlignTmpResult : TextVerticalAlign | undefined = textVerticalAlignTmpBuf
         const leadingMarginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let leadingMarginTmpBuf : Dimension | LeadingMarginPlaceholder | undefined = undefined
         if ((leadingMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -3098,7 +3257,7 @@ export class RichEditorParagraphStyle_serializer {
             textDirectionTmpBuf = TextDirection.fromValue(valueDeserializer.readInt32())
         }
         const textDirectionTmpResult : TextDirection | undefined = textDirectionTmpBuf
-        let value : RichEditorParagraphStyle = ({textAlign: textAlignTmpResult, leadingMargin: leadingMarginTmpResult, wordBreak: wordBreakTmpResult, lineBreakStrategy: lineBreakStrategyTmpResult, paragraphSpacing: paragraphSpacingTmpResult, textDirection: textDirectionTmpResult} as RichEditorParagraphStyle)
+        let value : RichEditorParagraphStyle = ({textAlign: textAlignTmpResult, textVerticalAlign: textVerticalAlignTmpResult, leadingMargin: leadingMarginTmpResult, wordBreak: wordBreakTmpResult, lineBreakStrategy: lineBreakStrategyTmpResult, paragraphSpacing: paragraphSpacingTmpResult, textDirection: textDirectionTmpResult} as RichEditorParagraphStyle)
         return value
     }
 }

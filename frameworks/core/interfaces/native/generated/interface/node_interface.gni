@@ -280,6 +280,7 @@ generated_sources = [
   "implementation/swipe_gesture_event_accessor.cpp",
   "implementation/swipe_recognizer_accessor.cpp",
   "implementation/swiper_content_transition_proxy_accessor.cpp",
+  "implementation/leading_margin_span_accessor.cpp",
   "implementation/swiper_controller_accessor.cpp",
   "implementation/indicator_accessor.cpp",
   "implementation/dot_indicator_accessor.cpp",

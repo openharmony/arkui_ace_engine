@@ -3761,6 +3761,8 @@ frameworks/core/interfaces/native/implementation/rich_editor_styled_string_contr
 frameworks/core/interfaces/native/implementation/rich_editor_base_controller_peer_impl.h @arkui_rich_editor
 frameworks/core/interfaces/native/implementation/rich_editor_controller_peer_impl.h @arkui_rich_editor
 frameworks/core/interfaces/native/implementation/rich_editor_styled_string_controller_peer_impl.h @arkui_rich_editor
+frameworks/core/interfaces/native/implementation/leading_margin_span_accessor.cpp @arkui_rich_editor
+frameworks/core/interfaces/native/implementation/leading_margin_span_peer.h @arkui_rich_editor
 frameworks/core/interfaces/native/implementation/copy_event_accessor.cpp @arkui_rich_editor
 frameworks/core/interfaces/native/implementation/copy_event_peer.h @arkui_rich_editor
 frameworks/core/interfaces/native/implementation/cut_event_accessor.cpp @arkui_rich_editor

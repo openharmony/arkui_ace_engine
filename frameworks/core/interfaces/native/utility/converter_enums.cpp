@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_v2/list/list_properties.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "ui/view/components/tabs/tabs_data.h"
@@ -379,11 +380,23 @@ template<>
 void AssignCast(std::optional<VerticalAlign>& dst, const Ark_ImageSpanAlignment& src)
 {
     switch (src) {
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_TOP: dst = VerticalAlign::TOP; break;
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_CENTER: dst = VerticalAlign::CENTER; break;
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM: dst = VerticalAlign::BOTTOM; break;
-        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BASELINE: dst = VerticalAlign::BASELINE; break;
-        default: LOGE("Unexpected enum value in Ark_ImageSpanAlignment: %{public}d", src);
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_TOP:
+            dst = VerticalAlign::TOP;
+            break;
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_CENTER:
+            dst = VerticalAlign::CENTER;
+            break;
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM:
+            dst = VerticalAlign::BOTTOM;
+            break;
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_BASELINE:
+            dst = VerticalAlign::BASELINE;
+            break;
+        case Ark_ImageSpanAlignment::ARK_IMAGE_SPAN_ALIGNMENT_FOLLOW_PARAGRAPH:
+            dst = VerticalAlign::FOLLOW_PARAGRAPH;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_ImageSpanAlignment: %{public}d", src);
     }
 }
 
@@ -743,6 +756,18 @@ void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src)
         case ARK_TEXT_ALIGN_LEFT: dst = TextAlign::LEFT; break;
         case ARK_TEXT_ALIGN_RIGHT: dst = TextAlign::RIGHT; break;
         default: LOGE("Unexpected enum value in Ark_TextAlign: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextVerticalAlign>& dst, const Ark_TextVerticalAlign& src)
+{
+    switch (src) {
+        case ARK_TEXT_VERTICAL_ALIGN_BASELINE: dst = TextVerticalAlign::BASELINE; break;
+        case ARK_TEXT_VERTICAL_ALIGN_BOTTOM: dst = TextVerticalAlign::BOTTOM; break;
+        case ARK_TEXT_VERTICAL_ALIGN_CENTER: dst = TextVerticalAlign::CENTER; break;
+        case ARK_TEXT_VERTICAL_ALIGN_TOP: dst = TextVerticalAlign::TOP; break;
+        default: LOGE("Unexpected enum value in Ark_TextVerticalAlign: %{public}d", src);
     }
 }
 
@@ -1161,6 +1186,16 @@ void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpan
         case ARK_SUB_MENU_EXPANDING_MODE_EMBEDDED_EXPAND: dst = SubMenuExpandingMode::EMBEDDED; break;
         case ARK_SUB_MENU_EXPANDING_MODE_STACK_EXPAND: dst = SubMenuExpandingMode::STACK; break;
         default: LOGE("Unexpected enum value in Ark_SubMenuExpandingMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<UndoStyle>& dst, const Ark_UndoStyle& src)
+{
+    switch (src) {
+        case ARK_UNDO_STYLE_CLEAR_STYLE: dst = UndoStyle::CLEAR_STYLE; break;
+        case ARK_UNDO_STYLE_KEEP_STYLE: dst = UndoStyle::KEEP_STYLE; break;
+        default: LOGE("Unexpected enum value in Ark_UndoStyle: %{public}d", src);
     }
 }
 

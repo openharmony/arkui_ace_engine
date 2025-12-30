@@ -431,7 +431,9 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithImageSpan002, Te
  */
 HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithRawSpans001, TestSize.Level0)
 {
+    ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
     auto customSpanItem = AceType::MakeRefPtr<NG::CustomSpanItem>();
     ASSERT_NE(customSpanItem, nullptr);
 
@@ -454,7 +456,9 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithRawSpans001, Tes
  */
 HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithRawSpans002, TestSize.Level0)
 {
+    ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
     auto imageSpanItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
     ASSERT_NE(imageSpanItem, nullptr);
 
@@ -473,7 +477,9 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithRawSpans002, Tes
  */
 HWTEST_F(RichEditorPlaceholderSpanTestNg, ReplacePlaceholderWithRawSpans003, TestSize.Level0)
 {
+    ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
     auto imageSpanItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
     ASSERT_NE(imageSpanItem, nullptr);
 
