@@ -612,7 +612,6 @@ void WindowPattern::CreateStartingWindow()
         HideStartingWindow();
         startingWindow_ = FrameNode::CreateFrameNode(
             V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        SetImagePatternSyncLoad(startingWindow_);
         return;
     }
 

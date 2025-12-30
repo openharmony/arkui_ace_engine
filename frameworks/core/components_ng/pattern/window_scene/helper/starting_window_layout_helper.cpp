@@ -168,6 +168,7 @@ RefPtr<FrameNode> StartingWindowLayoutHelper::CreateStartingWindowNode(
     if (!startingWindowInfo_.backgroundImagePath_.empty()) {
         auto bgImgNode = CreateBackgroundImageNode(startingWindowInfo_.backgroundImageFit_,
             ImageSourceInfo(startingWindowInfo_.backgroundImagePath_, bundleName, moduleName));
+        SetImagePatternSyncLoad(bgImgNode);
         startingWindow->AddChild(bgImgNode);
     }
 
@@ -175,6 +176,7 @@ RefPtr<FrameNode> StartingWindowLayoutHelper::CreateStartingWindowNode(
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_RETURN(columnNode, nullptr);
+    SetImagePatternSyncLoad(columnNode);
     auto columnLayoutProps = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(columnLayoutProps, nullptr);
     columnLayoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -186,6 +188,7 @@ RefPtr<FrameNode> StartingWindowLayoutHelper::CreateStartingWindowNode(
     columnNode->AddChild(upperAreaNode);
     auto brandNode = CreateBrandNode(ImageSourceInfo(startingWindowInfo_.brandingPath_, bundleName, moduleName));
     CHECK_NULL_RETURN(brandNode, nullptr);
+    SetImagePatternSyncLoad(brandNode);
     columnNode->AddChild(brandNode);
     columnNode->MarkModifyDone();
 
