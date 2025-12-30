@@ -1774,6 +1774,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern077, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. create mock paragraph.
+     */
     pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     Offset offset(1.0, 1.0);
     pattern->ConvertTouchOffsetToCaretPosition(offset);
@@ -1801,6 +1804,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern078, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step3. handle select.
+     */
     pattern->HandleSelect(CaretMoveIntent::ParagraghEnd);
 }
 
