@@ -155,6 +155,7 @@ class Constants {
   public static readonly EMPHASIZEWARN_PRESSED_BTN_COLOR = '#C53C3E';
   public static readonly EMPHASIZEWARN_DISABLE_BTN_COLOR = '#4C0f10';
   public static readonly EMPHASIZEWARN_DISABLE_TEXT_COLOR = '#99FFFFFF';
+  public static readonly PRESS_MERGE_COLOR = '#1AFFFFFF';
   public static readonly DEFAULT_TRANSPARENCY = 0.4;
 }
 
@@ -314,7 +315,8 @@ export struct ArcButton {
       case ArcButtonStyleMode.EMPHASIZED_LIGHT:
         this.btnNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_NORMAL_BTN_COLOR);
         this.textNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_TEXT_COLOR);
-        this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_PRESSED_BTN_COLOR);
+        this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_NORMAL_BTN_COLOR).blendColor(
+          ColorMetrics.resourceColor(Constants.PRESS_MERGE_COLOR));
         this.btnDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
         this.textDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_TEXT_COLOR);
         this.textPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_TEXT_COLOR);
@@ -323,7 +325,8 @@ export struct ArcButton {
       case ArcButtonStyleMode.NORMAL_LIGHT:
         this.btnNormalColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_NORMAL_BTN_COLOR);
         this.textNormalColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_TEXT_COLOR);
-        this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_PRESSED_BTN_COLOR);
+        this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_NORMAL_BTN_COLOR).blendColor(
+          ColorMetrics.resourceColor(Constants.PRESS_MERGE_COLOR));
         this.btnDisableColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_DISABLE_BTN_COLOR);
         this.textDisableColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_DISABLE_TEXT_COLOR);
         this.textPressColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_TEXT_COLOR);
@@ -332,7 +335,8 @@ export struct ArcButton {
       case ArcButtonStyleMode.NORMAL_DARK:
         this.btnNormalColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_NORMAL_BTN_COLOR);
         this.textNormalColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_TEXT_COLOR);
-        this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_PRESSED_BTN_COLOR);
+        this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_NORMAL_BTN_COLOR).blendColor(
+          ColorMetrics.resourceColor(Constants.PRESS_MERGE_COLOR));
         this.btnDisableColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_DISABLE_BTN_COLOR);
         this.textDisableColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_DISABLE_TEXT_COLOR);
         this.textPressColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_TEXT_COLOR);
@@ -341,7 +345,8 @@ export struct ArcButton {
       case ArcButtonStyleMode.EMPHASIZED_DARK:
         this.btnNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_NORMAL_BTN_COLOR);
         this.textNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_TEXT_COLOR);
-        this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_PRESSED_BTN_COLOR);
+        this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_NORMAL_BTN_COLOR).blendColor(
+          ColorMetrics.resourceColor(Constants.PRESS_MERGE_COLOR));
         this.btnDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_DISABLE_BTN_COLOR);
         this.textDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_DISABLE_TEXT_COLOR);
         this.textPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_TEXT_COLOR);
@@ -350,13 +355,17 @@ export struct ArcButton {
       default:
         this.btnNormalColor = this.options.backgroundColor;
         this.textNormalColor = this.options.fontColor;
-        this.btnPressColor = this.options.backgroundColor;
+        this.btnPressColor = this.options.backgroundColor.blendColor(
+          ColorMetrics.resourceColor(Constants.PRESS_MERGE_COLOR));
         this.textPressColor = this.options.pressedFontColor;
         break;
     }
     if (this.options.status === ArcButtonStatus.DISABLED) {
       this.btnColor = this.btnDisableColor;
       this.fontColor = this.textDisableColor;
+    } else if (this.options.status === ArcButtonStatus.PRESSED) {
+      this.btnColor = this.btnPressColor;
+      this.fontColor = this.textPressColor;
     } else {
       this.btnColor = this.btnNormalColor;
       this.fontColor = this.textNormalColor;
@@ -371,7 +380,7 @@ export struct ArcButton {
     this.btnColor = this.options.backgroundColor;
     this.fontColor = this.options.fontColor;
     this.curves = Curves.interpolatingSpring(10, 1, 350, 35);
-    this.scaleValue = 0.95;
+    this.scaleValue = 1;
     this.progressOptionsChange();
     this.changeStatus();
   }
@@ -553,7 +562,7 @@ export struct ArcButton {
           .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
           .shadow(this.getShadow())
       } else  {
-        Button({ type: ButtonType.Normal, stateEffect: true })
+        Button({ type: ButtonType.Normal, stateEffect: false })
           .width('100%')
           .height('100%')
           .rotate({ angle: !this.isUp ? 0 : 180 })
@@ -592,21 +601,28 @@ export struct ArcButton {
     if (this.options.onTouch) {
       this.options.onTouch(event);
     }
-    switch (event.type) {
-      case TouchType.Down:
-        this.scaleX = this.scaleValue;
-        this.scaleY = this.scaleValue;
-        this.btnColor = this.btnPressColor;
-        this.fontColor = this.textPressColor;
-        break;
-      case TouchType.Up:
-        this.scaleX = 1;
-        this.scaleY = 1;
-        this.btnColor = this.btnNormalColor;
-        this.fontColor = this.textNormalColor;
-        break;
-      default:
-        break;
+    if (this.options.status === ArcButtonStatus.PRESSED) {
+      this.scaleX = this.scaleValue;
+      this.scaleY = this.scaleValue;
+      this.btnColor = this.btnPressColor;
+      this.fontColor = this.textPressColor;
+    } else {
+      switch (event.type) {
+        case TouchType.Down:
+          this.scaleX = this.scaleValue;
+          this.scaleY = this.scaleValue;
+          this.btnColor = this.btnPressColor;
+          this.fontColor = this.textPressColor;
+          break;
+        case TouchType.Up:
+          this.scaleX = 1;
+          this.scaleY = 1;
+          this.btnColor = this.btnNormalColor;
+          this.fontColor = this.textNormalColor;
+          break;
+        default:
+          break;
+      }
     }
   }
 }
