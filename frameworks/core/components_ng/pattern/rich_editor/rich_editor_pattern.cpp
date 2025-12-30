@@ -4259,11 +4259,11 @@ bool RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
             ResetSelection();
         }
         IF_TRUE(!IsAiSelected(), StartVibratorByLongPress());
+        CHECK_EQUAL_RETURN(HandleLongPressOnAiSelection(), true, true);
         editingLongPress_ = isEditing_;
         previewLongPress_ = !isEditing_;
     }
     focusHub->RequestFocusImmediately();
-    CHECK_EQUAL_RETURN(HandleLongPressOnAiSelection(), true, true);
     InitSelection(textOffset);
     auto selectEnd = textSelector_.GetTextEnd();
     auto selectStart = textSelector_.GetTextStart();
