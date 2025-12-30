@@ -134,7 +134,7 @@ bool GetInt32Param(ani_env* env, ani_ref ref, int32_t& result)
     }
 
     ani_int resultValue;
-    ani_status status = env->Object_CallMethodByName_Int(object, "unboxed", nullptr, &resultValue);
+    ani_status status = env->Object_CallMethodByName_Int(object, "toInt", nullptr, &resultValue);
     if (status != ANI_OK) {
         return false;
     }
@@ -197,7 +197,7 @@ bool GetBoolParam(ani_env* env, ani_ref ref, bool& result)
     }
 
     ani_boolean resultValue;
-    ani_status status = env->Object_CallMethodByName_Boolean(object, "unboxed", nullptr, &resultValue);
+    ani_status status = env->Object_CallMethodByName_Boolean(object, "toBoolean", nullptr, &resultValue);
     if (status != ANI_OK) {
         return false;
     }
