@@ -30,7 +30,7 @@ import { IExtendableComponent } from "./component/extendableComponent";
 /** base class for user's structs */
 export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent {
     private peer?: PeerNode
-    protected _initializers?: () => T_Options
+    public _initializers?: () => T_Options
     reuseForceAddRefFlag: boolean = false;
     private themeScopeId?: int32
 
