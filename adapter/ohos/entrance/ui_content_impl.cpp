@@ -148,6 +148,7 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "interfaces/inner_api/ace/ui_content_config.h"
 #include "screen_session_manager_client.h"
+#include "parameters.h"
 #include "pointer_event.h"
 
 namespace OHOS::Ace {
@@ -171,6 +172,11 @@ constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
 constexpr float DEFAULT_VIEW_SCALE = 1.0f;
 static std::atomic<bool> g_isDynamicVsync = false;
 static bool g_isDragging = false;
+constexpr char SCENE_COMMON_CHAR = '0';
+constexpr char SCENE_START_CHAR = '1';
+constexpr uint32_t VSYNC_FIRST_WITHOUT_DEFAULT_BARRIER = 2;
+static const uint64_t VSYNC_FIRST_FORCE_ENABLE_TIME_NS =
+    system::GetIntParameter("const.sys.param_vsync_first_force_enable_time_ms", 5000) * 1000000ULL;
 
 enum class WindowChangeType {
     RECT_CHANGE,
@@ -1970,8 +1976,15 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
         payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
         payload["targetApiVersion"] = std::to_string(AceApplicationInfo::GetInstance().GetApiTargetVersion());
         g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
-        ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", g_isDynamicVsync.load());
-        OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(g_isDynamicVsync);
+        ResSchedReport::GetInstance().AppVsyncEnableScene(payload, reply);
+        const std::string& replyResult = reply["result"];
+        bool hasCommonScene = replyResult.find(SCENE_COMMON_CHAR) != std::string::npos;
+        bool hasStartScene = replyResult.find(SCENE_START_CHAR) != std::string::npos;
+        uint32_t vsyncPolicy = hasCommonScene ? VSYNC_FIRST_WITHOUT_DEFAULT_BARRIER : g_isDynamicVsync.load();
+        ACE_SCOPED_TRACE("SetVsyncPolicy(%u), ForceEnable(%d), ForceEnableTime(%" PRIu64 ")",
+            vsyncPolicy, hasStartScene, VSYNC_FIRST_FORCE_ENABLE_TIME_NS);
+        OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(vsyncPolicy);
+        OHOS::AppExecFwk::EventHandler::SetVsyncFirstForceEnableTime(hasStartScene, VSYNC_FIRST_FORCE_ENABLE_TIME_NS);
     };
     BackgroundTaskExecutor::GetInstance().PostTask(task);
 }
