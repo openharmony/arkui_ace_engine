@@ -157,17 +157,9 @@ void ContentChangeManager::OnVsyncEnd(const RectF& rootRect)
         if (!node) {
             continue;
         }
-        auto pattern = node->GetPattern();
-        if (!pattern) {
-            continue;
-        }
-        auto keyFrameNode = pattern->GetKeyFrameNodeWhenContentChanged();
-        if (!keyFrameNode) {
-            continue;
-        }
         ACE_SCOPED_TRACE("[ContentChangeManager] On%sChanged Reporting", hasTabsAncestor ? "Tabs" : "Swiper");
         auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
-        keyFrameNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, {false, false, false});
+        node->DumpSimplifyTreeWithParamConfig(0, simpleTree, true, {false, false, false});
         UiSessionManager::GetInstance()->ReportContentChangeEvent(
             hasTabsAncestor ? ChangeType::TABS : ChangeType::SWIPER, simpleTree->ToString());
     }
