@@ -3059,11 +3059,16 @@ void JSRichEditorBaseController::ParseJsStrokeWidthTextStyle(const JSRef<JSObjec
         return;
     }
     JSRef<JSVal> strokeWidthObject = styleObject->GetProperty("strokeWidth");
-    if (!strokeWidthObject->IsNull()) {
-        CalcDimension length = JSRichEditor::ParseLengthMetrics(strokeWidthObject, false);
-        style.SetStrokeWidth(length);
-        updateSpanStyle.updateStrokeWidth = length;
+    CHECK_NULL_VOID(!strokeWidthObject->IsNull() && !strokeWidthObject->IsUndefined());
+    CalcDimension length;
+    if (strokeWidthObject->IsNumber()) {
+        length.SetUnit(DimensionUnit::VP);
+        length.SetValue(strokeWidthObject->ToNumber<double>());
+    } else if (strokeWidthObject->IsObject()) {
+        length = JSRichEditor::ParseLengthMetrics(strokeWidthObject, false);
     }
+    style.SetStrokeWidth(length);
+    updateSpanStyle.updateStrokeWidth = length;
 }
  
 void JSRichEditorBaseController::ParseJsStrokeColorTextStyle(const JSRef<JSObject>& styleObject,

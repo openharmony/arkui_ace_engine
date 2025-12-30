@@ -98,7 +98,7 @@ HWTEST_F(RichEditorTextStyleTestNg, AddTextSpan001, TestSize.Level0)
     style.SetStrokeWidth(STROKE_WIDTH_VALUE);
 
     /**
-     * @tc.steps: step2. test add span
+     * @tc.steps: step3. test add span
      */
     TextSpanOptions options;
     options.offset = 1;
@@ -110,7 +110,7 @@ HWTEST_F(RichEditorTextStyleTestNg, AddTextSpan001, TestSize.Level0)
     EXPECT_EQ(index2, 1);
 
     /**
-     * @tc.steps: step2. check stroke style
+     * @tc.steps: step4. check stroke style
      */
     auto contentNode = richEditorNode_->GetChildAtIndex(0);
     ASSERT_NE(contentNode, nullptr);
@@ -162,7 +162,7 @@ HWTEST_F(RichEditorTextStyleTestNg, UpdateSpanStyle001, TestSize.Level1)
     ImageSpanAttribute imageStyle;
 
     /**
-     * @tc.steps: step3. update span
+     * @tc.steps: step4. update span
      */
     richEditorController->UpdateSpanStyle(0, 6, textStyle, imageStyle);
     auto newSpan = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
@@ -172,7 +172,7 @@ HWTEST_F(RichEditorTextStyleTestNg, UpdateSpanStyle001, TestSize.Level1)
     EXPECT_EQ(newSpan->GetStrokeColor(), STROKE_COLOR_VALUE);
 
     /**
-     * @tc.steps: step4. update stroke width
+     * @tc.steps: step5. update stroke width
      */
     textStyle.SetStrokeWidth(STROKE_WIDTH_VALUE);
     updateSpanStyle.updateStrokeWidth = STROKE_WIDTH_VALUE;
@@ -246,6 +246,9 @@ HWTEST_F(RichEditorTextStyleTestNg, CreateTextSpanNode001, TestSize.Level0)
     auto typingStyle = richEditorPattern->typingStyle_;
     auto typingTextStyle = richEditorPattern->typingTextStyle_;
 
+    /**
+     * @tc.steps: step2. Parameter declaration
+     */
     RefPtr<SpanNode> spanNode;
     TextInsertValueInfo info;
     std::u16string insertValue;
@@ -253,7 +256,7 @@ HWTEST_F(RichEditorTextStyleTestNg, CreateTextSpanNode001, TestSize.Level0)
     TextStyle textStyle;
 
     /**
-     * @tc.steps: step2. test CreateTextSpanNode
+     * @tc.steps: step3. test CreateTextSpanNode
      */
     richEditorPattern->typingStyle_ = updateSpanStyle;
     richEditorPattern->typingTextStyle_ = textStyle;
@@ -278,7 +281,7 @@ HWTEST_F(RichEditorTextStyleTestNg, CreateTextSpanNode001, TestSize.Level0)
     EXPECT_FALSE(richEditorPattern->typingStyle_->updateStrokeColor.has_value());
 
     /**
-     * @tc.steps: step2. reset typingStyle and typingTextStyle
+     * @tc.steps: step4. reset typingStyle and typingTextStyle
      */
     richEditorPattern->typingStyle_ = typingStyle;
     richEditorPattern->typingTextStyle_ = typingTextStyle;
