@@ -14,7 +14,6 @@
 import(
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 
-
 build_component_ng("gauge_pattern_ng") {
   sources = [
     "gauge_accessibility_property.cpp",
@@ -31,10 +30,11 @@ build_component_ng("gauge_pattern_ng") {
     "bridge/arkts_native_gauge_bridge.cpp",
     "bridge/gauge_dynamic_modifier.cpp",
     "bridge/gauge_dynamic_module.cpp",
-    "bridge/gauge_model_impl.cpp",
   ]
-
-  deps = [ "$ace_root/interfaces/inner_api/ace:ace_forward_compatibility" ]
-
-  ark_sources += [ "bridge/gauge_static_modifier.cpp" ]
+  if (!is_arkui_x) {
+    ark_sources += [
+      "bridge/gauge_model_impl.cpp",
+      "bridge/gauge_static_modifier.cpp",
+    ]
+  }
 }
