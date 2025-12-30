@@ -133,11 +133,11 @@
 #include "core/interfaces/native/node/flow_item_modifier.h"
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
+#include "core/interfaces/native/node/qrcode_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/components_ng/pattern/plugin/plugin_model_static.h"
 #endif
-
 namespace OHOS::Ace::NG::GeneratedViewModel {
 
 ArkUIAPICallbackMethod* callbacks = nullptr;
@@ -572,10 +572,13 @@ void* createCustomSpanNode(ArkUI_Int32 nodeId)
 
 void* createQRCodeNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = QRCodeModelNG::CreateFrameNode(nodeId);
+    auto arkUIQRCodeModifier = NG::NodeModifier::GetQRCodeModifier();
+    CHECK_NULL_RETURN(arkUIQRCodeModifier->createFrameNode, nullptr);
+    auto arkUINodeHandle = arkUIQRCodeModifier->createFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* createBadgeNode(ArkUI_Int32 nodeId)

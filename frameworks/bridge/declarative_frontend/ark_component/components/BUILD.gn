@@ -51,6 +51,9 @@ arkui_modules = [
   "slider",
 ]
 
+if (qrcodegen_support) {
+    arkui_modules += [ "qrcode" ]
+}
 module_targets = []
 
 foreach(item, arkui_modules) {

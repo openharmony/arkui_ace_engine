@@ -539,12 +539,6 @@ template("declarative_js_engine") {
       sources += [ "engine/functions/js_crown_function.cpp" ]
     }
 
-    if (qrcodegen_support) {
-      sources += [
-        "jsview/js_qrcode.cpp",
-      ]
-    }
-
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
     if (!build_ohos_sdk) {
       external_deps += [ "graphic_2d:text_napi_impl" ]
@@ -1035,9 +1029,6 @@ template("declarative_js_engine_ng") {
         "jsview/js_pattern_lock.cpp",
         "jsview/js_relative_container.cpp",
       ]
-      if (qrcodegen_support) {
-        sources += [ "jsview/js_qrcode.cpp" ]
-      }
     }
 
     if (defined(config.video_components_support) &&

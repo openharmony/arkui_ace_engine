@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT QRCodeLayoutAlgorithm : public BoxLayoutAlgorithm {
+class ACE_FORCE_EXPORT QRCodeLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(QRCodeLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:

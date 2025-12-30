@@ -97,7 +97,6 @@ private:
     static void RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGridAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterQRCodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterLoadingProgressAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextClockAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

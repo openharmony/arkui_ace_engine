@@ -16,7 +16,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_qrcode_ffi.h"
 
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
-
+#include "core/common/dynamic_module_helper.h"
 using namespace OHOS::Ace::Framework;
 using namespace OHOS::Ace;
 
@@ -25,20 +25,33 @@ constexpr double OPACITY_MAX = 1.0;
 constexpr double OPACITY_MIN = 0.0;
 }   // namespace
 
+namespace OHOS::Ace {
+
+NG::QRCodeModelNG* GetQRCodeModel()
+{
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("QRCode");
+    if (module == nullptr) {
+        LOGF("Can't find qrcode dynamic module");
+        abort();
+    }
+    return reinterpret_cast<NG::QRCodeModelNG*>(module->GetModel());
+}
+} // namespace OHOS::Ace
+
 extern "C" {
 void FfiOHOSAceFrameworkQRCodeCreate(const char* value)
 {
-    QRCodeModel::GetInstance()->Create(value);
+    GetQRCodeModel()->Create(value);
 }
 
 void FfiOHOSAceFrameworkQRCodeSetQRCodeColor(uint32_t color)
 {
-    QRCodeModel::GetInstance()->SetQRCodeColor(Color(color));
+    GetQRCodeModel()->SetQRCodeColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkQRCodeSetBackgroundColor(uint32_t color)
 {
-    QRCodeModel::GetInstance()->SetQRBackgroundColor(Color(color));
+    GetQRCodeModel()->SetQRBackgroundColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkQRCodeSetContentOpacity(double value)
@@ -46,6 +59,6 @@ void FfiOHOSAceFrameworkQRCodeSetContentOpacity(double value)
     if (value < OPACITY_MIN || value > OPACITY_MAX) {
         value = OPACITY_MAX;
     }
-    QRCodeModel::GetInstance()->SetContentOpacity(value);
+    GetQRCodeModel()->SetContentOpacity(value);
 }
 }

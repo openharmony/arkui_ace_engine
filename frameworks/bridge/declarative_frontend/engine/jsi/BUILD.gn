@@ -318,9 +318,6 @@ template("declarative_js_engine_ark") {
       sources += [ "nativeModule/arkts_native_folder_stack_bridge.cpp" ]
     }
 
-    if (qrcodegen_support) {
-      sources += [ "nativeModule/arkts_native_qrcode_bridge.cpp" ]
-    }
 
     deps = [ "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
     if (is_arkui_x) {
