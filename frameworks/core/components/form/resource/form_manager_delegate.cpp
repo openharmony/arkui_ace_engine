@@ -1192,6 +1192,7 @@ bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::
             return true;
         }
     }
+    LOGW("failed to get FormInfo.");
     return false;
 }
 
