@@ -23,6 +23,10 @@
 #include "core/common/ime/text_input_proxy.h"
 #include "adapter/preview/entrance/editing/text_input_impl.h"
 
+namespace OHOS::Ace {
+SINGLETON_INSTANCE_IMPL(Platform::TextInputClientMgr);
+}
+
 namespace OHOS::Ace::Platform {
 
 TextInputClientMgr::TextInputClientMgr() : clientId_(IME_CLIENT_ID_NONE), currentConnection_(nullptr)

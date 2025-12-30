@@ -35,5 +35,7 @@ public:
 
     MOCK_METHOD(RefPtr<Vibrator>, GetVibrator, (const RefPtr<TaskExecutor>& taskExecutor), (override));
 };
+
+SINGLETON_INSTANCE_IMPL(MockVibratorProxy);
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_TEST_UNITTEST_VIBRATOR_MOCK_VIBRATOR_H

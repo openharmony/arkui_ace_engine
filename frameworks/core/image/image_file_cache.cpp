@@ -26,6 +26,9 @@
 #include "core/components_ng/image_provider/drawing_image_data.h"
 
 namespace OHOS::Ace {
+
+SINGLETON_INSTANCE_IMPL(ImageFileCache);
+
 ImageFileCache::ImageFileCache() = default;
 ImageFileCache::~ImageFileCache() = default;
 

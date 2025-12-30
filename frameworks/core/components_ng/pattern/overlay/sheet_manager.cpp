@@ -25,6 +25,10 @@
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #endif
 
+namespace OHOS::Ace {
+SINGLETON_INSTANCE_IMPL(NG::SheetManager);
+}
+
 namespace OHOS::Ace::NG {
 namespace {
 std::string GetTagFromRootNodeType(RootNodeType rootNodeType)

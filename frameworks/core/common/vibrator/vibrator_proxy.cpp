@@ -17,6 +17,8 @@
 
 namespace OHOS::Ace {
 
+SINGLETON_INSTANCE_IMPL(VibratorProxy);
+
 VibratorProxy::VibratorProxy() = default;
 
 VibratorProxy::~VibratorProxy() = default;

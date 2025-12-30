@@ -18,6 +18,10 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_canvas_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_xcomponent_bridge.h"
 
+namespace OHOS::Ace {
+SINGLETON_INSTANCE_IMPL(Framework::JsiEngineLoader);
+}
+
 namespace OHOS::Ace::Framework {
 
 JsiEngineLoader::JsiEngineLoader() = default;
