@@ -359,7 +359,8 @@ void RichEditorModelNG::SetTextDetectEnable(bool value)
     pattern->SetTextDetectEnable(value);
 }
 
-bool RichEditorModelNG::GetTextDetectEnable(FrameNode* frameNode) {
+bool RichEditorModelNG::GetTextDetectEnable(FrameNode* frameNode)
+{
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, false);
