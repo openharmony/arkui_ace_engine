@@ -1683,7 +1683,8 @@ private:
         int32_t offsetInSpan, int32_t endInSpan, std::u16string content, std::optional<TextStyle> textStyle,
         std::optional<struct UpdateParagraphStyle> paraStyle, const std::optional<std::u16string>& urlAddress);
     void SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo, const TextStyle& textStyle);
-    void SetThemeTextStyleToRet(RichEditorAbstractSpanResult& retInfo);
+    void SetThemeTextStyleToRet(RichEditorAbstractSpanResult& retInfo,
+        const std::optional<std::u16string>& urlAddress);
     void SetParaStyleToRet(RichEditorAbstractSpanResult& retInfo, std::optional<struct UpdateParagraphStyle> paraStyle);
 
     RichEditorAbstractSpanResult GetResultByImageSpanOptions(const ImageSpanOptions& options, int32_t spanIndex);

@@ -1398,6 +1398,9 @@ int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, TextChangeReason
         if (options.useThemeDecorationColor) {
             options.style.value().SetTextDecorationColor(urlSpanColor);
         }
+        if (options.strokeColorFollowFontColor) {
+            options.style.value().SetStrokeColor(urlSpanColor);
+        }
     }
     CHECK_NULL_RETURN(isUndoRedo || BeforeChangeText(changeValue, options), -1);
     ClearRedoOperationRecords();
@@ -1548,10 +1551,12 @@ void RichEditorPattern::UpdateUrlStyle(RefPtr<SpanNode>& spanNode, const std::op
         const auto& textColor = themeTextStyle.GetTextColor();
         spanNode->UpdateTextColor(textColor);
         IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColor(textColor));
+        IF_TRUE(spanItem->strokeColorFollowFontColor, spanNode->UpdateStrokeColor(textColor));
     } else {
         const auto& urlSpanColor = GetUrlSpanColor();
         spanNode->UpdateTextColor(urlSpanColor);
         IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColor(urlSpanColor));
+        IF_TRUE(spanItem->strokeColorFollowFontColor, spanNode->UpdateStrokeColor(urlSpanColor));
     }
 }
 
@@ -6652,6 +6657,7 @@ void RichEditorPattern::SetDefaultColor(RefPtr<SpanNode>& spanNode)
     if (auto& spanItem = spanNode->GetSpanItem(); spanItem && spanItem->urlOnRelease) {
         spanNode->UpdateTextColor(GetUrlSpanColor());
     }
+    spanNode->UpdateStrokeColor(spanNode->GetTextColorValue(Color::BLACK));
 }
 
 bool RichEditorPattern::BeforeIMEInsertValue(const std::u16string& insertValue)
@@ -11834,7 +11840,7 @@ void RichEditorPattern::CreateSpanResult(RichEditorChangeValue& changeValue, int
     if (textStyle) {
         SetTextStyleToRet(retInfo, *textStyle);
     } else {
-        SetThemeTextStyleToRet(retInfo);
+        SetThemeTextStyleToRet(retInfo, urlAddress);
         if (urlAddress.has_value()) {
             retInfo.SetFontColor(GetUrlSpanColor().ColorToString());
         }
@@ -11886,7 +11892,8 @@ void RichEditorPattern::SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo,
     retInfo.SetFontWeight((int32_t)textStyle.GetFontWeight());
 }
 
-void RichEditorPattern::SetThemeTextStyleToRet(RichEditorAbstractSpanResult& retInfo)
+void RichEditorPattern::SetThemeTextStyleToRet(RichEditorAbstractSpanResult& retInfo,
+    const std::optional<std::u16string>& urlAddress)
 {
     auto theme = GetTheme<RichEditorTheme>();
     TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
@@ -11897,6 +11904,10 @@ void RichEditorPattern::SetThemeTextStyleToRet(RichEditorAbstractSpanResult& ret
     retInfo.SetTextDecoration(TextDecoration::NONE);
     retInfo.SetColor(style.GetTextColor().ColorToString());
     retInfo.SetFontFamily("HarmonyOS Sans");
+    TextStyleResult textStyleResult = retInfo.GetTextStyle();
+    textStyleResult.strokeColor = urlAddress.has_value() ? GetUrlSpanColor().ColorToString()
+        : style.GetTextColor().ColorToString();
+    retInfo.SetTextStyle(textStyleResult);
 }
 
 void RichEditorPattern::SetParaStyleToRet(RichEditorAbstractSpanResult& retInfo,
@@ -12180,7 +12191,7 @@ void RichEditorPattern::UpdateTextSpanResultByOptions(RichEditorAbstractSpanResu
     if (options.style.has_value()) {
         SetTextStyleToRet(retInfo, options.style.value());
     } else {
-        SetThemeTextStyleToRet(retInfo);
+        SetThemeTextStyleToRet(retInfo, options.urlAddress);
     }
     auto urlAddress = options.urlAddress;
     IF_TRUE(urlAddress.has_value(), retInfo.SetUrlAddress(urlAddress.value()));
