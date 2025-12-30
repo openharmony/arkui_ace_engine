@@ -256,6 +256,7 @@ public:
     void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
     virtual RefPtr<ScrollBarOverlayModifier> CreateOverlayModifier();
     void CreateScrollBarOverlayModifier();
+    virtual void AdjustOffset(float& delta, int32_t source) {}
 
     float GetScrollableDistance() const
     {

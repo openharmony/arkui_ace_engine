@@ -1535,6 +1535,11 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
                 scrollable->ProcessAxisUpdateEvent(offset, true);
                 return true;
             }
+            if (source == SCROLL_FROM_BAR_OVER_DRAG && pattern->GetAxis() != Axis::NONE && pattern->AnimateStoped()) {
+                float tmp = static_cast<float>(offset);
+                pattern->AdjustOffset(tmp, source);
+                offset = tmp;
+            }
             if (!nestedScroll) {
                 return pattern->UpdateCurrentOffset(offset, source);
             }

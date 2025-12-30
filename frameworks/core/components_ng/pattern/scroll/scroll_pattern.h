@@ -191,7 +191,7 @@ public:
         return false;
     }
     bool ScrollPageCheck(float delta, int32_t source);
-    void AdjustOffset(float& delta, int32_t source);
+    void AdjustOffset(float& delta, int32_t source) override;
     Rect GetItemRect(int32_t index) const override;
 
     // scrollSnap

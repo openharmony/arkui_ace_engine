@@ -15,7 +15,14 @@
 
 #include "list_test_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
+#define protected public
+#define private public
+#include "test/mock/core/common/mock_container.h"
 
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
+#undef private
+#undef protected
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -1619,6 +1626,46 @@ HWTEST_F(ListEventTestNg, ScrollBarSnapAnimation001, TestSize.Level1)
     };
     pattern_->StartSnapAnimation(snapAnimationOptions);
     EXPECT_FALSE(pattern_->predictSnapOffset_.has_value());
+}
+
+/**
+ * @tc.name: ListScrollBarOverDrag001
+ * @tc.desc: Test list overDrag by scrollbar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, ListScrollBarOverDrag001, TestSize.Level1)
+{
+    auto container = AceType::DynamicCast<Container>(MockContainer::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY_THREE);
+    StackModelNG stackModel;
+    stackModel.Create();
+
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
+    CreateListItems(5);
+
+    ScrollBarModelNG scrollBarModel;
+    scrollBarModel.Create(
+        pattern_->GetScrollBarProxy(), true, true, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON));
+    auto scrollBarPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ScrollBarPattern>();
+    CreateDone();
+
+    float dragDelta = 100.f;
+    GestureEvent info;
+    info.SetMainDelta(-dragDelta);
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    scrollBarPattern->scrollBar_->HandleDragStart(info);
+    scrollBarPattern->scrollBar_->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_LE(std::abs(pattern_->GetTotalOffset()), dragDelta);
+
+    scrollBarPattern->scrollBar_->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollBarPattern->scrollBar_->HandleDragEnd(info);
+    EXPECT_LE(std::abs(pattern_->GetTotalOffset()), dragDelta * 2);
 }
 
 /**
