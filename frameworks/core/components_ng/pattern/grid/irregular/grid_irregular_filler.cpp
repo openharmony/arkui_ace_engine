@@ -31,10 +31,8 @@ int32_t GridIrregularFiller::InitPos(int32_t lineIdx)
 }
 
 using Result = GridIrregularFiller::FillResult;
-Result GridIrregularFiller::Fill(const FillParameters& params, float targetLen, int32_t startingLine)
+Result GridIrregularFiller::FillImpl(const FillParameters& params, float targetLen, int32_t idx)
 {
-    startingLine = std::max(0, startingLine);
-    int32_t idx = InitPos(startingLine);
     // no gap on first row
     float len = -params.mainGap;
     auto childrenCount = info_->GetChildrenCount();
@@ -49,7 +47,6 @@ Result GridIrregularFiller::Fill(const FillParameters& params, float targetLen, 
         if (UpdateLength(len, targetLen, row, posY_, params.mainGap)) {
             return { len, row, idx - 1 };
         }
-
         MeasureItem(params, idx, posX_, posY_, false);
     }
 
@@ -62,6 +59,30 @@ Result GridIrregularFiller::Fill(const FillParameters& params, float targetLen, 
         return { len, posY_, idx };
     }
     return { len, lastRow, idx };
+}
+
+Result GridIrregularFiller::Fill(const FillParameters& params, float targetLen, int32_t startingLine)
+{
+    startingLine = std::max(0, startingLine);
+    int32_t idx = InitPos(startingLine);
+    return FillImpl(params, targetLen, idx);
+}
+
+Result GridIrregularFiller::FillFromStartIndex(const FillParameters& params, float targetLen)
+{
+    posX_ = -1;
+    posY_ = info_->startMainLineIndex_;
+    int32_t idx = info_->startIndex_ - 1;
+    return FillImpl(params, targetLen, idx);
+}
+
+Result GridIrregularFiller::FillBackward(const FillParameters& params, float targetLen, int32_t startingLine)
+{
+    startingLine = std::max(0, startingLine);
+    posX_ = -1;
+    posY_ = startingLine;
+    int32_t idx = info_->FindEndIdx(startingLine).itemIdx;
+    return FillImpl(params, targetLen, idx);
 }
 
 void GridIrregularFiller::FillToTarget(const FillParameters& params, int32_t targetIdx, int32_t startingLine)
@@ -223,7 +244,7 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
         constraint.maxSize = SizeF { LayoutInfinity<float>(), crossLen };
         constraint.parentIdealSize = OptionalSizeF(std::nullopt, crossLen);
     }
-    
+
     if (isCache) {
         child->SetActive();
     }
@@ -237,6 +258,67 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
         info_->lineHeightMap_[row + i] = std::max(info_->lineHeightMap_[row + i], heightPerRow);
     }
     return { childHeight, constraint };
+}
+
+float GridIrregularFiller::MeasureCurrentRow(const FillParameters& params, int32_t itemIdx)
+{
+    // 1. 初始化位置和索引
+    int32_t currentRow = info_->startMainLineIndex_;
+    posY_ = currentRow;
+    posX_ = 0;
+    int32_t idx = info_->startIndex_;
+    int32_t childrenCount = info_->GetChildrenCount();
+
+    // 2. 填充当前行的Matrix
+    while (posY_ == currentRow && idx < childrenCount) {
+        if (!FindNextItem(idx)) {
+            FillOne(idx);
+        }
+        idx++;
+    }
+
+    // 3. 测量行内每个节点
+    auto rowIt = info_->gridMatrix_.find(currentRow);
+    if (rowIt == info_->gridMatrix_.end()) {
+        TAG_LOGW(AceLogTag::ACE_GRID, "current row %{public}d not found in gridMatrix_", currentRow);
+        return 0.0f;
+    }
+
+    // 记录startIndex节点的位置信息
+    int32_t startIndexCol = -1;
+
+    for (const auto& [col, itemIdx] : rowIt->second) {
+        if (itemIdx >= 0) { // 只处理实际节点，跳过标记为 -idx 的节点
+            // 记录startIndex的列位置
+            if (itemIdx == info_->startIndex_) {
+                startIndexCol = col;
+            }
+            // 测量节点
+            MeasureItem(params, itemIdx, col, currentRow, false);
+        }
+    }
+
+    // 4. 计算并返回startIndex节点的总高度
+    if (startIndexCol == -1) {
+        TAG_LOGW(AceLogTag::ACE_GRID, "startIndex %{public}d not found in current row %{public}d", info_->startIndex_,
+            currentRow);
+        return 0.0f;
+    }
+
+    // 获取startIndex节点的大小信息
+    auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
+    int32_t rows = itemSize.rows;
+
+    // 计算总高度：sum(line heights for all rows it spans) + (rows - 1) * mainGap
+    float totalHeight = 0.0f;
+    for (int32_t i = 0; i < rows; ++i) {
+        auto lineHeightIt = info_->lineHeightMap_.find(currentRow + i);
+        if (lineHeightIt != info_->lineHeightMap_.end()) {
+            totalHeight += lineHeightIt->second;
+        }
+    }
+    totalHeight += (rows - 1) * params.mainGap;
+    return totalHeight;
 }
 
 int32_t GridIrregularFiller::InitPosToLastItem(int32_t lineIdx)
@@ -271,6 +353,21 @@ int32_t GridIrregularFiller::FillMatrixByLine(int32_t startingLine, int32_t targ
         }
     }
     return idx;
+}
+
+void GridIrregularFiller::FillMatrixFromStartIndex(int32_t startLine, int32_t startIndex, int32_t targetIdx)
+{
+    if (targetIdx >= info_->GetChildrenCount()) {
+        targetIdx = info_->GetChildrenCount() - 1;
+    }
+    posY_ = startLine;
+    int32_t idx = startIndex;
+    while (idx <= targetIdx) {
+        if (!FindNextItem(idx)) {
+            FillOne(idx);
+        }
+        idx++;
+    }
 }
 
 float GridIrregularFiller::MeasureBackward(const FillParameters& params, float targetLen, int32_t startingLine)

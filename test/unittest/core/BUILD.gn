@@ -45,6 +45,7 @@ group("scroll_test") {
     "pattern/arc_list:arc_list_test_ng",
     "pattern/grid:grid_test_ng",
     "pattern/grid:grid_test_regular",
+    "pattern/grid:grid_test_custom",
     "pattern/lazy_layout:lazy_grid_layout_test",
     "pattern/list:list_test_ng",
     "pattern/scroll:scroll_test_ng",

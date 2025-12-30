@@ -74,3 +74,16 @@ ace_unittest("grid_static_test_ng") {
     "grid_test_ng.cpp",
   ]
 }
+
+ace_unittest("grid_test_custom") {
+  module_name = "ScrollingSet-GridAndGridItem"
+  type = "new"
+  sources = [
+    "grid_test_ng.cpp",
+    "custom/custom_layout_options.cpp",
+    "custom/grid_custom_layout_test_ng.cpp",
+    "custom/grid_custom_algorithm_test_ng.cpp",
+    "custom/grid_custom_scroller_test_ng.cpp",
+    "custom/grid_custom_layout_algorithm_test.cpp",
+  ]
+}
