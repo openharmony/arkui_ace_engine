@@ -1061,6 +1061,8 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll003, TestSize.Level1)
  */
 HWTEST_F(GridOptionLayoutTestNg, OverScroll005, TestSize.Level1)
 {
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(3);
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr");
     model.SetLayoutOptions({});
@@ -1086,8 +1088,7 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll005, TestSize.Level1)
     scrollable->HandleTouchUp();
     (*scrollable->panRecognizerNG_->onActionEnd_)(info);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
+    TickToFinish();
     EXPECT_EQ(pattern_->info_.startIndex_, 0);
     EXPECT_NEAR(GetChildY(frameNode_, 0), 0.0f, 2e-5);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
