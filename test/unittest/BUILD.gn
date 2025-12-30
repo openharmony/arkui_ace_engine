@@ -22,7 +22,6 @@ group("unittest") {
   deps = []
   if (!is_asan) {
     deps += [
-      ":linux_unittest",
       "adapter:adapter_unittest",
       "base:base_unittest",
       "bridge:bridge_unittest",
@@ -31,6 +30,9 @@ group("unittest") {
       "frameworks:frameworks_unittest",
       "interfaces:interfaces_unittest",
     ]
+    if (target_os == "linux") {
+      deps += [ ":linux_unittest" ]
+    }
   }
 }
 
@@ -409,6 +411,7 @@ ohos_source_set("ace_components_manager") {
   part_name = ace_engine_part
   sources = [
     "$ace_root/frameworks/core/components_ng/manager/avoid_info/avoid_info_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/content_change_manager/content_change_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/display_sync/ui_display_sync.cpp",
     "$ace_root/frameworks/core/components_ng/manager/display_sync/ui_display_sync_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.cpp",
@@ -452,7 +455,6 @@ ohos_source_set("ace_components_manager") {
     "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/shared_overlay/shared_transition_effect.cpp",
     "$ace_root/frameworks/core/components_ng/manager/toolbar/toolbar_manager.cpp",
-    "$ace_root/frameworks/core/components_ng/manager/content_change_manager/content_change_manager.cpp",
   ]
   deps = []
   configs = [ ":ace_unittest_config" ]
@@ -985,8 +987,8 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/folder_stack/folder_stack_group_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/folder_stack/folder_stack_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/folder_stack/folder_stack_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/folder_stack/folder_stack_multithread_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/folder_stack/folder_stack_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/folder_stack/hover_stack_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form_link/form_link_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form_link/form_link_pattern.cpp",
@@ -1273,6 +1275,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/refresh/refresh_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/relative_container/relative_container_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/relative_container/relative_container_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/render_node/render_node_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/one_step_drag_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/paragraph_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.cpp",
@@ -1283,14 +1286,13 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_undo_manager.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_model_static.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/render_node/render_node_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/preview_menu_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/rich_editor_drag_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/rich_editor_drag_paint_method.cpp",
