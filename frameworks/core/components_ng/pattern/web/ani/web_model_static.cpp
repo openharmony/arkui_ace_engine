@@ -941,6 +941,20 @@ void WebModelStatic::SetOnDetectedBlankScreen(
     webEventHub->SetOnDetectedBlankScreenEvent(std::move(uiCallback));
 }
 
+void WebModelStatic::SetOnFirstScreenPaint(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto func = callback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo> &info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFirstScreenPaintEvent(std::move(uiCallback));
+}
+
 void WebModelStatic::SetBlankScreenDetectionConfig(
     FrameNode* frameNode, const BlankScreenDetectionConfig& detectConfig)
 {
