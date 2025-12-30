@@ -39,7 +39,7 @@ const uint32_t REMOVE_STARTING_WINDOW_TIMEOUT_MS = 5000;
 const int32_t ANIMATION_DURATION = 200;
 const uint32_t REMOVE_SNAPSHOT_WINDOW_DELAY_TIME = 100;
 const uint64_t REMOVE_WINDOW_PRELAUNCH_DELAY_TIME_MS =
-    system::GetIntParameter<int>("persist.sys.window.prelaunchDelayTime", 250);
+    system::GetIntParameter<int>("persist.sys.window.prelaunchDelayTime", 1000);
 std::unordered_map<uint64_t, int> surfaceNodeCountMap_;
 } // namespace
 
@@ -422,7 +422,7 @@ void WindowScene::BufferAvailableCallback()
             self->session_->SetBufferAvailable(true, true);
         }
         self->session_->EditSessionInfo().isPrelaunch_ = false;
-        self->isPrelaunch_ = false;
+        self->isPrelaunch_.store(false, std::memory_order_release);
         auto surfaceNode = self->session_->GetSurfaceNode();
         bool isWindowSizeEqual = self->IsWindowSizeEqual();
         if (!isWindowSizeEqual || surfaceNode == nullptr || !surfaceNode->IsBufferAvailable()) {
@@ -562,7 +562,7 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
 
         CHECK_NULL_VOID(self->snapshotWindow_);
         self->session_->EditSessionInfo().isPrelaunch_ = false;
-        self->isPrelaunch_ = false;
+        self->isPrelaunch_.store(false, std::memory_order_release);
         if (self->isBlankForSnapshot_) {
             self->SetOpacityAnimation(self->snapshotWindow_);
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "blank animation id %{public}d, name %{public}s",
@@ -598,7 +598,7 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
 bool WindowScene::CheckPrelaunchForBufferAvailableCallback(CancelableCallback<void()>& task,
     const std::function<void()>& uiTask)
 {
-    CHECK_EQUAL_RETURN(isPrelaunch_, false, false);
+    CHECK_EQUAL_RETURN(isPrelaunch_.load(std::memory_order_acquire), false, false);
     task.Cancel();
     task.Reset(uiTask);
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -648,7 +648,7 @@ void WindowScene::OnActivation()
             if (self->session_->IsPrelaunch()) {
                 TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnActivation CreateBlankWindow");
                 self->CreateBlankWindow(self->startingWindow_);
-                self->isPrelaunch_ = true;
+                self->isPrelaunch_.store(true, std::memory_order_release);
             } else {
                 self->CreateStartingWindow();
             }
@@ -1028,6 +1028,32 @@ void WindowScene::OnRestart()
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(
         std::move(uiTask), "ArkUIWindowSceneRestartApp", TaskExecutor::TaskType::UI);
+}
+
+void WindowScene::OnRemovePrelaunchStartingWindow()
+{
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        ACE_SCOPED_TRACE("WindowScene::OnRemovePrelaunchStartingWindow[id:%d][self:%d][enabled:%d]",
+            self->session_->GetPersistentId(), host->GetId(), self->session_->GetBufferAvailableCallbackEnable());
+
+        auto surfaceNode = self->session_->GetSurfaceNode();
+        CHECK_NULL_VOID(surfaceNode);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "prelaunch SetBufferAvailableCallback");
+        // bufferavailble callback no delay
+        self->isPrelaunch_.store(false, std::memory_order_release);
+        surfaceNode->SetBufferAvailableCallback(self->callback_);
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "prelaunch OnRemovePrelaunchStartingWindow");
+    pipelineContext->PostAsyncEvent(std::move(uiTask),
+        "ArkUIWindowSceneOnRemovePrelaunchStartingWindow", TaskExecutor::TaskType::UI);
 }
 
 bool WindowScene::IsWindowSizeEqual()
