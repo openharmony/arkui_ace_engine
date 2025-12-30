@@ -4624,7 +4624,7 @@ HWTEST_F(ListLayoutTestNg, SupportEmptyBranchInLazyLoading001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false), true);
 
     auto wrapper1 = layoutAlgorithm->GetListItem(AceType::RawPtr(frameNode_), 0);
-    EXPECT_EQ(wrapper1, nullptr);
+    EXPECT_NE(wrapper1, nullptr);
 
     int32_t itemCount = 5;
     float mainSize = 100.0f;

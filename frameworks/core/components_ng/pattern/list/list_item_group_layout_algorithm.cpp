@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -48,6 +49,13 @@ uint32_t GetMaxGridCounts(int32_t currentColumns)
             break;
     }
     return maxGridCounts;
+}
+
+RefPtr<LayoutWrapper> CreateDummyListItemChild()
+{
+    auto wrapper = ListItemModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    wrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0), CalcLength(0)));
+    return wrapper;
 }
 } // namespace
 
@@ -1759,5 +1767,19 @@ void ListItemGroupLayoutAlgorithm::ResetLayoutItem(LayoutWrapper* layoutWrapper)
             wrapperFrameNode->ClearSubtreeLayoutAlgorithm();
         }
     }
+}
+
+RefPtr<LayoutWrapper> ListItemGroupLayoutAlgorithm::GetListItem(
+    LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree, bool isCache) const
+{
+    index = !isStackFromEnd_ ? index : totalItemCount_ - index - 1;
+    if (index < 0) {
+        return nullptr;
+    }
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_, addToRenderTree, isCache);
+    if (!wrapper && listLayoutProperty_ && listLayoutProperty_->GetSupportLazyLoadingEmptyBranch().value_or(false)) {
+        wrapper = CreateDummyListItemChild();
+    }
+    return wrapper;
 }
 } // namespace OHOS::Ace::NG

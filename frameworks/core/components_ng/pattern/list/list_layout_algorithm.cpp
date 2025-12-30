@@ -59,12 +59,11 @@ RefPtr<LayoutWrapper> CreateDummyListItemChild()
  * @brief If developer enables supportEmptyBranchInLazyLoading. And Index in the range of
  *        LazyForEach/RepeatVirtualScroll, try to create empty branch LayoutWrapper for the index.
  */
-static RefPtr<LayoutWrapper> GetListItemWidthEmptyBranch(
+static RefPtr<LayoutWrapper> GetListItemWithEmptyBranch(
     LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree, bool isCache)
 {
     const auto& layoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    if (layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false) &&
-        ScrollableUtils::IsChildLazy(layoutWrapper->GetHostNode(), index)) {
+    if (layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false)) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
         if (!wrapper) {
             wrapper = CreateDummyListItemChild();
@@ -2551,7 +2550,7 @@ void ListLayoutAlgorithm::PredictBuildV2(
         ACE_SCOPED_TRACE("predict Item:%d", (*it).index);
         auto index = !pattern->IsStackFromEnd() ? (*it).index : frameNode->GetTotalChildCount() - (*it).index - 1;
         auto wrapper =
-            GetListItemWidthEmptyBranch(AceType::RawPtr(frameNode), index + pattern->GetItemStartIndex(), show, true);
+            GetListItemWithEmptyBranch(AceType::RawPtr(frameNode), index + pattern->GetItemStartIndex(), show, true);
         if (!wrapper) {
             it = param.items.erase(it);
             continue;
@@ -2930,6 +2929,6 @@ RefPtr<LayoutWrapper> ListLayoutAlgorithm::GetListItem(
 {
     index = (!isStackFromEnd_ ? index : totalItemCount_ - index - 1) + itemStartIndex_;
 
-    return GetListItemWidthEmptyBranch(layoutWrapper, index, addToRenderTree, isCache);
+    return GetListItemWithEmptyBranch(layoutWrapper, index, addToRenderTree, isCache);
 }
 } // namespace OHOS::Ace::NG
