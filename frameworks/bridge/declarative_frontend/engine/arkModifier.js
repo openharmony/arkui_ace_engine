@@ -1230,10 +1230,180 @@ class VideoModifier extends ArkVideoComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class WaterFlowModifier extends ArkWaterFlowComponent {
+class LazyArkWaterFlowComponent extends ArkScrollable {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkWaterFlowComponent.module === undefined) {
+      LazyArkWaterFlowComponent.module = globalThis.requireNapi('arkui.components.arkwaterflow');
+    }
+    this.lazyComponent = LazyArkWaterFlowComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  columnsGap(value) {
+    this.lazyComponent.columnsGap(value);
+    return this;
+  }
+  rowsGap(value) {
+    this.lazyComponent.rowsGap(value);
+    return this;
+  }
+  layoutDirection(value) {
+    this.lazyComponent.layoutDirection(value);
+    return this;
+  }
+  columnsTemplate(value) {
+    this.lazyComponent.columnsTemplate(value);
+    return this;
+  }
+  itemConstraintSize(value) {
+    this.lazyComponent.itemConstraintSize(value);
+    return this;
+  }
+  rowsTemplate(value) {
+    this.lazyComponent.rowsTemplate(value);
+    return this;
+  }
+  nestedScroll(value) {
+    this.lazyComponent.nestedScroll(value);
+    return this;
+  }
+  enableScrollInteraction(value) {
+    this.lazyComponent.enableScrollInteraction(value);
+    return this;
+  }
+  friction(value) {
+    this.lazyComponent.friction(value);
+    return this;
+  }
+  clip(value) {
+    this.lazyComponent.clip(value);
+    return this;
+  }
+  cachedCount(count, show) {
+    this.lazyComponent.cachedCount(count, show);
+    return this;
+  }
+  edgeEffect(edgeEffect, options) {
+    this.lazyComponent.edgeEffect(edgeEffect, options);
+    return this;
+  }
+  syncLoad(value) {
+    this.lazyComponent.syncLoad(value);
+    return this;
+  }
+  scrollBar(value) {
+    this.lazyComponent.scrollBar(value);
+    return this;
+  }
+  scrollBarWidth(value) {
+    this.lazyComponent.scrollBarWidth(value);
+    return this;
+  }
+  scrollBarColor(value) {
+    this.lazyComponent.scrollBarColor(value);
+    return this;
+  }
+  onScroll(value) {
+    this.lazyComponent.onScroll(value);
+    return this;
+  }
+  onScrollStart(value) {
+    this.lazyComponent.onScrollStart(value);
+    return this;
+  }
+  onScrollStop(value) {
+    this.lazyComponent.onScrollStop(value);
+    return this;
+  }
+  onScrollIndex(value) {
+    this.lazyComponent.onScrollIndex(value);
+    return this;
+  }
+  onReachStart(value) {
+    this.lazyComponent.onReachStart(value);
+    return this;
+  }
+  onReachEnd(value) {
+    this.lazyComponent.onReachEnd(value);
+    return this;
+  }
+  onScrollFrameBegin(value) {
+    this.lazyComponent.onScrollFrameBegin(value);
+    return this;
+  }
+  remoteMessage(value) {
+    this.lazyComponent.remoteMessage(value);
+    return this;
+  }
+  onClick(value) {
+    this.lazyComponent.onClick(value);
+    return this;
+  }
+  onTouch(value) {
+    this.lazyComponent.onTouch(value);
+    return this;
+  }
+  onHover(value) {
+    this.lazyComponent.onHover(value);
+    return this;
+  }
+  onKeyEvent(value) {
+    this.lazyComponent.onKeyEvent(value);
+    return this;
+  }
+  onDeleteEvent(value) {
+    this.lazyComponent.onDeleteEvent(value);
+    return this;
+  }
+  onAttach(value) {
+    this.lazyComponent.onAttach(value);
+    return this;
+  }
+  onAppear(value) {
+    this.lazyComponent.onAppear(value);
+    return this;
+  }
+  onDetach(value) {
+    this.lazyComponent.onDetach(value);
+    return this;
+  }
+  onDisAppear(value) {
+    this.lazyComponent.onDisAppear(value);
+    return this;
+  }
+  attributeModifier(modifier) {
+    this.lazyComponent.attributeModifier(modifier);
+    return this;
+  };
+  onWillStopDragging(value) {
+    this.lazyComponent.onWillStopDragging(value);
+    return this;
+  };
+  onWillStartDragging(value) {
+    this.lazyComponent.onWillStartDragging(value);
+    return this;
+  };
+  onDidStopDragging(value) {
+    this.lazyComponent.onDidStopDragging(value);
+    return this;
+  };
+  onWillStartFling(value) {
+    this.lazyComponent.onWillStartFling(value);
+    return this;
+  };
+  onDidStopFling(value) {
+    this.lazyComponent.onDidStopFling(value);
+    return this;
+  };
+}
+class WaterFlowModifier extends LazyArkWaterFlowComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

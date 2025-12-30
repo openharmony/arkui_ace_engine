@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,6 +130,8 @@
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 #include "core/interfaces/native/node/extension_companion_node.h"
+#include "core/interfaces/native/node/flow_item_modifier.h"
+#include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/components_ng/pattern/plugin/plugin_model_static.h"
@@ -416,7 +418,9 @@ void* createNavigationNode(ArkUI_Int32 nodeId)
 
 void* createWaterFlowNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = WaterFlowModelNG::CreateFrameNode(nodeId);
+    auto* modifier = NG::NodeModifier::GetWaterFlowModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(modifier->createWaterFlow(nodeId)));
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -424,7 +428,9 @@ void* createWaterFlowNode(ArkUI_Int32 nodeId)
 
 void* createFlowItemNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = WaterFlowItemModelNG::CreateFrameNode(nodeId);
+    auto* modifier = NG::NodeModifier::GetWaterFlowItemModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(modifier->createFlowItem(nodeId)));
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,15 +36,15 @@ ACE_FORCE_EXPORT std::optional<float> ConvertToPx(const CalcLength& value, const
 std::optional<float> ConvertToPx(const std::optional<CalcLength>& value, const ScaleProperty& scaleProperty,
     float percentReference = -1.0f, const std::vector<std::string>& rpnexp = std::vector<std::string>());
 
-std::optional<float> ConvertToPx(
+ACE_FORCE_EXPORT std::optional<float> ConvertToPx(
     const Dimension& dimension, const ScaleProperty& scaleProperty, float percentReference = -1.0f);
 
-SizeF ConvertToSize(const CalcSize& size, const ScaleProperty& scaleProperty,
+ACE_FORCE_EXPORT SizeF ConvertToSize(const CalcSize& size, const ScaleProperty& scaleProperty,
     const SizeF& percentReference = SizeF(-1.0f, -1.0f),
     const std::pair<std::vector<std::string>, std::vector<std::string>>& calcRpnexp =
         std::pair<std::vector<std::string>, std::vector<std::string>>());
 
-OptionalSizeF ConvertToOptionalSize(const CalcSize& size, const ScaleProperty& scaleProperty,
+ACE_FORCE_EXPORT OptionalSizeF ConvertToOptionalSize(const CalcSize& size, const ScaleProperty& scaleProperty,
     const SizeF& percentReference = SizeF(-1.0f, -1.0f),
     const std::pair<std::vector<std::string>, std::vector<std::string>>& calcRpnexp =
         std::pair<std::vector<std::string>, std::vector<std::string>>());
@@ -69,8 +69,8 @@ PaddingPropertyF ConvertWithResidueToPaddingPropertyF(const PaddingProperty& pad
 MarginPropertyF ConvertToMarginPropertyF(const std::unique_ptr<MarginProperty>& margin,
     const ScaleProperty& scaleProperty, float percentReference = -1.0f, bool roundPixel = true);
 
-MarginPropertyF ConvertToMarginPropertyF(const MarginProperty& margin, const ScaleProperty& scaleProperty,
-    float percentReference = -1.0f, bool roundPixel = true);
+ACE_FORCE_EXPORT MarginPropertyF ConvertToMarginPropertyF(const MarginProperty& margin,
+    const ScaleProperty& scaleProperty, float percentReference = -1.0f, bool roundPixel = true);
 
 BorderWidthPropertyF ConvertToBorderWidthPropertyF(const std::unique_ptr<BorderWidthProperty>& borderWidth,
     const ScaleProperty& scaleProperty, float percentReference = -1.0f, bool roundPixel = true);
@@ -93,11 +93,11 @@ void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
 
 PaddingPropertyF AdjacentExpandToRect(RectF& adjustingRect, PaddingPropertyF& frameExpand, RectF& frameRect);
 
-float GetCrossAxisSize(const SizeF& size, Axis axis);
+ACE_FORCE_EXPORT float GetCrossAxisSize(const SizeF& size, Axis axis);
 
 float GetMainAxisOffset(const OffsetF& offset, Axis axis);
 
-float GetMainAxisSize(const SizeF& size, Axis axis);
+ACE_FORCE_EXPORT float GetMainAxisSize(const SizeF& size, Axis axis);
 
 void SetCrossAxisSize(float value, Axis axis, SizeF& size);
 
@@ -169,7 +169,7 @@ OptionalSizeF CreateIdealSizeByPercentRef(const LayoutConstraintF& layoutConstra
  * @param axis the axis of this node.
  * @return SizeF the node size info.
  */
-OptionalSizeF ConstrainIdealSizeByLayoutPolicy(const LayoutConstraintF& layoutConstraint,
+ACE_FORCE_EXPORT OptionalSizeF ConstrainIdealSizeByLayoutPolicy(const LayoutConstraintF& layoutConstraint,
     LayoutCalPolicy widthLayoutPolicy, LayoutCalPolicy heightLayoutPolicy, Axis axis);
 
 /**

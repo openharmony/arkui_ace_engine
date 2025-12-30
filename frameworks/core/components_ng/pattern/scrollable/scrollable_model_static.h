@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,8 +53,8 @@ public:
     static void SetContentStartOffset(FrameNode* frameNode, const std::optional<float>& offset);
     static void SetContentEndOffset(FrameNode* frameNode, const std::optional<float>& offset);
 
-    static void SetOnWillScroll(FrameNode* frameNode, OnWillScrollEvent&& onScroll);
-    static void SetOnDidScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
+    ACE_FORCE_EXPORT static void SetOnWillScroll(FrameNode* frameNode, OnWillScrollEvent&& onScroll);
+    ACE_FORCE_EXPORT static void SetOnDidScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);

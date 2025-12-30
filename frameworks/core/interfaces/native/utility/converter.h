@@ -608,10 +608,10 @@ namespace Converter {
     template<> CalcDimension Convert(const Ark_LengthMetrics& src);
     template<> CalcDimension Convert(const Ark_Number& src);
     template<> CalcDimension Convert(const Ark_String& src);
-    template<> CalcLength Convert(const Ark_Float64& src);
+    template<> ACE_FORCE_EXPORT CalcLength Convert(const Ark_Float64& src);
     template<> CalcLength Convert(const Ark_LengthMetrics& src);
     template<> CalcLength Convert(const Ark_Number& src);
-    template<> CalcLength Convert(const Ark_String& src);
+    template<> ACE_FORCE_EXPORT CalcLength Convert(const Ark_String& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
     template<> Color Convert(const Ark_ColorMetrics& src);
     template<> Color Convert(const Ark_Float64& src);
@@ -674,10 +674,10 @@ namespace Converter {
     template<> PaddingProperty Convert(const Ark_Float64& src);
     template<> PaddingProperty Convert(const Ark_LengthMetrics& src);
     template<> PaddingProperty Convert(const Ark_LocalizedPadding& src);
-    template<> PaddingProperty Convert(const Ark_Number& src);
-    template<> PaddingProperty Convert(const Ark_Padding& src);
-    template<> PaddingProperty Convert(const Ark_Resource& src);
-    template<> PaddingProperty Convert(const Ark_String& src);
+    template<> ACE_FORCE_EXPORT PaddingProperty Convert(const Ark_Number& src);
+    template<> ACE_FORCE_EXPORT PaddingProperty Convert(const Ark_Padding& src);
+    template<> ACE_FORCE_EXPORT PaddingProperty Convert(const Ark_Resource& src);
+    template<> ACE_FORCE_EXPORT PaddingProperty Convert(const Ark_String& src);
     template<> PickerBackgroundStyle Convert(const Ark_PickerBackgroundStyle& src);
     template<> PickerIndicatorStyle Convert(const Ark_PickerIndicatorStyle& src);
     template<> PickerRangeType Convert(const Ark_Resource& src);
@@ -694,7 +694,7 @@ namespace Converter {
     template<> PickerValueType Convert(const Ark_String& src);
     template<> PickerValueType Convert(const Array_ResourceStr& src);
     template<> PointLightStyle Convert(const Ark_PointLightStyle& src);
-    template<> PresetFillType Convert(const Ark_ItemFillPolicy& src);
+    template<> ACE_FORCE_EXPORT PresetFillType Convert(const Ark_ItemFillPolicy& src);
     template<> PreviewText Convert(const Ark_PreviewText& src);
     template<> RadioStyle Convert(const Ark_RadioStyle& src);
     template<> RangeContent Convert(const Ark_TextPickerRangeContent& src);
@@ -720,7 +720,7 @@ namespace Converter {
     template<> ScaleOptions Convert(const Ark_ScaleOptions& src);
     template<> ScrollBarMargin Convert(const Ark_ScrollBarMargin& src);
     template<> ScrollFrameResult Convert(const Ark_OnScrollFrameBeginHandlerResult& from);
-    template<> ScrollFrameResult Convert(const Ark_ScrollResult& src);
+    template<> ACE_FORCE_EXPORT ScrollFrameResult Convert(const Ark_ScrollResult& src);
     template<> SelectMenuParam Convert(const Ark_SelectionMenuOptions& src);
     template<> SelectionOptions Convert(const Ark_SelectionOptions& options);
     template<> Shadow Convert(const Ark_Int32& src);
@@ -807,7 +807,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ButtonStyleMode>& dst, const Ark_ButtonStyleMode& src);
     template<> void AssignCast(std::optional<ButtonType>& dst, const Ark_ButtonType& src);
     template<> void AssignCast(std::optional<CalcDimension>& dst, const Ark_Resource& src);
-    template<> void AssignCast(std::optional<CalcLength>& dst, const Ark_Resource& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<CalcLength>& dst, const Ark_Resource& src);
     template<> void AssignCast(std::optional<CancelButtonStyle>& dst, const Ark_CancelButtonStyle& src);
     template<> void AssignCast(std::optional<ChainEdgeEffect>& dst, const Ark_ChainEdgeEffect& src);
     template<> void AssignCast(std::optional<ChainStyle>& dst, const Ark_ChainStyle& src);
@@ -847,7 +847,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_HorizontalAlign& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_ItemAlign& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_VerticalAlign& src);
-    template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_FlexDirection& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<FlexDirection>& dst, const Ark_FlexDirection& src);
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);
     template<> void AssignCast(std::optional<FocusDrawLevel>& dst, const Ark_FocusDrawLevel& src);
     template<> void AssignCast(std::optional<FocusWrapMode>& dst, const Ark_FocusWrapMode& src);

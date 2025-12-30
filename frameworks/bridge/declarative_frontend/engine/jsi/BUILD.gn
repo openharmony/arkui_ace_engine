@@ -312,7 +312,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_toggle_bridge.cpp",
       "nativeModule/arkts_native_utils_bridge.cpp",
       "nativeModule/arkts_native_video_bridge.cpp",
-      "nativeModule/arkts_native_water_flow_bridge.cpp",
       "nativeModule/arkts_utils.cpp",
       "nativeModule/ui_context_helper.cpp",
       "utils/jsi_module_loader.cpp",

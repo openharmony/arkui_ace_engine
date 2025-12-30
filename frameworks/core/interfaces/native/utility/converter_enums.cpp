@@ -585,7 +585,7 @@ void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src)
 }
 
 template<>
-void AssignCast(std::optional<FlexDirection>& dst, const Ark_FlexDirection& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<FlexDirection>& dst, const Ark_FlexDirection& src)
 {
     switch (src) {
         case ARK_FLEX_DIRECTION_ROW: dst = FlexDirection::ROW; break;

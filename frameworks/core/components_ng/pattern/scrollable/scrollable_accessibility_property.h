@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include "core/components_ng/property/accessibility_property.h"
 
 namespace OHOS::Ace::NG {
-class ScrollableAccessibilityProperty : public AccessibilityProperty {
+class ACE_FORCE_EXPORT ScrollableAccessibilityProperty : public AccessibilityProperty {
     DECLARE_ACE_TYPE(ScrollableAccessibilityProperty, AccessibilityProperty);
 
 public:
