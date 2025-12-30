@@ -954,7 +954,8 @@ std::optional<uint32_t> ParseColorResourceId(const EcmaVM* vm, const Local<JSVal
 }
 
 void ParsePlaceholderStyle(EcmaVM* vm, const Local<JSValueRef>& styleArg, PlaceholderOptions& options,
-    std::optional<Color>& fontColorOpt, std::optional<uint32_t>& colorResourceIdOpt)
+    std::optional<Color>& fontColorOpt, std::optional<uint32_t>& colorResourceIdOpt,
+    RefPtr<ResourceObject>& resObj, const NodeInfo& nodeInfo)
 {
     Font font;
     if (styleArg->IsObject(vm)) {
@@ -966,7 +967,7 @@ void ParsePlaceholderStyle(EcmaVM* vm, const Local<JSValueRef>& styleArg, Placeh
         }
         auto fontColorArg = styleObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "fontColor"));
         Color fontColorParsed;
-        if (!fontColorArg->IsNull() && ArkTSUtils::ParseJsColor(vm, fontColorArg, fontColorParsed)) {
+        if (!fontColorArg->IsNull() && ArkTSUtils::ParseJsColor(vm, fontColorArg, fontColorParsed, resObj, nodeInfo)) {
             fontColorOpt = fontColorParsed;
             colorResourceIdOpt = ParseColorResourceId(vm, fontColorArg);
         }
@@ -1000,7 +1001,9 @@ ArkUINativeModuleValue RichEditorBridge::SetPlaceholder(ArkUIRuntimeCallInfo* ru
     std::optional<uint32_t> colorResourceId = std::nullopt;
     std::string placeholderValue;
     ArkTSUtils::ParseJsString(vm, valueArg, placeholderValue);
-    ParsePlaceholderStyle(vm, styleArg, options, fontColor, colorResourceId);
+    RefPtr<ResourceObject> resourceObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    ParsePlaceholderStyle(vm, styleArg, options, fontColor, colorResourceId, resourceObject, nodeInfo);
     colorResourceId = -1;
     std::vector<ArkUI_CharPtr> stringParameters;
     stringParameters.push_back(placeholderValue.c_str());
@@ -1023,7 +1026,8 @@ ArkUINativeModuleValue RichEditorBridge::SetPlaceholder(ArkUIRuntimeCallInfo* ru
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getRichEditorModifier()->setRichEditorPlaceholder(
-        nativeNode, stringParameters.data(), stringParameters.size(), valuesVector.data(), valuesVector.size());
+        nativeNode, stringParameters.data(), stringParameters.size(), valuesVector.data(), valuesVector.size(),
+        AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1136,10 +1140,13 @@ ArkUINativeModuleValue RichEditorBridge::SetCaretColor(ArkUIRuntimeCallInfo* run
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> resourceObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         nodeModifiers->getRichEditorModifier()->resetRichEditorCaretColor(nativeNode);
     } else {
-        nodeModifiers->getRichEditorModifier()->setRichEditorCaretColor(nativeNode, color.GetValue());
+        nodeModifiers->getRichEditorModifier()->setRichEditorCaretColor(
+            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1439,11 +1446,13 @@ ArkUINativeModuleValue RichEditorBridge::SetSelectedBackgroundColor(ArkUIRuntime
     Color color;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> resourceObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         nodeModifiers->getRichEditorModifier()->resetRichEditorSelectedBackgroundColor(nativeNode);
     } else {
         nodeModifiers->getRichEditorModifier()->setRichEditorSelectedBackgroundColor(
-            nativeNode, color.GetValue());
+            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -2243,7 +2252,8 @@ ArkUINativeModuleValue RichEditorBridge::SetScrollBarColor(ArkUIRuntimeCallInfo*
     } else {
         auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
         ArkTSUtils::CompleteResourceObjectFromColor(resObj, color, true, nodeInfo);
-        nodeModifiers->getRichEditorModifier()->setRichEditorScrollBarColor(nativeNode, color.GetValue());
+        nodeModifiers->getRichEditorModifier()->setRichEditorScrollBarColor(
+            nativeNode, color.GetValue(), AceType::RawPtr(resObj));
     }
     return panda::JSValueRef::Undefined(vm);
 }

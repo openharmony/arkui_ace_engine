@@ -7302,7 +7302,7 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorCopyOptions)(ArkUINodeHandle node);
     void (*setRichEditorOnSelectionChange)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnSelectionChange)(ArkUINodeHandle node);
-    void (*setRichEditorCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setRichEditorCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetRichEditorCaretColor)(ArkUINodeHandle node);
     void (*setRichEditorOnSelect)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnSelect)(ArkUINodeHandle node);
@@ -7316,7 +7316,7 @@ struct ArkUIRichEditorModifier {
     void (*resetOnDeleteComplete)(ArkUINodeHandle node);
     void (*setOnEditingChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnEditingChange)(ArkUINodeHandle node);
-    void (*setRichEditorSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setRichEditorSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetRichEditorSelectedBackgroundColor)(ArkUINodeHandle node);
     void (*setRichEditorOnPaste)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnPaste)(ArkUINodeHandle node);
@@ -7338,7 +7338,8 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorOnDidChange)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnDidChange)(ArkUINodeHandle node);
     void (*setRichEditorPlaceholder)(ArkUINodeHandle node, ArkUI_CharPtr* stringParameters,
-        const ArkUI_Uint32 stringParametersCount, const ArkUI_Float64* valuesArray, const ArkUI_Uint32 valuesCount);
+        const ArkUI_Uint32 stringParametersCount, const ArkUI_Float64* valuesArray, const ArkUI_Uint32 valuesCount,
+        void* resRawPtr);
     void (*resetRichEditorPlaceholder)(ArkUINodeHandle node);
     void (*setRichEditorAboutToDelete)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorAboutToDelete)(ArkUINodeHandle node);
@@ -7370,7 +7371,7 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorFallbackLineSpacing)(ArkUINodeHandle node);
     void (*setRichEditorUndoStyle)(ArkUINodeHandle node, ArkUI_Int32 undoStyleValue);
     void (*resetRichEditorUndoStyle)(ArkUINodeHandle node);
-    void (*setRichEditorScrollBarColor)(ArkUINodeHandle node, ArkUI_Int32 color);
+    void (*setRichEditorScrollBarColor)(ArkUINodeHandle node, ArkUI_Int32 color, void* resRawPtr);
     void (*resetRichEditorScrollBarColor)(ArkUINodeHandle node);
     void (*setRichEditorSelectedDragPreviewStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetRichEditorSelectedDragPreviewStyle)(ArkUINodeHandle node);

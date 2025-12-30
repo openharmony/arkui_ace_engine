@@ -261,10 +261,16 @@ HWTEST_F(RichEditorStyleManagerTest, AddSymbolColorResToTextStyleTest001, TestSi
     resObjArr.push_back(std::make_pair(1, colorResObj));
     resObjArr.push_back(std::make_pair(2, colorResObj));
 
+    /**
+     * @tc.steps: step1. test old flow
+     */
     g_isConfigChangePerform = false;
     StyleManager::AddSymbolColorResource(textStyle, resObjArr);
     EXPECT_EQ(textStyle.resMap_.size(), 3);
 
+    /**
+     * @tc.steps: step2. test new flow
+     */
     g_isConfigChangePerform = true;
     StyleManager::AddSymbolColorResource(textStyle, resObjArr);
     EXPECT_EQ(textStyle.resMap_.size(), 3);
