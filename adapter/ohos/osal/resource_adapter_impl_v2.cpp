@@ -399,6 +399,30 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& pa
     return patternStyle;
 }
 
+void ResourceAdapterImplV2::DumpColorMode()
+{
+    auto manager = GetResourceManager();
+    CHECK_NULL_VOID(manager);
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    CHECK_NULL_VOID(resConfig);
+    manager->GetResConfig(*resConfig);
+    CHECK_NULL_VOID(resConfig);
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    auto colorMode = resConfig->GetColorMode();
+    auto sysColorMode = container->CurrentColorMode();
+    auto globalSysColorMode = ConvertColorModeToGlobal(sysColorMode);
+    auto localColorMode = pipelineContext->GetLocalColorMode();
+    auto globalLocalColorMode = ConvertColorModeToGlobal(localColorMode);
+    if (globalSysColorMode != colorMode && globalLocalColorMode != colorMode) {
+        TAG_LOGW(AceLogTag::ACE_RESOURCE,
+            "ColorMode exception: SysColorMode[%{public}d] | LocalColorMode[%{public}d] | CurColorMode[%{public}d]",
+            globalSysColorMode, globalLocalColorMode, colorMode);
+    }
+}
+
 Color ResourceAdapterImplV2::GetColor(uint32_t resId)
 {
     uint32_t result = 0;
@@ -412,6 +436,7 @@ Color ResourceAdapterImplV2::GetColor(uint32_t resId)
             std::to_string(resId), "Color", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
         return ERROR_VALUE_COLOR;
     }
+    DumpColorMode();
     return Color(result);
 }
 
@@ -429,6 +454,7 @@ Color ResourceAdapterImplV2::GetColorByName(const std::string& resName)
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             resName, "Color", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
+    DumpColorMode();
     return Color(result);
 }
 
