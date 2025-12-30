@@ -63,6 +63,9 @@ export class UIInspector {
     public createComponentObserver(id: string | int): inspector.ComponentObserver {
         throw Error("createComponentObserver not implemented in UIInspector!")
     }
+    public createComponentObserver(id: string): inspector.ComponentObserver {
+        throw Error("createComponentObserver not implemented in UIInspector!")
+    }
 }
 
 export interface TargetInfo {
