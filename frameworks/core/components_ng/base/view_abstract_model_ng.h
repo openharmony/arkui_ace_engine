@@ -1558,6 +1558,7 @@ public:
 
     static void ResetKeyboardShortcutAll(FrameNode* frameNode)
     {
+        CHECK_NULL_VOID(frameNode);
         auto eventHub = frameNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->ClearSingleKeyboardShortcutAll();
