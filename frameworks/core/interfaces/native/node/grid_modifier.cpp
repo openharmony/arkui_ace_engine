@@ -736,6 +736,15 @@ ArkUI_Int32 GetItemFillPolicy(ArkUINodeHandle node)
     return static_cast<int32_t>(GridModelNG::GetItemFillPolicy(frameNode));
 }
 
+void SetScrollToIndex(
+    ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment, float options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<float> extraOffset = options;
+    GridModelNG::SetScrollToIndex(frameNode, index, animation, alignment, extraOffset);
+}
+
 void SetSupportLazyLoadingEmptyBranch(ArkUINodeHandle node, ArkUI_Bool support)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -853,6 +862,7 @@ const ArkUIGridModifier* GetGridModifier()
         .resetItemFillPolicy = ResetItemFillPolicy,
         .setItemFillPolicy = SetItemFillPolicy,
         .getItemFillPolicy = GetItemFillPolicy,
+        .setScrollToIndex = SetScrollToIndex,
         .setSupportLazyLoadingEmptyBranch = SetSupportLazyLoadingEmptyBranch,
         .getSupportLazyLoadingEmptyBranch = GetSupportLazyLoadingEmptyBranch,
     };

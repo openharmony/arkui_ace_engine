@@ -13,27 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
-
-#include <string>
-
-#include "base/geometry/dimension.h"
-#include "base/memory/referenced.h"
+#include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "base/utils/multi_thread.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
-#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
-#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
-#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
 
 namespace OHOS::Ace::NG {
 
-void WaterFlowModelNG::SetScrollToIndexMultiThread(
+void GridModelNG::SetScrollToIndexMultiThread(
     FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment, std::optional<float> extraOffset)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     frameNode->PostAfterAttachMainTreeTask(
         [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), index, animation, alignment, extraOffset]() {

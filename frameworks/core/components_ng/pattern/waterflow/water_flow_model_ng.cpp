@@ -738,14 +738,15 @@ bool WaterFlowModelNG::GetScrollEnabled(FrameNode* frameNode)
     return value;
 }
 
-void WaterFlowModelNG::SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment)
+void WaterFlowModelNG::SetScrollToIndex(
+    FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment, std::optional<float> extraOffset)
 {
     // call SetScrollToIndexMultiThread by multi thread
-    FREE_NODE_CHECK(frameNode, SetScrollToIndex, frameNode, index, animation, alignment);
+    FREE_NODE_CHECK(frameNode, SetScrollToIndex, frameNode, index, animation, alignment, extraOffset);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->ScrollToIndex(index, animation, static_cast<ScrollAlign>(alignment));
+    pattern->ScrollToIndex(index, animation, static_cast<ScrollAlign>(alignment), extraOffset);
 }
 
 void WaterFlowModelNG::SetWaterflowFooter(FrameNode* frameNode, FrameNode* footerNode)
