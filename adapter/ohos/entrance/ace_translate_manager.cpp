@@ -59,6 +59,30 @@ void UiTranslateManagerImpl::GetWebViewCurrentLanguage()
     }
 }
 
+void UiTranslateManagerImpl::GetWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request)
+{
+#ifdef WEB_SUPPORTED
+    auto iter = listenerMap_.find(webId);
+    if (iter != listenerMap_.end()) {
+        auto frameNode = iter->second.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<NG::WebPattern>();
+        CHECK_NULL_VOID(pattern);
+        const auto& finishCallback = []
+            (uint32_t windowId, int32_t webId, const std::string& request, const std::string& result,
+                WebRequestErrorCode errorCode) {
+                UiSessionManager::GetInstance()->SendWebInfoByRequest(windowId, webId, request, result, errorCode);
+            };
+        pattern->GetWebInfoByRequest(windowId, webId, request, finishCallback);
+    } else {
+        UiSessionManager::GetInstance()->SendWebInfoByRequest(
+            windowId, webId, request, "", WebRequestErrorCode::INVALID_WEB_ID);
+    }
+#else
+    LOGW("GetWebInfoByRequest not supportted on this platform.");
+#endif
+}
+
 void UiTranslateManagerImpl::GetTranslateText(std::string extraData, bool isContinued)
 {
     if (listenerMap_.empty()) {
