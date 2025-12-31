@@ -141,7 +141,7 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
     return this;
   }
   onScroll(event: (scrollOffset: number, scrollState: ScrollState) => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onScroll not supported in attributeModifier scenario.');
   }
   onReachStart(event: () => void): this {
     modifierWithKey(this._modifiersWithKeys, GridOnReachStartModifier.identity, GridOnReachStartModifier, event);
