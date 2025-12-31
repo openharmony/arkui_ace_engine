@@ -132,10 +132,6 @@ const std::shared_ptr<PieceAttribute> DeclarationConstants::DEFAULT_PIECE_ATTR =
 const std::shared_ptr<PieceStyle> DeclarationConstants::DEFAULT_PIECE_STYLE = std::make_shared<PieceStyle>();
 const std::shared_ptr<PieceEvent> DeclarationConstants::DEFAULT_PIECE_EVENT = std::make_shared<PieceEvent>();
 
-// default value of qrcode
-const std::shared_ptr<QrcodeAttribute> DeclarationConstants::DEFAULT_QRCODE_ATTR = std::make_shared<QrcodeAttribute>();
-const std::shared_ptr<QrcodeStyle> DeclarationConstants::DEFAULT_QRCODE_STYLE = std::make_shared<QrcodeStyle>();
-
 // default value of search
 const std::shared_ptr<SearchAttribute> DeclarationConstants::DEFAULT_SEARCH_ATTR = std::make_shared<SearchAttribute>();
 const std::shared_ptr<SearchStyle> DeclarationConstants::DEFAULT_SEARCH_STYLE = std::make_shared<SearchStyle>();

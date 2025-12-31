@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_QRCODE_COMPOSED_ELEMENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_QRCODE_COMPOSED_ELEMENT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_QRCODE_QRCODE_COMPOSED_ELEMENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_QRCODE_QRCODE_COMPOSED_ELEMENT_H
 
-#include "core/components/qrcode/qrcode_element.h"
-#include "core/components/qrcode/render_qrcode.h"
+#include "compatible/components/qrcode/qrcode_element.h"
+#include "compatible/components/qrcode/render_qrcode.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -48,4 +48,4 @@ private:
 
 } // namespace OHOS::Ace::V2
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_QRCODE_COMPOSED_ELEMENT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_QRCODE_QRCODE_COMPOSED_ELEMENT_H

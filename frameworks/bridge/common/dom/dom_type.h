@@ -1120,14 +1120,6 @@ ACE_EXPORT extern const char DOM_TRANSITION_EFFECT[];
 ACE_EXPORT extern const char DOM_TRANSITION_CARD_COMPOSEID[];
 ACE_EXPORT extern const char DOM_TRANSITION_CARD_PARAMS[];
 
-// qrcode
-ACE_EXPORT extern const char DOM_QRCODE_BACKGROUND_COLOR[];
-ACE_EXPORT extern const char DOM_QRCODE_COLOR[];
-ACE_EXPORT extern const char DOM_QRCODE_HEIGHT[];
-ACE_EXPORT extern const char DOM_QRCODE_WIDTH[];
-ACE_EXPORT extern const char DOM_QRCODE_TYPE[];
-ACE_EXPORT extern const char DOM_QRCODE_VALUE[];
-
 // svg
 ACE_EXPORT extern const char DOM_SVG_ID[];
 ACE_EXPORT extern const char DOM_SVG_ANIMATION_BEGIN[];

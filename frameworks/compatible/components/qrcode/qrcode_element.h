@@ -13,19 +13,20 @@
  * limitations under the License.
  */
 
-#include "rosen_render_qrcode.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_QRCODE_QRCODE_ELEMENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_QRCODE_QRCODE_ELEMENT_H
+
+#include "compatible/components/qrcode/qrcode_component.h"
+#include "compatible/components/qrcode/render_qrcode.h"
+#include "core/focus/focus_node.h"
+#include "core/pipeline/base/render_element.h"
 
 namespace OHOS::Ace {
-RefPtr<RenderNode> RenderQrcode::Create()
-{
-    if (SystemProperties::GetRosenBackendEnabled()) {
-#ifdef ENABLE_ROSEN_BACKEND
-        return AceType::MakeRefPtr<RosenRenderQrcode>();
-#else
-        return nullptr;
-#endif
-    } else {
-        return nullptr;
-    }
-}
+
+class QrcodeElement : public SoleChildElement, public FocusNode {
+    DECLARE_ACE_TYPE(QrcodeElement, SoleChildElement, FocusNode);
+};
+
 } // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_QRCODE_QRCODE_ELEMENT_H

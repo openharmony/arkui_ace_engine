@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/models/qrcode_model_impl.h"
+#include "compatible/components/qrcode/qrcode_model_impl.h"
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/qrcode/qrcode_component.h"
+#include "compatible/components/qrcode/qrcode_component.h"
 
 namespace OHOS::Ace::Framework {
 void QRCodeModelImpl::Create(const std::string& value)
