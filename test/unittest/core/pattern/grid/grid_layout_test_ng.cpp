@@ -957,7 +957,7 @@ HWTEST_F(GridLayoutTestNg, GridLazyEmptyBranchTest001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false), true);
 
     auto wrapper1 = layoutAlgorithm->GetGridItem(AceType::RawPtr(frameNode_), 0);
-    EXPECT_EQ(wrapper1, nullptr);
+    EXPECT_NE(wrapper1, nullptr);
 
     auto repeatNode = CreateRepeatNode(1);
     frameNode_->AddChild(repeatNode);
