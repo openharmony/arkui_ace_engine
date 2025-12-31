@@ -953,6 +953,8 @@ public:
     
     void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
 
+    void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnAttachToFrameNode() override;
@@ -962,6 +964,7 @@ protected:
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
     void OnDetachFromMainTree() override;
     void OnDetachFromMainTreeMultiThread();
+    void ContentChangeByDetaching(PipelineContext* pipeline) override;
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
     EdgeEffect GetEdgeEffect() const;

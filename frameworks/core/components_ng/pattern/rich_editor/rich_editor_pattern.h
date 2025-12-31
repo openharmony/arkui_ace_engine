@@ -365,6 +365,7 @@ public:
         WeakPtr<RichEditorPattern> pattern_;
     };
 
+    void ContentChangeByDetaching(PipelineContext* pipeline) override {}
     bool NotUpdateCaretInPreview(int32_t caret, const PreviewTextRecord& record);
     int32_t SetPreviewText(const std::u16string& previewTextValue, const PreviewRange range) override;
     bool SetPreviewTextForDelete(int32_t oriLength, bool isBackward, bool isByIME);
