@@ -24,6 +24,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+    const std::u16string URL_ADDRESS_1 = u"https://www.abc.com";
+    const std::u16string URL_ADDRESS_2 = u"";
     const Color STROKE_COLOR_VALUE = Color::FromRGB(255, 100, 100);
     const Dimension STROKE_WIDTH_VALUE = Dimension(20.1, DimensionUnit::PX);
     const struct UpdateSpanStyle TYPING_STYLE = {
@@ -120,6 +122,46 @@ HWTEST_F(RichEditorTextStyleTestNg, AddTextSpan001, TestSize.Level0)
     EXPECT_EQ(newSpan->GetStrokeWidth(), STROKE_WIDTH_VALUE);
 
     ClearSpan();
+}
+
+/**
+ * @tc.name: AddTextSpan002
+ * @tc.desc: test add text span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextStyleTestNg, AddTextSpan002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. get RichEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. strokeColor does not follow fontColor
+     */
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    options.urlAddress = URL_ADDRESS_1;
+    options.useThemeFontColor = true;
+    options.style = TEXT_STYLE_1;
+    auto index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 0);
+
+    /**
+     * @tc.steps: step3. strokeColor follow fontColor
+     */
+    options.strokeColorFollowFontColor = true;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 1);
+
+    /**
+     * @tc.steps: step4. empty url address
+     */
+    options.urlAddress = URL_ADDRESS_2;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 2);
 }
 
 /**
