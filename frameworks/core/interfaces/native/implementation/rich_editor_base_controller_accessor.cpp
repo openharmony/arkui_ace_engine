@@ -133,7 +133,7 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const UpdateSpanStyle& src, Co
         dst.fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String>(Ark_Empty());
     } else {
         dst.fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(
-            static_cast<std::int32_t>(src.updateFontWeight.value()));
+            static_cast<int32_t>(src.updateFontWeight.value()));
     }
     if (src.updateFontFamily.has_value() && !src.updateFontFamily->empty()) {
         std::string family = V2::ConvertFontFamily(src.updateFontFamily.value());
