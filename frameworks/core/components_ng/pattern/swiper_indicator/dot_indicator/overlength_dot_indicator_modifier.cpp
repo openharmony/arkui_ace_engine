@@ -727,8 +727,10 @@ void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const OffsetF& margi
     PlayBlackPointsAnimation(itemHalfSizes);
 
     std::vector<std::pair<float, float>> pointCenterX;
-    if ((currentSelectedIndex_ == 0 && targetSelectedIndex_ == maxDisplayCount_ - 1) ||
-        (currentSelectedIndex_ == maxDisplayCount_ - 1 && targetSelectedIndex_ == 0)) {
+    bool isTouchBottomTypeLoop = touchBottomTypeLoop != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE ||
+                                 (currentSelectedIndex_ == 0 && targetSelectedIndex_ == maxDisplayCount_ - 1) ||
+                                 (currentSelectedIndex_ == maxDisplayCount_ - 1 && targetSelectedIndex_ == 0);
+    if (isTouchBottomTypeLoop) {
         auto currentSelectedIndex =
             isHorizontalAndRTL_ ? maxDisplayCount_ - 1 - currentSelectedIndex_ : currentSelectedIndex_;
         overlongSelectedStartCenterX_.first = animationEndCenterX_[currentSelectedIndex];
