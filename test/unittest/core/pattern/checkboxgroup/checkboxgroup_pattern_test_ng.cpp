@@ -924,7 +924,8 @@ HWTEST_F(CheckBoxGroupPatternTestNG, UpdateGroupManager001, TestSize.Level1)
     auto stageManager = context->GetStageManager();
     ASSERT_NE(stageManager, nullptr);
     stageManager->stageNode_ = stageNode;
-    auto checkBoxGroupNode = FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, 3, AceType::MakeRefPtr<CheckBoxGroupPattern>());
+    auto checkBoxGroupNode = FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, 3,
+        AceType::MakeRefPtr<CheckBoxGroupPattern>());
     ASSERT_NE(checkBoxGroupNode, nullptr);
     auto pattern = checkBoxGroupNode->GetPattern<CheckBoxGroupPattern>();
     ASSERT_NE(pattern, nullptr);
