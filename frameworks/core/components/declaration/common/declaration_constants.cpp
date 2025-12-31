@@ -124,19 +124,10 @@ const std::shared_ptr<ButtonMethod> DeclarationConstants::DEFAULT_BUTTON_METHOD 
 const std::shared_ptr<DivAttribute> DeclarationConstants::DEFAULT_DIV_ATTR = std::make_shared<DivAttribute>();
 const std::shared_ptr<DivStyle> DeclarationConstants::DEFAULT_DIV_STYLE = std::make_shared<DivStyle>();
 
-// default value of input
-const std::shared_ptr<InputAttribute> DeclarationConstants::DEFAULT_INPUT_ATTR = std::make_shared<InputAttribute>();
-
 // default value of piece
 const std::shared_ptr<PieceAttribute> DeclarationConstants::DEFAULT_PIECE_ATTR = std::make_shared<PieceAttribute>();
 const std::shared_ptr<PieceStyle> DeclarationConstants::DEFAULT_PIECE_STYLE = std::make_shared<PieceStyle>();
 const std::shared_ptr<PieceEvent> DeclarationConstants::DEFAULT_PIECE_EVENT = std::make_shared<PieceEvent>();
-
-// default value of search
-const std::shared_ptr<SearchAttribute> DeclarationConstants::DEFAULT_SEARCH_ATTR = std::make_shared<SearchAttribute>();
-const std::shared_ptr<SearchStyle> DeclarationConstants::DEFAULT_SEARCH_STYLE = std::make_shared<SearchStyle>();
-const std::shared_ptr<SearchEvent> DeclarationConstants::DEFAULT_SEARCH_EVENT = std::make_shared<SearchEvent>();
-const std::shared_ptr<SearchMethod> DeclarationConstants::DEFAULT_SEARCH_METHOD = std::make_shared<SearchMethod>();
 
 // default value of side bar
 const std::shared_ptr<SideBarContainerAttribute> DeclarationConstants::DEFAULT_SIDE_BAR_ATTR =
@@ -158,16 +149,6 @@ const std::shared_ptr<TextSpecializedAttribute> DeclarationConstants::DEFAULT_TE
     std::make_shared<TextSpecializedAttribute>();
 const std::shared_ptr<TextSpecializedStyle> DeclarationConstants::DEFAULT_TEXT_STYLE =
     std::make_shared<TextSpecializedStyle>();
-
-// default value of textfield
-const std::shared_ptr<TextFieldAttribute> DeclarationConstants::DEFAULT_TEXTFIELD_ATTR =
-    std::make_shared<TextFieldAttribute>();
-const std::shared_ptr<TextFieldStyle> DeclarationConstants::DEFAULT_TEXTFIELD_STYLE =
-    std::make_shared<TextFieldStyle>();
-const std::shared_ptr<TextFieldEvent> DeclarationConstants::DEFAULT_TEXTFIELD_EVENT =
-    std::make_shared<TextFieldEvent>();
-const std::shared_ptr<TextFieldMethod> DeclarationConstants::DEFAULT_TEXTFIELD_METHOD =
-    std::make_shared<TextFieldMethod>();
 
 // default value of texttimer
 const std::shared_ptr<TextTimerAttribute> DeclarationConstants::DEFAULT_TEXTTIMER_ATTR =

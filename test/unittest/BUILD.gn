@@ -672,6 +672,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/components/common/properties/clip_path.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/decoration.cpp",
+    "$ace_root/frameworks/core/components/common/properties/edge.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
     "$ace_root/frameworks/core/components/common/properties/text_style.cpp",

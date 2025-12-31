@@ -22,8 +22,8 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
-#include "frameworks/core/components/text_field/text_field_component.h"
-#include "frameworks/core/components/text_field/text_field_controller.h"
+#include "frameworks/compatible/components/text_field/text_field_component.h"
+#include "frameworks/compatible/components/text_field/text_field_controller.h"
 #include "frameworks/core/components/text_field/textfield_theme.h"
 #include "frameworks/core/components_ng/pattern/text/text_menu_extension.h"
 #include "frameworks/core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -106,8 +106,6 @@ public:
     static void OnDidInsertValue(const JSCallbackInfo& info);
     static void OnWillDelete(const JSCallbackInfo& info);
     static void OnDidDelete(const JSCallbackInfo& info);
-    static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,
-        const Border& boxBorder, const RefPtr<TextFieldTheme>& textFieldTheme);
     static void SetForegroundColor(const JSCallbackInfo& info);
     static void SetPasswordIcon(const JSCallbackInfo& info);
     static void SetShowUnit(const JSCallbackInfo& info);

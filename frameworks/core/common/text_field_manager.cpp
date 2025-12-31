@@ -14,8 +14,26 @@
  */
 
 #include "core/common/text_field_manager.h"
+#include "core/common/dynamic_module_helper.h"
+#include "compatible/components/text_field/modifier/text_field_modifier.h"
 
 namespace OHOS::Ace {
+
+namespace {
+const ArkUITextFieldModifierCompatible* GetTextFieldInnerModifier()
+{
+    static const ArkUITextFieldModifierCompatible* textFieldModifier_ = nullptr;
+    if (textFieldModifier_) {
+        return textFieldModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("textarea");
+    if (loader) {
+        textFieldModifier_ = reinterpret_cast<const ArkUITextFieldModifierCompatible*>(loader->GetCustomModifier());
+        return textFieldModifier_;
+    }
+    return nullptr;
+}
+} // namespace
 
 void TextFieldManager::SetClickPosition(const Offset& position)
 {
@@ -76,17 +94,11 @@ bool TextFieldManager::UpdatePanelForVirtualKeyboard(double offsetY, double full
     auto onFocusTextField = onFocusTextField_.Upgrade();
     CHECK_NULL_RETURN(onFocusTextField, false);
 #ifndef NG_BUILD
-    auto slidingPanelParent = onFocusTextField->GetSlidingPanelAncest();
-    CHECK_NULL_RETURN(slidingPanelParent, false);
-    if (GreatNotEqual(onFocusTextField->GetPaintRect().Height() +
-        onFocusTextField->GetGlobalOffset().GetY(), fullHeight)) {
-        LOGI("Raising panel with offset %{public}f",
-            onFocusTextField->GetPaintRect().Height() +
-            onFocusTextField->GetGlobalOffset().GetY() - fullHeight);
-        offsetY -= onFocusTextField->GetPaintRect().Height() +
-            onFocusTextField->GetGlobalOffset().GetY() - fullHeight;
+    auto* modifier = GetTextFieldInnerModifier();
+    CHECK_NULL_RETURN(modifier, false);
+    if (!modifier->liftPanelForVirtualKeyboard(onFocusTextField, offsetY, fullHeight)) {
+        return false;
     }
-    slidingPanelParent->LiftPanelForVirtualKeyboard(offsetY);
 #endif
     return true;
 }
@@ -96,9 +108,11 @@ bool TextFieldManager::ResetSlidingPanelParentHeight()
     auto onFocusTextField = onFocusTextField_.Upgrade();
     CHECK_NULL_RETURN(onFocusTextField, false);
 #ifndef NG_BUILD
-    auto slidingPanelParent = onFocusTextField->GetSlidingPanelAncest();
-    CHECK_NULL_RETURN(slidingPanelParent, false);
-    slidingPanelParent->UpdatePanelHeightByCurrentMode();
+    auto* modifier = GetTextFieldInnerModifier();
+    CHECK_NULL_RETURN(modifier, false);
+    if (!modifier->updatePanelHeightByCurrentMode(onFocusTextField)) {
+        return false;
+    }
 #endif
     return true;
 }

@@ -29,7 +29,7 @@
 #include "frameworks/compatible/components/clock/dom_clock.h"
 #include "frameworks/bridge/common/dom/dom_configs.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
-#include "frameworks/bridge/common/dom/dom_input.h"
+#include "frameworks/compatible/components/input/dom_input.h"
 #include "frameworks/bridge/common/dom/dom_proxy.h"
 #include "frameworks/bridge/common/dom/dom_stepper.h"
 #include "frameworks/bridge/common/dom/dom_stepper_item.h"

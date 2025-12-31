@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_ACE_ENGINE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_FORM_H
 
 #include "base/utils/macros.h"
-#include "frameworks/bridge/common/dom/dom_input.h"
+#include "compatible/components/input/dom_input.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
 
 namespace OHOS::Ace::Framework {
@@ -29,9 +29,9 @@ public:
     DOMForm(NodeId nodeId, const std::string& nodeName);
     ~DOMForm() override = default;
 
-    void Submit();
+    ACE_FORCE_EXPORT void Submit();
 
-    void Reset();
+    ACE_FORCE_EXPORT void Reset();
 
     RefPtr<Component> GetSpecializedComponent() override
     {

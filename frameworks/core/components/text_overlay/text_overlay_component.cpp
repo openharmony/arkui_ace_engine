@@ -25,6 +25,8 @@
 #include "core/components/text_overlay/render_text_overlay.h"
 #include "core/components/text_overlay/text_overlay_element.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/common/dynamic_module_helper.h"
+#include "compatible/components/text_field/modifier/text_field_modifier.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -43,6 +45,19 @@ constexpr char OVERLAY_SEARCH[] = "search";
 constexpr Dimension OVERLAY_MARGIN_BOTTOM = 8.0_vp;
 constexpr Dimension TOOL_BAR_HEIGHT = 40.0_vp;
 
+const ArkUITextFieldModifierCompatible* GetTextFieldInnerModifier()
+{
+    static const ArkUITextFieldModifierCompatible* textFieldModifier_ = nullptr;
+    if (textFieldModifier_) {
+        return textFieldModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("textarea");
+    if (loader) {
+        textFieldModifier_ = reinterpret_cast<const ArkUITextFieldModifierCompatible*>(loader->GetCustomModifier());
+        return textFieldModifier_;
+    }
+    return nullptr;
+}
 } // namespace
 
 TextOverlayComponent::TextOverlayComponent(
@@ -434,8 +449,9 @@ void TextOverlayComponent::OnToolBarButtonClick(const EventMarker& marker, const
 std::string TextOverlayComponent::GetSelectedText() const
 {
     const auto& textField = weakTextField_.Upgrade();
-    if (textField) {
-        return textField->GetEditingValue().GetSelectedText();
+    auto* modifier = GetTextFieldInnerModifier();
+    if (textField && modifier) {
+        return modifier->getEditingValue(textField);
     }
     return "";
 }

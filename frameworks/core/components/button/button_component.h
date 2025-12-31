@@ -37,7 +37,7 @@ using ProgressCallback = std::function<void(uint32_t)>;
 
 enum class ButtonStateAttribute { COLOR, RADIUS, HEIGHT, WIDTH };
 
-class ACE_EXPORT ButtonComponent : public ComponentGroup, public LabelTarget, public Measurable {
+class ACE_FORCE_EXPORT ButtonComponent : public ComponentGroup, public LabelTarget, public Measurable {
     DECLARE_ACE_TYPE(ButtonComponent, ComponentGroup, LabelTarget, Measurable);
 
 public:

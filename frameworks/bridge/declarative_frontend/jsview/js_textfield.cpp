@@ -39,8 +39,8 @@
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/jsview/models/text_field_model_impl.h"
 #include "core/common/container.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components/common/layout/common_text_constants.h"
@@ -49,6 +49,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/image/image_source_info.h"
 #include "core/text/text_emoji_processor.h"
 #ifdef ENABLE_STANDARD_INPUT
@@ -73,8 +74,9 @@ TextFieldModel* TextFieldModel::GetInstance()
         static NG::TextFieldModelNG instance;
         return &instance;
     } else {
-        static Framework::TextFieldModelImpl instance;
-        return &instance;
+        static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("textarea");
+        static TextFieldModel* instance = loader ? reinterpret_cast<TextFieldModel*>(loader->CreateModel()) : nullptr;
+        return instance;
     }
 #endif
 }
@@ -1586,43 +1588,6 @@ void JSTextField::SetPasswordIcon(const JSCallbackInfo& info)
     ParseOnIconSrc(showVal, passwordIcon);
     ParseOffIconSrc(hideVal, passwordIcon);
     TextFieldModel::GetInstance()->SetPasswordIcon(passwordIcon);
-}
-
-void JSTextField::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
-    const RefPtr<TextFieldComponent>& component, const Border& boxBorder,
-    const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme)
-{
-    if (!textFieldTheme) {
-        return;
-    }
-
-    RefPtr<Decoration> decoration = component->GetDecoration();
-    RefPtr<Decoration> boxDecoration = boxComponent->GetBackDecoration();
-    if (!decoration) {
-        decoration = AceType::MakeRefPtr<Decoration>();
-    }
-    if (boxDecoration) {
-        Border border = decoration->GetBorder();
-        border.SetLeftEdge(boxBorder.Left());
-        border.SetRightEdge(boxBorder.Right());
-        border.SetTopEdge(boxBorder.Top());
-        border.SetBottomEdge(boxBorder.Bottom());
-        border.SetBorderRadius(textFieldTheme->GetBorderRadius());
-        decoration->SetBorder(border);
-        component->SetOriginBorder(decoration->GetBorder());
-
-        if (boxDecoration->GetImage() || boxDecoration->GetGradient().IsValid()) {
-            // clear box properties except background image and radius.
-            boxDecoration->SetBackgroundColor(Color::TRANSPARENT);
-            Border border;
-            border.SetBorderRadius(textFieldTheme->GetBorderRadius());
-            boxDecoration->SetBorder(border);
-        }
-    } else {
-        boxDecoration = AceType::MakeRefPtr<Decoration>();
-        boxDecoration->SetBorderRadius(textFieldTheme->GetBorderRadius());
-        boxComponent->SetBackDecoration(boxDecoration);
-    }
 }
 
 void JSTextField::SetShowUnit(const JSCallbackInfo& info)

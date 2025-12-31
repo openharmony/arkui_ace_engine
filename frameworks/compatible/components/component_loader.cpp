@@ -35,6 +35,9 @@
 #include "compatible/components/qrcode/qrcode_loader.h"
 #include "compatible/components/rating/rating_loader.h"
 #include "compatible/components/refresh/refresh_loader.h"
+#include "compatible/components/search/search_loader.h"
+#include "compatible/components/text_field/text_field_loader.h"
+#include "compatible/components/input/input_loader.h"
 #include "frameworks/base/log/log_wrapper.h"
 
 #include "compatible/components/video/video_loader.h"
@@ -99,6 +102,9 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "tabs", []() -> ComponentLoader* { return new TabsLoader(); } },
         { "tab-bar", []() -> ComponentLoader* { return new TabBarLoader(); } },
         { "tab-content", []() -> ComponentLoader* { return new TabContentLoader(); } },
+        { "search", []() -> ComponentLoader* { return new SearchLoader(); } },
+        { "textarea", []() -> ComponentLoader* { return new TextFieldLoader(); } },
+        { "input", []() -> ComponentLoader* { return new InputLoader(); } },
     };
     auto loaderIter = sLoaderMap.find(nameStr);
     if (loaderIter != sLoaderMap.end()) {

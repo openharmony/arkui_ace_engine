@@ -858,7 +858,7 @@ public:
     ~TextStyle() = default;
 
     bool operator==(const TextStyle& rhs) const;
-    bool operator!=(const TextStyle& rhs) const;
+    ACE_FORCE_EXPORT bool operator!=(const TextStyle& rhs) const;
 
     static void ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextStyle>& style,
         const NG::InspectorFilter& filter);
@@ -1112,7 +1112,7 @@ public:
 
     // Only used in old frames.
     // start
-    void SetAdaptTextSize(
+    ACE_FORCE_EXPORT void SetAdaptTextSize(
         const Dimension& maxFontSize, const Dimension& minFontSize, const Dimension& fontSizeStep = 1.0_px);
 
     bool GetAdaptHeight() const

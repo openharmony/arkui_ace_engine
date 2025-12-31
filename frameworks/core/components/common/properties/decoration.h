@@ -908,8 +908,8 @@ public:
 
     // Indicate how much size the decoration taken, excluding the content size.
     Size GetOccupiedSize(double dipScale) const;
-    double HorizontalSpaceOccupied(double dipScale) const;
-    double VerticalSpaceOccupied(double dipScale) const;
+    ACE_FORCE_EXPORT double HorizontalSpaceOccupied(double dipScale) const;
+    ACE_FORCE_EXPORT double VerticalSpaceOccupied(double dipScale) const;
 
     Offset GetOffset(double dipScale) const;
 
