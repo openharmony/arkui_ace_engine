@@ -98,7 +98,7 @@ public:
         const std::optional<SelectionOptions>& options, bool isForward) override
     {
         if (auto controller = handler_.Upgrade(); controller) {
-            controller->SetSelection(selectionStart, selectionEnd, options, isForward);
+            controller->SetSelection(selectionStart, selectionEnd, options);
         }
     }
 
