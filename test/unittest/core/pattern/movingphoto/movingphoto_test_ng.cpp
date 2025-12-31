@@ -1331,6 +1331,84 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest028, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MovingPhotoPatternTest029
+ * @tc.desc: Test WherHandleImageErrorStopAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto
+     * @tc.expected: step1. Create MovingPhoto
+     */
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
+    auto pattern = frameNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. GetErrorImage
+     * @tc.expected: step2. StopAinmation
+     */
+    LoadImageFailEvent info(0, 0, "error");
+    pattern->HandleImageErrorEvent(info);
+    pattern->StopAnimation();
+    EXPECT_FALSE(pattern->isStopAnimation_);
+}
+
+/**
+ * @tc.name: MovingPhotoPatternTest030
+ * @tc.desc: Test HandleImageError
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ErrorImage
+     * @tc.expected: step1. Create MovingPhoto
+     */
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
+    auto pattern = frameNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. GetErrorImage
+     * @tc.expected: step2. HandleImageError
+     */
+    LoadImageFailEvent info(0, 0, "error");
+    pattern->HandleImageErrorEvent(info);
+    EXPECT_TRUE(pattern->handleImageError_);
+}
+
+/**
+ * @tc.name: MovingPhotoPatternTest031
+ * @tc.desc: Test Start
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto
+     * @tc.expected: step1. Create MovingPhoto
+     */
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
+    auto pattern = frameNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. Start
+     * @tc.expected: step2. handleImageError_ == false
+     */
+    pattern->Start();
+    EXPECT_FALSE(pattern->handleImageError_);
+}
+
+/**
  * @tc.name: MovingPhotoPatternTest032
  * @tc.desc: Test setMovingController
  * @tc.type: FUNC
