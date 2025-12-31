@@ -46,7 +46,7 @@ group("advanced_ui_component_static") {
       #"popup:popup",
       "tabtitlebar:tabTitleBar",
       "exceptionprompt:exceptionPrompt",
-      #"toolbar:toolBar",
+      "toolbar:toolBar",
       "filter:Filter",
       #"arcbutton:arcButton",
       #"formmenu:formMenu",
