@@ -35,6 +35,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/video/video_theme.h"
 #include "core/components/video/video_utils.h"
+#include "core/components/image/image_event.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/drag_event.h"
