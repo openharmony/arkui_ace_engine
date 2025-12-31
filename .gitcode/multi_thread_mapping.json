@@ -531,5 +531,12 @@
         "mapping": {
             "ResetLoadingProgressColor": "ResetLoadingProgressColorMultiThread"
         }
+    },
+    {
+        "file": "frameworks/core/components_ng/pattern/grid/grid_model_ng_multi_thread.cpp",
+        "normal_file": "frameworks/core/components_ng/pattern/grid/grid_model_ng.cpp",
+        "mapping": {
+            "GridModelNG::SetScrollToIndex": "GridModelNG::SetScrollToIndexMultiThread"
+        }
     }
 ]
