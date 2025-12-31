@@ -75,6 +75,11 @@ abstract class ViewBuildNodeBase {
         return false;
     }
 
+    public getElementNameById(elmtId: number): string {
+        const updateFuncRecord = this.updateFuncByElmtId.get(elmtId);
+        return updateFuncRecord ? updateFuncRecord.getComponentName() : 'unknown component name';
+    }
+
     public debugInfoElmtId(elmtId: number, isProfiler: boolean = false): string | ElementType {
         return isProfiler ? {
             elementId: elmtId,
