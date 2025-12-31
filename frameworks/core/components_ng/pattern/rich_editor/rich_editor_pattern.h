@@ -1126,6 +1126,8 @@ public:
         selectedBackgroundColor_ = selectedBackgroundColor;
     }
 
+    void SetSelectedDragPreviewColor(const Color& selectedDragPreviewColor);
+
     Color GetSelectedBackgroundColor() const;
 
     void SetCustomKeyboardOption(bool supportAvoidance);

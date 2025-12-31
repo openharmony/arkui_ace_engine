@@ -5667,6 +5667,7 @@ void RichEditorPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Proper
         { StyleManager::SCROLL_BAR_COLOR_KEY,  [this](const Color& c){ UpdateScrollBarColor(c); } },
         { StyleManager::PLACEHOLDER_FONT_COLOR_KEY,  [this](const Color& c){ UpdatePlaceholderFontColor(c); } },
         { StyleManager::SELECTED_BACKGROUND_COLOR_KEY,  [this](const Color& c){ SetSelectedBackgroundColor(c); } },
+        { StyleManager::SELECTED_DRAG_PREVIEW_COLOR_KEY,  [this](const Color& c){ SetSelectedDragPreviewColor(c); } },
     };
     auto iter = UPDATER_MAP.find(key);
     IF_TRUE(iter != UPDATER_MAP.end(), iter->second(*color));
@@ -9490,6 +9491,14 @@ void RichEditorPattern::CreateDragNode()
     CHECK_NULL_VOID(dragNode_);
     InitDragShadow(host, dragNode_, info.isDragShadowNeeded, info.dragBackgroundColor.has_value());
     FrameNode::ProcessOffscreenNode(dragNode_);
+}
+
+void RichEditorPattern::SetSelectedDragPreviewColor(const Color& selectedDragPreviewColor)
+{
+    auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
+    IF_PRESENT(layoutProperty, UpdateSelectedDragPreviewStyle(selectedDragPreviewColor));
+    auto host = GetContentHost();
+    IF_PRESENT(host, MarkDirtyNode(PROPERTY_UPDATE_MEASURE));
 }
 
 float RichEditorPattern::GetMaxSelectedWidth()

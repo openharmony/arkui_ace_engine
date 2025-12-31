@@ -796,7 +796,9 @@ void SetRichEditorSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 co
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         if (resObj) {
-            pattern->RegisterResource<Color>("selectedDragPreviewStyle", resObj, result);
+            pattern->RegisterResource<Color>("selectedDragPreviewColor", resObj, result);
+        } else {
+            pattern->UnRegisterResource("selectedDragPreviewColor");
         }
     }
 }
@@ -809,7 +811,7 @@ void ResetRichEditorSelectedDragPreviewStyle(ArkUINodeHandle node)
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        pattern->UnRegisterResource("selectedDragPreviewStyle");
+        pattern->UnRegisterResource("selectedDragPreviewColor");
     }
 }
 
