@@ -595,6 +595,26 @@ HWTEST_F(RichEditorSelectOverlayTestNg, SelectedBackgroundColorTest001, TestSize
 }
 
 /**
+ * @tc.name: SelectedDragPreviewColorTest001
+ * @tc.desc: test set and get selectedDragPreviewColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, SelectedDragPreviewColorTest001, TestSize.Level0)
+{
+    RichEditorModelNG model;
+    model.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    Color patternSelectedDragPreviewColor = richEditorPattern->GetSelectedDragPreviewStyleColor();
+    EXPECT_EQ(patternSelectedDragPreviewColor, Color(0xFFFFFFFF));
+    model.SetSelectedDragPreviewStyle(Color::RED);
+    patternSelectedDragPreviewColor = richEditorPattern->GetSelectedDragPreviewStyleColor();
+    EXPECT_EQ(patternSelectedDragPreviewColor, Color::RED);
+}
+
+/**
  * @tc.name: MoveHandle
  * @tc.desc: test whether the handle is moved when scrolling.
  * @tc.type: FUNC

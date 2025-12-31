@@ -726,6 +726,30 @@ HWTEST_F(GridLayoutTestNg, EstimateHeight001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollBarOverDrag001
+ * @tc.desc: Test ScrollBar over drag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, ScrollBarOverDrag001, TestSize.Level1)
+{
+    /*
+     * 0 0
+     * 0 0
+     * 1 2
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(5));
+    CreateBigItem(0, 1, 0, 1, 240.0f, 150.0f);
+    CreateFixedItems(10);
+    CreateDone();
+
+    UpdateCurrentOffset(-100.0f, SCROLL_FROM_BAR_OVER_DRAG);
+
+    EXPECT_EQ(pattern_->info_.currentOffset_, -22.5);
+}
+
+/**
  * @tc.name: GridLayoutInfo001
  * @tc.desc: Test Grid Layout Info
  * @tc.type: FUNC
@@ -933,7 +957,7 @@ HWTEST_F(GridLayoutTestNg, GridLazyEmptyBranchTest001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false), true);
 
     auto wrapper1 = layoutAlgorithm->GetGridItem(AceType::RawPtr(frameNode_), 0);
-    EXPECT_EQ(wrapper1, nullptr);
+    EXPECT_NE(wrapper1, nullptr);
 
     auto repeatNode = CreateRepeatNode(1);
     frameNode_->AddChild(repeatNode);

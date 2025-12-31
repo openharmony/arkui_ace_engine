@@ -40,9 +40,13 @@ public:
         const std::map<int32_t, std::vector<int32_t>>& arkWebs);
     void SetArkUIQueryErrorCode(MultiImageQueryErrorCode errorCode);
     void SetArkWebQueryErrorCode(MultiImageQueryErrorCode errorCode);
+    MultiImageQueryErrorCode GetArkWebQueryErrorCode() const;
     void GetPixelMapFromFrameNode(int32_t frameNodeId, std::shared_ptr<Media::PixelMap>& componentPixelMap);
+    bool GetHasSendArkWebQueryResult() const;
     void SendArkUIImagesById();
     void SendArkWebImagesById();
+    void DoSendArkWebImagesById();
+    void MarkCurrentWebImageQueryDone(int32_t currentWebId);
     void AddArkUIComponentPixelMap(int32_t componentId, std::shared_ptr<Media::PixelMap>& componentPixelMap);
     void AddArkWebImageMap(int32_t webId, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>& webImageMap);
     void PostToUI(const std::function<void()>& task) override;
@@ -52,24 +56,42 @@ private:
     void TraverseAddArkWebImages(const std::vector<int32_t>& webImageIds, int32_t windowId, int32_t webComponentId,
         const std::function<void(int32_t, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>&,
         MultiImageQueryErrorCode)>& webQueryCallback);
-    void PostArkWebQueryTasks(std::map<int32_t, std::vector<int32_t>>& localArkWebs,
-        std::weak_ptr<UiTranslateManagerImpl> weak, int32_t windowId);
+    void PostArkWebQueryTasks(std::weak_ptr<UiTranslateManagerImpl> weak, int32_t windowId);
     void PostArkWebQueryTasksToSingleWeb(std::weak_ptr<UiTranslateManagerImpl> weak,
         const std::vector<int32_t>& webImageIds, int32_t webId, int32_t windowId);
-    void AdjustArkWebImagesQueryCnt(size_t remainQueryCnt, std::map<int32_t, std::vector<int32_t>>& localArkWebs,
-        const std::map<int32_t, std::vector<int32_t>>& arkWebs);
+    void AdjustArkWebImagesQueryCnt(size_t remainQueryCnt, const std::map<int32_t, std::vector<int32_t>>& arkWebs);
     void GetPixelMapFromImageTypeNode(RefPtr<NG::FrameNode> frameNode,
         std::shared_ptr<Media::PixelMap>& componentPixelMap);
-    int32_t arkWebGetImagesTaskCnt_ = INT32_MAX;
+    bool CheckAllWebQueryTaskFinish() const;
     int32_t windowId_ = 0;
+
+    // mark if all web image queries have finished within QUERY_IMAGES_TIMEOUT_TIME.
+    bool hasSendArkWebQueryResult_ = true;
+
+    // record if a web component has finish its image query.
+    std::unordered_map<int32_t, bool> arkWebQueryImageTaskDone_;
+
+    /*
+     * the origin input ArkWeb's queries may contain too many ids, so we need set a limit and record the ids after
+     * adjusting the origin input map.
+    */
+    std::map<int32_t, std::vector<int32_t>> localArkWebQueries_;
+
     MultiImageQueryErrorCode arkUIQueryErrorCode_ = MultiImageQueryErrorCode::OK;
     MultiImageQueryErrorCode arkWebQueryErrorCode_ = MultiImageQueryErrorCode::OK;
+
+    // contains the result of GetImagesById, ArkUI's part, mapping ArkUIComponentId to pixelMap.
     std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>> arkUIComponentImages_;
+
+    /*
+     * contains the result of GetImagesById, ArkWeb's part, mapping webComponentId to imageIds and
+     * pixelMap in one webComponent.
+    */
     std::map<int32_t, std::map<int32_t, std::shared_ptr<Media::PixelMap>>> arkWebImages_;
+
     static constexpr int32_t QUERY_IMAGES_TIMEOUT_TIME = 1500;
     std::map<int32_t, WeakPtr<NG::FrameNode>> listenerMap_;
     std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> pixelMap_;
-    const static std::set<std::string> layoutTags_;
     RefPtr<TaskExecutor> taskExecutor_;
 };
 } // namespace OHOS::Ace

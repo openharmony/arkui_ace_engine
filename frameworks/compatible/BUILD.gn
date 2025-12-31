@@ -69,6 +69,20 @@ ohos_source_set("ace_compatible_source") {
     "components/marquee/render_marquee_creator.cpp",
     "components/marquee/rosen_render_marquee.cpp",
   ]
+
+  if (qrcodegen_support) {
+    sources += [
+      "components/qrcode/dom_qrcode.cpp",
+      "components/qrcode/qrcode_model_impl.cpp",
+      "components/qrcode/qrcode_component.cpp",
+      "components/qrcode/qrcode_composed_element.cpp",
+      "components/qrcode/qrcode_declaration.cpp",
+      "components/qrcode/qrcode_loader.cpp",
+      "components/qrcode/render_qrcode.cpp",
+      "components/qrcode/render_qrcode_creator.cpp",
+      "components/qrcode/rosen_render_qrcode.cpp",
+    ]
+  }
   external_deps = [
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
@@ -80,10 +94,18 @@ ohos_source_set("ace_compatible_source") {
     "$ace_root/frameworks/core:ace_container_scope",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
   ]
+
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 
   if (ohos_indep_compiler_enable) {
     include_dirs = indep_compile_includes
+  }
+  if (qrcodegen_support) {
+    if (is_arkui_x) {
+        deps += [ "//third_party/qrcodegen:ace_engine_qrcode" ]
+    } else {
+        external_deps += [ "qrcodegen:ace_engine_qrcode" ]
+    }
   }
 }

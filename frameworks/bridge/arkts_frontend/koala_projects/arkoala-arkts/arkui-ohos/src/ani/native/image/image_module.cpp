@@ -338,6 +338,7 @@ void Image_SetOnErrorCallback(ani_env* env, [[maybe_unused]] ani_object obj, ani
         return;
     }
     if (AniUtils::IsUndefined(env, onErrorCallback)) {
+        modifier->getImageAniModifier()->setImageOnErrorCallback(arkNode, nullptr);
         return;
     }
 

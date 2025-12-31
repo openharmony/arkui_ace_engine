@@ -19,6 +19,8 @@
 
 namespace OHOS::Ace {
 
+SINGLETON_INSTANCE_IMPL(JsiPaEngineLoader);
+
 JsiPaEngineLoader::JsiPaEngineLoader() = default;
 JsiPaEngineLoader::~JsiPaEngineLoader() = default;
 

@@ -124,7 +124,7 @@ static void ConvertOnClickCallback(
         ani_object clickEventAni = SecurityComponentAniMethod::CreateClickEvent(env, info);
         CHECK_NULL_VOID(clickEventAni);
         ani_object errorAni {};
-        ani_enum_item resultAni;
+        ani_enum_item resultAni {};
         CreateBusinessError(env, info, errorAni, resultAni);
         CHECK_NULL_VOID(errorAni);
         CHECK_NULL_VOID(resultAni);

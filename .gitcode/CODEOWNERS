@@ -39,6 +39,7 @@ adapter/ohos/capability/udmf/ @ArkUI_Event
 adapter/ohos/capability/window_connection_ng/ @arkuilayout1
 adapter/ohos/capability/window_connection/ @arkuilayout1
 adapter/ohos/capability/xcollie/ @arkui_framework_xnode
+adapter/ohos/entrance/ace_translate_manager.cpp @arkui_framework_xnode
 adapter/ohos/entrance/ace_ability.cpp @arkui_framework_xnode
 adapter/ohos/entrance/ace_ability.h @arkui_framework_xnode
 adapter/ohos/entrance/ace_application_info.cpp @arkui_framework_xnode
@@ -546,7 +547,7 @@ frameworks/bridge/common/utils/ @arkui_framework_xnode
 frameworks/bridge/common/utils/module_buffer_reader.h @arkui_framework_resource
 frameworks/bridge/common/utils/module_buffer_reader.cpp @arkui_framework_resource
 frameworks/bridge/declarative_frontend/ark_breakpoint/ @arkui_framework_resource
-frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/src/ArkAlphabetIndexer.ts @arkuicodepulse
 frameworks/bridge/declarative_frontend/ark_component/src/ArkBadge.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkBlank.ts @arkuilayout1
@@ -556,8 +557,8 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkCanvas.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/src/ArkCheckboxGroup.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/src/ArkCheckbox.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/src/ArkCircle.ts @arkuieco3
-frameworks/bridge/declarative_frontend/ark_component/src/ArkClassDefine.ts  @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/ark_component/src/ArkClassMock.ts @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/ark_component/src/ArkClassDefine.ts  @arkuieco3
+frameworks/bridge/declarative_frontend/ark_component/src/ArkClassMock.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/src/ArkColumnSplit.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkColumn.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkCommonShape.ts @arkuieco3
@@ -593,7 +594,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkListItemGroup.ts @ar
 frameworks/bridge/declarative_frontend/ark_component/src/ArkListItem.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkList.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLoadingProgress.ts @arkui001
-frameworks/bridge/declarative_frontend/ark_component/src/ArkLog.ts @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/ark_component/src/ArkLog.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/src/ArkMarquee.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkMenuItemGroup.ts @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/src/ArkMenuItem.ts @arkuipopupwindow_all
@@ -651,7 +652,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkVideo.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/src/ArkWaterFlow.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkWeb.ts @arkweb-committer-group
 frameworks/bridge/declarative_frontend/ark_component/src/ArkXComponent.ts @ArkUI_ability_group
-frameworks/bridge/declarative_frontend/ark_component/src/import.ts @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/ark_component/src/import.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/tsconfig.json @arkui_architecture
 frameworks/bridge/declarative_frontend/ark_modifier/src/alphabet_indexer_modifier.ts @arkuicodepulse
 frameworks/bridge/declarative_frontend/ark_modifier/src/blank_modifier.ts @arkuilayout1
@@ -662,7 +663,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/checkbox_modifier.ts @ar
 frameworks/bridge/declarative_frontend/ark_modifier/src/circle_modifier.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_modifier/src/column_modifier.ts @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_modifier/src/column_split_modifier.ts @arkuilayout1
-frameworks/bridge/declarative_frontend/ark_modifier/src/common_modifier.ts @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/ark_modifier/src/common_modifier.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_modifier/src/component3d_modifier.ts @arkui_component3d
 frameworks/bridge/declarative_frontend/ark_modifier/src/container_span_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/counter_modifier.ts @arkuipopupwindow_all
@@ -680,7 +681,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/hyperlink_modifier.ts @h
 frameworks/bridge/declarative_frontend/ark_modifier/src/image_animator_modifier.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_modifier/src/image_modifier.ts @arkui001
 frameworks/bridge/declarative_frontend/ark_modifier/src/image_span_modifier.ts @huawei_g_five
-frameworks/bridge/declarative_frontend/ark_modifier/src/import.ts @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/ark_modifier/src/import.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_modifier/src/lazy_grid_layout_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/line_modifier.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_modifier/src/linear_indicator_modifier.ts @arkui_navigation
@@ -738,16 +739,16 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/toggle_modifier.ts @arku
 frameworks/bridge/declarative_frontend/ark_modifier/src/video_modifier.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_modifier/src/water_flow_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/tsconfig.json @arkui_architecture
-frameworks/bridge/declarative_frontend/ark_mock/ @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/ark_node/ @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/ark_mock/ @arkuieco3
+frameworks/bridge/declarative_frontend/ark_node/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_prefetcher/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_shape/ @arkuicodepulse
 frameworks/bridge/declarative_frontend/ark_theme/ @arkui_framework_resource
 frameworks/bridge/declarative_frontend/BUILD.gn @arkui_architecture
 frameworks/bridge/declarative_frontend/declarative_frontend.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/declarative_frontend.h @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/engine/arkComponent.js @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/engine/arkModifier.js
+frameworks/bridge/declarative_frontend/engine/arkComponent.js @arkuieco3
+frameworks/bridge/declarative_frontend/engine/arkModifier.js @arkuieco3
 frameworks/bridge/declarative_frontend/engine/arkThemeControl.js @arkui_framework_resource
 frameworks/bridge/declarative_frontend/engine/arkTheme.js @arkui_framework_resource
 frameworks/bridge/declarative_frontend/engine/bindings_defines.h @arkui_statemgmt
@@ -1074,14 +1075,14 @@ frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_loader.cpp @a
 frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_loader.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/js_object_template.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/js_object_template.inl @arkui_statemgmt
-frameworks/bridge/declarative_frontend/engine/jsPrefetcher.js
+frameworks/bridge/declarative_frontend/engine/jsPrefetcher.js @arkuieco3
 frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsShape.js
 frameworks/bridge/declarative_frontend/engine/jsStateManagement.js @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/js_types.cpp @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/js_types.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/engine/jsUIContext.js
-frameworks/bridge/declarative_frontend/engine/jsXNode.js
+frameworks/bridge/declarative_frontend/engine/jsXNode.js @arkuieco3
 frameworks/bridge/declarative_frontend/state_mgmt/src/lib @arkui_statemgmt
 frameworks/bridge/declarative_frontend/frontend_delegate_declarative.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h @arkui_framework_xnode
@@ -1272,8 +1273,8 @@ frameworks/bridge/declarative_frontend/jsview/js_nav_path_stack.cpp @arkui_navig
 frameworks/bridge/declarative_frontend/jsview/js_nav_path_stack.h @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_navrouter.cpp @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_navrouter.h @arkui_navigation
-frameworks/bridge/declarative_frontend/jsview/js_node_container.cpp @arkui_framework_xnode
-frameworks/bridge/declarative_frontend/jsview/js_node_container.h @arkui_framework_xnode
+frameworks/bridge/declarative_frontend/jsview/js_node_container.cpp @arkuieco3
+frameworks/bridge/declarative_frontend/jsview/js_node_container.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_page_transition.cpp @arkuicodepulse
 frameworks/bridge/declarative_frontend/jsview/js_page_transition.h @arkuicodepulse
 frameworks/bridge/declarative_frontend/jsview/js_pan_handler.cpp @ArkUI_Event
@@ -1873,6 +1874,7 @@ frameworks/core/animation/test/ @arkuicodepulse
 frameworks/core/BUILD.gn @arkui_architecture
 frameworks/core/common/ace_application_info.cpp @arkui_framework_xnode
 frameworks/core/common/ace_application_info.h @arkui_framework_xnode
+frameworks/core/common/ace_translate_manager.h @arkui_framework_xnode
 frameworks/core/common/ace_engine.cpp @arkui_framework_xnode
 frameworks/core/common/ace_engine_ext.cpp @arkui_framework_xnode
 frameworks/core/common/ace_engine_ext.h @arkui_framework_xnode
@@ -2548,7 +2550,7 @@ frameworks/core/components_ng/pattern/model/ @arkui_component3d
 frameworks/core/components_ng/pattern/navigation/ @arkui_navigation
 frameworks/core/components_ng/pattern/navigator/ @arkui_navigation
 frameworks/core/components_ng/pattern/navrouter/ @arkui_navigation
-frameworks/core/components_ng/pattern/node_container/ @arkui_framework_xnode
+frameworks/core/components_ng/pattern/node_container/ @arkuieco3
 frameworks/core/components_ng/pattern/option/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/overlay/content_cover_param.h @arkuicodepulse
 frameworks/core/components_ng/pattern/overlay/dialog_manager.cpp @arkuipopupwindow_all
@@ -3262,16 +3264,16 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/res
 frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.h @arkui_framework_resource
 
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/UIContextImpl.ets @arkui_framework_xnode
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/BuilderNode.ts @arkui_framework_xnode
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/FrameNode.ts @arkui_framework_xnode
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/RenderNode.ts @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/BuilderNode.ts @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/FrameNode.ts @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/RenderNode.ts @arkuieco3
 frameworks/core/interfaces/native/implementation/frame_node_accessor.cpp @arkui_framework_xnode
 frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ArkUIEntry.ts @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/theme/ @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Graphics.ts @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Graphics.ets @arkui_framework_xnode
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/NodeController.ts @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/NodeController.ts @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/resources.ts @arkui_framework_resource
 frameworks/bridge/arkts_frontend/koala_projects/inner_api/ @arkui_framework_resource
 frameworks/bridge/arkts_frontend/arkts_frontend.cpp @arkui_framework_xnode
@@ -3642,7 +3644,7 @@ test/unittest/core/pattern/model/ @arkui_component3d
 test/unittest/core/pattern/navigation/ @arkui_navigation
 test/unittest/core/pattern/navigator/ @arkui_navigation
 test/unittest/core/pattern/navrouter/ @arkui_navigation
-test/unittest/core/pattern/node_container/ @arkui_framework_xnode
+test/unittest/core/pattern/node_container/ @arkuieco3
 test/unittest/core/pattern/option/ @arkuipopupwindow_all
 test/unittest/core/pattern/overlay/accessibility_focus_paint_node_test_ng.cpp @arkuipopupwindow_all
 test/unittest/core/pattern/overlay/dialog_manager_test_ng.cpp @arkuipopupwindow_all

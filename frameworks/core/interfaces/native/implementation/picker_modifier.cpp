@@ -52,6 +52,7 @@ void SetOnChangeImpl(Ark_NativePointer node, const Opt_OnPickerCallback* value)
     CHECK_NULL_VOID(frameNode);
     auto optCallback = Converter::GetOptPtr(value);
     if (!optCallback) {
+        ContainerPickerModelStatic::SetOnChange(frameNode, nullptr);
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optCallback)](const double& param) {
@@ -67,6 +68,7 @@ void SetOnScrollStopImpl(Ark_NativePointer node, const Opt_OnPickerCallback* val
     CHECK_NULL_VOID(frameNode);
     auto optCallback = Converter::GetOptPtr(value);
     if (!optCallback) {
+        ContainerPickerModelStatic::SetOnScrollStop(frameNode, nullptr);
         return;
     }
     auto onEvent = [arkCallback = CallbackHelper(*optCallback)](const double& param) {
@@ -105,9 +107,7 @@ void SetSelectionIndicatorImpl(Ark_NativePointer node, const Opt_PickerIndicator
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto pickerIndicatorStyle = Converter::OptConvertPtr<PickerIndicatorStyle>(value);
-    if (pickerIndicatorStyle) {
-        ContainerPickerModelStatic::SetIndicatorStyle(frameNode, pickerIndicatorStyle.value());
-    }
+    ContainerPickerModelStatic::SetIndicatorStyle(frameNode, pickerIndicatorStyle);
 }
 } // namespace PickerAttributeModifier
 const GENERATED_ArkUIPickerModifier* GetPickerModifier()

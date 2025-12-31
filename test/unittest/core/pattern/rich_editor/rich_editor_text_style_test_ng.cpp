@@ -24,6 +24,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+    const std::u16string URL_ADDRESS_1 = u"https://www.abc.com";
+    const std::u16string URL_ADDRESS_2 = u"";
     const Color STROKE_COLOR_VALUE = Color::FromRGB(255, 100, 100);
     const Dimension STROKE_WIDTH_VALUE = Dimension(20.1, DimensionUnit::PX);
     const struct UpdateSpanStyle TYPING_STYLE = {
@@ -98,7 +100,7 @@ HWTEST_F(RichEditorTextStyleTestNg, AddTextSpan001, TestSize.Level0)
     style.SetStrokeWidth(STROKE_WIDTH_VALUE);
 
     /**
-     * @tc.steps: step2. test add span
+     * @tc.steps: step3. test add span
      */
     TextSpanOptions options;
     options.offset = 1;
@@ -110,7 +112,7 @@ HWTEST_F(RichEditorTextStyleTestNg, AddTextSpan001, TestSize.Level0)
     EXPECT_EQ(index2, 1);
 
     /**
-     * @tc.steps: step2. check stroke style
+     * @tc.steps: step4. check stroke style
      */
     auto contentNode = richEditorNode_->GetChildAtIndex(0);
     ASSERT_NE(contentNode, nullptr);
@@ -120,6 +122,46 @@ HWTEST_F(RichEditorTextStyleTestNg, AddTextSpan001, TestSize.Level0)
     EXPECT_EQ(newSpan->GetStrokeWidth(), STROKE_WIDTH_VALUE);
 
     ClearSpan();
+}
+
+/**
+ * @tc.name: AddTextSpan002
+ * @tc.desc: test add text span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTextStyleTestNg, AddTextSpan002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. get RichEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. strokeColor does not follow fontColor
+     */
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    options.urlAddress = URL_ADDRESS_1;
+    options.useThemeFontColor = true;
+    options.style = TEXT_STYLE_1;
+    auto index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 0);
+
+    /**
+     * @tc.steps: step3. strokeColor follow fontColor
+     */
+    options.strokeColorFollowFontColor = true;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 1);
+
+    /**
+     * @tc.steps: step4. empty url address
+     */
+    options.urlAddress = URL_ADDRESS_2;
+    index = richEditorPattern->AddTextSpan(options);
+    EXPECT_EQ(index, 2);
 }
 
 /**
@@ -162,7 +204,7 @@ HWTEST_F(RichEditorTextStyleTestNg, UpdateSpanStyle001, TestSize.Level1)
     ImageSpanAttribute imageStyle;
 
     /**
-     * @tc.steps: step3. update span
+     * @tc.steps: step4. update span
      */
     richEditorController->UpdateSpanStyle(0, 6, textStyle, imageStyle);
     auto newSpan = AceType::DynamicCast<SpanNode>(contentNode->GetChildAtIndex(0));
@@ -172,7 +214,7 @@ HWTEST_F(RichEditorTextStyleTestNg, UpdateSpanStyle001, TestSize.Level1)
     EXPECT_EQ(newSpan->GetStrokeColor(), STROKE_COLOR_VALUE);
 
     /**
-     * @tc.steps: step4. update stroke width
+     * @tc.steps: step5. update stroke width
      */
     textStyle.SetStrokeWidth(STROKE_WIDTH_VALUE);
     updateSpanStyle.updateStrokeWidth = STROKE_WIDTH_VALUE;
@@ -246,6 +288,9 @@ HWTEST_F(RichEditorTextStyleTestNg, CreateTextSpanNode001, TestSize.Level0)
     auto typingStyle = richEditorPattern->typingStyle_;
     auto typingTextStyle = richEditorPattern->typingTextStyle_;
 
+    /**
+     * @tc.steps: step2. Parameter declaration
+     */
     RefPtr<SpanNode> spanNode;
     TextInsertValueInfo info;
     std::u16string insertValue;
@@ -253,7 +298,7 @@ HWTEST_F(RichEditorTextStyleTestNg, CreateTextSpanNode001, TestSize.Level0)
     TextStyle textStyle;
 
     /**
-     * @tc.steps: step2. test CreateTextSpanNode
+     * @tc.steps: step3. test CreateTextSpanNode
      */
     richEditorPattern->typingStyle_ = updateSpanStyle;
     richEditorPattern->typingTextStyle_ = textStyle;
@@ -278,7 +323,7 @@ HWTEST_F(RichEditorTextStyleTestNg, CreateTextSpanNode001, TestSize.Level0)
     EXPECT_FALSE(richEditorPattern->typingStyle_->updateStrokeColor.has_value());
 
     /**
-     * @tc.steps: step2. reset typingStyle and typingTextStyle
+     * @tc.steps: step4. reset typingStyle and typingTextStyle
      */
     richEditorPattern->typingStyle_ = typingStyle;
     richEditorPattern->typingTextStyle_ = typingTextStyle;

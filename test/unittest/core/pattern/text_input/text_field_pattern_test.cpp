@@ -3153,6 +3153,9 @@ HWTEST_F(TextFieldPatternTest, TextInputResponseAreaGetChildOffset, TestSize.Lev
     RectF contentRect = RectF(20.0f, 20.0f, 60.0f, 60.0f);
     SizeF childSize = SizeF(70.0f, 40.0f);
     float nodeWidth = 10.0f;
+    /**
+     * @tc.steps: step2. get childOffset
+     */
     auto offset = responseArea->GetChildOffset(parentSize, contentRect, childSize, nodeWidth);
     EXPECT_EQ(offset, OffsetF(75.0f, 20.0f));
     responseArea->hostPattern_.Reset();
@@ -3177,6 +3180,9 @@ HWTEST_F(TextFieldPatternTest, TextPatternGetWindowIdFromPipeline001, TestSize.L
     textFieldNode->SetParent(frameNode_);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. get windowId
+     */
     auto windowId = std::make_shared<uint32_t>(pattern->GetWindowIdFromPipeline());
     ASSERT_NE(windowId, nullptr);
 }

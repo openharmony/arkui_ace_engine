@@ -15,6 +15,7 @@
 
 #include "ui/view/view.h"
 
+#include "base/geometry/shape.h"
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "ui/base/referenced.h"
 #include "ui/view_stack/view_stack_processor.h"
@@ -57,6 +58,24 @@ void View::SetTranslate(const NG::TranslateOptions& options)
     NG::ViewAbstract::SetTranslate(reinterpret_cast<AceNode*>(node_->GetHandle()), options);
 }
 
+void View::SetPivot(const DimensionOffset& value)
+{
+    NG::ViewAbstract::SetPivot(reinterpret_cast<AceNode*>(node_->GetHandle()), value);
+}
+
+void View::SetScale(float x, float y)
+{
+    NG::VectorF scaleVector = { x, y };
+    NG::ViewAbstract::SetScale(reinterpret_cast<AceNode*>(node_->GetHandle()), scaleVector);
+}
+
+void View::SetClipPath(const std::string& svgPath)
+{
+    auto path = AceType::MakeRefPtr<Path>();
+    path->SetValue(svgPath);
+    NG::ViewAbstract::SetClipShape(reinterpret_cast<AceNode*>(node_->GetHandle()), path);
+}
+
 void View::SetOnTouch(TouchEventFunc&& touchEventFunc)
 {
     NG::ViewAbstract::SetOnTouch(reinterpret_cast<AceNode*>(node_->GetHandle()), std::move(touchEventFunc));
@@ -90,6 +109,50 @@ void View::SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara)
 void View::SetOpacity(double opacity)
 {
     NG::ViewAbstract::SetOpacity(reinterpret_cast<AceNode*>(node_->GetHandle()), opacity);
+}
+
+void View::CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
+    const std::function<void(float)>& onCallbackEvent, const Ace::PropertyUnit& propertyType)
+{
+    auto frameNode = reinterpret_cast<AceNode*>(node_->GetHandle());
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CreateAnimatablePropertyFloat(propertyName, value, onCallbackEvent, propertyType);
+}
+
+void View::UpdateAnimatablePropertyFloat(const std::string& propertyName, float value)
+{
+    auto frameNode = reinterpret_cast<AceNode*>(node_->GetHandle());
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UpdateAnimatablePropertyFloat(propertyName, value);
+}
+
+void View::DeleteAnimatablePropertyFloat(const std::string& propertyName)
+{
+    auto frameNode = reinterpret_cast<AceNode*>(node_->GetHandle());
+    CHECK_NULL_VOID(frameNode);
+    frameNode->DeleteAnimatablePropertyFloat(propertyName);
+}
+
+void View::UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts)
+{
+    NG::ViewAbstract::UpdateSafeAreaExpandOpts(reinterpret_cast<AceNode*>(node_->GetHandle()), opts);
+}
+
+void View::CreateAnimatableArithmeticProperty(const std::string& propertyName,
+    RefPtr<OHOS::Ace::NG::CustomAnimatableArithmetic>& value,
+    std::function<void(const RefPtr<OHOS::Ace::NG::CustomAnimatableArithmetic>&)>& onCallbackEvent)
+{
+    auto frameNode = reinterpret_cast<AceNode*>(node_->GetHandle());
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CreateAnimatableArithmeticProperty(propertyName, value, onCallbackEvent);
+}
+
+void View::UpdateAnimatableArithmeticProperty(const std::string& propertyName,
+    RefPtr<OHOS::Ace::NG::CustomAnimatableArithmetic>& value)
+{
+    auto frameNode = reinterpret_cast<AceNode*>(node_->GetHandle());
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UpdateAnimatableArithmeticProperty(propertyName, value);
 }
 
 TextDirection View::GetDirection()

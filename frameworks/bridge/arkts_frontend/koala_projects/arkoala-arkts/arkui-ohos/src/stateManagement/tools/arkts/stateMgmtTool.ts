@@ -31,7 +31,6 @@ import { ISubscribedWatches, IWatchSubscriberRegister } from '../../decorator';
 import { DecoratedV1VariableBase } from '../../decoratorImpl/decoratorBase';
 import { StateManager, GlobalStateManager } from '@koalaui/runtime';
 import { UIContextUtil } from '@uicontext/UIContextUtil';
-import { UIContextImpl } from '@uicontext/UIContextImpl';
 import { StateMgmtConsole } from '#StateMgmtConsole';
 import { int32 } from '@koalaui/common';
 
@@ -106,15 +105,5 @@ export class StateMgmtTool {
     }
     static getGlobalStateManager(): StateManager {
         return GlobalStateManager.instance;
-    }
-    static tryGetCurrentGlobalStateManager(): StateManager {
-        let context: UIContextImpl | undefined = undefined;
-        try {
-            context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-        } catch (e) {
-            // for scenario where UIContext is not ready.
-            StateMgmtConsole.log('Get current UIContext fail, will directly use GlobalStateManager');
-        }
-        return context && context.stateMgr ? context.stateMgr! : GlobalStateManager.instance;
     }
 }

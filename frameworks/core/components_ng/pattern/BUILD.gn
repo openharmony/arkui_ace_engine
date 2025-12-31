@@ -174,6 +174,7 @@ build_component_ng("pattern_ng") {
     "grid/grid_layout_info.cpp",
     "grid/grid_layout_property.cpp",
     "grid/grid_model_ng.cpp",
+    "grid/grid_model_ng_multi_thread.cpp",
     "grid/grid_model_static.cpp",
     "grid/grid_paint_method.cpp",
     "grid/grid_pattern.cpp",

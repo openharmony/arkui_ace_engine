@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 
+#include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
@@ -1143,6 +1144,17 @@ void GridModelNG::ParseResObjColumnsGap(FrameNode* frameNode, const RefPtr<Resou
     pattern->AddResObj("grid.columnsGap", resObj, std::move(updateFunc));
 }
 
+void GridModelNG::SetScrollToIndex(
+    FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment, std::optional<float> extraOffset)
+{
+    // call SetScrollToIndexMultiThread by multi thread
+    FREE_NODE_CHECK(frameNode, SetScrollToIndex, frameNode, index, animation, alignment, extraOffset);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ScrollToIndex(index, animation, static_cast<ScrollAlign>(alignment), extraOffset);
+}
+
 void GridModelNG::SetSupportLazyLoadingEmptyBranch(bool enable)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, SupportLazyLoadingEmptyBranch, enable);
@@ -1162,4 +1174,5 @@ bool GridModelNG::GetSupportLazyLoadingEmptyBranch(FrameNode* frameNode)
         GridLayoutProperty, SupportLazyLoadingEmptyBranch, enable, frameNode, false);
     return enable;
 }
+
 } // namespace OHOS::Ace::NG

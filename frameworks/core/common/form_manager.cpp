@@ -16,6 +16,9 @@
 #include "core/common/form_manager.h"
 
 namespace OHOS::Ace {
+
+SINGLETON_INSTANCE_IMPL(FormManager);
+
 FormManager::FormManager() {}
 
 FormManager::~FormManager() {}

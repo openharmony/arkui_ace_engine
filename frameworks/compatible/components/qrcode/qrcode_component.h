@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_COMPONENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_COMPONENT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_QRCODE_QRCODE_COMPONENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_QRCODE_QRCODE_COMPONENT_H
 
 #include "base/geometry/dimension.h"
+#include "compatible/components/qrcode/qrcode_declaration.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/base/sole_child_component.h"
-#include "core/components/declaration/qrcode/qrcode_declaration.h"
 
 namespace OHOS::Ace {
 
@@ -58,4 +58,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_QRCODE_COMPONENT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_QRCODE_QRCODE_COMPONENT_H

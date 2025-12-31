@@ -229,8 +229,20 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     return { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() };
   }
 
-  public getElementNameById(elmtId: number): string {
-    return this.owningView_?.getElementNameById(elmtId) ?? '';
+  public getPropertyElementInfo(): Map<string, Array<ElementInfo>> {
+    const resMap = new Map<string, Array<ElementInfo>>();
+    const elmtMap = this.dependentElmtIdsByProperty_.getPropertyElementId();
+    elmtMap.forEach((idArr: number[], name: string) => {
+      resMap.set(name, idArr.map(id => this.getElementById(id)));
+    });
+    return resMap;
+  }
+
+  public getElementById(elmtId: number): ElementInfo {
+    return { 
+      elementName: this.owningView_?.getElementNameById(elmtId) ?? 'unknown component name',
+      elementId: elmtId
+    } as ElementInfo;
   }
 
   public dumpSyncPeers(isProfiler: boolean, changedTrackPropertyName?: string): ObservedPropertyInfo<T>[] {
@@ -751,6 +763,14 @@ class PropertyDependencies {
       propertyDependencies: this.getPropertyDependencies() ? Array.from(this.getOrCreatePropertyDependencies()).map(formatElmtId) : [],
     }
     return PropertyDependenciesInfo;
+  }
+
+  public getPropertyElementId(): Map<string, Array<number>> {
+    const infoMap = new Map<string, Array<number>>();
+    this.getInnerTrackedObjectPropertyDependencies()?.forEach((propertyElmtId, propertyName) => {
+      infoMap.set(propertyName, Array.from(propertyElmtId));
+    });
+    return infoMap;
   }
 
   public hasDependencies() : boolean {

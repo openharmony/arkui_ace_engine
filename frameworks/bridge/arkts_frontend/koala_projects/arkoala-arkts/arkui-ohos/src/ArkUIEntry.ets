@@ -274,7 +274,6 @@ export class Application {
             this.manager = GlobalStateManager.instance
             let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
             this.instanceId = uiContext.getInstanceId();
-            uiContext.stateMgr = this.manager
             let uiData = new ContextRecord();
             uiData.uiContext = uiContext;
             this.uiContext = uiContext;

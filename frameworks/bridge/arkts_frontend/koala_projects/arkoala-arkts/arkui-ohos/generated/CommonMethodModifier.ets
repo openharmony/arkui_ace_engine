@@ -6202,9 +6202,11 @@ export class CommonMethodModifier implements CommonMethod {
             switch (flagArray[164] as int32) {
                 case 1:
                 case 3: {
+                    this.backgroundImage(modifier._backgroundImage_1_0value, modifier._backgroundImage_1_1value);
                     break;
                 }
                 default: {
+                    this.backgroundImage((undefined as ResourceStr | image.PixelMap | undefined), (undefined as BackgroundImageOptions | undefined | undefined));
                 }
             }
         }
@@ -6213,9 +6215,11 @@ export class CommonMethodModifier implements CommonMethod {
             switch (flagArray[165] as int32) {
                 case 1:
                 case 3: {
+                    this.backgroundImage(modifier._backgroundImage_2_0value, modifier._backgroundImage_2_1value);
                     break;
                 }
                 default: {
+                    this.backgroundImage((undefined as ResourceStr | image.PixelMap | undefined), (undefined as ImageRepeat | undefined | undefined));
                 }
             }
         }

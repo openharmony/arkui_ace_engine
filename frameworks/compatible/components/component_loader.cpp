@@ -25,6 +25,8 @@
 #include "compatible/components/grid_container/grid_container_loader.h"
 #include "compatible/components/grid_row/grid_row_loader.h"
 #include "compatible/components/marquee/marquee_loader.h"
+#include "compatible/components/qrcode/qrcode_loader.h"
+#include "frameworks/base/log/log_wrapper.h"
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_Compatible_GetLoader(const char* name)
 {
@@ -41,7 +43,8 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "grid-col", []() -> ComponentLoader* { return new GridColLoader(); } },
         { "grid-container", []() -> ComponentLoader* { return new GridContainerLoader(); } },
         { "grid-row", []() -> ComponentLoader* { return new GridRowLoader(); } },
-        { "marquee", []() -> ComponentLoader* { return new MarqueeLoader(); } }
+        { "marquee", []() -> ComponentLoader* { return new MarqueeLoader(); } },
+        { "qrcode", []() -> ComponentLoader* { return new QRCodeLoader(); } }
     };
     auto loaderIter = sLoaderMap.find(nameStr);
     if (loaderIter != sLoaderMap.end()) {

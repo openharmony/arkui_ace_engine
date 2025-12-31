@@ -693,11 +693,13 @@ ArkUI_Float32 GetWaterFlowFriction(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, 1);
     return WaterFlowModelNG::GetFriction(frameNode);
 }
-void SetScrollToIndex(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment)
+void SetScrollToIndex(
+    ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment, float options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WaterFlowModelNG::SetScrollToIndex(frameNode, index, animation, alignment);
+    std::optional<float> extraOffset = options;
+    WaterFlowModelNG::SetScrollToIndex(frameNode, index, animation, alignment, extraOffset);
 }
 
 void SetWaterflowFooter(ArkUINodeHandle node, ArkUINodeHandle footer)

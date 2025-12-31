@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { ArkImageComponent, ColorContent, ImageContent, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, ImageCompleteEvent, ImageErrorCallback, ResizableOptions, ImageRotateOrientation, ImageAttribute, } from "../component/image";
+import { ArkImageComponent, ColorContent, ImageContent, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, ImageCompleteEvent, ImageErrorCallback, ResizableOptions, ImageRotateOrientation, ImageAttribute, ImageAlt, ContentTransitionEffect } from "../component/image";
 import { ImageAnalyzerConfig, ImageAIOptions } from "../component/imageCommon"
 import { ImageFit, ImageRepeat, CopyOptions, Color } from "../component/enums"
 import { ArkBaseNode } from "./ArkBaseNode";
@@ -39,7 +39,7 @@ export class ArkImageNode extends ArkBaseNode implements ImageAttribute {
         this.markDirty()
         return this
     }
-    public alt(value: string | Resource | PixelMap | undefined): this {
+    public alt(value: string | Resource | PixelMap | ImageAlt | undefined): this {
         this.component.alt(value)
         this.markDirty()
         return this
@@ -54,7 +54,7 @@ export class ArkImageNode extends ArkBaseNode implements ImageAttribute {
         this.markDirty()
         return this
     }
-    public fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | ColorMetrics | undefined): this {
+    public fillColor(value: ResourceColor | ColorContent | ColorMetrics | undefined): this {
         this.component.fillColor(value)
         this.markDirty()
         return this
@@ -89,6 +89,11 @@ export class ArkImageNode extends ArkBaseNode implements ImageAttribute {
 
         this.component.dynamicRangeMode(value)
 
+        this.markDirty()
+        return this
+    }
+    public hdrBrightness(value: double | undefined): this {
+        this.component.hdrBrightness(value)
         this.markDirty()
         return this
     }
@@ -174,6 +179,16 @@ export class ArkImageNode extends ArkBaseNode implements ImageAttribute {
     }
     public orientation(value: ImageRotateOrientation | undefined): this {
         this.component.orientation(value)
+        this.markDirty()
+        return this
+    }
+    public supportSvg2(value: boolean | undefined): this {
+        this.component.supportSvg2(value)
+        this.markDirty()
+        return this
+    }
+    public contentTransition(value: ContentTransitionEffect | undefined): this {
+        this.component.contentTransition(value)
         this.markDirty()
         return this
     }

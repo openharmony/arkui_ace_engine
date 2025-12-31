@@ -28,7 +28,6 @@
 #include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components/declaration/input/input_declaration.h"
 #include "core/components/declaration/piece/piece_declaration.h"
-#include "core/components/declaration/qrcode/qrcode_declaration.h"
 #include "core/components/declaration/richtext/rich_text_declaration.h"
 #include "core/components/declaration/search/search_declaration.h"
 #include "core/components/declaration/side_bar/side_bar_declaration.h"
@@ -139,10 +138,6 @@ public:
     static const std::shared_ptr<PieceAttribute> DEFAULT_PIECE_ATTR;
     static const std::shared_ptr<PieceStyle> DEFAULT_PIECE_STYLE;
     static const std::shared_ptr<PieceEvent> DEFAULT_PIECE_EVENT;
-
-    // default value of qrcode
-    static const std::shared_ptr<QrcodeAttribute> DEFAULT_QRCODE_ATTR;
-    static const std::shared_ptr<QrcodeStyle> DEFAULT_QRCODE_STYLE;
 
     // default value of search
     static const std::shared_ptr<SearchAttribute> DEFAULT_SEARCH_ATTR;

@@ -17,6 +17,8 @@
 
 namespace OHOS::Ace {
 
+SINGLETON_INSTANCE_IMPL(TextInputProxy);
+
 TextInputProxy::TextInputProxy() = default;
 
 TextInputProxy::~TextInputProxy() = default;

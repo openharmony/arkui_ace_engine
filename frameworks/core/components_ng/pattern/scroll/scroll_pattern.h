@@ -101,10 +101,6 @@ public:
 
     bool OnScrollCallback(float offset, int32_t source) override;
 
-    bool FreeOverScrollWithDelta(Axis axis, double delta);
-
-    void ProcessFreeScrollOverDrag(const OffsetF velocity);
-
     void OnScrollEndCallback() override;
 
     double GetCurrentPosition() const
@@ -195,7 +191,7 @@ public:
         return false;
     }
     bool ScrollPageCheck(float delta, int32_t source);
-    void AdjustOffset(float& delta, int32_t source);
+    void AdjustOffset(float& delta, int32_t source) override;
     Rect GetItemRect(int32_t index) const override;
 
     // scrollSnap
@@ -408,6 +404,12 @@ public:
     {
         return contentStartOffset_;
     }
+
+    bool FreeOverScrollWithDelta(Axis axis, double delta) override;
+
+    void ProcessFreeScrollOverDrag(const OffsetF velocity) override;
+
+    bool TryFreeScroll(double offset, Axis axis) override;
 
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);

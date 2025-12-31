@@ -37,6 +37,10 @@ namespace OHOS::Ace::NG::Converter {
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AxisEventAccessor {
+namespace {
+    const Opt_Float64 INVALID_OPT_FLOAT64 = Converter::ArkValue<Opt_Float64>();
+    const double DEFAULT_VALUE = 0.0;
+} // namespace
 void DestroyPeerImpl(Ark_AxisEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
@@ -253,6 +257,50 @@ void PropagationImpl(Ark_AxisEvent peer)
     CHECK_NULL_VOID(info);
     info->SetStopPropagation(false);
 }
+Opt_Float64 GetGlobalDisplayXImpl(Ark_AxisEvent peer)
+{
+    CHECK_NULL_RETURN(peer, INVALID_OPT_FLOAT64);
+    AxisInfo* event = peer->GetEventInfo();
+    CHECK_NULL_RETURN(event, INVALID_OPT_FLOAT64);
+    const auto& globalDisplayLocation = event->GetGlobalDisplayLocation();
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX());
+    return Converter::ArkValue<Opt_Float64>(value);
+}
+void SetGlobalDisplayXImpl(Ark_AxisEvent peer,
+                           const Opt_Float64* globalDisplayX)
+{
+    CHECK_NULL_VOID(peer);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    auto globalDisplayLocation = info->GetGlobalDisplayLocation();
+    const auto animation = globalDisplayLocation.GetXAnimationOption();
+    auto value = Converter::OptConvertPtr<double>(globalDisplayX);
+    auto xConvert = PipelineBase::Vp2PxWithCurrentDensity(value.value_or(DEFAULT_VALUE));
+    globalDisplayLocation.SetX(xConvert, animation);
+    info->SetGlobalDisplayLocation(globalDisplayLocation);
+}
+Opt_Float64 GetGlobalDisplayYImpl(Ark_AxisEvent peer)
+{
+    CHECK_NULL_RETURN(peer, INVALID_OPT_FLOAT64);
+    AxisInfo* event = peer->GetEventInfo();
+    CHECK_NULL_RETURN(event, INVALID_OPT_FLOAT64);
+    const auto& globalDisplayLocation = event->GetGlobalDisplayLocation();
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY());
+    return Converter::ArkValue<Opt_Float64>(value);
+}
+void SetGlobalDisplayYImpl(Ark_AxisEvent peer,
+                           const Opt_Float64* globalDisplayY)
+{
+    CHECK_NULL_VOID(peer);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    auto globalDisplayLocation = info->GetGlobalDisplayLocation();
+    const auto animation = globalDisplayLocation.GetYAnimationOption();
+    auto value = Converter::OptConvertPtr<double>(globalDisplayY);
+    auto yConvert = PipelineBase::Vp2PxWithCurrentDensity(value.value_or(DEFAULT_VALUE));
+    globalDisplayLocation.SetY(yConvert, animation);
+    info->SetGlobalDisplayLocation(globalDisplayLocation);
+}
 } // AxisEventAccessor
 const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
 {
@@ -280,6 +328,10 @@ const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
         AxisEventAccessor::GetScrollStepImpl,
         AxisEventAccessor::SetScrollStepImpl,
         AxisEventAccessor::PropagationImpl,
+        AxisEventAccessor::GetGlobalDisplayXImpl,
+        AxisEventAccessor::SetGlobalDisplayXImpl,
+        AxisEventAccessor::GetGlobalDisplayYImpl,
+        AxisEventAccessor::SetGlobalDisplayYImpl,
     };
     return &AxisEventAccessorImpl;
 }

@@ -93,6 +93,12 @@ export function hookKeyboardShortcut(peer: ArkCommonMethodPeer, shortcuts: Array
   if (shortcuts && shortcuts.length > 0) {
     for (let i = 0; i < shortcuts.length; i++) {
       const shortcut = shortcuts[i];
+      if (shortcut.value !== undefined && typeof shortcut.value === 'string') {
+        const strValue = shortcut.value as string;
+        if (strValue.length > 1) {
+            continue;
+        }
+      }
       peer.setKeyboardShortcutAttribute(
         shortcut.value as string | FunctionKey | undefined,
         shortcut.keys as Array<ModifierKey> | undefined,
@@ -223,6 +229,9 @@ export function hookStateStyleImpl(
         curState |= UI_STATE_NORMAL;
     }
     if (value?.pressed) {
+        curState |= UI_STATE_PRESSED;
+    }
+    if (value?.clicked) {
         curState |= UI_STATE_PRESSED;
     }
     if (value?.focused) {
@@ -509,7 +518,7 @@ export function hookCreateImageData(peerPtr: CanvasRenderer, sw: number, sh: num
     const arrayBuffer: ArrayBuffer = new ArrayBuffer(length)
     const uint8View = new Uint8Array(arrayBuffer)
     for (let i = 0; i < length; i++) {
-        uint8View[i] = 0xffffffff
+        uint8View[i] = 0xffffffff.toInt()
     }
     const data: Uint8ClampedArray = new Uint8ClampedArray(arrayBuffer)
     const resObj: ImageData = new ImageData(width_cast, height_cast, data, LengthMetricsUnit.PX)
@@ -522,7 +531,7 @@ export function hookCreateImageData(peerPtr: CanvasRenderer, imagedata: ImageDat
     const arrayBuffer: ArrayBuffer = new ArrayBuffer(length)
     const uint8View = new Uint8Array(arrayBuffer)
     for (let i = 0; i < length; i++) {
-        uint8View[i] = 0xffffffff
+        uint8View[i] = 0xffffffff.toInt()
     }
     const data: Uint8ClampedArray = new Uint8ClampedArray(arrayBuffer)
     const resObj: ImageData = new ImageData(width_cast, height_cast, data, LengthMetricsUnit.PX)

@@ -101,3 +101,18 @@ HWTEST_F(UIContextAtomicServiceBarAccessorTest, atomicServiceBarFakeTest, TestSi
     ASSERT_NE(frameNode, nullptr);
 }
 
+HWTEST_F(TextTimerModifierTest, setFormatTestFormatValidValues, TestSize.Level1)
+{
+    auto checkValue = [this](const std::string& input, const Ark_String& value, const std::string& expectedStr) {
+        auto format = Converter::ArkValue<Opt_String>(value);
+        modifier_->setFormat(node_, &format);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FORMAT_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setFormat, attribute: format";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureTextTimerDateFormatValidValues) {
+        checkValue(input, value, expected);
+    }
+}
+

@@ -635,7 +635,7 @@ std::pair<uint32_t, int32_t> LayoutInspector::ProcessMessages(const std::string&
     }
     auto windowResult = NG::Inspector::ParseWindowIdFromMsg(message);
     uint32_t windowId = windowResult.first;
-    if (windowId == OHOS::Ace::NG::INVALID_WINDOW_ID && windowResult.second != QUERY_ABILITY) {
+    if (windowId == OHOS::Ace::NG::INSPECTOR_INVALID_WINDOW_ID && windowResult.second != QUERY_ABILITY) {
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message: %{public}s", message.c_str());
         return windowResult;
     }

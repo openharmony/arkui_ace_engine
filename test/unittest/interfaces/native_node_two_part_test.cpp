@@ -1486,4 +1486,21 @@ HWTEST_F(NativeNodeTwoPartTest, NativeNodeSelectionIndicatorTest_002, TestSize.L
     EXPECT_EQ(OH_ArkUI_PickerIndicatorStyle_ConfigureDivider(nullptr, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
     nodeAPI->disposeNode(picker);
 }
+
+/**
+ * @tc.name: NativeNodeScrollToIndexTest
+ * @tc.desc: Test Grid ScrollToIndex of grid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTwoPartTest, NativeNodeScrollToIndexTest, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto grid = nodeAPI->createNode(ARKUI_NODE_GRID);
+
+    ArkUI_NumberValue value[] = {{ .i32 = 1 }};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue), "test"};
+    auto ret=nodeAPI->setAttribute(grid, NODE_GRID_SCROLL_TO_INDEX, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
 } // namespace OHOS::Ace

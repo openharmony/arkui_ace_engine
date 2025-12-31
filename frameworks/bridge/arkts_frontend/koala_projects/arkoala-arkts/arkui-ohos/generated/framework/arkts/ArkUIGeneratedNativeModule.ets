@@ -3090,6 +3090,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_setOnWindowNew(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _WebAttribute_setOnWindowNewExt(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _WebAttribute_setOnWindowExit(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _WebAttribute_setMultiWindowAccess(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -3327,6 +3329,14 @@ export class ArkUIGeneratedNativeModule {
     native static _AccessibilityHoverEvent_getWindowY(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _AccessibilityHoverEvent_setWindowY(ptr: KPointer, windowY: KDouble): void
+    @ani.unsafe.Quick
+    native static _AccessibilityHoverEvent_getGlobalDisplayX(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _AccessibilityHoverEvent_setGlobalDisplayX(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _AccessibilityHoverEvent_getGlobalDisplayY(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _AccessibilityHoverEvent_setGlobalDisplayY(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ActionSheet_show(thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -3447,6 +3457,14 @@ export class ArkUIGeneratedNativeModule {
     native static _AxisEvent_getScrollStep(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _AxisEvent_setScrollStep(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _AxisEvent_getGlobalDisplayX(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _AxisEvent_setGlobalDisplayX(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _AxisEvent_getGlobalDisplayY(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _AxisEvent_setGlobalDisplayY(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _AxisEvent_propagation(ptr: KPointer): void
     @ani.unsafe.Direct
@@ -3863,6 +3881,14 @@ export class ArkUIGeneratedNativeModule {
     native static _ClickEvent_getHand(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _ClickEvent_setHand(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _ClickEvent_getGlobalDisplayX(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _ClickEvent_setGlobalDisplayX(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _ClickEvent_getGlobalDisplayY(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _ClickEvent_setGlobalDisplayY(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ClickEvent_preventDefault(ptr: KPointer): void
     @ani.unsafe.Direct
@@ -4135,6 +4161,10 @@ export class ArkUIGeneratedNativeModule {
     native static _DragEvent_getDisplayId(ptr: KPointer): int32
     @ani.unsafe.Quick
     native static _DragEvent_enableInternalDropAnimation(ptr: KPointer, configuration: KStringPtr): void
+    @ani.unsafe.Quick
+    native static _DragEvent_getGlobalDisplayX(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _DragEvent_getGlobalDisplayY(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _DragEvent_getDragBehavior(ptr: KPointer): int32
     @ani.unsafe.Direct
@@ -4323,6 +4353,8 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNodeExtender_setNeedsLayout(peer: KPointer): void
     @ani.unsafe.Quick
     native static _FrameNodeExtender_getPositionToScreen(peer: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_getGlobalPositionOnDisplay(peer: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _FrameNodeExtender_getPositionToWindowWithTransform(peer: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
@@ -4593,6 +4625,14 @@ export class ArkUIGeneratedNativeModule {
     native static _HoverEvent_getDisplayY(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _HoverEvent_setDisplayY(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _HoverEvent_getGlobalDisplayX(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _HoverEvent_setGlobalDisplayX(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _HoverEvent_getGlobalDisplayY(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _HoverEvent_setGlobalDisplayY(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _HoverEvent_stopPropagation(ptr: KPointer): void
     @ani.unsafe.Direct
@@ -4796,7 +4836,6 @@ export class ArkUIGeneratedNativeModule {
     native static _LazyBuild_SetListItemLazyBuilder(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _LazyBuild_SetTabContentLazyBuilder(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _LazyForEachOps_NotifyChange(node: KPointer, startIndex: KInt, endIndex: KInt, count: KInt): void
     @ani.unsafe.Direct
     native static _LazyForEachOps_Sync(node: KPointer, totalCount: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -5014,6 +5053,14 @@ export class ArkUIGeneratedNativeModule {
     native static _MouseEvent_getPressedButtons(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _MouseEvent_setPressedButtons(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _MouseEvent_getGlobalDisplayX(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _MouseEvent_setGlobalDisplayX(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _MouseEvent_getGlobalDisplayY(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _MouseEvent_setGlobalDisplayY(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _MutableStyledString_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct

@@ -3285,6 +3285,9 @@ float SwiperPattern::CalculateGroupTurnPageRate(float additionalOffset)
     }
 
     if (IsHorizontalAndRightToLeft()) {
+        if (NearZero(groupTurnPageRate)) {
+            return 0.0f;
+        }
         groupTurnPageRate = std::abs(groupTurnPageRate) <= 1.0f ? std::abs(groupTurnPageRate) - 1.0f : 0.0f;
     }
 

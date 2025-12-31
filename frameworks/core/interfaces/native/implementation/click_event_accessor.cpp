@@ -31,6 +31,10 @@ const int32_t HAND_RIGHT = 2;
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ClickEventAccessor {
+namespace {
+    const Opt_Float64 INVALID_OPT_FLOAT64 = Converter::ArkValue<Opt_Float64>();
+    const float DEFAULT_VALUE = 0.0;
+} // namespace
 void DestroyPeerImpl(Ark_ClickEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
@@ -211,6 +215,50 @@ void PreventDefaultImpl(Ark_ClickEvent peer)
     CHECK_NULL_VOID(info);
     info->SetPreventDefault(true);
 }
+Opt_Float64 GetGlobalDisplayXImpl(Ark_ClickEvent peer)
+{
+    CHECK_NULL_RETURN(peer, INVALID_OPT_FLOAT64);
+    const auto* info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, INVALID_OPT_FLOAT64);
+    const auto& globalDisplayLocation = info->GetGlobalDisplayLocation();
+    const auto x = PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX());
+    return Converter::ArkValue<Opt_Float64>(x);
+}
+void SetGlobalDisplayXImpl(Ark_ClickEvent peer,
+                           const Opt_Float64* globalDisplayX)
+{
+    CHECK_NULL_VOID(peer);
+    const auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    Offset globalDisplayLocation = info->GetGlobalDisplayLocation();
+    const auto animation = globalDisplayLocation.GetXAnimationOption();
+    const auto convX = Converter::OptConvertPtr<double>(globalDisplayX);
+    const auto x = PipelineBase::Vp2PxWithCurrentDensity(convX.value_or(DEFAULT_VALUE));
+    globalDisplayLocation.SetX(x, animation);
+    info->SetGlobalDisplayLocation(globalDisplayLocation);
+}
+Opt_Float64 GetGlobalDisplayYImpl(Ark_ClickEvent peer)
+{
+    CHECK_NULL_RETURN(peer, INVALID_OPT_FLOAT64);
+    const auto* info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, INVALID_OPT_FLOAT64);
+    const auto& globalDisplayLocation = info->GetGlobalDisplayLocation();
+    const auto y = PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY());
+    return Converter::ArkValue<Opt_Float64>(y);
+}
+void SetGlobalDisplayYImpl(Ark_ClickEvent peer,
+                           const Opt_Float64* globalDisplayY)
+{
+    CHECK_NULL_VOID(peer);
+    const auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    Offset globalDisplayLocation = info->GetGlobalDisplayLocation();
+    const auto animation = globalDisplayLocation.GetYAnimationOption();
+    const auto convY = Converter::OptConvertPtr<double>(globalDisplayY);
+    const auto y = PipelineBase::Vp2PxWithCurrentDensity(convY.value_or(DEFAULT_VALUE));
+    globalDisplayLocation.SetY(y, animation);
+    info->SetGlobalDisplayLocation(globalDisplayLocation);
+}
 } // ClickEventAccessor
 const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
 {
@@ -233,6 +281,10 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
         ClickEventAccessor::GetHandImpl,
         ClickEventAccessor::SetHandImpl,
         ClickEventAccessor::PreventDefaultImpl,
+        ClickEventAccessor::GetGlobalDisplayXImpl,
+        ClickEventAccessor::SetGlobalDisplayXImpl,
+        ClickEventAccessor::GetGlobalDisplayYImpl,
+        ClickEventAccessor::SetGlobalDisplayYImpl,
     };
     return &ClickEventAccessorImpl;
 }

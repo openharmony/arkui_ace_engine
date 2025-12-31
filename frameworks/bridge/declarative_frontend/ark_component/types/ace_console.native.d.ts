@@ -13,7 +13,18 @@
  * limitations under the License.
  */
 
-import { StateManager } from './env_mock'
-export class UIContextImpl {
-    public stateMgr: StateManager | undefined = undefined;
+/**
+ * AceConsole implemented onm C++ Side
+ * 
+ * non-public API
+ */
+
+declare class AceConsole {
+    log(...args : any) : void;
+    debug(...args : any) : void;
+    info(...args : any) : void;
+    warn(...args : any) : void;
+    error(...args : any) : void;
 }
+
+declare const aceConsole : AceConsole;

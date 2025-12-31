@@ -59,12 +59,11 @@ RefPtr<LayoutWrapper> CreateDummyListItemChild()
  * @brief If developer enables supportEmptyBranchInLazyLoading. And Index in the range of
  *        LazyForEach/RepeatVirtualScroll, try to create empty branch LayoutWrapper for the index.
  */
-static RefPtr<LayoutWrapper> GetListItemWidthEmptyBranch(
+static RefPtr<LayoutWrapper> GetListItemWithEmptyBranch(
     LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree, bool isCache)
 {
     const auto& layoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    if (layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false) &&
-        ScrollableUtils::IsChildLazy(layoutWrapper->GetHostNode(), index)) {
+    if (layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false)) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
         if (!wrapper) {
             wrapper = CreateDummyListItemChild();
@@ -1150,7 +1149,8 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
                 posMap_->OptimizeBeforeMeasure(endIndex, endPos, currentOffset_, contentMainSize_);
             }
             LayoutBackward(layoutWrapper, endIndex, endPos);
-            if (GetEndIndex() < (totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_)) {
+            if (GetEndIndex() < (totalItemCount_ - 1) &&
+                !LayoutReachEnd(GetEndPosition(), endMainPos_, GetEndIndex())) {
                 LayoutForward(layoutWrapper, GetEndIndex() + 1, GetEndPosition());
             }
         }
@@ -1315,12 +1315,12 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
 bool ListLayoutAlgorithm::LayoutReachEnd(float currentEndPos, float endMainPos, int32_t currentIndex)
 {
     if (LessNotEqual(currentEndPos, endMainPos)) {
-        return true;
-    }
-    if (GreatNotEqual(currentEndPos, endMainPos)) {
         return false;
     }
-    return (posMap_ && NearZero(posMap_->GetPositionInfo(currentIndex + 1).mainSize));
+    if (GreatNotEqual(currentEndPos, endMainPos)) {
+        return true;
+    }
+    return !posMap_ || !NearZero(posMap_->GetPositionInfo(currentIndex + 1).mainSize);
 }
 
 void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos)
@@ -1353,7 +1353,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             endMainPos = layoutEndMainPos_.value_or(endMainPos_);
             forwardFeature_ = false;
         }
-    } while (LayoutReachEnd(currentEndPos + chainOffset, endMainPos + endFixPos, currentIndex) || forwardFeature_);
+    } while (!LayoutReachEnd(currentEndPos + chainOffset, endMainPos + endFixPos, currentIndex) || forwardFeature_);
     currentEndPos += chainOffset;
 
     while (itemPosition_.size() > 1 && !targetIndex_) {
@@ -2550,7 +2550,7 @@ void ListLayoutAlgorithm::PredictBuildV2(
         ACE_SCOPED_TRACE("predict Item:%d", (*it).index);
         auto index = !pattern->IsStackFromEnd() ? (*it).index : frameNode->GetTotalChildCount() - (*it).index - 1;
         auto wrapper =
-            GetListItemWidthEmptyBranch(AceType::RawPtr(frameNode), index + pattern->GetItemStartIndex(), show, true);
+            GetListItemWithEmptyBranch(AceType::RawPtr(frameNode), index + pattern->GetItemStartIndex(), show, true);
         if (!wrapper) {
             it = param.items.erase(it);
             continue;
@@ -2929,6 +2929,6 @@ RefPtr<LayoutWrapper> ListLayoutAlgorithm::GetListItem(
 {
     index = (!isStackFromEnd_ ? index : totalItemCount_ - index - 1) + itemStartIndex_;
 
-    return GetListItemWidthEmptyBranch(layoutWrapper, index, addToRenderTree, isCache);
+    return GetListItemWithEmptyBranch(layoutWrapper, index, addToRenderTree, isCache);
 }
 } // namespace OHOS::Ace::NG

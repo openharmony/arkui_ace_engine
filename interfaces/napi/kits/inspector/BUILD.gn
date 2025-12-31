@@ -35,6 +35,11 @@ template("napi_inspector_static") {
     if (defined(config.libace_target)) {
       deps += [ config.libace_target ]
     }
+    if (is_arkui_x) {
+      deps += [ "$ace_root/frameworks/core:ace_container_scope_static" ]
+    } else {
+      deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
+    }
 
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part

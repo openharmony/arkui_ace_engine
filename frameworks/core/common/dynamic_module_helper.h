@@ -45,7 +45,7 @@ private:
     DynamicModuleHelper() = default;
     ~DynamicModuleHelper() = default;
 
-    std::unique_ptr<ComponentLoader> compatibleLib_ = nullptr;
+    ComponentLoaderFunc compatibleLoaderFunc_ = nullptr;
     std::unordered_map<std::string, std::unique_ptr<DynamicModule>> moduleMap_;
     std::mutex moduleMapMutex_;
 };

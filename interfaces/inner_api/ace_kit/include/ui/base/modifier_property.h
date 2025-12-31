@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,16 @@
  * limitations under the License.
  */
 
-#include "rosen_render_qrcode.h"
+#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_MODIFIER_PROPERTY_H
+#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_MODIFIER_PROPERTY_H
 
 namespace OHOS::Ace {
-RefPtr<RenderNode> RenderQrcode::Create()
-{
-    if (SystemProperties::GetRosenBackendEnabled()) {
-#ifdef ENABLE_ROSEN_BACKEND
-        return AceType::MakeRefPtr<RosenRenderQrcode>();
-#else
-        return nullptr;
-#endif
-    } else {
-        return nullptr;
-    }
-}
+
+enum class PropertyUnit {
+    UNKNOWN,
+    PIXEL_POSITION, // animatable properties are related to position of the object, the unit is pixels
+};
+
 } // namespace OHOS::Ace
+
+#endif //FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_MODIFIER_PROPERTY_H

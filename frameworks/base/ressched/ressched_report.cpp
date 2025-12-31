@@ -58,6 +58,7 @@ constexpr int32_t ABILITY_OR_PAGE_SWITCH_START_EVENT = 0;
 constexpr int32_t ABILITY_OR_PAGE_SWITCH_END_EVENT = 1;
 constexpr int32_t MODULE_SERIALIZER_COUNT = 3;
 constexpr int32_t RSS_TAIHANG_APP_WHITE_LIST_TYPE = 2;
+constexpr int32_t RSS_VSYNC_SCENE_LIST_VAULE = 2;
 #ifdef FFRT_EXISTS
 constexpr int32_t LONG_FRAME_START_EVENT = 0;
 constexpr int32_t LONG_FRAME_END_EVENT = 1;
@@ -333,6 +334,12 @@ bool ResSchedReport::AppWhiteListCheck(const std::unordered_map<std::string, std
 {
     ResScheSyncEventReport(RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST, 0, payload, reply);
     return reply["result"] == "\"true\"";
+}
+
+void ResSchedReport::AppVsyncEnableScene(const std::unordered_map<std::string, std::string>& payload,
+    std::unordered_map<std::string, std::string>& reply)
+{
+    ResScheSyncEventReport(RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST, RSS_VSYNC_SCENE_LIST_VAULE, payload, reply);
 }
 
 bool ResSchedReport::AppRVSEnableCheck(const std::unordered_map<std::string, std::string>& payload,

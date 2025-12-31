@@ -809,8 +809,8 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
         .animationVelocity = -velocity,
         .dragDistance = CalcPatternOffset(GetDragOffset()),
         .snapDirection = SnapDirection::NONE,
-        .fromScrollBar = !isTouchScreen_,
         .source = SCROLL_FROM_BAR,
+        .fromScrollBar = !isTouchScreen_,
     };
     if (startSnapAnimationCallback_ && startSnapAnimationCallback_(snapAnimationOptions)) {
         isDriving_ = false;

@@ -17,6 +17,7 @@ import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import util from '@ohos.util';
 import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import I18n from '@ohos.i18n';
+import uiMaterial from '@ohos.arkui.uiMaterial';
 
 const MIN_ITEM_COUNT = 2
 const MAX_ITEM_COUNT = 5
@@ -170,6 +171,7 @@ interface CommonSegmentButtonOptions {
   borderRadiusMode?: BorderRadiusMode
   backgroundBorderRadius?: LengthMetrics
   itemBorderRadius?: LengthMetrics
+  backgroundSystemMaterial?: uiMaterial.Material
 }
 
 type ItemRestriction<T> = [T, T, T?, T?, T?]
@@ -356,6 +358,7 @@ export class SegmentButtonOptions {
   public borderRadiusMode?: BorderRadiusMode
   public backgroundBorderRadius?: LengthMetrics
   public itemBorderRadius?: LengthMetrics
+  public backgroundSystemMaterial?: uiMaterial.Material
   private _buttons: SegmentButtonItemOptionsArray | undefined = void 0
 
   get buttons() {
@@ -415,6 +418,7 @@ export class SegmentButtonOptions {
     }
     let themePadding = LengthMetrics.resource($r('sys.float.segment_button_baseplate_padding')).value;
     this.componentPadding = this.multiply ? 0 : themePadding;
+    this.backgroundSystemMaterial = options.backgroundSystemMaterial
   }
 
   public onButtonsUpdated() {
@@ -449,7 +453,8 @@ export class SegmentButtonOptions {
       direction: options.direction,
       borderRadiusMode: options.borderRadiusMode,
       backgroundBorderRadius: options.backgroundBorderRadius,
-      itemBorderRadius: options.itemBorderRadius
+      itemBorderRadius: options.itemBorderRadius,
+      backgroundSystemMaterial: options.backgroundSystemMaterial
     })
   }
 
@@ -525,12 +530,12 @@ struct SelectItem {
         .size(this.buttonItemsSize[this.selectedIndexes[0]])
         .backgroundColor(this.options.selectedBackgroundColor ??
           (this.options.type === 'tab' ? segmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR :
-          segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR))
+            segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR))
         .position(this.selectedItemPosition)
         .scale({ x: this.zoomScaleArray[this.selectedIndexes[0]], y: this.zoomScaleArray[this.selectedIndexes[0]] })
         .shadow(this.isSegmentFocusStyleCustomized ? undefined :
           resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_BUTTON_SHADOW,
-          0) as ShadowStyle)
+            0) as ShadowStyle)
     }
   }
 }
@@ -1104,7 +1109,7 @@ struct SegmentButtonItemArrayComponent {
                   // Calculate height of items
                   this.buttonItemsRealHeight[index] = newValue.height as number
                   let maxHeight = Math.max(...this.buttonItemsRealHeight.slice(0, this.options.buttons ?
-                  this.options.buttons.length : 0))
+                    this.options.buttons.length : 0))
                   for (let index = 0; index < this.buttonItemsSize.length; index++) {
                     this.buttonItemsSize[index] = { width: this.buttonItemsSize[index].width, height: maxHeight }
                   }
@@ -1201,13 +1206,13 @@ struct SegmentButtonItemArrayComponent {
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
                   this.hoverColorArray[index].hoverColor =
                     this.isSegmentFocusStyleCustomized && this.focusIndex === index ?
-                    segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : segmentButtonTheme.HOVER_COLOR;
+                      segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : segmentButtonTheme.HOVER_COLOR;
                 })
               } else {
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
                   this.hoverColorArray[index].hoverColor =
                     this.isSegmentFocusStyleCustomized && this.focusIndex === index ?
-                    segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : Color.Transparent;
+                      segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : Color.Transparent;
                 })
               }
             })
@@ -1251,10 +1256,10 @@ struct SegmentButtonItemArrayComponent {
     if (this.selectedIndexes !== void 0 && this.selectedIndexes.length !== 0 &&
       this.selectedIndexes[0] === index) { // 选中态
       this.hoverColorArray[index].hoverColor = this.isDefaultSelectedBgColor() ?
-      segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : this.options.selectedBackgroundColor;
+        segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : this.options.selectedBackgroundColor;
     } else { // 未选中态
       this.hoverColorArray[index].hoverColor = this.options.backgroundColor === segmentButtonTheme.BACKGROUND_COLOR ?
-      segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : this.options.backgroundColor;
+        segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : this.options.backgroundColor;
     }
   }
 }
@@ -1462,6 +1467,7 @@ export struct SegmentButton {
           .direction(this.options.direction)
           .size(this.componentSize)
           .backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR)
+          .systemMaterial(this.options.backgroundSystemMaterial)
           .borderRadius(getBackgroundBorderRadius(
             this.options,
             this.componentSize.height as number / 2

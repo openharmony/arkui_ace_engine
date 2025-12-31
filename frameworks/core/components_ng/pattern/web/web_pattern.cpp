@@ -9502,7 +9502,7 @@ RefPtr<WebAgentEventReporter> WebPattern::GetAgentEventReporter()
     return webAgentEventReporter_;
 }
 
-void WebPattern::ReportSelectedText()
+void WebPattern::ReportSelectedText(bool isRegister)
 {
     if (UiSessionManager::GetInstance()->GetSelectTextEventRegistered()) {
         CHECK_NULL_VOID(delegate_);
@@ -10116,5 +10116,79 @@ void SnapshotTouchReporter::OnPan()
     item->Put("time", static_cast<int64_t>(GetMilliseconds()));
     item->Put("type", static_cast<uint8_t>(GestureType::PAN));
     infos_->Put(item);
+}
+
+namespace {
+bool IsNumber(const std::string &str)
+{
+    // 检查字符串是否为空
+    if (str.empty()) {
+        return false;
+    }
+
+    // 使用all_of检查所有字符是否为数字
+    return std::all_of(str.begin(), str.end(), [](char c) { return std::isdigit(static_cast<unsigned char>(c)); });
+}
+
+std::string EncodeURIComponent(const std::string &value)
+{
+    std::ostringstream escaped;
+    escaped.fill('0');
+    escaped << std::hex;
+
+    for (auto i = value.begin(), n = value.end(); i != n; ++i) {
+        std::string::value_type c = (*i);
+
+        // 检查是否为 RFC 3986 定义的未保留字符
+        if (std::isalnum(static_cast<unsigned char>(c)) || c == '-' || c == '_' || c == '.' || c == '~') {
+            escaped << c;
+            continue;
+        }
+
+        // 其他字符转换为 %XY 格式
+        escaped << std::uppercase;
+        escaped << '%' << std::setw(2) << static_cast<int>(static_cast<unsigned char>(c));
+        escaped << std::nouppercase;
+    }
+
+    return escaped.str();
+}
+} // namespace
+
+void WebPattern::HighlightSpecifiedContent(
+    const std::string &content, const std::vector<std::string> &nodeIds, const std::string &configs)
+{
+    CHECK_NULL_VOID(delegate_);
+    CHECK_NULL_VOID(webDomDocument_);
+    if (IS_CALLING_FROM_M114()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "HighlightSpecifiedContent not available.");
+        return;
+    }
+    auto agentManager = delegate_->GetNWebAgentManager();
+    if (!agentManager || !agentManager->IsAgentEnabled()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "EnableAgentManager GetNWebAgentManager failed, WebId: %{public}d", GetWebId());
+        return;
+    }
+
+    auto parsedConfigs = JsonUtil::ParseJsonString(configs);
+    agentManager->SetAgentNeedHighlight(parsedConfigs->GetBool("NeedHighlight", true));
+
+    std::unique_ptr<JsonValue> jsonArray = JsonUtil::CreateArray(true);
+    for (const std::string& nodeId : nodeIds) {
+        std::unique_ptr<JsonValue> jsonNode = JsonUtil::Create(true);
+        if (IsNumber(nodeId)) {
+            std::string Xpath = webDomDocument_->GetXpathById(std::atoi(nodeId.c_str()));
+            jsonNode->Put("value", Xpath.c_str());
+        } else {
+            jsonNode->Put("value", nodeId.c_str());
+        }
+        jsonArray->PutRef(std::move(jsonNode));
+    }
+    std::string jsonString = jsonArray->ToString();
+    RunJavascriptAsync("window.AgentHighlightUtils.HighlightTargetContent(\"" + EncodeURIComponent(jsonString) +
+                           "\",\"" + EncodeURIComponent(content) + "\")",
+        [](std::string result) {
+            TAG_LOGD(AceLogTag::ACE_WEB, "HighlightSpecifiedContent result = %{public}s ", result.c_str());
+        });
 }
 } // namespace OHOS::Ace::NG

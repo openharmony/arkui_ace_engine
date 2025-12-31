@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components/qrcode/render_qrcode.h"
+#include "compatible/components/qrcode/render_qrcode.h"
 
 namespace OHOS::Ace {
 namespace {

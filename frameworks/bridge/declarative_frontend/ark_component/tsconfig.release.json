@@ -1,0 +1,23 @@
+{
+    "include": [
+        "types/*.d.ts"
+    ],
+    "files": [
+        "src_dir/ArkLog.ts",
+        "src_dir/ArkComponent.ts",
+    ],
+
+    "compilerOptions": {
+        "module": "none",
+        "target": "ES2016",
+        "outDir": "dist",
+        "outFile": "dist/arkComponent.js",
+        "rootDir": "./src_dir/",
+        "declaration": true,
+        "noEmitOnError": false,
+        "experimentalDecorators": true,
+        "lib": [
+            "ES2016"
+        ],
+    }
+}

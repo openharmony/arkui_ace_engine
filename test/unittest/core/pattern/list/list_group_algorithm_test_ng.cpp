@@ -1892,4 +1892,35 @@ HWTEST_F(ListGroupAlgTestNg, LayoutPolicyTest001, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     EXPECT_EQ(geometryNode->GetFrameSize().Width(), 300.0f);
 }
+
+/**
+ * @tc.name: SupportLazyEmptryBranch001
+ * @tc.desc: test when ListItemGroup support lazy empty branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, SupportLazyEmptryBranch001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    RefPtr<FrameNode> listItemGroupNode = AceType::DynamicCast<FrameNode>(
+        ViewStackProcessor::GetInstance()->GetMainElementNode());
+
+    // list layout property
+    auto layoutProperty = frameNode_->GetLayoutProperty<ListLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(listItemGroupNode->GetLayoutAlgorithm());
+    ASSERT_TRUE(layoutAlgorithmWrapper);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+
+    layoutAlgorithm->listLayoutProperty_ = layoutProperty;
+    auto wrapper = layoutAlgorithm->GetListItem(AceType::RawPtr(listItemGroupNode), 0);
+    EXPECT_EQ(wrapper, nullptr);
+
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(true);
+    EXPECT_EQ(layoutAlgorithm->listLayoutProperty_->GetSupportLazyLoadingEmptyBranch().value_or(false), true);
+
+    auto wrapper1 = layoutAlgorithm->GetListItem(AceType::RawPtr(listItemGroupNode), 0);
+    EXPECT_NE(wrapper1, nullptr);
+}
 } // namespace OHOS::Ace::NG

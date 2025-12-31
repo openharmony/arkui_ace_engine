@@ -1398,6 +1398,9 @@ int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, TextChangeReason
         if (options.useThemeDecorationColor) {
             options.style.value().SetTextDecorationColor(urlSpanColor);
         }
+        if (options.strokeColorFollowFontColor) {
+            options.style.value().SetStrokeColor(urlSpanColor);
+        }
     }
     CHECK_NULL_RETURN(isUndoRedo || BeforeChangeText(changeValue, options), -1);
     ClearRedoOperationRecords();
@@ -1548,10 +1551,12 @@ void RichEditorPattern::UpdateUrlStyle(RefPtr<SpanNode>& spanNode, const std::op
         const auto& textColor = themeTextStyle.GetTextColor();
         spanNode->UpdateTextColor(textColor);
         IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColor(textColor));
+        IF_TRUE(spanItem->strokeColorFollowFontColor, spanNode->UpdateStrokeColor(textColor));
     } else {
         const auto& urlSpanColor = GetUrlSpanColor();
         spanNode->UpdateTextColor(urlSpanColor);
         IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColor(urlSpanColor));
+        IF_TRUE(spanItem->strokeColorFollowFontColor, spanNode->UpdateStrokeColor(urlSpanColor));
     }
 }
 
@@ -4259,11 +4264,11 @@ bool RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<
             ResetSelection();
         }
         IF_TRUE(!IsAiSelected(), StartVibratorByLongPress());
+        CHECK_EQUAL_RETURN(HandleLongPressOnAiSelection(), true, true);
         editingLongPress_ = isEditing_;
         previewLongPress_ = !isEditing_;
     }
     focusHub->RequestFocusImmediately();
-    CHECK_EQUAL_RETURN(HandleLongPressOnAiSelection(), true, true);
     InitSelection(textOffset);
     auto selectEnd = textSelector_.GetTextEnd();
     auto selectStart = textSelector_.GetTextStart();
@@ -5667,6 +5672,7 @@ void RichEditorPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Proper
         { StyleManager::SCROLL_BAR_COLOR_KEY,  [this](const Color& c){ UpdateScrollBarColor(c); } },
         { StyleManager::PLACEHOLDER_FONT_COLOR_KEY,  [this](const Color& c){ UpdatePlaceholderFontColor(c); } },
         { StyleManager::SELECTED_BACKGROUND_COLOR_KEY,  [this](const Color& c){ SetSelectedBackgroundColor(c); } },
+        { StyleManager::SELECTED_DRAG_PREVIEW_COLOR_KEY,  [this](const Color& c){ SetSelectedDragPreviewColor(c); } },
     };
     auto iter = UPDATER_MAP.find(key);
     IF_TRUE(iter != UPDATER_MAP.end(), iter->second(*color));
@@ -6652,6 +6658,7 @@ void RichEditorPattern::SetDefaultColor(RefPtr<SpanNode>& spanNode)
     if (auto& spanItem = spanNode->GetSpanItem(); spanItem && spanItem->urlOnRelease) {
         spanNode->UpdateTextColor(GetUrlSpanColor());
     }
+    spanNode->UpdateStrokeColor(spanNode->GetTextColorValue(Color::BLACK));
 }
 
 bool RichEditorPattern::BeforeIMEInsertValue(const std::u16string& insertValue)
@@ -9492,6 +9499,14 @@ void RichEditorPattern::CreateDragNode()
     FrameNode::ProcessOffscreenNode(dragNode_);
 }
 
+void RichEditorPattern::SetSelectedDragPreviewColor(const Color& selectedDragPreviewColor)
+{
+    auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
+    IF_PRESENT(layoutProperty, UpdateSelectedDragPreviewStyle(selectedDragPreviewColor));
+    auto host = GetContentHost();
+    IF_PRESENT(host, MarkDirtyNode(PROPERTY_UPDATE_MEASURE));
+}
+
 float RichEditorPattern::GetMaxSelectedWidth()
 {
     auto boxes = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
@@ -11834,7 +11849,7 @@ void RichEditorPattern::CreateSpanResult(RichEditorChangeValue& changeValue, int
     if (textStyle) {
         SetTextStyleToRet(retInfo, *textStyle);
     } else {
-        SetThemeTextStyleToRet(retInfo);
+        SetThemeTextStyleToRet(retInfo, urlAddress);
         if (urlAddress.has_value()) {
             retInfo.SetFontColor(GetUrlSpanColor().ColorToString());
         }
@@ -11886,7 +11901,8 @@ void RichEditorPattern::SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo,
     retInfo.SetFontWeight((int32_t)textStyle.GetFontWeight());
 }
 
-void RichEditorPattern::SetThemeTextStyleToRet(RichEditorAbstractSpanResult& retInfo)
+void RichEditorPattern::SetThemeTextStyleToRet(RichEditorAbstractSpanResult& retInfo,
+    const std::optional<std::u16string>& urlAddress)
 {
     auto theme = GetTheme<RichEditorTheme>();
     TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
@@ -11897,6 +11913,10 @@ void RichEditorPattern::SetThemeTextStyleToRet(RichEditorAbstractSpanResult& ret
     retInfo.SetTextDecoration(TextDecoration::NONE);
     retInfo.SetColor(style.GetTextColor().ColorToString());
     retInfo.SetFontFamily("HarmonyOS Sans");
+    TextStyleResult textStyleResult = retInfo.GetTextStyle();
+    textStyleResult.strokeColor = urlAddress.has_value() ? GetUrlSpanColor().ColorToString()
+        : style.GetTextColor().ColorToString();
+    retInfo.SetTextStyle(textStyleResult);
 }
 
 void RichEditorPattern::SetParaStyleToRet(RichEditorAbstractSpanResult& retInfo,
@@ -12180,7 +12200,7 @@ void RichEditorPattern::UpdateTextSpanResultByOptions(RichEditorAbstractSpanResu
     if (options.style.has_value()) {
         SetTextStyleToRet(retInfo, options.style.value());
     } else {
-        SetThemeTextStyleToRet(retInfo);
+        SetThemeTextStyleToRet(retInfo, options.urlAddress);
     }
     auto urlAddress = options.urlAddress;
     IF_TRUE(urlAddress.has_value(), retInfo.SetUrlAddress(urlAddress.value()));

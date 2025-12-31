@@ -27,6 +27,7 @@ public:
     ~MockUiSessionManager() override = default;
 
     MOCK_METHOD2(OnRouterChange, void(const std::string& path, const std::string& event));
+    MOCK_METHOD0(GetSelectTextEventRegistered, bool());
 };
 }
 #endif

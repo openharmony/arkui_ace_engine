@@ -329,6 +329,7 @@ ohos_unittest("image_loader_test") {
     "$ace_root/adapter/ohos/osal/file_uri_helper_ohos.cpp",
     "$ace_root/frameworks/core/image/image_loader.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
+    "$ace_root/test/mock/base/mock_event_report.cpp",
     "$ace_root/test/mock/base/mock_ace_trace.cpp",
     "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",

@@ -965,7 +965,7 @@ public:
     void HighlightSpecifiedContent(
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) override;
     void ResetHighLightValue();
-    void ReportSelectedText() override;
+    void ReportSelectedText(bool isRegister = false) override;
     int32_t HighlightStrIndexToPaintRectIndex(int32_t matchIndex, bool isStart);
     std::u16string TextHighlightSelectedContent(int32_t start, int32_t end);
 
@@ -1260,6 +1260,10 @@ private:
     void GetPaintOffsetWithoutTransform(OffsetF& paintOffset);
     void ContentChangeByDetaching(PipelineContext*) override;
     void HighlightDisappearAnimation();
+    void HighlightAppearAnimation();
+    bool HighlightTriggerScrollableParentToScroll(const RectF& hightlightRect);
+    const RefPtr<ScrollablePattern> FindScrollableParentWithRelativeOffset(OffsetF& offset);
+    RectF GetHighlightRect(const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& paragraphsRects) const;
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;

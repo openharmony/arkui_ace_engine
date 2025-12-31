@@ -119,17 +119,17 @@ export class ColorMetrics {
     private alpha_: int32;
     private colorSpace_: ColorSpace = ColorSpace.SRGB;
     private resourceId_: int32 = -1;
-    static readonly WHITE: int32 = 0xffffffff;
-    static readonly BLACK: int32 = 0xff000000;
-    static readonly BLUE: int32 = 0xff0000ff;
-    static readonly BROWN: int32 = 0xffa52a2a;
-    static readonly GRAY: int32 = 0xff808080;
-    static readonly GREEN: int32 = 0xff008000;
-    static readonly GREY: int32 = 0xff808080;
-    static readonly ORANGE: int32 = 0xffffa500;
-    static readonly PINK: int32 = 0xffffc0cb;
-    static readonly RED: int32 = 0xffff0000;
-    static readonly YELLOW: int32 = 0xffffff00;
+    static readonly WHITE: int32 = 0xffffffff.toInt();
+    static readonly BLACK: int32 = 0xff000000.toInt();
+    static readonly BLUE: int32 = 0xff0000ff.toInt();
+    static readonly BROWN: int32 = 0xffa52a2a.toInt();
+    static readonly GRAY: int32 = 0xff808080.toInt();
+    static readonly GREEN: int32 = 0xff008000.toInt();
+    static readonly GREY: int32 = 0xff808080.toInt();
+    static readonly ORANGE: int32 = 0xffffa500.toInt();
+    static readonly PINK: int32 = 0xffffc0cb.toInt();
+    static readonly RED: int32 = 0xffff0000.toInt();
+    static readonly YELLOW: int32 = 0xffffff00.toInt();
     static readonly TRANSPARENT: string = '#00000000';
     get color(): string {
         return `rgba(${this.red}, ${this.green}, ${this.blue}, ${(this.alpha as double) / MAX_CHANNEL_VALUE})`;
@@ -361,8 +361,8 @@ export class ShapeMask {
         this.circle = null;
         this.roundRect = null;
     }
-    public fillColor: int32 = 0XFF000000;
-    public strokeColor: int32 = 0XFF000000;
+    public fillColor: int32 = 0XFF000000.toInt();
+    public strokeColor: int32 = 0XFF000000.toInt();
     public strokeWidth: double = 0;
 }
 export class ShapeClip {

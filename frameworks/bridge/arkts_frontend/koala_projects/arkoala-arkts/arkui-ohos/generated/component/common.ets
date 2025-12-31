@@ -673,6 +673,8 @@ export interface DragEvent {
     startDataLoading(options: unifiedDataChannel.GetDataParams): string | undefined
     getDisplayId(): int32
     enableInternalDropAnimation(configuration: string): void
+    getGlobalDisplayX(): double
+    getGlobalDisplayY(): double
 }
 export class DragEventInternal implements MaterializedBase,DragEvent {
     peer?: Finalizable | undefined = undefined
@@ -778,6 +780,12 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         this.enableInternalDropAnimation_serialize(configuration_casted)
         return
     }
+    public getGlobalDisplayX(): double {
+        return this.getGlobalDisplayX_serialize()
+    }
+    public getGlobalDisplayY(): double {
+        return this.getGlobalDisplayY_serialize()
+    }
     private getDragBehavior(): DragBehavior {
         return this.getDragBehavior_serialize()
     }
@@ -869,6 +877,14 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     }
     enableInternalDropAnimation_serialize(configuration: string): void {
         ArkUIGeneratedNativeModule._DragEvent_enableInternalDropAnimation(this.peer!.ptr, configuration)
+    }
+    getGlobalDisplayX_serialize(): double {
+        const retval  = ArkUIGeneratedNativeModule._DragEvent_getGlobalDisplayX(this.peer!.ptr)
+        return retval
+    }
+    getGlobalDisplayY_serialize(): double {
+        const retval  = ArkUIGeneratedNativeModule._DragEvent_getGlobalDisplayY(this.peer!.ptr)
+        return retval
     }
     private getDragBehavior_serialize(): DragBehavior {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getDragBehavior(this.peer!.ptr)
@@ -6955,6 +6971,8 @@ export interface TouchObject {
     pressure?: double;
     width?: double;
     height?: double;
+    globalDisplayX?: double;
+    globalDisplayY?: double;
 }
 export interface HistoricalPoint {
     touchObject: TouchObject;
@@ -14058,6 +14076,22 @@ export class TouchObject_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForGlobalDisplayX  = value.globalDisplayX
+        if (valueHolderForGlobalDisplayX !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGlobalDisplayXTmpValue  = valueHolderForGlobalDisplayX!
+            valueSerializer.writeFloat64(valueHolderForGlobalDisplayXTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForGlobalDisplayY  = value.globalDisplayY
+        if (valueHolderForGlobalDisplayY !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGlobalDisplayYTmpValue  = valueHolderForGlobalDisplayY!
+            valueSerializer.writeFloat64(valueHolderForGlobalDisplayYTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): TouchObject {
         let valueDeserializer : DeserializerBase = buffer
@@ -14099,7 +14133,19 @@ export class TouchObject_serializer {
             heightTmpBuf = valueDeserializer.readFloat64()
         }
         const heightTmpResult : double | undefined = heightTmpBuf
-        let value : TouchObject = ({type: typeTmpResult, id: idTmpResult, displayX: displayXTmpResult, displayY: displayYTmpResult, windowX: windowXTmpResult, windowY: windowYTmpResult, x: xTmpResult, y: yTmpResult, hand: handTmpResult, pressedTime: pressedTimeTmpResult, pressure: pressureTmpResult, width: widthTmpResult, height: heightTmpResult} as TouchObject)
+        const globalDisplayXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let globalDisplayXTmpBuf : double | undefined = undefined
+        if ((globalDisplayXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            globalDisplayXTmpBuf = valueDeserializer.readFloat64()
+        }
+        const globalDisplayXTmpResult : double | undefined = globalDisplayXTmpBuf
+        const globalDisplayYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let globalDisplayYTmpBuf : double | undefined = undefined
+        if ((globalDisplayYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            globalDisplayYTmpBuf = valueDeserializer.readFloat64()
+        }
+        const globalDisplayYTmpResult : double | undefined = globalDisplayYTmpBuf
+        let value : TouchObject = ({type: typeTmpResult, id: idTmpResult, displayX: displayXTmpResult, displayY: displayYTmpResult, windowX: windowXTmpResult, windowY: windowYTmpResult, x: xTmpResult, y: yTmpResult, hand: handTmpResult, pressedTime: pressedTimeTmpResult, pressure: pressureTmpResult, width: widthTmpResult, height: heightTmpResult, globalDisplayX: globalDisplayXTmpResult, globalDisplayY: globalDisplayYTmpResult} as TouchObject)
         return value
     }
 }
@@ -23829,6 +23875,8 @@ export interface AccessibilityHoverEvent extends BaseEvent {
     displayY: double
     windowX: double
     windowY: double
+    globalDisplayX?: double | undefined
+    globalDisplayY?: double | undefined
 }
 export class AccessibilityHoverEventInternal extends BaseEventInternal implements MaterializedBase,AccessibilityHoverEvent {
     get type(): AccessibilityHoverType {
@@ -23872,6 +23920,20 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
     }
     set windowY(windowY: double) {
         this.setWindowY(windowY)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        const globalDisplayX_NonNull  = globalDisplayX as double
+        this.setGlobalDisplayX(globalDisplayX_NonNull)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        const globalDisplayY_NonNull  = globalDisplayY as double
+        this.setGlobalDisplayY(globalDisplayY_NonNull)
     }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
@@ -23945,6 +24007,22 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
         this.setWindowY_serialize(windowY_casted)
         return
     }
+    private getGlobalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX_serialize()
+    }
+    private setGlobalDisplayX(globalDisplayX: double | undefined): void {
+        const globalDisplayX_casted = globalDisplayX as (double | undefined)
+        this.setGlobalDisplayX_serialize(globalDisplayX_casted)
+        return
+    }
+    private getGlobalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY_serialize()
+    }
+    private setGlobalDisplayY(globalDisplayY: double | undefined): void {
+        const globalDisplayY_casted = globalDisplayY as (double | undefined)
+        this.setGlobalDisplayY_serialize(globalDisplayY_casted)
+        return
+    }
     private getType_serialize(): AccessibilityHoverType {
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getType(this.peer!.ptr)
         return AccessibilityHoverType.fromValue(retval)
@@ -23994,6 +24072,52 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
     private setWindowY_serialize(windowY: double): void {
         ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setWindowY(this.peer!.ptr, windowY)
     }
+    private getGlobalDisplayX_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getGlobalDisplayX(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayX !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayXTmpValue  = globalDisplayX!
+            thisSerializer.writeFloat64(globalDisplayXTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setGlobalDisplayX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getGlobalDisplayY_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getGlobalDisplayY(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayY !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayYTmpValue  = globalDisplayY!
+            thisSerializer.writeFloat64(globalDisplayYTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setGlobalDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface AxisEvent extends BaseEvent {
     action: AxisAction
@@ -24004,6 +24128,8 @@ export interface AxisEvent extends BaseEvent {
     x: double
     y: double
     scrollStep?: int32 | undefined
+    globalDisplayX?: double | undefined
+    globalDisplayY?: double | undefined
     propagation(): void
     getHorizontalAxisValue(): double
     getVerticalAxisValue(): double
@@ -24058,6 +24184,20 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     set scrollStep(scrollStep: int32 | undefined) {
         const scrollStep_NonNull  = (scrollStep as int32)
         this.setScrollStep(scrollStep_NonNull)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        const globalDisplayX_NonNull  = globalDisplayX as double
+        this.setGlobalDisplayX(globalDisplayX_NonNull)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        const globalDisplayY_NonNull  = globalDisplayY as double
+        this.setGlobalDisplayY(globalDisplayY_NonNull)
     }
     public propagation(): void {
         this.propagation_serialize()
@@ -24153,6 +24293,22 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
         this.setScrollStep_serialize(scrollStep_casted)
         return
     }
+    private getGlobalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX_serialize()
+    }
+    private setGlobalDisplayX(globalDisplayX: double | undefined): void {
+        const globalDisplayX_casted = globalDisplayX as (double | undefined)
+        this.setGlobalDisplayX_serialize(globalDisplayX_casted)
+        return
+    }
+    private getGlobalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY_serialize()
+    }
+    private setGlobalDisplayY(globalDisplayY: double | undefined): void {
+        const globalDisplayY_casted = globalDisplayY as (double | undefined)
+        this.setGlobalDisplayY_serialize(globalDisplayY_casted)
+        return
+    }
     getHorizontalAxisValue_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._AxisEvent_getHorizontalAxisValue(this.peer!.ptr)
         return retval
@@ -24240,6 +24396,52 @@ export class AxisEventInternal extends BaseEventInternal implements Materialized
     propagation_serialize(): void {
         ArkUIGeneratedNativeModule._AxisEvent_propagation(this.peer!.ptr)
     }
+    private getGlobalDisplayX_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getGlobalDisplayX(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayX !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayXTmpValue  = globalDisplayX!
+            thisSerializer.writeFloat64(globalDisplayXTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._AxisEvent_setGlobalDisplayX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getGlobalDisplayY_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._AxisEvent_getGlobalDisplayY(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayY !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayYTmpValue  = globalDisplayY!
+            thisSerializer.writeFloat64(globalDisplayYTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._AxisEvent_setGlobalDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface ClickEvent extends BaseEvent {
     displayX: double
@@ -24249,6 +24451,8 @@ export interface ClickEvent extends BaseEvent {
     x: double
     y: double
     hand?: InteractionHand | undefined
+    globalDisplayX?: double | undefined
+    globalDisplayY?: double | undefined
     preventDefault(): void
 }
 export class ClickEventInternal extends BaseEventInternal implements MaterializedBase,ClickEvent {
@@ -24294,6 +24498,20 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
     set hand(hand: InteractionHand | undefined) {
         const hand_NonNull  = (hand as InteractionHand)
         this.setHand(hand_NonNull)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        const globalDisplayX_NonNull  = globalDisplayX as double
+        this.setGlobalDisplayX(globalDisplayX_NonNull)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        const globalDisplayY_NonNull  = globalDisplayY as double
+        this.setGlobalDisplayY(globalDisplayY_NonNull)
     }
     public preventDefault(): void {
         // instructive change start
@@ -24372,6 +24590,22 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         this.setHand_serialize(hand_casted)
         return
     }
+    private getGlobalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX_serialize()
+    }
+    private setGlobalDisplayX(globalDisplayX: double | undefined): void {
+        const globalDisplayX_casted = globalDisplayX as (double | undefined)
+        this.setGlobalDisplayX_serialize(globalDisplayX_casted)
+        return
+    }
+    private getGlobalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY_serialize()
+    }
+    private setGlobalDisplayY(globalDisplayY: double | undefined): void {
+        const globalDisplayY_casted = globalDisplayY as (double | undefined)
+        this.setGlobalDisplayY_serialize(globalDisplayY_casted)
+        return
+    }
     private getDisplayX_serialize(): double {
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_getDisplayX(this.peer!.ptr)
         return retval
@@ -24435,6 +24669,52 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ClickEvent_setHand(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getGlobalDisplayX_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ClickEvent_getGlobalDisplayX(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayX !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayXTmpValue  = globalDisplayX!
+            thisSerializer.writeFloat64(globalDisplayXTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ClickEvent_setGlobalDisplayX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getGlobalDisplayY_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ClickEvent_getGlobalDisplayY(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayY !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayYTmpValue  = globalDisplayY!
+            thisSerializer.writeFloat64(globalDisplayYTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ClickEvent_setGlobalDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     preventDefault_serialize(): void {
@@ -24517,6 +24797,8 @@ export interface HoverEvent extends BaseEvent {
     windowY?: double | undefined
     displayX?: double | undefined
     displayY?: double | undefined
+    globalDisplayX?: double | undefined
+    globalDisplayY?: double | undefined
     stopPropagation(): void
 }
 export class HoverEventInternal extends BaseEventInternal implements MaterializedBase,HoverEvent {
@@ -24561,6 +24843,20 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
     set displayY(displayY: double | undefined) {
         const displayY_NonNull  = (displayY as double)
         this.setDisplayY(displayY_NonNull)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        const globalDisplayX_NonNull  = globalDisplayX as double
+        this.setGlobalDisplayX(globalDisplayX_NonNull)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        const globalDisplayY_NonNull  = globalDisplayY as double
+        this.setGlobalDisplayY(globalDisplayY_NonNull)
     }
     public stopPropagation(): void {
         this.stopPropagation_serialize()
@@ -24628,6 +24924,22 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
     private setDisplayY(displayY: double | undefined): void {
         const displayY_casted = displayY as (double | undefined)
         this.setDisplayY_serialize(displayY_casted)
+        return
+    }
+    private getGlobalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX_serialize()
+    }
+    private setGlobalDisplayX(globalDisplayX: double | undefined): void {
+        const globalDisplayX_casted = globalDisplayX as (double | undefined)
+        this.setGlobalDisplayX_serialize(globalDisplayX_casted)
+        return
+    }
+    private getGlobalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY_serialize()
+    }
+    private setGlobalDisplayY(globalDisplayY: double | undefined): void {
+        const globalDisplayY_casted = globalDisplayY as (double | undefined)
+        this.setGlobalDisplayY_serialize(globalDisplayY_casted)
         return
     }
     private getX_serialize(): double | undefined {
@@ -24768,6 +25080,52 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._HoverEvent_setDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    private getGlobalDisplayX_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getGlobalDisplayX(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayX !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayXTmpValue  = globalDisplayX!
+            thisSerializer.writeFloat64(globalDisplayXTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._HoverEvent_setGlobalDisplayX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getGlobalDisplayY_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._HoverEvent_getGlobalDisplayY(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayY !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayYTmpValue  = globalDisplayY!
+            thisSerializer.writeFloat64(globalDisplayYTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._HoverEvent_setGlobalDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     stopPropagation_serialize(): void {
         ArkUIGeneratedNativeModule._HoverEvent_stopPropagation(this.peer!.ptr)
     }
@@ -24785,6 +25143,8 @@ export interface MouseEvent extends BaseEvent {
     rawDeltaX?: double | undefined
     rawDeltaY?: double | undefined
     pressedButtons?: Array<MouseButton> | undefined
+    globalDisplayX?: double | undefined
+    globalDisplayY?: double | undefined
 }
 export class MouseEventInternal extends BaseEventInternal implements MaterializedBase,MouseEvent {
     get button(): MouseButton {
@@ -24861,6 +25221,20 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     set pressedButtons(pressedButtons: Array<MouseButton> | undefined) {
         const pressedButtons_NonNull  = (pressedButtons as Array<MouseButton>)
         this.setPressedButtons(pressedButtons_NonNull)
+    }
+    get globalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX()
+    }
+    set globalDisplayX(globalDisplayX: double | undefined) {
+        const globalDisplayX_NonNull  = globalDisplayX as double
+        this.setGlobalDisplayX(globalDisplayX_NonNull)
+    }
+    get globalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY()
+    }
+    set globalDisplayY(globalDisplayY: double | undefined) {
+        const globalDisplayY_NonNull  = globalDisplayY as double
+        this.setGlobalDisplayY(globalDisplayY_NonNull)
     }
     constructor(peerPtr: KPointer) {
         super(peerPtr)
@@ -24972,6 +25346,22 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     private setPressedButtons(pressedButtons: Array<MouseButton> | undefined): void {
         const pressedButtons_casted = pressedButtons as (Array<MouseButton> | undefined)
         this.setPressedButtons_serialize(pressedButtons_casted)
+        return
+    }
+    private getGlobalDisplayX(): double | undefined {
+        return this.getGlobalDisplayX_serialize()
+    }
+    private setGlobalDisplayX(globalDisplayX: double | undefined): void {
+        const globalDisplayX_casted = globalDisplayX as (double | undefined)
+        this.setGlobalDisplayX_serialize(globalDisplayX_casted)
+        return
+    }
+    private getGlobalDisplayY(): double | undefined {
+        return this.getGlobalDisplayY_serialize()
+    }
+    private setGlobalDisplayY(globalDisplayY: double | undefined): void {
+        const globalDisplayY_casted = globalDisplayY as (double | undefined)
+        this.setGlobalDisplayY_serialize(globalDisplayY_casted)
         return
     }
     private getButton_serialize(): MouseButton {
@@ -25137,6 +25527,52 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._MouseEvent_setPressedButtons(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+private getGlobalDisplayX_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getGlobalDisplayX(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayX_serialize(globalDisplayX: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayX !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayXTmpValue  = globalDisplayX!
+            thisSerializer.writeFloat64(globalDisplayXTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._MouseEvent_setGlobalDisplayX(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getGlobalDisplayY_serialize(): double | undefined {
+        const retval  = ArkUIGeneratedNativeModule._MouseEvent_getGlobalDisplayY(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private setGlobalDisplayY_serialize(globalDisplayY: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (globalDisplayY !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const globalDisplayYTmpValue  = globalDisplayY!
+            thisSerializer.writeFloat64(globalDisplayYTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._MouseEvent_setGlobalDisplayY(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

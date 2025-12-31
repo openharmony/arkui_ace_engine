@@ -475,11 +475,11 @@ export struct FoldSplitContainer {
 
   dealWindowStatusChange() {
     try {
-      this.windowInstance?.on('windowStatusChange', (status) => {
+      this.windowInstance?.onWindowStatusChange((status) => {
         this.windowStatusType = status;
       });
     } catch (err : BusinessError<void>) {
-      Logger.error('Failed windowInstance.on windowStatusChange. code:%{public}d, message:%{public}s',
+      Logger.error('Failed windowInstance.onWindowStatusChange. code:%{public}d, message:%{public}s',
         err.code, err.message);
     }
   }
@@ -495,7 +495,7 @@ export struct FoldSplitContainer {
       Logger.error('Failed display.offFoldStatusChange. code:%{public}d, message:%{public}s', err.code, err.message);
     }
     if (this.windowInstance) {
-      this.windowInstance?.off('windowStatusChange');
+      this.windowInstance?.offWindowStatusChange();
     }
   }
 

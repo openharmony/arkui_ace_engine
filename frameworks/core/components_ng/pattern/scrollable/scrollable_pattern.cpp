@@ -1523,14 +1523,22 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
 {
     CHECK_NULL_VOID(scrollBarProxy);
     auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source, bool nestedScroll,
-        bool isMouseWheelScroll) {
+        bool isMouseWheelScroll, Axis axis) {
         if (source != SCROLL_FROM_START) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_RETURN(pattern && pattern->GetAxis() != Axis::NONE, false);
+            if (pattern->TryFreeScroll(offset, axis)) {
+                return true;
+            }
             auto scrollable = pattern->GetScrollable();
             if (isMouseWheelScroll && scrollable) {
                 scrollable->ProcessAxisUpdateEvent(offset, true);
                 return true;
+            }
+            if (source == SCROLL_FROM_BAR_OVER_DRAG && pattern->GetAxis() != Axis::NONE && pattern->AnimateStoped()) {
+                float tmp = static_cast<float>(offset);
+                pattern->AdjustOffset(tmp, source);
+                offset = tmp;
             }
             if (!nestedScroll) {
                 return pattern->UpdateCurrentOffset(offset, source);

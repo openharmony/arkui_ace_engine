@@ -52,7 +52,6 @@ const std::vector SUPPORT_METHOD = {"ArkUI.tree", "ArkUI.tree.3D", "ArkUI.queryA
 
 const uint32_t LONG_PRESS_DELAY = 1000;
 RectF deviceRect;
-thread_local std::set<RefPtr<FrameNode>> offscreenNodes;
 
 TouchEvent GetUpPoint(const TouchEvent& downPoint)
 {
@@ -547,19 +546,21 @@ std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t p
 
 RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key, bool notDetach, bool skipoffscreenNodes)
 {
-    // 如果查找的目标节点确定是已经挂树的节点，可以跳过offscreenNodes的遍历，避免offscreenNodes过多的情况消耗性能。
-    if (!offscreenNodes.empty() && !skipoffscreenNodes) {
+    auto context = NG::PipelineContext::GetCurrentContext();
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "Internal error! Context is null.");
+        return nullptr;
+    }
+    auto offscreenNodesMgr = context->GetInspectorOffscreenNodesMgr();
+    // can skip traversing offscreenNodes to avoid performance degradation caused by excessive offscreenNodes.
+    if (offscreenNodesMgr != nullptr && !skipoffscreenNodes) {
+        auto offscreenNodes = offscreenNodesMgr->GetOffscreenNodes();
         for (auto node : offscreenNodes) {
             auto frameNode = AceType::DynamicCast<FrameNode>(GetInspectorByKey(node, key, notDetach));
             if (frameNode) {
                 return frameNode;
             }
         }
-    }
-    auto context = NG::PipelineContext::GetCurrentContextSafely();
-    if (!context) {
-        LOGW("Internal error! Context is null.");
-        return nullptr;
     }
     auto rootNode = context->GetRootElement();
     if (!rootNode) {
@@ -858,23 +859,37 @@ void Inspector::HideAllMenus()
 void Inspector::AddOffscreenNode(RefPtr<FrameNode> node)
 {
     CHECK_NULL_VOID(node);
-    offscreenNodes.insert(node);
+    auto pipeline = node->GetContextRefPtr();
+    if (!pipeline) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "Internal error! can't get pipeline in node %{public}s",
+            node->GetInspectorId().value_or("").c_str());
+        return;
+    }
+    auto offscreenNodesMgr = pipeline->GetInspectorOffscreenNodesMgr();
+    if (!offscreenNodesMgr) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "Internal error! can't get offscreenNodesMgr in node %{public}s",
+            node->GetInspectorId().value_or("").c_str());
+        return;
+    }
+    offscreenNodesMgr->AddOffscreenNode(node);
 }
 
 void Inspector::RemoveOffscreenNode(RefPtr<FrameNode> node)
 {
     CHECK_NULL_VOID(node);
-    offscreenNodes.erase(node);
-}
-
-int32_t Inspector::GetOffscreenNodesSize()
-{
-    return offscreenNodes.size();
-}
-
-void Inspector::ClearAllOffscreenNodes()
-{
-    offscreenNodes.clear();
+    auto pipeline = node->GetContextRefPtr();
+    if (!pipeline) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "Internal error! can't get pipeline in node %{public}s",
+            node->GetInspectorId().value_or("").c_str());
+        return;
+    }
+    auto offscreenNodesMgr = pipeline->GetInspectorOffscreenNodesMgr();
+    if (!offscreenNodesMgr) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "Internal error! can't get offscreenNodesMgr in node %{public}s",
+            node->GetInspectorId().value_or("").c_str());
+        return;
+    }
+    offscreenNodesMgr->RemoveOffscreenNode(node);
 }
 
 void Inspector::GetInspectorTree(InspectorTreeMap& treesInfo)
@@ -1023,6 +1038,17 @@ void Inspector::GetInspectorChildrenInfo(
 
 void Inspector::GetOffScreenTreeNodes(InspectorTreeMap& nodes)
 {
+    auto context = NG::PipelineContext::GetCurrentContext();
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetOffScreenTreeNodes Internal error! Context is null.");
+        return;
+    }
+    auto offscreenNodesMgr = context->GetInspectorOffscreenNodesMgr();
+    if (!offscreenNodesMgr) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetOffScreenTreeNodes Internal error! offscreenNodesMgr is null.");
+        return;
+    }
+    auto offscreenNodes = offscreenNodesMgr->GetOffscreenNodes();
     for (const auto& item : offscreenNodes) {
         AddInspectorTreeNode(item, nodes);
     }
@@ -1031,7 +1057,7 @@ void Inspector::GetOffScreenTreeNodes(InspectorTreeMap& nodes)
 std::pair<uint32_t, int32_t> Inspector::ParseWindowIdFromMsg(const std::string& message)
 {
     TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "start process inspector get window msg");
-    uint32_t windowId = INVALID_WINDOW_ID;
+    uint32_t windowId = INSPECTOR_INVALID_WINDOW_ID;
     int32_t methodIndex = INVALID_METHOD_ID;
     auto json = JsonUtil::ParseJsonString(message);
     if (json == nullptr || !json->IsValid() || !json->IsObject()) {
@@ -1052,5 +1078,32 @@ std::pair<uint32_t, int32_t> Inspector::ParseWindowIdFromMsg(const std::string& 
     }
     windowId = StringUtils::StringToUint(paramObj->GetString("windowId"));
     return {windowId, methodIndex};
+}
+
+void InspectorOffscreenNodesMgr::AddOffscreenNode(RefPtr<FrameNode> node)
+{
+    CHECK_NULL_VOID(node);
+    offscreenNodes_.insert(node);
+}
+
+void InspectorOffscreenNodesMgr::RemoveOffscreenNode(RefPtr<FrameNode> node)
+{
+    CHECK_NULL_VOID(node);
+    offscreenNodes_.erase(node);
+}
+
+int32_t InspectorOffscreenNodesMgr::GetOffscreenNodesSize()
+{
+    return offscreenNodes_.size();
+}
+
+std::set<RefPtr<FrameNode>> InspectorOffscreenNodesMgr::GetOffscreenNodes()
+{
+    return offscreenNodes_;
+}
+
+void InspectorOffscreenNodesMgr::ClearOffscreenNodes()
+{
+    offscreenNodes_.clear();
 }
 } // namespace OHOS::Ace::NG

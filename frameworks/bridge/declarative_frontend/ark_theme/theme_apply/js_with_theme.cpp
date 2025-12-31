@@ -17,6 +17,7 @@
 
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -84,7 +85,7 @@ void JSWithTheme::SendThemeToNative(const JSCallbackInfo& info)
     // save the current theme when Theme was created by WithTheme container
     if (JSThemeScope::isCurrentThemeDefault || themeScopeId > 0) {
         std::optional<JSTheme> themeOpt = std::make_optional(JSThemeScope::jsThemes[themeScopeId]);
-        JSThemeScope::jsCurrentTheme.swap(themeOpt);
+        JSThemeUtils::SwapCurrentTheme(themeOpt);
     }
 }
 
@@ -99,7 +100,7 @@ void JSWithTheme::SetThemeScopeId(const JSCallbackInfo& info)
     auto theme = JSThemeScope::jsThemes.find(themeScopeId);
     std::optional<JSTheme> themeOpt = (theme != JSThemeScope::jsThemes.end()) ?
         std::make_optional(theme->second) : std::nullopt;
-    JSThemeScope::jsCurrentTheme.swap(themeOpt);
+    JSThemeUtils::SwapCurrentTheme(themeOpt);
 }
 
 } // namespace OHOS::Ace::Framework

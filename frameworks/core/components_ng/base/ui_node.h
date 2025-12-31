@@ -1136,7 +1136,7 @@ public:
     }
 
     void ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child);
-    virtual bool CheckVisibleOrActive()
+    virtual bool CheckVisibleAndActive()
     {
         return true;
     }

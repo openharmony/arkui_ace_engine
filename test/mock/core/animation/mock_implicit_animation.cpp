@@ -20,6 +20,10 @@
 #include "core/components_ng/base/modifier.h"
 
 namespace OHOS::Ace {
+
+SINGLETON_INSTANCE_IMPL_TEMPLATE(float);
+SINGLETON_INSTANCE_IMPL_TEMPLATE(NG::OffsetF);
+
 void MockImplicitAnimation::UpdateProp(const WeakPtr<NG::PropertyBase>& propWk) const
 {
 #ifdef ENHANCED_ANIMATION

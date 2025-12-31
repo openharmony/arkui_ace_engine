@@ -29,6 +29,8 @@ namespace OHOS::Ace {
 
 #define COMPRESS_VERSION 9
 
+SINGLETON_INSTANCE_IMPL(DumpLog);
+
 DumpLog::DumpLog() = default;
 DumpLog::~DumpLog() = default;
 

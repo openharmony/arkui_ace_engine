@@ -76,6 +76,8 @@ public:
         std::unordered_map<std::string, std::string>& reply);
     bool AppWhiteListCheck(const std::unordered_map<std::string, std::string>& payload,
         std::unordered_map<std::string, std::string>& reply);
+    void AppVsyncEnableScene(const std::unordered_map<std::string, std::string>& payload,
+        std::unordered_map<std::string, std::string>& reply);
     bool AppRVSEnableCheck(const std::unordered_map<std::string, std::string>& payload,
         std::unordered_map<std::string, std::string>& reply);
     bool AppClickExtEnableCheck(const std::unordered_map<std::string, std::string>& payload,

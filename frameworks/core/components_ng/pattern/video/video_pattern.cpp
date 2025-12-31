@@ -1103,7 +1103,6 @@ void VideoPattern::OnModifyDone()
 
     // Update the control bar and preview image.
     UpdatePreviewImage();
-    UpdateControllerBar();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // Update the media player when video node is not in full screen or current node is full screen node
@@ -2091,6 +2090,7 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
 {
     CHECK_NULL_VOID(videoPattern);
     currentPos_ = videoPattern->GetCurrentPos();
+    OnUpdateTime(currentPos_, CURRENT_POS);
     if (mediaPlayer_ && mediaPlayer_->IsMediaPlayerValid() && mediaPlayer_->IsPlaying() != isPlaying_) {
         isPlaying_ = mediaPlayer_->IsPlaying();
         ChangePlayButtonTag();

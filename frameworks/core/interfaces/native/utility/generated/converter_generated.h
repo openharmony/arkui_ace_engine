@@ -1201,6 +1201,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_LengthMetrics_F64& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_LengthMetrics_String& src)
 {
     switch (src.selector) {
@@ -3686,6 +3701,7 @@ ASSIGN_OPT(Opt_NavDestinationActiveReason)
 ASSIGN_OPT(Opt_NavDestinationMode)
 ASSIGN_OPT(Opt_NavigationMode)
 ASSIGN_OPT(Opt_NavigationOperation)
+ASSIGN_OPT(Opt_NavigationPolicy)
 ASSIGN_OPT(Opt_NavigationSystemTransitionType)
 ASSIGN_OPT(Opt_NavigationTitleMode)
 ASSIGN_OPT(Opt_NavPathStack)
@@ -4008,6 +4024,7 @@ ASSIGN_OPT(Opt_window_Orientation)
 ASSIGN_OPT(Opt_window_WindowStage)
 ASSIGN_OPT(Opt_window_WindowStatusType)
 ASSIGN_OPT(Opt_WindowAnimationTarget)
+ASSIGN_OPT(Opt_WindowFeatures)
 ASSIGN_OPT(Opt_WindowModeFollowStrategy)
 ASSIGN_OPT(Opt_WindowSize)
 ASSIGN_OPT(Opt_WordBreak)
@@ -4242,6 +4259,7 @@ ASSIGN_OPT(Opt_Callback_OnSslErrorEventReceiveEvent_Void)
 ASSIGN_OPT(Opt_Callback_OnTitleReceiveEvent_Void)
 ASSIGN_OPT(Opt_Callback_OnTouchIconUrlReceivedEvent_Void)
 ASSIGN_OPT(Opt_Callback_OnWindowNewEvent_Void)
+ASSIGN_OPT(Opt_Callback_OnWindowNewExtEvent_Void)
 ASSIGN_OPT(Opt_Callback_Opt_Array_NavDestinationTransition_Void)
 ASSIGN_OPT(Opt_Callback_Opt_Array_String_Void)
 ASSIGN_OPT(Opt_Callback_Opt_CustomBuilder_Void)
@@ -4664,6 +4682,7 @@ ASSIGN_OPT(Opt_OnSslErrorEventReceiveEvent)
 ASSIGN_OPT(Opt_OnTitleReceiveEvent)
 ASSIGN_OPT(Opt_OnTouchIconUrlReceivedEvent)
 ASSIGN_OPT(Opt_OnWindowNewEvent)
+ASSIGN_OPT(Opt_OnWindowNewExtEvent)
 ASSIGN_OPT(Opt_OverlayOffset)
 ASSIGN_OPT(Opt_PanGestureHandlerOptions)
 ASSIGN_OPT(Opt_PasteButtonOptions)
@@ -4799,6 +4818,7 @@ ASSIGN_OPT(Opt_Union_I32_Resource)
 ASSIGN_OPT(Opt_Union_I32_String_SwiperAutoFill)
 ASSIGN_OPT(Opt_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ASTCResource)
 ASSIGN_OPT(Opt_Union_ImageBitmap_PixelMap)
+ASSIGN_OPT(Opt_Union_LengthMetrics_F64)
 ASSIGN_OPT(Opt_Union_LengthMetrics_String)
 ASSIGN_OPT(Opt_Union_MenuPreviewMode_CustomBuilder)
 ASSIGN_OPT(Opt_Union_NestedScrollOptions_NestedScrollOptionsExt)

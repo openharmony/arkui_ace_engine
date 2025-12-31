@@ -23,8 +23,6 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 
 namespace OHOS::Ace {
-const std::set<std::string> UiTranslateManagerImpl::layoutTags_ = { "Flex", "Stack", "Row", "Column", "WindowScene",
-    "root", "__Common__", "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent" };
 void UiTranslateManagerImpl::AddTranslateListener(const WeakPtr<NG::FrameNode> node)
 {
     auto frameNode = node.Upgrade();
@@ -183,8 +181,10 @@ void UiTranslateManagerImpl::TraverseAddArkUIComponentImages(const size_t compon
             }
         },
         TaskExecutor::TaskType::UI, QUERY_IMAGES_TIMEOUT_TIME, "ArkUIAddComponentImagesDuringMultiQuery");
-    arkUIQueryErrorCode_ = finishInTime ? MultiImageQueryErrorCode::OK : MultiImageQueryErrorCode::TIMEOUT;
-    if (arkUIQueryErrorCode_ == MultiImageQueryErrorCode::TIMEOUT) {
+    if (arkUIQueryErrorCode_ == MultiImageQueryErrorCode::OK && !finishInTime) {
+        arkUIQueryErrorCode_ = MultiImageQueryErrorCode::TIMEOUT;
+    }
+    if (!finishInTime) {
         for (size_t i = arkUIComponentImages_.size(); i < componentQueryCnt; ++i) {
             arkUIComponentImages_.emplace(arkUIIds[i], nullptr);
         }
@@ -198,20 +198,32 @@ void UiTranslateManagerImpl::TraverseAddArkWebImages(const std::vector<int32_t>&
     auto frameNode =
         AceType::DynamicCast<NG::FrameNode>(OHOS::Ace::ElementRegister::GetInstance()->GetNodeById(webComponentId));
     if (frameNode == nullptr || frameNode->GetPattern<NG::WebPattern>() == nullptr) {
-        arkWebQueryErrorCode_ = MultiImageQueryErrorCode::INVALID_ID;
         std::map<int32_t, std::shared_ptr<Media::PixelMap>> emptyMap;
         for (auto webImageId : webImageIds) {
             emptyMap.emplace(webImageId, nullptr);
         }
-        arkWebImages_.emplace(webComponentId, std::move(emptyMap));
+        webQueryCallback(windowId, emptyMap, MultiImageQueryErrorCode::INVALID_WEBNODE);
         return;
     }
     frameNode->GetPattern<NG::WebPattern>()->GetImagesByIDs(webImageIds, windowId, webQueryCallback);
 }
 
+void UiTranslateManagerImpl::MarkCurrentWebImageQueryDone(int32_t currentWebId)
+{
+    if (arkWebQueryImageTaskDone_.find(currentWebId) != arkWebQueryImageTaskDone_.end()) {
+        arkWebQueryImageTaskDone_[currentWebId] = true;
+    }
+}
+
+MultiImageQueryErrorCode UiTranslateManagerImpl::GetArkWebQueryErrorCode() const
+{
+    return arkWebQueryErrorCode_;
+}
+
 void UiTranslateManagerImpl::PostArkWebQueryTasksToSingleWeb(std::weak_ptr<UiTranslateManagerImpl> weak,
     const std::vector<int32_t>& webImageIds, int32_t webId, int32_t windowId)
 {
+    CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostTask(
         [weak, webImageIds, webId, windowId]() mutable {
             auto uiTranslateManagerImpl = weak.lock();
@@ -221,16 +233,14 @@ void UiTranslateManagerImpl::PostArkWebQueryTasksToSingleWeb(std::weak_ptr<UiTra
                     std::shared_ptr<Media::PixelMap>>& imagesInOneWeb, MultiImageQueryErrorCode errorCode) {
                         auto uiTranslateManagerImpl = weak.lock();
                         CHECK_NULL_VOID(uiTranslateManagerImpl);
-                        uiTranslateManagerImpl->SetArkWebQueryErrorCode(errorCode);
-                        if (errorCode == MultiImageQueryErrorCode::TIMEOUT) {
-                            std::map<int32_t, std::shared_ptr<Media::PixelMap>> emptyMap;
-                            for (auto webImageId : webImageIds) {
-                                emptyMap.emplace(webImageId, nullptr);
-                            }
-                            uiTranslateManagerImpl->AddArkWebImageMap(webId, emptyMap);
-                        } else {
-                            uiTranslateManagerImpl->AddArkWebImageMap(webId, imagesInOneWeb);
+                        if (uiTranslateManagerImpl->GetHasSendArkWebQueryResult()) {
+                            return;
                         }
+                        uiTranslateManagerImpl->MarkCurrentWebImageQueryDone(webId);
+                        if (uiTranslateManagerImpl->GetArkWebQueryErrorCode() == MultiImageQueryErrorCode::OK) {
+                            uiTranslateManagerImpl->SetArkWebQueryErrorCode(errorCode);
+                        }
+                        uiTranslateManagerImpl->AddArkWebImageMap(webId, imagesInOneWeb);
                         uiTranslateManagerImpl->SendArkWebImagesById();
                     };
             uiTranslateManagerImpl->TraverseAddArkWebImages(webImageIds, windowId, webId, getWebImagesCallback);
@@ -238,49 +248,61 @@ void UiTranslateManagerImpl::PostArkWebQueryTasksToSingleWeb(std::weak_ptr<UiTra
         TaskExecutor::TaskType::UI, "ArkWebAddImagesDuringMultiQuery");
 }
 
-void UiTranslateManagerImpl::PostArkWebQueryTasks(std::map<int32_t, std::vector<int32_t>>& localArkWebs,
-    std::weak_ptr<UiTranslateManagerImpl> weak, int32_t windowId)
+bool UiTranslateManagerImpl::GetHasSendArkWebQueryResult() const
 {
-    for (const auto& webIter : localArkWebs) {
-        PostArkWebQueryTasksToSingleWeb(weak, webIter.second, webIter.first, windowId);
+    return hasSendArkWebQueryResult_;
+}
+
+void UiTranslateManagerImpl::PostArkWebQueryTasks(std::weak_ptr<UiTranslateManagerImpl> weak, int32_t windowId)
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    hasSendArkWebQueryResult_ = false;
+    auto setRejectTimeoutArkWebImageQuery = [weak]() {
+        auto uiTranslateManagerImpl = weak.lock();
+        CHECK_NULL_VOID(uiTranslateManagerImpl);
+        if (uiTranslateManagerImpl->GetHasSendArkWebQueryResult()) {
+            return;
+        }
+        uiTranslateManagerImpl->SetArkWebQueryErrorCode(MultiImageQueryErrorCode::TIMEOUT);
+        uiTranslateManagerImpl->DoSendArkWebImagesById();
+    };
+    taskExecutor_->PostDelayedTask(setRejectTimeoutArkWebImageQuery,
+        TaskExecutor::TaskType::UI, QUERY_IMAGES_TIMEOUT_TIME, "ArkUISetRejectTimeoutArkWebImageQuery");
+    for (const auto& [webId, webImagesIds] : localArkWebQueries_) {
+        PostArkWebQueryTasksToSingleWeb(weak, webImagesIds, webId, windowId);
     }
 }
 
 void UiTranslateManagerImpl::AdjustArkWebImagesQueryCnt(size_t remainQueryCnt,
-    std::map<int32_t, std::vector<int32_t>>& localArkWebs,
     const std::map<int32_t, std::vector<int32_t>>& arkWebs)
 {
-    int32_t queryTaskCnt = 0;
-    for (const auto& websIter : arkWebs) {
+    for (const auto& [webId, webImagesIds] : arkWebs) {
         if (remainQueryCnt == 0) {
             break;
         }
-        ++queryTaskCnt;
-        auto& currentWebImageIds = websIter.second;
-        size_t currentSize = std::min(remainQueryCnt, currentWebImageIds.size());
+        size_t currentSize = std::min(remainQueryCnt, webImagesIds.size());
         remainQueryCnt -= currentSize;
         for (size_t i = 0; i < currentSize; ++i) {
-            localArkWebs[websIter.first].emplace_back(currentWebImageIds[i]);
+            localArkWebQueries_[webId].emplace_back(webImagesIds[i]);
         }
+        arkWebQueryImageTaskDone_.emplace(webId, false);
     }
-    arkWebGetImagesTaskCnt_ = queryTaskCnt;
 }
 
 void UiTranslateManagerImpl::GetMultiImagesById(uint32_t windowId, const std::vector<int32_t>& arkUIIds,
     const std::map<int32_t, std::vector<int32_t>>& arkWebs)
 {
+    if (!taskExecutor_) {
+        LOGE("UiTranslateManagerImpl::GetMultiImagesById taskExecutor_ doesn't exist");
+        return;
+    }
     windowId_ = windowId;
-    size_t totalQueryCnt = 20;
-    std::map<int32_t, std::vector<int32_t>> localArkWebs;
+    const size_t totalQueryCnt = 20;
     size_t componentQueryCnt = std::min(totalQueryCnt, arkUIIds.size());
     size_t webQueryCnt = totalQueryCnt - componentQueryCnt;
     std::weak_ptr<UiTranslateManagerImpl> weak = shared_from_this();
-    if (webQueryCnt > 0) {
-        AdjustArkWebImagesQueryCnt(webQueryCnt, localArkWebs, arkWebs);
-    } else {
-        arkWebGetImagesTaskCnt_ = 0;
-    }
-    if (taskExecutor_) {
+    AdjustArkWebImagesQueryCnt(webQueryCnt, arkWebs);
+    if (componentQueryCnt > 0) {
         taskExecutor_->PostTask(
             [weak, componentQueryCnt, arkUIIds]() {
                 auto uiTranslateManagerImpl = weak.lock();
@@ -289,9 +311,13 @@ void UiTranslateManagerImpl::GetMultiImagesById(uint32_t windowId, const std::ve
                 uiTranslateManagerImpl->SendArkUIImagesById();
             },
             TaskExecutor::TaskType::UI, "ArkUIHandleTranslateManagerGetArkUIImagesByIds");
-        PostArkWebQueryTasks(localArkWebs, weak, windowId);
     } else {
-        LOGE("UiTranslateManagerImpl::GetMultiImagesById taskExecutor_ doesn't exist");
+        LOGW("UiTranslateManagerImpl::GetMultiImagesById ArkUI query count is 0");
+    }
+    if (!arkWebQueryImageTaskDone_.empty()) {
+        PostArkWebQueryTasks(weak, windowId);
+    } else {
+        LOGW("UiTranslateManagerImpl::GetMultiImagesById ArkWeb query count is 0");
     }
 }
 
@@ -355,6 +381,9 @@ void UiTranslateManagerImpl::GetPixelMapFromFrameNode(int32_t frameNodeId,
         return;
     }
     GetPixelMapFromImageTypeNode(frameNode, componentPixelMap);
+    if (componentPixelMap == nullptr && arkUIQueryErrorCode_ == MultiImageQueryErrorCode::OK) {
+        arkUIQueryErrorCode_ = MultiImageQueryErrorCode::INVALID_ID;
+    }
 }
 
 void UiTranslateManagerImpl::SendArkUIImagesById()
@@ -364,13 +393,41 @@ void UiTranslateManagerImpl::SendArkUIImagesById()
     arkUIQueryErrorCode_ = MultiImageQueryErrorCode::OK;
 }
 
+void UiTranslateManagerImpl::DoSendArkWebImagesById()
+{
+    if (hasSendArkWebQueryResult_) {
+        return;
+    }
+    for (const auto& [webId, taskHasDone] : arkWebQueryImageTaskDone_) {
+        if (!taskHasDone) {
+            for (const auto& webImageId : localArkWebQueries_[webId]) {
+                arkWebImages_[webId].emplace(webImageId, nullptr);
+            }
+        }
+    }
+    UiSessionManager::GetInstance()->SendArkWebImagesById(windowId_, arkWebImages_, arkWebQueryErrorCode_);
+    arkWebImages_.clear();
+    arkWebQueryImageTaskDone_.clear();
+    localArkWebQueries_.clear();
+    arkWebQueryErrorCode_ = MultiImageQueryErrorCode::OK;
+    hasSendArkWebQueryResult_ = true;
+}
+
+bool UiTranslateManagerImpl::CheckAllWebQueryTaskFinish() const
+{
+    for (const auto& [_, taskIsDone] : arkWebQueryImageTaskDone_) {
+        if (!taskIsDone) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void UiTranslateManagerImpl::SendArkWebImagesById()
 {
-    if (--arkWebGetImagesTaskCnt_ <= 0) {
-        UiSessionManager::GetInstance()->SendArkWebImagesById(windowId_, arkWebImages_, arkWebQueryErrorCode_);
-        arkWebImages_.clear();
-        arkWebQueryErrorCode_ = MultiImageQueryErrorCode::OK;
-        arkWebGetImagesTaskCnt_ = INT32_MAX;
+    bool allWebQueryTasksFinish = CheckAllWebQueryTaskFinish();
+    if (allWebQueryTasksFinish) {
+        DoSendArkWebImagesById();
     }
 }
 
@@ -397,18 +454,10 @@ void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
 {
     for (const auto& item : currentNode->GetChildren()) {
         auto node = AceType::DynamicCast<NG::FrameNode>(item);
-        if (node) {
-            if (!node->CheckVisibleOrActive()) {
-                continue;
-            }
-            auto property = node->GetLayoutProperty();
-            if (node->GetTag() == V2::IMAGE_ETS_TAG && property &&
-                (static_cast<int32_t>(property->GetVisibility().value_or(VisibleType::VISIBLE)) == 0) &&
-                node->IsActive()) {
-                auto imagePattern = node->GetPattern<NG::ImagePattern>();
-                CHECK_NULL_VOID(imagePattern);
-                imagePattern->AddPixelMapToUiManager();
-            }
+        if (node && node->CheckVisibleAndActive() && node->GetTag() == V2::IMAGE_ETS_TAG) {
+            auto imagePattern = node->GetPattern<NG::ImagePattern>();
+            CHECK_NULL_VOID(imagePattern);
+            imagePattern->AddPixelMapToUiManager();
         }
         TravelFindPixelMap(item);
     }

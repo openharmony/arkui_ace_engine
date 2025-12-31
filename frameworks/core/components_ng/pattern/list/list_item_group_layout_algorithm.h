@@ -456,14 +456,7 @@ private:
     void LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& paddingOffset,
         float crossSize, float startPos);
     RefPtr<LayoutWrapper> GetListItem(LayoutWrapper *layoutWrapper, int32_t index, bool addToRenderTree = true,
-                                      bool isCache = false) const
-    {
-        index = !isStackFromEnd_ ? index : totalItemCount_ - index - 1;
-        if (index < 0) {
-            return nullptr;
-        }
-        return layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_, addToRenderTree, isCache);
-    }
+                                      bool isCache = false) const;
     void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis);
 

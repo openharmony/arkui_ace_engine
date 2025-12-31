@@ -382,134 +382,134 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     });
   }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
   outline(value: OutlineOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
   outlineColor(value: ResourceColor | EdgeColors): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
   outlineRadius(value: Dimension | OutlineRadiuses): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
   outlineStyle(value: OutlineStyle | EdgeOutlineStyles): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
   outlineWidth(value: Dimension | EdgeOutlineWidths): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
   width(value: Length): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   height(value: Length): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   responseRegion(value: Array<Rectangle> | Rectangle): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   mouseResponseRegion(value: Array<Rectangle> | Rectangle): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   size(value: SizeOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   constraintSize(value: ConstraintSizeOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   touchable(value: boolean): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   hitTestBehavior(value: HitTestMode): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   layoutWeight(value: number | string): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   padding(value: Padding | Length): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   margin(value: Margin | Length): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   background(builder: CustomBuilder, options?: { align?: Alignment }): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   backgroundColor(value: ResourceColor): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   backgroundImage(src: ResourceStr, repeat?: ImageRepeat): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   backgroundImageSize(value: SizeOptions | ImageSize): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   backgroundImagePosition(value: Position | Alignment): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   backgroundBlurStyle(value: BlurStyle, options?: BackgroundBlurStyleOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   foregroundBlurStyle(value: BlurStyle, options?: ForegroundBlurStyleOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   opacity(value: number | Resource): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   border(value: BorderOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   borderStyle(value: BorderStyle | EdgeStyles): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   borderWidth(value: Length | EdgeWidths): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   borderColor(value: ResourceColor | EdgeColors): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   borderRadius(value: Length | BorderRadiuses): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
 
   borderImage(value: BorderImageOption): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   foregroundColor(value: ResourceColor | ColoringStrategy): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onClick(event: (event?: ClickEvent) => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onHover(event: (isHover?: boolean, event?: HoverEvent) => void): this {
@@ -518,222 +518,222 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   }
 
   hoverEffect(value: HoverEffect): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onMouse(event: (event?: MouseEvent) => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onTouch(event: (event?: TouchEvent) => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onKeyEvent(event: (event?: KeyEvent) => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   focusable(value: boolean): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onFocus(event: () => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onBlur(event: () => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   tabIndex(index: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   defaultFocus(value: boolean): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   groupDefaultFocus(value: boolean): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   focusOnTouch(value: boolean): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   animation(value: AnimateParam): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   transition(value: TransitionOptions | TransitionEffect): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   gesture(gesture: GestureType, mask?: GestureMask): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   priorityGesture(gesture: GestureType, mask?: GestureMask): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   parallelGesture(gesture: GestureType, mask?: GestureMask): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   blur(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   linearGradientBlur(value: number, options: LinearGradientBlurOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   brightness(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   contrast(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   grayscale(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   colorBlend(value: Color | string | Resource): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   saturate(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   sepia(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   invert(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   hueRotate(value: number | string): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   useEffect(value: boolean): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   backdropBlur(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   renderGroup(value: boolean): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   translate(value: TranslateOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   scale(value: ScaleOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
   gridSpan(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   gridOffset(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   rotate(value: RotateOptions | RotateAngleOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   transform(value: object): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   transform3D(value: object): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onAppear(event: () => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onDisAppear(event: () => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onAttach(event: () => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onDetach(event: () => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onAreaChange(event: (oldValue: Area, newValue: Area) => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   visibility(value: Visibility): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   flexGrow(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   flexShrink(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   flexBasis(value: number | string): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   alignSelf(value: ItemAlign): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   displayPriority(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   zIndex(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   sharedTransition(id: string, options?: sharedTransitionOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   direction(value: Direction): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   align(value: Alignment): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   position(value: Position): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   markAnchor(value: Position): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   offset(value: Position): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   enabled(value: boolean): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   useSizeType(value: {
@@ -742,59 +742,59 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     md?: number | { span: number; offset: number };
     lg?: number | { span: number; offset: number };
   }): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   alignRules(value: AlignRuleOption): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   aspectRatio(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   clickEffect(value: ClickEffect | null): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onDragMove(event: (event?: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onDragLeave(event: (event?: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onDrop(event: (event?: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onDragEnd(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   allowDrop(value: Array<UniformDataType> | Array<string>): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   draggable(value: boolean): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number } }): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   linearGradient(value: {
@@ -803,7 +803,7 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     colors: Array<any>;
     repeating?: boolean;
   }): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   sweepGradient(value: {
@@ -814,95 +814,95 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     colors: Array<any>;
     repeating?: boolean;
   }): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   radialGradient(value: { center: Array<any>; radius: number | string; colors: Array<any>; repeating?: boolean }): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   motionPath(value: MotionPathOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   shadow(value: ShadowOptions | ShadowStyle): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   mask(value: CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute | ProgressMask): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   key(value: string): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   id(value: string): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   geometryTransition(id: string): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   bindPopup(show: boolean, popup: PopupOptions | CustomPopupOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   bindMenu(content: Array<MenuElement> | CustomBuilder, options?: MenuOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   bindContextMenu(content: CustomBuilder, responseType: ResponseType, options?: ContextMenuOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   bindContentCover(isShow: boolean, builder: CustomBuilder, type?: ModalTransition | ContentCoverOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   blendMode(value: BlendMode): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   bindSheet(isShow: boolean, builder: CustomBuilder, options?: SheetOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   stateStyles(value: StateStyles): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   restoreId(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   onVisibleAreaChange(ratios: Array<number>, event: (isVisible: boolean, currentRatio: number) => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   sphericalEffect(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   lightUpEffect(value: number): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   pixelStretchEffect(options: PixelStretchEffectOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   keyboardShortcut(value: string | FunctionKey, keys: Array<ModifierKey>, action?: () => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   accessibilityGroup(value: boolean): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   accessibilityText(value: string): this {
@@ -933,23 +933,23 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
   }
 
   obscured(reasons: Array<ObscuredReasons>): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   reuseId(id: string): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   renderFit(fitMode: RenderFit): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   systemMaterial(material: SystemUiMaterial | undefined) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   materialFilter(filter: Filter) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100028, 'Method not implemented.');
   }
 
   attributeModifier(modifier: AttributeModifier<CommonAttribute>): this {
