@@ -243,7 +243,8 @@ void ApplyModifierFinish(Ark_NodeHandle nodePtr)
          * 1. if node is not TabContent
          * 2. if node is TabContent and it should be on the main tree.
          */
-        if (frameNode->IsOnMainTree() || frameNode->GetTag() != V2::TAB_CONTENT_ITEM_ETS_TAG) {
+        if (frameNode->IsOnMainTree() || (frameNode->GetTag() != V2::TAB_CONTENT_ITEM_ETS_TAG &&
+            frameNode->GetTag() != V2::LIST_ITEM_ETS_TAG)) {
             frameNode->MarkDirtyNode();
         }
     }
