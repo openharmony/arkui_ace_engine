@@ -40,6 +40,7 @@ public:
     RefPtr<FrameNode> CreateStartingWindowNode(const Rosen::StartingWindowInfo& startingWindowInfo,
         const std::string& bundleName, const std::string& moduleName);
     void MeasureChildNode(const SizeF& parentSize);
+    void SetImagePatternSyncLoad(const RefPtr<FrameNode>& node);
 
 private:
     void MeasureUpperAreaNode(

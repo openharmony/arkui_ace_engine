@@ -151,8 +151,18 @@ RefPtr<FrameNode> CreateBackgroundImageNode(
     return bgImgNode;
 }
 
+void StartingWindowLayoutHelper::SetImagePatternSyncLoad(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto imagePattern = node->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    imagePattern->SetSyncLoad(syncStartingWindow_);
+    ACE_SCOPED_TRACE("StartingWindowLayoutHelper::SetImagePatternSyncLoad set sync [%d]", syncStartingWindow_);
+}
+
 RefPtr<FrameNode> StartingWindowLayoutHelper::CreateStartingWindowNode(
-    const Rosen::StartingWindowInfo& startingWindowInfo, const std::string& bundleName, const std::string& moduleName)
+    const Rosen::StartingWindowInfo& startingWindowInfo, const std::string& bundleName, const std::string& moduleName,
+    bool syncStartingWindow)
 {
     startingWindowInfo_ = startingWindowInfo;
     // -root node of starting window
