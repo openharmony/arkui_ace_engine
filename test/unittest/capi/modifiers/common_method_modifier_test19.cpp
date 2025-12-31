@@ -651,7 +651,7 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_bindMenu1Test, TestSize.Level1)
     auto unionCustomNodeBuilderValue =
         Converter::ArkUnion<Opt_Union_Array_MenuElement_CustomBuilder, CustomNodeBuilder>(builder);
 
-    auto show = Converter::ArkValue<Opt_Boolean>(false);
+    auto show = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(false);
     modifier_->setBindMenu1(node_, &show, &unionCustomNodeBuilderValue, &optOptions);
     EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
 }

@@ -5471,12 +5471,24 @@ void impl_CommonMethod_setBindMenu1(Ark_NativePointer thisPtr, KSerializerBuffer
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto isShowValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Boolean isShowValueTempTmpBuf = {};
+        Opt_Union_Boolean_Bindable isShowValueTempTmpBuf = {};
         isShowValueTempTmpBuf.tag = isShowValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((isShowValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            isShowValueTempTmpBuf.value = thisDeserializer.readBoolean();
+            const Ark_Int8 isShowValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
+            Ark_Union_Boolean_Bindable isShowValueTempTmpBuf_ = {};
+            isShowValueTempTmpBuf_.selector = isShowValueTempTmpBuf_UnionSelector;
+            if (isShowValueTempTmpBuf_UnionSelector == 0) {
+                isShowValueTempTmpBuf_.selector = 0;
+                isShowValueTempTmpBuf_.value0 = thisDeserializer.readBoolean();
+            } else if (isShowValueTempTmpBuf_UnionSelector == 1) {
+                isShowValueTempTmpBuf_.selector = 1;
+                isShowValueTempTmpBuf_.value1 = Bindable_Boolean_serializer::read(thisDeserializer);
+            } else {
+                INTEROP_FATAL("One of the branches for isShowValueTempTmpBuf_ has to be chosen through deserialisation.");
+            }
+            isShowValueTempTmpBuf.value = static_cast<Ark_Union_Boolean_Bindable>(isShowValueTempTmpBuf_);
         }
-        Opt_Boolean isShowValueTemp = isShowValueTempTmpBuf;;
+        Opt_Union_Boolean_Bindable isShowValueTemp = isShowValueTempTmpBuf;;
         const auto contentValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_Union_Array_MenuElement_CustomBuilder contentValueTempTmpBuf = {};
         contentValueTempTmpBuf.tag = contentValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
@@ -5510,7 +5522,7 @@ void impl_CommonMethod_setBindMenu1(Ark_NativePointer thisPtr, KSerializerBuffer
             optionsValueTempTmpBuf.value = MenuOptions_serializer::read(thisDeserializer);
         }
         Opt_MenuOptions optionsValueTemp = optionsValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setBindMenu1(self, static_cast<Opt_Boolean*>(&isShowValueTemp), static_cast<Opt_Union_Array_MenuElement_CustomBuilder*>(&contentValueTemp), static_cast<Opt_MenuOptions*>(&optionsValueTemp));
+        GetNodeModifiers()->getCommonMethodModifier()->setBindMenu1(self, static_cast<Opt_Union_Boolean_Bindable*>(&isShowValueTemp), static_cast<Opt_Union_Array_MenuElement_CustomBuilder*>(&contentValueTemp), static_cast<Opt_MenuOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setBindMenu1, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setBindContextMenu0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -5564,12 +5576,24 @@ void impl_CommonMethod_setBindContextMenu1(Ark_NativePointer thisPtr, KSerialize
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto isShownValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Boolean isShownValueTempTmpBuf = {};
+        Opt_Union_Boolean_Bindable isShownValueTempTmpBuf = {};
         isShownValueTempTmpBuf.tag = isShownValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((isShownValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            isShownValueTempTmpBuf.value = thisDeserializer.readBoolean();
+            const Ark_Int8 isShownValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
+            Ark_Union_Boolean_Bindable isShownValueTempTmpBuf_ = {};
+            isShownValueTempTmpBuf_.selector = isShownValueTempTmpBuf_UnionSelector;
+            if (isShownValueTempTmpBuf_UnionSelector == 0) {
+                isShownValueTempTmpBuf_.selector = 0;
+                isShownValueTempTmpBuf_.value0 = thisDeserializer.readBoolean();
+            } else if (isShownValueTempTmpBuf_UnionSelector == 1) {
+                isShownValueTempTmpBuf_.selector = 1;
+                isShownValueTempTmpBuf_.value1 = Bindable_Boolean_serializer::read(thisDeserializer);
+            } else {
+                INTEROP_FATAL("One of the branches for isShownValueTempTmpBuf_ has to be chosen through deserialisation.");
+            }
+            isShownValueTempTmpBuf.value = static_cast<Ark_Union_Boolean_Bindable>(isShownValueTempTmpBuf_);
         }
-        Opt_Boolean isShownValueTemp = isShownValueTempTmpBuf;;
+        Opt_Union_Boolean_Bindable isShownValueTemp = isShownValueTempTmpBuf;;
         const auto contentValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_CustomNodeBuilder contentValueTempTmpBuf = {};
         contentValueTempTmpBuf.tag = contentValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
@@ -5584,7 +5608,7 @@ void impl_CommonMethod_setBindContextMenu1(Ark_NativePointer thisPtr, KSerialize
             optionsValueTempTmpBuf.value = ContextMenuOptions_serializer::read(thisDeserializer);
         }
         Opt_ContextMenuOptions optionsValueTemp = optionsValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setBindContextMenu1(self, static_cast<Opt_Boolean*>(&isShownValueTemp), static_cast<Opt_CustomNodeBuilder*>(&contentValueTemp), static_cast<Opt_ContextMenuOptions*>(&optionsValueTemp));
+        GetNodeModifiers()->getCommonMethodModifier()->setBindContextMenu1(self, static_cast<Opt_Union_Boolean_Bindable*>(&isShownValueTemp), static_cast<Opt_CustomNodeBuilder*>(&contentValueTemp), static_cast<Opt_ContextMenuOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setBindContextMenu1, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setBindContentCover0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
