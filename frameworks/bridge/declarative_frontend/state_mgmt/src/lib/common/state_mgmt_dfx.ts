@@ -366,10 +366,12 @@ function findViewById(id: number): ViewPU | ViewV2 | undefined {
 };
 
 class aceDebugTrace {
-  public static begin(...args: any): void {
+  public static begin(...args: any): boolean {
     if (stateMgmtDFX.enableDebug) {
       aceTrace.begin(...args);
     }
+    // add return value to use stateMgmtDFX.enableDebug && aceDebugTrace.begin to optimize performance
+    return true;
   }
   public static end(): void {
     if (stateMgmtDFX.enableDebug) {
