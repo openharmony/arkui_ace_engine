@@ -648,9 +648,9 @@ export struct SubHeaderV2 {
       this.ageing = false;
       this.subHeaderModifier.isAgeing = this.ageing;
     }
-    children.forEach((child) => {
+    children.forEach((child: Measurable) => {
       constraint.minHeight = Math.min(Number(this.getMinHeight() as number), Number(constraint.maxHeight as number));
-      result.height = child.measure(constraint).height;
+      result.height = (child.measure(constraint) as MeasureResult).height;
       result.width = Number(constraint.maxWidth as number);
     })
     return result;
@@ -1514,7 +1514,7 @@ struct TextArrowLayout {
       minHeight: Math.max(textArrowHeight, Number(constraint.minHeight as number)),
       maxHeight: constraint.maxHeight,
     };
-    let textMeasureResult: MeasureResult = textChild.measure(textConstraint);
+    let textMeasureResult: MeasureResult = textChild.measure(textConstraint) as MeasureResult;
     textArrowWidth = Math.max(textArrowWidth, textMeasureResult.width);
     textArrowHeight = Math.max(textArrowHeight, textMeasureResult.height);
 
