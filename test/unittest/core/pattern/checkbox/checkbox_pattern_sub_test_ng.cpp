@@ -801,4 +801,34 @@ HWTEST_F(CheckBoxPatternSubTestNG, OnInjectionEvent001, TestSize.Level1)
     status = checkBoxPaintProperty->GetCheckBoxSelect().value_or(false);
     EXPECT_EQ(status, true);
 }
+
+/**
+ * @tc.name: UpdateGroupManager001
+ * @tc.desc: test UpdateGroupManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPatternSubTestNG, UpdateGroupManager001, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 1, AIWriteAdapter::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(pageNode, nullptr);
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    ASSERT_NE(pageEventHub, nullptr);
+    pageNode->eventHub_ = pageEventHub;
+    pageNode->MountToParent(stageNode);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto stageManager = context->GetStageManager();
+    ASSERT_NE(stageManager, nullptr);
+    stageManager->stageNode_ = stageNode;
+    auto checkboxNode = FrameNode::CreateFrameNode(V2::CHECK_BOX_ETS_TAG, 3, AceType::MakeRefPtr<CheckBoxPattern>());
+    ASSERT_NE(checkboxNode, nullptr);
+    auto pattern = checkboxNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_EQ(pattern->groupManager_.Upgrade(), nullptr);
+
+    pattern->UpdateGroupManager();
+    EXPECT_NE(pattern->groupManager_.Upgrade(), nullptr);
+}
 } // namespace OHOS::Ace::NG
