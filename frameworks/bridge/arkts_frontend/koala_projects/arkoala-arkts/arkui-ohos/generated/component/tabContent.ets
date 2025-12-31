@@ -24,13 +24,13 @@ import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { ComponentContent_serializer } from "./../ComponentContent"
+import { ComponentContentBase_serializer } from "./../ComponentContent"
 import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ComponentContent } from "arkui.ComponentContent"
+import { ComponentContentBase } from "arkui.ComponentContent"
 import { Resource } from "global.resource"
 import { CustomBuilder } from "./builder"
 import { VoidCallback, ResourceColor, Length, ResourceStr, Font, Padding, Dimension, LocalizedPadding, Font_serializer, Padding_serializer, LocalizedPadding_serializer } from "./units"
@@ -140,15 +140,15 @@ export class ArkTabContentPeer extends ArkCommonMethodPeer {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         ArkUIGeneratedNativeModule._TabContentInterface_setTabContentOptions(this.peer.ptr)
     }
-    setTabBarAttribute(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): void {
+    setTabBarAttribute(value: ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof ComponentContent) {
+            if (valueTmpValue instanceof ComponentContentBase) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as ComponentContent
-                ComponentContent_serializer.write(thisSerializer, valueTmpValueForIdx0)
+                const valueTmpValueForIdx0  = valueTmpValue as ComponentContentBase
+                ComponentContentBase_serializer.write(thisSerializer, valueTmpValueForIdx0)
             } else if (valueTmpValue instanceof SubTabBarStyle) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as SubTabBarStyle
@@ -246,7 +246,7 @@ export interface TabContentAttribute extends CommonMethod {
     setTabContentOptions(): this {
         throw new Error("Unimplemented method setTabContentOptions")
     }
-    tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
+    tabBar(value: ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
         throw new Error("Unimplemented method tabBar")
     }
     onWillShow(value: VoidCallback | undefined): this {
@@ -260,14 +260,14 @@ export interface TabContentAttribute extends CommonMethod {
     }
 }
 export class ArkTabContentStyle extends ArkCommonMethodStyle implements TabContentAttribute {
-    tabBar_value?: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined
+    tabBar_value?: ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined
     onWillShow_value?: VoidCallback | undefined
     onWillHide_value?: VoidCallback | undefined
     attributeModifier_value?: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined
     setTabContentOptions(): this {
         return this
     }
-    tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
+    tabBar(value: ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
         return this
     }
     onWillShow(value: VoidCallback | undefined): this {
@@ -296,9 +296,9 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
+    public tabBar(value: ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
         if (this.checkPriority("tabBar")) {
-            const value_casted = value as (ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined)
+            const value_casted = value as (ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined)
             this.getPeer()?.setTabBarAttribute(value_casted)
             return this
         }
@@ -335,17 +335,17 @@ export class ArkTabContentComponent extends ArkCommonMethodComponent implements 
     }
 }
 export class SubTabBarStyle {
-    _content?: ResourceStr | ResourceStr | ComponentContent | undefined
+    _content?: ResourceStr | ResourceStr | ComponentContentBase | undefined
     _indicator?: SubTabBarIndicatorStyle | undefined
     _selectedMode?: SelectedMode | undefined
     _board?: BoardStyle | undefined
     _labelStyle?: TabBarLabelStyle | undefined
     _padding?: Padding | Dimension | LocalizedPadding | undefined
     _id?: string | undefined
-    constructor(content: ResourceStr | ResourceStr | ComponentContent) {
+    constructor(content: ResourceStr | ResourceStr | ComponentContentBase) {
         this._content = content
     }
-    static of(content: ResourceStr | ComponentContent): SubTabBarStyle {
+    static of(content: ResourceStr | ComponentContentBase): SubTabBarStyle {
         return new SubTabBarStyle(content)
     }
     indicator(style: SubTabBarIndicatorStyle): this {
@@ -1241,10 +1241,10 @@ export class SubTabBarStyle_serializer {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderFor_contentTmpValueForIdx1  = valueHolderFor_contentTmpValue as Resource
                 Resource_serializer.write(valueSerializer, valueHolderFor_contentTmpValueForIdx1)
-            } else if (valueHolderFor_contentTmpValue instanceof ComponentContent) {
+            } else if (valueHolderFor_contentTmpValue instanceof ComponentContentBase) {
                 valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_contentTmpValueForIdx2  = valueHolderFor_contentTmpValue as ComponentContent
-                ComponentContent_serializer.write(valueSerializer, valueHolderFor_contentTmpValueForIdx2)
+                const valueHolderFor_contentTmpValueForIdx2  = valueHolderFor_contentTmpValue as ComponentContentBase
+                ComponentContentBase_serializer.write(valueSerializer, valueHolderFor_contentTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)

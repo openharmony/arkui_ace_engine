@@ -24,7 +24,7 @@ import { PeerNode } from "./PeerNode"
 import { ArkTabContentPeer, SubTabBarStyle, BottomTabBarStyle, TabBarOptions, TabContentAttribute } from "./component/tabContent"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
-import { ComponentContent } from "arkui.ComponentContent"
+import { ComponentContentBase } from "arkui.ComponentContent"
 import { Resource } from "global.resource"
 import { CustomBuilder } from "./component/builder"
 import { VoidCallback } from "./component/units"
@@ -41,7 +41,7 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
     applyDisabledAttribute(instance: TabContentAttribute): void { }
     applySelectedAttribute(instance: TabContentAttribute): void { }
     _tabBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _tabBar_0_0value?: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined
+    _tabBar_0_0value?: ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined
     _onWillShow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onWillShow_0_0value?: VoidCallback | undefined
     _onWillHide_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -54,7 +54,7 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
         {
             switch (this._tabBar_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setTabBarAttribute((this._tabBar_0_0value as ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined));
+                    peer.setTabBarAttribute((this._tabBar_0_0value as ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined));
                     this._tabBar_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -64,7 +64,7 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
                 }
                 default: {
                     this._tabBar_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setTabBarAttribute((undefined as ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined));
+                    peer.setTabBarAttribute((undefined as ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined));
                 }
             }
         }
@@ -117,7 +117,7 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
                     break;
                 }
                 default: {
-                    this.tabBar((undefined as ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined));
+                    this.tabBar((undefined as ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined));
                 }
             }
         }
@@ -148,7 +148,7 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
             }
         }
     }
-    tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
+    tabBar(value: ComponentContentBase | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
         if (((this._tabBar_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._tabBar_0_flag = AttributeUpdaterFlag.UPDATE
