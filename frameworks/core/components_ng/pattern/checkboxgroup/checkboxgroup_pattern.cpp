@@ -74,7 +74,6 @@ void CheckBoxGroupPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     FireBuilder();
-    UpdateState();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -810,8 +809,10 @@ void CheckBoxGroupPattern::OnAttachToMainTree()
 void CheckBoxGroupPattern::OnAttachToMainTreeImpl(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(host);
+    UpdateGroupManager();
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
+    UpdateState();
     auto parent = host->GetParent();
     while (parent) {
         if (parent->GetTag() == V2::NAVDESTINATION_CONTENT_ETS_TAG) {
@@ -841,6 +842,13 @@ std::string CheckBoxGroupPattern::GetGroupNameWithNavId()
     auto groupManager = GetGroupManager();
     CHECK_NULL_RETURN(groupManager, eventHub->GetGroupName());
     return eventHub->GetGroupName() + groupManager->GetLastNavId();
+}
+
+void CheckBoxGroupPattern::UpdateGroupManager()
+{
+    auto manager = GroupManager::GetGroupManager();
+    CHECK_NULL_VOID(manager.Upgrade());
+    groupManager_ = manager;
 }
 
 RefPtr<GroupManager> CheckBoxGroupPattern::GetGroupManager()
