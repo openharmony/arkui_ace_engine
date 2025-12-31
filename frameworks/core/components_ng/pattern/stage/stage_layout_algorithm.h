@@ -30,10 +30,10 @@ public:
     StageLayoutAlgorithm() = default;
     ~StageLayoutAlgorithm() override = default;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    void MovePageToSafeArea(const RefPtr<LayoutWrapper>& childLayoutWrapper);
     SafeAreaInsets childInsets_;
 
     ACE_DISALLOW_COPY_AND_MOVE(StageLayoutAlgorithm);
