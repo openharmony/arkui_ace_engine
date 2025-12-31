@@ -38,9 +38,9 @@ public:
     ~StartingWindowLayoutHelper() = default;
 
     RefPtr<FrameNode> CreateStartingWindowNode(const Rosen::StartingWindowInfo& startingWindowInfo,
-        const std::string& bundleName, const std::string& moduleName);
+        const std::string& bundleName, const std::string& moduleName, bool syncLoadStartingWindow = false);
     void MeasureChildNode(const SizeF& parentSize);
-    void SetImagePatternSyncLoad(const RefPtr<FrameNode>& node);
+    void SetImagePatternSyncLoad(const RefPtr<FrameNode>& node, bool syncLoadStartingWindow);
 
 private:
     void MeasureUpperAreaNode(

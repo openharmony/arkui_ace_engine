@@ -151,18 +151,18 @@ RefPtr<FrameNode> CreateBackgroundImageNode(
     return bgImgNode;
 }
 
-void StartingWindowLayoutHelper::SetImagePatternSyncLoad(const RefPtr<FrameNode>& node)
+void StartingWindowLayoutHelper::SetImagePatternSyncLoad(const RefPtr<FrameNode>& node, bool syncLoadStartingWindow)
 {
     CHECK_NULL_VOID(node);
     auto imagePattern = node->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
-    imagePattern->SetSyncLoad(syncStartingWindow_);
-    ACE_SCOPED_TRACE("StartingWindowLayoutHelper::SetImagePatternSyncLoad set sync [%d]", syncStartingWindow_);
+    imagePattern->SetSyncLoad(syncLoadStartingWindow);
+    ACE_SCOPED_TRACE("StartingWindowLayoutHelper::SetImagePatternSyncLoad set sync [%d]", syncLoadStartingWindow);
 }
 
 RefPtr<FrameNode> StartingWindowLayoutHelper::CreateStartingWindowNode(
     const Rosen::StartingWindowInfo& startingWindowInfo, const std::string& bundleName, const std::string& moduleName,
-    bool syncStartingWindow)
+    bool syncLoadStartingWindow)
 {
     startingWindowInfo_ = startingWindowInfo;
     // -root node of starting window
@@ -178,7 +178,7 @@ RefPtr<FrameNode> StartingWindowLayoutHelper::CreateStartingWindowNode(
     if (!startingWindowInfo_.backgroundImagePath_.empty()) {
         auto bgImgNode = CreateBackgroundImageNode(startingWindowInfo_.backgroundImageFit_,
             ImageSourceInfo(startingWindowInfo_.backgroundImagePath_, bundleName, moduleName));
-        SetImagePatternSyncLoad(bgImgNode);
+        SetImagePatternSyncLoad(bgImgNode, syncLoadStartingWindow);
         startingWindow->AddChild(bgImgNode);
     }
 
@@ -186,7 +186,7 @@ RefPtr<FrameNode> StartingWindowLayoutHelper::CreateStartingWindowNode(
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_RETURN(columnNode, nullptr);
-    SetImagePatternSyncLoad(columnNode);
+    SetImagePatternSyncLoad(columnNode, syncLoadStartingWindow);
     auto columnLayoutProps = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(columnLayoutProps, nullptr);
     columnLayoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -198,7 +198,7 @@ RefPtr<FrameNode> StartingWindowLayoutHelper::CreateStartingWindowNode(
     columnNode->AddChild(upperAreaNode);
     auto brandNode = CreateBrandNode(ImageSourceInfo(startingWindowInfo_.brandingPath_, bundleName, moduleName));
     CHECK_NULL_RETURN(brandNode, nullptr);
-    SetImagePatternSyncLoad(brandNode);
+    SetImagePatternSyncLoad(brandNode, syncLoadStartingWindow);
     columnNode->AddChild(brandNode);
     columnNode->MarkModifyDone();
 
