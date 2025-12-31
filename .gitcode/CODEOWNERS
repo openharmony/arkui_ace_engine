@@ -547,6 +547,12 @@ frameworks/bridge/common/utils/ @arkui_framework_xnode
 frameworks/bridge/common/utils/module_buffer_reader.h @arkui_framework_resource
 frameworks/bridge/common/utils/module_buffer_reader.cpp @arkui_framework_resource
 frameworks/bridge/declarative_frontend/ark_breakpoint/ @arkui_framework_resource
+frameworks/bridge/declarative_frontend/ark_component/src_dir/ @arkuieco3
+frameworks/bridge/declarative_frontend/ark_component/types/ @arkuieco3
+frameworks/bridge/declarative_frontend/ark_component/.gitignore @arkuieco3
+frameworks/bridge/declarative_frontend/ark_component/package-lock.json @arkuieco3
+frameworks/bridge/declarative_frontend/ark_component/package.json @arkuieco3
+frameworks/bridge/declarative_frontend/ark_component/tsconfig.release.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/src/ArkAlphabetIndexer.ts @arkuicodepulse
 frameworks/bridge/declarative_frontend/ark_component/src/ArkBadge.ts @huawei_g_five
