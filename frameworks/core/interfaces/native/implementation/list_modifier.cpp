@@ -372,6 +372,16 @@ void SetEditModeOptionsImpl(Ark_NativePointer node,
         auto enableGatherSelectedItemsAnimation =
             Converter::OptConvert<bool>(convValue->enableGatherSelectedItemsAnimation);
         options.enableGatherSelectedItemsAnimation = enableGatherSelectedItemsAnimation.value_or(false);
+
+        auto onGetPreviewBadge = Converter::OptConvert<::Callback_Union_Boolean_I32>(convValue->onGetPreviewBadge);
+        if (onGetPreviewBadge) {
+            auto modelCallback = [callback = CallbackHelper(*onGetPreviewBadge)]() -> PreviewBadge {
+                auto resultOpt = callback.InvokeWithOptConvertResult<PreviewBadge, Ark_Union_Boolean_I32,
+                    Callback_Union_Boolean_I32_Void>();
+                return resultOpt.value_or(PreviewBadge());
+            };
+            options.getPreviewBadge = modelCallback;
+        }
     }
     ListModelStatic::SetEditModeOptions(frameNode, options);
 }

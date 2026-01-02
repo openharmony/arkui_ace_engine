@@ -196,6 +196,8 @@ export enum CallbackKind {
     Kind_Callback_Tuple_I32_I32_I32_I32_Void = 1381083927,
     Kind_Callback_Tuple_I32_I32_Void = -1321460777,
     Kind_Callback_UIExtensionProxy_Void = -1063506522,
+    Kind_Callback_Union_Boolean_I32 = 250356603,
+    Kind_Callback_Union_Boolean_I32_Void = -1389552,
     Kind_Callback_Union_CustomBuilder_DragItemInfo_Void = -620935067,
     Kind_Callback_Union_DrawingRenderingContext_Undefined_Void = -495170669,
     Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void = -1322200028,

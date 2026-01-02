@@ -55,6 +55,21 @@ void AssignOptionalTo(std::optional<T>& dst, const P& src);
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Boolean_I32& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Boolean_I64& src)
 {
     switch (src.selector) {
@@ -3959,6 +3974,7 @@ ASSIGN_OPT(Opt_uiObserver_NavigationInfo)
 ASSIGN_OPT(Opt_uiObserver_RouterPageState)
 ASSIGN_OPT(Opt_unifiedDataChannel_UnifiedData)
 ASSIGN_OPT(Opt_uniformTypeDescriptor_UniformDataType)
+ASSIGN_OPT(Opt_Union_Boolean_I32)
 ASSIGN_OPT(Opt_Union_Boolean_I64)
 ASSIGN_OPT(Opt_Union_CircleShape_EllipseShape_PathShape_RectShape)
 ASSIGN_OPT(Opt_Union_Color_I32_String)
@@ -4320,6 +4336,8 @@ ASSIGN_OPT(Opt_Callback_TouchResult_Void)
 ASSIGN_OPT(Opt_Callback_Tuple_I32_I32_I32_I32_Void)
 ASSIGN_OPT(Opt_Callback_Tuple_I32_I32_Void)
 ASSIGN_OPT(Opt_Callback_UIExtensionProxy_Void)
+ASSIGN_OPT(Opt_Callback_Union_Boolean_I32)
+ASSIGN_OPT(Opt_Callback_Union_Boolean_I32_Void)
 ASSIGN_OPT(Opt_Callback_Union_CustomBuilder_DragItemInfo_Void)
 ASSIGN_OPT(Opt_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void)
 ASSIGN_OPT(Opt_Callback_Void)

@@ -811,6 +811,8 @@ typedef struct unifiedDataChannel_UnifiedDataPeer* Ark_unifiedDataChannel_Unifie
 typedef struct Opt_unifiedDataChannel_UnifiedData Opt_unifiedDataChannel_UnifiedData;
 typedef struct Ark_Union_Alignment_LocalizedAlignment Ark_Union_Alignment_LocalizedAlignment;
 typedef struct Opt_Union_Alignment_LocalizedAlignment Opt_Union_Alignment_LocalizedAlignment;
+typedef struct Ark_Union_Boolean_I32 Ark_Union_Boolean_I32;
+typedef struct Opt_Union_Boolean_I32 Opt_Union_Boolean_I32;
 typedef struct Ark_Union_Boolean_I64 Ark_Union_Boolean_I64;
 typedef struct Opt_Union_Boolean_I64 Opt_Union_Boolean_I64;
 typedef struct Ark_Union_CircleShape_EllipseShape_PathShape_RectShape Ark_Union_CircleShape_EllipseShape_PathShape_RectShape;
@@ -1526,6 +1528,10 @@ typedef struct Callback_Tuple_I32_I32_Void Callback_Tuple_I32_I32_Void;
 typedef struct Opt_Callback_Tuple_I32_I32_Void Opt_Callback_Tuple_I32_I32_Void;
 typedef struct Callback_UIExtensionProxy_Void Callback_UIExtensionProxy_Void;
 typedef struct Opt_Callback_UIExtensionProxy_Void Opt_Callback_UIExtensionProxy_Void;
+typedef struct Callback_Union_Boolean_I32 Callback_Union_Boolean_I32;
+typedef struct Opt_Callback_Union_Boolean_I32 Opt_Callback_Union_Boolean_I32;
+typedef struct Callback_Union_Boolean_I32_Void Callback_Union_Boolean_I32_Void;
+typedef struct Opt_Callback_Union_Boolean_I32_Void Opt_Callback_Union_Boolean_I32_Void;
 typedef struct Callback_Union_CustomBuilder_DragItemInfo_Void Callback_Union_CustomBuilder_DragItemInfo_Void;
 typedef struct Opt_Callback_Union_CustomBuilder_DragItemInfo_Void Opt_Callback_Union_CustomBuilder_DragItemInfo_Void;
 typedef struct Callback_Union_DrawingRenderingContext_Undefined_Void Callback_Union_DrawingRenderingContext_Undefined_Void;
@@ -8880,6 +8886,18 @@ typedef struct Opt_Union_Alignment_LocalizedAlignment {
     Ark_Tag tag;
     Ark_Union_Alignment_LocalizedAlignment value;
 } Opt_Union_Alignment_LocalizedAlignment;
+typedef struct Ark_Union_Boolean_I32 {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_Boolean value0;
+        Ark_Int32 value1;
+    };
+} Ark_Union_Boolean_I32;
+typedef struct Opt_Union_Boolean_I32 {
+    Ark_Tag tag;
+    Ark_Union_Boolean_I32 value;
+} Opt_Union_Boolean_I32;
 typedef struct Ark_Union_Boolean_I64 {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -12310,6 +12328,26 @@ typedef struct Opt_Callback_UIExtensionProxy_Void {
     Ark_Tag tag;
     Callback_UIExtensionProxy_Void value;
 } Opt_Callback_UIExtensionProxy_Void;
+typedef struct Callback_Union_Boolean_I32 {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Callback_Union_Boolean_I32_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Callback_Union_Boolean_I32_Void continuation);
+} Callback_Union_Boolean_I32;
+typedef struct Opt_Callback_Union_Boolean_I32 {
+    Ark_Tag tag;
+    Callback_Union_Boolean_I32 value;
+} Opt_Callback_Union_Boolean_I32;
+typedef struct Callback_Union_Boolean_I32_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Union_Boolean_I32 value);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_Boolean_I32 value);
+} Callback_Union_Boolean_I32_Void;
+typedef struct Opt_Callback_Union_Boolean_I32_Void {
+    Ark_Tag tag;
+    Callback_Union_Boolean_I32_Void value;
+} Opt_Callback_Union_Boolean_I32_Void;
 typedef struct Callback_Union_CustomBuilder_DragItemInfo_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -14665,6 +14703,7 @@ typedef struct Opt_EditMenuOptions {
 typedef struct Ark_EditModeOptions {
     /* kind: Interface */
     Opt_Boolean enableGatherSelectedItemsAnimation;
+    Opt_Callback_Union_Boolean_I32 onGetPreviewBadge;
 } Ark_EditModeOptions;
 typedef struct Opt_EditModeOptions {
     Ark_Tag tag;

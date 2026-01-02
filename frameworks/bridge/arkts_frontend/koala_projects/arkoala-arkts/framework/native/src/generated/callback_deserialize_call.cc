@@ -4034,6 +4034,66 @@ void deserializeAndCallSyncCallback_UIExtensionProxy_Void(Ark_VMContext vmContex
     Ark_UIExtensionProxy value0 = static_cast<Ark_UIExtensionProxy>(UIExtensionProxy_serializer::read(thisDeserializer));
     callSyncMethod(vmContext, resourceId, value0);
 }
+void deserializeAndCallCallback_Union_Boolean_I32(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Callback_Union_Boolean_I32_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Union_Boolean_I32))));
+    thisDeserializer.readPointer();
+    Callback_Union_Boolean_I32_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_Boolean_I32 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Union_Boolean_I32_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_Boolean_I32 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Union_Boolean_I32_Void))))};
+    _call(_resourceId, continuationResult);
+}
+void deserializeAndCallSyncCallback_Union_Boolean_I32(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Callback_Union_Boolean_I32_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Union_Boolean_I32))));
+    Callback_Union_Boolean_I32_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_Boolean_I32 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Union_Boolean_I32_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_Boolean_I32 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Union_Boolean_I32_Void))))};
+    callSyncMethod(vmContext, resourceId, continuationResult);
+}
+void deserializeAndCallCallback_Union_Boolean_I32_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_Boolean_I32 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Union_Boolean_I32_Void))));
+    thisDeserializer.readPointer();
+    const Ark_Int8 valueTmpBufUnionSelector = thisDeserializer.readInt8();
+    Ark_Union_Boolean_I32 valueTmpBuf = {};
+    valueTmpBuf.selector = valueTmpBufUnionSelector;
+    if (valueTmpBufUnionSelector == 0) {
+        valueTmpBuf.selector = 0;
+        valueTmpBuf.value0 = thisDeserializer.readBoolean();
+    } else if (valueTmpBufUnionSelector == 1) {
+        valueTmpBuf.selector = 1;
+        valueTmpBuf.value1 = thisDeserializer.readInt32();
+    } else {
+        INTEROP_FATAL("One of the branches for valueTmpBuf has to be chosen through deserialisation.");
+    }
+    Ark_Union_Boolean_I32 value = static_cast<Ark_Union_Boolean_I32>(valueTmpBuf);
+    _call(_resourceId, value);
+}
+void deserializeAndCallSyncCallback_Union_Boolean_I32_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_Boolean_I32 value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Union_Boolean_I32_Void))));
+    const Ark_Int8 valueTmpBufUnionSelector = thisDeserializer.readInt8();
+    Ark_Union_Boolean_I32 valueTmpBuf = {};
+    valueTmpBuf.selector = valueTmpBufUnionSelector;
+    if (valueTmpBufUnionSelector == 0) {
+        valueTmpBuf.selector = 0;
+        valueTmpBuf.value0 = thisDeserializer.readBoolean();
+    } else if (valueTmpBufUnionSelector == 1) {
+        valueTmpBuf.selector = 1;
+        valueTmpBuf.value1 = thisDeserializer.readInt32();
+    } else {
+        INTEROP_FATAL("One of the branches for valueTmpBuf has to be chosen through deserialisation.");
+    }
+    Ark_Union_Boolean_I32 value = static_cast<Ark_Union_Boolean_I32>(valueTmpBuf);
+    callSyncMethod(vmContext, resourceId, value);
+}
 void deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -7520,6 +7580,8 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_Callback_Tuple_I32_I32_I32_I32_Void: return deserializeAndCallCallback_Tuple_I32_I32_I32_I32_Void(thisArray, thisLength);
         case Kind_Callback_Tuple_I32_I32_Void: return deserializeAndCallCallback_Tuple_I32_I32_Void(thisArray, thisLength);
         case Kind_Callback_UIExtensionProxy_Void: return deserializeAndCallCallback_UIExtensionProxy_Void(thisArray, thisLength);
+        case Kind_Callback_Union_Boolean_I32: return deserializeAndCallCallback_Union_Boolean_I32(thisArray, thisLength);
+        case Kind_Callback_Union_Boolean_I32_Void: return deserializeAndCallCallback_Union_Boolean_I32_Void(thisArray, thisLength);
         case Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void(thisArray, thisLength);
         case Kind_Callback_Union_DrawingRenderingContext_Undefined_Void: return deserializeAndCallCallback_Union_DrawingRenderingContext_Undefined_Void(thisArray, thisLength);
         case Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return deserializeAndCallCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void(thisArray, thisLength);
@@ -7855,6 +7917,8 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Callback_Tuple_I32_I32_I32_I32_Void: return deserializeAndCallSyncCallback_Tuple_I32_I32_I32_I32_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Tuple_I32_I32_Void: return deserializeAndCallSyncCallback_Tuple_I32_I32_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_UIExtensionProxy_Void: return deserializeAndCallSyncCallback_UIExtensionProxy_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_Union_Boolean_I32: return deserializeAndCallSyncCallback_Union_Boolean_I32(vmContext, thisArray, thisLength);
+        case Kind_Callback_Union_Boolean_I32_Void: return deserializeAndCallSyncCallback_Union_Boolean_I32_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return deserializeAndCallSyncCallback_Union_CustomBuilder_DragItemInfo_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Union_DrawingRenderingContext_Undefined_Void: return deserializeAndCallSyncCallback_Union_DrawingRenderingContext_Undefined_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return deserializeAndCallSyncCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void(vmContext, thisArray, thisLength);

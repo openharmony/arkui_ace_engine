@@ -79,6 +79,7 @@ struct NavigationBarOptions;
 struct NavigationOptions;
 struct NavigationTitlebarOptions;
 struct NavigationTransition;
+struct PreviewBadge;
 
 namespace Converter {
 // SORTED_SECTION
@@ -555,6 +556,12 @@ namespace Converter {
     };
     template<>
     void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& src);
+
+    template<>
+    void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Boolean& from);
+
+    template<>
+    void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Int32& from);
 
     // Converter declarations should be here, because they can be used in other converters!
     // SORTED_SECTION: Converter's specializations. No multiline declarations, please!
