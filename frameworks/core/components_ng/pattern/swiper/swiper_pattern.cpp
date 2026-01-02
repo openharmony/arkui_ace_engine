@@ -8100,7 +8100,7 @@ void SwiperPattern::LoadCompleteManagerStopCollect()
     pipeline->GetLoadCompleteManager()->StopCollect();
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
-    if (!IsAutoPlay()) {
+    if (!IsAutoPlay() && (!targetIndex_.has_value() || targetIndex_.value() != currentIndex_)) {
         mgr->OnSwiperChangeEnd(GetHost(), hasTabsAncestor_);
     }
 }
