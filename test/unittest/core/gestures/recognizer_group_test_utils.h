@@ -75,7 +75,7 @@ RefPtr<ExclusiveRecognizer> CreateExclusiveRecognizerWithParam(
 
 void DispatchSingleClickEvent(const RefPtr<NGGestureRecognizer>& recognizer)
 {
-    recognizer->BeginReferee(0, true);
+    recognizer->BeginReferee(0, 0, true);
     TouchEvent downEvent;
     downEvent.SetId(0).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f);
     recognizer->HandleEvent(downEvent);
@@ -86,8 +86,8 @@ void DispatchSingleClickEvent(const RefPtr<NGGestureRecognizer>& recognizer)
 
 void DispatchDoubleFingerSingleClickEvent(const RefPtr<NGGestureRecognizer>& recognizer)
 {
-    recognizer->BeginReferee(0, true);
-    recognizer->BeginReferee(1, true);
+    recognizer->BeginReferee(0, 0, true);
+    recognizer->BeginReferee(1, 1, true);
     TouchEvent downEventOne;
     downEventOne.SetId(0).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f);
     recognizer->HandleEvent(downEventOne);
@@ -104,7 +104,7 @@ void DispatchDoubleFingerSingleClickEvent(const RefPtr<NGGestureRecognizer>& rec
 
 void DispatchPanEvent(const RefPtr<NGGestureRecognizer>& recognizer)
 {
-    recognizer->BeginReferee(0, true);
+    recognizer->BeginReferee(0, 0, true);
     TouchEvent downEventOne;
     downEventOne.SetId(0).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f);
     recognizer->HandleEvent(downEventOne);
@@ -117,7 +117,7 @@ void DispatchPanEvent(const RefPtr<NGGestureRecognizer>& recognizer)
 
 void DispatchSwipeEvent(const RefPtr<NGGestureRecognizer>& recognizer)
 {
-    recognizer->BeginReferee(0, true);
+    recognizer->BeginReferee(0, 0, true);
     TouchEvent downEventOne;
     std::chrono::nanoseconds nanoseconds(1000);
     downEventOne.SetId(0).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f).SetTime(TimeStamp(nanoseconds));
@@ -143,8 +143,8 @@ void DispatchSwipeEvent(const RefPtr<NGGestureRecognizer>& recognizer)
 
 void DispatchPinchEvent(const RefPtr<NGGestureRecognizer>& recognizer)
 {
-    recognizer->BeginReferee(0, true);
-    recognizer->BeginReferee(1, true);
+    recognizer->BeginReferee(0, 0, true);
+    recognizer->BeginReferee(1, 1, true);
     TouchEvent downEventOne;
     downEventOne.SetId(0).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f);
     recognizer->HandleEvent(downEventOne);
@@ -169,8 +169,8 @@ void DispatchPinchEvent(const RefPtr<NGGestureRecognizer>& recognizer)
 
 void DispatchRotationEvent(const RefPtr<NGGestureRecognizer>& recognizer)
 {
-    recognizer->BeginReferee(0, true);
-    recognizer->BeginReferee(1, true);
+    recognizer->BeginReferee(0, 0, true);
+    recognizer->BeginReferee(1, 1, true);
     TouchEvent downEventOne;
     downEventOne.SetId(0).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f);
     recognizer->HandleEvent(downEventOne);
@@ -201,8 +201,8 @@ void DispatchRotationEvent(const RefPtr<NGGestureRecognizer>& recognizer)
 
 void DispatchSingleDownSingleMoveEvent(const RefPtr<NGGestureRecognizer>& recognizer)
 {
-    recognizer->BeginReferee(0, true);
-    recognizer->BeginReferee(1, true);
+    recognizer->BeginReferee(0, 0, true);
+    recognizer->BeginReferee(1, 1, true);
     TouchEvent downEventOne;
     downEventOne.SetId(0).SetType(TouchType::DOWN).SetX(100.0f).SetY(100.0f);
     recognizer->HandleEvent(downEventOne);

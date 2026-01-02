@@ -302,7 +302,7 @@ void ExclusiveRecognizer::CleanRecognizerState()
 {
     for (const auto& child : recognizers_) {
         auto childRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(child);
-        if (childRecognizer && childRecognizer->GetTouchPointsSize() <= 1) {
+        if (childRecognizer && childRecognizer->GetOriginalTouchPointsSize() <= 1) {
             childRecognizer->CleanRecognizerState();
         }
     }
