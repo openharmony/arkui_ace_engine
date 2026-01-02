@@ -134,6 +134,7 @@ public:
     void BackFromDynamicExtender(const std::string& url, const std::string& params) override;
     void ClearFromDynamicExtender() override;
     int32_t GetLengthFromDynamicExtender() override;
+    int32_t GetStackSizeFromDynamicExtender() override;
     std::string GetParamsFromDynamicExtender() override;
     bool GetStateByUrlFromDynamicExtender(const std::string& url, std::vector<RouterStateInfo>& stateArray) override;
     bool GetStateByIndexFromDynamicExtender(int32_t index, RouterStateInfo& state) override;
