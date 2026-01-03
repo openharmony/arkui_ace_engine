@@ -3341,7 +3341,7 @@ void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNav
 
 void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& navigationStack, bool needUpdateCallback)
 {
-    if (navigationStack_) {
+    if (navigationStack_ && needUpdateCallback) {
         navigationStack_->SetOnStateChangedCallback(nullptr);
     }
     navigationStack_ = navigationStack;
