@@ -692,6 +692,11 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
         }
         CHECK_NULL_VOID(frameNode);
         OnExpandChanged(frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->ContentChangeReport(GetMenuWrapper(), true);
         return;
     }
 
@@ -755,6 +760,9 @@ void MenuItemPattern::ShowSubMenuWithAnimation(const RefPtr<FrameNode>& subMenu)
             },
             animationOption.GetOnFinishEvent(), nullptr, subMenu->GetContextRefPtr());
     }
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->ContentChangeReport(GetMenuWrapper(), true);
 }
 
 void MenuItemPattern::SendSubMenuOpenToAccessibility(RefPtr<FrameNode>& subMenu, ShowSubMenuType type)
