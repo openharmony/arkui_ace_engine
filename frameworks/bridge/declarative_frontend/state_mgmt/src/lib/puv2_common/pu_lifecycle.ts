@@ -85,8 +85,8 @@ class CustomComponentLifecycle {
             return false;
         }
         stateMgmtConsole.debug(`Lifecycle handleEvent, view id:${this.owningView_.id__()}, view name:${this.owningView_.constructor.name}, current state:${this.currentState_}, event id:${event}, nextState:${nextState}.`);
-        this.executeHandleEvent(event);
         this.currentState_ = nextState;
+        this.executeHandleEvent(event);
         return true;
     }
 

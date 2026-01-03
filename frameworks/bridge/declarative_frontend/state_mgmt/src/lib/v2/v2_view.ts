@@ -176,6 +176,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         }, 'aboutToReuseInternal', this.constructor.name);
         ObserveV2.getObserve().updateDirty2(true, true);
         ObserveV2.getObserve().setCurrentReuseId(ObserveV2.NO_REUSE);
+        if (this.__isReuseNodeNeedAttach__Internal) {
+            this.__lifecycle__Internal.handleEvent(LifeCycleEvent.ON_ATTACH);
+        }
         this.traverseChildDoRecycleOrReuse(PUV2ViewBase.doReuse);
     }
 
