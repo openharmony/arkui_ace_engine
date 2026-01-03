@@ -5081,9 +5081,10 @@ void PipelineContext::OnHide()
     RequestFrame();
     OnVirtualKeyboardAreaChange(Rect());
     FlushWindowStateChangedCallback(false);
-    AccessibilityEvent event;
-    event.type = AccessibilityEventType::PAGE_CLOSE;
-    SendEventToAccessibility(event);
+    auto rootNode = GetRootElement();
+    if (rootNode && !IsFormRenderExceptDynamicComponent()) {
+        rootNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE);
+    }
     memoryMgr_->PostMemRecycleTask();
 }
 
