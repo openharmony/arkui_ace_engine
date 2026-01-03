@@ -32,6 +32,7 @@ public:
     MOCK_METHOD(RefPtr<UnifiedData>, TransformUnifiedDataForNative, (void* rawData), (override));
     MOCK_METHOD(RefPtr<UnifiedData>, TransformUnifiedDataFromANI, (void* rawData), (override));
     MOCK_METHOD(void*, TransformUnifiedDataPtr, (RefPtr<UnifiedData>& UnifiedData), (override));
+    MOCK_METHOD(std::shared_ptr<void>, TransformUnifiedDataSharedPtr, (RefPtr<UnifiedData>& UnifiedData), (override));
     MOCK_METHOD(napi_value, TransformSummary, ((std::map<std::string, int64_t>& summary)), (override));
     MOCK_METHOD(void, TransformSummaryANI, ((std::map<std::string, int64_t>& summaryMap), void* summaryPtr),
         (override));
