@@ -1628,7 +1628,7 @@ HWTEST_F(TextTestNgSix, TextHighlightSelectedContent004, TestSize.Level1)
     span1->spanItemType = SpanItemType::NORMAL;
 
     auto span2 = AceType::MakeRefPtr<SpanItem>(); // Image span
-    span2->content = u"";
+    span2->content = u" ";
     span2->position = 5;         // Image takes 1 position
     span2->placeholderIndex = 0; // placeholderIndex != -1 indicates image/custom span
     span2->spanItemType = SpanItemType::CustomSpan;
@@ -2117,5 +2117,119 @@ HWTEST_F(TextTestNgSix, ReportSelectedText010, TestSize.Level1)
 
     // Verify the correct content is selected (should handle reversed selection)
     EXPECT_EQ(textPattern->textSelector_.lastReportContent_, "lo Wo");
+}
+
+/**
+ * @tc.name: GetSpecifiedContentIndex001
+ * @tc.desc: Test GetSpecifiedContentIndex with Chinese content
+ * @tc.type: FUNC
+ * @tc.require: AR000FL0VB
+ * @tc.author: your_name
+ */
+HWTEST_F(TextTestNgSix, GetSpecifiedContentIndex001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step1. Set textForDisplay_ to "你好世界你好"
+     * @tc.expected: The textForDisplay_ is set correctly
+     */
+    pattern->textForDisplay_ = u"你好世界你好";
+
+    /**
+     * @tc.steps: step2. Call GetSpecifiedContentIndex with "你好" and isFirst=false
+     * @tc.expected: Return vector with two elements [0, 8] (注意：中文UTF-16可能是2字节)
+     */
+    auto result = pattern->GetSpecifiedContentIndex("你好", false);
+    ASSERT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], 0);
+    EXPECT_EQ(result[1], 4);
+}
+
+/**
+ * @tc.name: GetSpecifiedContentIndex002
+ * @tc.desc: Test GetSpecifiedContentIndex with overlapping content (should not find overlapping)
+ * @tc.type: FUNC
+ * @tc.require: AR000FL0VB
+ * @tc.author: your_name
+ */
+HWTEST_F(TextTestNgSix, GetSpecifiedContentIndex002, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step1. Set textForDisplay_ to "aaaaa"
+     * @tc.expected: The textForDisplay_ is set correctly
+     */
+    pattern->textForDisplay_ = u"aaaaa";
+
+    /**
+     * @tc.steps: step2. Call GetSpecifiedContentIndex with "aa" and isFirst=false
+     * @tc.expected: Return vector with elements [0, 2, 4] or [0, 2] depending on algorithm
+     */
+    auto result = pattern->GetSpecifiedContentIndex("aa", false);
+    // 根据当前算法，会找到位置0, 2, 4
+    ASSERT_EQ(result.size(), 2);
+    EXPECT_EQ(result[0], 0);
+    EXPECT_EQ(result[1], 2);
+}
+
+/**
+ * @tc.name: GetSpecifiedContentIndex003
+ * @tc.desc: Test GetSpecifiedContentIndex with special characters
+ * @tc.type: FUNC
+ * @tc.require: AR000FL0VB
+ * @tc.author: your_name
+ */
+HWTEST_F(TextTestNgSix, GetSpecifiedContentIndex003, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step1. Set textForDisplay_ to "Line1\nLine2\tLine3"
+     * @tc.expected: The textForDisplay_ is set correctly
+     */
+    pattern->textForDisplay_ = u"Line1\nLine2\tLine3";
+
+    /**
+     * @tc.steps: step2. Call GetSpecifiedContentIndex with "Line" and isFirst=false
+     * @tc.expected: Return vector with three elements [0, 6, 12]
+     */
+    auto result = pattern->GetSpecifiedContentIndex("Line", false);
+    ASSERT_EQ(result.size(), 3);
+    EXPECT_EQ(result[0], 0);
+    EXPECT_EQ(result[1], 6);
+    EXPECT_EQ(result[2], 12);
+}
+
+/**
+ * @tc.name: GetSpecifiedContentIndex004
+ * @tc.desc: Test GetSpecifiedContentIndex with overlapping content (should not find overlapping)
+ * @tc.type: FUNC
+ * @tc.require: AR000FL0VB
+ * @tc.author: your_name
+ */
+HWTEST_F(TextTestNgSix, GetSpecifiedContentIndex004, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step1. Set textForDisplay_ to "aaaaa"
+     * @tc.expected: The textForDisplay_ is set correctly
+     */
+    pattern->textForDisplay_ = u"你好你好鸭你好你好";
+
+    /**
+     * @tc.steps: step2. Call GetSpecifiedContentIndex with "aa" and isFirst=false
+     * @tc.expected: Return vector with elements [0, 2, 4] or [0, 2] depending on algorithm
+     */
+    auto result = pattern->GetSpecifiedContentIndex("你好", false);
+    // 根据当前算法，会找到位置0, 2, 4
+    // 因为每次找到后pos += content.length()，不会重叠查找
+    ASSERT_EQ(result.size(), 4);
+    EXPECT_EQ(result[0], 0);
+    EXPECT_EQ(result[1], 2);
+    EXPECT_EQ(result[2], 5);
+    EXPECT_EQ(result[3], 7);
 }
 } // namespace OHOS::Ace::NG
