@@ -1679,12 +1679,18 @@ void JSText::ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqu
         options.UpdateTextMarqueeUpdatePolicy(updatePolicy);
     }
 
+    SetMarqueeSpacing(paramObject, options);
+}
+
+void JSText::SetMarqueeSpacing(const JSRef<JSObject>& paramObject, NG::TextMarqueeOptions& options)
+{
     auto getSpacing = paramObject->GetProperty("spacing");
+    UnRegisterResource("MarqueeSpacing");
     if (!getSpacing->IsNull() && !getSpacing->IsUndefined()) {
         CalcDimension value;
-        UnRegisterResource("MarqueeSpacing");
         RefPtr<ResourceObject> resObj;
-        if (ParseLengthMetricsToDimension(getSpacing, value, resObj) && !value.IsNegative()) {
+        if (ParseLengthMetricsToDimension(getSpacing, value, resObj) && !value.IsNegative()
+            && value.Unit() != DimensionUnit::PERCENT) {
             options.UpdateTextMarqueeSpacing(value);
         }
         if (SystemProperties::ConfigChangePerform() && resObj) {

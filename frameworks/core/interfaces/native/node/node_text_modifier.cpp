@@ -1673,8 +1673,10 @@ void SetMarqueeOptions(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* val
     marqueeOptions.UpdateTextMarqueeFadeout(value->fadeout);
     marqueeOptions.UpdateTextMarqueeStartPolicy(static_cast<MarqueeStartPolicy>(value->marqueeStartPolicy));
     marqueeOptions.UpdateTextMarqueeUpdatePolicy(static_cast<MarqueeUpdatePolicy>(value->marqueeUpdatePolicy));
-    CalcDimension spacing(value->spacing.value, static_cast<DimensionUnit>(value->spacing.units));
-    if (spacing.IsNegative()) {
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(value->spacing.units);
+    CalcDimension spacing(value->spacing.value, unitEnum);
+
+    if (spacing.IsNegative() || unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
         spacing = DEFAULT_MARQUEE_SPACING_WIDTH;
     }
     marqueeOptions.UpdateTextMarqueeSpacing(spacing);
