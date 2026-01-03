@@ -771,6 +771,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionNotifyDragStartReques)
         },
         ani_native_function {
+            "_DragController_enableDropDisallowedBadge",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionEnableDropDisallowedBadge)
+        },
+        ani_native_function {
             "_StyledString_SetPixelMap",
             "lC{@ohos.multimedia.image.image.PixelMap}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::StyledStringModule::SetPixelMap)

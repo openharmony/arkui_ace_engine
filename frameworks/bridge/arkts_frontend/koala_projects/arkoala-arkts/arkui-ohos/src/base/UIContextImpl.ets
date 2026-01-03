@@ -513,6 +513,12 @@ export class DragControllerImpl extends DragController {
         ArkUIAniModule._DragController_notifyDragStartReques(requestStatus);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
+
+    public enableDropDisallowedBadge(enabled: boolean): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ArkUIAniModule._DragController_enableDropDisallowedBadge(enabled);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
 }
 
 export class RouterImpl extends Router {

@@ -683,6 +683,7 @@ struct ArkUIAniDragControllerModifier {
     void (*aniDragActionSetDragEventStrictReportingEnabled)(bool enable);
     void (*aniDragActionCancelDataLoading)(const char* key);
     void (*aniDragActionNotifyDragStartReques)(int requestStatus);
+    void (*aniDragActionEnableDropDisallowedBadge)(bool enabled);
 };
 struct ArkUIAniImageSpanModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
