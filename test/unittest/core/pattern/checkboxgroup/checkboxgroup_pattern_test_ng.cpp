@@ -312,6 +312,7 @@ HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupPatternTest005, TestSize.Level
      * @tc.steps: step3. Call OnClick
      * @tc.expected: updateFlag_ is false
      */
+    pattern->UpdateState();
     pattern->OnClick();
     EXPECT_FALSE(pattern->updateFlag_);
 }
