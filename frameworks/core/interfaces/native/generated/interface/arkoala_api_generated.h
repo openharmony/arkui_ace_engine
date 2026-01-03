@@ -13820,6 +13820,10 @@ typedef struct Opt_AcceptableFileType {
 typedef struct Ark_AccessibilityOptions {
     /* kind: Interface */
     Opt_Boolean accessibilityPreferred;
+    Opt_AccessibilityRoleType stateControllerRoleType;
+    Opt_String stateControllerId;
+    Opt_AccessibilityRoleType actionControllerRoleType;
+    Opt_String actionControllerId;
 } Ark_AccessibilityOptions;
 typedef struct Opt_AccessibilityOptions {
     Ark_Tag tag;

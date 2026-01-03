@@ -26,7 +26,7 @@ import { Resource } from "global.resource"
 import { extractors } from "#handwritten"
 import { LengthMetrics, LengthMetricsUnit, ColorMetrics } from "arkui.Graphics"
 import { Color, BorderStyle, FontWeight, FontStyle, DividerMode } from "./enums"
-import { OutlineStyle } from "./common"
+import { OutlineStyle, AccessibilityRoleType } from "./common"
 import { LengthMetrics_serializer } from "./../Graphics"
 import { Resource_serializer } from "./../framework/resource"
 export class ColorFilterInternal {
@@ -251,6 +251,10 @@ export interface ChainWeightOptions {
 }
 export interface AccessibilityOptions {
     accessibilityPreferred?: boolean;
+    stateControllerRoleType?: AccessibilityRoleType;
+    stateControllerId?: string;
+    actionControllerRoleType?: AccessibilityRoleType;
+    actionControllerId?: string;
 }
 export interface AccessibilityActionOptions {
     scrollStep?: int32;
@@ -301,6 +305,38 @@ export class AccessibilityOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForStateControllerRoleType  = value.stateControllerRoleType
+        if (valueHolderForStateControllerRoleType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStateControllerRoleTypeTmpValue  = (valueHolderForStateControllerRoleType as AccessibilityRoleType)
+            valueSerializer.writeInt32(valueHolderForStateControllerRoleTypeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForStateControllerId  = value.stateControllerId
+        if (valueHolderForStateControllerId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStateControllerIdTmpValue  = valueHolderForStateControllerId!
+            valueSerializer.writeString(valueHolderForStateControllerIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForActionControllerRoleType  = value.actionControllerRoleType
+        if (valueHolderForActionControllerRoleType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForActionControllerRoleTypeTmpValue  = (valueHolderForActionControllerRoleType as AccessibilityRoleType)
+            valueSerializer.writeInt32(valueHolderForActionControllerRoleTypeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForActionControllerId  = value.actionControllerId
+        if (valueHolderForActionControllerId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForActionControllerIdTmpValue  = valueHolderForActionControllerId!
+            valueSerializer.writeString(valueHolderForActionControllerIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): AccessibilityOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -310,7 +346,31 @@ export class AccessibilityOptions_serializer {
             accessibilityPreferredTmpBuf = valueDeserializer.readBoolean()
         }
         const accessibilityPreferredTmpResult : boolean | undefined = accessibilityPreferredTmpBuf
-        let value : AccessibilityOptions = ({accessibilityPreferred: accessibilityPreferredTmpResult} as AccessibilityOptions)
+        const stateControllerRoleTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let stateControllerRoleTypeTmpBuf : AccessibilityRoleType | undefined = undefined
+        if ((stateControllerRoleTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            stateControllerRoleTypeTmpBuf = AccessibilityRoleType.fromValue(valueDeserializer.readInt32())
+        }
+        const stateControllerRoleTypeTmpResult : AccessibilityRoleType | undefined = stateControllerRoleTypeTmpBuf
+        const stateControllerIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let stateControllerIdTmpBuf : string | undefined = undefined
+        if ((stateControllerIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            stateControllerIdTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const stateControllerIdTmpResult : string | undefined = stateControllerIdTmpBuf
+        const actionControllerRoleTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let actionControllerRoleTypeTmpBuf : AccessibilityRoleType | undefined = undefined
+        if ((actionControllerRoleTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            actionControllerRoleTypeTmpBuf = AccessibilityRoleType.fromValue(valueDeserializer.readInt32())
+        }
+        const actionControllerRoleTypeTmpResult : AccessibilityRoleType | undefined = actionControllerRoleTypeTmpBuf
+        const actionControllerIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let actionControllerIdTmpBuf : string | undefined = undefined
+        if ((actionControllerIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            actionControllerIdTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const actionControllerIdTmpResult : string | undefined = actionControllerIdTmpBuf
+        let value : AccessibilityOptions = ({accessibilityPreferred: accessibilityPreferredTmpResult, stateControllerRoleType: stateControllerRoleTypeTmpResult, stateControllerId: stateControllerIdTmpResult, actionControllerRoleType: actionControllerRoleTypeTmpResult, actionControllerId: actionControllerIdTmpResult} as AccessibilityOptions)
         return value
     }
 }

@@ -695,6 +695,7 @@ namespace Converter {
     template<> RectHeightStyle Convert(const Ark_text_RectHeightStyle& src);
     template<> RectWidthStyle Convert(const Ark_text_RectWidthStyle& src);
     template<> NG::AccessibilityActionOptions Convert(const Ark_AccessibilityActionOptions& src);
+    template<> NG::AccessibilityGroupOptions Convert(const Ark_AccessibilityOptions& src);
     template<> RefPtr<BasicShape> Convert(const Ark_CircleShape& src);
     template<> RefPtr<BasicShape> Convert(const Ark_EllipseShape& src);
     template<> RefPtr<BasicShape> Convert(const Ark_PathShape& src);

@@ -2087,6 +2087,31 @@ NG::AccessibilityActionOptions Convert(const Ark_AccessibilityActionOptions& src
     return AccessibilityActionOptions { .scrollStep = scrollStep };
 }
 
+template<>
+NG::AccessibilityGroupOptions Convert(const Ark_AccessibilityOptions& src)
+{
+    auto stateControllerByType = AccessibilityRoleType::ROLE_NONE;
+    auto stateTypePtr = Converter::GetOptPtr(&src.stateControllerRoleType);
+    if (stateTypePtr) {
+        stateControllerByType = static_cast<AccessibilityRoleType>(stateTypePtr.value());
+    }
+    auto actionControllerByType = AccessibilityRoleType::ROLE_NONE;
+    auto actionTypePtr = Converter::GetOptPtr(&src.actionControllerRoleType);
+    if (actionTypePtr) {
+        actionControllerByType = static_cast<AccessibilityRoleType>(actionTypePtr.value());
+    }
+
+    NG::AccessibilityGroupOptions groupOptions = {
+        .accessibilityTextPreferred = Converter::OptConvert<bool>(src.accessibilityPreferred).value_or(false),
+        .stateControllerByType = stateControllerByType,
+        .stateControllerByInspector = Converter::OptConvert<std::string>(src.stateControllerId).value_or(""),
+        .actionControllerByType = actionControllerByType,
+        .actionControllerByInspector = Converter::OptConvert<std::string>(src.actionControllerId).value_or(""),
+    };
+
+    return groupOptions;
+}
+
 void AssignArkValue(Ark_TouchTestInfo& dst, const TouchTestInfo& src, ConvContext *ctx)
 {
     dst.windowX = ArkValue<Ark_Float64>(src.windowPoint.GetX());
@@ -6385,11 +6410,15 @@ void SetAccessibilityGroupWithConfigImpl(Ark_NativePointer node,
     if (isGroupValue) {
         isGroupFlag = *isGroupValue;
     }
-    auto optValue = Converter::GetOptPtr(config);
-    auto accessibilityPreferred = optValue ?
-        Converter::OptConvert<bool>(optValue->accessibilityPreferred) : std::nullopt;
     ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupFlag);
+    auto optValue = Converter::GetOptPtr(config);
+    CHECK_NULL_VOID(optValue);
+    auto accessibilityPreferred =
+        Converter::OptConvert<bool>(optValue->accessibilityPreferred);
     ViewAbstractModelNG::SetAccessibilityTextPreferred(frameNode, accessibilityPreferred.value_or(false));
+
+    NG::AccessibilityGroupOptions groupOptions = Converter::Convert<NG::AccessibilityGroupOptions>(*optValue);
+    ViewAbstractModelNG::SetAccessibilityGroupOptions(frameNode, groupOptions);
 }
 void SetOnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
                                            const Opt_GestureRecognizerJudgeBeginCallback* callback_,
