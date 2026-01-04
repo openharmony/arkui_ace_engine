@@ -27,7 +27,7 @@ group("advanced_ui_component_static") {
       "composeListItem:composeListItem",
       #"foldsplitcontainer:foldSplitContainer",
       #"fullscreenlaunchcomponent:fullScreenLaunch",
-      #"segmentbutton:segmentButton",
+      "segmentbutton:segmentButton",
       "segmentbuttonv2:SegmentButtonV2",
       #"selectionmenu:selectionMenu",
       "splitlayout:splitLayout",
