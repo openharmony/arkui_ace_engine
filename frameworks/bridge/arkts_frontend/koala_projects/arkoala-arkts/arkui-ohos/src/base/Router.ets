@@ -358,6 +358,7 @@ export class RouterImpl implements Router {
             })
         })
         this.rootState.push(stateNode)
+        this.peerNodeList.push(pageNode)
         let pagePushTransitionCallback = (pageNode: KPointer) => {
             let index = this.peerNodeList.indexOf(pageNode);
             if (index !== -1) {
@@ -1120,6 +1121,23 @@ export class RouterUtil {
             console.log(`AceRouter: getLength error, name: ${e.name} message: ${e.message}`);
             console.log(e.stack);
             return "0";
+        }
+    }
+
+    static getStackSizeFromDynamic(instanceId: int32): int32 {
+        try {
+            let context: UIContext = UIContextUtil.getOrCreateUIContextById(instanceId);
+            let router = context.getRouter();
+            let routerImpl = router.getRouter() as RouterImpl;
+            if (!routerImpl) {
+                console.error(`AceRouter: failed to getRouter in getStackSizeFromDynamic with instanceId: ${instanceId}`)
+                return 0;
+            }
+            return routerImpl.getStackSize();
+        } catch (e: Error) {
+            console.error(`AceRouter: getStackSize error, name: ${e.name} message: ${e.message}`);
+            console.error(e.stack);
+            return 0;
         }
     }
 

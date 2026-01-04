@@ -961,6 +961,36 @@ int32_t ArktsFrontend::GetLengthFromDynamicExtender()
     return length;
 }
 
+int32_t ArktsFrontend::GetStackSizeFromDynamicExtender()
+{
+    CHECK_NULL_RETURN(vm_, 0);
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
+    CHECK_NULL_RETURN(env, 0);
+    ani_status status;
+    ani_class routerUtilCls;
+    const char* clsMangling = "arkui.base.Router.RouterUtil";
+    if ((status = env->FindClass(clsMangling, &routerUtilCls)) != ANI_OK) {
+        LOGE("AceRouter Cannot find class: %{public}s, status:%{public}d", clsMangling, status);
+        return 0;
+    }
+    ani_static_method getStackSizeFromDynamicMethod;
+    const char* methodName = "getStackSizeFromDynamic";
+    const char* methodMangling = "i:i";
+    if ((status = env->Class_FindStaticMethod(
+        routerUtilCls, methodName, methodMangling, &getStackSizeFromDynamicMethod)) != ANI_OK) {
+        LOGE("AceRouter Cannot find method: %{public}s, status:%{public}d", methodName, status);
+        return 0;
+    }
+    ani_int result;
+    auto instanceId = Container::CurrentIdSafely();
+    if ((status = env->Class_CallStaticMethod_Int(routerUtilCls, getStackSizeFromDynamicMethod,
+        &result, static_cast<ani_int>(instanceId))) != ANI_OK) {
+        LOGE("AceRouter failed to call getStackSizeFromDynamic, status:%{public}d", status);
+        return 0;
+    }
+    return static_cast<int>(result);
+}
+
 std::string ArktsFrontend::GetParamsFromDynamicExtender()
 {
     CHECK_NULL_RETURN(vm_, "");
