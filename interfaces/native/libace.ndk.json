@@ -5066,5 +5066,9 @@
     {
         "first_introduced": "24",
         "name": "OH_ArkUI_TextDataDetectorConfig_GetEnablePreviewMenu"
+    },
+    {
+        "first_introduced": "23",
+        "name": "OH_ArkUI_NativeModule_GetNativeAccessibilityProvider"
     }
 ]
