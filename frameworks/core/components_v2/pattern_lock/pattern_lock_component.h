@@ -20,7 +20,7 @@
 #include "core/components/common/properties/edge.h"
 #include "core/components_v2/pattern_lock/pattern_lock_controller.h"
 #include "core/pipeline/base/render_component.h"
-#include "frameworks/core/components/common/properties/svg_paint_state.h"
+#include "frameworks/core/components/common/svg_paint_state.h"
 
 namespace OHOS::Ace::V2 {
 constexpr int32_t DEFAULT_SIDE_LENGTH = 300;

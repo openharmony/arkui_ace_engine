@@ -19,7 +19,7 @@
 #include "base/geometry/rect.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
-#include "frameworks/core/components/common/properties/svg_paint_state.h"
+#include "frameworks/core/components/common/svg_paint_state.h"
 
 
 namespace OHOS::Ace::Framework {

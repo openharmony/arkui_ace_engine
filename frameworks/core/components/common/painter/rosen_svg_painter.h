@@ -21,7 +21,7 @@
 #include "core/components_ng/render/drawing.h"
 #include "frameworks/base/geometry/matrix4.h"
 #include "frameworks/core/components/common/properties/motion_path_evaluator.h"
-#include "frameworks/core/components/common/properties/svg_paint_state.h"
+#include "frameworks/core/components/common/svg_paint_state.h"
 #include "frameworks/core/components/svg/render_svg_base.h"
 #include "frameworks/core/pipeline/base/render_node.h"
 

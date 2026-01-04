@@ -600,9 +600,14 @@
       *OHOS::Ace::NG::Converter::AssignArkValue*;
       *OHOS::Ace::NG::Converter::OptConvertFromArkNumStrRes*;
 
-      OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
-      "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";
-
+      OHOS::Ace::V2::HYPERLINK_ETS_TAG;
+      OHOS::Ace::V2::SYMBOL_ETS_TAG;
+      OHOS::Ace::PipelineBase*;
+      OHOS::Ace::FontManager::*;
+      OHOS::Ace::NG::TextPattern::*;
+      OHOS::Ace::NG::SelectOverlayClient::*;
+      OHOS::Ace::NG::InputEventActuator::*;
+      OHOS::Ace::RosenRenderOffscreenCanvas::*;
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;

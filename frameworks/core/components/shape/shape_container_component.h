@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SHARP_SHAPE_CONTAINER_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SHARP_SHAPE_CONTAINER_COMPONENT_H
 
-#include "frameworks/core/components/common/properties/svg_paint_state.h"
+#include "frameworks/core/components/common/svg_paint_state.h"
 #include "frameworks/core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace {

@@ -19,7 +19,7 @@
 #include "base/memory/ace_type.h"
 
 #include "frameworks/core/animation/animator.h"
-#include "frameworks/core/components/common/properties/svg_paint_state.h"
+#include "frameworks/core/components/common/svg_paint_state.h"
 #include "frameworks/core/components/svg/render_svg_base.h"
 #include "frameworks/core/pipeline/base/render_node.h"
 

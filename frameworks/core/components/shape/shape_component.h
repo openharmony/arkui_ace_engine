@@ -20,7 +20,7 @@
 #include "core/pipeline/base/measurable.h"
 #include "frameworks/core/components/common/properties/animatable_path.h"
 #include "frameworks/core/components/common/properties/radius.h"
-#include "frameworks/core/components/common/properties/svg_paint_state.h"
+#include "frameworks/core/components/common/svg_paint_state.h"
 #include "frameworks/core/pipeline/base/render_component.h"
 
 namespace OHOS::Ace {
