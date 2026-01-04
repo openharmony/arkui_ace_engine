@@ -20,7 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
-#include "core/components/video/video_utils.h"
+#include "core/components_ng/pattern/video/video_utils.h"
 #include "core/components_ng/render/render_surface.h"
 
 namespace OHOS::Ace::NG {

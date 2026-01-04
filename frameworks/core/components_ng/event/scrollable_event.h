@@ -158,7 +158,7 @@ public:
 
     void CollectScrollableTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        ResponseLinkResult& responseLinkResult, int32_t touchId);
+        ResponseLinkResult& responseLinkResult, int32_t touchId, int32_t originalId);
 
 private:
     Axis axis_ = Axis::VERTICAL;

@@ -64,9 +64,9 @@ public:
         bool isPostEventResult = false, int32_t postEventNodeId = -1);
 
     // Triggered when the gesture referee finishes collecting gestures and begin a gesture referee.
-    void BeginReferee(int32_t touchId, bool needUpdateChild = false)
+    void BeginReferee(int32_t touchId, int32_t originalId, bool needUpdateChild = false)
     {
-        OnBeginGestureReferee(touchId, needUpdateChild);
+        OnBeginGestureReferee(touchId, originalId, needUpdateChild);
     }
 
     virtual RefPtr<Gesture> CreateGestureFromRecognizer() const
@@ -460,7 +460,7 @@ protected:
     }
     virtual void BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal);
 
-    virtual void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) {}
+    virtual void OnBeginGestureReferee(int32_t touchId, int32_t originalId, bool needUpdateChild = false) {}
     virtual void OnFinishGestureReferee(int32_t touchId, bool isBlocked = false) {}
 
     virtual void HandleTouchDownEvent(const TouchEvent& event) = 0;

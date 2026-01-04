@@ -31,7 +31,7 @@ class ACE_EXPORT RenderGestureListener final : public RenderProxy {
     DECLARE_ACE_TYPE(RenderGestureListener, RenderProxy);
 
 public:
-    static RefPtr<RenderNode> Create();
+    ACE_FORCE_EXPORT static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override;
 
     bool GetVisible() const override;

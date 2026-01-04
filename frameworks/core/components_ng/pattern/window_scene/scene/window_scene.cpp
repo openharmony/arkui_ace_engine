@@ -903,6 +903,7 @@ void WindowScene::OnRemoveSnapshot()
             CHECK_NULL_VOID(surfaceNode);
             if (!surfaceNode->IsBufferAvailable()) {
                 TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "OnRemoveSnapshot not IsBufferAvailable");
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 surfaceNode->SetBufferAvailableCallback(self->callback_);
                 return;
             }

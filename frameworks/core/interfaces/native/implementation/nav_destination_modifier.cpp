@@ -421,8 +421,8 @@ void EnableNavigationIndicatorImpl(Ark_NativePointer node,
     NavDestinationModelStatic::SetEnableNavigationIndicator(frameNode, navigationIndicator);
 }
 void SetTitleImpl(Ark_NativePointer node,
-                  const Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource* value,
-                  const Opt_NavigationTitleOptions* options)
+    const Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource* value,
+    const Opt_NavigationTitleOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

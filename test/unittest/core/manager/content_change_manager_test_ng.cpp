@@ -170,4 +170,33 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest002, TestSize.Level
     contentChangeMgr->currentContentChangeConfig_.reset();
     EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
 }
+
+/**
+ * @tc.name: ContentChangeManagerTest003
+ * @tc.desc: Test OnScrollChangeStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test whether can get content change manager
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    auto node = FrameNode::CreateFrameNode("frameNode", INITIAL_NODE_SIZE, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+
+    /**
+     * @tc.steps: step2. test OnScrollChangeStart
+     */
+    contentChangeMgr->currentContentChangeConfig_ = std::nullopt;
+    contentChangeMgr->OnScrollChangeStart(nullptr);
+    EXPECT_TRUE(contentChangeMgr->scrollingNodes_.empty());
+    ContentChangeConfig config;
+    contentChangeMgr->currentContentChangeConfig_ = config;
+    contentChangeMgr->OnScrollChangeStart(nullptr);
+    EXPECT_TRUE(contentChangeMgr->scrollingNodes_.empty());
+    contentChangeMgr->OnScrollChangeStart(node);
+    EXPECT_FALSE(contentChangeMgr->scrollingNodes_.empty());
+}
 } // namespace OHOS::Ace::NG

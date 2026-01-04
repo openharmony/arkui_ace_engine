@@ -110,9 +110,8 @@ class PersistenceV2 extends AppStorageV2 {
    * use application path to store data in disk
    *
    * @template T - The original object.
-   * @template S - The type of items contained in the original object (collection).
-   * @param { ConnectOptions<T, S> } connectOptions - Connect param.
-   * @returns { T } The value of the existed key or the default value.
+   * @param { ConnectOptions<T> | ConnectOptionsCollections<T, S> } connectOptions - Connect param.
+   * @returns { T | undefined } The value of the existed key or the default value.
    */
   static globalConnect(connectOptions) {
     return PersistenceV2.persistenceV2Impl_.globalConnect(connectOptions);

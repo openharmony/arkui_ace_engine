@@ -36,7 +36,7 @@ public:
     ACE_FORCE_EXPORT AnimatableColor();
     explicit AnimatableColor(uint32_t value, const AnimationOption& option = AnimationOption());
 
-    explicit AnimatableColor(const Color& color, const AnimationOption& option = AnimationOption());
+    ACE_FORCE_EXPORT explicit AnimatableColor(const Color& color, const AnimationOption& option = AnimationOption());
     ACE_FORCE_EXPORT ~AnimatableColor();
 
     void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback);
@@ -51,7 +51,7 @@ public:
         animationOption_ = option;
     }
 
-    AnimatableColor& operator=(const AnimatableColor& newColor);
+    ACE_FORCE_EXPORT AnimatableColor& operator=(const AnimatableColor& newColor);
 
 private:
     void AnimateTo(uint32_t endValue);

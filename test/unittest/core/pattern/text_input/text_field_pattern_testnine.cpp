@@ -1472,4 +1472,25 @@ HWTEST_F(TextFieldPatternTestNine, CloseTextCustomKeyboard001, TestSize.Level1)
     pattern->CloseTextCustomKeyboard(1, true);
     EXPECT_FALSE(pattern->isCustomKeyboardAttached_);
 }
+
+/**
+ * @tc.name: CloseTextCustomKeyboard002
+ * @tc.desc: test NeedCloseKeyboard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CloseTextCustomKeyboard002, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(keyboard, nullptr);
+    pattern->keyboardOverlay_ = AceType::MakeRefPtr<OverlayManager>(keyboard);
+    pattern->customKeyboardBuilder_ = [] {};
+    pattern->isCustomKeyboardAttached_ = false;
+    pattern->CloseTextCustomKeyboard(1, false);
+    EXPECT_FALSE(pattern->isCustomKeyboardAttached_);
+}
 } // namespace OHOS::Ace::NG

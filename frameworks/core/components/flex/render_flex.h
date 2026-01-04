@@ -47,7 +47,7 @@ class ACE_FORCE_EXPORT RenderFlex : public RenderNode {
     DECLARE_ACE_TYPE(RenderFlex, RenderNode);
 
 public:
-    static RefPtr<RenderNode> Create();
+    ACE_FORCE_EXPORT static RefPtr<RenderNode> Create();
 
     void Update(const RefPtr<Component>& component) override;
 

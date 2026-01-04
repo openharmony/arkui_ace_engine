@@ -24,7 +24,7 @@
 namespace OHOS::Ace {
 
 // A padding component.
-class ACE_EXPORT PaddingComponent : public SoleChildComponent {
+class ACE_FORCE_EXPORT PaddingComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(PaddingComponent, SoleChildComponent);
 
 public:

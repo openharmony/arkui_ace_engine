@@ -618,7 +618,6 @@ template("declarative_js_engine") {
         sources += [
           "jsview/js_video.cpp",
           "jsview/js_video_controller.cpp",
-          "jsview/models/video_model_impl.cpp",
         ]
       }
       if (defined(config.video_support_jsstack) &&

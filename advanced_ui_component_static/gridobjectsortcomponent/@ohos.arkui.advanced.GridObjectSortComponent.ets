@@ -212,8 +212,8 @@ export struct GridObjectSortComponent {
   @State scaleAddIcon: number = 0;
   // whether to start dragging
   @State isStartDrag: boolean = false;
-  @State insertIndex: number = -1;
-  @State itemIndex: number = 0;
+  @State insertIndex: int = -1;
+  @State itemIndex: int = 0;
   @State editGridDataLength: number = -1;
   @State isTouchDown: boolean = false;
   @State addItemMoveX: number = 0;
@@ -520,11 +520,11 @@ export struct GridObjectSortComponent {
   }
 
   // Drag and move triggering event
-  onDragMoveEvent(event: ItemDragInfo, itemIndex: number, insertIndex: number): void {
+  onDragMoveEvent(event: ItemDragInfo, itemIndex: int, insertIndex: int): void {
     if (this.gridComState === null || (event.x < this.blockWidth / 3 && event.y < this.blockHeight / 3)) {
       return;
     }
-    let targetIndex: number = insertIndex as number;
+    let targetIndex: int = insertIndex as int;
     if (targetIndex < 0) {
       targetIndex = this.selected.length - 1;
     } else {
@@ -561,7 +561,7 @@ export struct GridObjectSortComponent {
     this.clickRemoveBtn = true;
     this.scaleIcon = 0;
     this.arraySelectIsChange = 1;
-    let currentIndex: number = this.selected.findIndex(val => val.id === content.id);
+    let currentIndex: int = this.selected.findIndex(val => val.id === content.id);
     this.content = content;
     this.selectedIndex = currentIndex;
     this.calcGridHeight();
@@ -1157,7 +1157,7 @@ export struct GridObjectSortComponent {
     }
     this.scaleIcon = 0;
     this.content = content;
-    const index: number = this.unSelected.findIndex(i => i.id === content.id);
+    const index: int = this.unSelected.findIndex(i => i.id === content.id);
     this.editGridDataLength = this.selected.length + 1;
     const endPosition = this.getEditItemGridPosition(this.selected, index);
     this.unSelectedIndex = index;
@@ -1511,7 +1511,7 @@ export struct GridObjectSortComponent {
         this.scaleAddIcon = 1;
       }
       this.scaleIcon = 0;
-      const index: number = this.unSelected.findIndex(i => i.id === item.id);
+      const index: int = this.unSelected.findIndex(i => i.id === item.id);
       this.editGridDataLength = this.selected.length + 1;
       const endPosition = this.getEditItemGridPosition(this.selected, index);
       this.content = item;
@@ -1578,7 +1578,7 @@ export struct GridObjectSortComponent {
       this.scaleAddIcon = 1;
     }
     this.scaleIcon = 0;
-    const index: number = this.unSelected.findIndex(i => i.id === item.id);
+    const index: int = this.unSelected.findIndex(i => i.id === item.id);
     this.editGridDataLength = this.selected.length + 1;
     const endPosition = this.getEditItemGridPosition(this.selected, index);
     this.content = item;
@@ -1836,7 +1836,7 @@ export struct GridObjectSortComponent {
     });
   }
 
-  insertItem(itemIndex: number, insertIndex: number): void {
+  insertItem(itemIndex: int, insertIndex: int): void {
     if (!this.gridComState) {
       return;
     }
@@ -1972,7 +1972,7 @@ export struct GridObjectSortComponent {
       if (typeof resource === 'string') {
         resourceString = resource as string;
       } else {
-        let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+        let uiContent: common.Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
          if (uiContent) {
           resourceString =
             (uiContent as common.UIAbilityContext).resourceManager.getStringSync((resource as Resource).id as Long)

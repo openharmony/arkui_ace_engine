@@ -958,8 +958,8 @@ private:
         NG::GradientColor& gradientColor, int32_t& indx);
     static void NewParseRadialGradientColor(NG::Gradient& gradient, RefPtr<ResourceObject>& resObj,
         NG::GradientColor& gradientColor, int32_t& indx);
-    static bool ParseBackgroundBuilder(
-        const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, std::function<void()>& builderFunc);
+    static bool ParseBackgroundBuilder(const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc,
+        std::function<void()>& builderFunc, RefPtr<ResourceObject>& resObj);
     static int32_t GetStringFormatStartIndex(const JSRef<JSObject>& jsObj);
     static void GetResourceObjectType(const JSRef<JSObject>& jsObj, JSRef<JSVal>& type, int32_t& resTypeValue);
 };

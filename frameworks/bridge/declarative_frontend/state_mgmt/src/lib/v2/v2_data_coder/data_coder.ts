@@ -29,7 +29,17 @@ class DataCoder {
    * Serialize an object to a JSON2
    */
   public static stringify<T>(value: T): string {
-    return this.FORMAT_TAG + JSON2.stringify(value);
+    const origValue = ObserveV2.IsMakeObserved(value)
+      ? UIUtilsImpl.instance().getTarget(value)
+      : value;
+
+    const result = this.FORMAT_TAG + JSON2.stringify(origValue);
+
+    if (ObserveV2.IsMakeObserved(value)) {
+      DataCoder.touchAll(value as unknown as object);
+    }
+
+    return result;
   }
 
   /**
@@ -57,7 +67,7 @@ class DataCoder {
       factory = (_: object): TypeConstructor<S> => {
         return class {
           constructor() {
-            return defaultSubCreator();
+            return defaultSubCreator() ?? DataCoder.throwInvalidSubCreatorResult();
           }
         } as TypeConstructor<S>;
       };
@@ -76,17 +86,19 @@ class DataCoder {
       return target;
     }
 
-    // Touch the makeObserved collection items so its getter records dependencies
+    return DataCoder.touchAll(target);
+  }
+
+  // Recursively touch all properties of an object to record dependencies
+  private static touchAll<T extends object>(target: T): T {
     if ([Array, Map, Set, SendableArray, SendableMap, SendableSet].some(clazz => target instanceof clazz)) {
       (target as any)?.forEach?.(() => {});
     }
 
-    // Touch the makeObserved Object props to record dependencies
     if (typeof target === 'object' && target != null) {
       Object.entries(target).forEach(() => {});
     }
 
-    // Touch the makeObserved Date so its getter records dependencies
     if (target instanceof Date) {
       target.getTime();
     }
@@ -310,6 +322,10 @@ class DataCoder {
 
   private static throwNoFactory<T>(targetProp: string): void {
     throw new Error(`Miss @Type in object defined, the property name is ${targetProp}`);
+  }
+
+  private static throwInvalidSubCreatorResult(): never {
+    throw new Error(`The defaultSubCreator returned invalid value`);
   }
 
 }

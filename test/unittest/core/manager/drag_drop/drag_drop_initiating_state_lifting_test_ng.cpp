@@ -49,13 +49,11 @@ struct CheckDoShowPreviewTestCase {
     bool isDragNodeNeedClean = false;
     bool isBindMenu = false;
     bool isMenuShow = false;
-    bool isDragPreviewEnabled = false;
     bool exceptResult = false;
     CheckDoShowPreviewTestCase(DragDropMgrState dragDropMgrState, bool hasPixelMap, bool isDragNodeNeedClean,
-        bool isBindMenu, bool isMenuShow, bool isDragPreviewEnabled, bool exceptResult)
+        bool isBindMenu, bool isMenuShow, bool exceptResult)
         : dragDropMgrState(dragDropMgrState), hasPixelMap(hasPixelMap), isDragNodeNeedClean(isDragNodeNeedClean),
-          isBindMenu(isBindMenu), isMenuShow(isMenuShow), isDragPreviewEnabled(isDragPreviewEnabled),
-          exceptResult(exceptResult)
+          isBindMenu(isBindMenu), isMenuShow(isMenuShow), exceptResult(exceptResult)
     {}
 };
 
@@ -170,18 +168,16 @@ const std::vector<DragDropInitiatingStateLiftingTestCase> DRAG_DROP_INITIATING_S
 };
 
 const std::vector<CheckDoShowPreviewTestCase> DRAG_DROP_INITIATING_CHECK_DO_SHOW_PREVIEW_TEST_CASES = {
-    CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, true, false, false, false, false, false),
-    CheckDoShowPreviewTestCase(DragDropMgrState::ABOUT_TO_PREVIEW, false, false, false, false, false, false),
-    CheckDoShowPreviewTestCase(DragDropMgrState::ABOUT_TO_PREVIEW, false, true, false, false, false, false),
-    CheckDoShowPreviewTestCase(DragDropMgrState::DRAGGING, false, false, false, false, false, false),
-    CheckDoShowPreviewTestCase(DragDropMgrState::DRAGGING, false, true, false, false, false, false),
-    CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, false, true, false, false, false, false),
-    CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, false, false, false, false, false, false),
-    CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, false, false, true, false, false, false),
-    CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, false, false, false, true, false, false),
-    CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, false, false, true, true, false, false),
-    CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, false, false, false, false, true, true),
-    CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, false, false, false, false, false, false),
+    CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, true, false, false, false, false),
+    CheckDoShowPreviewTestCase(DragDropMgrState::ABOUT_TO_PREVIEW, false, false, false, false, false),
+    CheckDoShowPreviewTestCase(DragDropMgrState::ABOUT_TO_PREVIEW, false, true, false, false, false),
+    CheckDoShowPreviewTestCase(DragDropMgrState::DRAGGING, false, false, false, false, false),
+    CheckDoShowPreviewTestCase(DragDropMgrState::DRAGGING, false, true, false, false, false),
+    CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, false, true, false, false, false),
+    CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, false, false, false, false, true),
+    CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, false, false, true, false, true),
+    CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, false, false, false, true, false),
+    CheckDoShowPreviewTestCase(DragDropMgrState::IDLE, false, false, true, true, false)
 };
 
 const std::vector<HandlePreDragStatusTestCase> DRAG_DROP_INITIATING_HANDLE_PRE_DRAG_STATUS_TEST_CASES = {
@@ -373,7 +369,6 @@ HWTEST_F(DragDropInitiatingStateLiftingTestNG, DragDropInitiatingStateLiftingTes
         dragDropManager->isDragNodeNeedClean_ = testCase.isDragNodeNeedClean;
         DragDropGlobalController::GetInstance().UpdateMenuShowingStatus(testCase.isMenuShow);
         auto dragPreviewOption = frameNode->GetDragPreviewOption();
-        dragPreviewOption.isDragPreviewEnabled = testCase.isDragPreviewEnabled;
         frameNode->SetDragPreviewOptions(dragPreviewOption);
         gestureEventHub->bindMenuStatus_.isBindLongPressMenu = testCase.isBindMenu;
         EXPECT_EQ(liftingState->CheckDoShowPreview(frameNode), testCase.exceptResult);

@@ -229,6 +229,10 @@ void SetSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        LOGE("optValue value is null.");
+        return;
+    }
     auto width = Dimension(Converter::Convert<double>(optValue->width));
     auto height = Dimension(Converter::Convert<double>(optValue->height));
     SetWidthInternal(frameNode, width);
@@ -294,7 +298,7 @@ void SetOnAcquiredImpl(Ark_NativePointer node,
             auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             isLocked = sourceJson->GetBool(FORM_COMPONENT_IS_LOCKED_KEY, false);
-            int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
+            int64_t result = std::strtoll(jsonId.c_str(), &endptr, 10);
             if (endptr && *endptr == '\0') {
                 id = result;
             }
@@ -401,7 +405,7 @@ void SetOnUninstallImpl(Ark_NativePointer node,
             auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             isLocked = sourceJson->GetBool(FORM_COMPONENT_IS_LOCKED_KEY, false);
-            int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
+            int64_t result = std::strtoll(jsonId.c_str(), &endptr, 10);
             if (endptr && *endptr == '\0') {
                 id = result;
             }
@@ -446,7 +450,7 @@ void SetOnUpdateImpl(Ark_NativePointer node,
             char* endptr = nullptr;
             auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
-            int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
+            int64_t result = std::strtoll(jsonId.c_str(), &endptr, 10);
             if (endptr && *endptr == '\0') {
                 id = result;
             }

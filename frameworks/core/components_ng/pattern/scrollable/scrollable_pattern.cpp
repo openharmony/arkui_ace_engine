@@ -3341,6 +3341,7 @@ void ScrollablePattern::FireOnScrollStart(bool withPerfMonitor)
     if (scrollBarProxy_) {
         scrollBarProxy_->SetIsScrollableNodeScrolling(true);
     }
+    ContentChangeOnScrollStart(host);
     FireObserverOnScrollStart();
     auto onScrollStart = hub->GetOnScrollStart();
     auto onJSFrameNodeScrollStart = hub->GetJSFrameNodeOnScrollStart();
@@ -5001,5 +5002,24 @@ void ScrollablePattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnScrollChangeEnd(keyNode);
+}
+void ScrollablePattern::ContentChangeByDetaching(PipelineContext* pipeline)
+{
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    mgr->OnScrollRemoved(host->GetId());
+}
+
+void ScrollablePattern::ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode)
+{
+    CHECK_NULL_VOID(keyNode);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnScrollChangeStart(keyNode);
 }
 } // namespace OHOS::Ace::NG

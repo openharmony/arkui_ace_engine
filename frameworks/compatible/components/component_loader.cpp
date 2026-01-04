@@ -28,6 +28,8 @@
 #include "compatible/components/qrcode/qrcode_loader.h"
 #include "frameworks/base/log/log_wrapper.h"
 
+#include "compatible/components/video/video_loader.h"
+
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_Compatible_GetLoader(const char* name)
 {
     return OHOS::Ace::ComponentLoader::GetLoaderByName(name);
@@ -44,7 +46,8 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "grid-container", []() -> ComponentLoader* { return new GridContainerLoader(); } },
         { "grid-row", []() -> ComponentLoader* { return new GridRowLoader(); } },
         { "marquee", []() -> ComponentLoader* { return new MarqueeLoader(); } },
-        { "qrcode", []() -> ComponentLoader* { return new QRCodeLoader(); } }
+        { "video", []() -> ComponentLoader* { return new VideoLoader(); } },
+        { "qrcode", []() -> ComponentLoader* { return new QRCodeLoader(); } },
     };
     auto loaderIter = sLoaderMap.find(nameStr);
     if (loaderIter != sLoaderMap.end()) {

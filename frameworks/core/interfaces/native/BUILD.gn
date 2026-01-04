@@ -161,6 +161,7 @@ template("ace_core_interfaces_native_node") {
         "ani/condition_scope_ani_modifier.cpp",
         "ani/content_slot_ani_modifier.cpp",
         "ani/custom_node_ani_modifier.cpp",
+        "ani/detached_free_root_ani_modifier.cpp",
         "ani/drag_ani_modifier.cpp",
         "ani/image_ani_modifier.cpp",
         "ani/image_span_ani_modifier.cpp",

@@ -118,12 +118,12 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
                 event->BarCollectLongPressTarget(
                     coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
                 event->CollectScrollableTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode,
-                    targetComponent, responseLinkResult, touchId);
+                    targetComponent, responseLinkResult, touchId, touchRestrict.touchEvent.originalId);
                 event->BarRectCollectTouchTarget(
                     coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
             } else {
                 event->CollectScrollableTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode,
-                    targetComponent, responseLinkResult, touchId);
+                    targetComponent, responseLinkResult, touchId, touchRestrict.touchEvent.originalId);
             }
         }
         bool clickJudge = event->ClickJudge(localPoint);
@@ -181,7 +181,8 @@ RefPtr<NGGestureRecognizer> GetOverrideRecognizer(const RefPtr<FrameNode>& frame
 
 void ScrollableEvent::CollectScrollableTouchTarget(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult, int32_t touchId)
+    const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult, int32_t touchId,
+    int32_t originalId)
 {
     if (auto superRecognizer = GetOverrideRecognizer(frameNode)) {
         result.emplace_back(superRecognizer);
@@ -190,7 +191,7 @@ void ScrollableEvent::CollectScrollableTouchTarget(const OffsetF& coordinateOffs
             auto offset = Offset(coordinateOffset.GetX(), coordinateOffset.GetY());
             recognizerGroup->SetRecognizerInfoRecursively(offset, frameNode, targetComponent, getEventTargetImpl);
             recognizerGroup->CollectResponseLinkRecognizersRecursively(responseLinkResult);
-            recognizerGroup->BeginReferee(touchId, true);
+            recognizerGroup->BeginReferee(touchId, originalId, true);
         } else {
             responseLinkResult.emplace_back(superRecognizer);
         }

@@ -709,7 +709,7 @@ struct SimpleSegmentButtonV2 {
     }
     return this.items.map(
       // todo number to int
-      (_: SegmentButtonV2Item, index: double) => this.itemRects.get(index.toInt())!
+      (_: SegmentButtonV2Item, index: int) => this.itemRects.get(index)!
     );
   }
 

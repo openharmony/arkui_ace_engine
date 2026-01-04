@@ -144,7 +144,7 @@ uint32_t Tabs::GetAnimationDuration()
     }
 
     bool bottomStyle = false;
-    const int32_t itemSize = GetTabBarItemSize();
+    const int32_t itemSize = static_cast<int32_t>(GetTabBarItemSize());
     for (int32_t index = 0; index < itemSize; index++) {
         if (tabPattern->GetTabBarStyle(index) == TabBarStyle::BOTTOMTABBATSTYLE) {
             bottomStyle = true;

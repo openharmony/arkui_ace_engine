@@ -532,7 +532,7 @@ abstract class ViewPU extends PUV2ViewBase
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number> | undefined): void {
     stateMgmtProfiler.begin('ViewPU.viewPropertyHasChanged');
-    aceDebugTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName,
+    stateMgmtDFX.enableDebug && aceDebugTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName,
       dependentElmtIds ? dependentElmtIds.size : 0, this.id__(),
       this.dirtDescendantElementIds_.size, this.runReuse_);
     if (this.isRenderInProgress) {

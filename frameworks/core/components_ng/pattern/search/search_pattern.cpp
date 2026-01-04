@@ -2102,6 +2102,8 @@ void SearchPattern::OnColorConfigurationUpdate()
         UpdateImageIconNode(SEARCH_IMAGE_INDEX);
         UpdateImageIconNode(CANCEL_IMAGE_INDEX);
     }
+    ImageIconColorConfigurationUpdate(SEARCH_IMAGE_INDEX);
+    ImageIconColorConfigurationUpdate(CANCEL_IMAGE_INDEX);
     UpdateDividerColorMode();
     if (SystemProperties::ConfigChangePerform()) {
         auto searchTheme = GetTheme();
@@ -2765,6 +2767,21 @@ void SearchPattern::UpdateImageIconNode(int32_t index)
         UpdateImageIconProperties(iconFrameNode, index);
         iconFrameNode->MarkModifyDone();
         iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
+void SearchPattern::ImageIconColorConfigurationUpdate(int32_t index)
+{
+    if (!IsSymbolIcon(index)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto iconFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(index));
+        CHECK_NULL_VOID(iconFrameNode);
+        auto pattern = iconFrameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        auto imagePattern = AceType::DynamicCast<ImagePattern>(pattern);
+        CHECK_NULL_VOID(imagePattern);
+        pattern->OnColorConfigurationUpdate();
     }
 }
 

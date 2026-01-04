@@ -306,6 +306,7 @@ void GridPattern::FireOnScrollStart(bool withPerfMonitor)
     if (onJSFrameNodeScrollStart) {
         onJSFrameNodeScrollStart();
     }
+    ContentChangeOnScrollStart(host);
 }
 
 void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart)

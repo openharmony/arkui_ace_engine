@@ -448,7 +448,7 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
     this.changeStartIndex = start;
     this.deleteCount = deleteCount;
     this.addLength = items.length;
-    return this._wrappedArray.splice(start.toDouble(), deleteCount.toDouble(), ...items);
+    return this._wrappedArray.splice(start, deleteCount, ...items);
   }
 
   static create(elements: SegmentButtonItemTuple): SegmentButtonItemOptionsArray {
@@ -859,8 +859,8 @@ struct SegmentButtonItem {
     .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
       // Calculate height of items
       this.buttonItemsRealHeight[this.index as int] = (newValue.height ?? 0) as number;
-      let maxHeight: number = Math.max(...this.buttonItemsRealHeight.slice(0.0, this.options.buttons ?
-        this!.options!.buttons!.length : 0.0));
+      let maxHeight: number = Math.max(...this.buttonItemsRealHeight.slice(0, this.options.buttons ?
+        this!.options!.buttons!.length : 0));
       for (let index: number = 0.0; index < this.buttonItemsSize.length; index++) {
         const currentWidth = (this.buttonItemsSize[index as int].width ?? 0.0) as number;
         const currentHeight = (this.buttonItemsSize[index as int].height ?? 0.0) as number;

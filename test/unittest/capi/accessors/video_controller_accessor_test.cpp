@@ -16,7 +16,7 @@
 #include "core/interfaces/native/implementation/video_controller_peer_impl.h"
 
 #include "accessor_test_base.h"
-#include "core/components/video/video_controller_v2.h"
+#include "core/components_ng/pattern/video/video_controller_v2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "gmock/gmock.h"

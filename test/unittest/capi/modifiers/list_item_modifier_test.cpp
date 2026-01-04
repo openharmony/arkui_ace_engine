@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "generated/type_helpers.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 
@@ -24,10 +25,10 @@
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_v2/list/list_properties.h"
+#include "core/interfaces/native/implementation/lazy_build_accessor.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "generated/type_helpers.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -93,6 +94,23 @@ public:
  */
 HWTEST_F(ListItemModifierTest, ConstructTest, TestSize.Level1)
 {
+    const auto id = GetId();
+    auto node = modifier_->construct(id, 0);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    ASSERT_TRUE(node);
+    EXPECT_EQ(frameNode->GetId(), id);
+    EXPECT_EQ(frameNode->GetTag(), V2::LIST_ITEM_ETS_TAG);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+}
+
+/*
+ * @tc.name: ConstructWithLazy
+ * @tc.desc: Check the functionality of ListItemModifier.Construct
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemModifierTest, ConstructWithLazyTest, TestSize.Level1)
+{
+    GeneratedModifier::LazyBuild::NeedLazyBuild();
     const auto id = GetId();
     auto node = modifier_->construct(id, 0);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
