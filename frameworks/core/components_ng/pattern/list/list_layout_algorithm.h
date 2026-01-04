@@ -499,6 +499,8 @@ public:
 
     static int32_t GetListLanesByFillType(PresetFillType fillType, WidthBreakpoint point);
 
+    float GetChildMainSize(const RefPtr<LayoutWrapper>& wrapper, int32_t index);
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -692,6 +694,7 @@ private:
 
     float GetStopOnScreenOffset(ScrollSnapAlign scrollSnapAlign) const;
     bool LayoutReachEnd(float currentEndPos, float endMainPos, int32_t currentIndex);
+    bool LayoutReachStart(float currentStartPos, float startMainPos, int32_t currentIndex);
 
     std::optional<int32_t> jumpIndexInGroup_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
