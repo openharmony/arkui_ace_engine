@@ -457,6 +457,8 @@ public:
     // background
     virtual void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) = 0;
     virtual void SetBackground(std::function<void()>&& buildFunc) = 0;
+    virtual void SetBackgroundWithResourceObj(
+        std::function<void()>&& buildFunc, const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetBackgroundAlign(const Alignment& align) = 0;
     virtual void SetCustomBackgroundColor(const Color& color) = 0;
     virtual void SetCustomBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj) = 0;

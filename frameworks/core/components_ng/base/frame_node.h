@@ -1501,6 +1501,7 @@ public:
         return isPendingState_;
     }
 
+    void UpdateBackground();
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1683,7 +1684,6 @@ private:
     void MarkDirtyNodeMultiThread(PropertyChangeFlag extraFlag);
     void RebuildRenderContextTreeMultiThread();
     void MarkNeedRenderMultiThread(bool isRenderBoundary);
-    void UpdateBackground();
     void DispatchVisibleAreaChangeEvent(const CacheVisibleRectResult& visibleResult);
     PipelineContext* GetOffMainTreeNodeContext();
     RefPtr<AccessibilityProperty>& GetOrCreateAccessibilityProperty();

@@ -1624,6 +1624,8 @@ public:
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
     void SetBackground(std::function<void()>&& buildFunc) override;
+    void SetBackgroundWithResourceObj(
+        std::function<void()>&& buildFunc, const RefPtr<ResourceObject>& resObj) override;
     void SetBackgroundAlign(const Alignment& align) override
     {
         NG::ViewAbstract::SetBackgroundAlign(align);
