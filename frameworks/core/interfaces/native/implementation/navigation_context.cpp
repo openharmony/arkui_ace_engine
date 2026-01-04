@@ -193,7 +193,7 @@ void PathStack::ReplacePath(PathInfo info, const std::optional<NavigationOptions
         it->param_ = info.param_;
         it->onPop_ = info.onPop_;
         it->index_ = -1;
-        if (it == (pathArray_.end() - 1)) {
+        if (it != (pathArray_.end() - 1)) {
             auto targetInfo = *it;
             it = pathArray_.erase(it);
             if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON) {
@@ -239,7 +239,7 @@ ReplaceDestinationResultType PathStack::ReplaceDestination(PathInfo info,
         it->param_ = info.param_;
         it->onPop_ = info.onPop_;
         it->index_ = -1;
-        if (it == (pathArray_.end() - 1)) {
+        if (it != (pathArray_.end() - 1)) {
             auto targetInfo = *it;
             it = pathArray_.erase(it);
             if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON) {
@@ -780,6 +780,10 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
     }
     if (GetNavDestinationNodeInUINode(targetNode, desNode)) {
         errorCode = ERROR_CODE_NO_ERROR;
+        auto navDestinationPattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
+        if (navDestinationPattern) {
+            SetDestinationIdToJsStack(index, std::to_string(navDestinationPattern->GetNavDestinationId()));
+        }
     }
     if (errorCode != ERROR_CODE_NO_ERROR) {
         RefPtr<UINode> tempNode = nullptr;
@@ -795,6 +799,11 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
         node = AceType::DynamicCast<NG::UINode>(
             NavDestinationModelStatic::CreateFrameNode(0, navPathInfo));
         FirePromise(pathInfo, errorCode);
+        auto navNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(node);
+        CHECK_NULL_RETURN(navNode, true);
+        auto navDestinationPattern = AceType::DynamicCast<NG::NavDestinationPattern>(navNode->GetPattern());
+        CHECK_NULL_RETURN(navDestinationPattern, true);
+        SetDestinationIdToJsStack(index, std::to_string(navDestinationPattern->GetNavDestinationId()));
         return true;
     }
     node = targetNode;

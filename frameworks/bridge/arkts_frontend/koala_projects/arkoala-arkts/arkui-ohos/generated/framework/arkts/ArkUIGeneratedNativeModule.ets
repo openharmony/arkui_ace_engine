@@ -4096,6 +4096,18 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _DialogExtender_showDatePickerDialog(thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _DigitIndicator_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _DigitIndicator_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _DigitIndicator_fontColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DigitIndicator_selectedFontColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DigitIndicator_digitFont(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DigitIndicator_selectedDigitFont(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _DisappearSymbolEffect_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _DisappearSymbolEffect_getFinalizer(): KPointer
@@ -4123,6 +4135,28 @@ export class ArkUIGeneratedNativeModule {
     native static _DismissPopupAction_getReason(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _DismissPopupAction_setReason(ptr: KPointer, reason: KInt): void
+    @ani.unsafe.Direct
+    native static _DotIndicator_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _DotIndicator_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _DotIndicator_itemWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DotIndicator_itemHeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DotIndicator_selectedItemWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DotIndicator_selectedItemHeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DotIndicator_mask(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DotIndicator_color(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DotIndicator_selectedColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DotIndicator_maxDisplayCount(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DotIndicator_space(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _DragEvent_construct(): KPointer
     @ani.unsafe.Direct
@@ -4697,6 +4731,28 @@ export class ArkUIGeneratedNativeModule {
     native static _ImageData_getWidth(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _ImageData_setWidth(ptr: KPointer, width: KInt): void
+    @ani.unsafe.Direct
+    native static _Indicator_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _Indicator_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _Indicator_left(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _Indicator_top(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _Indicator_right(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _Indicator_bottom0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _Indicator_bottom1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32, ignoreSize: KInt): void
+    @ani.unsafe.Direct
+    native static _Indicator_start(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _Indicator_end(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _Indicator_dot(): KPointer
+    @ani.unsafe.Direct
+    native static _Indicator_digit(): KPointer
     @ani.unsafe.Direct
     native static _IndicatorComponentController_construct(): KPointer
     @ani.unsafe.Direct

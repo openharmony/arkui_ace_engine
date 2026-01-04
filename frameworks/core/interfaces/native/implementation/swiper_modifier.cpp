@@ -24,6 +24,8 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/peer_utils.h"
+#include "core/interfaces/native/implementation/dot_indicator_peer_impl.h"
+#include "core/interfaces/native/implementation/digit_indicator_peer_impl.h"
 #include "core/interfaces/native/implementation/swiper_content_transition_proxy_peer.h"
 #include "core/interfaces/native/implementation/swiper_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/implementation/indicator_component_controller_peer.h"
@@ -62,56 +64,6 @@ std::optional<int32_t> ProcessBindableIndex(FrameNode* frameNode, const Opt_Unio
 }
 
 namespace OHOS::Ace::NG::Converter {
-template<>
-SwiperParameters Convert(const Ark_DotIndicator& src)
-{
-    SwiperParameters p;
-    p.dimLeft = Converter::OptConvert<Dimension>(src._left);
-    p.dimTop = Converter::OptConvert<Dimension>(src._top);
-    p.dimRight = Converter::OptConvert<Dimension>(src._right);
-    p.dimBottom = Converter::OptConvert<Dimension>(src._bottom);
-
-    p.dimStart = Converter::OptConvert<Dimension>(src._start);
-    p.dimEnd = Converter::OptConvert<Dimension>(src._end);
-
-    p.itemWidth = Converter::OptConvert<Dimension>(src._itemWidth);
-    p.itemHeight = Converter::OptConvert<Dimension>(src._itemHeight);
-    p.selectedItemWidth = Converter::OptConvert<Dimension>(src._selectedItemWidth);
-    p.selectedItemHeight = Converter::OptConvert<Dimension>(src._selectedItemHeight);
-
-    p.maskValue = Converter::OptConvert<bool>(src._mask);
-    p.colorVal = Converter::OptConvert<Color>(src._color);
-    p.selectedColorVal = Converter::OptConvert<Color>(src._selectedColor);
-    p.maxDisplayCountVal = Converter::OptConvert<int32_t>(src._maxDisplayCount);
-    return p;
-}
-
-template<>
-SwiperDigitalParameters Convert(const Ark_DigitIndicator& src)
-{
-    SwiperDigitalParameters p;
-    p.dimLeft = Converter::OptConvert<Dimension>(src._left);
-    p.dimTop = Converter::OptConvert<Dimension>(src._top);
-    p.dimRight = Converter::OptConvert<Dimension>(src._right);
-    p.dimBottom = Converter::OptConvert<Dimension>(src._bottom);
-
-    p.dimStart = Converter::OptConvert<Dimension>(src._start);
-    p.dimEnd = Converter::OptConvert<Dimension>(src._end);
-
-    if (auto font = Converter::OptConvert<Converter::FontMetaData>(src._digitFont); font) {
-        p.fontSize = font->size;
-        p.fontWeight = font->weight;
-    }
-    if (auto font = Converter::OptConvert<Converter::FontMetaData>(src._selectedDigitFont); font) {
-        p.selectedFontSize = font->size;
-        p.selectedFontWeight = font->weight;
-    }
-
-    p.fontColor = Converter::OptConvert<Color>(src._fontColor);
-    p.selectedFontColor = Converter::OptConvert<Color>(src._selectedFontColor);
-    return p;
-}
-
 template<>
 ArrowStyleVariantType Convert(const Ark_ArrowStyle& src)
 {
@@ -330,8 +282,10 @@ void SetIntervalImpl(Ark_NativePointer node,
 namespace {
 void SetIndicator(FrameNode* frameNode, const Ark_DigitIndicator& src)
 {
-    auto digitParam = Converter::Convert<SwiperDigitalParameters>(src);
-    CheckSwiperDigitalParameters(digitParam);
+    CHECK_NULL_VOID(frameNode);
+    auto peerDigitIndicator = src;
+    CHECK_NULL_VOID(peerDigitIndicator);
+    auto digitParam = peerDigitIndicator->GetDigitParameters();
     SwiperModelStatic::SetIndicatorIsBoolean(frameNode, false);
     SwiperModelStatic::SetDigitIndicatorStyle(frameNode, digitParam);
     SwiperModelStatic::SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
@@ -339,7 +293,10 @@ void SetIndicator(FrameNode* frameNode, const Ark_DigitIndicator& src)
 }
 void SetIndicator(FrameNode* frameNode, const Ark_DotIndicator& src)
 {
-    auto dotParam = Converter::Convert<SwiperParameters>(src);
+    CHECK_NULL_VOID(frameNode);
+    auto peerDotIndicator = src;
+    CHECK_NULL_VOID(peerDotIndicator);
+    auto dotParam = peerDotIndicator->GetDotParameters();
     auto isCustomSize = CheckSwiperParameters(dotParam);
     SwiperModelStatic::SetIndicatorIsBoolean(frameNode, false);
     SwiperModelStatic::SetDotIndicatorStyle(frameNode, dotParam);
@@ -794,9 +751,9 @@ void SetDisplayCountImpl(Ark_NativePointer node,
             SwiperModelStatic::SetDisplayMode(frameNode, OHOS::Ace::SwiperDisplayMode::AUTO_LINEAR);
             SwiperModelStatic::ResetDisplayCount(frameNode);
             return;
+        } else {
+            SwiperModelStatic::SetDisplayCount(frameNode, DEFAULT_DISPLAY_COUNT);
         }
-        int32_t val = StringUtils::StringToInt(*descPtr);
-        SwiperModelStatic::SetDisplayCount(frameNode, val);
     } else if (auto autofillPtr = std::get_if<Ark_SwiperAutoFill>(&(*optDispCount)); autofillPtr) {
         if (auto minsizeOpt = Converter::OptConvert<Dimension>(autofillPtr->minSize); minsizeOpt) {
             SwiperModelStatic::SetMinSize(frameNode, *minsizeOpt);
@@ -812,11 +769,8 @@ void SetPrevMarginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optMargin = Converter::OptConvert<Dimension>(*value);
-    if (!optMargin) {
-        optMargin = Dimension(0.0);
-    }
     auto optIgnore = Converter::OptConvertPtr<bool>(ignoreBlank);
-    SwiperModelStatic::SetPreviousMargin(frameNode, *optMargin, optIgnore);
+    SwiperModelStatic::SetPreviousMargin(frameNode, optMargin, optIgnore);
 }
 void SetNextMarginImpl(Ark_NativePointer node,
                        const Opt_Length* value,
@@ -825,11 +779,8 @@ void SetNextMarginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optMargin = Converter::OptConvertPtr<Dimension>(value);
-    if (!optMargin) {
-        optMargin = Dimension(0.0);
-    }
     auto optIgnore = Converter::OptConvertPtr<bool>(ignoreBlank);
-    SwiperModelStatic::SetNextMargin(frameNode, *optMargin, optIgnore);
+    SwiperModelStatic::SetNextMargin(frameNode, optMargin, optIgnore);
 }
 } // SwiperAttributeModifier
 const GENERATED_ArkUISwiperModifier* GetSwiperModifier()

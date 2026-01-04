@@ -317,6 +317,16 @@ public:
     }
     void NotifyNavDestinationSizeChange(const std::optional<SizeF>& size, int64_t notifyId);
 
+    void SetIsStatic(bool isStatic)
+    {
+        isStatic_ = isStatic;
+    }
+
+    bool GetIsStatic() const
+    {
+        return isStatic_;
+    }
+
 private:
     struct HideBarOnSwipeContext {
         CancelableCallback<void()> showBarTask;
@@ -380,6 +390,7 @@ private:
     bool isFirstTimeCheckNavigationIndicatorConfig_ = true;
     RefPtr<TouchEventImpl> touchListener_ = nullptr;
     std::string serializedParam_ = "";
+    bool isStatic_ = false;
     bool needNotifySizeChangeWhenVisible_ = false;
     int64_t lastSizeChangeNotifyId_ = 0;
 };

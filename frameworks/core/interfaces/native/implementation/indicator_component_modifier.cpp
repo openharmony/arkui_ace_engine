@@ -16,16 +16,13 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_static.h"
+#include "core/interfaces/native/implementation/dot_indicator_peer_impl.h"
+#include "core/interfaces/native/implementation/digit_indicator_peer_impl.h"
 #include "core/interfaces/native/implementation/indicator_component_controller_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
-
-namespace OHOS::Ace::NG::Converter {
-template<> SwiperDigitalParameters Convert(const Ark_DigitIndicator& src);
-template<> SwiperParameters Convert(const Ark_DotIndicator& src);
-} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::SwiperAttributeModifierInternal {
 bool CheckSwiperParameters(SwiperParameters& p);
@@ -92,7 +89,10 @@ void SetStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     Converter::VisitUnion(*value,
         [frameNode](const Ark_DotIndicator& value) {
-            auto dotParam = Converter::Convert<SwiperParameters>(value);
+            CHECK_NULL_VOID(frameNode);
+            auto peerDotIndicator = value;
+            CHECK_NULL_VOID(peerDotIndicator);
+            auto dotParam = peerDotIndicator->GetDotParameters();
             auto isCustomSize = SwiperAttributeModifierInternal::CheckSwiperParameters(dotParam);
             IndicatorModelStatic::SetDotIndicatorStyle(frameNode, dotParam);
             IndicatorModelStatic::SetIsIndicatorCustomSize(frameNode, isCustomSize);
@@ -100,7 +100,10 @@ void SetStyleImpl(Ark_NativePointer node,
             IndicatorModelStatic::SetShowIndicator(frameNode, true);
         },
         [frameNode](const Ark_DigitIndicator& value) {
-            auto digitParam = Converter::Convert<SwiperDigitalParameters>(value);
+            CHECK_NULL_VOID(frameNode);
+            auto peerDigitIndicator = value;
+            CHECK_NULL_VOID(peerDigitIndicator);
+            auto digitParam = peerDigitIndicator->GetDigitParameters();
             SwiperAttributeModifierInternal::CheckSwiperDigitalParameters(digitParam);
             IndicatorModelStatic::SetDigitIndicatorStyle(frameNode, digitParam);
             IndicatorModelStatic::SetIsIndicatorCustomSize(frameNode, false);
