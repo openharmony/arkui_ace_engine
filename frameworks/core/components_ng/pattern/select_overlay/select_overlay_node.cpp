@@ -580,8 +580,8 @@ RefPtr<FrameNode> BuildButton(const MenuOptionsParam& menuOption, int32_t overla
     const auto& padding = textOverlayTheme->GetMenuButtonPadding();
     auto left = CalcLength(padding.Left().ConvertToPx());
     auto right = CalcLength(padding.Right().ConvertToPx());
-    auto top = isAging ? MENU_BUTTON_SPACING : CalcLength(padding.Top().ConvertToPx());
-    auto bottom = isAging ? MENU_BUTTON_SPACING : CalcLength(padding.Bottom().ConvertToPx());
+    auto top = CalcLength(isAging ? MENU_BUTTON_SPACING.ConvertToPx() : padding.Top().ConvertToPx());
+    auto bottom = CalcLength(isAging ? MENU_BUTTON_SPACING.ConvertToPx() : padding.Bottom().ConvertToPx());
     contentWidth = contentWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
 
     // Update button property.

@@ -6496,6 +6496,9 @@ HWTEST_F(SelectOverlayTestNg, AdjustToInfo, TestSize.Level1)
  */
 HWTEST_F(SelectOverlayTestNg, InitSurfaceChangedCallback, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create selectoverlay node.
+     */
     SelectOverlayInfo selectInfo;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
@@ -6504,6 +6507,10 @@ HWTEST_F(SelectOverlayTestNg, InitSurfaceChangedCallback, TestSize.Level1)
     ASSERT_NE(selectOverlayNode, nullptr);
     auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
     ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. modify overlay mode and test InitSurfaceChangedCallback.
+     */
     pattern->overlayMode_ = SelectOverlayMode::HANDLE_ONLY;
     pattern->surfaceChangeCallbackId_.reset();
     pattern->InitSurfaceChangedCallback();
