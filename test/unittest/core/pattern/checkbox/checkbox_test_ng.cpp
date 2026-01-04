@@ -1063,6 +1063,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest029, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
 
     auto eventHub = frameNode->GetFocusHub();
     ASSERT_NE(eventHub, nullptr);
@@ -1089,6 +1092,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest030, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
