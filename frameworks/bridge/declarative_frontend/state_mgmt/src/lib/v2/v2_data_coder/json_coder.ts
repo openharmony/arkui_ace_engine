@@ -189,7 +189,7 @@ class JSONCoder {
     } else if (!t1 && !t2) {
       JSONCoder.parseInto(target, json);
     } else {
-      throw new Error(`The type of target '${t2}' mismatches the type of source '${t1}'`);
+      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, `The type of target '${t2}' mismatches the type of source '${t1}'`);
     }
     return target;
   }
@@ -225,7 +225,7 @@ class JSONCoder {
 
   private static parseInto(target: any, source: any): any {
     if (typeof source !== 'object') {
-      throw new Error(`The type of target '${typeof target}' mismatches the type of source '${typeof source}'`);
+      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, `The type of target '${typeof target}' mismatches the type of source '${typeof source}'`);
     }
 
     const meta = Meta.gets(target);
@@ -292,14 +292,14 @@ class JSONCoder {
       } else if (tarType === typeof value) {
         target[targetKey] = value;
       } else if (target[targetKey] !== undefined) {
-        throw new Error(`The type of target '${tarType}' mismatches the type of source '${typeof value}'`);
+        throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, `The type of target '${tarType}' mismatches the type of source '${typeof value}'`);
       }
       return;
     }
 
     // value is object, target[targetKey] is undefined or null
     if (target[targetKey] === null) {
-      throw new Error(`Miss @Type in object defined, the property name is ${targetKey}`);
+      throw new BusinessError(PERSISTENCE_V2_LACK_TYPE, `Miss @Type in object defined, the property name is ${targetKey}`);
     } else if (target[targetKey] === undefined) {
       // ignore target[targetKey] undefined
       return;
@@ -319,7 +319,7 @@ class JSONCoder {
 
   private static parseIntoArray(target: any, source: any, options: TransformOptions<any>): any {
     if (typeof target !== 'object') {
-      throw new Error(`The type of target '${typeof target}' mismatches the type of source '${typeof source}'`);
+      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, `The type of target '${typeof target}' mismatches the type of source '${typeof source}'`);
     }
     // here, source maybe a array or map or set
     if (target instanceof Map) {
@@ -355,7 +355,7 @@ class JSONCoder {
       if (i === 0) {
         if (!options?.factory) {
           target.length = 0;
-          throw new Error(`Miss @Type in array defined`);
+          throw new BusinessError(PERSISTENCE_V2_LACK_TYPE, `Miss @Type in array defined`);
         }
       }
 

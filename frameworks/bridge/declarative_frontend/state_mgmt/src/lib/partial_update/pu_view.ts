@@ -131,7 +131,8 @@ abstract class ViewPU extends PUV2ViewBase
       if (usesStateMgmtVersion === 2) {
         const error = `${this.debugInfo__()}: mixed use of stateMgmt V1 and V2 variable decorators. Application error!`;
         stateMgmtConsole.applicationError(error);
-        throw new Error(error);
+        // toolchain can check
+        throw new BusinessError(USE_V1_STATE_IN_COMPONENTV2, error);
       }
     }
     stateMgmtConsole.debug(`${this.debugInfo__()}: uses stateMgmt version ${this.isViewV2 === true ? 3 : 2}`);
@@ -686,7 +687,7 @@ abstract class ViewPU extends PUV2ViewBase
    */
   protected addProvidedVar<T>(providedPropName: string, store: ObservedPropertyAbstractPU<T>, allowOverride: boolean = false) {
     if (!allowOverride && this.findProvidePU__(providedPropName)) {
-      throw new ReferenceError(`${this.constructor.name}: duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Views already. @Provide override not allowed.`);
+      throw new BusinessError(DUPLICATE_PROVIDE_KEY, `${this.constructor.name}: duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Views already. @Provide override not allowed.`);
     }
     store.setDecoratorInfo('@Provide');
     this.providedVars_.set(providedPropName, store);
@@ -722,7 +723,7 @@ abstract class ViewPU extends PUV2ViewBase
         providedVarStore = new ObservedPropertyPU(defaultValue, this, consumeVarName);
         providedVarStore.__setIsFake_ObservedPropertyAbstract_Internal(true);
       } else {
-        throw new ReferenceError(`${this.debugInfo__()} missing @Provide property with name ${providedPropName} or default value.
+        throw new BusinessError(MISSING_PROVIDE_DEFAULT_VALUE_FOR_CONSUME_CONSUMER, `${this.debugInfo__()} missing @Provide property with name ${providedPropName} or default value.
           Fail to resolve @Consume(${providedPropName}).`);
       }
     }
@@ -1222,7 +1223,7 @@ abstract class ViewPU extends PUV2ViewBase
       // ViewPU should not have a ReusableV2 Component, throw error!
       const error = `@Component cannot have a child @ReusableV2 component !`;
       stateMgmtConsole.applicationError(error);
-      throw new Error(error);
+      throw new BusinessError(USE_REUSABLE_V2_IN_COMPONENT, error);
   }
 
   protected mutableBuilderImpl<Args extends Object[]>(

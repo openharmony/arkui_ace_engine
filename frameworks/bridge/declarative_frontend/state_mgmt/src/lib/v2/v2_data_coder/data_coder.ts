@@ -294,14 +294,14 @@ class DataCoder {
   private static throwIfNotInstanceOf(target: unknown, clazz: new (...args: unknown[]) => unknown): void {
     if (target instanceof clazz === false) {
       const type = target?.constructor?.name ?? typeof target;
-      throw new Error(`The class of target (${type}) mismatches '${clazz.name}'`);
+      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, `The class of target (${type}) mismatches '${clazz.name}'`);
     }
   }
 
   // Ensure target has given type
   private static throwIfNotTypeOf(target: unknown, type: string): void {
     if (typeof target !== type) {
-      throw new Error(`The type of target ('${typeof target}') mismatches '${type}'`);
+      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, `The type of target ('${typeof target}') mismatches '${type}'`);
     }
   }
 
@@ -309,23 +309,25 @@ class DataCoder {
   private static throwIfNotSendable(target: unknown): void {
     if (target != null && globalThis.isSendable(target) === false) {
       const type = target.constructor?.name ?? typeof target
-      throw new Error(`The target (${type}) is not @Sendable`);
+      // todo: why need to check twice
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, `Not supported type! The target (${type}) is not @Sendable`);
     }
   }
 
   // Ensure value is not collection
   private static throwIfCollection(value: unknown): void {
     if ([Array, Map, Set, SendableArray, SendableMap, SendableSet].some(clazz => value instanceof clazz)) {
-      throw new Error(`Array, Map, Set, or collections.Array/Map/Set cannot be used as collection items`);
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, `Not supported type! Array, Map, Set, or collections.Array/Map/Set cannot be used as collection items`);
     }
   }
 
   private static throwNoFactory<T>(targetProp: string): void {
-    throw new Error(`Miss @Type in object defined, the property name is ${targetProp}`);
+    throw new BusinessError(PERSISTENCE_V2_LACK_TYPE, `Miss @Type in object defined, the property name is ${targetProp}`);
   }
 
+  // todo: need check error message
   private static throwInvalidSubCreatorResult(): never {
-    throw new Error(`The defaultSubCreator returned invalid value`);
+    throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_INVALID_DEFAULT_CREATOR, `The defaultSubCreator returned invalid value`);
   }
 
 }

@@ -558,11 +558,6 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       // not access recording 
       return;
     }
-    if (elmtId === UINodeRegisterProxy.monitorIllegalV1V2StateAccess) {
-      const error = `${this.debugInfo()}: recordPropertyDependentUpdate trying to use V1 state to init/update child V2 @Component. Application error`;
-      stateMgmtConsole.applicationError(error);
-      throw new TypeError(error);
-    }
 
     stateMgmtConsole.debug(`${this.debugInfo()}: recordPropertyDependentUpdate: add (state) variable dependency for elmtId ${elmtId}.`);
     this.dependentElmtIdsByProperty_.addPropertyDependency(elmtId);
@@ -588,12 +583,14 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   // unified Appstorage, what classes to use, and the API
   public createLink(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstractPU<T> {
-      throw new Error(`${this.debugInfo()}: createLink: Can not create a AppStorage 'Link' from this property.`);
+      // method implemented in FU, will never be invoke in PU
+      throw new BusinessError(NOT_IMPLEMENT, `${this.debugInfo()}: createLink does not implemented in ObservedPropertyAbstractPU`);
   }
 
   public createProp(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstractPU<T> {
-      throw new Error(`${this.debugInfo()}: createProp: Can not create a AppStorage 'Prop' from a @State property. `);
+      // method implemented in FU, will never be invoke in PU
+      throw new BusinessError(NOT_IMPLEMENT, `${this.debugInfo()}: createProp does not implemented in ObservedPropertyAbstractPU `);
   }
 
   /*

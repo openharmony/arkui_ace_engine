@@ -266,7 +266,7 @@ class JSON2 {
 
     for (const [key, val] of Object.entries(value)) {
       if (typeof val === 'object' && val !== null) {
-        throw new Error(`PersistenceV2: @Sendable only allows plain property types. Invalid key: ${key}`);
+        throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, `Not supported type! PersistenceV2: @Sendable only allows plain property types. Invalid key: ${key}`);
       }
     }
   }

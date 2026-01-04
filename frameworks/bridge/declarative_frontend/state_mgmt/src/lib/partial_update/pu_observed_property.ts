@@ -175,7 +175,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     if (renderingElmtId >= 0) {
       if (!isTracked) {
         stateMgmtConsole.applicationError(`${this.debugInfo()}: onOptimisedObjectPropertyRead read NOT TRACKED property '${readPropertyName}' during rendering!`);
-        throw new Error(`Illegal usage of not @Track'ed property '${readPropertyName}' on UI!`);
+        throw new BusinessError(NON_TRACK_PROPERTY_ON_UI, `Illegal usage of not @Track'ed property '${readPropertyName}' on UI!`);
       } else {
         stateMgmtConsole.debug(`${this.debugInfo()}: onOptimisedObjectPropertyRead: ObservedObject property '@Track ${readPropertyName}' read.`);
         // only record dependency when

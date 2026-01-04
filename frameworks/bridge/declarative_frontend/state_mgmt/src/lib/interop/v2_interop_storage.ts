@@ -18,13 +18,14 @@ class InteropStorageV2 extends StorageHelper {
 
   // get value from AppStorage in ArkTS1.2
   getStaticValue_: (value: string) => object = () => {
-    throw new Error('not implement');
+    // will implement further, no error code
+    throw new BusinessError(NOT_IMPLEMENT, `getStaticValue_ method does not implement in InteropStorageV2`)
   };
   removeStaticValue_: (value: string) => boolean = () => {
-    throw new Error('not implement');
+    throw new BusinessError(NOT_IMPLEMENT, `removeStaticValue_ method does not implement in InteropStorageV2`)
   };
   getStaticTotalKeys_: () => Array<string> = () => {
-    throw new Error('not implement');
+    throw new BusinessError(NOT_IMPLEMENT, `getStaticTotalKeys_ method does not implement in InteropStorageV2`)
   };
 
   constructor() {

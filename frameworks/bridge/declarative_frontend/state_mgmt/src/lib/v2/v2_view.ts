@@ -138,7 +138,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     // If it's not defined, it indicates that an older version of the toolchain is being used,
     // and an error is thrown to notify about the outdated toolchain.
     public resetStateVarsOnReuse(params: Object): void {
-        throw new Error('Old toolchain detected. Please upgrade to the latest.');
+        throw new BusinessError(REUSABLE_V2_OLD_TOOLCHAIN, 'Old toolchain detected. Please upgrade to the latest.');
     }
 
     // The aboutToReuse function defined in the application will be called if it exists.
