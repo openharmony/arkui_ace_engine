@@ -7861,10 +7861,6 @@ void JSViewAbstract::ParseDragInteractionOptions(const JSCallbackInfo& info,
         if (hapicFeedback->IsBoolean()) {
             previewOption.enableHapticFeedback = hapicFeedback->ToBoolean();
         }
-        auto dragPreview = interObj->GetProperty("isDragPreviewEnabled");
-        if (dragPreview->IsBoolean()) {
-            previewOption.isDragPreviewEnabled = dragPreview->ToBoolean();
-        }
         auto enableEdgeAutoScroll = interObj->GetProperty("enableEdgeAutoScroll");
         if (enableEdgeAutoScroll->IsBoolean()) {
             previewOption.enableEdgeAutoScroll = enableEdgeAutoScroll->ToBoolean();
