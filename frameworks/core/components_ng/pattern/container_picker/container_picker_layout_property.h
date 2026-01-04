@@ -20,7 +20,7 @@
 #include "base/utils/macros.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"

@@ -318,9 +318,9 @@ public:
     FocusGroup() : FocusNode(true) {}
     ~FocusGroup() override = default;
 
-    bool IsFocusable() const override;
+    ACE_FORCE_EXPORT bool IsFocusable() const override;
 
-    bool IsFocusableByTab() const override;
+    ACE_FORCE_EXPORT bool IsFocusableByTab() const override;
 
     void AddChild(const RefPtr<FocusNode>& focusNode);
     void AddChild(const RefPtr<FocusNode>& focusNode, const RefPtr<FocusNode>& nextFocusNode);
@@ -342,13 +342,13 @@ public:
         return false;
     }
 
-    void DumpFocusTree(int32_t depth) override;
+    ACE_FORCE_EXPORT void DumpFocusTree(int32_t depth) override;
 
-    void SetShow(bool show) override;
+    ACE_FORCE_EXPORT void SetShow(bool show) override;
 
-    void SetEnabled(bool enabled) override;
+    ACE_FORCE_EXPORT void SetEnabled(bool enabled) override;
 
-    void RefreshParentFocusable(bool focusable) override;
+    ACE_FORCE_EXPORT void RefreshParentFocusable(bool focusable) override;
 
     void SetIsGroupDefaultFocused(bool isGroupDefaultFocused)
     {
@@ -369,13 +369,13 @@ public:
     }
 
 protected:
-    bool OnKeyEvent(const KeyEvent& keyEvent) override;
-    void OnFocus() override;
-    void OnBlur() override;
+    ACE_FORCE_EXPORT bool OnKeyEvent(const KeyEvent& keyEvent) override;
+    ACE_FORCE_EXPORT void OnFocus() override;
+    ACE_FORCE_EXPORT void OnBlur() override;
 
     bool TryRequestFocus(const RefPtr<FocusNode>& focusNode, const Rect& rect);
     bool CalculateRect(const RefPtr<FocusNode>& node, Rect& rect);
-    bool AcceptFocusByRectOfLastFocus(const Rect& rect) override;
+    ACE_FORCE_EXPORT bool AcceptFocusByRectOfLastFocus(const Rect& rect) override;
 
     virtual bool RequestNextFocus(bool vertical, bool reverse, const Rect& rect) = 0;
 

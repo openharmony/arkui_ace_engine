@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 
-class PanRecognizer : public MultiFingersRecognizer {
+class ACE_FORCE_EXPORT PanRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(PanRecognizer, MultiFingersRecognizer);
 
 public:

@@ -395,6 +395,8 @@ build_component_ng("pattern_ng") {
     "picker/datepicker_paint_method.cpp",
     "picker/datepicker_pattern.cpp",
     "picker/datepicker_pattern_multi_thread.cpp",
+    "picker/picker_data.cpp",
+    "picker/picker_theme.cpp",
     "picker_utils/picker_column_pattern.cpp",
     "picker_utils/picker_column_pattern_multi_thread.cpp",
     "picker_utils/toss_animation_controller.cpp",

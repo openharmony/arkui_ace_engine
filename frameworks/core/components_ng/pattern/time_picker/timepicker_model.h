@@ -19,8 +19,8 @@
 #include <mutex>
 
 #include "base/i18n/time_format.h"
-#include "core/components/picker/picker_data.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/picker_model.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 

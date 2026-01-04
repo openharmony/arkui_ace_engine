@@ -30,7 +30,6 @@
 #include "frameworks/bridge/common/dom/dom_list_item_group.h"
 #include "frameworks/bridge/common/dom/dom_navigation_bar.h"
 #include "frameworks/bridge/common/dom/dom_panel.h"
-#include "frameworks/bridge/common/dom/dom_picker_view.h"
 #include "frameworks/bridge/common/dom/dom_progress.h"
 #include "frameworks/bridge/common/dom/dom_refresh.h"
 #ifdef WEB_SUPPORTED
@@ -50,7 +49,6 @@
 #include "frameworks/bridge/common/dom/dom_menu.h"
 #include "frameworks/bridge/common/dom/dom_navigation_menu.h"
 #include "frameworks/bridge/common/dom/dom_option.h"
-#include "frameworks/bridge/common/dom/dom_picker_dialog.h"
 #include "frameworks/bridge/common/dom/dom_piece.h"
 #include "frameworks/bridge/common/dom/dom_popup.h"
 #include "frameworks/bridge/common/dom/dom_select.h"
@@ -121,10 +119,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_OPTION, &DOMNodeCreator<DOMOption> },
         { DOM_NODE_TAG_PANEL, &DOMNodeCreator<DOMPanel> },
 #endif
-#ifndef WEARABLE_PRODUCT
-        { DOM_NODE_TAG_PICKER_DIALOG, &DOMNodeCreator<DOMPickerDialog> },
-#endif
-        { DOM_NODE_TAG_PICKER_VIEW, &DOMNodeCreator<DOMPickerView> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_POPUP, &DOMNodeCreator<DOMPopup> },
 #endif

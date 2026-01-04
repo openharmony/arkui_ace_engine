@@ -154,4 +154,9 @@ bool Localization::LocalizeNumber(const std::string& inputNum, std::string& outp
     outputNum = inputNum;
     return true;
 }
+
+bool Localization::GetDateColumnFormatOrder(std::vector<std::string>& outOrder)
+{
+    return true;
+}
 } // namespace OHOS::Ace

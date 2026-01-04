@@ -21,7 +21,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components/calendar/calendar_data_adapter.h"
-#include "core/components/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/calendar/calendar_controller_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"

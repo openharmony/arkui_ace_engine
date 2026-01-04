@@ -32,7 +32,10 @@ ohos_source_set("ace_compatible_source") {
       cflags_cc += config.cflags_cc
     }
   }
-  defines += [ "ENABLE_ROSEN_BACKEND" ]
+  defines += [
+      "ENABLE_ROSEN_BACKEND",
+      "USE_ARK_ENGINE",
+    ]
   configs = [ "$ace_root:ace_config" ]
 
   sources = [
@@ -82,6 +85,42 @@ ohos_source_set("ace_compatible_source") {
     "components/marquee/render_marquee.cpp",
     "components/marquee/render_marquee_creator.cpp",
     "components/marquee/rosen_render_marquee.cpp",
+    "components/picker/date_picker_composed_element.cpp",
+    "components/picker/date_picker_dialog_composed_element.cpp",
+    "components/picker/picker_loader.cpp",
+    "components/picker/dom_picker_base.cpp",
+    "components/picker/dom_picker_dialog.cpp",
+    "components/picker/picker_animation_controller.cpp",
+    "components/picker/picker_animation.cpp",
+    "components/picker/picker_base_component.cpp",
+    "components/picker/picker_base_element.cpp",
+    "components/picker/picker_column_component.cpp",
+    "components/picker/picker_column_element.cpp",
+    "components/picker/picker_date_component.cpp",
+    "components/picker/picker_datetime_component.cpp",
+    "components/picker/picker_model_impl.cpp",
+    "components/picker/picker_multitext_component.cpp",
+    "components/picker/picker_option_component.cpp",
+    "components/picker/picker_option_element.cpp",
+    "components/picker/picker_text_component.cpp",
+    "components/picker/picker_text_dialog_composed_element.cpp",
+    "components/picker/picker_time_component.cpp",
+    "components/picker/picker_value_element.cpp",
+    "components/picker/render_picker_base.cpp",
+    "components/picker/render_picker_base_creator.cpp",
+    "components/picker/render_picker_column.cpp",
+    "components/picker/render_picker_column_creator.cpp",
+    "components/picker/render_picker_option.cpp",
+    "components/picker/render_picker_value.cpp",
+    "components/picker/rosen_render_picker_base.cpp",
+    "components/picker/text_picker_composed_element.cpp",
+    "components/picker/textpicker_model_impl.cpp",
+    "components/picker/time_picker_composed_element.cpp",
+    "components/picker/time_picker_dialog_composed_element.cpp",
+    "components/picker/timepicker_model_impl.cpp",
+    "components/picker/toss_animation_controller.cpp",
+    "components/picker-view/dom_picker_view.cpp",
+    "components/picker-view/picker_view_loader.cpp",
     "components/rating/dom_rating.cpp",
     "components/rating/rating_composed_element.cpp",
     "components/rating/rating_component.cpp",
@@ -278,6 +317,7 @@ ohos_source_set("ace_compatible_source") {
     "graphic_2d:librender_service_client",
     "icu:shared_icui18n",
     "icu:shared_icuuc",
+    "napi:ace_napi",
   ]
   deps = [
     "$ace_root/frameworks/core:ace_container_scope",
