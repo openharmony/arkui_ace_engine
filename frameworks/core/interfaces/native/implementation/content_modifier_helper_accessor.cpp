@@ -154,7 +154,8 @@ void ContentModifierGaugeImpl(
 {
     auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("gauge");
     CHECK_NULL_VOID(module);
-    auto* modifier = reinterpret_cast<const GENERATED_ArkUIGaugeContentModifier*>(module->GetCustomModifier());
+    auto* modifier =
+        reinterpret_cast<const GENERATED_ArkUIGaugeContentModifier*>(module->GetCustomModifier("contentModifier"));
     CHECK_NULL_VOID(modifier);
     modifier->contentModifierGaugeImpl(node, contentModifier, builder);
 }
@@ -162,7 +163,8 @@ void ResetContentModifierGaugeImpl(Ark_NativePointer node)
 {
     auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("gauge");
     CHECK_NULL_VOID(module);
-    auto* modifier = reinterpret_cast<const GENERATED_ArkUIGaugeContentModifier*>(module->GetCustomModifier());
+    auto* modifier =
+        reinterpret_cast<const GENERATED_ArkUIGaugeContentModifier*>(module->GetCustomModifier("contentModifier"));
     CHECK_NULL_VOID(modifier);
     modifier->resetContentModifierGaugeImpl(node);
 }

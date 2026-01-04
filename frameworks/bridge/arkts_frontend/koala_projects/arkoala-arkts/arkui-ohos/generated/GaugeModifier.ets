@@ -18,7 +18,7 @@
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { ModifierState } from './CommonModifier'
-import { AttributeModifier, ContentModifier, hookGaugeContentModifier } from "#handwritten"
+import { AttributeModifier, ContentModifier, hookGaugeIndicator, hookGaugeContentModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkGaugePeer, GaugeShadowOptions, GaugeIndicatorOptions, GaugeConfiguration, GaugeAttribute } from "./component/gauge"
@@ -195,7 +195,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
         {
             switch (this._indicator_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setIndicatorAttribute((this._indicator_0_0value as GaugeIndicatorOptions | null | undefined));
+                    hookGaugeIndicator(peer, (this._indicator_0_0value as GaugeIndicatorOptions | null | undefined));
                     this._indicator_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -205,7 +205,7 @@ export class GaugeModifier extends CommonMethodModifier implements GaugeAttribut
                 }
                 default: {
                     this._indicator_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setIndicatorAttribute((undefined as GaugeIndicatorOptions | null | undefined));
+                    hookGaugeIndicator(peer, (undefined as GaugeIndicatorOptions | null | undefined));
                 }
             }
         }

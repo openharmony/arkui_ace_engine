@@ -29,7 +29,7 @@ import { ResourceColor, Length, ResourceStr, Dimension } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { CustomBuilder } from "./builder"
-import { ContentModifier, AttributeModifier, hookGaugeContentModifier, hookGaugeAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookGaugeContentModifier, hookGaugeIndicator, hookGaugeAttributeModifier, AttributeUpdater } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -209,18 +209,6 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GaugeAttribute_setTrackShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setIndicatorAttribute(value: GaugeIndicatorOptions | null | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined && value !== null) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            GaugeIndicatorOptions_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._GaugeAttribute_setIndicator(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPrivacySensitiveAttribute(value: boolean | undefined): void {
@@ -414,9 +402,7 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements Gauge
     }
     public indicator(value: GaugeIndicatorOptions | null | undefined): this {
         if (this.checkPriority("indicator")) {
-            const value_casted = value as (GaugeIndicatorOptions | null | undefined)
-            this.getPeer()?.setIndicatorAttribute(value_casted)
-            return this
+            hookGaugeIndicator(this, value)
         }
         return this
     }

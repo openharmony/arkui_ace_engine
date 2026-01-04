@@ -2954,10 +2954,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Opt_GaugeShadowOptions* value)
     {
     }
-    void SetIndicatorImpl(Ark_NativePointer node,
-                          const Opt_GaugeIndicatorOptions* value)
-    {
-    }
     void SetPrivacySensitiveImpl(Ark_NativePointer node,
                                  const Opt_Boolean* value)
     {
@@ -9103,7 +9099,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GaugeAttributeModifier::SetStrokeWidthImpl,
             GaugeAttributeModifier::SetDescriptionImpl,
             GaugeAttributeModifier::SetTrackShadowImpl,
-            GaugeAttributeModifier::SetIndicatorImpl,
             GaugeAttributeModifier::SetPrivacySensitiveImpl,
         };
         return &ArkUIGaugeModifierImpl;
@@ -14003,6 +13998,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // FullScreenExitHandlerAccessor
+    namespace GaugeExtenderAccessor {
+    void SetIndicatorImpl(Ark_NativePointer node,
+                          const Opt_GaugeIndicatorOptions* options)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    } // GaugeExtenderAccessor
     namespace GestureAccessor {
     void DestroyPeerImpl(Ark_Gesture peer)
     {
@@ -20828,6 +20831,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct FullScreenExitHandlerPeer {
         virtual ~FullScreenExitHandlerPeer() = default;
     };
+    const GENERATED_ArkUIGaugeExtenderAccessor* GetGaugeExtenderAccessor()
+    {
+        static const GENERATED_ArkUIGaugeExtenderAccessor GaugeExtenderAccessorImpl {
+            GaugeExtenderAccessor::SetIndicatorImpl,
+        };
+        return &GaugeExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIGestureAccessor* GetGestureAccessor()
     {
         static const GENERATED_ArkUIGestureAccessor GestureAccessorImpl {
@@ -23373,6 +23384,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetFrameNodeExtenderAccessor,
             GetFrictionMotionAccessor,
             GetFullScreenExitHandlerAccessor,
+            GetGaugeExtenderAccessor,
             GetGestureAccessor,
             GetGestureEventAccessor,
             GetGestureGroupAccessor,

@@ -37,7 +37,7 @@ import { ModifierStateManager } from '../CommonModifier';
 import { ButtonConfiguration } from "./button"
 import { CheckBoxConfiguration } from "./checkbox"
 import { DataPanelConfiguration } from "./dataPanel"
-import { GaugeConfiguration } from "./gauge"
+import { GaugeConfiguration, GaugeIndicatorOptions_serializer, GaugeIndicatorOptions } from "./gauge"
 import { LoadingProgressConfiguration } from "./loadingProgress"
 import { ProgressConfiguration } from "./progress"
 import { RadioConfiguration } from "./radio"
@@ -4529,6 +4529,26 @@ export class SelectExtender {
         const node_casted = node as (KPointer)
         const options_casted = options as (DividerOptions | undefined)
         SelectExtender.setDivider_serialize(node_casted, options_casted)
+        return
+    }
+}
+export class GaugeExtender {
+    static setIndicator_serialize(node: KPointer, options?: GaugeIndicatorOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            GaugeIndicatorOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GaugeExtender_setIndicator(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static setIndicator(node: KPointer, options?: GaugeIndicatorOptions): void {
+        const node_casted = node as (KPointer)
+        const options_casted = options as (GaugeIndicatorOptions | undefined)
+        GaugeExtender.setIndicator_serialize(node_casted, options_casted)
         return
     }
 }

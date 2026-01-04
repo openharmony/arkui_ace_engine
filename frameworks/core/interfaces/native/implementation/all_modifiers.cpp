@@ -257,6 +257,7 @@ const GENERATED_ArkUIForEachOpsAccessor* GetForEachOpsAccessor();
 const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor();
 const GENERATED_ArkUIFrictionMotionAccessor* GetFrictionMotionAccessor();
 const GENERATED_ArkUIFullScreenExitHandlerAccessor* GetFullScreenExitHandlerAccessor();
+const GENERATED_ArkUIGaugeExtenderAccessor* GetGaugeExtenderAccessor();
 const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor();
 const GENERATED_ArkUIGestureOpsAccessor* GetGestureOpsAccessor();
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
@@ -584,6 +585,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetFrameNodeExtenderAccessor,
         GetFrictionMotionAccessor,
         GetFullScreenExitHandlerAccessor,
+        GetGaugeExtenderAccessor,
         GetGestureEventAccessor,
         GetGestureOpsAccessor,
         GetGestureRecognizerAccessor,

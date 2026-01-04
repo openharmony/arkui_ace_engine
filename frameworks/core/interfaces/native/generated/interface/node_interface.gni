@@ -114,6 +114,7 @@ generated_sources = [
   "implementation/frame_node_extender_accessor.cpp",
   "implementation/friction_motion_accessor.cpp",
   "implementation/full_screen_exit_handler_accessor.cpp",
+  "implementation/gauge_extender_accessor.cpp",
   "implementation/gauge_modifier.cpp",
   "implementation/gesture_event_accessor.cpp",
   "implementation/gesture_ops_accessor.cpp",
