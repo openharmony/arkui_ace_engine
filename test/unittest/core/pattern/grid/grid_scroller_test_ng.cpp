@@ -914,4 +914,30 @@ HWTEST_F(GridScrollerTestNg, ScrollToNode001, TestSize.Level1)
     FlushUITasks();
     EXPECT_TRUE(Position(0));
 }
+
+/**
+ * @tc.name: OnInjectionEventTest001
+ * @tc.desc: test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, OnInjectionEventTest001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(10);
+    CreateDone();
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    std::string command = R"()";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_-> info_.currentOffset_, 0);
+
+    command = R"({"cmd":"scrollForward"})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_-> info_.currentOffset_, 0);
+
+    command = R"({"cmd":"scrollBackward"})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_NE(pattern_->info_.currentOffset_, 0);
+}
 } // namespace OHOS::Ace::NG

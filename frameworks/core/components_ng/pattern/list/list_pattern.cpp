@@ -39,6 +39,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -580,6 +581,7 @@ void ListPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnRea
             GreatOrEqual(startMainPos_, contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
             FireObserverOnReachStart();
+            ReportOnItemListEvent("onReachStart");
             CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
             ACE_SCOPED_TRACE("OnReachStart, scrollUpToStart:%u, scrollDownToStart:%u, id:%d, tag:List",
                 scrollUpToStart, scrollDownToStart, static_cast<int32_t>(host->GetAccessibilityId()));
@@ -607,6 +609,7 @@ void ListPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
         auto scrollSource = GetScrollSource();
         if (scrollUpToEnd || (scrollDownToEnd && scrollSource != SCROLL_FROM_NONE)) {
             FireObserverOnReachEnd();
+            ReportOnItemListEvent("onReachEnd");
             CHECK_NULL_VOID(onReachEnd || onJSFrameNodeReachEnd);
             ACE_SCOPED_TRACE("OnReachEnd, scrollUpToEnd:%u, scrollDownToEnd:%u, scrollSource:%d, id:%d, tag:List",
                 scrollUpToEnd, scrollDownToEnd, scrollSource, static_cast<int32_t>(host->GetAccessibilityId()));
@@ -630,6 +633,7 @@ void ListPattern::FireOnScrollIndex(bool indexChanged, const OnScrollIndexEvent&
         endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(endIndex);
     }
     onScrollIndex(startIndex, endIndex, centerIndex_);
+    ReportOnItemListScrollEvent("onScrollIndex", startIndex, endIndex);
 }
 
 void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
@@ -3296,6 +3300,7 @@ void ListPattern::OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listE
     if (onScrollVisibleContentChange) {
         if (indexChanged || startChanged || endChanged) {
             onScrollVisibleContentChange(startInfo_, endInfo_);
+            ReportOnItemListScrollEvent("onScrollVisibleContentChange", startInfo_.index, endInfo_.index);
             groupIndexChanged_ = true;
         }
     }
@@ -4405,5 +4410,70 @@ void ListPattern::UpdateGroupFocusIndexForDataChange(int32_t groupIndexInList, i
 void ListPattern::ResetForExtScroll()
 {
     currentDelta_ = 0;
+}
+
+void ListPattern::ReportOnItemListEvent(const std::string& event)
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    auto listEvent = std::string("List.") + event;
+    params->Put("name", listEvent.c_str());
+    params->Put("nodeId", nodeId);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
+}
+
+void ListPattern::ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex)
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::string value = std::string("List.") + event;
+
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("StartX", startindex);
+    params->Put("StartY", endindex);
+
+    auto eventData = JsonUtil::Create();
+    CHECK_NULL_VOID(eventData);
+    eventData->Put("name", value.c_str());
+    eventData->Put("params", params);
+
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("nodeId", host->GetId());
+    json->Put("event", eventData);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", json);
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
+}
+
+int32_t ListPattern::OnInjectionEvent(const std::string& command)
+{
+    std::string ret = ScrollablePattern::ParseCommand(command);
+    if (ret == "scrollForward") {
+        ScrollPage(true);
+    } else if (ret == "scrollBackward") {
+        ScrollPage(false);
+    } else {
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
 }
 } // namespace OHOS::Ace::NG

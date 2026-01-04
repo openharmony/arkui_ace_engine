@@ -1911,4 +1911,29 @@ HWTEST_F(ListPatternTestNg, IsFreeScrollTest001, TestSize.Level1)
 
     EXPECT_FALSE(scrollBarProxy->IsFreeScroll());
 }
+
+/**
+ * @tc.name: OnInjectionEventTest001
+ * @tc.desc: Test ListPattern OnInjectionEventTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, OnInjectionEventTest001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    EXPECT_TRUE(pattern_->IsAtTop());
+
+    std::string command = R"()";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentDelta_, 0);
+
+    command = R"({"cmd":"scrollForward"})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentDelta_, 0);
+
+    command = R"({"cmd":"scrollBackward"})";
+    pattern_->OnInjectionEvent(command);
+    EXPECT_EQ(pattern_->currentDelta_, 400);
+}
 } // namespace OHOS::Ace::NG
