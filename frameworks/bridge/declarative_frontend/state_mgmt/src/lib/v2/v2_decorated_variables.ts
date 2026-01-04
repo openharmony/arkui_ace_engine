@@ -162,7 +162,10 @@ class VariableUtilV2 {
 
         checkView = checkView.getParent();
       }; // while
-      stateMgmtConsole.warn(`findProvider: ${view.debugInfo__()} @Consumer('${aliasName}'), no matching @Provider found amongst ancestor @ComponentV2's!`);
+      if (stateMgmtDFX.enableDebug) {
+        // this log costs a lot of time, should not print while it is in valid situation
+        stateMgmtConsole.warn(`findProvider: ${view.debugInfo__()} @Consumer('${aliasName}'), no matching @Provider found amongst ancestor @ComponentV2's!`);
+      }
       return undefined;
     }
 
