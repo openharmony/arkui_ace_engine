@@ -18,6 +18,9 @@
 #include "arkoala_api_generated.h"
 #include "builder_node_ops_peer.h"
 #include "frame_node_peer_impl.h"
+#include "touch_event_peer.h"
+#include "mouse_event_peer.h"
+#include "axis_event_peer.h"
 #include "ui/base/utils/utils.h"
 
 #include "base/geometry/ng/size_t.h"
@@ -138,7 +141,92 @@ Ark_Boolean PostTouchEventImpl(Ark_BuilderNodeOps peer, Ark_TouchEvent event)
 {
     return Converter::ArkValue<Ark_Boolean>(false);
 }
-
+Ark_Boolean GetTouchEvent(const TouchEventInfo* touchEventInfo, TouchEvent& touchEvent)
+{
+    // get changedTouches
+    CHECK_NULL_RETURN(touchEventInfo, false);
+    touchEvent = touchEventInfo->ConvertToTouchEvent();
+    touchEvent.originalId = touchEvent.id;
+    touchEvent.operatingHand = touchEventInfo->GetChangedTouches().front().GetOperatingHand();
+    // get common
+    touchEvent.sourceType = touchEventInfo->GetSourceDevice();
+    touchEvent.sourceTool = touchEventInfo->GetSourceTool();
+    touchEvent.force = touchEventInfo->GetForce();
+    touchEvent.time = touchEventInfo->GetTimeStamp();
+    touchEvent.deviceId = touchEventInfo->GetDeviceId();
+    touchEvent.targetDisplayId = touchEventInfo->GetTargetDisplayId();
+    touchEvent.tiltX = touchEventInfo->GetTiltX();
+    touchEvent.tiltY = touchEventInfo->GetTiltY();
+    touchEvent.rollAngle = touchEventInfo->GetRollAngle();
+    touchEvent.SetPressedKeyCodes(touchEventInfo->GetPressedKeyCodes());
+    // get touches property
+    for (const auto& touch : touchEventInfo->GetTouches()) {
+        TouchPoint point;
+        point.id = touch.GetFingerId();
+        point.x = touch.GetGlobalLocation().GetX();
+        point.y = touch.GetGlobalLocation().GetY();
+        point.screenX = touch.GetScreenLocation().GetX();
+        point.screenY = touch.GetScreenLocation().GetY();
+        point.originalId = touch.GetFingerId();
+        point.force = touch.GetForce();
+        point.width = touch.GetWidth();
+        point.height = touch.GetHeight();
+        point.globalDisplayX = touch.GetGlobalDisplayLocation().GetX();
+        point.globalDisplayY = touch.GetGlobalDisplayLocation().GetY();
+        point.operatingHand = touch.GetOperatingHand();
+        point.downTime = touch.GetPressedTime();
+        touchEvent.pointers.emplace_back(point);
+    }
+    return true;
+}
+ 	 
+Ark_Boolean PostInputEventImpl(Ark_BuilderNodeOps peer, const Opt_InputEventType* event)
+{
+    const auto errValue = Converter::ArkValue<Ark_Boolean>(false);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(event, errValue);
+    if (InteropTag::INTEROP_TAG_UNDEFINED == event->tag) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostInputEventImpl event is undefined");
+        return errValue;
+    }
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, errValue);
+    auto postEventManager = pipelineContext->GetPostEventManager();
+    CHECK_NULL_RETURN(postEventManager, errValue);
+    bool result = false;
+    auto arkEevent = event->value;
+    switch (arkEevent.selector) {
+        case SELECTOR_ID_0: {
+            auto touchEventInfo = arkEevent.value0->GetEventInfo();
+            CHECK_NULL_RETURN(touchEventInfo, errValue);
+            TouchEvent touchEvent;
+            if (!GetTouchEvent(touchEventInfo, touchEvent)) {
+                return errValue;
+            }
+            result = postEventManager->PostTouchEvent(peer->realNode_, std::move(touchEvent));
+            break;
+        }
+        case SELECTOR_ID_1: {
+            auto mouseEventInfo = arkEevent.value1->GetEventInfo();
+            auto mouseEvent = mouseEventInfo->ConvertToMouseEvent();
+            mouseEvent.time = mouseEventInfo->GetTimeStamp();
+            result = postEventManager->PostMouseEvent(peer->realNode_, std::move(mouseEvent));
+            break;
+        }
+        case SELECTOR_ID_2: {
+            auto axisEventInfo = arkEevent.value2->GetEventInfo();
+            auto axisEvent = axisEventInfo->ConvertToAxisEvent();
+            axisEvent.pressedCodes = axisEventInfo->GetPressedKeyCodes();
+            result = postEventManager->PostAxisEvent(peer->realNode_, std::move(axisEvent));
+            break;
+        }
+        default: {
+            result = false;
+            break;
+        }
+    }
+    return Converter::ArkValue<Ark_Boolean>(result);
+}
 Ark_NativePointer SetRootFrameNodeInBuilderNodeImpl(Ark_BuilderNodeOps peer, Ark_NativePointer node)
 {
     auto uiNode = reinterpret_cast<UINode*>(node);
@@ -162,6 +250,7 @@ const GENERATED_ArkUIBuilderNodeOpsAccessor* GetBuilderNodeOpsAccessor()
         BuilderNodeOpsAccessor::SetUpdateConfigurationCallbackImpl,
         BuilderNodeOpsAccessor::SetOptionsImpl,
         BuilderNodeOpsAccessor::PostTouchEventImpl,
+        BuilderNodeOpsAccessor::PostInputEventImpl,
         BuilderNodeOpsAccessor::SetRootFrameNodeInBuilderNodeImpl,
     };
     return &BuilderNodeOpsAccessorImpl;

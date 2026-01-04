@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { TouchEvent, } from "./component/common"
+import { TouchEvent, InputEventType } from './component/common'
 import { Size } from "./Graphics"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Finalizable, InteropNativeModule, KPointer, loadNativeModuleLibrary, nullptr, pointer } from "@koalaui/interop"
@@ -182,6 +182,10 @@ export class BuilderNode<T = undefined> {
     }
     public postTouchEvent(touchEvent: TouchEvent): boolean {
         let ret = this._JSBuilderNode.postTouchEvent(touchEvent);
+        return ret;
+    }
+    public postInputEvent(event: InputEventType): boolean {
+        let ret = this._JSBuilderNode.postInputEvent(event);
         return ret;
     }
     public dispose(): void {
