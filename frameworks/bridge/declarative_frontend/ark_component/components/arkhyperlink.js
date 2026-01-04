@@ -101,6 +101,7 @@ class JSHyperlink extends JSViewAbstract {
     console.log("[Hyperlink] JSHyperlink::create")
     if (params !== undefined) {
       console.log("[Hyperlink] JSHyperlink::create params defined")
+      console.log(`[Hyperlink] JSHyperlink::create ${params.address}, ${params.content}`)
       getUINativeModule().hyperlink.create(params.address, params.content);
     } else {
       console.log("[Hyperlink] JSHyperlink::create params undefined")
@@ -122,6 +123,43 @@ class JSHyperlink extends JSViewAbstract {
   static responseRegion() {
     let node = getUINativeModule().frameNode.getStackTopNode();
     getUINativeModule().hyperlink.responseRegion(node);
+  }
+
+  static pop() {
+    let node = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().hyperlink.pop(node);
+  }
+
+  static onAttach(value) {
+    __Common__.onAttach(value);
+  }
+
+  static onAppear(value) {
+    __Common__.onAppear(value);
+  }
+
+  static onDetach(value) {
+    __Common__.onDetach(value);
+  }
+
+  static onDisAppear(value) {
+    __Common__.onDisAppear(value);
+  }
+
+  static onTouch(value) {
+    __Common__.onTouch(value);
+  }
+
+  static onHover(value) {
+    __Common__.onHover(value);
+  }
+
+  static onKey(value) {
+    __Common__.onKey(value);
+  }
+
+  static onDelete(value) {
+    __Common__.onDelete(value);
   }
 
   static attributeModifier(modifier) {

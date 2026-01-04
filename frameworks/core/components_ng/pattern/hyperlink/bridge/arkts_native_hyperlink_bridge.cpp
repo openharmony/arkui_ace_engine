@@ -29,10 +29,10 @@ constexpr int NUM_2 = 2;
 } // namespace
 
 void HyperlinkBridge::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object, EcmaVM *vm) {
-    LOGE("Start RegisterHyperlinkAttributes nativeModule");
+    LOGI("Start RegisterHyperlinkAttributes nativeModule");
 
     const char* functionNames[] = {
-        "create", "color", "draggable", "responseRegion", "pop"
+        "create", "color", "draggable", "responseRegion", "pop",
     };
 
     Local<JSValueRef> functionValues[] = {
@@ -46,7 +46,7 @@ void HyperlinkBridge::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object
     auto hyperlink = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, functionValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "hyperlink"), hyperlink);
 
-    LOGE("Finish RegisterHyperlinkAttributes nativeModule");
+    LOGI("Finish RegisterHyperlinkAttributes nativeModule");
 }
 
 ArkUINativeModuleValue HyperlinkBridge::Color(ArkUIRuntimeCallInfo* runtimeCallInfo)

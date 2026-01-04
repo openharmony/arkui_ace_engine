@@ -41863,10 +41863,12 @@ if (globalThis.Picker !== undefined) {
 if (globalThis.Hyperlink === undefined) {
   globalThis.Hyperlink = {
     create: function(params) {
+      console.log("[Hyperlink] Hyperlink::create params defined")
       getUINativeModule().loadNativeModule("hyperlink");
       var module = globalThis.requireNapi('arkui.components.arkhyperlink');
       module.exportView();
       if (params !== undefined) {
+        console.log(`[Hyperlink] Hyperlink::create ${params.address}, ${params.content}`)
         getUINativeModule().hyperlink.create(params.address, params.content);
       } else {
         getUINativeModule().hyperlink.create('', '');
