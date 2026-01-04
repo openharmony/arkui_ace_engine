@@ -952,6 +952,9 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest037, TestSize.Level1)
     if (!rosenRenderContext) {
         return;
     }
+    /**
+     * @tc.steps: step1. Set normal shadow.
+     */
     Shadow shadow;
     shadow.SetBlurRadius(1.0);
     shadow.SetOffsetX(1.0);
@@ -960,12 +963,25 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest037, TestSize.Level1)
     rosenRenderContext->OnBackShadowUpdate(shadow);
     auto color = rosenRenderContext->rsNode_->GetStagingProperties().GetShadowColor();
     ASSERT_TRUE(color.AsArgbInt() == Color::BLACK.GetValue());
-    auto offsetX =  rosenRenderContext->rsNode_->GetStagingProperties().GetShadowOffsetY();
+    auto offsetX =  rosenRenderContext->rsNode_->GetStagingProperties().GetShadowOffsetX();
     auto offsetY =  rosenRenderContext->rsNode_->GetStagingProperties().GetShadowOffsetY();
     ASSERT_TRUE(NearEqual(1.0, offsetX));
     ASSERT_TRUE(NearEqual(1.0, offsetY));
     auto isFilled =  rosenRenderContext->rsNode_->GetStagingProperties().GetShadowIsFilled();
     ASSERT_TRUE(isFilled);
+    /**
+     * @tc.steps: step2. Set zero shadow.
+     */
+    Shadow shadow0;
+    shadow0.SetBlurRadius(0.0);
+    shadow0.SetOffset(Offset());
+    rosenRenderContext->UpdateBackShadow(shadow0);
+    auto radius0 = rosenRenderContext->rsNode_->GetStagingProperties().GetShadowRadius();
+    auto offsetX0 = rosenRenderContext->rsNode_->GetStagingProperties().GetShadowOffsetX();
+    auto offsetY0 = rosenRenderContext->rsNode_->GetStagingProperties().GetShadowOffsetY();
+    EXPECT_TRUE(NearEqual(radius0, 0.0f));
+    EXPECT_TRUE(NearEqual(offsetX0, 0.0f));
+    EXPECT_TRUE(NearEqual(offsetY0, 0.0f));
 }
 
 /**
