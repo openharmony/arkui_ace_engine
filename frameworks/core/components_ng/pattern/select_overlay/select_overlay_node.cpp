@@ -88,6 +88,7 @@ constexpr Dimension EXTENSION_MENU_DEFAULT_WIDTH = 224.0_vp;
 constexpr Dimension EXTENSION_MENU_ITEM_DEFAULT_WIDTH = 216.0_vp;
 constexpr Dimension MIN_HOTSPOT_WIDTH = 40.0_vp;
 constexpr float AGING_MIN_SCALE = 1.75f;
+constexpr Dimension MENU_BUTTON_SPACING = 4.0_vp;
 
 std::unordered_map<TextDataDetectType, std::pair<std::string, std::function<bool()>>> AI_TYPE_ID_MAP = {
     { TextDataDetectType::PHONE_NUMBER, std::make_pair(OH_DEFAULT_AI_MENU_PHONE, &TextSystemMenu::IsShowAIPhone) },
@@ -290,6 +291,8 @@ void PreparePasteButtonLayoutProperty(RefPtr<OHOS::Ace::NG::SecurityComponentLay
     buttonWidth = MeasureUtil::MeasureTextWidth(textStyle, buttonContent);
     buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
     if (GreatOrEqual(fontScale, AGING_MIN_SCALE)) {
+        buttonLayoutProperty->UpdateBackgroundTopPadding(MENU_BUTTON_SPACING);
+        buttonLayoutProperty->UpdateBackgroundBottomPadding(MENU_BUTTON_SPACING);
         buttonLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(buttonWidth), std::nullopt });
     } else {
         buttonLayoutProperty->UpdateUserDefinedIdealSize(
@@ -573,18 +576,19 @@ RefPtr<FrameNode> BuildButton(const MenuOptionsParam& menuOption, int32_t overla
     text->MarkModifyDone();
     // Calculate the width of entension option include button padding.
     contentWidth = static_cast<float>(MeasureUtil::MeasureTextWidth(textStyle, data));
+    bool isAging = GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE);
     const auto& padding = textOverlayTheme->GetMenuButtonPadding();
     auto left = CalcLength(padding.Left().ConvertToPx());
     auto right = CalcLength(padding.Right().ConvertToPx());
-    auto top = CalcLength(padding.Top().ConvertToPx());
-    auto bottom = CalcLength(padding.Bottom().ConvertToPx());
+    auto top = isAging ? MENU_BUTTON_SPACING : CalcLength(padding.Top().ConvertToPx());
+    auto bottom = isAging ? MENU_BUTTON_SPACING : CalcLength(padding.Bottom().ConvertToPx());
     contentWidth = contentWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
 
     // Update button property.
     auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, button);
     buttonLayoutProperty->UpdatePadding({ left, right, top, bottom, std::nullopt, std::nullopt });
-    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+    if (isAging) {
         buttonLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(contentWidth), std::nullopt });
     } else {
         buttonLayoutProperty->UpdateUserDefinedIdealSize(
@@ -594,9 +598,10 @@ RefPtr<FrameNode> BuildButton(const MenuOptionsParam& menuOption, int32_t overla
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     BindButtonClickEvent(button, menuOption, overlayId);
     SetResponseRegion(button);
-    if (button->GetPatternPtr<ButtonPattern>()) {
-        button->GetPatternPtr<ButtonPattern>()->SetClickedColor(textOverlayTheme->GetButtonClickedColor());
-        button->GetPatternPtr<ButtonPattern>()->SetBlendColor(textOverlayTheme->GetButtonClickedColor(),
+    if (auto buttonPattern = button->GetPatternPtr<ButtonPattern>(); buttonPattern) {
+        buttonPattern->SetHasCustomPadding(isAging);
+        buttonPattern->SetClickedColor(textOverlayTheme->GetButtonClickedColor());
+        buttonPattern->SetBlendColor(textOverlayTheme->GetButtonClickedColor(),
             textOverlayTheme->GetButtonHoverColor());
     }
     button->MarkModifyDone();
