@@ -3130,6 +3130,13 @@ HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread3, TestSize.Level1
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->StartTwinklingMultiThread();
+    MoveCaretToContentRectData val = {
+        .index = 0,
+        .textAffinity = TextAffinity::DOWNSTREAM,
+        .isEditorValueChanged = true,
+        .moveContent = false
+    };
+    pattern->MoveCaretToContentRectMultiThread(val);
 }
 
 /**

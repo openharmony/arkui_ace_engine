@@ -249,6 +249,9 @@ void TextFieldPattern::MoveCaretToContentRectMultiThread(const MoveCaretToConten
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (selectController_) {
+        selectController_->UpdateCaretIndex(value.index);
+    }
     host->PostAfterAttachMainTreeTask([value, weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
