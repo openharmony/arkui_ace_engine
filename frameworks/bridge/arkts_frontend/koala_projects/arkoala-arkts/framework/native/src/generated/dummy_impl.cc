@@ -30982,6 +30982,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // DragEventAccessor
+    namespace DragUtilsAccessor {
+    Ark_Int64 GetForegroundColorValueImpl(const Ark_ResourceColor* resourceColor)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("GetForegroundColorValue(");
+        WriteToString(&out, resourceColor);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    } // DragUtilsAccessor
     namespace DrawingRenderingContextAccessor {
     void DestroyPeerImpl(Ark_DrawingRenderingContext peer)
     {
@@ -48749,6 +48764,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DragEventPeer {
         virtual ~DragEventPeer() = default;
     };
+    const GENERATED_ArkUIDragUtilsAccessor* GetDragUtilsAccessor()
+    {
+        static const GENERATED_ArkUIDragUtilsAccessor DragUtilsAccessorImpl {
+            DragUtilsAccessor::GetForegroundColorValueImpl,
+        };
+        return &DragUtilsAccessorImpl;
+    }
     const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor()
     {
         static const GENERATED_ArkUIDrawingRenderingContextAccessor DrawingRenderingContextAccessorImpl {
@@ -51547,6 +51569,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetDismissDialogActionAccessor,
             GetDismissPopupActionAccessor,
             GetDragEventAccessor,
+            GetDragUtilsAccessor,
             GetDrawingRenderingContextAccessor,
             GetEnvironmentBackendAccessor,
             GetEventEmulatorAccessor,

@@ -27599,6 +27599,10 @@ typedef struct GENERATED_ArkUIDragEventAccessor {
                                    const Opt_ModifierKeyStateGetter* getModifierKeyState);
 } GENERATED_ArkUIDragEventAccessor;
 
+typedef struct GENERATED_ArkUIDragUtilsAccessor {
+    Ark_Int64 (*GetForegroundColorValue)(const Ark_ResourceColor* resourceColor);
+} GENERATED_ArkUIDragUtilsAccessor;
+
 typedef struct GENERATED_ArkUIDrawingRenderingContextAccessor {
     void (*destroyPeer)(Ark_DrawingRenderingContext peer);
     Ark_DrawingRenderingContext (*construct)(const Opt_LengthMetricsUnit* unit);
@@ -30348,6 +30352,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIDismissDialogActionAccessor* (*getDismissDialogActionAccessor)();
     const GENERATED_ArkUIDismissPopupActionAccessor* (*getDismissPopupActionAccessor)();
     const GENERATED_ArkUIDragEventAccessor* (*getDragEventAccessor)();
+    const GENERATED_ArkUIDragUtilsAccessor* (*getDragUtilsAccessor)();
     const GENERATED_ArkUIDrawingRenderingContextAccessor* (*getDrawingRenderingContextAccessor)();
     const GENERATED_ArkUIEnvironmentBackendAccessor* (*getEnvironmentBackendAccessor)();
     const GENERATED_ArkUIEventEmulatorAccessor* (*getEventEmulatorAccessor)();

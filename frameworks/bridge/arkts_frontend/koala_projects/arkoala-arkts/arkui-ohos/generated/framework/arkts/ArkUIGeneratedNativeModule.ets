@@ -4176,6 +4176,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _DragEvent_setGetModifierKeyState(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _DragUtils_GetForegroundColorValue(thisArray: KSerializerBuffer, thisLength: int32): int64
+    @ani.unsafe.Direct
     native static _DrawingRenderingContext_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _DrawingRenderingContext_getFinalizer(): KPointer
