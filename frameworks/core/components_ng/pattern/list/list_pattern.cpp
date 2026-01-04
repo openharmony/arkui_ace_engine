@@ -199,6 +199,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto predictSnapEndPos = listLayoutAlgorithm->GetPredictSnapEndPosition();
     bool isJump = listLayoutAlgorithm->NeedEstimateOffset();
     auto lanesLayoutAlgorithm = DynamicCast<ListLanesLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    bool prevStackEnd = isStackFromEnd_;
     isStackFromEnd_ = listLayoutAlgorithm->GetStackFromEnd();
     if (lanesLayoutAlgorithm) {
         lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
@@ -208,6 +209,9 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             if (item) {
                 item->ResetSwipeStatus();
             }
+        }
+        if (prevStackEnd != isStackFromEnd_) {
+            lanesItemRange_.clear();
         }
         lanes_ = lanesLayoutAlgorithm->GetLanes();
         laneGutter_ = lanesLayoutAlgorithm->GetLaneGutter();
