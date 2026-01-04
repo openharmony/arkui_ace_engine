@@ -372,6 +372,10 @@ public:
     {
         return false;
     }
+    virtual std::optional<void*> GetRawParagraph()
+    {
+        return std::nullopt;
+    }
 };
 } // namespace OHOS::Ace::NG
 

@@ -71,6 +71,7 @@ class PreviewMenuController;
 enum class Status { DRAGGING, FLOATING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
+using ExternalDrawCallback = std::function<bool(float, float, float, float)>;
 struct SpanNodeInfo {
     RefPtr<UINode> node;
     RefPtr<UINode> containerSpanNode;
@@ -949,6 +950,17 @@ public:
         return true;
     }
 
+    void SetExternalDrawCallback(ExternalDrawCallback&& callback)
+    {
+        externalDrawCallback_ = std::move(callback);
+    }
+
+    const ExternalDrawCallback& GetExternalDrawCallback()
+    {
+        return externalDrawCallback_;
+    }
+    std::optional<void*> GetDrawParagraph();
+
     void UpdateStyledStringByColorMode();
     virtual void MarkContentNodeForRender() {};
     float TextContentAlignOffsetY();
@@ -1327,6 +1339,7 @@ private:
     bool isTryEntityDragging_ = false;
     bool isRegisteredAreaCallback_ = false;
     OffsetF gestureSelectTextPaintOffset_;
+    ExternalDrawCallback externalDrawCallback_;
 
     std::shared_ptr<AnimationUtils::Animation> highlightAppearAnimation_;
     std::shared_ptr<AnimationUtils::Animation> highlightDisappearAnimation_;

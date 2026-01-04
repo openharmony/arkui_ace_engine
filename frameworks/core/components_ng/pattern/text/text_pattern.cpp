@@ -7636,4 +7636,15 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 }
+
+std::optional<void*> TextPattern::GetDrawParagraph()
+{
+    auto paragraphs = GetParagraphs();
+    if (!paragraphs.empty()) {
+        auto drawParagraph = paragraphs.front().paragraph;
+        CHECK_NULL_RETURN(drawParagraph, std::nullopt);
+        return drawParagraph->GetRawParagraph();
+    }
+    return std::nullopt;
+}
 } // namespace OHOS::Ace::NG
