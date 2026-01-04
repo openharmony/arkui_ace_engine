@@ -365,6 +365,8 @@ protected:
     bool CheckOhmUrlValid(const std::string& ohmUrl);
     void ThrowError(const std::string& msg, int32_t code);
 
+    void ThrowRuntimeError(const std::string& msg, int32_t code);
+
     bool TryPreloadNamedRouter(const std::string& name, std::function<void()>&& finishCallback);
     void PushNamedRouteInner(const RouterPageInfo& target);
     void ReplaceNamedRouteInner(const RouterPageInfo& target);
