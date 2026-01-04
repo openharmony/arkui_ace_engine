@@ -95,7 +95,7 @@ public:
      */
     ACE_FORCE_EXPORT bool RemoveItemSilently(ElementIdType elementId);
 
-    void MoveRemovedItems(RemovedElementsType& removedItems);
+    ACE_FORCE_EXPORT void MoveRemovedItems(RemovedElementsType& removedItems);
 
     /**
      * does a complete reset

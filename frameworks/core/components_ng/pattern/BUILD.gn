@@ -174,6 +174,7 @@ build_component_ng("pattern_ng") {
     "grid/grid_layout_info.cpp",
     "grid/grid_layout_property.cpp",
     "grid/grid_model_ng.cpp",
+    "grid/grid_model_ng_multi_thread.cpp",
     "grid/grid_model_static.cpp",
     "grid/grid_paint_method.cpp",
     "grid/grid_pattern.cpp",
@@ -799,6 +800,20 @@ build_component_ng("pattern_ng") {
     "app_bar/interfaces:custom_app_bar",
     "container_modal/interfaces:customtitle",
   ]
+
+ if (enable_player_framework) {
+   sources += [
+     "video/resource/ext_surface.cpp",
+     "video/resource/ext_texture.cpp",
+     "video/resource/player.cpp",
+     "video/resource/resource.cpp",
+     "video/resource/texture.cpp",
+   ]
+
+   if (!build_ohos_sdk) {
+     external_deps += [ "player_framework:media_client" ]
+   }
+ }
 
   if (!build_ohos_sdk && !is_arkui_x) {
     # arkts 1.2

@@ -28,7 +28,7 @@
 #include "core/components/remote_window/remote_window_component.h"
 #include "core/components/scoring/scoring_component.h"
 #include "core/components/text_field/text_field_component.h"
-#include "core/components/video/video_component_v2.h"
+#include "compatible/components/video/video_component_v2.h"
 #include "core/components/web/web_component.h"
 #include "core/components/xcomponent/xcomponent_component.h"
 #include "core/components_v2/list/list_item_component.h"

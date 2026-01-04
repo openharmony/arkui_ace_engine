@@ -684,6 +684,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     auto customNode = BuildSubMenuCustomNode();
     CHECK_NULL_VOID(customNode);
     UpdateSubmenuExpandingMode(customNode);
+    detachedProxy_ = customNode;
     if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
         auto frameNode = GetSubMenu(customNode);
         if (!frameNode) {
@@ -702,9 +703,8 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     auto outterMenuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(outterMenuLayoutProps);
     param.isShowInSubWindow = outterMenuLayoutProps->GetShowInSubWindowValue(false);
-    if (!ParseMenuBlurStyleEffect(param, menuNode->GetRenderContext())) {
-        return;
-    }
+    if (!ParseMenuBlurStyleEffect(param, menuNode->GetRenderContext())) { return; }
+
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
     ParseMenuRadius(param);
     auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), param);
@@ -936,6 +936,7 @@ void MenuItemPattern::OnExpandChanged(const RefPtr<FrameNode>& expandableNode)
         menuPattern->AddEmbeddedMenuItem(host);
     } else {
         HideEmbedded();
+        detachedProxy_ = nullptr;
     }
 }
 
@@ -1156,6 +1157,33 @@ void MenuItemPattern::CloseMenu()
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->UpdateMenuAnimation(menuWrapper);
     menuWrapperPattern->HideMenu();
+}
+
+void MenuItemPattern::HandleCloseSubMenu()
+{
+    CHECK_NULL_VOID(embeddedMenu_);
+    auto menuPattern = embeddedMenu_->GetPattern<MenuPattern>();
+    if (menuPattern) {
+        menuPattern->DoCloseSubMenus();
+    }
+    DoCloseSubMenu();
+}
+
+void MenuItemPattern::DoCloseSubMenu()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChild(embeddedMenu_, true);
+    embeddedMenu_ = nullptr;
+    isExpanded_ = false;
+    this->detachedProxy_ = nullptr;
+    auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    CHECK_NULL_VOID(rightRow);
+    auto imageNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildren().back());
+    CHECK_NULL_VOID(imageNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    imageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
 }
 
 void MenuItemPattern::RegisterOnClick()

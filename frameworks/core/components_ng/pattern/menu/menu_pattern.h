@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/symbol_modifier.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
@@ -347,6 +348,8 @@ public:
     {
         needHideAfterTouch_ = needHideAfterTouch;
     }
+
+    void DoCloseSubMenus() const;
 
     void HideMenu(const HideMenuType& reason)
     {
@@ -746,7 +749,7 @@ protected:
     {
         isNeedDivider_ = false;
     }
-    virtual void InitTheme(const RefPtr<FrameNode>& host);
+    virtual void InitTheme(const RefPtr<FrameNode>& host, const RefPtr<SelectTheme>& theme);
     virtual void UpdateBorderRadius(const RefPtr<FrameNode>& menuNode, const BorderRadiusProperty& borderRadius);
 
 private:
@@ -835,7 +838,7 @@ private:
     std::optional<SelectMakeCallback> makeFunc_;
 
     RefPtr<FrameNode> parentMenuItem_;
-    RefPtr<FrameNode> showedSubMenu_;
+    mutable RefPtr<FrameNode> showedSubMenu_;
     std::vector<RefPtr<FrameNode>> options_;
     std::vector<RefPtr<FrameNode>> menuItems_;
     std::optional<int32_t> foldStatusChangedCallbackId_;
@@ -872,7 +875,7 @@ private:
     bool expandDisplay_ = false;
     RefPtr<FrameNode> lastSelectedItem_ = nullptr;
     bool isEmbedded_ = false;
-    std::vector<RefPtr<FrameNode>> embeddedMenuItems_;
+    mutable std::vector<RefPtr<FrameNode>> embeddedMenuItems_;
     bool isStackSubmenu_ = false;
     bool isNeedDivider_ = false;
     PreviewMenuParam layoutParam_;
@@ -909,7 +912,7 @@ public:
     }
 
 private:
-    void InitTheme(const RefPtr<FrameNode>& host) override;
+    void InitTheme(const RefPtr<FrameNode>& host, const RefPtr<SelectTheme>& theme) override;
     void UpdateBorderRadius(const RefPtr<FrameNode>& menuNode, const BorderRadiusProperty& borderRadius) override;
     uint32_t FindSiblingMenuCount();
     void ApplyDesktopMenuTheme();

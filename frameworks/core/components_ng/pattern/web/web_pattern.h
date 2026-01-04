@@ -187,6 +187,7 @@ public:
     using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using WebNodeInfoCallback = const std::function<void(std::shared_ptr<JsonValue>& jsonNodeArray, int32_t webId)>;
     using TextBlurCallback = std::function<void(int64_t, const std::string)>;
+    using OnMediaCastEnterCallback = std::function<void()>;
     using WebComponentClickCallback = std::function<void(int64_t, const std::string)>;
     using OnWebNativeMessageConnectCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using OnWebNativeMessageDisConnectCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
@@ -376,6 +377,16 @@ public:
     DefaultFileSelectorShowCallback GetDefaultFileSelectorShowCallback()
     {
         return defaultFileSelectorShowCallback_;
+    }
+
+    void SetOnMediaCastEnterCallback(OnMediaCastEnterCallback&& Callback)
+    {
+        onMediaCastEnterCallback_ = std::move(Callback);
+    }
+
+    OnMediaCastEnterCallback GetOnMediaCastEnterCallback()
+    {
+        return onMediaCastEnterCallback_;
     }
 
     PermissionClipboardCallback GetPermissionClipboardCallback() const
@@ -982,7 +993,7 @@ public:
     // WebAgentEventReporter funcs
     RefPtr<WebAgentEventReporter> GetAgentEventReporter();
     // WebAgentEventReporter reference
-    void ReportSelectedText() override;
+    void ReportSelectedText(bool isRegister = false) override;
     std::pair<int32_t, RectF> GetScrollAreaInfoFromDocument(int32_t id);
 
     // Data Detector funcs
@@ -993,12 +1004,15 @@ public:
     void InitSelectDataDetector();
     void InitAIDetectResult();
     void CloseDataDetectorMenu();
+    void HighlightSpecifiedContent(
+        const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) override;
 
     void SetAILinkMenuShow(bool isAILinkMenuShow)
     {
         isAILinkMenuShow_ = isAILinkMenuShow;
     }
 
+    bool CheckCreateImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     void CreateSnapshotImageFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height);
     void RemoveSnapshotFrameNode(bool isAnimate = false);
     void RealRemoveSnapshotFrameNode();
@@ -1036,6 +1050,10 @@ public:
     bool IsTextSelectionEnable()
     {
         return isTextSelectionEnable_;
+    }
+    void SetTextSelectionEnable(bool textSelectionEnable)
+    {
+        isTextSelectionEnable_ = textSelectionEnable;
     }
     void NotifyOverlayRotation();
 protected:
@@ -1385,6 +1403,7 @@ private:
     uint32_t rotation_ = 0;
     SetWebIdCallback setWebIdCallback_ = nullptr;
     SetWebDetachCallback setWebDetachCallback_ = nullptr;
+    OnMediaCastEnterCallback onMediaCastEnterCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
     SetFaviconCallback setFaviconCallback_ = nullptr;

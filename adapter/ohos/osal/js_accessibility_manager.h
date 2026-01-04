@@ -474,6 +474,9 @@ public:
     bool NeedChangeToReadableNode(const RefPtr<NG::FrameNode>& curFrameNode,
         RefPtr<NG::FrameNode>& readableNode) override;
 
+    void ResetBlockedEvent();
+    int32_t GetTreeId(int32_t instanceId = -1) override;
+
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
     void DumpHandleEvent(const std::vector<std::string>& params) override;
@@ -879,6 +882,12 @@ private:
         const int64_t elementId, const Accessibility::AccessibilityFocusMoveParam param,
         const int32_t requestId, Accessibility::AccessibilityElementOperatorCallback &callback);
 
+    void ActAccessibilityActionPreHandle(Accessibility::ActionType action,
+     const RefPtr<NG::FrameNode>& frameNode);
+    bool ActAccessibilityAction(Accessibility::ActionType action,
+        const std::map<std::string, std::string>& actionArguments,
+        RefPtr<NG::AccessibilityProperty> accessibilityProperty, const RefPtr<NG::FrameNode>& frameNode);
+
     std::string callbackKey_;
     uint32_t windowId_ = 0;
     std::unordered_map<uint32_t, std::shared_ptr<JsAccessibilityStateObserver>> stateObserver_;
@@ -923,6 +932,8 @@ private:
     NG::HoverTransparentCallbackController hoverTransparentCallbackController_;
 
     bool isIgnoreAllAction_ = false;
+
+    NG::AccessibilityEventBlockerInAction blockerInAction_;
 };
 
 } // namespace OHOS::Ace::Framework

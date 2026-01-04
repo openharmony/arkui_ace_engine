@@ -167,10 +167,6 @@ abstract class ViewPU extends PUV2ViewBase
     this.localStoragebackStore_ = instance;
   }
 
-  public getElementNameById(elmtId: number): string {
-    return this.updateFuncByElmtId.getElementNameById(elmtId);
-  }
-
   // FIXME
   // indicate if this is  V1 or a V2 component
   // V1 by default, changed to V2 by the first V2 decorated variable
@@ -536,7 +532,7 @@ abstract class ViewPU extends PUV2ViewBase
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number> | undefined): void {
     stateMgmtProfiler.begin('ViewPU.viewPropertyHasChanged');
-    aceDebugTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName,
+    stateMgmtDFX.enableDebug && aceDebugTrace.begin('ViewPU.viewPropertyHasChanged', this.constructor.name, varName,
       dependentElmtIds ? dependentElmtIds.size : 0, this.id__(),
       this.dirtDescendantElementIds_.size, this.runReuse_);
     if (this.isRenderInProgress) {

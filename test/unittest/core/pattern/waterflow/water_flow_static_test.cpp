@@ -59,4 +59,47 @@ HWTEST_F(WaterFlowStaticTest, SetRowsTemplate, TestSize.Level1)
     WaterFlowModelStatic::SetRowsTemplate(AceType::RawPtr(frameNode_), rowsTemplate);
     EXPECT_FALSE(layoutProperty_->GetRowsTemplate().has_value());
 }
+
+/**
+ * @tc.name: ResetItemLayoutConstraint
+ * @tc.desc: Test ResetItemLayoutConstraint function when undefined is passed
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ResetItemLayoutConstraint, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create waterFlow and set initial constraints
+     */
+    WaterFlowModelNG model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(WATER_FLOW_HEIGHT));
+    model.SetScroller(model.CreateScrollController(), model.CreateScrollBarProxy());
+    GetWaterFlow();
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Set valid constraints first
+     * @tc.expected: Constraints should be applied
+     */
+    model.SetItemMinWidth(AceType::RawPtr(frameNode_), Dimension(100.f));
+    model.SetItemMaxWidth(AceType::RawPtr(frameNode_), Dimension(200.f));
+    model.SetItemMinHeight(AceType::RawPtr(frameNode_), Dimension(50.f));
+    model.SetItemMaxHeight(AceType::RawPtr(frameNode_), Dimension(150.f));
+    FlushUITasks();
+
+    EXPECT_TRUE(layoutProperty_->HasItemLayoutConstraint());
+    EXPECT_EQ(model.GetItemMinWidth(AceType::RawPtr(frameNode_)), Dimension(100.f));
+    EXPECT_EQ(model.GetItemMaxWidth(AceType::RawPtr(frameNode_)), Dimension(200.f));
+
+    /**
+     * @tc.steps: step3. Call ResetItemLayoutConstraint
+     * @tc.expected: All constraints should be cleared
+     */
+    WaterFlowModelStatic::ResetItemLayoutConstraint(AceType::RawPtr(frameNode_));
+    FlushUITasks();
+
+    EXPECT_FALSE(layoutProperty_->HasItemLayoutConstraint());
+}
 } // namespace OHOS::Ace::NG

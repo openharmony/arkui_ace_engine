@@ -131,16 +131,11 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
     };
 
     const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-    let manager = uiContext.stateMgr;
-    if (manager === undefined) {
-        manager = GlobalStateManager.instance;
-    }
+    const manager = GlobalStateManager.instance;
 
     ArkThemeScopeManager.getInstance().applyColorModeFromThemeScope();
     
     const node = manager.updatableNode(new IncrementalNode(), (context: StateContext) => {
-        const frozen = manager.frozen;
-        manager.frozen = true;
         ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
         let r = OBSERVE.renderingComponent;
         OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
@@ -149,7 +144,6 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
         setNeedCreate(needCreate);
         OBSERVE.renderingComponent = r;
         ArkUIAniModule._Common_Restore_InstanceId();
-        manager.frozen = frozen;
     });
 
     const inc = node.value;
@@ -497,21 +491,15 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
                 }
             }
         } else {
-            const target = (reflect.Value.of(rawValue) as ClassValue).getFieldByName('@target').getData() as Object;
-            const keys = Object.keys(target);
-            if (rawValue instanceof IObservedObject) {
-                const PREFIX = '__backing_';
-                keys.forEach((key)=>{
-                    if(key.startsWith(PREFIX)){
-                        const value = (reflect.Value.of(target) as ClassValue).getFieldByName(key).getData() as Object;
-                        stateParam.setProperty(key.slice(PREFIX.length), value);
-                        invokeObserveFireChange.invoke(stateParam, ESValue.wrap(key.slice(PREFIX.length)));
-                    }
-                })
+            if (!Object.keys(rawValue as Object).includes('handler')) {
+                return;
             } else {
-                keys.forEach((key)=>{
+                const handler = (reflect.Value.of(rawValue) as ClassValue).getFieldByName('handler').getData() as Object;
+                const target = (reflect.Value.of(handler) as ClassValue).getFieldByName('_target').getData() as Object;
+                const keys = Object.keys(target);
+                keys.forEach((key) => {
                     const value = (reflect.Value.of(target) as ClassValue).getFieldByName(key).getData() as Object;
-                    stateParam.setProperty(key, value);
+                    stateParam.setProperty(ESValue.wrap(key), ESValue.wrap(value));
                     invokeObserveFireChange.invoke(stateParam, ESValue.wrap(key));
                 })
             }
@@ -532,20 +520,14 @@ export function transferCompatibleBuilder<T extends Function>(
         };
 
         const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-        let manager = uiContext.stateMgr;
-        if (manager === undefined) {
-            manager = GlobalStateManager.instance;
-        }
+        const manager = GlobalStateManager.instance;
         const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
-            const frozen = manager.frozen;
-            manager.frozen = true;
             ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
             let r = OBSERVE.renderingComponent;
             OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
             memoEntry<void>(context, 0, func);
             OBSERVE.renderingComponent = r;
             ArkUIAniModule._Common_Restore_InstanceId();
-            manager.frozen = frozen;
         });
 
         const ptr = node.value.peer.ptr;
@@ -576,20 +558,14 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
             }
         }
         const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-        let manager = uiContext.stateMgr;
-        if (manager === undefined) {
-            manager = GlobalStateManager.instance;
-        }
+        const manager = GlobalStateManager.instance;
         const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
-            const frozen = manager.frozen;
-            manager.frozen = true;
             ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
             let r = OBSERVE.renderingComponent;
             OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
             memoEntry1<T, void>(context, 0, builder, args);
             OBSERVE.renderingComponent = r;
             ArkUIAniModule._Common_Restore_InstanceId();
-            manager.frozen = frozen;
         });
         const ptr = node.value.peer.ptr;
         uiContext.getDetachedRootEntryManager().detachedRoots_.set(ptr, new DetachedRootEntryImpl<PeerNode>(node));
@@ -614,7 +590,7 @@ function makeBuilderParameterStaticProxy<T extends Object>(name: string, value: 
  * through hook functions, thereby enabling it to refresh the 1.2 UI.
  */
 function updateDynamicObjectForInterop(args: Any): MutableState<int32> | undefined {
-    let state: MutableState<int32> = StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
+    let state: MutableState<int32> = GlobalStateManager.instance.mutableState<int32>(0, true);
     const startHookFunc = ESValue.getGlobal().getProperty('startStaticHook');
     const result = startHookFunc.invoke(ESValue.wrap(args), ESValue.wrap(()=>{ state.value })).unwrap();
     if (result === undefined) {
@@ -628,7 +604,7 @@ class InteropBuilderLiteralProxyHandler<T extends Object> extends proxy.DefaultP
     state: MutableState<int32>;
     constructor(source: Any) {
         this.source = ESValue.wrap(source)
-        this.state = StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
+        this.state = GlobalStateManager.instance.mutableState<int32>(0, true);
     }
 
     override get(target: T, name: string): Any {
@@ -1080,7 +1056,7 @@ export function enableCompatibleObservedV2ForStatic<T>(
 ): T {
     let method = ESValue.getGlobal().getProperty('enableCompatibleObservedV2ForStatic');
     let createStaticState = () => {
-        return StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
+        return GlobalStateManager.instance.mutableState<int32>(0, true);
     }
     let recordStaticState = (value: MutableState<int32>) => {
         value.value

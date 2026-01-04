@@ -64,7 +64,7 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
     fingerList_.clear();
     lastPointEvent_.reset();
     auto maxTimeStamp = TimeStamp::min().time_since_epoch().count();
-    std::unordered_map<int32_t, FingerInfo> latestTouchPoints;
+    std::map<int32_t, FingerInfo> latestTouchPoints;
     std::unordered_map<int32_t, uint64_t> latestTimeStamps;
     for (const auto& point : touchPoints_) {
         if (CheckFingerListInDownFingers(point.second.id)) {
@@ -205,5 +205,14 @@ std::string MultiFingersRecognizer::DumpGestureInfo() const
     }
     infoStr.append("]");
     return infoStr;
+}
+
+int32_t MultiFingersRecognizer::GetOriginalTouchPointsSize() const
+{
+    std::set<int32_t> originalIds;
+    for (const auto& point : touchPoints_) {
+        originalIds.insert(point.second.originalId);
+    }
+    return static_cast<int32_t>(originalIds.size());
 }
 } // namespace OHOS::Ace::NG

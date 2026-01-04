@@ -1892,4 +1892,23 @@ HWTEST_F(ListPatternTestNg, CustomizeSafeAreaPadding002, TestSize.Level1)
     EXPECT_EQ(padding.left, std::nullopt);
     EXPECT_EQ(padding.right, std::nullopt);
 }
+
+/**
+ * @tc.name: IsFreeScrollTest001
+ * @tc.desc: Test IsFreeScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, IsFreeScrollTest001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listPattern);
+    ASSERT_NE(listNode, nullptr);
+    model.SetListDirection(Axis::FREE);
+    auto scrollBarProxy = listPattern->GetScrollBarProxy();
+    CHECK_NULL_VOID(scrollBarProxy);
+
+    EXPECT_FALSE(scrollBarProxy->IsFreeScroll());
+}
 } // namespace OHOS::Ace::NG

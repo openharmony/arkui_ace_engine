@@ -6083,6 +6083,19 @@ void ViewAbstract::SetRenderGroup(bool isRenderGroup)
     frameNode->SetApplicationRenderGroupMarked(true);
 }
 
+void ViewAbstract::SetAdaptiveGroup(bool isRenderGroup, bool adaptive)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    const auto& ctx = frameNode->GetRenderContext();
+    if (ctx) {
+        ctx->UpdateAdaptiveGroup(isRenderGroup, adaptive);
+    }
+}
+
 void ViewAbstract::SetExcludeFromRenderGroup(bool exclude)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -10365,9 +10378,9 @@ void ViewAbstract::ResetResObj(const std::string& key)
 int32_t ViewAbstract::GetWindowWidthBreakpoint()
 {
     auto container = Container::Current();
-    CHECK_NULL_RETURN(container, -1);
+    CHECK_NULL_RETURN(container, -2); // container is null
     auto window = container->GetWindow();
-    CHECK_NULL_RETURN(window, -1);
+    CHECK_NULL_RETURN(window, -3); // window is null
     double density = PipelineBase::GetCurrentDensity();
     double width = 0.0;
     if (NearZero(density)) {
@@ -10393,9 +10406,9 @@ int32_t ViewAbstract::GetWindowWidthBreakpoint()
 int32_t ViewAbstract::GetWindowHeightBreakpoint()
 {
     auto container = Container::Current();
-    CHECK_NULL_RETURN(container, -1);
+    CHECK_NULL_RETURN(container, -2); // container is null
     auto window = container->GetWindow();
-    CHECK_NULL_RETURN(window, -1);
+    CHECK_NULL_RETURN(window, -3); // window is null
     auto width = window->GetCurrentWindowRect().Width();
     auto height = window->GetCurrentWindowRect().Height();
     auto aspectRatio = 0.0;

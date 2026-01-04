@@ -740,16 +740,6 @@ const char DOM_REFRESH_PROGRESS_COLOR[] = "progressColor";
 const char DOM_REFRESH_EVENT_PULL_DOWN[] = "pulldown";
 const char DOM_REFRESH_TIME_OFFSET[] = "timeoffset";
 
-// rating attribute and style constants
-const char DOM_STAR_NUM[] = "numstars";
-const char DOM_RATING_SCORE[] = "rating";
-const char DOM_RATING_STEP[] = "stepsize";
-const char DOM_RATING_INDICATOR[] = "indicator";
-const char DOM_BACKGROUND_SRC[] = "starBackground";
-const char DOM_FOREGROUND_SRC[] = "starForeground";
-const char DOM_SECONDARY_SRC[] = "starSecondary";
-const char DOM_RTL_FLIP[] = "rtlFlip";
-
 // marquee attribute and style constants
 const char DOM_MARQUEE_LOOP[] = "loop";
 const char DOM_MARQUEE_SCROLL_AMOUNT[] = "scrollamount";
@@ -836,33 +826,6 @@ const char DOM_ROTATION[] = "rotation";
 const char DOM_ANIMATION_FINISH[] = "animationfinish";
 
 // video constants
-const char DOM_VIDEO_MUTED[] = "muted";
-const char DOM_VIDEO_SRC[] = "src";
-const char DOM_VIDEO_AUTOPLAY[] = "autoplay";
-const char DOM_VIDEO_POSTER[] = "poster";
-const char DOM_VIDEO_CONTROLS[] = "controls";
-const char DOM_VIDEO_FIT[] = "objectFit";
-const char DOM_VIDEO_LOOP[] = "loop";
-const char DOM_VIDEO_START_TIME[] = "starttime";
-const char DOM_VIDEO_EVENT_PREPARED[] = "prepared";
-const char DOM_VIDEO_EVENT_START[] = "start";
-const char DOM_VIDEO_EVENT_PAUSE[] = "pause";
-const char DOM_VIDEO_EVENT_STOP[] = "stop";
-const char DOM_VIDEO_EVENT_FINISH[] = "finish";
-const char DOM_VIDEO_EVENT_ERROR[] = "error";
-const char DOM_VIDEO_EVENT_SEEKING[] = "seeking";
-const char DOM_VIDEO_EVENT_SEEKED[] = "seeked";
-const char DOM_VIDEO_EVENT_TIMEUPDATE[] = "timeupdate";
-const char DOM_VIDEO_EVENT_FULLSCREENCHANGE[] = "fullscreenchange";
-const char DOM_VIDEO_METHOD_START[] = "start";
-const char DOM_VIDEO_METHOD_PAUSE[] = "pause";
-const char DOM_VIDEO_METHOD_STOP[] = "stop";
-const char DOM_VIDEO_METHOD_SEEK_TO[] = "setCurrentTime";
-const char DOM_VIDEO_METHOD_REQUEST_FULLSCREEN[] = "requestFullscreen";
-const char DOM_VIDEO_METHOD_EXIT_FULLSCREEN[] = "exitFullscreen";
-const char DOM_VIDEO_SPEED[] = "speed";
-const char DOM_VIDEO_DIRECTION[] = "direction";
-const char DOM_VIDEO_POSITION[] = "objectPosition";
 const char DOM_VIDEO_POSITION_LEFT[] = "left";
 const char DOM_VIDEO_POSITION_CENTER[] = "center";
 const char DOM_VIDEO_POSITION_RIGHT[] = "right";
@@ -1115,14 +1078,6 @@ const char DOM_TOOL_BAR_ITEM_ALLOW_SCALE[] = "allowScale";
 const char DOM_TRANSITION_EFFECT[] = "transitionEffect";
 const char DOM_TRANSITION_CARD_COMPOSEID[] = "ref";
 const char DOM_TRANSITION_CARD_PARAMS[] = "paramsData";
-
-// qrcode
-const char DOM_QRCODE_BACKGROUND_COLOR[] = "backgroundColor";
-const char DOM_QRCODE_COLOR[] = "color";
-const char DOM_QRCODE_HEIGHT[] = "height";
-const char DOM_QRCODE_WIDTH[] = "width";
-const char DOM_QRCODE_TYPE[] = "type";
-const char DOM_QRCODE_VALUE[] = "value";
 
 // svg
 const char DOM_SVG_ID[] = "svgId";

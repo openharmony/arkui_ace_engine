@@ -163,7 +163,7 @@ public:
 
     void ClearFocusState() override;
 
-    const std::shared_ptr<Rosen::RSNode>& GetRSNode();
+    ACE_FORCE_EXPORT const std::shared_ptr<Rosen::RSNode>& GetRSNode();
 
     void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode);
 
@@ -542,6 +542,9 @@ public:
 
     bool IsOnRenderTree() override
     {
+        if (!rsNode_) {
+            return false;
+        }
         return rsNode_->GetIsOnTheTree();
     }
 
@@ -641,6 +644,7 @@ protected:
     void OnUseShadowBatchingUpdate(bool useShadowBatching) override;
     void OnFreezeUpdate(bool isFreezed) override;
     void OnRenderGroupUpdate(bool isRenderGroup) override;
+    void UpdateAdaptiveGroup(bool isRenderGroup, bool useAdaptiveFilter) override;
     void OnSuggestedRenderGroupUpdate(bool isRenderGroup) override;
     void OnExcludeFromRenderGroupUpdate(bool exclude) override;
     void OnRenderFitUpdate(RenderFit renderFit) override;

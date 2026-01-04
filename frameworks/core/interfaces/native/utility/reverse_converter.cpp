@@ -763,6 +763,7 @@ std::optional<OHOS::Ace::NG::BorderRadiusProperty> ParseBorderRadiusString(const
         borderRadius.radiusTopRight = Dimension::FromString(json->GetString("topRight"));
         borderRadius.radiusBottomLeft = Dimension::FromString(json->GetString("bottomLeft"));
         borderRadius.radiusBottomRight = Dimension::FromString(json->GetString("bottomRight"));
+        borderRadius.multiValued = true;
     } else {
         LOGE("Unexpected Border Radius String:%{public}s", ss.c_str());
         return std::nullopt;
@@ -781,10 +782,11 @@ void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src)
     auto borderRadius = ParseBorderRadiusString(src.borderRadius);
     CHECK_NULL_VOID(borderRadius.has_value());
     if (borderRadius->multiValued) {
-        auto arkBorder = ArkValue<Ark_BorderRadiuses>(borderRadius.value());
-        dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(arkBorder);
+        auto arkBorder = ArkValue<Ark_BorderRadiuses>(borderRadius.value(), Converter::FC);
+        dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(arkBorder, Converter::FC);
     } else {
-        dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Dimension>(borderRadius->radiusTopLeft);
+        dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_Dimension>(borderRadius->radiusTopLeft,
+            Converter::FC);
     }
 }
 

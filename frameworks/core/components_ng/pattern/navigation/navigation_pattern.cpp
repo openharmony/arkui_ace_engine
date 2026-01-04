@@ -2820,20 +2820,23 @@ void NavigationPattern::AddDividerHotZoneRect()
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    auto navBarOrHomeDestNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarOrHomeDestinationNode());
-    CHECK_NULL_VOID(navBarOrHomeDestNode);
-    auto geometryNode = navBarOrHomeDestNode->GetGeometryNode();
+    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(GetDividerNode());
+    CHECK_NULL_VOID(dividerFrameNode);
+    auto geometryNode = dividerFrameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
 
     OffsetF hotZoneOffset;
     hotZoneOffset.SetX(-DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
-    hotZoneOffset.SetY(DEFAULT_DIVIDER_START_MARGIN.ConvertToPx());
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto dividerStart = layoutProperty->GetDividerStartMargin().value_or(DEFAULT_DIVIDER_START_MARGIN).ConvertToPx();
+    hotZoneOffset.SetY(dividerStart);
     SizeF hotZoneSize;
     hotZoneSize.SetWidth(realDividerWidth_ + DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM *
                                                  DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
     hotZoneSize.SetHeight(geometryNode->GetFrameSize().Height());
     DimensionRect hotZoneRegion;
-    auto paintHeight = GetPaintRectHeight(navBarOrHomeDestNode);
+    auto paintHeight = GetPaintRectHeight(dividerFrameNode);
     if (navigationMode_ == NavigationMode::STACK || enableDragBar_) {
         hotZoneRegion.SetSize(DimensionSize(Dimension(0.0f), Dimension(0.0f)));
     } else {
@@ -2845,8 +2848,6 @@ void NavigationPattern::AddDividerHotZoneRect()
     std::vector<DimensionRect> mouseRegion;
     mouseRegion.emplace_back(hotZoneRegion);
 
-    auto dividerFrameNode = GetDividerNode();
-    CHECK_NULL_VOID(dividerFrameNode);
     auto dividerGestureHub = dividerFrameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(dividerGestureHub);
     dividerGestureHub->SetMouseResponseRegion(mouseRegion);
@@ -3340,7 +3341,7 @@ void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNav
 
 void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& navigationStack, bool needUpdateCallback)
 {
-    if (navigationStack_) {
+    if (navigationStack_ && needUpdateCallback) {
         navigationStack_->SetOnStateChangedCallback(nullptr);
     }
     navigationStack_ = navigationStack;
@@ -4374,7 +4375,6 @@ bool NavigationPattern::ExecuteAddAnimation(RefPtr<NavDestinationGroupNode> preT
         proxy->SetIsFinished(true);
         // update pre navigation stack
         ACE_SCOPED_TRACE_COMMERCIAL("navigation page custom transition end");
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
         pattern->LoadCompleteManagerStopCollect();
         pattern->ClearRecoveryList();
         pattern->OnCustomAnimationFinish(preDestination, topDestination, isPopPage);
@@ -4406,7 +4406,7 @@ bool NavigationPattern::ExecuteAddAnimation(RefPtr<NavDestinationGroupNode> preT
         [weakProxy = WeakPtr<NavigationTransitionProxy>(proxy)] {
             auto transitionProxy = weakProxy.Upgrade();
             CHECK_NULL_VOID(transitionProxy);
-            transitionProxy->FireFinishCallback();
+            transitionProxy->FireFinishCallback(true);
         },
         TaskExecutor::TaskType::UI, timeout, "ArkUINavigationTransitionProxyFinish");
     return true;
@@ -5823,6 +5823,8 @@ void NavigationPattern::AdjustNodeForNonDestForceSplit(bool needFireLifecycle)
     CHECK_NULL_VOID(navContentNode);
     auto primaryContentNode = AceType::DynamicCast<FrameNode>(host->GetPrimaryContentNode());
     CHECK_NULL_VOID(primaryContentNode);
+    auto primaryProperty = primaryContentNode->GetLayoutProperty();
+    CHECK_NULL_VOID(primaryProperty);
 
     if (needFireLifecycle) {
         FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_HIDE, NavDestVisibilityChangeReason::TRANSITION);
@@ -5841,6 +5843,7 @@ void NavigationPattern::AdjustNodeForNonDestForceSplit(bool needFireLifecycle)
         bool hideNavBar = navProperty->GetHideNavBarValue(false);
         navBarProperty->UpdateVisibility(hideNavBar ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
     }
+    primaryProperty->UpdateVisibility(VisibleType::INVISIBLE);
     bool placeHolderIsVisible = forceSplitSuccess_ && stackNodePairs.empty();
     UpdateNavContentAndChildVisibility(navContentNode, !placeHolderIsVisible);
     UpdatePlaceholderOrRelatedPageVisible(placeHolderIsVisible);

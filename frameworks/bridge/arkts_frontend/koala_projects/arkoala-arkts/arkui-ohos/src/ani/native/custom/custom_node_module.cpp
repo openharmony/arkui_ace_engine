@@ -259,8 +259,11 @@ void NativeCustomComponent::CustomNodeAddChild(ani_env* env, [[maybe_unused]] an
 {
     Ark_NodeHandle parentNode = reinterpret_cast<Ark_NodeHandle>(parent);
     Ark_NodeHandle childNode = reinterpret_cast<Ark_NodeHandle>(child);
-    GetArkUIBasicNodeAPI()->addChild(parentNode, childNode);
-    GetArkUIBasicNodeAPI()->markDirty(parentNode, 0);
+    auto basicNodeAPI = GetArkUIBasicNodeAPI();
+    if (basicNodeAPI) {
+        basicNodeAPI->addChild(parentNode, childNode);
+        basicNodeAPI->markDirty(parentNode, 0);
+    }
 }
 
 } // namespace OHOS::Ace::Ani

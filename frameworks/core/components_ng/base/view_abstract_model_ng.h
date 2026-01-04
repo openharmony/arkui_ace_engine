@@ -936,6 +936,11 @@ public:
         ViewAbstract::SetRenderGroup(isRenderGroup);
     }
 
+    void SetAdaptiveGroup(bool isRenderGroup, bool adaptive) override
+    {
+        ViewAbstract::SetAdaptiveGroup(isRenderGroup, adaptive);
+    }
+
     void SetExcludeFromRenderGroup(bool exclude) override
     {
         ViewAbstract::SetExcludeFromRenderGroup(exclude);
@@ -1553,6 +1558,7 @@ public:
 
     static void ResetKeyboardShortcutAll(FrameNode* frameNode)
     {
+        CHECK_NULL_VOID(frameNode);
         auto eventHub = frameNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->ClearSingleKeyboardShortcutAll();
@@ -1618,6 +1624,8 @@ public:
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
     void SetBackground(std::function<void()>&& buildFunc) override;
+    void SetBackgroundWithResourceObj(
+        std::function<void()>&& buildFunc, const RefPtr<ResourceObject>& resObj) override;
     void SetBackgroundAlign(const Alignment& align) override
     {
         NG::ViewAbstract::SetBackgroundAlign(align);
@@ -1743,6 +1751,11 @@ public:
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
+    }
+
+    void ResetColorPicker() override
+    {
+        ViewAbstract::BindColorPicker(ColorPlaceholder::FOREGROUND, ColorPickStrategy::NONE);
     }
 
     void SetForegroundEffect(float radius) override

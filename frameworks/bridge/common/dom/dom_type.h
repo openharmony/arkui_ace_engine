@@ -744,16 +744,6 @@ ACE_EXPORT extern const char DOM_REFRESH_PROGRESS_COLOR[];
 ACE_EXPORT extern const char DOM_REFRESH_EVENT_PULL_DOWN[];
 ACE_EXPORT extern const char DOM_REFRESH_TIME_OFFSET[];
 
-// rating attribute and style constants
-ACE_EXPORT extern const char DOM_STAR_NUM[];
-ACE_EXPORT extern const char DOM_RATING_SCORE[];
-ACE_EXPORT extern const char DOM_RATING_STEP[];
-ACE_EXPORT extern const char DOM_RATING_INDICATOR[];
-ACE_EXPORT extern const char DOM_BACKGROUND_SRC[];
-ACE_EXPORT extern const char DOM_FOREGROUND_SRC[];
-ACE_EXPORT extern const char DOM_SECONDARY_SRC[];
-ACE_EXPORT extern const char DOM_RTL_FLIP[];
-
 // marquee attribute and style constants
 ACE_EXPORT extern const char DOM_MARQUEE_LOOP[];
 ACE_EXPORT extern const char DOM_MARQUEE_SCROLL_AMOUNT[];
@@ -790,7 +780,7 @@ ACE_EXPORT extern const char DOM_NAVIGATION_BAR_EVENT_START_CLICK[];
 ACE_EXPORT extern const char DOM_NAVIGATION_BAR_EVENT_END_CLICK[];
 
 // common event list
-ACE_EXPORT extern const char DOM_CHANGE[];
+ACE_FORCE_EXPORT extern const char DOM_CHANGE[];
 ACE_EXPORT extern const char DOM_TOUCH_START[];
 ACE_EXPORT extern const char DOM_TOUCH_MOVE[];
 ACE_EXPORT extern const char DOM_TOUCH_CANCEL[];
@@ -840,33 +830,6 @@ ACE_EXPORT extern const char DOM_ROTATION[];
 ACE_EXPORT extern const char DOM_ANIMATION_FINISH[];
 
 // video constants
-ACE_EXPORT extern const char DOM_VIDEO_MUTED[];
-ACE_EXPORT extern const char DOM_VIDEO_SRC[];
-ACE_EXPORT extern const char DOM_VIDEO_AUTOPLAY[];
-ACE_EXPORT extern const char DOM_VIDEO_POSTER[];
-ACE_EXPORT extern const char DOM_VIDEO_CONTROLS[];
-ACE_EXPORT extern const char DOM_VIDEO_FIT[];
-ACE_EXPORT extern const char DOM_VIDEO_LOOP[];
-ACE_EXPORT extern const char DOM_VIDEO_START_TIME[];
-ACE_EXPORT extern const char DOM_VIDEO_EVENT_PREPARED[];
-ACE_EXPORT extern const char DOM_VIDEO_EVENT_START[];
-ACE_EXPORT extern const char DOM_VIDEO_EVENT_PAUSE[];
-ACE_EXPORT extern const char DOM_VIDEO_EVENT_STOP[];
-ACE_EXPORT extern const char DOM_VIDEO_EVENT_FINISH[];
-ACE_EXPORT extern const char DOM_VIDEO_EVENT_ERROR[];
-ACE_EXPORT extern const char DOM_VIDEO_EVENT_SEEKING[];
-ACE_EXPORT extern const char DOM_VIDEO_EVENT_SEEKED[];
-ACE_EXPORT extern const char DOM_VIDEO_EVENT_TIMEUPDATE[];
-ACE_EXPORT extern const char DOM_VIDEO_EVENT_FULLSCREENCHANGE[];
-ACE_EXPORT extern const char DOM_VIDEO_METHOD_START[];
-ACE_EXPORT extern const char DOM_VIDEO_METHOD_PAUSE[];
-ACE_EXPORT extern const char DOM_VIDEO_METHOD_STOP[];
-ACE_EXPORT extern const char DOM_VIDEO_METHOD_SEEK_TO[];
-ACE_EXPORT extern const char DOM_VIDEO_METHOD_REQUEST_FULLSCREEN[];
-ACE_EXPORT extern const char DOM_VIDEO_METHOD_EXIT_FULLSCREEN[];
-ACE_EXPORT extern const char DOM_VIDEO_SPEED[];
-ACE_EXPORT extern const char DOM_VIDEO_DIRECTION[];
-ACE_EXPORT extern const char DOM_VIDEO_POSITION[];
 ACE_EXPORT extern const char DOM_VIDEO_POSITION_LEFT[];
 ACE_EXPORT extern const char DOM_VIDEO_POSITION_CENTER[];
 ACE_EXPORT extern const char DOM_VIDEO_POSITION_RIGHT[];
@@ -1119,14 +1082,6 @@ ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_ALLOW_SCALE[];
 ACE_EXPORT extern const char DOM_TRANSITION_EFFECT[];
 ACE_EXPORT extern const char DOM_TRANSITION_CARD_COMPOSEID[];
 ACE_EXPORT extern const char DOM_TRANSITION_CARD_PARAMS[];
-
-// qrcode
-ACE_EXPORT extern const char DOM_QRCODE_BACKGROUND_COLOR[];
-ACE_EXPORT extern const char DOM_QRCODE_COLOR[];
-ACE_EXPORT extern const char DOM_QRCODE_HEIGHT[];
-ACE_EXPORT extern const char DOM_QRCODE_WIDTH[];
-ACE_EXPORT extern const char DOM_QRCODE_TYPE[];
-ACE_EXPORT extern const char DOM_QRCODE_VALUE[];
 
 // svg
 ACE_EXPORT extern const char DOM_SVG_ID[];

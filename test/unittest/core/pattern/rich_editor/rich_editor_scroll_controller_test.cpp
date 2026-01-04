@@ -333,11 +333,18 @@ HWTEST_F(RichEditorScrollControllerTest, ScheduleAutoScroll003, TestSize.Level0)
  */
 HWTEST_F(RichEditorScrollControllerTest, StopAutoScroll001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get RichEditorPattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. check isAutoScrollRunning_
+     */
     auto& scrollController = richEditorPattern->scrollController_;
+    EXPECT_FALSE(scrollController->isAutoScrollRunning_);
     scrollController->isAutoScrollRunning_ = true;
     scrollController->StopAutoScroll();
     EXPECT_FALSE(scrollController->isAutoScrollRunning_);

@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -46,55 +48,67 @@ struct OpenPopupOptionsIndex {
         .textAlign(TextAlign.Center)
         .width('100%')
         .backgroundColor(0x0000FF)
-      Button("outlineWidth")
+      Button('outlineWidth')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
           this.getUIContext().getRouter().pushUrl({ url: 'pages/components/popup_static/openPopup/outlineWidth' });
         })
-      Button("borderWidth")
+      Button('borderWidth')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
           this.getUIContext().getRouter().pushUrl({ url: 'pages/components/popup_static/openPopup/borderWidth' });
         })
-      Button("outlineLinearGradient")
+      Button('outlineLinearGradient')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/popup_static/openPopup/outlineLinearGradient' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/popup_static/openPopup/outlineLinearGradient' });
         })
-      Button("outlineLinearGradient_direction")
+      Button('outlineLinearGradient_direction')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/popup_static/openPopup/outlineLinearGradientDirection' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/popup_static/openPopup/outlineLinearGradientDirection' });
         })
-      Button("outlineLinearGradient_colors")
+      Button('outlineLinearGradient_colors')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/popup_static/openPopup/outlineLinearGradientColors' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/popup_static/openPopup/outlineLinearGradientColors' });
         })
-      Button("borderLinearGradient")
+      Button('borderLinearGradient')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/popup_static/openPopup/borderLinearGradient' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/popup_static/openPopup/borderLinearGradient' });
         })
-      Button("borderLinearGradient_direction")
+      Button('borderLinearGradient_direction')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/popup_static/openPopup/borderLinearGradientDirection' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/popup_static/openPopup/borderLinearGradientDirection' });
         })
-      Button("borderLinearGradient_colors")
+      Button('borderLinearGradient_colors')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {
-          this.getUIContext().getRouter().pushUrl({ url: 'pages/components/popup_static/openPopup/borderLinearGradientColors' });
+          this.getUIContext()
+            .getRouter()
+            .pushUrl({ url: 'pages/components/popup_static/openPopup/borderLinearGradientColors' });
         })
-      Button("avoidTarget")
+      Button('avoidTarget')
         .margin(10)
         .width('80%')
         .onClick((e: ClickEvent) => {

@@ -6841,6 +6841,12 @@ void RosenRenderContext::OnRenderGroupUpdate(bool isRenderGroup)
     rsNode_->MarkNodeGroup(isRenderGroup);
 }
 
+void RosenRenderContext::UpdateAdaptiveGroup(bool isRenderGroup, bool useAdaptiveFilter)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkNodeGroup(isRenderGroup, true, false, useAdaptiveFilter);
+}
+
 void RosenRenderContext::UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty)
 {
     CHECK_NULL_VOID(rsNode_);

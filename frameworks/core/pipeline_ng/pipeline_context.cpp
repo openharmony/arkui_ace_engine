@@ -56,7 +56,6 @@
 #include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/text_field_manager.h"
-#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/node_render_status_monitor.h"
 #include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/base/ui_node_gc.h"
@@ -304,7 +303,7 @@ void PipelineContext::ReportSelectedText()
     CHECK_NULL_VOID(id != -1);
     auto node = AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(id));
     CHECK_NULL_VOID(node);
-    node->ReportSelectedText();
+    node->ReportSelectedText(true);
 }
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
@@ -962,6 +961,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     }
     FlushWindowPatternInfo();
     InspectDrew();
+    InspectLayoutChildren();
     UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
     if (onShow_ && onFocus_ && isWindowHasFocused_) {
         auto isDynamicRender = Container::Current() == nullptr ? false : Container::Current()->IsDynamicRender();
@@ -993,6 +993,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         isNeedFlushAnimationStartTime_ = false;
     }
     needRenderNode_.clear();
+    needRenderNodeByUniqueId_.clear();
     taskScheduler_->FlushAfterRenderTask();
     window_->FlushLayoutSize(width_, height_);
     if (IsFocusWindowIdSetted()) {
@@ -1019,6 +1020,22 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     if (contentChangeMgr_) {
         contentChangeMgr_->OnVsyncEnd(rootNode_->GetRectWithRender());
     }
+}
+
+void PipelineContext::UpdateDrawLayoutChildObserver(
+    int32_t uniqueId, bool isClearLayoutObserver, bool isClearDrawObserver)
+{
+    auto uiNode = ElementRegister::GetInstance()->GetUINodeById(uniqueId);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->UpdateDrawLayoutChildObserver(isClearLayoutObserver, isClearDrawObserver);
+}
+
+void PipelineContext::UpdateDrawLayoutChildObserver(
+    const std::string& inspectorKey, bool isClearLayoutObserver, bool isClearDrawObserver)
+{
+    auto frameNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(inspectorKey);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->UpdateDrawLayoutChildObserver(isClearLayoutObserver, isClearDrawObserver);
 }
 
 void PipelineContext::FlushMouseEventVoluntarily()
@@ -1097,6 +1114,16 @@ void PipelineContext::InspectDrew()
             eventHub->FireDrawCompletedNDKCallback(this);
         }
     }
+    if (!needRenderNodeByUniqueId_.empty()) {
+        auto needRenderNode = std::move(needRenderNodeByUniqueId_);
+        for (auto&& nodeWeak : needRenderNode) {
+            auto node = nodeWeak.Upgrade();
+            if (node == nullptr) {
+                continue;
+            }
+            OnDrawCompleted(node->GetId());
+        }
+    }
     if (!needRenderForDrawChildrenNodes_.empty()) {
         auto needRenderNodes = std::move(needRenderForDrawChildrenNodes_);
         for (auto&& nodeWeak : needRenderNodes) {
@@ -1107,8 +1134,28 @@ void PipelineContext::InspectDrew()
             if (node->GetInspectorId().has_value()) {
                 OnDrawChildrenCompleted(node->GetInspectorId().value());
             }
+            OnDrawChildrenCompleted(node->GetId());
         }
         needRenderForDrawChildrenNodes_.clear();
+    }
+}
+
+void PipelineContext::InspectLayoutChildren()
+{
+    CHECK_RUN_ON(UI);
+    if (!needRenderForLayoutChildrenNodes_.empty()) {
+        auto needRenderNodes = std::move(needRenderForLayoutChildrenNodes_);
+        needRenderForLayoutChildrenNodes_.clear();
+        for (auto&& nodeWeak : needRenderNodes) {
+            auto node = nodeWeak.Upgrade();
+            if (node == nullptr) {
+                continue;
+            }
+            if (node->GetInspectorId().has_value()) {
+                OnLayoutChildrenCompleted(node->GetInspectorId().value());
+            }
+            OnLayoutChildrenCompleted(node->GetId());
+        }
     }
 }
 
@@ -1321,6 +1368,12 @@ void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask()
     window_->Unlock();
 }
 
+void PipelineContext::SetNeedRenderNodeByUniqueId(const WeakPtr<FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    needRenderNodeByUniqueId_.insert(node);
+}
+
 void PipelineContext::SetNeedRenderNode(const WeakPtr<FrameNode>& node)
 {
     CHECK_RUN_ON(UI);
@@ -1331,6 +1384,12 @@ void PipelineContext::SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>
 {
     CHECK_NULL_VOID(node.Upgrade());
     needRenderForDrawChildrenNodes_.emplace(node);
+}
+
+void PipelineContext::SetNeedRenderForLayoutChildrenNode(const WeakPtr<NG::UINode>& node)
+{
+    CHECK_NULL_VOID(node.Upgrade());
+    needRenderForLayoutChildrenNodes_.emplace(node);
 }
 
 void PipelineContext::FlushFocus()
@@ -1644,6 +1703,7 @@ void PipelineContext::SetupRootElement()
     auto frameNode = DynamicCast<FrameNode>(installationFree_ ? atomicService->GetParent() :
         stageNode->GetParent());
     overlayManager_ = MakeRefPtr<OverlayManager>(frameNode);
+    inspectorOffscreenNodesMgr_ = MakeRefPtr<InspectorOffscreenNodesMgr>();
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     fontManager_->AddFontObserver(selectOverlayManager_);
@@ -1764,6 +1824,7 @@ void PipelineContext::SetupSubRootElement()
     };
     stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
+    inspectorOffscreenNodesMgr_ = MakeRefPtr<InspectorOffscreenNodesMgr>();
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     fontManager_->AddFontObserver(selectOverlayManager_);
@@ -1930,6 +1991,51 @@ void PipelineContext::OnDrawChildrenCompleted(const std::string& componentId)
     auto frontend = weakFrontend_.Upgrade();
     if (frontend) {
         frontend->OnDrawChildrenCompleted(componentId);
+    }
+}
+
+void PipelineContext::OnLayoutChildrenCompleted(const std::string& componentId)
+{
+    CHECK_RUN_ON(UI);
+    auto frontend = weakFrontend_.Upgrade();
+    if (frontend) {
+        frontend->OnLayoutChildrenCompleted(componentId);
+    }
+}
+
+void PipelineContext::OnLayoutCompleted(int32_t uniqueId)
+{
+    CHECK_RUN_ON(UI);
+    auto frontend = weakFrontend_.Upgrade();
+    if (frontend) {
+        frontend->OnLayoutCompleted(uniqueId);
+    }
+}
+
+void PipelineContext::OnDrawCompleted(int32_t uniqueId)
+{
+    CHECK_RUN_ON(UI);
+    auto frontend = weakFrontend_.Upgrade();
+    if (frontend) {
+        frontend->OnDrawCompleted(uniqueId);
+    }
+}
+
+void PipelineContext::OnDrawChildrenCompleted(int32_t uniqueId)
+{
+    CHECK_RUN_ON(UI);
+    auto frontend = weakFrontend_.Upgrade();
+    if (frontend) {
+        frontend->OnDrawChildrenCompleted(uniqueId);
+    }
+}
+
+void PipelineContext::OnLayoutChildrenCompleted(int32_t uniqueId)
+{
+    CHECK_RUN_ON(UI);
+    auto frontend = weakFrontend_.Upgrade();
+    if (frontend) {
+        frontend->OnLayoutChildrenCompleted(uniqueId);
     }
 }
 
@@ -2339,6 +2445,11 @@ void PipelineContext::UpdateSystemSafeAreaWithoutAnimation(const SafeAreaInsets&
     }
 }
 
+const RefPtr<InspectorOffscreenNodesMgr>& PipelineContext::GetInspectorOffscreenNodesMgr()
+{
+    return inspectorOffscreenNodesMgr_;
+}
+
 void PipelineContext::UpdateCutoutSafeAreaWithoutAnimation(const SafeAreaInsets& cutoutSafeArea,
     bool checkSceneBoardWindow)
 {
@@ -2491,6 +2602,7 @@ void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
     }
     dirtyPropertyNodes_.erase(frameNode);
     needRenderNode_.erase(WeakPtr<FrameNode>(frameNode));
+    needRenderNodeByUniqueId_.erase(WeakPtr<FrameNode>(frameNode));
 
     if (dirtyFocusNode_ == frameNode) {
         dirtyFocusNode_.Reset();
@@ -3274,6 +3386,7 @@ void PipelineContext::OnTouchEvent(
         touchRestrict.touchEvent = point;
         touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
         touchRestrict.sourceTool = point.sourceTool;
+        eventManager_->UnregisterTouchDelegate(point.id);
 
         eventManager_->ClearHitTestInfoRecord(scalePoint);
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
@@ -3301,7 +3414,7 @@ void PipelineContext::OnTouchEvent(
             auto recognizer = rebirth.CreateRecognizer();
             if (recognizer) {
                 recognizer->SetInnerFlag(true);
-                recognizer->BeginReferee(scalePoint.id, true);
+                recognizer->BeginReferee(scalePoint.id, scalePoint.originalId, true);
                 std::list<RefPtr<NGGestureRecognizer>> combined;
                 combined.emplace_back(recognizer);
                 for (auto iter = touchTestResults[point.id].begin();
@@ -3315,7 +3428,7 @@ void PipelineContext::OnTouchEvent(
                 }
                 auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(combined));
                 exclusiveRecognizer->AttachFrameNode(node);
-                exclusiveRecognizer->BeginReferee(scalePoint.id);
+                exclusiveRecognizer->BeginReferee(scalePoint.id, scalePoint.originalId);
                 touchTestResults[point.id].emplace_back(exclusiveRecognizer);
                 eventManager_->touchTestResults_ = touchTestResults;
                 eventManager_->SetInnerFlag(true);
@@ -3415,7 +3528,7 @@ void PipelineContext::OnTouchEvent(
     eventManager_->DispatchTouchEvent(scalePoint);
 
     if ((scalePoint.type == TouchType::UP) || (scalePoint.type == TouchType::CANCEL)) {
-        eventManager_->LogHitTestInfoRecord(scalePoint.id);
+        eventManager_->LogHitTestInfoRecord(scalePoint);
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
         if (formEventMgr) {
@@ -3889,6 +4002,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             }
             auto childrenJson = root->GetValue("$children");
             auto topNavDestinationJson = JsonUtil::CreateSharedPtrJson();
+            GetAppInfo(topNavDestinationJson);
             topNavNode->DumpSimplifyTreeWithParamConfig(0, topNavDestinationJson, true, { true, true, true });
             childrenJson->Put(topNavDestinationJson);
         }
@@ -3896,7 +4010,12 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-visibleInfoHasNoTopNavNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
-        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, { true, true, true });
+        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, { true, true, true, true });
+        DumpLog::GetInstance().Print(root->ToString());
+    } else if (params[0] == "-visibleInfoHasNoTopNavNodeWithoutWeb") {
+        auto root = JsonUtil::CreateSharedPtrJson(true);
+        GetAppInfo(root);
+        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, { true, true, true, false });
         DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-infoOfRootNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
@@ -4962,9 +5081,10 @@ void PipelineContext::OnHide()
     RequestFrame();
     OnVirtualKeyboardAreaChange(Rect());
     FlushWindowStateChangedCallback(false);
-    AccessibilityEvent event;
-    event.type = AccessibilityEventType::PAGE_CLOSE;
-    SendEventToAccessibility(event);
+    auto rootNode = GetRootElement();
+    if (rootNode && !IsFormRenderExceptDynamicComponent()) {
+        rootNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE);
+    }
     memoryMgr_->PostMemRecycleTask();
 }
 
@@ -5172,14 +5292,6 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
     renderContext->UpdateWindowBlur();
 }
 
-void PipelineContext::ClearInspectorOffScreenNodes()
-{
-    auto containerLocalSet = ContainerScope::GetAllLocalContainer();
-    if (static_cast<uint32_t>(containerLocalSet.size()) == 1 && *containerLocalSet.cbegin() == instanceId_) {
-        Inspector::ClearAllOffscreenNodes();
-    }
-}
-
 void PipelineContext::Destroy()
 {
     CHECK_RUN_ON(UI);
@@ -5223,6 +5335,7 @@ void PipelineContext::Destroy()
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
     needRenderNode_.clear();
+    needRenderNodeByUniqueId_.clear();
     dirtyRequestFocusNode_.Reset();
     auto formEventMgr = this->GetFormEventManager();
     if (formEventMgr) {
@@ -5233,7 +5346,6 @@ void PipelineContext::Destroy()
     uiExtensionManager_.Reset();
 #endif
     uiContextImpl_.Reset();
-    ClearInspectorOffScreenNodes();
     PipelineBase::Destroy();
 }
 
@@ -6553,6 +6665,7 @@ void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(
         }
         auto childrenJson = root->GetValue("$children");
         auto topNavDestinationJson = JsonUtil::CreateSharedPtrJson();
+        GetAppInfo(topNavDestinationJson);
         topNavNode->DumpSimplifyTreeWithParamConfig(0, topNavDestinationJson, true, config);
         childrenJson->Put(topNavDestinationJson);
     } else {

@@ -2199,6 +2199,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                             const Opt_FocusDrawLevel* value)
     {
     }
+    void SetOnTouchTestDoneImpl(Ark_NativePointer node,
+                                const Opt_TouchTestDoneCallback* value)
+    {
+    }
     void SetAccessibilityStateDescriptionImpl(Ark_NativePointer node,
                                               const Opt_Union_String_Resource* value)
     {
@@ -2948,10 +2952,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetTrackShadowImpl(Ark_NativePointer node,
                             const Opt_GaugeShadowOptions* value)
-    {
-    }
-    void SetIndicatorImpl(Ark_NativePointer node,
-                          const Opt_GaugeIndicatorOptions* value)
     {
     }
     void SetPrivacySensitiveImpl(Ark_NativePointer node,
@@ -8046,6 +8046,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Opt_Callback_OnWindowNewEvent_Void* value)
     {
     }
+    void SetOnWindowNewExtImpl(Ark_NativePointer node,
+                               const Opt_Callback_OnWindowNewExtEvent_Void* value)
+    {
+    }
     void SetOnWindowExitImpl(Ark_NativePointer node,
                              const Opt_Callback_Void* value)
     {
@@ -8813,6 +8817,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetOnTouchInterceptImpl,
             CommonMethodModifier::SetOnSizeChangeImpl,
             CommonMethodModifier::SetAccessibilityFocusDrawLevelImpl,
+            CommonMethodModifier::SetOnTouchTestDoneImpl,
             CommonMethodModifier::SetAccessibilityStateDescriptionImpl,
             CommonMethodModifier::SetAccessibilityActionOptionsImpl,
             CommonMethodModifier::SetExpandSafeAreaImpl,
@@ -9094,7 +9099,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GaugeAttributeModifier::SetStrokeWidthImpl,
             GaugeAttributeModifier::SetDescriptionImpl,
             GaugeAttributeModifier::SetTrackShadowImpl,
-            GaugeAttributeModifier::SetIndicatorImpl,
             GaugeAttributeModifier::SetPrivacySensitiveImpl,
         };
         return &ArkUIGaugeModifierImpl;
@@ -10775,6 +10779,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetOnSslErrorEventImpl,
             WebAttributeModifier::SetOnClientAuthenticationRequestImpl,
             WebAttributeModifier::SetOnWindowNewImpl,
+            WebAttributeModifier::SetOnWindowNewExtImpl,
             WebAttributeModifier::SetOnWindowExitImpl,
             WebAttributeModifier::SetMultiWindowAccessImpl,
             WebAttributeModifier::SetOnInterceptKeyEventImpl,
@@ -11087,6 +11092,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetWindowYImpl(Ark_AccessibilityHoverEvent peer,
                         Ark_Float64 windowY)
+    {
+    }
+    Opt_Float64 GetGlobalDisplayXImpl(Ark_AccessibilityHoverEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayXImpl(Ark_AccessibilityHoverEvent peer,
+                               const Opt_Float64* globalDisplayX)
+    {
+    }
+    Opt_Float64 GetGlobalDisplayYImpl(Ark_AccessibilityHoverEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayYImpl(Ark_AccessibilityHoverEvent peer,
+                               const Opt_Float64* globalDisplayY)
     {
     }
     } // AccessibilityHoverEventAccessor
@@ -11410,6 +11431,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetScrollStepImpl(Ark_AxisEvent peer,
                            const Opt_Int32* scrollStep)
+    {
+    }
+    Opt_Float64 GetGlobalDisplayXImpl(Ark_AxisEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayXImpl(Ark_AxisEvent peer,
+                               const Opt_Float64* globalDisplayX)
+    {
+    }
+    Opt_Float64 GetGlobalDisplayYImpl(Ark_AxisEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayYImpl(Ark_AxisEvent peer,
+                               const Opt_Float64* globalDisplayY)
     {
     }
     void PropagationImpl(Ark_AxisEvent peer)
@@ -12521,6 +12558,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                      const Opt_InteractionHand* hand)
     {
     }
+    Opt_Float64 GetGlobalDisplayXImpl(Ark_ClickEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayXImpl(Ark_ClickEvent peer,
+                               const Opt_Float64* globalDisplayX)
+    {
+    }
+    Opt_Float64 GetGlobalDisplayYImpl(Ark_ClickEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayYImpl(Ark_ClickEvent peer,
+                               const Opt_Float64* globalDisplayY)
+    {
+    }
     void PreventDefaultImpl(Ark_ClickEvent peer)
     {
     }
@@ -13292,6 +13345,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                          const Ark_String* configuration)
     {
     }
+    Ark_Float64 GetGlobalDisplayXImpl(Ark_DragEvent peer)
+    {
+        return {};
+    }
+    Ark_Float64 GetGlobalDisplayYImpl(Ark_DragEvent peer)
+    {
+        return {};
+    }
     Ark_DragBehavior GetDragBehaviorImpl(Ark_DragEvent peer)
     {
         return {};
@@ -13757,6 +13818,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_Vector2 GetGlobalPositionOnDisplayImpl(Ark_FrameNode peer)
+    {
+        return {};
+    }
     Ark_Vector2 GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
     {
         return {};
@@ -13933,6 +13998,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // FullScreenExitHandlerAccessor
+    namespace GaugeExtenderAccessor {
+    void SetIndicatorImpl(Ark_NativePointer node,
+                          const Opt_GaugeIndicatorOptions* options)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    } // GaugeExtenderAccessor
     namespace GestureAccessor {
     void DestroyPeerImpl(Ark_Gesture peer)
     {
@@ -14163,6 +14236,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    void PreventBeginImpl(Ark_GestureRecognizer peer)
+    {
+    }
     } // GestureRecognizerAccessor
     namespace GestureStyleAccessor {
     void DestroyPeerImpl(Ark_GestureStyle peer)
@@ -14313,6 +14389,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetDisplayYImpl(Ark_HoverEvent peer,
                          const Opt_Float64* displayY)
+    {
+    }
+    Opt_Float64 GetGlobalDisplayXImpl(Ark_HoverEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayXImpl(Ark_HoverEvent peer,
+                               const Opt_Float64* globalDisplayX)
+    {
+    }
+    Opt_Float64 GetGlobalDisplayYImpl(Ark_HoverEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayYImpl(Ark_HoverEvent peer,
+                               const Opt_Float64* globalDisplayY)
     {
     }
     void StopPropagationImpl(Ark_HoverEvent peer)
@@ -15455,6 +15547,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetPressedButtonsImpl(Ark_MouseEvent peer,
                                const Opt_Array_MouseButton* pressedButtons)
+    {
+    }
+    Opt_Float64 GetGlobalDisplayXImpl(Ark_MouseEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayXImpl(Ark_MouseEvent peer,
+                               const Opt_Float64* globalDisplayX)
+    {
+    }
+    Opt_Float64 GetGlobalDisplayYImpl(Ark_MouseEvent peer)
+    {
+        return {};
+    }
+    void SetGlobalDisplayYImpl(Ark_MouseEvent peer,
+                               const Opt_Float64* globalDisplayY)
     {
     }
     } // MouseEventAccessor
@@ -19552,6 +19660,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             AccessibilityHoverEventAccessor::SetWindowXImpl,
             AccessibilityHoverEventAccessor::GetWindowYImpl,
             AccessibilityHoverEventAccessor::SetWindowYImpl,
+            AccessibilityHoverEventAccessor::GetGlobalDisplayXImpl,
+            AccessibilityHoverEventAccessor::SetGlobalDisplayXImpl,
+            AccessibilityHoverEventAccessor::GetGlobalDisplayYImpl,
+            AccessibilityHoverEventAccessor::SetGlobalDisplayYImpl,
         };
         return &AccessibilityHoverEventAccessorImpl;
     }
@@ -19676,6 +19788,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             AxisEventAccessor::SetYImpl,
             AxisEventAccessor::GetScrollStepImpl,
             AxisEventAccessor::SetScrollStepImpl,
+            AxisEventAccessor::GetGlobalDisplayXImpl,
+            AxisEventAccessor::SetGlobalDisplayXImpl,
+            AxisEventAccessor::GetGlobalDisplayYImpl,
+            AxisEventAccessor::SetGlobalDisplayYImpl,
             AxisEventAccessor::PropagationImpl,
         };
         return &AxisEventAccessorImpl;
@@ -20061,6 +20177,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ClickEventAccessor::SetYImpl,
             ClickEventAccessor::GetHandImpl,
             ClickEventAccessor::SetHandImpl,
+            ClickEventAccessor::GetGlobalDisplayXImpl,
+            ClickEventAccessor::SetGlobalDisplayXImpl,
+            ClickEventAccessor::GetGlobalDisplayYImpl,
+            ClickEventAccessor::SetGlobalDisplayYImpl,
             ClickEventAccessor::PreventDefaultImpl,
         };
         return &ClickEventAccessorImpl;
@@ -20437,6 +20557,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DragEventAccessor::ExecuteDropAnimationImpl,
             DragEventAccessor::GetDisplayIdImpl,
             DragEventAccessor::EnableInternalDropAnimationImpl,
+            DragEventAccessor::GetGlobalDisplayXImpl,
+            DragEventAccessor::GetGlobalDisplayYImpl,
             DragEventAccessor::GetDragBehaviorImpl,
             DragEventAccessor::SetDragBehaviorImpl,
             DragEventAccessor::GetUseCustomDropAnimationImpl,
@@ -20648,6 +20770,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::LayoutImpl,
             FrameNodeExtenderAccessor::SetNeedsLayoutImpl,
             FrameNodeExtenderAccessor::GetPositionToScreenImpl,
+            FrameNodeExtenderAccessor::GetGlobalPositionOnDisplayImpl,
             FrameNodeExtenderAccessor::GetPositionToWindowWithTransformImpl,
             FrameNodeExtenderAccessor::GetPositionToParentWithTransformImpl,
             FrameNodeExtenderAccessor::GetPositionToScreenWithTransformImpl,
@@ -20708,6 +20831,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct FullScreenExitHandlerPeer {
         virtual ~FullScreenExitHandlerPeer() = default;
     };
+    const GENERATED_ArkUIGaugeExtenderAccessor* GetGaugeExtenderAccessor()
+    {
+        static const GENERATED_ArkUIGaugeExtenderAccessor GaugeExtenderAccessorImpl {
+            GaugeExtenderAccessor::SetIndicatorImpl,
+        };
+        return &GaugeExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIGestureAccessor* GetGestureAccessor()
     {
         static const GENERATED_ArkUIGestureAccessor GestureAccessorImpl {
@@ -20793,6 +20924,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GestureRecognizerAccessor::IsValidImpl,
             GestureRecognizerAccessor::GetFingerCountImpl,
             GestureRecognizerAccessor::IsFingerCountLimitImpl,
+            GestureRecognizerAccessor::PreventBeginImpl,
         };
         return &GestureRecognizerAccessorImpl;
     }
@@ -20883,6 +21015,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             HoverEventAccessor::SetDisplayXImpl,
             HoverEventAccessor::GetDisplayYImpl,
             HoverEventAccessor::SetDisplayYImpl,
+            HoverEventAccessor::GetGlobalDisplayXImpl,
+            HoverEventAccessor::SetGlobalDisplayXImpl,
+            HoverEventAccessor::GetGlobalDisplayYImpl,
+            HoverEventAccessor::SetGlobalDisplayYImpl,
             HoverEventAccessor::StopPropagationImpl,
         };
         return &HoverEventAccessorImpl;
@@ -21394,6 +21530,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             MouseEventAccessor::SetRawDeltaYImpl,
             MouseEventAccessor::GetPressedButtonsImpl,
             MouseEventAccessor::SetPressedButtonsImpl,
+            MouseEventAccessor::GetGlobalDisplayXImpl,
+            MouseEventAccessor::SetGlobalDisplayXImpl,
+            MouseEventAccessor::GetGlobalDisplayYImpl,
+            MouseEventAccessor::SetGlobalDisplayYImpl,
         };
         return &MouseEventAccessorImpl;
     }
@@ -23244,6 +23384,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetFrameNodeExtenderAccessor,
             GetFrictionMotionAccessor,
             GetFullScreenExitHandlerAccessor,
+            GetGaugeExtenderAccessor,
             GetGestureAccessor,
             GetGestureEventAccessor,
             GetGestureGroupAccessor,

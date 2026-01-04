@@ -100,6 +100,8 @@ public:
         return static_cast<int32_t>(touchPoints_.size());
     }
 
+    int32_t GetOriginalTouchPointsSize() const;
+
     void SetTouchPointsForSucceedBlock()
     {
         backupTouchPointsForSucceedBlock_ = touchPoints_;
@@ -111,9 +113,10 @@ public:
     }
 
 protected:
-    void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override
+    void OnBeginGestureReferee(int32_t touchId, int32_t originalId, bool needUpdateChild = false) override
     {
         touchPoints_[touchId] = {};
+        touchPoints_[touchId].originalId = originalId;
     }
 
     void RemoveUnsupportEvent(int32_t touchId) override

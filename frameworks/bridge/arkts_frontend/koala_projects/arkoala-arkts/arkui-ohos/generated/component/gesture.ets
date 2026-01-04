@@ -113,6 +113,10 @@ export class GestureRecognizer implements MaterializedBase {
     public isFingerCountLimit(): boolean {
         return this.isFingerCountLimit_serialize()
     }
+    public preventBegin(): void {
+        this.preventBegin_serialize()
+        return
+    }
     getTag_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._GestureRecognizer_getTag(this.peer!.ptr)
         return retval
@@ -158,6 +162,9 @@ export class GestureRecognizer implements MaterializedBase {
     isFingerCountLimit_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._GestureRecognizer_isFingerCountLimit(this.peer!.ptr)
         return retval
+    }
+    preventBegin_serialize(): void {
+        ArkUIGeneratedNativeModule._GestureRecognizer_preventBegin(this.peer!.ptr)
     }
 }
 export class PanGestureOptionsInternal {
@@ -324,6 +331,8 @@ export interface EventLocationInfo {
 }
 export interface FingerInfo {
     id: int32;
+    globalDisplayX?: double;
+    globalDisplayY?: double;
     globalX: double;
     globalY: double;
     localX: double;
@@ -546,6 +555,22 @@ export class EventLocationInfo_serializer {
 export class FingerInfo_serializer {
     public static write(buffer: SerializerBase, value: FingerInfo): void {
         let valueSerializer : SerializerBase = buffer
+        const valueHolderForGlobalDisplayX  = value.globalDisplayX
+        if (valueHolderForGlobalDisplayX !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGlobalDisplayXTmpValue  = valueHolderForGlobalDisplayX!
+            valueSerializer.writeFloat64(valueHolderForGlobalDisplayXTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForGlobalDisplayY  = value.globalDisplayY
+        if (valueHolderForGlobalDisplayY !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGlobalDisplayYTmpValue  = valueHolderForGlobalDisplayY!
+            valueSerializer.writeFloat64(valueHolderForGlobalDisplayYTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForId  = value.id
         valueSerializer.writeInt32(valueHolderForId)
         const valueHolderForGlobalX  = value.globalX
@@ -572,6 +597,18 @@ export class FingerInfo_serializer {
     public static read(buffer: DeserializerBase): FingerInfo {
         let valueDeserializer : DeserializerBase = buffer
         const idTmpResult : int32 = valueDeserializer.readInt32()
+        const globalDisplayXTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let globalDisplayXTmpBuf : double | undefined = undefined
+        if ((globalDisplayXTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            globalDisplayXTmpBuf = valueDeserializer.readFloat64()
+        }
+        const globalDisplayXTmpResult : double | undefined = globalDisplayXTmpBuf
+        const globalDisplayYTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let globalDisplayYTmpBuf : double | undefined = undefined
+        if ((globalDisplayYTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            globalDisplayYTmpBuf = valueDeserializer.readFloat64()
+        }
+        const globalDisplayYTmpResult : double | undefined = globalDisplayYTmpBuf
         const globalXTmpResult : double = valueDeserializer.readFloat64()
         const globalYTmpResult : double = valueDeserializer.readFloat64()
         const localXTmpResult : double = valueDeserializer.readFloat64()
@@ -584,7 +621,7 @@ export class FingerInfo_serializer {
             handTmpBuf = InteractionHand.fromValue(valueDeserializer.readInt32())
         }
         const handTmpResult : InteractionHand | undefined = handTmpBuf
-        let value : FingerInfo = ({id: idTmpResult, globalX: globalXTmpResult, globalY: globalYTmpResult, localX: localXTmpResult, localY: localYTmpResult, displayX: displayXTmpResult, displayY: displayYTmpResult, hand: handTmpResult} as FingerInfo)
+        let value : FingerInfo = ({id: idTmpResult, globalDisplayX: globalDisplayXTmpResult, globalDisplayY: globalDisplayYTmpResult, globalX: globalXTmpResult, globalY: globalYTmpResult, localX: localXTmpResult, localY: localYTmpResult, displayX: displayXTmpResult, displayY: displayYTmpResult, hand: handTmpResult} as FingerInfo)
         return value
     }
 }
@@ -771,6 +808,9 @@ export class BaseGestureEvent_serializer {
         let ptr : KPointer = valueDeserializer.readPointer()
         // instructive change start
         let type = ArkUIGeneratedNativeModule._GestureOps_getGestureEventType(ptr)
+        if (type === -1) {
+            return BaseGestureEventInternal.fromPtr(ptr)
+        }
         let recognizerType = GestureControl.GestureType.fromValue(type as int32)
         switch(recognizerType) {
             case GestureControl.GestureType.TAP_GESTURE:

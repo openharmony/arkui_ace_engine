@@ -1302,6 +1302,7 @@ void AssignCast(std::optional<WebKeyboardAvoidMode>& dst, const Ark_WebKeyboardA
         case ARK_WEB_KEYBOARD_AVOID_MODE_RESIZE_VISUAL: dst = WebKeyboardAvoidMode::RESIZE_VISUAL; break;
         case ARK_WEB_KEYBOARD_AVOID_MODE_RESIZE_CONTENT: dst = WebKeyboardAvoidMode::RESIZE_CONTENT; break;
         case ARK_WEB_KEYBOARD_AVOID_MODE_OVERLAYS_CONTENT: dst = WebKeyboardAvoidMode::OVERLAYS_CONTENT; break;
+        case ARK_WEB_KEYBOARD_AVOID_MODE_RETURN_TO_UICONTEXT: dst = WebKeyboardAvoidMode::RETURN_TO_UICONTEXT; break;
         default: LOGE("Unexpected enum value in Ark_WebKeyboardAvoidMode: %{public}d", src);
     }
 }

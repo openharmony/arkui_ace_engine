@@ -65,6 +65,8 @@ public:
 
     void OnRecycle() override;
 
+    void SetShallowBuilder(const RefPtr<ShallowBuilder>&& shallowBuilder);
+
     bool IsAtomicNode() const override
     {
         return false;

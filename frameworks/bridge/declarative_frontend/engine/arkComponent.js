@@ -16471,7 +16471,9 @@ class TextAreaBorderModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return this.value.checkObjectDiff(this.stageValue);
+    let emptyColor = new ArkBorderColor();
+    let hasBorderColor = !this.stageValue.arkColor.isEqual(emptyColor) || !this.value.arkColor.isEqual(emptyColor);
+    return hasBorderColor || this.value.checkObjectDiff(this.stageValue);
   }
 }
 TextAreaBorderModifier.identity = Symbol('textAreaBorder');
@@ -16520,6 +16522,16 @@ TextAreaBorderWidthModifier.identity = Symbol('textAreaBorderWidth');
 class TextAreaBorderColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
+  }
+  applyStage(node, component) {
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.value = this.stageValue;
+      this.applyPeer(node, true, component);
+      return true;
+    }
+    this.value = this.stageValue;
+    this.applyPeer(node, false, component);
+    return false;
   }
   applyPeer(node, reset) {
     if (reset) {
@@ -18631,7 +18643,9 @@ class TextInputBorderModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return this.value.checkObjectDiff(this.stageValue);
+    let emptyColor = new ArkBorderColor();
+    let hasBorderColor = !this.stageValue.arkColor.isEqual(emptyColor) || !this.value.arkColor.isEqual(emptyColor);
+    return hasBorderColor || this.value.checkObjectDiff(this.stageValue);
   }
 }
 TextInputBorderModifier.identity = Symbol('textInputBorder');
@@ -18680,6 +18694,16 @@ TextInputBorderWidthModifier.identity = Symbol('textInputBorderWidth');
 class TextInputBorderColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
+  }
+  applyStage(node, component) {
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.value = this.stageValue;
+      this.applyPeer(node, true, component);
+      return true;
+    }
+    this.value = this.stageValue;
+    this.applyPeer(node, false, component);
+    return false;
   }
   applyPeer(node, reset) {
     if (reset) {

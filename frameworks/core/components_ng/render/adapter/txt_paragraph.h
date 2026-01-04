@@ -129,6 +129,7 @@ public:
 
     bool DidExceedMaxLinesInner() override;
     std::string GetDumpInfo() override;
+    std::optional<void*> GetRawParagraph() override;
 
 protected:
     ParagraphStyle paraStyle_;

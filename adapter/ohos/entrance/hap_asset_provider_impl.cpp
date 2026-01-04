@@ -44,7 +44,7 @@ bool GetHspModulePath(const std::string& hspBundleName, const std::string& hspMo
     auto bundleMgr =
         iface_cast<AppExecFwk::IBundleMgr>(systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID));
     if (!bundleMgr) {
-        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "fail to request ex module buffer, SystemAbilityManager is none");
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "fail to request ex module buffer, bundleMgr is none");
         return false;
     }
 
@@ -59,9 +59,14 @@ bool GetHspModulePath(const std::string& hspBundleName, const std::string& hspMo
         TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "GetBaseSharedBundleInfos failed");
         return false;
     }
+    if (baseSharedBundleInfos.empty()) {
+        TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "baseSharedBundleInfos is empty");
+        return false;
+    }
     for (const auto& info : baseSharedBundleInfos) {
         if ((info.bundleName == hspBundleName) && (info.moduleName == hspModuleName)) {
             hspPath = info.hapPath;
+            break;
         }
     }
     if (hspPath.empty()) {

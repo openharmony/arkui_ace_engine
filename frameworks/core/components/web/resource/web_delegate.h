@@ -1483,6 +1483,7 @@ public:
     bool IsBlanklessFrameValid() const;
     void SetEnableAutoFill(bool isEnabled);
     void RemoveSnapshotFrameNodeIfNeeded();
+    void CallBlanklessCallback(int32_t state, const std::string& reason);
 
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
     void SetPipNativeWindow(int delegate_id, int child_id, int frame_routing_id, void* window);
@@ -1513,6 +1514,7 @@ public:
     void UpdateEnableImageAnalyzer(bool enable);
     void OnPdfScrollAtBottom(const std::string& url);
     void OnPdfLoadEvent(int32_t result, const std::string& url);
+    void OnMediaCastEnter();
     void SetImeShow(bool visible);
     void OnRequestAutofill(int32_t menuType);
 

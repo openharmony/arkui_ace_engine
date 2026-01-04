@@ -21,7 +21,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/multi_thread.h"
 #include "core/common/ai/image_analyzer_manager.h"
-#include "core/components/video/video_theme.h"
+#include "core/components_ng/pattern/video/video_theme.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"

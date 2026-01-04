@@ -26,7 +26,7 @@ class AlignComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(AlignComponent, ComponentGroup);
 
 public:
-    AlignComponent(const std::list<RefPtr<Component>>& children, const Alignment& alignment);
+    ACE_FORCE_EXPORT AlignComponent(const std::list<RefPtr<Component>>& children, const Alignment& alignment);
     ~AlignComponent() override = default;
 
     RefPtr<RenderNode> CreateRenderNode() override;

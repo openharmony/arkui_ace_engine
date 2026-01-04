@@ -21,7 +21,6 @@
 #include "core/components/declaration/clock/clock_declaration.h"
 #include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components/declaration/piece/piece_declaration.h"
-#include "core/components/declaration/qrcode/qrcode_declaration.h"
 #include "core/components/declaration/richtext/rich_text_declaration.h"
 #include "core/components/declaration/span/span_declaration.h"
 #include "core/components/declaration/svg/svg_animate_declaration.h"
@@ -47,6 +46,8 @@
 #include "core/components/declaration/xcomponent/xcomponent_declaration.h"
 
 namespace OHOS::Ace {
+
+SINGLETON_INSTANCE_IMPL(DeclarationCreatorManager);
 
 DeclarationCreatorManager::DeclarationCreatorManager() = default;
 DeclarationCreatorManager::~DeclarationCreatorManager() = default;
@@ -83,7 +84,6 @@ const RefPtr<Declaration> DeclarationCreatorManager::CreateDeclaration(const std
         { DOM_NODE_TAG_PIECE, DeclarationCreator<PieceDeclaration> },
         { DOM_NODE_TAG_POLYGON, DeclarationCreator<SvgPolygonDeclaration> },
         { DOM_NODE_TAG_POLYLINE, DeclarationCreator<SvgPolygonDeclaration> },
-        { DOM_NODE_TAG_QRCODE, DeclarationCreator<QrcodeDeclaration> },
         { DOM_NODE_TAG_RADIAL_GRADIENT, DeclarationCreator<SvgGradientDeclaration> },
         { DOM_NODE_TAG_RECT, DeclarationCreator<SvgRectDeclaration> },
         { DOM_NODE_TAG_RICH_TEXT, DeclarationCreator<RichTextDeclaration> },

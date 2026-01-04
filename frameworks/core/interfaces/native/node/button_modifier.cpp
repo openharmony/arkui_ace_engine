@@ -836,6 +836,15 @@ ArkUI_Float32 GetButtonMaxFontScale(ArkUINodeHandle node)
     return static_cast<ArkUI_Float32>(ButtonModelNG::GetMaxFontScale(frameNode));
 }
 
+void SetButtonFontColorWithPlaceholder(ArkUINodeHandle node, uint32_t fontColor, ArkUI_Uint32 colorPlaceholder)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(fontColor);
+    result.SetPlaceholder(static_cast<ColorPlaceholder>(colorPlaceholder));
+    ButtonModelNG::SetFontColor(frameNode, result);
+}
+
 namespace NodeModifier {
 const ArkUIButtonModifier* GetButtonModifier()
 {
@@ -896,6 +905,7 @@ const ArkUIButtonModifier* GetButtonModifier()
         .setButtonMinFontScalePtr = SetButtonMinFontScalePtr,
         .setButtonMaxFontScalePtr = SetButtonMaxFontScalePtr,
         .setButtonBackgroundColorPtr = SetButtonBackgroundColorPtr,
+        .setButtonFontColorWithPlaceholder = SetButtonFontColorWithPlaceholder,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

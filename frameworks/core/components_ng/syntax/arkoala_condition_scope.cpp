@@ -14,18 +14,11 @@
  */
 
 #include "core/components_ng/syntax/arkoala_condition_scope.h"
-
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
 
-namespace {
-
-constexpr char CONDITION_SCOPE_TAG[] = "ConditionScope";
-
-}
-
-ConditionScopeNode::ConditionScopeNode(int32_t nodeId) : UINode(CONDITION_SCOPE_TAG, nodeId) {}
+ConditionScopeNode::ConditionScopeNode(int32_t nodeId) : UINode(V2::JS_IF_ELSE_ETS_TAG, nodeId) {}
 
 void ConditionScopeNode::AddChild(
     const RefPtr<UINode>& child, int32_t slot, bool silently, bool addDefaultTransition, bool addModalUiextension)

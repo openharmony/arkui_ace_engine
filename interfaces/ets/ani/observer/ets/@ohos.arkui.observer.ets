@@ -138,6 +138,7 @@ import { Size } from '@ohos.arkui.node'
     export interface NavigationInfo {
         navigationId: string;
         pathStack: NavPathStack;
+        uniqueId?: int;
     }
     export class WindowSizeLayoutBreakpointInfo {
         widthBreakpoint: WidthBreakpoint;
@@ -147,6 +148,7 @@ import { Size } from '@ohos.arkui.node'
     export class NavigationInfoImpl implements NavigationInfo {
         navigationId: string;
         pathStack: NavPathStack;
+        uniqueId?: int;
         static transferStatic(input: Any): Object {
             let dynamicValue = ESValue.wrap(input);
             let staticValue = new NavigationInfoImpl();
@@ -160,6 +162,11 @@ import { Size } from '@ohos.arkui.node'
             let navPathStack = dynamicValue.getProperty("pathStack");
             if (navPathStack.typeOf() !== 'undefined' && navPathStack.typeOf() !== 'null')  {
                 // pathStack needs analysis to static NavPathStack
+            }
+            let uniqueId =dynamicValue.getProperty('uniqueId');
+            if (uniqueId.typeOf() !== 'undefined' && uniqueId.typeOf() !== 'null' && uniqueId.isNumber()) {
+                let id = uniqueId.toNumber();
+                staticValue.uniqueId = Double.toInt(id);
             }
             return staticValue;
         }
@@ -175,6 +182,9 @@ import { Size } from '@ohos.arkui.node'
             }
             dynamicValue.setProperty('navigationId', ESValue.wrap(staticValue.navigationId));
             dynamicValue.setProperty('pathStack', ESValue.wrap(staticValue.pathStack));
+            if (staticValue.uniqueId != undefined && staticValue.uniqueId != null) {
+                dynamicValue.setProperty('uniqueId', ESValue.wrap(staticValue.uniqueId));
+            }
             return dynamicValue as Any;
         }
     }

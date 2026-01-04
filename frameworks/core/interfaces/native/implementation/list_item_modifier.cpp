@@ -16,9 +16,11 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_model_static.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/lazy_build_accessor.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -61,6 +63,7 @@ void SetDeleteArea(const Opt_Union_CustomBuilder_SwipeActionItem& arg, bool isSt
         [isStartArea, frameNode, node](const Ark_SwipeActionItem& value) {
             auto length = Converter::OptConvert<Dimension>(value.actionAreaDistance);
             auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
+            auto builderComponent = value.builderComponent.value;
             OnDeleteEvent onActionCallback;
             AssignVoidCallback(onActionCallback, value.onAction);
 
@@ -72,7 +75,16 @@ void SetDeleteArea(const Opt_Union_CustomBuilder_SwipeActionItem& arg, bool isSt
 
             OnStateChangedEvent onStateChangeCallback;
             AssignOnStateChangedEventCallback(onStateChangeCallback, value.onStateChange);
-            if (builder.has_value()) {
+            if (builderComponent) {
+                auto contentPeer = reinterpret_cast<FrameNodePeer*>(builderComponent);
+                CHECK_NULL_VOID(contentPeer);
+                auto componentNode = FrameNodePeer::GetFrameNodeByPeer(contentPeer);
+                if (componentNode) {
+                    ListItemModelStatic::SetDeleteArea(frameNode, static_cast<UINode*>(AceType::RawPtr(componentNode)),
+                        std::move(onActionCallback), std::move(onEnterActionAreaCallback),
+                        std::move(onExitActionAreaCallback), std::move(onStateChangeCallback), length, isStartArea);
+                }
+            } else if (builder.has_value()) {
                 CallbackHelper(builder.value()).BuildAsync([
                     frameNode, length, isStartArea,
                     onAction = std::move(onActionCallback),
@@ -134,7 +146,8 @@ namespace ListItemModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = ListItemModelStatic::CreateFrameNode(id);
+    auto frameNode = ListItemModelStatic::CreateFrameNode(id, false, LazyBuild::IsLazyBuild());
+    LazyBuild::ResetLazyBuild();
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

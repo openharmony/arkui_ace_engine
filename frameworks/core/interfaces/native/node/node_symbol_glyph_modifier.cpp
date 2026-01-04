@@ -235,6 +235,20 @@ void ResetMaxFontScale(ArkUINodeHandle node)
         pattern->UnRegisterResource("MaxFontScale");
     }
 }
+
+void SetFontColorWithPlaceholder(
+    ArkUINodeHandle node, ArkUI_Uint32* color, ArkUI_Uint32 colorPlaceholder, int32_t size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<Color> colorArray;
+    for (int32_t i = 0; i < size; i++) {
+        Color result = Color(color[i]);
+        result.SetPlaceholder(static_cast<ColorPlaceholder>(colorPlaceholder));
+        colorArray.emplace_back(result);
+    }
+    SymbolModelNG::SetFontColor(frameNode, colorArray);
+}
 }
 
 namespace NodeModifier {
@@ -261,6 +275,7 @@ const ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
         .resetMinFontScale = ResetMinFontScale,
         .setMaxFontScale = SetMaxFontScale,
         .resetMaxFontScale = ResetMaxFontScale,
+        .setFontColorWithPlaceholder = SetFontColorWithPlaceholder,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

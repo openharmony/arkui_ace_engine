@@ -18,6 +18,7 @@
 
 namespace OHOS::Ace {
 std::string g_cacheFilePath = "this is test cache file path.";
+SINGLETON_INSTANCE_IMPL(ImageFileCache);
 ImageFileCache::ImageFileCache() = default;
 ImageFileCache::~ImageFileCache() = default;
 void ImageFileCache::DumpCacheInfo() {}

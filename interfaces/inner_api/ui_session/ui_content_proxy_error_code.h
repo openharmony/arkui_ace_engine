@@ -22,6 +22,8 @@ enum class MultiImageQueryErrorCode : int32_t {
     OK = 0,
     TIMEOUT = 1,
     INVALID_ID = 2,
+    INVALID_WEBNODE = 3,
+    LAST_TASK_UNFINISH = 4,
 };
 } // namespace OHOS::Ace
 

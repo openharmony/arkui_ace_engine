@@ -38,8 +38,8 @@ public:
     ~CustomizedCallback() override = default;
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
     {
-        // Note: This method is not used because RSSurfaceCaptureConfig.needErrorCode is set to true.
-        // Use OnSurfaceCaptureWithErrorCode instead.
+        // For compatibility, delegate to OnSurfaceCaptureWithErrorCode method
+        OnSurfaceCaptureWithErrorCode(pixelMap, nullptr, Rosen::CaptureError::CAPTURE_OK);
     }
 
     void OnSurfaceCaptureWithErrorCode(std::shared_ptr<Media::PixelMap> pixelMap,
@@ -61,7 +61,13 @@ public:
 
         switch (captureErrorCode) {
             case Rosen::CaptureError::CAPTURE_NO_PERMISSION:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "No permission to capture the surface.");
+                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                    "Permission verification failed. A non-system application calls a system API.");
+                callback_(nullptr, ERROR_CODE_VERIFICATION_FAILED, removeNode);
+                break;
+            case Rosen::CaptureError::CAPTURE_NO_SECURE_PERMISSION:
+                TAG_LOGW(
+                    AceLogTag::ACE_COMPONENT_SNAPSHOT, "Taking screenshots of other processes, nodes is not allowed.");
                 callback_(nullptr, ERROR_CODE_INTERNAL_ERROR, removeNode);
                 break;
             case Rosen::CaptureError::CAPTURE_NO_NODE:
@@ -155,8 +161,8 @@ public:
     ~SyncCustomizedCallback() override = default;
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
     {
-        // Note: This method is not used because RSSurfaceCaptureConfig.needErrorCode is set to true.
-        // Use OnSurfaceCaptureWithErrorCode instead.
+        // For compatibility, delegate to OnSurfaceCaptureWithErrorCode method
+        OnSurfaceCaptureWithErrorCode(pixelMap, nullptr, Rosen::CaptureError::CAPTURE_OK);
     }
 
     void OnSurfaceCaptureWithErrorCode(std::shared_ptr<Media::PixelMap> pixelMap,
@@ -167,7 +173,13 @@ public:
 
         switch (captureErrorCode) {
             case Rosen::CaptureError::CAPTURE_NO_PERMISSION:
-                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "No permission to capture the surface.");
+                TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                    "Permission verification failed. A non-system application calls a system API.");
+                errorCode_ = ERROR_CODE_VERIFICATION_FAILED;
+                break;
+            case Rosen::CaptureError::CAPTURE_NO_SECURE_PERMISSION:
+                TAG_LOGW(
+                    AceLogTag::ACE_COMPONENT_SNAPSHOT, "Taking screenshots of other processes, nodes is not allowed.");
                 errorCode_ = ERROR_CODE_INTERNAL_ERROR;
                 break;
             case Rosen::CaptureError::CAPTURE_NO_NODE:

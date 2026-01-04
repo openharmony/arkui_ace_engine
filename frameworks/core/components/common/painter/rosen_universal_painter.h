@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 
-class RosenUniversalPainter {
+class ACE_FORCE_EXPORT RosenUniversalPainter {
 public:
     RosenUniversalPainter() = default;
     ~RosenUniversalPainter() = default;

@@ -1297,6 +1297,26 @@ void SetOnWindowNewImpl(Ark_NativePointer node,
     WebModelStatic::SetWindowNewEvent(frameNode, onWindowNew);
 #endif // WEB_SUPPORTED
 }
+void SetOnWindowNewExtImpl(Ark_NativePointer node,
+                           const Opt_Callback_OnWindowNewExtEvent_Void* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onWindowNewExt = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const std::shared_ptr<BaseEventInfo>& info) {
+        OnWindowNewExt(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetWindowNewExtEvent(frameNode, onWindowNewExt);
+#endif // WEB_SUPPORTED
+}
 void SetOnWindowExitImpl(Ark_NativePointer node,
                          const Opt_Callback_Void* value)
 {
@@ -3021,6 +3041,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnSslErrorEventImpl,
         WebAttributeModifier::SetOnClientAuthenticationRequestImpl,
         WebAttributeModifier::SetOnWindowNewImpl,
+        WebAttributeModifier::SetOnWindowNewExtImpl,
         WebAttributeModifier::SetOnWindowExitImpl,
         WebAttributeModifier::SetMultiWindowAccessImpl,
         WebAttributeModifier::SetOnInterceptKeyEventImpl,

@@ -7861,10 +7861,6 @@ void JSViewAbstract::ParseDragInteractionOptions(const JSCallbackInfo& info,
         if (hapicFeedback->IsBoolean()) {
             previewOption.enableHapticFeedback = hapicFeedback->ToBoolean();
         }
-        auto dragPreview = interObj->GetProperty("isDragPreviewEnabled");
-        if (dragPreview->IsBoolean()) {
-            previewOption.isDragPreviewEnabled = dragPreview->ToBoolean();
-        }
         auto enableEdgeAutoScroll = interObj->GetProperty("enableEdgeAutoScroll");
         if (enableEdgeAutoScroll->IsBoolean()) {
             previewOption.enableEdgeAutoScroll = enableEdgeAutoScroll->ToBoolean();
@@ -11429,6 +11425,7 @@ void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
         return;
     }
+    ViewAbstractModel::GetInstance()->ResetColorPicker();
     if (!SystemProperties::ConfigChangePerform()) {
         ParseJsColor(info[0], foregroundColor);
         ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
@@ -11628,12 +11625,17 @@ void JSViewAbstract::JsPrivacySensitive(const JSCallbackInfo& info)
 
 void JSViewAbstract::JSRenderGroup(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1) {
+    const auto argLen = info.Length();
+    if (argLen == 0 || argLen > 2) {
         return;
     }
     bool isRenderGroup = false;
     if (info[0]->IsBoolean()) {
         isRenderGroup = info[0]->ToBoolean();
+    }
+    if (argLen == 2 && info[1]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetAdaptiveGroup(isRenderGroup, info[1]->ToBoolean());
+        return;
     }
     ViewAbstractModel::GetInstance()->SetRenderGroup(isRenderGroup);
 }
@@ -12647,11 +12649,12 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     // parse custom background
     Color color = Color::TRANSPARENT;
     RefPtr<ResourceObject> backgroundColorResObj;
+    RefPtr<ResourceObject> backgroundResObj;
     std::function<void()> builderFunc;
     BackgroundType backgroundType = BackgroundType::COLOR;
     if (!ParseJsColor(info[0], color, backgroundColorResObj)) {
         ViewAbstractModel::GetInstance()->ClearResObj("customBackgroundColor");
-        if (ParseBackgroundBuilder(info, info[0], builderFunc)) {
+        if (ParseBackgroundBuilder(info, info[0], builderFunc, backgroundResObj)) {
             backgroundType = BackgroundType::CUSTOM_BUILDER;
         } else {
             return;
@@ -12685,26 +12688,29 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     }
 
     ViewAbstractModel::GetInstance()->SetIsBuilderBackground(BackgroundType::CUSTOM_BUILDER == backgroundType);
-    ViewAbstractModel::GetInstance()->SetBackground(std::move(builderFunc));
     ViewAbstractModel::GetInstance()->SetBackgroundIgnoresLayoutSafeAreaEdges(ignoreLayoutSafeAreaEdges);
     ViewAbstractModel::GetInstance()->SetBackgroundAlign(alignment);
     if (SystemProperties::ConfigChangePerform()) {
+        ViewAbstractModel::GetInstance()->SetBackgroundWithResourceObj(std::move(builderFunc), backgroundResObj);
         ViewAbstractModel::GetInstance()->SetCustomBackgroundColorWithResourceObj(color, backgroundColorResObj);
     } else {
+        ViewAbstractModel::GetInstance()->SetBackground(std::move(builderFunc));
         ViewAbstractModel::GetInstance()->SetCustomBackgroundColor(color);
     }
 }
 
-bool JSViewAbstract::ParseBackgroundBuilder(
-    const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, std::function<void()>& builderFunc)
+bool JSViewAbstract::ParseBackgroundBuilder(const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc,
+    std::function<void()>& builderFunc, RefPtr<ResourceObject>& resObj)
 {
     if (!jsFunc->IsObject()) {
+        resObj = nullptr;
         return false;
     }
 
     JSRef<JSObject> backgroundObj = JSRef<JSObject>::Cast(jsFunc);
     auto contentObj = backgroundObj->GetProperty(static_cast<int32_t>(ArkUIIndex::BUILDER));
     if (!contentObj->IsFunction()) {
+        resObj = nullptr;
         return false;
     }
     auto jsBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(contentObj));
@@ -12716,6 +12722,12 @@ bool JSViewAbstract::ParseBackgroundBuilder(
         PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
+
+    if (SystemProperties::ConfigChangePerform()) {
+        if (!resObj) {
+            resObj = AceType::MakeRefPtr<ResourceObject>();
+        }
+    }
 
     return true;
 }

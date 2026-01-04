@@ -176,4 +176,38 @@ HWTEST_F(ContainerPickerEventHubTest, ContainerPickerEventHubTest_NoScrollStopCa
     EXPECT_TRUE(true);
 }
 
+/**
+ * @tc.name: SetChangeEventTest001
+ * @tc.desc: Test SetChangeEvent with valid frameNode and eventHub
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerPickerEventHubTest, SetChangeEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create container picker node and push to stack
+     */
+    auto frameNode = CreateContainerPickerNode();
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+
+    /**
+     * @tc.steps: step2. Create test event and call SetChangeEvent
+     */
+    bool eventFired = false;
+    double receivedIndex = -1;
+    ContainerPickerChangeEvent testEvent = [&eventFired, &receivedIndex](const double& index) {
+        eventFired = true;
+        receivedIndex = index;
+    };
+    ContainerPickerModel::SetChangeEvent(std::move(testEvent));
+
+    /**
+     * @tc.steps: step3. Verify event was set and can be fired
+     */
+    auto eventHub = frameNode->GetEventHub<ContainerPickerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->FireChangeEvent(5.0);
+    EXPECT_TRUE(eventFired);
+    EXPECT_EQ(receivedIndex, 5.0);
+}
+
 } // namespace OHOS::Ace::NG

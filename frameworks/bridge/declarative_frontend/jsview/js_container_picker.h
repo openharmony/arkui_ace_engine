@@ -33,6 +33,8 @@ public:
     static void SetSelectionIndicator(const JSCallbackInfo& info);
 
 private:
+    static JSRef<JSVal> ParseSelectedIndex(const JSCallbackInfo& info);
+    static void SetSelectedIndexChangeEvent(const JSCallbackInfo& info, const JSRef<JSVal> changeEventVal);
     static void SetDivider(const JSRef<JSObject>& paramObj, NG::PickerIndicatorStyle& indicatorStyle);
     static void SetSelectedBackground(const JSRef<JSObject>& paramObj, NG::PickerIndicatorStyle& indicatorStyle);
 };

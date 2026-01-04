@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_MOCK_MOCK_FRONTEND_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_MOCK_MOCK_FRONTEND_H
 
+#include <cstdint>
 #include <memory>
 
 #include "gmock/gmock-function-mocker.h"
@@ -99,7 +100,47 @@ public:
         componentId_ = componentId;
     }
 
-    bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override
+    void OnLayoutChildrenCompleted(const std::string& componentId)
+    {
+        componentId_ = componentId;
+    }
+
+    bool IsDrawChildrenCallbackFuncExist(const std::string& componentId)
+    {
+        return false;
+    }
+
+    bool IsLayoutChildrenCallbackFuncExist(const std::string& componentId)
+    {
+        return false;
+    }
+
+    void OnLayoutCompleted(int32_t uniqueId)
+    {
+        uniqueId_ = uniqueId;
+    }
+
+    void OnDrawCompleted(int32_t uniqueId)
+    {
+        uniqueId_ = uniqueId;
+    }
+
+    void OnDrawChildrenCompleted(int32_t uniqueId)
+    {
+        uniqueId_ = uniqueId;
+    }
+
+    void OnLayoutChildrenCompleted(int32_t uniqueId)
+    {
+        uniqueId_ = uniqueId;
+    }
+
+    bool IsDrawChildrenCallbackFuncExist(int32_t uniqueId)
+    {
+        return false;
+    }
+
+    bool IsLayoutChildrenCallbackFuncExist(int32_t uniqueId)
     {
         return false;
     }
@@ -127,6 +168,7 @@ public:
 private:
     int32_t width_ = 0;
     int32_t height_ = 0;
+    int32_t uniqueId_ = -1;
     std::string componentId_ = "init_id";
     WindowConfig windowConfig_;
 };

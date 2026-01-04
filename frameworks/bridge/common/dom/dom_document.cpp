@@ -32,9 +32,6 @@
 #include "frameworks/bridge/common/dom/dom_panel.h"
 #include "frameworks/bridge/common/dom/dom_picker_view.h"
 #include "frameworks/bridge/common/dom/dom_progress.h"
-#ifdef QRCODEGEN_SUPPORT
-#include "frameworks/bridge/common/dom/dom_qrcode.h"
-#endif
 #include "frameworks/bridge/common/dom/dom_refresh.h"
 #ifdef WEB_SUPPORTED
 #include "frameworks/bridge/common/dom/dom_rich_text.h"
@@ -77,14 +74,10 @@
 #include "frameworks/bridge/common/dom/dom_picker_dialog.h"
 #include "frameworks/bridge/common/dom/dom_piece.h"
 #include "frameworks/bridge/common/dom/dom_popup.h"
-#include "frameworks/bridge/common/dom/dom_rating.h"
 #include "frameworks/bridge/common/dom/dom_select.h"
 #include "frameworks/bridge/common/dom/dom_tab_bar.h"
 #include "frameworks/bridge/common/dom/dom_tab_content.h"
 #include "frameworks/bridge/common/dom/dom_tool_bar.h"
-#if defined(PLAYER_FRAMEWORK_EXISTS)
-#include "frameworks/bridge/common/dom/dom_video.h"
-#endif
 #if !defined(PREVIEW)
 #ifdef WEB_SUPPORTED
 #include "frameworks/bridge/common/dom/dom_web.h"
@@ -176,12 +169,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_POPUP, &DOMNodeCreator<DOMPopup> },
 #endif
         { DOM_NODE_TAG_PROGRESS, &DOMNodeCreator<DOMProgress> },
-#ifdef QRCODEGEN_SUPPORT
-        { DOM_NODE_TAG_QRCODE, &DOMNodeCreator<DOMQrcode> },
-#endif
-#ifndef WEARABLE_PRODUCT
-        { DOM_NODE_TAG_RATING, &DOMNodeCreator<DOMRating> },
-#endif
         { DOM_NODE_TAG_RECT, &DOMNodeCreator<DOMSvgRect> },
         { DOM_NODE_TAG_REFRESH, &DOMNodeCreator<DOMRefresh> },
 #ifdef WEB_SUPPORTED
@@ -218,9 +205,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_TSPAN, &DOMNodeCreator<DOMSvgTspan> },
         { DOM_NODE_TAG_USE, &DOMNodeCreator<DOMSvgUse> },
 #ifndef WEARABLE_PRODUCT
-#if defined(PLAYER_FRAMEWORK_EXISTS)
-        { DOM_NODE_TAG_VIDEO, &DOMNodeCreator<DOMVideo> },
-#endif
 #ifdef WEB_SUPPORTED
         { DOM_NODE_TAG_WEB, &DOMNodeCreator<DOMWeb> },
 #endif
@@ -247,30 +231,27 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
             creatorIndex = BinarySearchFindIndex(phoneNodeCreators, ArraySize(phoneNodeCreators), tag.c_str());
             if (creatorIndex >= 0) {
                 domNode = phoneNodeCreators[creatorIndex].value(nodeId, tag, itemIndex);
-            } else {
-                
-                auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName(tag.c_str());
-                if (loader) {
-                    LOGI("DynamicModuleHelper getLoaderByName success, tag = %{public}s", tag.c_str());
-                    domNode = loader->CreateDomNode(nodeId, tag);
-                }
-                if (!domNode) {
-                    return nullptr;
-                }
             }
         }
 #endif
     }
     if (!domNode) {
-#if defined(PREVIEW)
-        if (std::strcmp(tag.c_str(), DOM_NODE_TAG_WEB) == 0 || std::strcmp(tag.c_str(), DOM_NODE_TAG_XCOMPONENT) == 0 ||
-            std::strcmp(tag.c_str(), DOM_NODE_TAG_RICH_TEXT) == 0) {
-            LOGW("[Engine Log] Unable to use the %{public}s component in the Previewer. Perform this operation on the "
-                 "emulator or a real device instead.",
-                tag.c_str());
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName(tag.c_str());
+        if (loader) {
+            LOGI("DynamicModuleHelper getLoaderByName success, tag = %{public}s", tag.c_str());
+            domNode = loader->CreateDomNode(nodeId, tag);
         }
+        if (!domNode) {
+#if defined(PREVIEW)
+            if (std::strcmp(tag.c_str(), DOM_NODE_TAG_WEB) == 0 || std::strcmp(tag.c_str(), DOM_NODE_TAG_XCOMPONENT) == 0 ||
+                std::strcmp(tag.c_str(), DOM_NODE_TAG_RICH_TEXT) == 0) {
+                LOGW("[Engine Log] Unable to use the %{public}s component in the Previewer. Perform this operation on the "
+                    "emulator or a real device instead.",
+                    tag.c_str());
+            }
 #endif
-        return nullptr;
+            return nullptr;
+        }
     }
 
     auto result = domNodes_.try_emplace(nodeId, domNode);

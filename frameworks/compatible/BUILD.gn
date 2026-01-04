@@ -13,6 +13,8 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import(
+"//foundation/arkui/ace_engine/frameworks/core/components/components.gni")
 
 ohos_source_set("ace_compatible_source") {
   if (defined(current_platform.name)) {
@@ -68,7 +70,40 @@ ohos_source_set("ace_compatible_source") {
     "components/marquee/render_marquee.cpp",
     "components/marquee/render_marquee_creator.cpp",
     "components/marquee/rosen_render_marquee.cpp",
+    "components/rating/dom_rating.cpp",
+    "components/rating/rating_composed_element.cpp",
+    "components/rating/rating_component.cpp",
+    "components/rating/rating_loader.cpp",
+    "components/rating/rating_model_impl.cpp",
+    "components/rating/render_rating.cpp",
+    "components/rating/render_rating_creator.cpp",
+    "components/rating/rosen_render_rating.cpp",
+    "components/video/dom_video.cpp",
+    "components/video/render_texture_creator.cpp",
+    "components/video/render_texture.cpp",
+    "components/video/rosen_render_texture.cpp",
+    "components/video/texture_component.cpp",
+    "components/video/video_component_v2.cpp",
+    "components/video/video_component.cpp",
+    "components/video/video_element_v2.cpp",
+    "components/video/video_element.cpp",
+    "components/video/video_loader.cpp",
+    "components/video/video_model_impl.cpp",
   ]
+
+  if (qrcodegen_support) {
+    sources += [
+      "components/qrcode/dom_qrcode.cpp",
+      "components/qrcode/qrcode_model_impl.cpp",
+      "components/qrcode/qrcode_component.cpp",
+      "components/qrcode/qrcode_composed_element.cpp",
+      "components/qrcode/qrcode_declaration.cpp",
+      "components/qrcode/qrcode_loader.cpp",
+      "components/qrcode/render_qrcode.cpp",
+      "components/qrcode/render_qrcode_creator.cpp",
+      "components/qrcode/rosen_render_qrcode.cpp",
+    ]
+  }
   external_deps = [
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
@@ -80,10 +115,18 @@ ohos_source_set("ace_compatible_source") {
     "$ace_root/frameworks/core:ace_container_scope",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
   ]
+
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 
   if (ohos_indep_compiler_enable) {
     include_dirs = indep_compile_includes
+  }
+  if (qrcodegen_support) {
+    if (is_arkui_x) {
+        deps += [ "//third_party/qrcodegen:ace_engine_qrcode" ]
+    } else {
+        external_deps += [ "qrcodegen:ace_engine_qrcode" ]
+    }
   }
 }

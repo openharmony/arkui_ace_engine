@@ -1141,6 +1141,15 @@ void WebModelStatic::SetWindowNewEvent(
     webEventHub->SetOnWindowNewEvent(std::move(callback));
 }
 
+void WebModelStatic::SetWindowNewExtEvent(
+    FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnWindowNewExtEvent(std::move(callback));
+}
+
 void WebModelStatic::SetWindowExitEventId(
     FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
 {

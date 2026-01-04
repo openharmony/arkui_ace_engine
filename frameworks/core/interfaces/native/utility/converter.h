@@ -244,8 +244,7 @@ namespace Converter {
     std::optional<Dimension> OptConvertFromArkNumResStr(
         const Ark_Union_F64_ResourceStr& src, DimensionUnit defaultUnit = DimensionUnit::FP);
     Dimension ConvertFromString(const std::string& str, DimensionUnit unit = DimensionUnit::FP);
-    template<typename T, typename NumberType = Ark_Int32>
-    ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkNumStrRes(
+    template<typename T, typename NumberType = Ark_Float64> std::optional<Dimension> OptConvertFromArkNumStrRes(
         const T& src, DimensionUnit defaultUnit = DimensionUnit::FP);
     std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src,
         DimensionUnit defaultUnit = DimensionUnit::VP);
@@ -253,6 +252,9 @@ namespace Converter {
         DimensionUnit defaultUnit = DimensionUnit::FP);
     std::optional<Dimension> OptConvertFromArkLengthResource(const Ark_Resource& src,
         DimensionUnit defaultUnit = DimensionUnit::VP);
+    std::optional<Dimension> OptConvertFromResourceStr(const Ark_ResourceStr& src, DimensionUnit defaultUnit);
+    std::optional<Dimension> OptConvertFromF64ResourceStr(
+        const Opt_Union_F64_ResourceStr& src, DimensionUnit defaultUnit);
 
     template<typename T, typename P>
     ACE_FORCE_EXPORT void AssignCast(std::optional<T>& dst, const P& src)

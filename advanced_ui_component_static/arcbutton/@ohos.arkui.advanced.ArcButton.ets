@@ -210,30 +210,15 @@ interface ArcButtonThemeInterface {
   CHAMFER_CIRCLE_RADIUS: number,
 }
 
-export class ArcButtonProgressConfig {
-  /**
-   * 指定当前Progress进度值
-   */
-  value?: double;
-  /**
-   * 指定Progress总进度值
-   */
-  total?: double;
-  /**
-   * Progress进度条颜色
-   */
-  color?: ResourceColor;
-}
-
 @ObservedV2
-export class ArcButtonProgress {
-  @Trace public value?: number;
-  @Trace public total?: number;
+export class ArcButtonProgressConfig {
+  @Trace public value: double;
+  @Trace public total?: double;
   @Trace public color?: ResourceColor;
-  constructor(options: ArcButtonProgressConfig) {
-    this.value = options?.value;
-    this.total = options?.total;
-    this.color = options?.color;
+  constructor(value: double, total?: double, color?:ResourceColor) {
+    this.value = value ?? 0;
+    this.total = total ?? 100;
+    this.color = color ?? Constants.EMPHASIZED_DISABLE_BTN_COLOR;
   }
 }
 
@@ -247,7 +232,7 @@ export class ArcButtonOptions {
   @Trace public backgroundColor: ColorMetrics;
   @Trace public shadowColor: ColorMetrics;
   @Trace public shadowEnabled: boolean;
-  @Trace public fontSize: LengthMetrics;
+  @Trace public fontSize?: LengthMetrics;
   @Trace public fontColor: ColorMetrics;
   @Trace public pressedFontColor: ColorMetrics;
   @Trace public fontStyle: FontStyle;
@@ -255,7 +240,7 @@ export class ArcButtonOptions {
   @Trace public fontMargin: LocalizedMargin;
   @Trace public onTouch?: Callback<TouchEvent>;
   @Trace public onClick?: Callback<ClickEvent>;
-  @Trace public progressConfig?: ArcButtonProgress;
+  @Trace public progressConfig?: ArcButtonProgressConfig;
 
   constructor(options: CommonArcButtonOptions) {
     this.position = options.position ?? ArcButtonPosition.BOTTOM_EDGE;
@@ -266,7 +251,7 @@ export class ArcButtonOptions {
     this.backgroundColor = options.backgroundColor ?? ColorMetrics.resourceColor(Color.Black);
     this.shadowColor = options.shadowColor ?? ColorMetrics.resourceColor('#000000');
     this.shadowEnabled = options.shadowEnabled ?? false;
-    this.fontSize = options.fontSize ?? LengthMetrics.fp(Constants.MAX_FONT_SIZE);
+    this.fontSize = options.fontSize ?? undefined;
     this.fontColor = options.fontColor ?? ColorMetrics.resourceColor(Color.White);
     this.pressedFontColor = options.pressedFontColor ?? ColorMetrics.resourceColor(Color.White);
     this.fontStyle = options.fontStyle ?? FontStyle.Normal;
@@ -284,7 +269,7 @@ export class ArcButtonOptions {
     if (options?.progressConfig) {
       this.backgroundColor = options.backgroundColor ?? ColorMetrics.resourceColor(
         Constants.EMPHASIZED_DISABLE_BTN_COLOR);
-      this.progressConfig = new ArcButtonProgress(options?.progressConfig as ArcButtonProgressConfig)
+      this.progressConfig = options?.progressConfig as ArcButtonProgressConfig;
     } else {
       this.progressConfig = undefined;
     }
@@ -304,7 +289,7 @@ export struct ArcButton {
   @Local private fontColor: ColorMetrics = ColorMetrics.resourceColor(Color.White);
   @Local private isExceed: boolean = false;
   @Local private pathString: string = '';
-  @Local private fontSize: string = '';
+  @Local private fontSize: string | undefined = undefined;
   @Local private progressValue: number = 0;
   @Local private progressTotal: number = 100;
   @Local private progressColor: ColorMetrics = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
@@ -328,7 +313,11 @@ export struct ArcButton {
   @Monitor(['options.label', 'options.fontSize', 'options.styleMode', 'options.status', 'options.backgroundColor',
     'options.fontColor'])
   optionsChange(monitor: IMonitor) {
-    this.fontSize = this.cover(this.options.fontSize ?? LengthMetrics.fp(Constants.MAX_FONT_SIZE))
+    if (this.options.fontSize) {
+      this.fontSize = this.cover(this.options.fontSize as LengthMetrics);
+    } else {
+      this.fontSize = undefined;
+    }
     this.judgeTextWidth()
     this.changeStatus()
   }
@@ -342,7 +331,7 @@ export struct ArcButton {
   progressOptionsUpdate(){
     if (this.options?.progressConfig) {
       if (this.options?.progressConfig?.value) {
-        this.progressValue = this.options?.progressConfig?.value as number;
+        this.progressValue = this.options?.progressConfig?.value as double;
       } else {
         this.progressValue = 0;
       }
@@ -354,7 +343,7 @@ export struct ArcButton {
         this.progressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
       }
       if (this.options?.progressConfig?.total) {
-        this.progressTotal = this.options?.progressConfig?.total as number;
+        this.progressTotal = this.options?.progressConfig?.total as double;
       } else {
         this.progressTotal = 100;
       }
@@ -770,8 +759,8 @@ class DataProcessUtil {
 
   /**
    * 查找两圆的交点
-   * @param C1 第一个圆
-   * @param c2 第二个圆
+   * @param firstCircus 第一个圆
+   * @param secondCircus 第二个圆
    * @returns 两圆相交的点的数组
    */
   findCircleIntersections(firstCircus: ArcButtonCircle, secondCircus: ArcButtonCircle): ArcButtonPoint[] {

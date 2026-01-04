@@ -55,7 +55,7 @@ public:
 
     void InitializeFormAccessibility();
 
-    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId);
+    bool OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId);
 
     void OnAccessibilityChildTreeDeregister();
 

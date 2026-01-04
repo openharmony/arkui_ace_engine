@@ -558,6 +558,19 @@ HWTEST_F(RichEditorSelectOverlayTestNg, DumpInfo001, TestSize.Level0)
     json = std::make_unique<JsonValue>();
     richEditorPattern->DumpInfo(json);
     EXPECT_FALSE(richEditorPattern->selectOverlay_->HasRenderTransform());
+
+    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    ASSERT_NE(richEditorOverlay, nullptr);
+    richEditorOverlay->SetCaretOffsetAndHeight(OffsetF(80.0f, 100.0f), 60.0f);
+    auto cursorInfo = JsonUtil::ParseJsonString(richEditorPattern->GetCursorInfoInJson());
+    EXPECT_TRUE(cursorInfo->Contains("left"));
+    EXPECT_EQ(cursorInfo->GetDouble("left"), 80.0);
+    EXPECT_TRUE(cursorInfo->Contains("top"));
+    EXPECT_EQ(cursorInfo->GetDouble("top"), 100.0);
+    EXPECT_TRUE(cursorInfo->Contains("width"));
+    EXPECT_EQ(cursorInfo->GetDouble("width"), 2.0);
+    EXPECT_TRUE(cursorInfo->Contains("height"));
+    EXPECT_EQ(cursorInfo->GetDouble("height"), 60.0);
 }
 
 /**
@@ -579,6 +592,26 @@ HWTEST_F(RichEditorSelectOverlayTestNg, SelectedBackgroundColorTest001, TestSize
     patternSelectedBackgroundColor = richEditorPattern->GetSelectedBackgroundColor();
     auto selectedBackgroundColorResult = Color::RED.ChangeOpacity(DEFAILT_OPACITY);
     EXPECT_EQ(patternSelectedBackgroundColor, selectedBackgroundColorResult);
+}
+
+/**
+ * @tc.name: SelectedDragPreviewColorTest001
+ * @tc.desc: test set and get selectedDragPreviewColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, SelectedDragPreviewColorTest001, TestSize.Level0)
+{
+    RichEditorModelNG model;
+    model.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    Color patternSelectedDragPreviewColor = richEditorPattern->GetSelectedDragPreviewStyleColor();
+    EXPECT_EQ(patternSelectedDragPreviewColor, Color(0xFFFFFFFF));
+    model.SetSelectedDragPreviewStyle(Color::RED);
+    patternSelectedDragPreviewColor = richEditorPattern->GetSelectedDragPreviewStyleColor();
+    EXPECT_EQ(patternSelectedDragPreviewColor, Color::RED);
 }
 
 /**

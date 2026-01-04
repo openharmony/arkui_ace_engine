@@ -269,6 +269,7 @@ public:
         bool followWithoutTransition = false, bool doRegisterSharedTransition = true) = 0;
     virtual void SetMotionPath(const MotionPathOption& option) = 0;
     virtual void SetRenderGroup(bool isRenderGroup) = 0;
+    virtual void SetAdaptiveGroup(bool isRenderGroup, bool useAdaptiveFilter) {}
     virtual void SetExcludeFromRenderGroup(bool exclude) {}
     virtual void SetRenderFit(RenderFit renderFit) = 0;
     virtual void SetRenderStrategy(RenderStrategy renderStrategy) = 0;
@@ -456,6 +457,8 @@ public:
     // background
     virtual void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) = 0;
     virtual void SetBackground(std::function<void()>&& buildFunc) = 0;
+    virtual void SetBackgroundWithResourceObj(
+        std::function<void()>&& buildFunc, const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetBackgroundAlign(const Alignment& align) = 0;
     virtual void SetCustomBackgroundColor(const Color& color) = 0;
     virtual void SetCustomBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj) = 0;
@@ -530,6 +533,7 @@ public:
     // foregroundColor
     virtual void SetForegroundColor(const Color& color) = 0;
     virtual void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) = 0;
+    virtual void ResetColorPicker() {}
 
     // custom animation properties
     virtual void CreateAnimatablePropertyFloat(

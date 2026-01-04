@@ -185,7 +185,6 @@ template("ace_core_source_set") {
       "components/declaration/image/image_animator_declaration.cpp",
       "components/declaration/input/input_declaration.cpp",
       "components/declaration/piece/piece_declaration.cpp",
-      "components/declaration/qrcode/qrcode_declaration.cpp",
       "components/declaration/richtext/rich_text_declaration.cpp",
       "components/declaration/search/search_declaration.cpp",
       "components/declaration/side_bar/side_bar_declaration.cpp",
@@ -520,7 +519,6 @@ template("ace_core_source_set") {
 
     if (qrcodegen_support) {
       deps += [
-        "$ace_root/frameworks/core/components/qrcode:ace_core_components_qrcode_$platform",
         "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
       ]
     }
@@ -664,13 +662,9 @@ template("ace_core_source_set") {
         "$ace_root/frameworks/core/components/multimodal:ace_core_components_multimodal_$platform",
         "$ace_root/frameworks/core/components/piece:ace_core_components_piece_$platform",
         "$ace_root/frameworks/core/components/popup:ace_core_components_popup_$platform",
-        "$ace_root/frameworks/core/components/rating:ace_core_components_rating_$platform",
         "$ace_root/frameworks/core/components/select:ace_core_components_select_$platform",
         "$ace_root/frameworks/core/components/tool_bar:ace_core_components_tool_bar_$platform",
       ]
-      if (enable_player_framework) {
-        deps += [ "$ace_root/frameworks/core/components/video:ace_core_components_video_$platform" ]
-      }
     }
 
     if ((current_os == "mingw" || current_os == "mac" ||
@@ -939,7 +933,6 @@ template("ace_core_ng_source_set") {
       "components/theme/theme_manager_multi_thread.cpp",
       "components/theme/theme_utils.cpp",
       "components/theme/ui_material_theme.cpp",
-      "components/video/resource/player.cpp",
 
       # v2 inspector
       "components_v2/grid/grid_event.cpp",
@@ -992,9 +985,6 @@ template("ace_core_ng_source_set") {
         "components/common/properties/scroll_bar.cpp",
         "components/custom_paint/rosen_render_offscreen_canvas.cpp",
         "components/declaration/common/event.cpp",
-        "components/video/resource/ext_surface.cpp",
-        "components/video/resource/ext_texture.cpp",
-        "components/video/resource/resource.cpp",
       ]
     }
 

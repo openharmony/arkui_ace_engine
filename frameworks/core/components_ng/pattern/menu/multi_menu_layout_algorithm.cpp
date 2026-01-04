@@ -92,7 +92,9 @@ struct SelectOverlayRightClickMenuLayoutHelper {
         CHECK_NULL_VOID(menuWrapperNode);
         auto childLayoutProperty = child->GetLayoutProperty();
         CHECK_NULL_VOID(childLayoutProperty);
-        if (!IsAdjustLayoutConstraints(outterMenuPattern, menuWrapperNode, child)) {
+        if (menuWrapperNode->GetInspectorIdValue("") != SelectOverlayRrightClickMenuWrapper ||
+            !outterMenuPattern->IsSelectOverlayRightClickMenu() ||
+            child->GetHostTag() != V2::RELATIVE_CONTAINER_ETS_TAG) {
             return;
         }
         childLayoutProperty->UpdateUserDefinedIdealSize(

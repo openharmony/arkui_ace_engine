@@ -74,6 +74,7 @@ ace_unittest("syntax_arkoala_test_ng") {
   module_output = "syntaxs"
   sources = [
     "arkoala_for_each_test_ng.cpp",
+    "arkoala_if_else_test_ng.cpp",
     "arkoala_lazy_test_ng.cpp",
   ]
 }

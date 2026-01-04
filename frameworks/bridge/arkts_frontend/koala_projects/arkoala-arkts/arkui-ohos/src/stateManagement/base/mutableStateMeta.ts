@@ -16,10 +16,9 @@
 import { int32 } from '@koalaui/common';
 import { ArkUIAniModule } from 'arkui.ani';
 import { IMutableStateMeta, IMutableKeyedStateMeta } from '../decorator';
-import { Dependent, MutableState } from '@koalaui/runtime';
+import { Dependent, MutableState, GlobalStateManager } from '@koalaui/runtime';
 import { ObserveSingleton } from './observeSingleton';
 import { RenderIdType } from '../decorator';
-import { StateMgmtTool } from '#stateMgmtTool';
 import { StateUpdateLoop } from './stateUpdateLoop';
 import { StateTracker } from '../tests/lib/stateTracker';
 import { StateMgmtDFX } from '../tools/stateMgmtDFX';
@@ -91,7 +90,7 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
 
     constructor(info: string, metaDependency?: MutableState<int32>) {
         super(info);
-        this.__metaDependency = metaDependency ?? StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
+        this.__metaDependency = metaDependency ?? GlobalStateManager.instance.mutableState<int32>(0, true);
         this.bindingRefs_ = new Set<WeakRef<ITrackedDecoratorRef>>();
         this.weakThis = new WeakRef<IBindingSource>(this);
         this.metaValue = 0;
@@ -182,7 +181,7 @@ export class MutableKeyedStateMeta extends MutableStateMetaBase implements IMuta
             // incremental engine does not allow create mutableState while building tree
             metaDependency = new MutableStateMeta(
                 key,
-                StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true)
+                GlobalStateManager.instance.mutableState<int32>(0, true)
             );
             this.__metaDependencies.set(key, metaDependency);
         }

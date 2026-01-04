@@ -83,6 +83,7 @@ protected:
     void ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::SnapshotStatus key, bool freeMultiWindow);
     bool AddPersistentImage(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
         const RefPtr<NG::FrameNode>& host);
+    void DelayAddAppWindowForDmaResume(int32_t pid);
 
     void AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
         const std::string& nodeType, int32_t index = DEFAULT_NODE_SLOT);
@@ -125,6 +126,7 @@ protected:
     bool isBlankForSnapshot_ = false;
     bool isPrelaunch_ = false;
     bool syncStartingWindow_ = false;
+    bool dmaReclaimEnabled_ = false;
 
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();
@@ -144,9 +146,11 @@ private:
     void AddBackgroundColorDelayed();
     CancelableCallback<void()> interruptStartingTask_;
     CancelableCallback<void()> addBackgroundColorTask_;
+    CancelableCallback<void()> delayAddAppWindowTask_;
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     bool needAddBackgroundColor_ = true;
+    bool appWindowDelayAdded_ = false;
     friend class LifecycleListener;
     friend class WindowEventProcess;
 

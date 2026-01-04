@@ -77,7 +77,7 @@ void ContentChangeManager::RemoveOnContentChangeNode(WeakPtr<FrameNode> node)
 
 void ContentChangeManager::OnPageTransitionEnd(const RefPtr<FrameNode>& keyNode)
 {
-    if (!IsContentChangeDetectEnable() || !keyNode) {
+    if (!IsContentChangeDetectEnable() || !keyNode || IsScrolling()) {
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OnPageTransitionEnd");
@@ -88,17 +88,20 @@ void ContentChangeManager::OnPageTransitionEnd(const RefPtr<FrameNode>& keyNode)
 
 void ContentChangeManager::OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode)
 {
-    if (!IsContentChangeDetectEnable() || !keyNode || scrollReported_) {
+    if (!IsContentChangeDetectEnable() || !keyNode) {
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OnScrollChangeEnd");
+    scrollingNodes_.erase(keyNode->GetId());
+    if (!scrollingNodes_.empty()) {
+        return;
+    }
     UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::SCROLL, "");
-    scrollReported_ = true;
 }
 
 void ContentChangeManager::OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor)
 {
-    if (!IsContentChangeDetectEnable() || !keyNode) {
+    if (!IsContentChangeDetectEnable() || !keyNode || IsScrolling()) {
         return;
     }
 
@@ -108,7 +111,7 @@ void ContentChangeManager::OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, b
 
 void ContentChangeManager::OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow)
 {
-    if (!IsContentChangeDetectEnable() || !keyNode) {
+    if (!IsContentChangeDetectEnable() || !keyNode || IsScrolling()) {
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OnDialogChangeEnd");
@@ -124,7 +127,7 @@ void ContentChangeManager::OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, b
 
 void ContentChangeManager::OnTextChangeEnd(const RectF& rect)
 {
-    if (!IsContentChangeDetectEnable() || !textCollecting_ || rect.IsEmpty()) {
+    if (!IsContentChangeDetectEnable() || !textCollecting_ || rect.IsEmpty() || IsScrolling()) {
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OntextChange {%s}", rect.ToString().c_str());
@@ -141,7 +144,6 @@ void ContentChangeManager::OnVsyncStart()
     }
 
     StartTextAABBCollecting();
-    scrollReported_ = false;
 }
 
 void ContentChangeManager::OnVsyncEnd(const RectF& rootRect)
@@ -157,17 +159,9 @@ void ContentChangeManager::OnVsyncEnd(const RectF& rootRect)
         if (!node) {
             continue;
         }
-        auto pattern = node->GetPattern();
-        if (!pattern) {
-            continue;
-        }
-        auto keyFrameNode = pattern->GetKeyFrameNodeWhenContentChanged();
-        if (!keyFrameNode) {
-            continue;
-        }
         ACE_SCOPED_TRACE("[ContentChangeManager] On%sChanged Reporting", hasTabsAncestor ? "Tabs" : "Swiper");
         auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
-        keyFrameNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, {false, false, false});
+        node->DumpSimplifyTreeWithParamConfig(0, simpleTree, true, {false, false, false});
         UiSessionManager::GetInstance()->ReportContentChangeEvent(
             hasTabsAncestor ? ChangeType::TABS : ChangeType::SWIPER, simpleTree->ToString());
     }
@@ -182,7 +176,7 @@ bool ContentChangeManager::IsTextAABBCollecting() const
 
 void ContentChangeManager::StartTextAABBCollecting()
 {
-    if (!IsContentChangeDetectEnable() || textCollecting_) {
+    if (!IsContentChangeDetectEnable() || textCollecting_ || IsScrolling()) {
         return;
     }
 
@@ -195,7 +189,7 @@ void ContentChangeManager::StartTextAABBCollecting()
 
 void ContentChangeManager::StopTextAABBCollecting(const RectF& rootRect)
 {
-    if (!IsContentChangeDetectEnable() || textAABB_.IsEmpty()) {
+    if (!IsContentChangeDetectEnable() || textAABB_.IsEmpty() || IsScrolling()) {
         return;
     }
     if (rootRect.IsIntersectWith(textAABB_)) {
@@ -212,5 +206,25 @@ void ContentChangeManager::StopTextAABBCollecting(const RectF& rootRect)
 
     textAABB_.Reset();
     textCollecting_ = false;
+}
+
+void ContentChangeManager::OnScrollChangeStart(const RefPtr<FrameNode>& keyNode)
+{
+    if (!IsContentChangeDetectEnable() || !keyNode) {
+        return;
+    }
+    scrollingNodes_.emplace(keyNode->GetId());
+}
+
+void ContentChangeManager::OnScrollRemoved(int32_t nodeId)
+{
+    if (scrollingNodes_.count(nodeId)) {
+        scrollingNodes_.erase(nodeId);
+    }
+}
+
+bool ContentChangeManager::IsScrolling() const
+{
+    return !scrollingNodes_.empty();
 }
 } // namespace OHOS::Ace::NG

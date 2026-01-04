@@ -218,7 +218,7 @@ public:
     MOCK_METHOD(bool, IsNeedResetStatus, (), ());
     MOCK_METHOD(void, ResetStatusOnFinish, (bool isBlocked), ());
     void BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal) {}
-    void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) {}
+    void OnBeginGestureReferee(int32_t touchId, int32_t originalId, bool needUpdateChild = false) {}
     void HandleTouchDownEvent(const TouchEvent& event) {}
     void HandleTouchUpEvent(const TouchEvent& event) {}
     void HandleTouchMoveEvent(const TouchEvent& event) {}
@@ -237,7 +237,7 @@ class MockNGGestureRecognizer : public NGGestureRecognizer {
 public:
     MOCK_METHOD(void, ResetStatusOnFinish, (bool isBlocked), ());
     void BatchAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal) {}
-    void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) {}
+    void OnBeginGestureReferee(int32_t touchId, int32_t originalId, bool needUpdateChild = false) {}
     void HandleTouchDownEvent(const TouchEvent& event) {}
     void HandleTouchUpEvent(const TouchEvent& event) {}
     void HandleTouchMoveEvent(const TouchEvent& event) {}

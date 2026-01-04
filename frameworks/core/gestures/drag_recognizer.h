@@ -129,7 +129,7 @@ using DragCancelCallback = std::function<void()>;
 using DragUpdateNotifyCallback = std::function<void(double x, double y, const DragUpdateInfo& updateInfo)>;
 using DragEndNotifyCallback = std::function<void(double x, double y, const DragEndInfo& endInfo)>;
 
-class DragRecognizer : public GestureRecognizer {
+class ACE_FORCE_EXPORT DragRecognizer : public GestureRecognizer {
     DECLARE_ACE_TYPE(DragRecognizer, GestureRecognizer);
 
 public:

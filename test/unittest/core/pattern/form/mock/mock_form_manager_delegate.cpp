@@ -106,15 +106,23 @@ void FormManagerDelegate::SetObscured(bool isObscured) {}
 
 void FormManagerDelegate::SetColorMode(int32_t colorMode) {}
 
-void FormManagerDelegate::OnAccessibilityChildTreeRegister(
-    uint32_t windowId, int32_t treeId, int64_t accessibilityId) {}
+bool FormManagerDelegate::OnAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    return true;
+}
+
 void FormManagerDelegate::OnAccessibilityChildTreeDeregister() {}
+
 void FormManagerDelegate::OnAccessibilityDumpChildInfo(
     const std::vector<std::string>& params, std::vector<std::string>& info) {}
+
 void FormManagerDelegate::OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
     int32_t eventType, int64_t timeMs) {}
+
 void FormManagerDelegate::NotifyFormDump(const std::vector<std::string>& params,
     std::vector<std::string>& info) {}
+
 void FormManagerDelegate::HandleCachedClickEvents() {}
 
 #if OHOS_STANDARD_SYSTEM

@@ -172,6 +172,7 @@ ArkUINativeModuleValue RatingBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
         [vm, frameNode, obj = std::move(obj), containerId](
             RatingConfiguration config) -> RefPtr<FrameNode> {
             ContainerScope scope(containerId);
+            LocalScope pandaScope(vm);
             auto context = ArkTSUtils::GetContext(vm);
             CHECK_EQUAL_RETURN(context->IsUndefined(), true, nullptr);
             const char* keys[] = { "stars", "indicator", "rating", "stepSize", "enabled", "triggerChange" };
@@ -185,7 +186,6 @@ ArkUINativeModuleValue RatingBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
             rating->SetNativePointerFieldCount(vm, 1);
             rating->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
             panda::Local<panda::JSValueRef> params[NUM_2] = { context, rating };
-            LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             auto makeFunc = obj.ToLocal()->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
             CHECK_EQUAL_RETURN(makeFunc->IsFunction(vm), false, nullptr);

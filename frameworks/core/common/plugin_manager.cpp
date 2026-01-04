@@ -16,6 +16,9 @@
 #include "core/common/plugin_manager.h"
 
 namespace OHOS::Ace {
+
+SINGLETON_INSTANCE_IMPL(PluginManager);
+
 PluginManager::PluginManager() {}
 
 PluginManager::~PluginManager()

@@ -50,10 +50,7 @@ export class WaterFlowHandWritten {
                     let stageNode = manager.updatableNode<IncrementalNode>(
                         new IncrementalNode(),
                         (context: StateContext) => {
-                            const frozen = manager.frozen;
-                            manager.frozen = true;
                             memoEntry<void>(context, 0, valueBuilder);
-                            manager.frozen = frozen;
                         }
                     );
                     GlobalStateManager.SetLocalManager(old);

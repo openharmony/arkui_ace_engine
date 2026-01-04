@@ -246,6 +246,7 @@ public:
     virtual void SetSafeBrowsingCheckFinishId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckFinishId) {};
     virtual void SetBackToTop(bool isBackToTop) {};
+    virtual void SetOnMediaCastEnter(std::function<void()>&& jsCallback) {};
     virtual void SetOnVerifyPinRequest(std::function<bool(const BaseEventInfo* info)>&& jsCallback) {};
     virtual void SetCameraCaptureStateChangedId(std::function<void(const BaseEventInfo* info)> && jsCallback) {}
     virtual void SetMicrophoneCaptureStateChangedId(std::function<void(const BaseEventInfo* info)> && jsCallback) {}

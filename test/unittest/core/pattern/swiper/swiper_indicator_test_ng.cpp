@@ -1146,6 +1146,23 @@ HWTEST_F(SwiperIndicatorTestNg, CalculateGroupTurnPageRate001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalculateGroupTurnPageRate002
+ * @tc.desc: Test SwiperPattern CalculateGroupTurnPageRate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalculateGroupTurnPageRate002, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    SwiperModelNG model = CreateSwiper();
+    model.SetSwipeByGroup(true);
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+
+    auto groupTurnPageRate = pattern_->CalculateGroupTurnPageRate(0.0f);
+    EXPECT_EQ(groupTurnPageRate, 0.0f);
+}
+
+/**
  * @tc.name: CircleSwiperIndicatorPatternCheckIsTouchBottom001
  * @tc.desc: CheckIsTouchBottom
  * @tc.type: FUNC

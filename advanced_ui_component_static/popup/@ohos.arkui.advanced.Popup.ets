@@ -284,8 +284,16 @@ function isValidResource(context: Context | undefined, value: Resource) {
     return false;
   }
 
-  if (value.type === RESOURCE_TYPE_INTEGER || value.type === RESOURCE_TYPE_FLOAT) {
+  if (value.type === RESOURCE_TYPE_INTEGER) {
     if (resourceManager.getInt(value.id) >= 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  if (value.type === RESOURCE_TYPE_FLOAT) {
+    if (resourceManager.getDouble(value.id) >= 0) {
       return true;
     } else {
       return false;
@@ -306,6 +314,7 @@ export struct PopupComponent {
   private applyContentKey: string = 'applyContent' + systemDateTime.getTime(false);
   @PropRef icon ?: PopupIconOptions = { image: '' } as PopupIconOptions;
   @PropRef maxWidth ?: Dimension;
+  @PropRef messageMaxWidth ?: number = 0;
   @PropRef title ?: PopupTextOptions = { text: '' } as PopupTextOptions;
   @PropRef message ?: PopupTextOptions = { text: '' } as PopupTextOptions;
   @PropRef popupDirection ?: Direction = Direction.Auto;
@@ -316,7 +325,8 @@ export struct PopupComponent {
   @State titleHeight: number = 0;
   @State applyHeight: number = 0;
   @State buttonHeight: number = 0;
-  @State beforeScreenStatus: boolean | undefined = undefined;
+  @State messageMaxWeight: number | undefined = 0;
+  beforeScreenStatus: boolean | undefined = undefined;
   @State currentScreenStatus: boolean | undefined = undefined;
   @State applySizeOptions: ConstraintSizeOptions | undefined = undefined;
   @State closeButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
@@ -384,7 +394,7 @@ export struct PopupComponent {
 
   private getTitlePadding(): LocalizedPadding {
     return {
-      start: this.getLengthMetrics(this.theme.button.margin.start?.value as number || 0 / 2,
+      start: this.getLengthMetrics((this.theme.button.margin.start?.value as number || 0) / 2,
         this.theme.button.margin.start?.unit),
       end: this.theme.closeButton.margin.end
     }
@@ -400,11 +410,15 @@ export struct PopupComponent {
 
   private getTitleFontWeight(): int | FontWeight | string {
     const fontWeight = this.title?.fontWeight
-    if(fontWeight){
-      if(typeof fontWeight === 'number'){
-        return Math.trunc(fontWeight as number) as int
+    if (typeof fontWeight === 'string') {
+      return fontWeight as string
+    } else if (typeof fontWeight === 'number') {
+      let fontWeightValue: int = Math.trunc(fontWeight as number) as int
+      if (fontWeight instanceof Number) {
+        return fontWeightValue
+      } else {
+        return fontWeightValue as FontWeight;
       }
-      return fontWeight as FontWeight | string
     } else {
       return this.theme.title.fontWeight
     }
@@ -515,15 +529,7 @@ export struct PopupComponent {
   }
 
   private getMessageFontWeight(): Int | FontWeight | string | undefined {
-    const fontWeight = this.message?.fontWeight
-    if(fontWeight){
-      if(typeof fontWeight === 'number'){
-        return Math.trunc(fontWeight as number) as int
-      }
-      return fontWeight as FontWeight | string
-    } else {
-      return this.theme.message.fontWeight
-    }
+    return this.theme.message.fontWeight
   }
 
   private getButtonMargin(): LocalizedMargin {
@@ -615,7 +621,7 @@ export struct PopupComponent {
   aboutToAppear() {
     this.listener?.onChange((mediaQueryResult) => {
       setTimeout(() => {
-        this.currentScreenStatus = mediaQueryResult.matches as boolean
+        this.currentScreenStatus = mediaQueryResult?.matches as boolean
       }, 10)
     })
   }
@@ -626,6 +632,11 @@ export struct PopupComponent {
 
   getScrollMaxHeight(): number | undefined {
     let scrollMaxHeight: number = 0;
+    if (this.beforeScreenStatus === undefined ||
+      this.currentScreenStatus !== this.beforeScreenStatus) {
+      this.applySizeOptions = this.getApplyMaxSize();
+      this.beforeScreenStatus = this.currentScreenStatus
+    }
 
     scrollMaxHeight = this.getUIContext()
       .px2vp(this.getUIContext().getComponentUtils().getRectangleById(this.applyContentKey)?.size?.height as number)
@@ -669,12 +680,6 @@ export struct PopupComponent {
               this.getUIContext().getHostContext()?.resourceManager?.getInt((value as Resource).id) as int
             ) as number
           )
-        }
-        if ((value?.type?.toInt()) === RESOURCE_TYPE_STRING) {
-          let resourceResult: number = Number(
-            this.getUIContext().getHostContext()?.resourceManager?.getStringSync((value as Resource).id)
-          ) as number;
-          return resourceResult ? this.getUIContext().px2vp(resourceResult) : POPUP_DEFAULT_MAXWIDTH
         }
         return POPUP_DEFAULT_MAXWIDTH
       } else {
@@ -765,6 +770,7 @@ export struct PopupComponent {
       defaultDisplaySync = display.getDefaultDisplaySync()
     } catch (error) {
       console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
+      this.messageMaxWeight = 400
       return applyMaxSize = { maxWidth: 400, maxHeight: 480 }
     }
     if (this.maxWidth !== undefined) {
@@ -792,6 +798,8 @@ export struct PopupComponent {
       applyMaxHeight = this.getUIContext().px2vp(defaultDisplaySync?.height as Long) - 40 - 40
     }
     applyMaxSize = { maxWidth: applyMaxWidth, maxHeight: applyMaxHeight }
+    this.messageMaxWidth = applyMaxWidth;
+    this.messageMaxWeight = this.getMessageMaxWeight(applyMaxWidth)
     return applyMaxSize
   }
 
@@ -809,10 +817,6 @@ export struct PopupComponent {
   }
 
   build() {
-    const applyMaxSize: ConstraintSizeOptions = this.getApplyMaxSize();
-    const applyMaxWidth: number | undefined = applyMaxSize?.maxWidth as number | undefined;
-    const messageMaxWeight: number | undefined = this.getMessageMaxWeight(applyMaxWidth);
-
     Row() {
       if (this.icon?.image !== '' && this.icon?.image !== undefined) {
         Image(this.getIconImage())
@@ -981,7 +985,7 @@ export struct PopupComponent {
                 .fontSize(this.getMessageFontSize())
                 .fontColor(this.getMessageFontColor())
                 .fontWeight(this.getMessageFontWeight())
-                .constraintSize({ maxWidth: messageMaxWeight, minHeight: this.getCloseButtonHeight() })
+                .constraintSize({ maxWidth: this.messageMaxWeight, minHeight: this.getCloseButtonHeight() })
                 .onAreaChange((_, rect) => {
                   this.textHeight = rect.height as number
                 })
@@ -1104,7 +1108,7 @@ export struct PopupComponent {
     .direction(this.popupDirection)
     .alignItems(VerticalAlign.Top)
     .padding(this.getWindowsPadding())
-    .constraintSize(applyMaxSize)
+    .constraintSize(this.getApplyMaxSize())
     .key(this.applyContentKey)
     .onAreaChange((_, rect) => {
       this.applyHeight = rect.height as number

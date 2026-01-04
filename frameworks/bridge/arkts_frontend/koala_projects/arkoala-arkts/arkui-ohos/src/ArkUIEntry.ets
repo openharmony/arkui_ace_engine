@@ -133,10 +133,7 @@ export function createUiDetachedBuilderRoot(
     manager: StateManager
 ): ComputableState<PeerNode> {
     const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
-        const frozen = manager.frozen
-        manager.frozen = true
         memoEntry<void>(context, 0, builder)
-        manager.frozen = frozen
     })
     detachedRoots.set(node.value.peer.ptr, node)
     detachedStatMgt.set(new WeakRef<StateManager>(manager), new WeakRef<ComputableState<PeerNode>>(node))
@@ -277,7 +274,6 @@ export class Application {
             this.manager = GlobalStateManager.instance
             let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
             this.instanceId = uiContext.getInstanceId();
-            uiContext.stateMgr = this.manager
             let uiData = new ContextRecord();
             uiData.uiContext = uiContext;
             this.uiContext = uiContext;
@@ -301,10 +297,7 @@ export class Application {
             root = this.trackFrame(() => {
                 if (plugin) {
                     this.rootState = this.manager!.updatableNode<PeerNode>(PeerNode.generateRootPeer(), (context: StateContext) => {
-                        const frozen = this.manager!.frozen
-                        this.manager!.frozen = true
                         memoEntry<void>(context, 0, builder)
-                        this.manager!.frozen = frozen
                     })
                 } else {
                     if (this.startName) {
@@ -391,6 +384,7 @@ export class Application {
             preState = uiContextRouter.getPreState();
         }
         ObserveSingleton.instance.updateDirty();
+        this.uiContext!.flushCallback();
         this.trackFrame(() => this.updateStates(this.manager!, rootState, preState));
         ObserveSingleton.instance.makeDelayedMutableStateChanges();
         while (StateUpdateLoop.len) {

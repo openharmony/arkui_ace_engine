@@ -748,6 +748,7 @@ void XComponentPattern::NativeXComponentDispatchTouchEvent(
     const auto* callback = nativeXComponentImpl_->GetCallback();
     CHECK_NULL_VOID(callback);
     CHECK_NULL_VOID(callback->DispatchTouchEvent);
+    LOG_CALLBACK(callback->DispatchTouchEvent);
     callback->DispatchTouchEvent(nativeXComponent_.get(), surface);
 }
 
@@ -1260,6 +1261,7 @@ void XComponentPattern::HandleMouseHoverEvent(bool isHover)
     const auto* callback = nativeXComponentImpl_->GetMouseEventCallback();
     CHECK_NULL_VOID(callback);
     CHECK_NULL_VOID(callback->DispatchHoverEvent);
+    LOG_CALLBACK(callback->DispatchHoverEvent);
     callback->DispatchHoverEvent(nativeXComponent_.get(), isHover);
 }
 
@@ -1275,6 +1277,7 @@ void XComponentPattern::NativeXComponentDispatchMouseEvent(const OH_NativeXCompo
     const auto* callback = nativeXComponentImpl_->GetMouseEventCallback();
     CHECK_NULL_VOID(callback);
     CHECK_NULL_VOID(callback->DispatchMouseEvent);
+    LOG_CALLBACK(callback->DispatchMouseEvent);
     callback->DispatchMouseEvent(nativeXComponent_.get(), surface);
 }
 
@@ -1783,6 +1786,7 @@ void XComponentPattern::OnSurfaceCreated()
         CHECK_NULL_VOID(callback->OnSurfaceCreated);
         TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] native OnSurfaceCreated", GetId().c_str());
         ACE_SCOPED_TRACE("XComponent[%s] NativeSurfaceCreated[w:%f,h:%f]", GetId().c_str(), width, height);
+        LOG_CALLBACK(callback->OnSurfaceCreated);
         callback->OnSurfaceCreated(nativeXComponent_.get(), nativeWindow_);
     } else {
         auto host = GetHost();
@@ -1814,6 +1818,7 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
         CHECK_NULL_VOID(callback->OnSurfaceChanged);
         {
             ACE_SCOPED_TRACE("XComponent[%s] native OnSurfaceChanged[w:%f,h:%f]", GetId().c_str(), width, height);
+            LOG_CALLBACK(callback->OnSurfaceChanged);
             callback->OnSurfaceChanged(nativeXComponent_.get(), surface);
         }
     } else {
@@ -1835,6 +1840,7 @@ void XComponentPattern::OnSurfaceDestroyed(FrameNode* frameNode)
         CHECK_NULL_VOID(callback->OnSurfaceDestroyed);
         TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] native OnSurfaceDestroyed", GetId().c_str());
         ACE_SCOPED_TRACE("XComponent[%s] native OnSurfaceDestroyed", GetId().c_str());
+        LOG_CALLBACK(callback->OnSurfaceDestroyed);
         callback->OnSurfaceDestroyed(nativeXComponent_.get(), surface);
         nativeXComponentImpl_->SetSurface(nullptr);
     } else if (isTypedNode_) {

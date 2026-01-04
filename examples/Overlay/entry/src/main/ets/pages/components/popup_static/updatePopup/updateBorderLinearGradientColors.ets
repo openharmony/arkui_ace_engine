@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -30,7 +32,7 @@ import promptAction from '@ohos.promptAction';
 import hilog from '@ohos.hilog'
 
 @Builder
-function PopupBuilder() {
+function popupBuilder() {
   Scroll(new Scroller()) {
     Column({ space: 5 } as ColumnOptions) {
       Text('This is a popup with PopupOptionsThis is a popup with PopupOptionsThis is a popup with PopupOptions' +
@@ -44,18 +46,18 @@ function PopupBuilder() {
 struct UpdatePopupBorderLinearGradientDirection {
   private uiContext: UIContext = this.getUIContext();
   private promptAction: PromptAction = this.uiContext.getPromptAction();
-  private contentNode: ComponentContent = new ComponentContent(this.uiContext, wrapBuilder(PopupBuilder));
+  private contentNode: ComponentContent = new ComponentContent(this.uiContext, wrapBuilder(popupBuilder));
 
   build() {
     Column({ space: 5 } as ColumnOptions) {
       Text(`enableArrow设置为true:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Row({ space: 5 } as RowOptions) {
         Text('从正常值更新成正常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("75%")
+          .width('75%')
         Button('更新为3种')
           .id('1')
           .onClick(() => {
@@ -110,7 +112,7 @@ struct UpdatePopupBorderLinearGradientDirection {
         Text('从正常值更新成异常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("65%")
+          .width('65%')
         Button('更新为undefined')
           .id('2')
           .onClick(() => {
@@ -165,7 +167,7 @@ struct UpdatePopupBorderLinearGradientDirection {
         Text('从异常值更新成正常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("75%")
+          .width('75%')
         Button('更新为3种')
           .id('4')
           .onClick(() => {
@@ -220,7 +222,7 @@ struct UpdatePopupBorderLinearGradientDirection {
         Text('从异常值更新成异常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("70%")
+          .width('70%')
         Button('更新为$rError')
           .id('5')
           .onClick(() => {
@@ -251,7 +253,7 @@ struct UpdatePopupBorderLinearGradientDirection {
                   {
                     borderLinearGradient: {
                       direction: GradientDirection.LeftBottom,
-                      colors: [[$r("app.string.error"), 0.0], [Color.Pink, 0.5], [Color.Blue, 1.0]]
+                      colors: [[$r('app.string.error'), 0.0], [Color.Pink, 0.5], [Color.Blue, 1.0]]
                     },
                   }, true)
                   .then(() => {
@@ -275,7 +277,7 @@ struct UpdatePopupBorderLinearGradientDirection {
         Text('从不设置更新成正常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("75%")
+          .width('75%')
         Button('更新为3种')
           .id('6')
           .onClick(() => {
@@ -326,7 +328,7 @@ struct UpdatePopupBorderLinearGradientDirection {
         Text('从不设置更新成异常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("65%")
+          .width('65%')
         Button('更新为undefined')
           .id('7')
           .onClick(() => {
@@ -378,7 +380,7 @@ struct UpdatePopupBorderLinearGradientDirection {
         Text('从设置全量更新到不设置 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("70%")
+          .width('70%')
         Button('更新为不设置')
           .id('9')
           .onClick(() => {
@@ -428,12 +430,12 @@ struct UpdatePopupBorderLinearGradientDirection {
 
       Text(`enableArrow设置为false:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Row({ space: 5 } as RowOptions) {
         Text('从正常值更新成正常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("75%")
+          .width('75%')
         Button('更新为3种')
           .id('10')
           .onClick(() => {
@@ -488,7 +490,7 @@ struct UpdatePopupBorderLinearGradientDirection {
         Text('从正常值更新成异常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("65%")
+          .width('65%')
         Button('更新为undefined')
           .id('11')
           .onClick(() => {
@@ -543,7 +545,7 @@ struct UpdatePopupBorderLinearGradientDirection {
         Text('从异常值更新成正常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("75%")
+          .width('75%')
         Button('更新为3种')
           .id('13')
           .onClick(() => {
@@ -598,7 +600,7 @@ struct UpdatePopupBorderLinearGradientDirection {
         Text('从异常值更新成异常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("70%")
+          .width('70%')
         Button('更新为$rError')
           .id('14')
           .onClick(() => {
@@ -629,7 +631,7 @@ struct UpdatePopupBorderLinearGradientDirection {
                   {
                     borderLinearGradient: {
                       direction: GradientDirection.LeftBottom,
-                      colors: [[$r("app.string.error"), 0.0], [Color.Pink, 0.5], [Color.Blue, 1.0]]
+                      colors: [[$r('app.string.error'), 0.0], [Color.Pink, 0.5], [Color.Blue, 1.0]]
                     },
                   }, true)
                   .then(() => {
@@ -653,7 +655,7 @@ struct UpdatePopupBorderLinearGradientDirection {
         Text('从不设置更新成正常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("75%")
+          .width('75%')
         Button('更新为3种')
           .id('15')
           .onClick(() => {
@@ -704,7 +706,7 @@ struct UpdatePopupBorderLinearGradientDirection {
         Text('从不设置更新成异常值 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("65%")
+          .width('65%')
         Button('更新为undefined')
           .id('16')
           .onClick(() => {
@@ -755,7 +757,7 @@ struct UpdatePopupBorderLinearGradientDirection {
         Text('从设置全量更新到不设置 :')
           .fontSize(12)
           .fontColor('rgba(24,36,49,0.60)')
-          .width("70%")
+          .width('70%')
         Button('更新为不设置')
           .id('18')
           .onClick(() => {

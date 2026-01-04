@@ -6463,9 +6463,6 @@ void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime, bool isAnimate)
 
 void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height)
 {
-    if (snapshotPath.empty()) {
-        return;
-    }
     TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::CreateSnapshotFrameNode");
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
@@ -6520,6 +6517,13 @@ void WebDelegate::RemoveSnapshotFrameNodeIfNeeded()
         TAG_LOGD(AceLogTag::ACE_WEB, "blankless RemoveSnapshotFrameNodeIfNeeded");
         RemoveSnapshotFrameNode(0);
     }
+}
+
+void WebDelegate::CallBlanklessCallback(int32_t state, const std::string& reason)
+{
+    CHECK_NULL_VOID(nweb_);
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::CallBlanklessCallback");
+    nweb_->CallExecuteBlanklessCallback(state, reason);
 }
 
 bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
@@ -9572,9 +9576,6 @@ void WebDelegate::OnTextSelectionChange(const std::string& selectionText, bool i
         return;
     }
     lastSelectionText_ = selectionText;
-    if (webPattern->IsShowHandle() && !isFromOverlay) {
-        return;
-    }
     if (webPattern->IsTextSelectionEnable()) {
         return;
     }
@@ -9726,6 +9727,17 @@ void WebDelegate::OnPdfLoadEvent(int32_t result, const std::string& url)
             webEventHub->FireOnPdfLoadEvent(std::make_shared<PdfLoadEvent>(result, url));
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPdfLoadEvent");
+}
+
+void WebDelegate::OnMediaCastEnter()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnMediaCastEnter");
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto onMediaCastEnterCallback = webPattern->GetOnMediaCastEnterCallback();
+    if (onMediaCastEnterCallback) {
+        onMediaCastEnterCallback();
+    }
 }
 
 void WebDelegate::SetForceEnableZoom(bool isEnabled)

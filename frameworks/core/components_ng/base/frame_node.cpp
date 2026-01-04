@@ -548,7 +548,7 @@ FrameNode::~FrameNode()
         removeCustomProperties_();
         removeCustomProperties_ = nullptr;
     }
-
+    CleanRenderTreeLifeCycle();
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
         OnDetachFromMainTree(false, GetContextWithCheck());
@@ -997,6 +997,8 @@ void FrameNode::DumpCommonInfo()
                             : "NA"));
     }
     DumpLog::GetInstance().AddDesc(std::string("IsOnMaintree: ").append(std::to_string(IsOnMainTree())));
+    DumpLog::GetInstance().AddDesc(
+        std::string("IsPendingOnMainRenderTree: ").append(IsPendingOnMainRenderTree() ? "true" : "false"));
     if (!NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
         DumpLog::GetInstance().AddDesc(
             std::string("zIndex: ").append(std::to_string(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))));
@@ -1212,13 +1214,9 @@ void FrameNode::DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json)
     json->Put("OverlayOffset", (offsetX.ToString() + "," + offsetY.ToString()).c_str());
 }
 
-bool FrameNode::CheckVisibleOrActive()
+bool FrameNode::CheckVisibleAndActive()
 {
-    if (layoutTags_.find(tag_) != layoutTags_.end()) {
-        return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE && IsActive();
-    } else {
-        return true;
-    }
+    return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE && IsActive();
 }
 
 void FrameNode::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
@@ -2533,6 +2531,11 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(weak);
         }
+        {
+            auto pipeline = self->GetContextRefPtr();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetNeedRenderNodeByUniqueId(weak);
+        }
         if (self->IsObservedByDrawChildren()) {
             auto pipeline = self->GetContextRefPtr();
             CHECK_NULL_VOID(pipeline);
@@ -2793,6 +2796,10 @@ void FrameNode::RebuildRenderContextTree()
 void FrameNode::ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChildren,
     const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& oldChildren)
 {
+    if (!renderContext_) {
+        return;
+    }
+    ACE_LAYOUT_SCOPED_TRACE("ProcessRenderTreeDiff");
     std::unordered_set<FrameNode*> oldChildrenSet;
     for (const auto& item : oldChildren) {
         auto child = item.Upgrade();
@@ -2815,15 +2822,20 @@ void FrameNode::ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChi
     }
 }
 
+// Cleans up the render tree lifecycle by detaching the node if it is still in a pending attached state.
+void FrameNode::CleanRenderTreeLifeCycle()
+{
+    if (isPendingState_) {
+        DetachFromRenderTree(true, true);
+    }
+}
+
 void FrameNode::DetachFromRenderTree(bool isOnMainTree, bool recursive)
 {
-    if (!isOnMainTree) {
+    if (!isOnMainTree || !isPendingState_) {
         return;
     }
-    auto currentState = renderContext_->IsOnRenderTree();
-    if (!currentState) {
-        return;
-    }
+    isPendingState_ = false;
     if (recursive) {
         for (const auto& item : frameChildren_) {
             auto child = item.Upgrade();
@@ -2837,13 +2849,10 @@ void FrameNode::DetachFromRenderTree(bool isOnMainTree, bool recursive)
 
 void FrameNode::AttachToRenderTree(bool isOnMainTree, bool recursive)
 {
-    if (!isOnMainTree) {
+    if (!isOnMainTree || isPendingState_) {
         return;
     }
-    auto currentState = renderContext_->IsOnRenderTree();
-    if (currentState) {
-        return;
-    }
+    isPendingState_ = true;
     OnAttachToMainRenderTree();
     if (recursive) {
         for (const auto& item : frameChildren_) {
@@ -2857,18 +2866,24 @@ void FrameNode::AttachToRenderTree(bool isOnMainTree, bool recursive)
 
 void FrameNode::OnDetachFromMainRenderTree()
 {
-    pattern_->OnDetachFromMainRenderTree();
+    if (pattern_) {
+        pattern_->OnDetachFromMainRenderTree();
+    }
 }
 
 void FrameNode::OnAttachToMainRenderTree()
 {
-    pattern_->OnAttachToMainRenderTree();
+    if (pattern_) {
+        pattern_->OnAttachToMainRenderTree();
+    }
 }
 
 void FrameNode::OnOffscreenProcessResource()
 {
     UINode::OnOffscreenProcessResource();
-    pattern_->OnOffscreenProcessResource();
+    if (pattern_) {
+        pattern_->OnOffscreenProcessResource();
+    }
 }
 
 void FrameNode::MarkModifyDone()
@@ -3576,7 +3591,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         // combine into exclusive recognizer group.
         auto gestureHub = GetOrCreateGestureEventHub();
         if (gestureHub) {
-            gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result, touchId);
+            gestureHub->CombineIntoExclusiveRecognizer(
+                globalPoint, localPoint, result, touchId, touchRestrict.touchEvent.originalId);
         }
     }
 
@@ -5801,6 +5817,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         if (GetInspectorId()) {
             context->OnLayoutCompleted(GetInspectorId()->c_str());
         }
+        context->OnLayoutCompleted(GetId());
         if (eventHub_) {
             eventHub_->FireLayoutNDKCallback(context);
         }
@@ -5824,6 +5841,12 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     ProcessAccessibilityVirtualNode();
     CHECK_NULL_RETURN(context, false);
     context->SendUpdateVirtualNodeFocusEvent();
+
+    if (IsObservedByLayoutChildren() && !config.skipMeasure && !config.skipLayout) {
+        auto pipeline = GetContextRefPtr();
+        CHECK_NULL_RETURN(pipeline, true);
+        pipeline->SetNeedRenderForLayoutChildrenNode(GetObserverParentForLayoutChildren());
+    }
     return true;
 }
 
@@ -8006,10 +8029,10 @@ void FrameNode::HighlightSpecifiedContent(
     pattern->HighlightSpecifiedContent(content, nodeIds, configs);
 }
 
-void FrameNode::ReportSelectedText()
+void FrameNode::ReportSelectedText(bool isRegister)
 {
     auto pattern = GetPattern();
     CHECK_NULL_VOID(pattern);
-    pattern->ReportSelectedText();
+    pattern->ReportSelectedText(isRegister);
 }
 } // namespace OHOS::Ace::NG

@@ -23,6 +23,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_udmf.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 
 namespace OHOS::Ace::NG {
 
@@ -2460,5 +2461,32 @@ HWTEST_F(TextPatternTestNg, HandleSetStyledString01, TestSize.Level1)
     textPattern->UpdateStyledStringByColorMode();
     auto spanString = AceType::MakeRefPtr<SpanString>(u"1234455");
     textPattern->SetStyledString(spanString);
+}
+
+/**
+ * @tc.name: TextNewMaterialFunctions
+ * @tc.desc: Test functions in text new material requirements.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, TextNewMaterialFunctions, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->CreateModifier();
+    bool drawCalledFlag = false;
+    textPattern->SetExternalDrawCallback([flag = &drawCalledFlag](float x, float y, float width, float height) {
+        *flag = true;
+        return true;
+    });
+    Testing::MockCanvas rsCanvas;
+    auto pManager = textPattern->GetParagraphManager();
+    ASSERT_NE(pManager, nullptr);
+    pManager->AddParagraph({ .paragraph = nullptr, .start = 0, .end = 100 });
+    textPattern->contentMod_->DrawText(rsCanvas, pManager, textPattern);
+    EXPECT_TRUE(drawCalledFlag);
+    auto drawParagraph = textPattern->GetDrawParagraph();
+    EXPECT_EQ(drawParagraph, std::nullopt);
 }
 } // namespace OHOS::Ace::NG

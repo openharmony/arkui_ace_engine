@@ -88,6 +88,7 @@ import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import util from '@ohos.util';
 import { LengthMetrics } from '@ohos.arkui.node';
 import I18n from '@ohos.i18n';
+import uiMaterial from '@ohos.arkui.uiMaterial';
 
 const MIN_ITEM_COUNT: int = 2;
 const MAX_ITEM_COUNT: int = 5;
@@ -200,7 +201,8 @@ interface CommonSegmentButtonOptions {
   localizedTextPadding?: LocalizedPadding,
   localizedButtonPadding?: LocalizedPadding,
   backgroundBlurStyle?: BlurStyle,
-  direction?: Direction
+  direction?: Direction,
+  backgroundSystemMaterial?: uiMaterial.Material
 }
 export type ItemRestriction<T> = Array<T>
 export type SegmentButtonItemTuple = ItemRestriction<SegmentButtonTextItem> |
@@ -446,7 +448,7 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
     this.changeStartIndex = start;
     this.deleteCount = deleteCount;
     this.addLength = items.length;
-    return this._wrappedArray.splice(start.toDouble(), deleteCount.toDouble(), ...items);
+    return this._wrappedArray.splice(start, deleteCount, ...items);
   }
 
   static create(elements: SegmentButtonItemTuple): SegmentButtonItemOptionsArray {
@@ -479,6 +481,7 @@ export class SegmentButtonOptions {
   public backgroundBlurStyle: BlurStyle = BlurStyle.Thick;
   public direction?: Direction;
   private _buttons: SegmentButtonItemOptionsArray | undefined = undefined;
+  public backgroundSystemMaterial?: uiMaterial.Material;
 
   get buttons(): SegmentButtonItemOptionsArray | undefined {
     return this._buttons;
@@ -527,6 +530,7 @@ export class SegmentButtonOptions {
     }
     let themePadding: number = LengthMetrics.resource($r('sys.float.segment_button_baseplate_padding')).value;
     this.componentPadding = this.multiply ? 0.0 : themePadding;
+    this.backgroundSystemMaterial = options.backgroundSystemMaterial
   }
 
   public onButtonsUpdated() {
@@ -559,7 +563,8 @@ export class SegmentButtonOptions {
       localizedTextPadding: options.localizedTextPadding,
       localizedButtonPadding: options.localizedButtonPadding,
       backgroundBlurStyle: options.backgroundBlurStyle,
-      direction: options.direction
+      direction: options.direction,
+      backgroundSystemMaterial: options.backgroundSystemMaterial
     } as TabSegmentButtonOptions)
   }
 
@@ -854,8 +859,8 @@ struct SegmentButtonItem {
     .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
       // Calculate height of items
       this.buttonItemsRealHeight[this.index as int] = (newValue.height ?? 0) as number;
-      let maxHeight: number = Math.max(...this.buttonItemsRealHeight.slice(0.0, this.options.buttons ?
-        this!.options!.buttons!.length : 0.0));
+      let maxHeight: number = Math.max(...this.buttonItemsRealHeight.slice(0, this.options.buttons ?
+        this!.options!.buttons!.length : 0));
       for (let index: number = 0.0; index < this.buttonItemsSize.length; index++) {
         const currentWidth = (this.buttonItemsSize[index as int].width ?? 0.0) as number;
         const currentHeight = (this.buttonItemsSize[index as int].height ?? 0.0) as number;
@@ -1280,13 +1285,13 @@ struct SegmentButtonItemArrayComponent {
               .onHover((isHover: boolean, event: HoverEvent) => {
                 this.hoverArray[index as int] = isHover
                 if (isHover) {
-                  this.getUIContext()?.animateTo({ duration: 250.0, curve: Curve.Friction }, () => {
+                  this.getUIContext()?.animateTo({ duration: 250, curve: Curve.Friction }, () => {
                     this.hoverColorArray[index as int].hoverColor =
                       this.isSegmentFocusStyleCustomized && this.focusIndex === index ?
                         segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : segmentButtonTheme.HOVER_COLOR;
                   })
                 } else {
-                  this.getUIContext()?.animateTo({ duration: 250.0, curve: Curve.Friction }, () => {
+                  this.getUIContext()?.animateTo({ duration: 250, curve: Curve.Friction }, () => {
                     this.hoverColorArray[index as int].hoverColor =
                       this.isSegmentFocusStyleCustomized && this.focusIndex === index ?
                         segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : Color.Transparent;
@@ -1299,7 +1304,7 @@ struct SegmentButtonItemArrayComponent {
                     this.getUIContext()?.animateTo({ curve: curves.springMotion(0.347, 0.99) as ICurve }, () => {
                       this.zoomScaleArray[index as int] = 0.95;
                     })
-                    this.getUIContext()?.animateTo({ duration: 100.0, curve: Curve.Sharp }, () => {
+                    this.getUIContext()?.animateTo({ duration: 100, curve: Curve.Sharp }, () => {
                       this.pressArray[index as int] = true;
                     })
                     break;
@@ -1307,7 +1312,7 @@ struct SegmentButtonItemArrayComponent {
                     this.getUIContext()?.animateTo({ curve: curves.springMotion(0.347, 0.99) as ICurve }, () => {
                       this.zoomScaleArray[index as int] = 1.0;
                     })
-                    this.getUIContext()?.animateTo({ duration: 100.0, curve: Curve.Sharp }, () => {
+                    this.getUIContext()?.animateTo({ duration: 100, curve: Curve.Sharp }, () => {
                       this.pressArray[index as int] = false;
                     })
                     break;
@@ -1559,6 +1564,7 @@ export struct SegmentButton {
           .direction(this.options.direction)
           .size(this.componentSize)
           .backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR)
+          .systemMaterial(this.options.backgroundSystemMaterial)
           .borderRadius(this.options.iconTextBackgroundRadius ?? ((this.componentSize.height ?? 0) as number) / 2.0)
           .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
         }
@@ -1580,7 +1586,7 @@ export struct SegmentButton {
         .id("SegmentButton_ItemStack")
         .direction(this.options.direction)
         .size(this.componentSize)
-        .animation({ duration: 0.0 })
+        .animation({ duration: 0 })
         .borderRadius((this.options.type === 'capsule' && (this.options.multiply ?? false) ?
           this.options.iconTextRadius : this.options.iconTextBackgroundRadius) ??
           ((this.componentSize.height ?? 0) as number) / 2.0)

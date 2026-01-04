@@ -384,8 +384,8 @@ void SetLetterSpacingImpl(Ark_NativePointer node,
                           const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto spacing = Converter::OptConvertPtr<Dimension>(value);
+    CHECK_NULL_VOID(frameNode && value);
+    auto spacing = Converter::OptConvertFromArkNumStrRes<Opt_Union_F64_String, Ark_Float64>(*value);
     Validator::ValidateNonPercent(spacing);
     TextModelStatic::SetLetterSpacing(frameNode, spacing);
 }
@@ -401,8 +401,8 @@ void SetBaselineOffsetImpl(Ark_NativePointer node,
                            const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto offset = Converter::OptConvertPtr<Dimension>(value);
+    CHECK_NULL_VOID(frameNode && value);
+    auto offset = Converter::OptConvertFromArkNumStrRes<Opt_Union_F64_String, Ark_Float64>(*value);
     TextModelStatic::SetBaselineOffset(frameNode, offset);
 }
 void SetCopyOptionImpl(Ark_NativePointer node,

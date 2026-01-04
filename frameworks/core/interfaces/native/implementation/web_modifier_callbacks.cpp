@@ -825,6 +825,60 @@ void OnWindowNew(const CallbackHelper<Callback_OnWindowNewEvent_Void>& arkCallba
     arkCallback.InvokeSync(parameter);
 }
 
+static bool HandleWindowNewExtEvent(const WebWindowNewExtEvent* eventInfo)
+{
+    auto handler = eventInfo->GetWebWindowNewHandler();
+    if ((handler) && (!handler->IsFrist())) {
+        int32_t parentId = -1;
+        auto controller = ControllerHandlerPeer::PopController(handler->GetId(), &parentId);
+        if (!controller) {
+            return false;
+        }
+        if (controller->getWebIdFunc) {
+            handler->SetWebController(controller->getWebIdFunc());
+        }
+        if (controller->completeWindowNewFunc) {
+            controller->completeWindowNewFunc(parentId);
+        }
+        if (controller->releaseRefFunc) {
+            controller->releaseRefFunc();
+        }
+        delete controller;
+        return false;
+    }
+    return true;
+}
+
+void OnWindowNewExt(const CallbackHelper<Callback_OnWindowNewExtEvent_Void>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowNewExtEvent>(info.get());
+    CHECK_NULL_VOID(eventInfo);
+    Ark_WindowFeatures arkFeatures;
+    arkFeatures.x = Converter::ArkValue<Ark_Float64>(eventInfo->GetX());
+    arkFeatures.y = Converter::ArkValue<Ark_Float64>(eventInfo->GetY());
+    arkFeatures.width = Converter::ArkValue<Ark_Float64>(eventInfo->GetWidth());
+    arkFeatures.height = Converter::ArkValue<Ark_Float64>(eventInfo->GetHeight());
+    if (!HandleWindowNewExtEvent(eventInfo)) {
+        return;
+    }
+    Ark_OnWindowNewExtEvent parameter;
+    parameter.isAlert = Converter::ArkValue<Ark_Boolean>(eventInfo->IsAlert());
+    parameter.isUserTrigger = Converter::ArkValue<Ark_Boolean>(eventInfo->IsUserTrigger());
+    parameter.targetUrl = Converter::ArkValue<Ark_String>(eventInfo->GetTargetUrl());
+    parameter.windowFeatures = Converter::ArkValue<Ark_WindowFeatures>(arkFeatures);
+    parameter.navigationPolicy =
+        static_cast<Ark_NavigationPolicy>(static_cast<int32_t>(eventInfo->GetNavigationPolicy()));
+    auto peer = new ControllerHandlerPeer();
+    peer->handler = eventInfo->GetWebWindowNewHandler();
+    parameter.handler = peer;
+    arkCallback.InvokeSync(parameter);
+}
+
 void OnWindowExit(const CallbackHelper<Callback_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {

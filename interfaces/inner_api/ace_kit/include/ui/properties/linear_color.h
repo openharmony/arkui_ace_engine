@@ -31,7 +31,8 @@ public:
         blue_ = static_cast<int16_t>(argb & 0xFF);
     }
     explicit LinearColor(const Color& color)
-        : alpha_(color.GetAlpha()), red_(color.GetRed()), green_(color.GetGreen()), blue_(color.GetBlue()), placeholder_(color.GetPlaceholder())
+        : alpha_(color.GetAlpha()), red_(color.GetRed()), green_(color.GetGreen()), blue_(color.GetBlue()),
+            placeholder_(color.GetPlaceholder())
     {}
     LinearColor(int16_t alpha, int16_t red, int16_t green, int16_t blue)
         : alpha_(alpha), red_(red), green_(green), blue_(blue)

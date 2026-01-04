@@ -187,6 +187,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     if (props->GetIsCustomAnimation().value_or(false)) {
         algo->SetUseCustomAnimation(true);
         algo->SetCustomAnimationToIndex(customAnimationToIndex_);
+        algo->SetCustomAnimationPrevIndex(customAnimationPrevIndex_);
         algo->SetIndexsInAnimation(indexsInAnimation_);
         algo->SetNeedUnmountIndexs(needUnmountIndexs_);
         return algo;
@@ -3284,6 +3285,9 @@ float SwiperPattern::CalculateGroupTurnPageRate(float additionalOffset)
     }
 
     if (IsHorizontalAndRightToLeft()) {
+        if (NearZero(groupTurnPageRate)) {
+            return 0.0f;
+        }
         groupTurnPageRate = std::abs(groupTurnPageRate) <= 1.0f ? std::abs(groupTurnPageRate) - 1.0f : 0.0f;
     }
 
@@ -6502,6 +6506,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
     FireSelectedEvent(fromIndex, toIndex);
     FireUnselectedEvent(fromIndex, toIndex);
     FireAnimationStartEvent(fromIndex, toIndex, info);
+    customAnimationPrevIndex_ = fromIndex;
 
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -6523,6 +6528,7 @@ void SwiperPattern::OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, 
     customAnimationToIndex_.reset();
     needUnmountIndexs_.insert(fromIndex);
     indexsInAnimation_.erase(toIndex);
+    customAnimationPrevIndex_ = toIndex;
 
     if (!hasOnChanged) {
         const auto props = GetLayoutProperty<SwiperLayoutProperty>();
@@ -8097,7 +8103,7 @@ void SwiperPattern::LoadCompleteManagerStopCollect()
     pipeline->GetLoadCompleteManager()->StopCollect();
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
-    if (!IsAutoPlay()) {
+    if (!IsAutoPlay() && (!targetIndex_.has_value() || targetIndex_.value() != currentIndex_)) {
         mgr->OnSwiperChangeEnd(GetHost(), hasTabsAncestor_);
     }
 }

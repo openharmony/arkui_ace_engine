@@ -444,7 +444,7 @@ public:
     void NotifyCoastingAxisEventStop() const;
     std::string GetLastHitTestNodeInfosForTouch(bool isTopMost);
     void AddHitTestInfoRecord(const RefPtr<NG::FrameNode>& frameNode);
-    void LogHitTestInfoRecord(int32_t fingerId);
+    void LogHitTestInfoRecord(const TouchEvent& touchPoint);
     void ClearHitTestInfoRecord(const TouchEvent& touchPoint);
 
 private:

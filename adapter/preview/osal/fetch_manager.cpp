@@ -34,7 +34,6 @@
     } while (0)
 
 namespace OHOS::Ace {
-namespace {
 
 class FetchManagerImpl final : public FetchManager, public Singleton<FetchManagerImpl> {
     DECLARE_SINGLETON(FetchManagerImpl);
@@ -191,7 +190,7 @@ FetchManagerImpl::~FetchManagerImpl()
     curl_global_cleanup();
 }
 
-} // namespace
+SINGLETON_INSTANCE_IMPL(FetchManagerImpl);
 
 FetchManager& FetchManager::GetInstance()
 {

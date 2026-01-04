@@ -20,7 +20,6 @@
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/container_modal/container_modal_constants.h"
-#include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
@@ -185,9 +184,9 @@ void MenuPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(focusHub);
     RegisterOnKeyEvent(focusHub);
     DisableTabInMenu();
-    InitTheme(host);
     auto pipelineContext = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
+    InitTheme(host, pipelineContext->GetTheme<SelectTheme>());
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
     auto eventHub = targetNode->GetEventHub<EventHub>();
@@ -1024,6 +1023,22 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position, const HideMenuT
     CHECK_NULL_VOID(overlayManager);
     overlayManager->HideMenu(wrapper, targetId_, isMenuOnTouch, reason);
     overlayManager->EraseMenuInfo(targetId_);
+    DoCloseSubMenus();
+}
+
+void MenuPattern::DoCloseSubMenus() const
+{
+    showedSubMenu_ = nullptr;
+    for (auto iter = embeddedMenuItems_.begin(); iter != embeddedMenuItems_.end();) {
+        auto& menuItem = *iter;
+        auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+        if (menuItemPattern) {
+            menuItemPattern->HandleCloseSubMenu();
+            iter = embeddedMenuItems_.erase(iter);
+        } else {
+             ++iter;
+        }
+    }
 }
 
 bool MenuPattern::HideStackExpandMenu(const OffsetF& position) const
@@ -1357,15 +1372,14 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
     scrollProp->UpdatePadding(PaddingProperty());
 }
 
-void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
+void MenuPattern::InitTheme(const RefPtr<FrameNode>& host, const RefPtr<SelectTheme>& theme)
 {
     CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(theme);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
     expandDisplay_ = expandDisplay;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()) {
@@ -1388,10 +1402,11 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     renderContext->UpdateOuterBorderRadius(borderRadius);
 }
 
-void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)
+void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host, const RefPtr<SelectTheme>& theme)
 {
     CHECK_NULL_VOID(host);
-    MenuPattern::InitTheme(host);
+    CHECK_NULL_VOID(theme);
+    MenuPattern::InitTheme(host, theme);
     // inner menu applies shadow in OnModifyDone(), where it can determine if it's a DesktopMenu or a regular menu
 
     auto layoutProperty = host->GetLayoutProperty();
@@ -1399,10 +1414,6 @@ void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)
         // if user defined padding exists, skip applying default padding
         return;
     }
-    auto pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
     // apply default padding from theme on inner menu
     PaddingProperty padding;
     padding.SetEdges(CalcLength(theme->GetMenuPadding()));

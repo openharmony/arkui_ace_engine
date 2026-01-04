@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -30,7 +32,7 @@ import promptAction from '@ohos.promptAction';
 import hilog from '@ohos.hilog'
 
 @Builder
-function PopupBuilder() {
+function popupBuilder() {
   Scroll(new Scroller()) {
     Column({ space: 5 } as ColumnOptions) {
       Text('This is a popup with PopupOptionsThis is a popup with PopupOptionsThis is a popup with PopupOptions' +
@@ -44,47 +46,25 @@ function PopupBuilder() {
 struct OpenPopupBorderWidth {
   private uiContext: UIContext = this.getUIContext();
   private promptAction: PromptAction = this.uiContext.getPromptAction();
-  private contentNode: ComponentContent = new ComponentContent(this.uiContext, wrapBuilder(PopupBuilder));
+  private contentNode: ComponentContent = new ComponentContent(this.uiContext, wrapBuilder(popupBuilder));
   @State outlineWidthIndex: Int = 0;
-  @State outlineWidthList: Array<Dimension | undefined> = new Array<Dimension | undefined>(
-    '1vp',
-    '2vp',
-    '5vp',
-    '10vp',
-    undefined,
-    0,
-    -1,
-    '2px',
-    '3.9fp',
-    '5vp',
-    '10lpx',
-    1000,
-    $r("app.string.width"),
-    $r("app.string.error")
-  )
+  @State outlineWidthList: (Dimension | undefined)[] = [
+    '1vp' as Dimension, '2vp' as Dimension, '5vp' as Dimension, '10vp' as Dimension, undefined, 0 as Dimension,
+    -1 as Dimension, '2px' as Dimension, '3.9fp' as Dimension, '5vp' as Dimension, '10lpx' as Dimension,
+    1000 as Dimension, $r('app.string.width') as Dimension, $r('app.string.error') as Dimension,
+  ]
   @State borderWidthIndex: Int = 0;
-  @State borderWidthList: Array<Dimension | undefined> = new Array<Dimension | undefined>(
-    '1vp',
-    '2vp',
-    '5vp',
-    '10vp',
-    undefined,
-    0,
-    -1,
-    '2px',
-    '3.9fp',
-    '5vp',
-    '10lpx',
-    1000,
-    $r("app.string.width"),
-    $r("app.string.error")
-  )
+  @State borderWidthList: (Dimension | undefined)[] = [
+    '1vp' as Dimension, '2vp' as Dimension, '5vp' as Dimension, '10vp' as Dimension, undefined, 0 as Dimension,
+    -1 as Dimension, '2px' as Dimension, '3.9fp' as Dimension, '5vp' as Dimension, '10lpx' as Dimension,
+    1000 as Dimension, $r('app.string.width') as Dimension, $r('app.string.error') as Dimension,
+  ]
 
   build() {
     Column({ space: 5 } as ColumnOptions) {
       Text(`enableArrow设置为true:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Row({ space: 5 } as RowOptions) {
         Button('10vp')
           .id('1')
@@ -296,7 +276,7 @@ struct OpenPopupBorderWidth {
               this.promptAction.openPopup(this.contentNode, { id: '9' } as TargetInfo, {
                 placement: Placement.Bottom,
                 enableArrow: true,
-                borderWidth: $r("app.string.width"),
+                borderWidth: $r('app.string.width'),
                 borderLinearGradient: {
                   direction: GradientDirection.None,
                   colors: [[Color.Pink, 0.0], [Color.Blue, 1.0]]
@@ -324,7 +304,7 @@ struct OpenPopupBorderWidth {
               this.promptAction.openPopup(this.contentNode, { id: '10' } as TargetInfo, {
                 placement: Placement.Bottom,
                 enableArrow: true,
-                borderWidth: $r("app.string.error"),
+                borderWidth: $r('app.string.error'),
                 borderLinearGradient: {
                   direction: GradientDirection.None,
                   colors: [[Color.Pink, 0.0], [Color.Blue, 1.0]]
@@ -371,7 +351,7 @@ struct OpenPopupBorderWidth {
 
       Text(`enableArrow设置为false:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Row({ space: 5 } as RowOptions) {
         Button('10vp')
           .id('12')
@@ -583,7 +563,7 @@ struct OpenPopupBorderWidth {
               this.promptAction.openPopup(this.contentNode, { id: '20' } as TargetInfo, {
                 placement: Placement.Bottom,
                 enableArrow: false,
-                borderWidth: $r("app.string.width"),
+                borderWidth: $r('app.string.width'),
                 borderLinearGradient: {
                   direction: GradientDirection.None,
                   colors: [[Color.Pink, 0.0], [Color.Blue, 1.0]]
@@ -611,7 +591,7 @@ struct OpenPopupBorderWidth {
               this.promptAction.openPopup(this.contentNode, { id: '21' } as TargetInfo, {
                 placement: Placement.Bottom,
                 enableArrow: false,
-                borderWidth: $r("app.string.error"),
+                borderWidth: $r('app.string.error'),
                 borderLinearGradient: {
                   direction: GradientDirection.None,
                   colors: [[Color.Pink, 0.0], [Color.Blue, 1.0]]
@@ -658,7 +638,7 @@ struct OpenPopupBorderWidth {
 
       Text(`内外描边结合:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Button('popup_false')
         .id('23')
         .onClick(() => {
@@ -719,14 +699,14 @@ struct OpenPopupBorderWidth {
           }
           ;
         })
-      Button("动态切换outlineWidth : " + this.outlineWidthList[this.outlineWidthIndex])
+      Button('动态切换outlineWidth : ' + this.outlineWidthList[this.outlineWidthIndex])
         .onClick(() => {
           this.outlineWidthIndex++
           if (this.outlineWidthIndex >= this.outlineWidthList.length) {
             this.outlineWidthIndex = 0
           }
         })
-      Button("动态切换borderWidth : " + this.borderWidthList[this.borderWidthIndex])
+      Button('动态切换borderWidth : ' + this.borderWidthList[this.borderWidthIndex])
         .onClick(() => {
           this.borderWidthIndex++
           if (this.borderWidthIndex >= this.borderWidthList.length) {

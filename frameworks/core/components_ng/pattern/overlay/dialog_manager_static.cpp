@@ -24,6 +24,10 @@
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
+namespace OHOS::Ace {
+SINGLETON_INSTANCE_IMPL(NG::DialogManagerStatic);
+}
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t CALLBACK_ERRORCODE_CANCEL = 1;

@@ -157,8 +157,7 @@ RefPtr<LayoutWrapper> GridLayoutBaseAlgorithm::GetGridItem(
     LayoutWrapper* layoutWrapper, int32_t index, bool addToRenderTree, bool isCache)
 {
     const auto& layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    if (layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false) &&
-        ScrollableUtils::IsChildLazy(layoutWrapper->GetHostNode(), index)) {
+    if (layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false)) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index, addToRenderTree, isCache);
         if (!wrapper) {
             wrapper = CreateDummyGridItemChild();

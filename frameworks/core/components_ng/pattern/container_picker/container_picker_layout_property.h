@@ -32,7 +32,7 @@ namespace OHOS::Ace::NG {
 enum class PickerIndicatorType { BACKGROUND = 0, DIVIDER };
 static const char* INDICATOR_TYPE_VALUE[] = { "PickerIndicatorType.BACKGROUND", "PickerIndicatorType.DIVIDER" };
 struct PickerIndicatorStyle {
-    int32_t type;
+    int32_t type = 0;
     std::optional<Dimension> strokeWidth;
     std::optional<Color> dividerColor;
     std::optional<Dimension> startMargin;
@@ -91,7 +91,8 @@ public:
 
         auto pickerIndicatorStyle = JsonUtil::Create(true);
         int32_t typeIndex = GetIndicatorType().value_or(0);
-        typeIndex = (typeIndex < 0 || typeIndex >= std::size(INDICATOR_TYPE_VALUE)) ? 0 : typeIndex;
+        typeIndex = (typeIndex < 0 || typeIndex >= static_cast<int32_t>(std::size(INDICATOR_TYPE_VALUE))) ? 0
+            : typeIndex;
         pickerIndicatorStyle->Put("type", INDICATOR_TYPE_VALUE[typeIndex]);
         pickerIndicatorStyle->Put(
             "strokeWidth", GetIndicatorDividerWidth().value_or(defaultDividerWidth).ToString().c_str());

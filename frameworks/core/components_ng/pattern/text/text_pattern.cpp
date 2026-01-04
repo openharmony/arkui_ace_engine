@@ -628,12 +628,12 @@ void TextPattern::HandleLongPress(GestureEvent& info)
         gestureHub->SetIsTextDraggable(true);
         return;
     }
-    ReportSelectedText();
     ResetAISelected(AIResetSelectionReason::LONG_PRESS);
     gestureHub->SetIsTextDraggable(false);
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { localOffset.GetX() - textPaintOffset.GetX(), localOffset.GetY() - textPaintOffset.GetY() };
     InitSelection(textOffset);
+    ReportSelectedText();
     textResponseType_ = TextResponseType::LONG_PRESS;
     UpdateSelectionSpanType(std::min(textSelector_.baseOffset, textSelector_.destinationOffset),
         std::max(textSelector_.baseOffset, textSelector_.destinationOffset));
@@ -865,6 +865,9 @@ bool TextPattern::IsSelectAll()
 
 std::u16string TextPattern::TextHighlightSelectedContent(int32_t start, int32_t end)
 {
+    if (start == end) {
+        return u"";
+    }
     if (spans_.empty()) {
         auto min = std::clamp(std::max(std::min(start, end), 0), 0, static_cast<int32_t>(textForDisplay_.length()));
         auto max = std::clamp(std::min(std::max(start, end), static_cast<int32_t>(textForDisplay_.length())), 0,
@@ -6660,7 +6663,14 @@ std::vector<std::pair<float, float>> TextPattern::GetSpecifiedContentOffsets(con
     CHECK_NULL_RETURN(host, offsets);
     auto textLayoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, offsets);
-    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE || IsSetObscured()) {
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "MARQUEE mode, GetSpecifiedContentOffsets Not supported id:[%{public}d]",
+            host->GetId());
+        return offsets;
+    }
+    if (IsSetObscured()) {
+        TAG_LOGW(
+            AceLogTag::ACE_TEXT, "obscured, GetSpecifiedContentOffsets Not supported id:[%{public}d]", host->GetId());
         return offsets;
     }
     auto indexes = GetSpecifiedContentIndex(content);
@@ -6746,6 +6756,111 @@ void TextPattern::ResetHighLightValue()
     overlayMod_->SetHightlightOpacity(0.0f);
 }
 
+const RefPtr<ScrollablePattern> TextPattern::FindScrollableParentWithRelativeOffset(OffsetF& offset)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto parent = host->GetAncestorNodeOfFrame(true);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    offset = renderContext->GetPaintRectWithTransform().GetOffset();
+    while (parent) {
+        auto scrollablePattern = parent->GetPattern<ScrollablePattern>();
+        if (scrollablePattern && scrollablePattern->IsScrollable()) {
+            return scrollablePattern;
+        }
+        auto parentRenderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(parentRenderContext, nullptr);
+        offset += parentRenderContext->GetPaintRectWithTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return nullptr;
+}
+
+bool TextPattern::HighlightTriggerScrollableParentToScroll(const RectF& hightlightRect)
+{
+    CHECK_NULL_RETURN(textSelector_.highlightStart.value() != textSelector_.highlightEnd.value(), true);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    OffsetF textOffset;
+    auto scrollablePattern = FindScrollableParentWithRelativeOffset(textOffset);
+    if (!scrollablePattern) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "HighlightTriggerScrollableParentToScroll, no scroll parent, id:[%{public}d]",
+            host->GetId());
+        return false;
+    }
+    auto scrollAxis = scrollablePattern->GetAxis();
+    if (scrollAxis != Axis::VERTICAL && scrollAxis != Axis::HORIZONTAL) {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "HighlightTriggerScrollableParentToScroll, scrollAxis error, id:[%{public}d]",
+            host->GetId());
+        return true;
+    }
+    auto scrollableHost = scrollablePattern->GetHost();
+    CHECK_NULL_RETURN(scrollableHost, true);
+    auto geometryNode = scrollableHost->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, true);
+    auto frameRect = geometryNode->GetFrameRect();
+
+    // Convert highlight region from text local coordinate system to scroll coordinate system
+    RectF highlightInScroll = hightlightRect;
+    highlightInScroll.SetOffset(highlightInScroll.GetOffset() + textOffset);
+    
+    float targetOffset = 0.0f;
+    
+    if (scrollAxis == Axis::VERTICAL) {
+        // Vertical scrolling: center the highlight region vertically
+        float scrollCenterY = frameRect.Height() / 2.0f;
+        float highlightCenterY = highlightInScroll.Top() + highlightInScroll.Height() / 2.0f;
+        targetOffset = highlightCenterY - scrollCenterY;
+        
+        // Ensure the highlight region is fully visible (if needed)
+        float minOffset = highlightInScroll.Bottom() - frameRect.Height();
+        float maxOffset = highlightInScroll.Top();
+        targetOffset = std::min(std::max(targetOffset, minOffset), maxOffset);
+        // Set scroll offset
+        scrollablePattern->UpdateCurrentOffset(-targetOffset, SCROLL_FROM_JUMP);
+    } else if (scrollAxis == Axis::HORIZONTAL) {
+        // Horizontal scrolling: center the highlight region horizontally
+        float scrollCenterX = frameRect.Width() / 2.0f;
+        float highlightCenterX = highlightInScroll.Left() + highlightInScroll.Width() / 2.0f;
+        targetOffset = highlightCenterX - scrollCenterX;
+        
+        float minOffset = highlightInScroll.Right() - frameRect.Width();
+        float maxOffset = highlightInScroll.Left();
+        targetOffset = std::min(std::max(targetOffset, minOffset), maxOffset);
+        
+        scrollablePattern->UpdateCurrentOffset(-targetOffset, SCROLL_FROM_JUMP);
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT,
+        "HighlightTriggerScrollableParentToScroll, scroll offset, id:[%{public}d] targetOffset:%{public}f "
+        "highlightInScroll:%{public}s, scrollableHost id:%{public}d frameRect:%{public}s",
+        host->GetId(), targetOffset, highlightInScroll.ToString().c_str(), scrollableHost->GetId(),
+        frameRect.ToString().c_str());
+    return true;
+}
+
+RectF TextPattern::GetHighlightRect(
+    const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& paragraphsRects) const
+{
+    RectF highlightRect;
+    bool isFirst = true;
+    for (const auto& selectedRect : paragraphsRects) {
+        auto rects = selectedRect.first;
+        for (const auto& rect : rects) {
+            if (isFirst) {
+                highlightRect = rect;
+                isFirst = false;
+            } else {
+                highlightRect = highlightRect.CombineRectT(rect);
+            }
+        }
+    }
+    RectF textContentRect = contentRect_;
+    textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    highlightRect.SetOffset(highlightRect.GetOffset() + textContentRect.GetOffset());
+    return highlightRect;
+}
+
 void TextPattern::HighlightSpecifiedContent(
     const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs)
 {
@@ -6753,17 +6868,43 @@ void TextPattern::HighlightSpecifiedContent(
     CHECK_NULL_VOID(host);
     auto textLayoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE || IsSetObscured()) {
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "MARQUEE mode, HighlightSpecifiedContent not supported, id:[%{public}d]",
+            host->GetId());
+        return;
+    }
+    if (IsSetObscured()) {
+        TAG_LOGW(
+            AceLogTag::ACE_TEXT, "obscured, HighlightSpecifiedContent not supported, id:[%{public}d]", host->GetId());
         return;
     }
     auto indexes = GetSpecifiedContentIndex(content, true);
-    CHECK_NULL_VOID(!indexes.empty());
+    if (indexes.empty()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT,
+            "HighlightSpecifiedContent, the content was not found, id:[%{public}d] content:%{public}s", host->GetId(),
+            content.c_str());
+        return;
+    }
     CloseSelectOverlay(true);
     ResetSelection();
     textSelector_.highlightStart = indexes[0];
     textSelector_.highlightEnd = indexes[0] + UtfUtils::Str8DebugToStr16(content).length();
     textSelector_.highlightStart = HighlightStrIndexToPaintRectIndex(textSelector_.highlightStart.value(), true);
     textSelector_.highlightEnd = HighlightStrIndexToPaintRectIndex(textSelector_.highlightEnd.value(), false);
+
+    CHECK_NULL_VOID(pManager_);
+    auto paragraphsRects =
+        pManager_->GetTextBoxesForSelect(textSelector_.highlightStart.value(), textSelector_.highlightEnd.value());
+    CHECK_NULL_VOID(!paragraphsRects.empty());
+    auto highlightRect = GetHighlightRect(paragraphsRects);
+    HighlightTriggerScrollableParentToScroll(highlightRect);
+    HighlightAppearAnimation();
+}
+
+void TextPattern::HighlightAppearAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (highlightAppearAnimation_) {
         AnimationUtils::StopAnimation(highlightAppearAnimation_);
     }
@@ -6819,12 +6960,30 @@ void TextPattern::HighlightDisappearAnimation()
         });
 }
 
-void TextPattern::ReportSelectedText()
+void TextPattern::ReportSelectedText(bool isRegister)
 {
     if (UiSessionManager::GetInstance()->GetSelectTextEventRegistered()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto selectOverlayManager = pipeline->GetSelectOverlayManager();
+        CHECK_NULL_VOID(selectOverlayManager);
+        auto id = selectOverlayManager->GetTextSelectionHolderId();
         auto res = UtfUtils::Str16DebugToStr8(
             TextHighlightSelectedContent(textSelector_.GetTextStart(), textSelector_.GetTextEnd()));
-        UiSessionManager::GetInstance()->ReportSelectTextEvent(res);
+        if (id != host->GetId() && id != -1) {
+            textSelector_.lastReportContent_ = "";
+            return;
+        }
+        if (textSelector_.lastReportContent_ != res || isRegister) {
+            textSelector_.lastReportContent_ = res;
+            TAG_LOGI(AceLogTag::ACE_TEXT, "ReportSelectedText id:[%{public}d] content:%{public}s", host->GetId(),
+                res.c_str());
+            UiSessionManager::GetInstance()->ReportSelectTextEvent(res);
+        }
+    } else {
+        textSelector_.lastReportContent_ = "";
     }
 }
 
@@ -7476,5 +7635,16 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
     if (frameNode->GetRerenderable()) {
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+}
+
+std::optional<void*> TextPattern::GetDrawParagraph()
+{
+    auto paragraphs = GetParagraphs();
+    if (!paragraphs.empty()) {
+        auto drawParagraph = paragraphs.front().paragraph;
+        CHECK_NULL_RETURN(drawParagraph, std::nullopt);
+        return drawParagraph->GetRawParagraph();
+    }
+    return std::nullopt;
 }
 } // namespace OHOS::Ace::NG

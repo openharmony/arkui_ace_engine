@@ -20,7 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "core/components/video/resource/ext_surface.h"
+#include "core/components_ng/pattern/video/resource/ext_surface.h"
 #include "core/components_ng/render/ext_surface_callback_interface.h"
 #include "core/components_ng/render/render_surface.h"
 

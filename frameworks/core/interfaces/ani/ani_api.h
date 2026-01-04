@@ -177,6 +177,7 @@ struct ArkUIDragInfo {
 struct ArkUINavigationInfo {
     std::string navigationId;
     ani_ref navPathStack;
+    std::optional<ani_int> uniqueId;
 };
 
 struct ArkUINavDestinationInfo {
@@ -187,8 +188,10 @@ struct ArkUINavDestinationInfo {
     std::string navigationId;
     ani_size state;
     ani_size mode;
+    std::optional<std::string> param;
     std::optional<ani_double> width;
     std::optional<ani_double> height;
+    ani_ref navPathStack;
 };
 
 struct ArkUIRouterPageInfo {
@@ -219,7 +222,6 @@ struct ArkUIDragPreviewOption {
     bool isNumber = false;
     bool isDefaultShadowEnabled = false;
     bool isDefaultRadiusEnabled = false;
-    bool isDragPreviewEnabled = true;
     bool isDefaultDragItemGrayEffectEnabled = false;
     bool enableEdgeAutoScroll = true;
     bool enableHapticFeedback = false;
@@ -484,7 +486,7 @@ struct ArkUIAniDragModifier {
     void (*setDragPreviewOptions)(ArkUINodeHandle node, ArkUIDragPreviewOption options);
     const char* (*getUdKey)(ani_ref event);
     ani_long (*createUnifiedDataPeer)(void* data);
-    ani_long (*getUnifiedData)(ani_long peer);
+    SharedPointerWrapper (*getUnifiedData)(ani_long peer);
     void (*getPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
 };
 struct ArkUIAniXBarModifier {
@@ -817,6 +819,10 @@ struct ArkUIAniVisualEffectModifier {
     void (*destroyMaterial)(OHOS::Ace::UiMaterial* ptr);
 };
 
+struct ArkUIAniDetachedFreeRootModifier {
+    ani_long (*constructDetachedFreeRoot)(ani_int);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -857,6 +863,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniParallelizeUIModifier* (*getParallelizeUIModifier)();
     const ArkUIAniSaveButtonModifier* (*getSaveButtonAniModifier)();
     const ArkUIAniPasteButtonModifier* (*getPasteButtonAniModifier)();
+    const ArkUIAniDetachedFreeRootModifier* (*getArkUIAniDetachedFreeRootModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

@@ -22,6 +22,10 @@
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
+namespace OHOS::Ace {
+SINGLETON_INSTANCE_IMPL(NG::UIExtensionIdUtility);
+}
+
 namespace OHOS::Ace::NG {
 UIExtensionIdUtility::UIExtensionIdUtility() {}
 

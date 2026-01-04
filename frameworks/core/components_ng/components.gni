@@ -129,6 +129,23 @@ template("build_component_ng") {
           "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
           "//third_party/skia:skia_canvaskit_static",
         ]
+        if (defined(invoker.ark_sources)) {
+          deps -= [
+            "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
+            "//third_party/skia:skia_canvaskit_static",
+          ]
+          include_dirs += [
+            "//foundation/graphic/graphic_2d/frameworks/text/interface/export/rosen_text",
+            "//foundation/graphic/graphic_2d/frameworks/text/interface/export",
+          ]
+          configs += [
+            "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler:event_handler_config",
+            "//foundation/graphic/graphic_2d/rosen/modules/platform:ipc_core_config",
+            "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config",
+            "//third_party/skia/m133:skia_public",
+            "//third_party/skia:skia_config",
+          ]
+        }
         defines += [ "CROSS_PLATFORM" ]
       }
       if (!is_arkui_x && defined(config.enable_drag_framework) &&
@@ -157,7 +174,7 @@ template("build_component_ng") {
         }
       }
 
-      if (defined(invoker.ark_sources) && defined(vendor_configs.ace_engine_advanced) &&
+      if (!defined(invoker.ark_sources) && defined(vendor_configs.ace_engine_advanced) &&
           (platform == "ohos" || platform == "ohos_ng")) {
         include_dirs += vendor_configs.ace_advance_dirs
       }
@@ -190,17 +207,16 @@ template("build_component_ng") {
           "${ace_root}/interfaces/native/runtime",
         ]
 
-        defines += [ "INCLUDE_GENERATED_SOURCES" ]
 
         
         if (is_arkui_x) {
           configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
-          deps += [ "$ark_ets_path:libark_jsruntime_static" ]
         } else {
           external_deps += [
             "ets_runtime:libark_jsruntime",
             "napi:ace_napi",
           ]
+          defines += [ "INCLUDE_GENERATED_SOURCES" ]
         }
       }
 

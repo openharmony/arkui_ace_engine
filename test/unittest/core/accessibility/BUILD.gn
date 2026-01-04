@@ -32,6 +32,7 @@ ace_unittest("accessibility_test_ng") {
   sources = [
     "$ace_root/frameworks/core/accessibility/accessibility_manager_ng.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
+    "$ace_root/frameworks/core/accessibility/utils/accessibility_manager_utils.cpp",
     "$ace_root/frameworks/core/accessibility/utils/accessibility_property_utils.cpp",
     "$ace_root/interfaces/native/native_interface_accessibility.cpp",
     "accessibility_manager_ng_test_ng.cpp",
@@ -40,6 +41,7 @@ ace_unittest("accessibility_test_ng") {
     "native_interface_accessibility_provider_test.cpp",
     "native_interface_accessibility_test.cpp",
     "node_uitls/accessibility_frame_node_utils_test.cpp",
+    "utils/accessibitlity_manager_utils_test.cpp",
     "utils/accessibitlity_property_utils_test.cpp",
   ]
   if (is_ohos_standard_system) {
@@ -123,6 +125,7 @@ ace_unittest("accessibility_adapter_test_ng") {
     "$ace_root/frameworks/core/accessibility/js_inspector/inspect_toolbar.cpp",
     "$ace_root/frameworks/core/accessibility/js_inspector/inspect_toolbar_item.cpp",
     "$ace_root/frameworks/core/accessibility/js_inspector/inspect_video.cpp",
+    "$ace_root/frameworks/core/accessibility/utils/accessibility_manager_utils.cpp",
     "$ace_root/frameworks/core/accessibility/utils/accessibility_property_utils.cpp",
     "$ace_root/interfaces/native/native_interface_accessibility.cpp",
     "$ace_root/test/unittest/core/accessibility/mock_ace_container.cpp",

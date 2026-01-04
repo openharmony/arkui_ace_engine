@@ -106,9 +106,9 @@ struct ScrollFrameInfo {
 };
 
 struct ScrollSnapOptions {
-    int32_t snapAlign;
-    int32_t enableSnapToStart;
-    int32_t enableSnapToEnd;
+    int32_t snapAlign = 0;
+    int32_t enableSnapToStart = 0;
+    int32_t enableSnapToEnd = 0;
     std::vector<Dimension> paginationParams;
 };
 

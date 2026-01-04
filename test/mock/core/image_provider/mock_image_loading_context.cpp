@@ -184,7 +184,7 @@ std::string ImageLoadingContext::GetImageSizeInfo() const
     return "";
 }
 
-bool ImageLoadingContext::IsNetworkImageCached() const
+bool ImageLoadingContext::IsNetworkImageSafeToRecycle() const
 {
     return false;
 }

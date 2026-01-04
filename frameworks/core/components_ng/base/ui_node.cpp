@@ -747,7 +747,7 @@ void UINode::DoAddChild(
         }
     }
 
-    UpdateDrawChildObserver(child);
+    UpdateDrawLayoutChildObserver(child);
 
     child->SetParent(WeakClaim(this), false);
     auto themeScopeId = GetThemeScopeId();
@@ -1286,7 +1286,7 @@ void UINode::DumpMoreBasicInfo()
     DumpLog::GetInstance().AddDesc("IsBuildByJS: " + std::to_string(isBuildByJS_));
     DumpLog::GetInstance().AddDesc("IsStaticNode: " + std::to_string(isStaticNode_));
     DumpLog::GetInstance().AddDesc("IsGcEnable: " + std::to_string(uiNodeGcEnable_));
-    DumpLog::GetInstance().AddDesc("VisibleOrActive: " + std::to_string(CheckVisibleOrActive()));
+    DumpLog::GetInstance().AddDesc("VisibleAndActive: " + std::to_string(CheckVisibleAndActive()));
     DumpLog::GetInstance().AddDesc("IsFrameNode: " + std::to_string(InstanceOf<FrameNode>(this)));
 }
 
@@ -1336,7 +1336,7 @@ void UINode::DumpTree(int32_t depth, bool hasJson, const std::string& desc)
             DumpLog::GetInstance().Append(depth, name, static_cast<int32_t>(GetChildren().size()));
         }
     }
-    if (!CheckVisibleOrActive() && !DumpLog::GetInstance().IsDumpAllNodes()) {
+    if (!CheckVisibleAndActive() && !DumpLog::GetInstance().IsDumpAllNodes()) {
         return;
     }
     if (DumpLog::GetInstance().IsDumpAllNodes() && desc == "BrokenChildren") {
@@ -1430,24 +1430,33 @@ void UINode::DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& current
 void UINode::DumpSimplifyTreeWithParamConfig(
     int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible, ParamConfig config)
 {
+    if (onlyNeedVisible && !CheckVisibleAndActive()) {
+        return;
+    }
     DumpSimplifyTreeBase(current);
     auto nodeChildren = GetChildren();
     DumpSimplifyInfoWithParamConfig(current, config);
-    if (onlyNeedVisible && !CheckVisibleOrActive()) {
-        return;
+    std::list<RefPtr<UINode>> cacheChildren;
+    if (GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG || GetTag() == V2::JS_REPEAT_ETS_TAG) {
+        cacheChildren = GetChildrenForInspector(true);
     }
-    bool hasChildren = !nodeChildren.empty() || !disappearingChildren_.empty();
+    bool hasChildren = !nodeChildren.empty() || !disappearingChildren_.empty() ||
+        (config.cacheNodes && !cacheChildren.empty());
     if (hasChildren) {
         auto array = JsonUtil::CreateArray();
-        if (!nodeChildren.empty()) {
-            for (const auto& item : nodeChildren) {
-                auto child = JsonUtil::CreateSharedPtrJson();
-                item->DumpSimplifyTreeWithParamConfig(depth + 1, child, onlyNeedVisible, config);
-                array->PutRef(std::move(child));
-            }
+        for (const auto& item : nodeChildren) {
+            auto child = JsonUtil::CreateSharedPtrJson();
+            item->DumpSimplifyTreeWithParamConfig(depth + 1, child, onlyNeedVisible, config);
+            array->PutRef(std::move(child));
         }
-        if (!disappearingChildren_.empty()) {
-            for (const auto& [item, index, branch] : disappearingChildren_) {
+        for (const auto& [item, index, branch] : disappearingChildren_) {
+            auto child = JsonUtil::CreateSharedPtrJson();
+            item->DumpSimplifyTreeWithParamConfig(depth + 1, child, onlyNeedVisible, config);
+            array->PutRef(std::move(child));
+        }
+        if (config.cacheNodes) {
+            for (const auto& item : cacheChildren) {
+                CHECK_NULL_CONTINUE(item);
                 auto child = JsonUtil::CreateSharedPtrJson();
                 item->DumpSimplifyTreeWithParamConfig(depth + 1, child, onlyNeedVisible, config);
                 array->PutRef(std::move(child));
@@ -1462,7 +1471,7 @@ void UINode::DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current
     DumpSimplifyTreeBase(current);
     auto nodeChildren = GetChildren();
     DumpSimplifyInfo(current);
-    if (!CheckVisibleOrActive()) {
+    if (!CheckVisibleAndActive()) {
         return;
     }
     bool hasChildren = !nodeChildren.empty() || !disappearingChildren_.empty();
@@ -2518,7 +2527,27 @@ bool UINode::LessThanAPITargetVersion(PlatformVersion version) const
     return context_->LessThanAPITargetVersion(version);
 }
 
-void UINode::UpdateDrawChildObserver(const RefPtr<UINode>& child)
+void UINode::UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isClearDrawObserver)
+{
+    if (isObservedByDrawChildren_) {
+        return;
+    }
+    if (isClearLayoutObserver) {
+        ClearObserverParentForLayoutChildren();
+    }
+    if (isClearDrawObserver) {
+        ClearObserverParentForDrawChildren();
+    }
+    if (isClearLayoutObserver || isClearDrawObserver) {
+        return;
+    }
+    for (const auto& child : GetChildren()) {
+        CHECK_NULL_CONTINUE(child);
+        UpdateDrawLayoutChildObserver(child);
+    }
+}
+
+void UINode::UpdateDrawLayoutChildObserver(const RefPtr<UINode>& child)
 {
     if (GetInspectorId().has_value()) {
         auto pipeline = GetContextRefPtr();
@@ -2529,12 +2558,37 @@ void UINode::UpdateDrawChildObserver(const RefPtr<UINode>& child)
             if (hasDrawChildCallback) {
                 child->SetObserverParentForDrawChildren(Claim(this));
             }
+            auto hasLayoutChildCallback = front->IsLayoutChildrenCallbackFuncExist(GetInspectorId().value_or(""));
+            if (hasLayoutChildCallback) {
+                child->SetObserverParentForLayoutChildren(Claim(this));
+            }
+        }
+    }
+    {
+        auto pipeline = GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto front = pipeline->GetFrontend();
+        if (front) {
+            auto hasDrawChildUniqueIdCallback = front->IsDrawChildrenCallbackFuncExist(GetId());
+            if (hasDrawChildUniqueIdCallback) {
+                child->SetObserverParentForDrawChildren(Claim(this));
+            }
+            auto hasLayoutChildUniqueIdCallback = front->IsLayoutChildrenCallbackFuncExist(GetId());
+            if (hasLayoutChildUniqueIdCallback) {
+                child->SetObserverParentForLayoutChildren(Claim(this));
+            }
         }
     }
     if (IsObservedByDrawChildren()) {
         auto parentForObserverDrawChildren = GetObserverParentForDrawChildren();
         if (parentForObserverDrawChildren) {
             child->SetObserverParentForDrawChildren(parentForObserverDrawChildren);
+        }
+    }
+    if (IsObservedByLayoutChildren()) {
+        auto parentForObserverLayoutChildren = GetObserverParentForLayoutChildren();
+        if (parentForObserverLayoutChildren) {
+            child->SetObserverParentForLayoutChildren(parentForObserverLayoutChildren);
         }
     }
 }
@@ -2546,6 +2600,25 @@ void UINode::SetObserverParentForDrawChildren(const RefPtr<UINode>& parent)
     drawChildrenParent_ = parent;
     for (const auto& child : GetChildren()) {
         child->SetObserverParentForDrawChildren(parent);
+    }
+}
+
+void UINode::SetObserverParentForLayoutChildren(const RefPtr<UINode>& parent)
+{
+    CHECK_NULL_VOID(parent);
+    isObservedByLayoutChildren_ = true;
+    layoutChildrenParent_ = parent;
+    for (const auto& child : GetChildren()) {
+        child->SetObserverParentForLayoutChildren(parent);
+    }
+}
+
+void UINode::ClearObserverParentForLayoutChildren()
+{
+    layoutChildrenParent_.Reset();
+    isObservedByLayoutChildren_ = false;
+    for (const auto& child : GetChildren()) {
+        child->ClearObserverParentForLayoutChildren();
     }
 }
 

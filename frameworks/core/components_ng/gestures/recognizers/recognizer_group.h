@@ -207,7 +207,7 @@ public:
     virtual void CheckAndSetRecognizerCleanFlag(const RefPtr<NGGestureRecognizer>& recognizer) {}
 
 protected:
-    void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override;
+    void OnBeginGestureReferee(int32_t touchId, int32_t originalId, bool needUpdateChild = false) override;
     void OnFinishGestureReferee(int32_t touchId, bool isBlocked = false) override;
     void GroupAdjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal);
 

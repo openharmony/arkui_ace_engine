@@ -597,7 +597,7 @@ void ViewAbstractModelImpl::SetUseAlign(
 
 void ViewAbstractModelImpl::SetGrid(std::optional<uint32_t> span, std::optional<int32_t> offset, GridSizeType type)
 {
-    static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("grid_container");
+    static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("grid-container");
     CHECK_NULL_VOID(loader);
     static GridContainerModel* instance =
         loader ? reinterpret_cast<GridContainerModel*>(loader->CreateModel()) : nullptr;

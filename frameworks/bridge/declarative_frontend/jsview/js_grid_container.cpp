@@ -32,10 +32,12 @@ GridContainerModel* GridContainerModel::GetInstance()
         static NG::GridContainerModelNG instance;
         return &instance;
     } else {
-        static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("grid_container");
-        static GridContainerModel* instance =
-            loader ? reinterpret_cast<GridContainerModel*>(loader->CreateModel()) : nullptr;
-        return instance;
+        static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("grid-container");
+        if (loader == nullptr) {
+            LOGF("Can't find grid-container loader");
+            abort();
+        }
+        return reinterpret_cast<GridContainerModel*>(loader->CreateModel());
     }
 #endif
 }

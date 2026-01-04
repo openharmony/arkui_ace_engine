@@ -156,7 +156,6 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreviewOption options)
     previewOptions.isNumber = options.isNumber;
     previewOptions.isDefaultShadowEnabled = options.isDefaultShadowEnabled;
     previewOptions.isDefaultRadiusEnabled = options.isDefaultRadiusEnabled;
-    previewOptions.isDragPreviewEnabled = options.isDragPreviewEnabled;
     previewOptions.isDefaultDragItemGrayEffectEnabled = options.isDefaultDragItemGrayEffectEnabled;
     previewOptions.enableEdgeAutoScroll = options.enableEdgeAutoScroll;
     previewOptions.enableHapticFeedback = options.enableHapticFeedback;
@@ -203,15 +202,13 @@ ani_long CreateUnifiedDataPeer(void* data)
     return reinterpret_cast<ani_long>(peerPtr);
 }
 
-ani_long GetUnifiedData(ani_long peer)
+SharedPointerWrapper GetUnifiedData(ani_long peer)
 {
     auto unifiedDataPeer = reinterpret_cast<unifiedDataChannel_UnifiedDataPeer*>(peer);
-    CHECK_NULL_RETURN(unifiedDataPeer, 0);
+    CHECK_NULL_RETURN(unifiedDataPeer, SharedPointerWrapper());
     auto unifiedData = unifiedDataPeer->unifiedData;
-    CHECK_NULL_RETURN(unifiedData, 0);
-    auto unifiedDataPtr = UdmfClient::GetInstance()->TransformUnifiedDataPtr(unifiedData);
-    CHECK_NULL_RETURN(unifiedDataPtr, 0);
-    return reinterpret_cast<ani_long>(unifiedDataPtr);
+    CHECK_NULL_RETURN(unifiedData, SharedPointerWrapper());
+    return SharedPointerWrapper(UdmfClient::GetInstance()->TransformUnifiedDataSharedPtr(unifiedData));
 }
 
 void GetPressedModifierKey(ani_long nativePtr, char*** keys, ani_int* length)

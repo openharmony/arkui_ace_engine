@@ -365,6 +365,7 @@ public:
         WeakPtr<RichEditorPattern> pattern_;
     };
 
+    void ContentChangeByDetaching(PipelineContext* pipeline) override {}
     bool NotUpdateCaretInPreview(int32_t caret, const PreviewTextRecord& record);
     int32_t SetPreviewText(const std::u16string& previewTextValue, const PreviewRange range) override;
     bool SetPreviewTextForDelete(int32_t oriLength, bool isBackward, bool isByIME);
@@ -929,6 +930,7 @@ public:
     void CalculateDefaultHandleHeight(float& height) override;
     bool IsSingleHandle();
     bool IsHandlesShow() override;
+    bool IsHandleMoving();
     void SetCustomKeyboardNode(const RefPtr<UINode>& customKeyboardNode);
     void ProcessCloseKeyboard(const RefPtr<FrameNode>& currentNode);
     bool GetCustomKeyboardIsMatched(int32_t customKeyboard);
@@ -1124,6 +1126,8 @@ public:
             selectedBackgroundColor.ToString().c_str());
         selectedBackgroundColor_ = selectedBackgroundColor;
     }
+
+    void SetSelectedDragPreviewColor(const Color& selectedDragPreviewColor);
 
     Color GetSelectedBackgroundColor() const;
 
@@ -1432,7 +1436,7 @@ public:
     void SetContentPattern(const RefPtr<RichEditorContentPattern>& contentPattern);
     RefPtr<FrameNode> GetContentHost() const override;
 
-    float GetCaretWidth();
+    float GetCaretWidth() const;
     void UpdateCaretStyleByTypingStyle(bool isReset);
     void MarkAISpanStyleChanged() override;
     void HandleOnAskCelia() override;
@@ -1604,6 +1608,7 @@ private:
     std::string GetPlaceHolderInJson() const;
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
     std::string GetCustomKeyboardInJson() const;
+    std::string GetCursorInfoInJson() const;
     Color GetSelectedDragPreviewStyleColor() const;
     void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const override;
     void ResetSelectionAfterAddSpan(bool isPaste);
@@ -1681,7 +1686,8 @@ private:
         int32_t offsetInSpan, int32_t endInSpan, std::u16string content, std::optional<TextStyle> textStyle,
         std::optional<struct UpdateParagraphStyle> paraStyle, const std::optional<std::u16string>& urlAddress);
     void SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo, const TextStyle& textStyle);
-    void SetThemeTextStyleToRet(RichEditorAbstractSpanResult& retInfo);
+    void SetThemeTextStyleToRet(RichEditorAbstractSpanResult& retInfo,
+        const std::optional<std::u16string>& urlAddress);
     void SetParaStyleToRet(RichEditorAbstractSpanResult& retInfo, std::optional<struct UpdateParagraphStyle> paraStyle);
 
     RichEditorAbstractSpanResult GetResultByImageSpanOptions(const ImageSpanOptions& options, int32_t spanIndex);

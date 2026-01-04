@@ -1379,6 +1379,151 @@ void ArktsFrontend::PreloadAceModule(void* aniEnv)
     env->Class_CallStaticMethod_Void(appClass, create, &appLocal);
 }
 
+void ArktsFrontend::OnLayoutChildrenCompleted(const std::string& componentId)
+{
+    auto iter = layoutChildrenCallbacks_.find(componentId);
+    if (iter == layoutChildrenCallbacks_.end()) {
+        return;
+    }
+    if (taskExecutor_ == nullptr) {
+        return;
+    }
+    auto&& observer = iter->second;
+    taskExecutor_->PostTask([observer] { (*observer)(); }, TaskExecutor::TaskType::JS, "ArkUIDrawChildrenCompleted");
+}
+
+bool ArktsFrontend::IsLayoutChildrenCallbackFuncExist(const std::string& componentId)
+{
+    auto iter = layoutChildrenCallbacks_.find(componentId);
+    if (iter == layoutChildrenCallbacks_.end()) {
+        return false;
+    }
+    return iter->second->HasCallback();
+}
+
+void ArktsFrontend::OnLayoutCompleted(int32_t uniqueId)
+{
+    auto iter = uniqueIdLayoutCallbacks_.find(uniqueId);
+    if (iter == uniqueIdLayoutCallbacks_.end()) {
+        return;
+    }
+    if (taskExecutor_ == nullptr) {
+        return;
+    }
+    auto&& observer = iter->second;
+    taskExecutor_->PostTask([observer] { (*observer)(); }, TaskExecutor::TaskType::JS, "ArkUILayoutCompleted");
+}
+
+void ArktsFrontend::OnDrawCompleted(int32_t uniqueId)
+{
+    auto iter = uniqueIdDrawCallbacks_.find(uniqueId);
+    if (iter == uniqueIdDrawCallbacks_.end()) {
+        return;
+    }
+    if (taskExecutor_ == nullptr) {
+        return;
+    }
+    auto&& observer = iter->second;
+    taskExecutor_->PostTask([observer] { (*observer)(); }, TaskExecutor::TaskType::JS, "ArkUIDrawCompleted");
+}
+
+void ArktsFrontend::OnDrawChildrenCompleted(int32_t uniqueId)
+{
+    auto iter = uniqueIdDrawChildrenCallbacks_.find(uniqueId);
+    if (iter == uniqueIdDrawChildrenCallbacks_.end()) {
+        return;
+    }
+    if (taskExecutor_ == nullptr) {
+        return;
+    }
+    auto&& observer = iter->second;
+    taskExecutor_->PostTask([observer] { (*observer)(); }, TaskExecutor::TaskType::JS, "ArkUIDrawChildrenCompleted");
+}
+
+void ArktsFrontend::OnLayoutChildrenCompleted(int32_t uniqueId)
+{
+    auto iter = uniqueIdLayoutChildrenCallbacks_.find(uniqueId);
+    if (iter == uniqueIdLayoutChildrenCallbacks_.end()) {
+        return;
+    }
+    if (taskExecutor_ == nullptr) {
+        return;
+    }
+    auto&& observer = iter->second;
+    taskExecutor_->PostTask([observer] { (*observer)(); }, TaskExecutor::TaskType::JS, "ArkUIDrawChildrenCompleted");
+}
+
+bool ArktsFrontend::IsDrawChildrenCallbackFuncExist(int32_t uniqueId)
+{
+    auto iter = uniqueIdDrawChildrenCallbacks_.find(uniqueId);
+    if (iter == uniqueIdDrawChildrenCallbacks_.end()) {
+        return false;
+    }
+    return iter->second->HasCallback();
+}
+
+bool ArktsFrontend::IsLayoutChildrenCallbackFuncExist(int32_t uniqueId)
+{
+    auto iter = uniqueIdLayoutChildrenCallbacks_.find(uniqueId);
+    if (iter == uniqueIdLayoutChildrenCallbacks_.end()) {
+        return false;
+    }
+    return iter->second->HasCallback();
+}
+
+void ArktsFrontend::RegisterLayoutChildrenInspectorCallback(
+    const RefPtr<InspectorEvent>& layoutChildrenFunc, const std::string& componentId)
+{
+    layoutChildrenCallbacks_[componentId] = layoutChildrenFunc;
+}
+
+void ArktsFrontend::RegisterLayoutInspectorCallback(const RefPtr<InspectorEvent>& layoutFunc, int32_t uniqueId)
+{
+    uniqueIdLayoutCallbacks_[uniqueId] = layoutFunc;
+}
+
+void ArktsFrontend::RegisterDrawInspectorCallback(const RefPtr<InspectorEvent>& drawFunc, int32_t uniqueId)
+{
+    uniqueIdDrawCallbacks_[uniqueId] = drawFunc;
+}
+
+void ArktsFrontend::RegisterDrawChildrenInspectorCallback(
+    const RefPtr<InspectorEvent>& drawChildrenFunc, int32_t uniqueId)
+{
+    uniqueIdDrawChildrenCallbacks_[uniqueId] = drawChildrenFunc;
+}
+
+void ArktsFrontend::RegisterLayoutChildrenInspectorCallback(
+    const RefPtr<InspectorEvent>& layoutChildrenFunc, int32_t uniqueId)
+{
+    uniqueIdLayoutChildrenCallbacks_[uniqueId] = layoutChildrenFunc;
+}
+
+void ArktsFrontend::UnregisterLayoutChildrenInspectorCallback(const std::string& componentId)
+{
+    layoutChildrenCallbacks_.erase(componentId);
+}
+
+void ArktsFrontend::UnregisterLayoutInspectorCallback(int32_t uniqueId)
+{
+    uniqueIdLayoutCallbacks_.erase(uniqueId);
+}
+
+void ArktsFrontend::UnregisterDrawInspectorCallback(int32_t uniqueId)
+{
+    uniqueIdDrawCallbacks_.erase(uniqueId);
+}
+
+void ArktsFrontend::UnregisterDrawChildrenInspectorCallback(const int32_t uniqueId)
+{
+    uniqueIdDrawChildrenCallbacks_.erase(uniqueId);
+}
+
+void ArktsFrontend::UnregisterLayoutChildrenInspectorCallback(const int32_t uniqueId)
+{
+    uniqueIdLayoutChildrenCallbacks_.erase(uniqueId);
+}
+
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceArkTSModule(void* aniEnv)
 {
     ArktsFrontend::PreloadAceModule(aniEnv);

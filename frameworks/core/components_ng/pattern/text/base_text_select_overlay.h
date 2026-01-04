@@ -60,7 +60,7 @@ public:
     {
         return hostTextBase_;
     }
-
+    void CheckHasPasteData(const std::function<void(bool)>& callback);
     void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
     void ProcessOverlayOnAreaChanged(const OverlayRequest& request = OverlayRequest());
     virtual bool PreProcessOverlay(const OverlayRequest& request)

@@ -69,7 +69,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern002, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern003
- * @tc.desc: Test TextPattern OnIsFocusActiveUpdate
+ * @tc.desc: Test TextPattern OnIsFocusActiveUpdate.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern003, TestSize.Level1)
@@ -89,7 +89,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern003, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern004
- * @tc.desc: Test TextPattern HandleExtendAction
+ * @tc.desc: Test TextPattern HandleExtendAction.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern004, TestSize.Level1)
@@ -109,7 +109,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern004, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern005
- * @tc.desc: Test TextPattern HandleBlurEvent
+ * @tc.desc: Test TextPattern HandleBlurEvent.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
@@ -134,7 +134,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern006
- * @tc.desc: Test TextPattern HandleOnUndoAction
+ * @tc.desc: Test TextPattern HandleOnUndoAction.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern006, TestSize.Level1)
@@ -3089,7 +3089,7 @@ HWTEST_F(TextFieldPatternTest, AdjustAutoScrollOffset, TestSize.Level1)
 
 /**
  * @tc.name: TextFieldPatternTestMultiThread
- * @tc.desc: Test OnAttachToFrameNodeMultiThread.
+ * @tc.desc: Test OnAttachToFrameNodeMultiThread
  */
 HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread, TestSize.Level1)
 {
@@ -3104,7 +3104,7 @@ HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread, TestSize.Level1)
 
 /**
  * @tc.name: TextFieldPatternTestMultiThread2
- * @tc.desc: Test OnAttachToFrameNodeMultiThread.
+ * @tc.desc: Test OnAttachToFrameNodeMultiThread
  */
 HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread2, TestSize.Level1)
 {
@@ -3119,7 +3119,7 @@ HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread2, TestSize.Level1
 
 /**
  * @tc.name: TextFieldPatternTestMultiThread3
- * @tc.desc: Test OnAttachToFrameNodeMultiThread.
+ * @tc.desc: Test OnAttachToFrameNodeMultiThread
  */
 HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread3, TestSize.Level1)
 {
@@ -3134,7 +3134,7 @@ HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread3, TestSize.Level1
 
 /**
  * @tc.name: TextInputResponseAreaGetChildOffset
- * @tc.desc: test TextInputResponseArea GetChildOffset method.
+ * @tc.desc: test TextInputResponseArea GetChildOffset method
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextInputResponseAreaGetChildOffset, TestSize.Level0)
@@ -3153,6 +3153,9 @@ HWTEST_F(TextFieldPatternTest, TextInputResponseAreaGetChildOffset, TestSize.Lev
     RectF contentRect = RectF(20.0f, 20.0f, 60.0f, 60.0f);
     SizeF childSize = SizeF(70.0f, 40.0f);
     float nodeWidth = 10.0f;
+    /**
+     * @tc.steps: step2. get childOffset
+     */
     auto offset = responseArea->GetChildOffset(parentSize, contentRect, childSize, nodeWidth);
     EXPECT_EQ(offset, OffsetF(75.0f, 20.0f));
     responseArea->hostPattern_.Reset();
@@ -3177,6 +3180,9 @@ HWTEST_F(TextFieldPatternTest, TextPatternGetWindowIdFromPipeline001, TestSize.L
     textFieldNode->SetParent(frameNode_);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. get windowId
+     */
     auto windowId = std::make_shared<uint32_t>(pattern->GetWindowIdFromPipeline());
     ASSERT_NE(windowId, nullptr);
 }

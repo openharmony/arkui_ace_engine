@@ -84,6 +84,8 @@ import { WebHandWritten } from "./WebHandWritten";
 import { ArkSaveButtonComponent, ArkSaveButtonPeer, SaveButtonCallback, ArkPasteButtonComponent, ArkPasteButtonPeer, PasteButtonCallback } from '#generated';
 import { SaveButtonOpsHandWritten } from './SaveButtonOpsHandWritten';
 import { PasteButtonOpsHandWritten } from './PasteButtonOpsHandWritten';
+import { ArkGaugeComponent, ArkGaugePeer, GaugeIndicatorOptions } from "#generated";
+import { GaugeExtender } from "#generated"
 
 export function hookId(component: object, value?: string) {}
 
@@ -93,6 +95,12 @@ export function hookKeyboardShortcut(peer: ArkCommonMethodPeer, shortcuts: Array
   if (shortcuts && shortcuts.length > 0) {
     for (let i = 0; i < shortcuts.length; i++) {
       const shortcut = shortcuts[i];
+      if (shortcut.value !== undefined && typeof shortcut.value === 'string') {
+        const strValue = shortcut.value as string;
+        if (strValue.length > 1) {
+            continue;
+        }
+      }
       peer.setKeyboardShortcutAttribute(
         shortcut.value as string | FunctionKey | undefined,
         shortcut.keys as Array<ModifierKey> | undefined,
@@ -212,6 +220,9 @@ export function hookStateStyleImpl(
   receiver: ArkCommonMethodComponent,
   value: StateStyles | undefined
 ) {
+    if (value === undefined) {
+        return;
+    }
     const UI_STATE_NORMAL = 0;
     const UI_STATE_PRESSED = 1;
     const UI_STATE_FOCUSED = 1 << 1;
@@ -223,6 +234,9 @@ export function hookStateStyleImpl(
         curState |= UI_STATE_NORMAL;
     }
     if (value?.pressed) {
+        curState |= UI_STATE_PRESSED;
+    }
+    if (value?.clicked) {
         curState |= UI_STATE_PRESSED;
     }
     if (value?.focused) {
@@ -509,7 +523,7 @@ export function hookCreateImageData(peerPtr: CanvasRenderer, sw: number, sh: num
     const arrayBuffer: ArrayBuffer = new ArrayBuffer(length)
     const uint8View = new Uint8Array(arrayBuffer)
     for (let i = 0; i < length; i++) {
-        uint8View[i] = 0xffffffff
+        uint8View[i] = 0xffffffff.toInt()
     }
     const data: Uint8ClampedArray = new Uint8ClampedArray(arrayBuffer)
     const resObj: ImageData = new ImageData(width_cast, height_cast, data, LengthMetricsUnit.PX)
@@ -522,7 +536,7 @@ export function hookCreateImageData(peerPtr: CanvasRenderer, imagedata: ImageDat
     const arrayBuffer: ArrayBuffer = new ArrayBuffer(length)
     const uint8View = new Uint8Array(arrayBuffer)
     for (let i = 0; i < length; i++) {
-        uint8View[i] = 0xffffffff
+        uint8View[i] = 0xffffffff.toInt()
     }
     const data: Uint8ClampedArray = new Uint8ClampedArray(arrayBuffer)
     const resObj: ImageData = new ImageData(width_cast, height_cast, data, LengthMetricsUnit.PX)
@@ -784,4 +798,28 @@ export function hookSaveButtonOnClick(
 export function hookPasteButtonOnClick(
   receiver: ArkPasteButtonComponent | ArkPasteButtonPeer, value: PasteButtonCallback | undefined): void {
     PasteButtonOpsHandWritten.hookPasteButtonOnClickImpl(receiver, value);
+}
+
+export function hookGaugeIndicator(receiver: ArkGaugeComponent | ArkGaugePeer,
+  value: GaugeIndicatorOptions | null | undefined): void {
+
+  const gaugePeer: ArkGaugePeer =
+    receiver instanceof ArkGaugeComponent ? (receiver as ArkGaugeComponent).getPeer() :
+      (receiver as ArkGaugePeer);
+  if (!gaugePeer) {
+    return;
+  }
+
+  let value_casted: GaugeIndicatorOptions | undefined;
+  if (value === undefined) {
+    value_casted = {
+      icon: undefined,
+      space: undefined
+    }
+  } else if (value === null) {
+    value_casted = undefined;
+  } else {
+    value_casted = value as (GaugeIndicatorOptions | undefined)
+  }
+  GaugeExtender.setIndicator(gaugePeer.peer.ptr, value_casted)
 }

@@ -1428,7 +1428,8 @@ class ObserveV2 {
   public getElementNameById(elmtId: number): string {
     const weak: WeakRef<ViewBuildNodeBase> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
     let view;
-    return (weak && (view = weak.deref()) && (view instanceof PUV2ViewBase)) ? view.getElementNameById(elmtId) : '';
+    return (weak && (view = weak.deref()) && (view instanceof PUV2ViewBase)) ?
+      view.getElementNameById(elmtId) : 'unknown component name';
   }
 
   /**

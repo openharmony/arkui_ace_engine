@@ -31,7 +31,8 @@ class JSON2 {
     const serializeSendable = (value: unknown): string => {
       // Sendables can only be deserialized via JSON.parseSendable, which skips the
       // reviver, so encoding types and using Meta aliases is useless.
-      return (JSON as any)?.stringifySendable(value)?? '';
+      JSON2.throwIfNotJSONSafe(value);
+      return (JSON as any).stringifySendable(value);
     };
 
     const replace = function (key: string, val: any, root: any): any {
@@ -250,4 +251,24 @@ class JSON2 {
       }
     }
   }
+
+  // Ensure value contains only JSON safe props
+  private static throwIfNotJSONSafe(value: unknown): void {
+    // allow plain types
+    if (typeof value !== 'object' || value === null) {
+      return;
+    }
+
+    // allow collections
+    if ([Array, Map, Set, SendableArray, SendableMap, SendableSet].some(clazz => value instanceof clazz)) {
+      return;
+    }
+
+    for (const [key, val] of Object.entries(value)) {
+      if (typeof val === 'object' && val !== null) {
+        throw new Error(`PersistenceV2: @Sendable only allows plain property types. Invalid key: ${key}`);
+      }
+    }
+  }
+
 }

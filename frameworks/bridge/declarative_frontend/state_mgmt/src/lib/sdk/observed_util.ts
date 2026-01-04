@@ -125,15 +125,21 @@ class ObservedUtil {
       decoratorInfo: []
     };
     if (ObserveV2.IsObservedObjectV2(source)) {
-      ret.decoratorInfo = this.getV2Result(source, false);
+      const decoMeta = source[ObserveV2.V2_DECO_META];
+      const symbolRefs = source[ObserveV2.SYMBOL_REFS];
+      ret.decoratorInfo = this.getV2Result(source, symbolRefs, '', decoMeta);
       const flag = this.hasDependentElement(ret.decoratorInfo);
       ret.reason = flag ? ObservedReason.V2_UI : ObservedReason.V2_NO_UI;
     } else if (ObserveV2.IsMakeObserved(source)) {
-      ret.decoratorInfo = this.getV2Result(source, true);
+      const target = this.getV2MakeObservedTarget(source);
+      const symbolRefs = target ? target[ObserveV2.SYMBOL_REFS] : undefined;
+      ret.decoratorInfo = this.getV2Result(source, symbolRefs, 'MakeObserved');
       const flag = this.hasDependentElement(ret.decoratorInfo);
       ret.reason = flag ? ObservedReason.V2_MAKE_UI: ObservedReason.V2_MAKE_NO_UI;
     } else if (ObserveV2.IsProxiedObservedV2(source)) {
-      ret.decoratorInfo = this.getV2Result<Object>(source[ObserveV2.SYMBOL_PROXY_GET_TARGET], false);
+      const target = UIUtilsImpl.instance().getTarget(source);
+      const symbolRefs = target ? target[ObserveV2.SYMBOL_REFS] : undefined;
+      ret.decoratorInfo = this.getV2Result(source, symbolRefs, 'ProxyObservedV2');
       const flag = this.hasDependentElement(ret.decoratorInfo);
       ret.reason = flag ? ObservedReason.V2_PROXY_UI : ObservedReason.V2_PROXY_NO_UI;
     } else if (ObservedObject.IsObservedObject(source)) {
@@ -188,38 +194,39 @@ class ObservedUtil {
     return false;
   }
 
-  private static getV2Result<T extends Object>(source: T, isMakedObserved: boolean): Array<DecoratorInfo> {
+  /**
+   * @param source original data source
+   * @param symbolRefs dependent info get from the SymbolRefs
+   * @param decoratorName if makeObserved decoratorName is 'MakeObserved',
+   *  if proxyObservedV2 decoratorName is 'ProxyObservedV2',
+   *  else decoratorName get from source,
+   * @param decoMeta is ObsrevedV2 get from the ObservedV2 class, if is exist,
+   *  the decorator name will get from the decoMeta
+   * @returns DecoratorInfo array
+   */
+  private static getV2Result(source: object, symbolRefs: object, decoratorName: string,
+    decoMeta?: object): Array<DecoratorInfo> {
     const decoratorInfos: Array<DecoratorInfo> = [];
-    const target = isMakedObserved ? this.getV2MakeObservedTarget(source) : source;
-    if (Utils.isNull(target)) {
+    if (Utils.isNull(source) || Utils.isNull(symbolRefs)) {
       return decoratorInfos;
     }
-    const observedV2Source = isMakedObserved ? target[ObserveV2.SYMBOL_REFS] : target[ObserveV2.V2_DECO_META];
-    if (Utils.isNull(observedV2Source)) {
-      return decoratorInfos;
-    }
-    const eleSource = target[ObserveV2.SYMBOL_REFS];
-    if (Utils.isNull(observedV2Source)) {
-      return decoratorInfos;
-    }
-    if (!Utils.isNull(observedV2Source) && typeof (observedV2Source) === 'object') {
-      Object.getOwnPropertyNames(observedV2Source).forEach((name: string) => {
-        const stateName = ObserveV2.getObserve().getDecoratorInfo(source, name);
-        const owningName = isMakedObserved ?
-          UIUtilsImpl.instance().getTarget(source).constructor.name : source.constructor.name;
-        const eleIdSet = isMakedObserved ? observedV2Source[name] : eleSource[name];
-        if (!Utils.isNull(eleIdSet)) {
-          const decoratorInfo: DecoratorInfo = {
-            decoratorName: isMakedObserved ? 'MakeObserved' : stateName,
-            stateVariableName: name,
-            owningComponentOrClassName: owningName,
-            owningComponentId: -1,
-            dependentInfo: stateMgmtDFX.dumpDepenetElementV2(eleIdSet, true) as Array<ElementInfo>
-          };
-          decoratorInfos.push(decoratorInfo);
-        }
-      })
-    }
+    // if ObservedV2 use decoMeta for property not used in ui, else use symbolRefs
+    Object.getOwnPropertyNames(decoMeta ?? symbolRefs).forEach((name: string) => {
+      const decorator: DecoratorInfo = {
+        decoratorName: decoratorName === '' ?
+          ObserveV2.getObserve().getDecoratorInfo(source, name) : decoratorName,
+        stateVariableName: name,
+        owningComponentOrClassName: decoMeta ? source.constructor.name :
+          UIUtilsImpl.instance().getTarget(source).constructor.name,
+        owningComponentId: -1, // For V2 decorators, component id is not collected, default is -1
+        dependentInfo: []
+      };
+      const eleIdSet = symbolRefs[name];
+      if (!Utils.isNull(eleIdSet) && eleIdSet.size > 0) {
+        decorator.dependentInfo = stateMgmtDFX.dumpDepenetElementV2(eleIdSet, true) as Array<ElementInfo>;
+      }
+      decoratorInfos.push(decorator);
+    });
     return decoratorInfos;
   }
 
@@ -233,7 +240,7 @@ class ObservedUtil {
   }
 
   private static getV1Result<T extends Object>(source: T): Array<DecoratorInfo> {
-    const decoratorInfos: Array<DecoratorInfo> = [];
+    let decoratorInfos: Array<DecoratorInfo> = [];
     const observedSource = source as ObservedObject<Object>;
     if (Utils.isNull(observedSource)) {
       return decoratorInfos;
@@ -242,17 +249,52 @@ class ObservedUtil {
     if (Utils.isNull(properties) || properties.size === 0) {
       return decoratorInfos;
     }
-    properties.forEach((id: any) => {
+    properties.forEach((id: number) => {
       const proSubs = SubscriberManager.Find(id);
-      if (Utils.isNull(proSubs)) {
-        return decoratorInfos;
-      }
-      const decoratorInfo = this.getV1DecoratorInfo(proSubs);
-      if (decoratorInfo) {
-        decoratorInfos.push(...decoratorInfo);
+      if (!Utils.isNull(proSubs)) {
+        if (!TrackedObject.isCompatibilityMode(source)) {
+          let className = '';
+          // first get prototype for source proxy
+          const sourceProto = Object.getPrototypeOf(source);
+          if (!Utils.isNull(sourceProto)) {
+            // second get prototype for source target
+            const sourceTarget = Object.getPrototypeOf(sourceProto);
+            className = sourceTarget ? sourceProto.constructor.name : '';
+          }
+          decoratorInfos = this.getV1TrackDecorator(proSubs, decoratorInfos, className);
+        } else {
+          const decoratorInfo = this.getV1DecoratorInfo(proSubs);
+          if (decoratorInfo) {
+            decoratorInfos.push(...decoratorInfo);
+          }
+        }
       }
     });
     return decoratorInfos;
+  }
+
+  private static getV1TrackDecorator(proSubs: any, decorators: Array<DecoratorInfo>,
+    className: string): Array<DecoratorInfo> {
+    const decos: Array<DecoratorInfo> = decorators;
+    const elmntMap = (proSubs as ObservedPropertyAbstractPU<Object>).getPropertyElementInfo();
+    elmntMap?.forEach((value, name) => {
+      if (!name.includes('OPTI_TRACKED_ASSIGNMENT_FAKE_OBJLINK_PROPERTY')) {
+        const index = decorators.findIndex((item) => item.stateVariableName === name);
+        if (index !== -1) {
+          decos[index].dependentInfo.push(... value);
+        } else {
+          const dec = {
+            decoratorName: '@Track',
+            stateVariableName: name,
+            owningComponentOrClassName: className,
+            owningComponentId: -1,
+            dependentInfo: value
+          };
+          decos.push(dec);
+        }
+      }
+    });
+    return decos;
   }
 
   private static getV1DecoratorInfo(proSubs: any): Array<DecoratorInfo> {
@@ -262,13 +304,11 @@ class ObservedUtil {
       decoratorInfos.push(decoratorInfo);
     }
     const puProSubs = proSubs as ObservedPropertyAbstractPU<Object>;
-    if (!Utils.isNull(puProSubs)) {
-      const subsRefs = puProSubs.getSubscriberRefs();
-      if (!Utils.isNull(subsRefs) && subsRefs.size > 0) {
-        subsRefs.forEach((subRef: any) => {
-          decoratorInfos.push(... this.getV1DecoratorInfo(subRef));
-        });
-      }
+    const subsRefs = puProSubs.getSubscriberRefs();
+    if (!Utils.isNull(subsRefs) && subsRefs.size > 0) {
+      subsRefs.forEach((subRef: any) => {
+        decoratorInfos.push(... this.getV1DecoratorInfo(subRef));
+      });
     }
     return decoratorInfos;
   }
@@ -291,19 +331,13 @@ class ObservedUtil {
     const owningView = puProSubs.getOwningView() as TargetInfo;
     decoratorInfo.owningComponentOrClassName = owningView?.componentName ?? '';
     decoratorInfo.owningComponentId = owningView?.id;
-    if (!Utils.isNull(puProSubs)) {
-      const elementProperty = puProSubs.getDependencies();
-      if (!Utils.isNull(elementProperty) && elementProperty?.size !== 0) {
-        const dependentInfo: Array<ElementInfo> = [];
-        elementProperty?.forEach((elmtId: number) => {
-          const elementInfo: ElementInfo = {
-            elementName: puProSubs.getElementNameById(elmtId),
-            elementId: elmtId
-          };
-          dependentInfo.push(elementInfo);
-        });
-        decoratorInfo.dependentInfo = dependentInfo;
-      }
+    const elementProperty = puProSubs.getDependencies();
+    if (!Utils.isNull(elementProperty) && elementProperty?.size !== 0) {
+      const dependentInfo: Array<ElementInfo> = [];
+      elementProperty?.forEach((elmtId: number) => {
+        dependentInfo.push(puProSubs.getElementById(elmtId));
+      });
+      decoratorInfo.dependentInfo = dependentInfo;
     }
     return decoratorInfo;
   }

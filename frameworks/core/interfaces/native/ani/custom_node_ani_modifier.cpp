@@ -125,6 +125,7 @@ void QueryNavigationInfo(ani_long node, ArkUINavigationInfo& info)
 
     info.navigationId = result->navigationId;
     info.navPathStack = reinterpret_cast<ani_ref>(ptr);
+    info.uniqueId = result->uniqueId;
     return;
 }
 
@@ -195,6 +196,20 @@ void GetNavDestinationInfo(RefPtr<UINode> node, ArkUINavDestinationInfo& info)
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE) && size.has_value()) {
         info.width = size.value().Width();
         info.height = size.value().Height();
+    }
+    info.navPathStack = nullptr;
+    auto navigationStack = pattern->GetNavigationStack().Upgrade();
+    CHECK_NULL_VOID(navigationStack);
+    if (navigationStack->IsStaticStack()) {
+        auto navigationStackExtend = navigationStack->GetNavigationStackExtend();
+        if (navigationStackExtend) {
+            info.param = navigationStackExtend->GetSerializedParamByIndex(host->GetIndex());
+        } else {
+            NavPathStackPeer* ptr = new NavPathStackPeer(navigationStack);
+            info.navPathStack = reinterpret_cast<ani_ref>(ptr);
+        }
+    } else {
+        info.param = pattern->GetSerializedParam();
     }
 }
 

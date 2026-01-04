@@ -725,6 +725,7 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCollectRecognizers001
 
     Offset offset = Offset(0, 0);
     int32_t touchId = 0;
+    int32_t originalId = 0;
     RefPtr<TargetComponent> targetComponent = nullptr;
     RefPtr<FrameNode> host = nullptr;
     RefPtr<NGGestureRecognizer> current = nullptr;
@@ -737,7 +738,7 @@ HWTEST_F(GestureEventHubTestCoverageNg, GestureEventHubTestCollectRecognizers001
 
     gestureEventHub->externalParallelRecognizer_.push_back(parallelRecognizer);
     gestureEventHub->ProcessParallelPriorityGesture(
-        offset, touchId, targetComponent, host, current, recognizers, parallelIndex);
+        offset, touchId, originalId, targetComponent, host, current, recognizers, parallelIndex);
     ASSERT_NE(gestureEventHub->externalParallelRecognizer_[parallelIndex], nullptr);
     auto touchPoint = gestureEventHub->externalParallelRecognizer_[parallelIndex]->GetTouchPoints();
     EXPECT_EQ(touchPoint.size(), 1);

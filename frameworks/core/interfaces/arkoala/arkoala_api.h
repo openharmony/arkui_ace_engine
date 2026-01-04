@@ -3463,6 +3463,8 @@ struct ArkUITextModifier {
     void (*setTextMarqueeOptions)(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value, void* spacingRawPtr);
     void (*resetTextMarqueeOptions)(ArkUINodeHandle node);
     ArkUITextMarqueeOptions (*getTextMarqueeOptions)(ArkUINodeHandle node);
+    void (*setTextMarqueeOptionsByNode)(ArkUINodeHandle node,
+        struct ArkUITextMarqueeOptions* value, void* spacingRawPtr);
     void (*setOnMarqueeStateChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnMarqueeStateChange)(ArkUINodeHandle node);
     void (*setImmutableFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);
@@ -3511,6 +3513,7 @@ struct ArkUITextModifier {
     void (*setTextSelectedDragPreviewStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetTextSelectedDragPreviewStyle)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextSelectedDragPreviewStyle)(ArkUINodeHandle node);
+    void (*setFontColorWithPlaceholder)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Uint32 colorPlaceholder);
 };
 
 struct ArkUIButtonModifier {
@@ -3575,6 +3578,8 @@ struct ArkUIButtonModifier {
     void (*setButtonMinFontScalePtr)(ArkUINodeHandle node, ArkUI_Float32 minFontScale, ArkUI_VoidPtr scaleRawPtr);
     void (*setButtonMaxFontScalePtr)(ArkUINodeHandle node, ArkUI_Float32 maxFontScale,  ArkUI_VoidPtr scaleRawPtr);
     void (*setButtonBackgroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
+    void (*setButtonFontColorWithPlaceholder)(
+        ArkUINodeHandle node, ArkUI_Uint32 fontColor, ArkUI_Uint32 colorPlaceholder);
 };
 
 struct ArkUIImageModifier {
@@ -4359,6 +4364,8 @@ struct ArkUIGridModifier {
     void (*resetItemFillPolicy)(ArkUINodeHandle node);
     void (*setItemFillPolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
     ArkUI_Int32 (*getItemFillPolicy)(ArkUINodeHandle node);
+    void (*setScrollToIndex)(
+        ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment, ArkUI_Float32 options);
     void (*setSupportLazyLoadingEmptyBranch)(ArkUINodeHandle node, ArkUI_Bool support);
     ArkUI_Bool (*getSupportLazyLoadingEmptyBranch)(ArkUINodeHandle node);
 };
@@ -6061,7 +6068,8 @@ struct ArkUIWaterFlowModifier {
     ArkUI_Float32 (*getItemMaxHeight)(ArkUINodeHandle node, ArkUI_Int32 unit);
     ArkUI_Int32 (*getWaterFlowEnableScrollInteraction)(ArkUINodeHandle node);
     ArkUI_Float32 (*getWaterFlowFriction)(ArkUINodeHandle node);
-    void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment);
+    void (*setScrollToIndex)(
+        ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment, ArkUI_Float32 options);
     void (*setWaterflowFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
     void (*resetWaterflowFooter)(ArkUINodeHandle node);
     ArkUINodeHandle (*getScrollController)(ArkUINodeHandle node);
@@ -6874,6 +6882,8 @@ struct ArkUISymbolGlyphModifier {
     void (*setMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 maxFontScale, void* resourceRawPtr);
     void (*resetMaxFontScale)(ArkUINodeHandle node);
     void (*setCustomSymbolGlyphInitialize)(ArkUINodeHandle node, ArkUI_Uint32 symbolId, ArkUI_CharPtr fontFamily);
+    void (*setFontColorWithPlaceholder)(
+        ArkUINodeHandle node, ArkUI_Uint32* color, ArkUI_Uint32 colorPlaceholder, ArkUI_Int32 size);
 };
 
 struct ArkUISymbolSpanModifier {

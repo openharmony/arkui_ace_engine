@@ -700,8 +700,8 @@ export struct ChipComponent {
         return;
       }
       let isDeleteChip = event.keyCode === KeyCode.KEYCODE_FORWARD_DEL;
-      let isEnterDeleteChip = event.keyCode === KeyCode.KEYCODE_ENTER && this.allowClose !== false &&
-        !this.suffixIcon?.src && this.isSuffixIconFocusStyleCustomized;
+      let isEnterDeleteChip = event.keyCode === KeyCode.KEYCODE_ENTER && this.allowClose !== false && 
+      !this.suffixIcon?.src && this.isSuffixIconFocusStyleCustomized;
       if (isDeleteChip || isEnterDeleteChip) {
         this.deleteChip();
       }
@@ -1018,13 +1018,24 @@ export struct ChipComponent {
     return chipSize;
   }
 
+  copyPadding(src: LocalizedPadding): LocalizedPadding {
+    return {
+      top: src.top,
+      bottom: src.bottom,
+      start: src.start,
+      end: src.end
+    }
+  }
+
   getChipPadding(): Length | Padding | LocalizedPadding {
     let chipTheme = this.theme.chipNode;
     let res: LocalizedPadding;
     if (this.isSmallChipSize()) {
-      res = this.isChipActivated() ? chipTheme.localizedActivatedSmallPadding : chipTheme.localizedSmallPadding;
+      res = this.isChipActivated() ? this.copyPadding(chipTheme.localizedActivatedSmallPadding) :
+        this.copyPadding(chipTheme.localizedSmallPadding);
     } else {
-      res = this.isChipActivated() ? chipTheme.localizedActivatedNormalPadding : chipTheme.localizedNormalPadding;
+      res = this.isChipActivated() ? this.copyPadding(chipTheme.localizedActivatedNormalPadding) :
+        this.copyPadding(chipTheme.localizedNormalPadding);
     }
     if (this.chipPadding?.top && LengthMetricsUtils.getInstance().isNaturalNumber(this.chipPadding.top)) {
       res.top = this.chipPadding.top;

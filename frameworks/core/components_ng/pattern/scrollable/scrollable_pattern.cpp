@@ -1523,14 +1523,22 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
 {
     CHECK_NULL_VOID(scrollBarProxy);
     auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source, bool nestedScroll,
-        bool isMouseWheelScroll) {
+        bool isMouseWheelScroll, Axis axis) {
         if (source != SCROLL_FROM_START) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_RETURN(pattern && pattern->GetAxis() != Axis::NONE, false);
+            if (pattern->TryFreeScroll(offset, axis)) {
+                return true;
+            }
             auto scrollable = pattern->GetScrollable();
             if (isMouseWheelScroll && scrollable) {
                 scrollable->ProcessAxisUpdateEvent(offset, true);
                 return true;
+            }
+            if (source == SCROLL_FROM_BAR_OVER_DRAG && pattern->GetAxis() != Axis::NONE && pattern->AnimateStoped()) {
+                float tmp = static_cast<float>(offset);
+                pattern->AdjustOffset(tmp, source);
+                offset = tmp;
             }
             if (!nestedScroll) {
                 return pattern->UpdateCurrentOffset(offset, source);
@@ -3333,6 +3341,7 @@ void ScrollablePattern::FireOnScrollStart(bool withPerfMonitor)
     if (scrollBarProxy_) {
         scrollBarProxy_->SetIsScrollableNodeScrolling(true);
     }
+    ContentChangeOnScrollStart(host);
     FireObserverOnScrollStart();
     auto onScrollStart = hub->GetOnScrollStart();
     auto onJSFrameNodeScrollStart = hub->GetJSFrameNodeOnScrollStart();
@@ -4993,5 +5002,24 @@ void ScrollablePattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnScrollChangeEnd(keyNode);
+}
+void ScrollablePattern::ContentChangeByDetaching(PipelineContext* pipeline)
+{
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    mgr->OnScrollRemoved(host->GetId());
+}
+
+void ScrollablePattern::ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode)
+{
+    CHECK_NULL_VOID(keyNode);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnScrollChangeStart(keyNode);
 }
 } // namespace OHOS::Ace::NG

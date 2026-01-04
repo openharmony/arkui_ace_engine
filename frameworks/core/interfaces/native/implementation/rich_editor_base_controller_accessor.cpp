@@ -90,7 +90,7 @@ UpdateSpanStyle Convert(const Ark_RichEditorTextStyle& src)
     if (auto strokeColor = Converter::OptConvert<Color>(src.strokeColor); strokeColor) {
         ret.updateStrokeColor = strokeColor.value();
     } else if (ret.updateTextColor.has_value()) {
-        ret.updateStrokeColor = ret.updateTextColor.value();
+        ret.strokeColorFollowFontColor = true;
     }
     return ret;
 }
@@ -118,7 +118,7 @@ Ark_RichEditorTextStyle CreateEmptyArkTextStyle()
     dst.fontFeature = Converter::ArkValue<Opt_String>(Ark_Empty());
     dst.halfLeading = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(Ark_Empty());
-    dst.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty());
+    dst.strokeWidth = Converter::ArkUnion<Opt_Union_LengthMetrics_F64>(Ark_Empty());
     dst.strokeColor = Converter::ArkUnion<Opt_ResourceColor>(Ark_Empty());
     return dst;
 }
@@ -129,7 +129,12 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const UpdateSpanStyle& src, Co
     dst.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(src.updateTextColor, ctx);
     dst.fontSize = Converter::ArkUnion<Opt_Union_String_F64_Resource, Ark_String>(src.updateFontSize, ctx);
     dst.fontStyle = Converter::ArkValue<Opt_FontStyle>(src.updateItalicFontStyle);
-    dst.fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_FontWeight>(src.updateFontWeight);
+    if (!src.updateFontWeight.has_value()) {
+        dst.fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String>(Ark_Empty());
+    } else {
+        dst.fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(
+            static_cast<int32_t>(src.updateFontWeight.value()));
+    }
     if (src.updateFontFamily.has_value() && !src.updateFontFamily->empty()) {
         std::string family = V2::ConvertFontFamily(src.updateFontFamily.value());
         dst.fontFamily = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(family, ctx);
@@ -147,7 +152,9 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const UpdateSpanStyle& src, Co
     }
     dst.halfLeading = Converter::ArkValue<Opt_Boolean>(src.updateHalfLeading);
     dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(src.updateTextBackgroundStyle, ctx);
-    dst.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(src.updateStrokeWidth, ctx);
+    dst.strokeWidth = src.updateStrokeWidth.has_value()
+        ? Converter::ArkUnion<Opt_Union_LengthMetrics_F64, Ark_LengthMetrics>(src.updateStrokeWidth, ctx)
+        : Converter::ArkUnion<Opt_Union_LengthMetrics_F64>(Ark_Empty());
     dst.strokeColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(src.updateStrokeColor, ctx);
 }
 

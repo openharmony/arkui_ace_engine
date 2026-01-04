@@ -16,11 +16,13 @@
 'use static'
 
 import { State } from '@ohos.arkui.stateManagement'
-import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions, Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor,
-  SubMenuExpandingMode, MenuOptions, ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions, PopupCommonOptions, PopupStateChangeParam,
-  EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement, PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode, BlurStyle, ModalMode,
-  PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder, CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin,
-  FlexAlign
+import { Entry, Component, NavDestination, ClickEvent, Dimension, EdgeColors, Column, ColumnOptions, Row, RowOptions,
+  Scroll, Scroller, Button, Text, Color, $r, Image, ResourceStr, ResourceColor, SubMenuExpandingMode, MenuOptions,
+  ContextMenuOptions, MenuElement, Menu, MenuItem, MenuItemOptions, CustomDialog, PopupOptions, CustomPopupOptions,
+  PopupCommonOptions, PopupStateChangeParam, EdgeOutlineWidths, wrapBuilder, AvoidanceMode, Placement,
+  PopupMessageOptions, PopupBorderLinearGradient, GradientDirection, ContextMenuAnimationOptions, MenuPreviewMode,
+  BlurStyle, ModalMode, PreviewScaleMode, AvailableLayoutArea, ResponseType, CustomDialogController, CustomBuilder,
+  CustomBuilderT, FontWeight, Length, TextAlign, TransitionEffect, Curve,AnimationNumberRange, Margin, FlexAlign
 } from '@ohos.arkui.component'
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ComponentContent, FrameNode, Frame } from '@ohos.arkui.node';
@@ -44,31 +46,22 @@ struct CustomPopupOutlineLinearGradient {
   @State handlePopup6: boolean = false;
   @State handlePopup7: boolean = false;
   @State outlineLinearGradientIndex: Int = 0;
-  @State outlineLinearGradientList: Array<PopupBorderLinearGradient | undefined> =
-    new Array<PopupBorderLinearGradient | undefined>(
-      {
-        direction: GradientDirection.LeftBottom,
-        colors: [[Color.Yellow, 0.0], [Color.Green, 0.5], [Color.Blue, 1.0]]
-      },
-      undefined,
-      {
-        direction: GradientDirection.Left,
-        colors: [[Color.Pink, 0.0], [Color.Blue, 1.0]]
-      },
-    )
+  @State outlineLinearGradientList: (PopupBorderLinearGradient | undefined)[] = [
+    {
+      direction: GradientDirection.LeftBottom,
+      colors: [[Color.Yellow, 0.0], [Color.Green, 0.5], [Color.Blue, 1.0]]
+    } as PopupBorderLinearGradient,
+    undefined,
+    { direction: GradientDirection.Left, colors: [[Color.Pink, 0.0], [Color.Blue, 1.0]] } as PopupBorderLinearGradient,
+  ]
   @State outlineLinearGradientIndex1: Int = 0;
-  @State outlineLinearGradientList1: Array<PopupBorderLinearGradient | undefined> =
-    new Array<PopupBorderLinearGradient | undefined>(
-      {
-        direction: GradientDirection.LeftBottom,
-        colors: [[Color.Yellow, 0.0], [Color.Green, 0.5], [Color.Blue, 1.0]]
-      },
-      undefined,
-      {
-        direction: GradientDirection.Left,
-        colors: [[Color.Pink, 0.0], [Color.Blue, 1.0]]
-      },
-    )
+  @State outlineLinearGradientList1: (PopupBorderLinearGradient | undefined)[] = [
+    {
+      direction: GradientDirection.LeftBottom, colors: [[Color.Yellow, 0.0], [Color.Green, 0.5], [Color.Blue, 1.0]]
+    } as PopupBorderLinearGradient,
+    undefined,
+    { direction: GradientDirection.Left, colors: [[Color.Pink, 0.0], [Color.Blue, 1.0]] } as PopupBorderLinearGradient,
+  ]
 
   @Builder
   PopupBuilder() {
@@ -84,7 +77,7 @@ struct CustomPopupOutlineLinearGradient {
     Column({ space: 5 } as ColumnOptions) {
       Text(`enableArrow设置为true:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Button('设置LeftBottom,Yellow,Green,Blue')
         .onClick(() => {
           this.handlePopup1 = !this.handlePopup1;
@@ -151,9 +144,8 @@ struct CustomPopupOutlineLinearGradient {
                 this.handlePopup = false;
               }
             }
-
           })
-        Button("动态切换 : " + this.outlineLinearGradientList[this.outlineLinearGradientIndex])
+        Button('动态切换 : ' + this.outlineLinearGradientList[this.outlineLinearGradientIndex])
           .onClick(() => {
             setTimeout(() => {
               this.outlineLinearGradientIndex++
@@ -166,7 +158,7 @@ struct CustomPopupOutlineLinearGradient {
 
       Text(`enableArrow设置为false:`)
         .fontSize(16)
-        .width("100%")
+        .width('100%')
       Button('设置LeftBottom,Yellow,Green,Blue')
         .onClick(() => {
           this.handlePopup4 = !this.handlePopup4;
@@ -233,9 +225,8 @@ struct CustomPopupOutlineLinearGradient {
                 this.handlePopup7 = false;
               }
             }
-
           })
-        Button("动态切换 : " + this.outlineLinearGradientList1[this.outlineLinearGradientIndex1])
+        Button('动态切换 : ' + this.outlineLinearGradientList1[this.outlineLinearGradientIndex1])
           .onClick(() => {
             setTimeout(() => {
               this.outlineLinearGradientIndex1++

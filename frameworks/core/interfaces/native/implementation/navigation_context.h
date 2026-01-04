@@ -202,8 +202,8 @@ public:
         const std::optional<NavigationOptions>& optionParam);
     void SetIsReplace(enum IsReplace value);
     void SetAnimated(bool value);
-    bool Pop(bool isAnimated, PathInfo& info);
-    bool Pop(bool isAnimated, Ark_Object result, PathInfo& info);
+    bool Pop(bool animated, PathInfo& info);
+    bool Pop(bool animated, Ark_Object result, PathInfo& info);
     void PopTo(const std::string& name, const std::optional<bool>& animated);
     int PopToName(const std::string& name, const std::optional<bool>& animated);
     int PopToName(const std::string& name, const std::optional<bool>& animated, Ark_Object result);
