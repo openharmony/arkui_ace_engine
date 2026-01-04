@@ -110,7 +110,11 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
     console.log(`[createXBarCustomComponent]start getUIContextById ${instanceID}`)
     const uiContext = UIContextUtil.getOrCreateUIContextById(instanceID) as UIContextImpl;
     console.log(`[createXBarCustomComponent]getUIContextById`)
-    const manager = GlobalStateManager.instance;
+    let manager = uiContext.stateMgr;
+    if (manager === undefined) {
+        console.log(`[createXBarCustomComponent]manager is undefined`)
+        manager = GlobalStateManager.instance;
+    }
     const node = manager.updatableNode(new IncrementalNode(), (context: StateContext) => {
         ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
         let r = OBSERVE.renderingComponent;

@@ -131,7 +131,10 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
     };
 
     const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-    const manager = GlobalStateManager.instance;
+    let manager = uiContext.stateMgr;
+    if (manager === undefined) {
+        manager = GlobalStateManager.instance;
+    }
 
     ArkThemeScopeManager.getInstance().applyColorModeFromThemeScope();
     
@@ -520,7 +523,10 @@ export function transferCompatibleBuilder<T extends Function>(
         };
 
         const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-        const manager = GlobalStateManager.instance;
+        let manager = uiContext.stateMgr;
+        if (manager === undefined) {
+            manager = GlobalStateManager.instance;
+        }
         const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
             ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
             let r = OBSERVE.renderingComponent;
@@ -558,7 +564,10 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
             }
         }
         const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-        const manager = GlobalStateManager.instance;
+        let manager = uiContext.stateMgr;
+        if (manager === undefined) {
+            manager = GlobalStateManager.instance;
+        }
         const node = manager.updatableNode(ArkContentSlotPeer.create(undefined) as PeerNode, (context: StateContext) => {
             ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
             let r = OBSERVE.renderingComponent;
@@ -590,7 +599,7 @@ function makeBuilderParameterStaticProxy<T extends Object>(name: string, value: 
  * through hook functions, thereby enabling it to refresh the 1.2 UI.
  */
 function updateDynamicObjectForInterop(args: Any): MutableState<int32> | undefined {
-    let state: MutableState<int32> = GlobalStateManager.instance.mutableState<int32>(0, true);
+    let state: MutableState<int32> = StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
     const startHookFunc = ESValue.getGlobal().getProperty('startStaticHook');
     const result = startHookFunc.invoke(ESValue.wrap(args), ESValue.wrap(()=>{ state.value })).unwrap();
     if (result === undefined) {
@@ -604,7 +613,7 @@ class InteropBuilderLiteralProxyHandler<T extends Object> extends proxy.DefaultP
     state: MutableState<int32>;
     constructor(source: Any) {
         this.source = ESValue.wrap(source)
-        this.state = GlobalStateManager.instance.mutableState<int32>(0, true);
+        this.state = StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
     }
 
     override get(target: T, name: string): Any {
@@ -1056,7 +1065,7 @@ export function enableCompatibleObservedV2ForStatic<T>(
 ): T {
     let method = ESValue.getGlobal().getProperty('enableCompatibleObservedV2ForStatic');
     let createStaticState = () => {
-        return GlobalStateManager.instance.mutableState<int32>(0, true);
+        return StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
     }
     let recordStaticState = (value: MutableState<int32>) => {
         value.value
