@@ -3987,12 +3987,6 @@ void MenuLayoutAlgorithm::MenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode,
 {
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-
-    // When the top of the soft keyboard position is larger than the bottom of the menu layout area, the menu does not
-    // need to avoid the soft keyboard.
-    if (LessNotEqual(wrapperRect_.Bottom(), keyboardTopPosition)) {
-        return;
-    }
     // When the top of the soft keyboard position is smaller than the top of the menu layout area, the menu does not
     // need to avoid the soft keyboard.
     if (GreatNotEqual(wrapperRect_.Top(), keyboardTopPosition)) {
@@ -4002,8 +3996,13 @@ void MenuLayoutAlgorithm::MenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode,
     if (minKeyboardAvoidDistanceValue.Unit() == DimensionUnit::PERCENT) {
         minKeyboardAvoidDistanceValue = MIN_KEYBOARD_AVOID_DISTANCE;
     }
-    auto isPreview = menuPattern->GetPreviewMode() != MenuPreviewMode::NONE;
     auto newRectBottom = keyboardTopPosition - minKeyboardAvoidDistanceValue.ConvertToPx();
+    // When the top of the soft keyboard position is larger than the bottom of the menu layout area, the menu does not
+    // need to avoid the soft keyboard.
+    if (LessNotEqual(wrapperRect_.Bottom(), newRectBottom)) {
+        return;
+    }
+    auto isPreview = menuPattern->GetPreviewMode() != MenuPreviewMode::NONE;
     // In the preview menu, the bottom of the layout area of the menu is equal to the layout area of the menu
     // minus the bottom security area. When the top of the soft keyboard position is larger than the bottom of the
     // layout area of the preview menu, the menu does not need to avoid the soft keyboard.
