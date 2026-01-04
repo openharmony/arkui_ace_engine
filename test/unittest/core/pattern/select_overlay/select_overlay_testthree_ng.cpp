@@ -551,7 +551,13 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset00
     EXPECT_EQ(controller.UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
     EXPECT_EQ(magnifierPaintOffset, OffsetF(0.f, 0.f));
     EXPECT_EQ(magnifierOffset, VectorF(0.f, 0.f));
-    EXPECT_EQ(zoomOffset, VectorF(localOffset.GetX() - magnifierWidth / 2, localOffset.GetY() - magnifierHeight / 2));
+    float halfPreScaledTextWidth = magnifierWidth / MAGNIFIER_FACTOR / 2;
+    float magnifierInnerPaddingX =
+        static_cast<float>((MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5).ConvertToPx());
+    float maxZoomOffsetX = magnifierWidth / 2 - halfPreScaledTextWidth + magnifierInnerPaddingX;
+    float targetZoomOffsetX = localOffset.GetX() - magnifierWidth / 2;
+    EXPECT_EQ(zoomOffset, VectorF(std::clamp(targetZoomOffsetX, -maxZoomOffsetX, maxZoomOffsetX),
+        localOffset.GetY() - magnifierHeight / 2));
 }
 
 /**
@@ -600,9 +606,14 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset00
     EXPECT_EQ(controller.UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
     EXPECT_EQ(controller.UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
     EXPECT_EQ(magnifierPaintOffset, OffsetF(frameSize.Width() - magnifierWidth,
-      localOffset.GetY() - MAGNIFIER_OFFSETY.ConvertToPx() - magnifierHeight / 2));
+        localOffset.GetY() - MAGNIFIER_OFFSETY.ConvertToPx() - magnifierHeight / 2));
     EXPECT_EQ(magnifierOffset, VectorF(0.f, MAGNIFIER_OFFSETY.ConvertToPx()));
-    EXPECT_EQ(zoomOffset, VectorF(localOffset.GetX() - frameSize.Width() + magnifierWidth / 2,
+    float halfPreScaledTextWidth = magnifierWidth / MAGNIFIER_FACTOR / 2;
+    float magnifierInnerPaddingX =
+        static_cast<float>((MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5).ConvertToPx());
+    float maxZoomOffsetX = magnifierWidth / 2 - halfPreScaledTextWidth + magnifierInnerPaddingX;
+    float targetZoomOffsetX = localOffset.GetX() - frameSize.Width() + magnifierWidth / 2;
+    EXPECT_EQ(zoomOffset, VectorF(std::clamp(targetZoomOffsetX, -maxZoomOffsetX, maxZoomOffsetX),
         localOffset.GetY() - frameSize.Height() + magnifierHeight / 2));
 }
 
@@ -652,7 +663,7 @@ HWTEST_F(SelectOverlayPatternTestNg, MagnifierController_UpdateMagnifierOffset00
     EXPECT_EQ(controller.UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
     EXPECT_EQ(controller.UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, zoomOffset), true);
     EXPECT_EQ(magnifierPaintOffset, OffsetF(localOffset.GetX() - magnifierWidth / 2,
-      localOffset.GetY() - MAGNIFIER_OFFSETY.ConvertToPx() - magnifierHeight / 2));
+        localOffset.GetY() - MAGNIFIER_OFFSETY.ConvertToPx() - magnifierHeight / 2));
     EXPECT_EQ(magnifierOffset, VectorF(0.f, MAGNIFIER_OFFSETY.ConvertToPx()));
     EXPECT_EQ(zoomOffset, VectorF(0.f, 0.f));
 }

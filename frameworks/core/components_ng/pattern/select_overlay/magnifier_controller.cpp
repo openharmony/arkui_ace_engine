@@ -74,11 +74,15 @@ bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, 
     auto rootFrameSize = rootGeometryNode->GetFrameSize();
     auto magnifierX =
         std::clamp(left, 0.f, static_cast<float>(rootFrameSize.Width() - magnifierNodeWidth_.ConvertToPx()));
+    float halfPreScaledTextWidth = halfMenuWidth / MAGNIFIER_FACTOR;
+    float magnifierInnerPaddingX =
+        static_cast<float>((MAGNIFIER_SHADOWOFFSETX + MAGNIFIER_SHADOWSIZE * 1.5).ConvertToPx());
+    float maxZoomOffsetX = halfMenuWidth - halfPreScaledTextWidth + magnifierInnerPaddingX;
     auto zoomOffsetX = globalOffset_.GetX() - (magnifierX + halfMenuWidth);
     if (LessNotEqual(zoomOffsetX, -halfMenuWidth) || GreatNotEqual(zoomOffsetX, halfMenuWidth)) {
         TAG_LOGW(AceLogTag::ACE_SELECT_OVERLAY, "zoomOffsetX is invalid.");
     }
-    zoomOffsetX = std::clamp(zoomOffsetX, -halfMenuWidth, halfMenuWidth);
+    zoomOffsetX = std::clamp(zoomOffsetX, -maxZoomOffsetX, maxZoomOffsetX);
     magnifierPaintOffset.SetX(magnifierX);
     magnifierOffset.x = MAGNIFIER_OFFSETX.ConvertToPx();
     zoomOffset.x = zoomOffsetX;
@@ -119,12 +123,17 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
     magnifierPaintOffset.SetY(magnifierPaintOffsetY);
     magnifierOffset.y = offsetY_;
     if (LessNotEqual(globalOffset_.GetY(), halfMenuHeight)) {
-        zoomOffset.y = std::clamp(globalOffset_.GetY() - halfMenuHeight, -halfMenuHeight, 0.f);
+        zoomOffset.y = globalOffset_.GetY() - halfMenuHeight;
     } else if (GreatNotEqual(globalOffset_.GetY(), rootFrameSize.Height() - halfMenuHeight)) {
-        zoomOffset.y = std::clamp(globalOffset_.GetY() - rootFrameSize.Height() + halfMenuHeight, 0.f, halfMenuHeight);
+        zoomOffset.y = globalOffset_.GetY() - rootFrameSize.Height() + halfMenuHeight;
     } else {
         zoomOffset.y = 0.f;
     }
+    float preScaledTextHeight = static_cast<float>(magnifierNodeHeight_.ConvertToPx() / MAGNIFIER_FACTOR);
+    float magnifierInnerPaddingY =
+        static_cast<float>((MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * 1.5).ConvertToPx());
+    float maxZoomOffsetY = halfMenuHeight - preScaledTextHeight / 2 + magnifierInnerPaddingY;
+    zoomOffset.y = std::clamp(zoomOffset.y, -maxZoomOffsetY, maxZoomOffsetY);
     return true;
 }
 
