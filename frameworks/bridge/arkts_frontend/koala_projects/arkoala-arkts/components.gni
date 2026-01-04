@@ -384,7 +384,6 @@ arkui_files = [
   "arkui-preprocessed/arkui/framework/ohos.multimedia.image.ets",
   "arkui-preprocessed/arkui/framework/ohos.promptAction.ets",
   "arkui-preprocessed/arkui/framework/ohos.resourceManager.ets",
-  "arkui-preprocessed/arkui/framework/ohos.router.ets",
   "arkui-preprocessed/arkui/framework/ohos.web.webview.ets",
   "arkui-preprocessed/arkui/framework/ohos.window.ets",
   "arkui-preprocessed/arkui/framework/peers/CallbackDeserializeCall.ets",

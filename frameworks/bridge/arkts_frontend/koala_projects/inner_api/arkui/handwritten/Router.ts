@@ -35,7 +35,7 @@ export interface Router {
 
     clear(): void;
 
-    getParam(key: string): Object | undefined;
+    getParam(key: string): jsonx.JsonElement | undefined;
 
     depth: number;
 

@@ -1073,7 +1073,6 @@ bool ArktsFrontend::GetStateByUrlFromDynamicExtender(const std::string& url, std
         tempStates.push_back(state);
     }
     std::swap(tempStates, stateArray);
-    LOGE("AceRouter GetStateByUrlFromDynamicExtender 2");
     return true;
 }
 
@@ -1110,10 +1109,8 @@ bool ArktsFrontend::GetStateByIndexFromDynamicExtender(int32_t index, RouterStat
         return false;
     }
     if (isUndefined) {
-        LOGE("AceRouter GetStateByIndexFromDynamicExtender 1");
         return false;
     }
-    LOGE("AceRouter GetStateByIndexFromDynamicExtender 2");
     return ParseRouterStateInfo(env, result, state);
 }
 

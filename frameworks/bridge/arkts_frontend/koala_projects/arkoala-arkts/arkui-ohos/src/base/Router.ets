@@ -87,14 +87,14 @@ class VisiblePage {
     page: UserViewBuilder
     url: string
     path: string
-    params: Object | undefined
+    params: jsonx.JsonElement | undefined
     peerNode: PeerNode | undefined
 
     constructor(
         page: UserViewBuilder,
         url: string,
         path: string,
-        params?: Object
+        params?: jsonx.JsonElement
     ) {
         this.page = page
         this.url = url
@@ -114,7 +114,7 @@ class RouterState {
     constructor(
         page: UserViewBuilder,
         url: string,
-        params?: Map<string, Object>,
+        params?: jsonx.JsonElement,
         resolve?: (dummy: undefined) => void
     ) {
         this.page = page
@@ -126,7 +126,7 @@ class RouterState {
     @memo
     page: UserViewBuilder
     url: string
-    params?: Map<string, Object>
+    params?: jsonx.JsonElement
     resolve?: (dummy: undefined) => void
     version = mutableState(0)
 }
@@ -202,7 +202,7 @@ export interface Router {
 
     getStackSize(): int
 
-    getParams(): Object
+    getParams(): jsonx.JsonElement
 
     getState(): router.RouterState
 
@@ -260,6 +260,22 @@ export class RouterImpl implements Router {
     }
     public SetRuntimeLinker(linker: RuntimeLinker | undefined): void {
         this.runtimeLinker = linker;
+    }
+
+    public static StringifyParams(params: jsonx.JsonElement | undefined): string {
+        if (params == undefined) {
+            return "";
+        } else if (params.jsonType != jsonx.JsonType.JsonArray && params.jsonType != jsonx.JsonType.JsonObject) {
+            console.log(`AceRouter: only array or object type of JsonElement was supported stringify in router`);
+            return "";
+        }
+        try {
+            return JSON.stringifyJsonElement(params!);
+        } catch (e: Error) {
+            console.log(`AceRouter: failed to stringifyParams, name: ${e.name}, msg: ${e.message}`);
+            console.log(e.stack);
+            return "";
+        }
     }
 
     private getClassName(url: string): string {
@@ -445,7 +461,7 @@ export class RouterImpl implements Router {
             };
             let pageOptions: PageRouterOptions = { options: {
                     url: options.name,
-                    params: options.params,
+                    params: RouterImpl.StringifyParams(options.params),
                     recoverable: options.recoverable
                 },
                 mode: mode
@@ -498,7 +514,7 @@ export class RouterImpl implements Router {
             this.showingPageIndex += 1;
             let pageOptions: PageRouterOptions = { options: {
                     url: options.name,
-                    params: options.params,
+                    params: RouterImpl.StringifyParams(options.params),
                     recoverable: options.recoverable
                 }
             };
@@ -522,7 +538,7 @@ export class RouterImpl implements Router {
             };
             let pageOptions: PageRouterOptions = { options: {
                     url: options.name,
-                    params: options.params,
+                    params: RouterImpl.StringifyParams(options.params),
                     recoverable: options.recoverable
                 },
                 mode: mode
@@ -574,7 +590,7 @@ export class RouterImpl implements Router {
             this.showingPageIndex += 1;
             let pageOptions: PageRouterOptions = { options: {
                     url: options.name,
-                    params: options.params,
+                    params: RouterImpl.StringifyParams(options.params),
                     recoverable: options.recoverable
                 }
             };
@@ -677,7 +693,7 @@ export class RouterImpl implements Router {
             };
             let pageOptions: PageRouterOptions = { options: {
                     url: options.name,
-                    params: options.params,
+                    params: RouterImpl.StringifyParams(options.params),
                     recoverable: options.recoverable
                 },
                 mode: mode
@@ -731,7 +747,7 @@ export class RouterImpl implements Router {
             this.showingPageIndex += 1
             let pageOptions: PageRouterOptions = { options: {
                     url: options.name,
-                    params: options.params,
+                    params: RouterImpl.StringifyParams(options.params),
                     recoverable: options.recoverable
                 }
             };
@@ -758,7 +774,7 @@ export class RouterImpl implements Router {
             };
             let pageOptions: PageRouterOptions = { options: {
                     url: options.name,
-                    params: options.params,
+                    params: RouterImpl.StringifyParams(options.params),
                     recoverable: options.recoverable
                 },
                 mode: mode
@@ -811,7 +827,7 @@ export class RouterImpl implements Router {
             this.showingPageIndex += 1
             let pageOptions: PageRouterOptions = { options: {
                     url: options.name,
-                    params: options.params,
+                    params: RouterImpl.StringifyParams(options.params),
                     recoverable: options.recoverable
                 }
             };
@@ -839,9 +855,9 @@ export class RouterImpl implements Router {
         RouterExtender.clear();
     }
 
-    getParams(): Object {
+    getParams(): jsonx.JsonElement {
         let curPage = this.visiblePages.at(this.showingPageIndex)
-        return curPage.params !== undefined ? curPage.params! : new Object()
+        return curPage.params !== undefined ? curPage.params! : new jsonx.JsonElement()
     }
 
     getLength(): string {
@@ -859,7 +875,7 @@ export class RouterImpl implements Router {
             index: this.showingPageIndex + 1,
             name: curPage.url,
             path: curPage.path,
-            params: curPage.params !== undefined ? curPage.params! : new Object()
+            params: curPage.params !== undefined ? curPage.params! : new jsonx.JsonElement()
         } as router.RouterState
         return state
     }
@@ -873,7 +889,7 @@ export class RouterImpl implements Router {
             index: index,
             name: page.url,
             path: page.path,
-            params: page.params !== undefined ? page.params! : new Object()
+            params: page.params !== undefined ? page.params! : new jsonx.JsonElement()
         } as router.RouterState
         return state
     }
@@ -887,7 +903,7 @@ export class RouterImpl implements Router {
                     index: index.toInt() + 1,
                     name: element.url,
                     path: element.path,
-                    params: element.params !== undefined ? element.params! : new Object()
+                    params: element.params !== undefined ? element.params! : new jsonx.JsonElement()
                 } as router.RouterState
                 retVal.push(state)
             }
@@ -981,15 +997,6 @@ export interface InnerRouterState {
 }
 
 export class RouterUtil {
-    static stringifyParams(params: Object): string {
-        try {
-            return JSON.stringify(params);
-        } catch (e: Error) {
-            console.log(`AceRouter: RouterUtil.stringifyParams failed`);
-            console.log(e.stack);
-            return "";
-        }
-    }
     static pushFromDynamic(instanceId: int32, url: string, params: string, linker?: RuntimeLinker): void {
         let context: UIContext = UIContextUtil.getOrCreateUIContextById(instanceId);
         let router = context.getRouter();
@@ -998,18 +1005,15 @@ export class RouterUtil {
             console.log(`AceRouter: failed to getRouter in pushFromDynamic with instanceId: ${instanceId}`)
             return;
         }
-        let objParams: Object | undefined = undefined;
+        let jsonParams: jsonx.JsonElement | undefined = undefined;
         if (params.length != 0) {
             try {
-                let tempObj: Object | null | undefined = JSON.parse<Object>(params, Type.of(new Object()));
-                if (tempObj != null && tempObj != undefined) {
-                    objParams = tempObj!;
-                }
+                jsonParams = JSON.parseJsonElement(params);
             } catch (error) {
                 InteropNativeModule._NativeLog(`AceRouter failed to parse params: ${params} error:` + error)
             }
         }
-        let options: router.RouterOptions = { url: url, params: objParams };
+        let options: router.RouterOptions = { url: url, params: jsonParams };
         let backupLinker = routerImpl.GetRuntimeLinker();
         let tempLinker: RuntimeLinker = linker as RuntimeLinker;
         routerImpl.SetRuntimeLinker(linker);
@@ -1030,18 +1034,15 @@ export class RouterUtil {
             console.log(`AceRouter: failed to getRouter in replaceFromDynamic with instanceId: ${instanceId}`)
             return;
         }
-        let objParams: Object | undefined = undefined;
+        let jsonParams: jsonx.JsonElement | undefined = undefined;
         if (params.length != 0) {
             try {
-                let tempObj: Object | null | undefined = JSON.parse<Object>(params, Type.of(new Object()));
-                if (tempObj != null && tempObj != undefined) {
-                    objParams = tempObj!;
-                }
+                jsonParams = JSON.parseJsonElement(params);
             } catch (error) {
                 InteropNativeModule._NativeLog(`AceRouter failed to parse params: ${params} error:` + error)
             }
         }
-        let options: router.RouterOptions = { url: url, params: objParams };
+        let options: router.RouterOptions = { url: url, params: jsonParams };
         let backupLinker = routerImpl.GetRuntimeLinker();
         let tempLinker: RuntimeLinker = linker as RuntimeLinker;
         routerImpl.SetRuntimeLinker(linker);
@@ -1062,18 +1063,15 @@ export class RouterUtil {
             console.log(`AceRouter: failed to getRouter in backFromDynamic with instanceId: ${instanceId}`)
             return;
         }
-        let objParams: Object | undefined = undefined;
+        let jsonParams: jsonx.JsonElement | undefined = undefined;
         if (params.length != 0) {
             try {
-                let tempObj: Object | null | undefined = JSON.parse<Object>(params, Type.of(new Object()));
-                if (tempObj != null && tempObj != undefined) {
-                    objParams = tempObj!;
-                }
+                jsonParams = JSON.parseJsonElement(params);
             } catch (error) {
                 InteropNativeModule._NativeLog(`AceRouter failed to parse params: ${params} error:` + error)
             }
         }
-        let options: router.RouterOptions = { url: url, params: objParams };
+        let options: router.RouterOptions = { url: url, params: jsonParams };
         let backupLinker = routerImpl.GetRuntimeLinker();
         let tempLinker: RuntimeLinker = linker as RuntimeLinker;
         routerImpl.SetRuntimeLinker(linker);
@@ -1151,7 +1149,7 @@ export class RouterUtil {
                 return "";
             }
             let params = routerImpl.getParams();
-            let paramsStr = RouterUtil.stringifyParams(params);
+            let paramsStr = RouterImpl.StringifyParams(params);
             return paramsStr;
         } catch (e: Error) {
             console.log(`AceRouter: getParams error, name: ${e.name} message: ${e.message}`);
@@ -1177,7 +1175,7 @@ export class RouterUtil {
                     index: states[i].index,
                     name: states[i].name,
                     path: states[i].path,
-                    params: RouterUtil.stringifyParams(states[i].params)
+                    params: RouterImpl.StringifyParams(states[i].params)
                 } as InnerRouterState;
                 result.push(innerState);
             }
@@ -1206,7 +1204,7 @@ export class RouterUtil {
                 index: state!.index,
                 name: state!.name,
                 path: state!.path,
-                params: RouterUtil.stringifyParams(state!.params)
+                params: RouterImpl.StringifyParams(state!.params)
             } as InnerRouterState;
             return innerState;
         } catch (e: Error) {
@@ -1230,7 +1228,7 @@ export class RouterUtil {
                 index: state.index,
                 name: state.name,
                 path: state.path,
-                params: RouterUtil.stringifyParams(state.params)
+                params: RouterImpl.StringifyParams(state.params)
             } as InnerRouterState;
             return innerState;
         } catch (e: Error) {
