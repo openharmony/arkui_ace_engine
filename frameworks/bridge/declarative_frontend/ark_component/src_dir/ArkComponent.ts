@@ -761,3 +761,383 @@ class SepiaModifier extends ModifierWithKey<number> {
     }
   }
 }
+
+class SaturateModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('saturate');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetSaturate(node);
+    } else {
+      getUINativeModule().common.setSaturate(node, this.value);
+    }
+  }
+}
+
+class ColorBlendModifier extends ModifierWithKey<Color | string | Resource> {
+  constructor(value: Color | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('colorBlend');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetColorBlend(node);
+    } else {
+      getUINativeModule().common.setColorBlend(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class GrayscaleModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('grayscale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetGrayscale(node);
+    } else {
+      getUINativeModule().common.setGrayscale(node, this.value);
+    }
+  }
+}
+
+class ContrastModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('contrast');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetContrast(node);
+    } else {
+      getUINativeModule().common.setContrast(node, this.value);
+    }
+  }
+}
+
+class BrightnessModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('brightness');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBrightness(node);
+    } else {
+      getUINativeModule().common.setBrightness(node, this.value);
+    }
+  }
+}
+
+class BlurModifier extends ModifierWithKey<ArkBlurOptions> {
+  constructor(value: ArkBlurOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('blur');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBlur(node);
+    } else {
+      getUINativeModule().common.setBlur(node, this.value.value, this.value.options?.grayscale);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
+  }
+}
+
+class LinearGradientModifier extends ModifierWithKey<{
+  angle?: number | string;
+  direction?: GradientDirection; colors: Array<any>; repeating?: boolean;
+}> {
+  constructor(value: {
+    angle?: number | string; direction?: GradientDirection;
+    colors: Array<any>; repeating?: boolean;
+  }) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('linearGradient');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetLinearGradient(node);
+    } else {
+      getUINativeModule().common.setLinearGradient(node,
+        this.value?.angle, this.value?.direction,
+        this.value?.colors, this.value?.repeating);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue?.angle === this.value?.angle) &&
+      (this.stageValue?.direction === this.value?.direction) &&
+      (this.stageValue?.colors === this.value?.colors) &&
+      (this.stageValue?.repeating === this.value?.repeating));
+  }
+}
+
+class RadialGradientModifier extends ModifierWithKey<{ center: Array<any>; radius: number | string; colors: Array<any>; repeating?: boolean }> {
+  constructor(value: { center: Array<any>; radius: number | string; colors: Array<any>; repeating?: boolean }) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('radialGradient');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetRadialGradient(node);
+    } else {
+      getUINativeModule().common.setRadialGradient(node,
+        this.value?.center, this.value?.radius, this.value?.colors, this.value?.repeating);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue?.center === this.value?.center) &&
+      (this.stageValue?.radius === this.value?.radius) &&
+      (this.stageValue?.colors === this.value?.colors) &&
+      (this.stageValue?.repeating === this.value?.repeating));
+  }
+}
+
+class SweepGradientModifier extends ModifierWithKey<{
+  center: Array<any>; start?: number |
+  string; end?: number | string; rotation?: number | string;
+  colors: Array<any>; metricsColors?: Array<any>; repeating?: boolean;
+}> {
+  constructor(value: {
+    center: Array<any>;
+    start?: number | string; end?: number | string;
+    rotation?: number | string; colors: Array<any>; metricsColors?: Array<any>; repeating?: boolean;
+  }) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('sweepGradient');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetSweepGradient(node);
+    } else {
+      getUINativeModule().common.setSweepGradient(node,
+        this.value?.center,
+        this.value?.start, this.value?.end, this.value?.rotation,
+        this.value?.colors, this.value?.metricsColors, this.value?.repeating);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.stageValue?.center === this.value?.center) &&
+      (this.stageValue?.start === this.value?.start) &&
+      (this.stageValue?.end === this.value?.end) &&
+      (this.stageValue?.rotation === this.value?.rotation) &&
+      (this.stageValue?.colors === this.value?.colors) &&
+      (this.stageValue?.metricsColors === this.value?.metricsColors) &&
+      (this.stageValue?.repeating === this.value?.repeating));
+  }
+}
+
+class OverlayModifier extends ModifierWithKey<ArkOverlay> {
+  constructor(value: ArkOverlay) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('overlay');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOverlay(node);
+    } else {
+      getUINativeModule().common.setOverlay(node,
+        this.value?.value, this.value?.align,
+        this.value?.offsetX, this.value?.offsetY,
+        this.value?.hasOptions, this.value?.hasOffset);
+    }
+  }
+  checkObjectDiff(): boolean {
+    if (isUndefined(this.value)) {
+      return !isUndefined(this.stageValue);
+    }
+    return this.value.checkObjectDiff(this.stageValue);
+  }
+}
+
+class BorderImageModifier extends ModifierWithKey<BorderImageOption> {
+  constructor(value: BorderImageOption) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('borderImage');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBorderImage(node);
+    } else {
+      let sliceTop: Length | undefined;
+      let sliceRight: Length | undefined;
+      let sliceBottom: Length | undefined;
+      let sliceLeft: Length | undefined;
+      let repeat: RepeatMode | undefined;
+      let source: string | Resource | LinearGradient | undefined;
+      let sourceAngle: number | string | undefined;
+      let sourceDirection: GradientDirection | undefined;
+      let sourceColors: Array<any> | undefined;
+      let sourceRepeating: boolean | undefined;
+      let widthTop: Length | undefined;
+      let widthRight: Length | undefined;
+      let widthBottom: Length | undefined;
+      let widthLeft: Length | undefined;
+      let outsetTop: Length | undefined;
+      let outsetRight: Length | undefined;
+      let outsetBottom: Length | undefined;
+      let outsetLeft: Length | undefined;
+      let fill: boolean | undefined;
+
+      if (!isUndefined(this.value?.slice)) {
+        if (isLengthType(this.value?.slice) || isResource(this.value?.slice)) {
+          let tmpSlice = this.value?.slice as Length;
+          sliceTop = tmpSlice;
+          sliceRight = tmpSlice;
+          sliceBottom = tmpSlice;
+          sliceLeft = tmpSlice;
+        } else {
+          let tmpSlice = this.value?.slice as EdgeWidths;
+          sliceTop = tmpSlice.top;
+          sliceRight = tmpSlice.right;
+          sliceBottom = tmpSlice.bottom;
+          sliceLeft = tmpSlice.left;
+        }
+      }
+      repeat = this.value?.repeat;
+      if (!isUndefined(this.value?.source)) {
+        if (isString(this.value?.source) || isResource(this.value?.source)) {
+          source = this.value?.source;
+        } else {
+          let tmpSource = this.value!.source as LinearGradient;
+          sourceAngle = tmpSource.angle;
+          sourceDirection = tmpSource.direction;
+          sourceColors = tmpSource.colors;
+          sourceRepeating = tmpSource.repeating;
+        }
+      }
+      if (!isUndefined(this.value?.width)) {
+        if (isLengthType(this.value?.width) || isResource(this.value?.width)) {
+          let tmpWidth = this.value?.width as Length;
+          widthTop = tmpWidth;
+          widthRight = tmpWidth;
+          widthBottom = tmpWidth;
+          widthLeft = tmpWidth;
+        } else {
+          let tmpWidth = this.value?.width as EdgeWidths;
+          widthTop = tmpWidth.top;
+          widthRight = tmpWidth.right;
+          widthBottom = tmpWidth.bottom;
+          widthLeft = tmpWidth.left;
+        }
+      }
+      if (!isUndefined(this.value?.outset)) {
+        if (isLengthType(this.value?.outset) || isResource(this.value?.outset)) {
+          let tmpOutset = this.value?.outset as Length;
+          outsetTop = tmpOutset;
+          outsetRight = tmpOutset;
+          outsetBottom = tmpOutset;
+          outsetLeft = tmpOutset;
+        } else {
+          let tmpOutset = this.value?.outset as EdgeWidths;
+          outsetTop = tmpOutset.top;
+          outsetRight = tmpOutset.right;
+          outsetBottom = tmpOutset.bottom;
+          outsetLeft = tmpOutset.left;
+        }
+      }
+      fill = this.value?.fill;
+      getUINativeModule().common.setBorderImage(node,
+        sliceTop, sliceRight, sliceBottom, sliceLeft,
+        repeat,
+        source, sourceAngle, sourceDirection, sourceColors, sourceRepeating,
+        widthTop, widthRight, widthBottom, widthLeft,
+        outsetTop, outsetRight, outsetBottom, outsetLeft,
+        fill);
+    }
+  }
+}
+
+class BorderModifier extends ModifierWithKey<ArkBorder> {
+  constructor(value: ArkBorder) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('border');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBorder(node);
+    } else {
+      let isLocalizedBorderWidth;
+      let isLocalizedBorderColor;
+      let isLocalizedBorderRadius;
+      if ((Object.keys(this.value.arkWidth).indexOf('start') >= 0 && isUndefined(this.value.arkWidth.start)) ||
+        (Object.keys(this.value.arkWidth).indexOf('end') >= 0 && isUndefined(this.value.arkWidth.end))) {
+        isLocalizedBorderWidth = true;
+      } else {
+        isLocalizedBorderWidth = false;
+      }
+      if ((Object.keys(this.value.arkColor).indexOf('startColor') >= 0 && isUndefined(this.value.arkColor.startColor)) ||
+        (Object.keys(this.value.arkColor).indexOf('endColor') >= 0 && isUndefined(this.value.arkColor.endColor))) {
+        isLocalizedBorderColor = true;
+      } else {
+        isLocalizedBorderColor = false;
+      }
+      if ((Object.keys(this.value.arkRadius).indexOf('topStart') >= 0 && isUndefined(this.value.arkRadius.topStart)) ||
+        (Object.keys(this.value.arkRadius).indexOf('topEnd') >= 0 && isUndefined(this.value.arkRadius.topEnd)) ||
+        (Object.keys(this.value.arkRadius).indexOf('bottomStart') >= 0 && isUndefined(this.value.arkRadius.bottomStart)) ||
+        (Object.keys(this.value.arkRadius).indexOf('bottomEnd') >= 0 && isUndefined(this.value.arkRadius.bottomEnd))) {
+        isLocalizedBorderRadius = true;
+      } else {
+        isLocalizedBorderRadius = false;
+      }
+      getUINativeModule().common.setBorderWithDashParams(node,
+        this.value.arkWidth.left, this.value.arkWidth.right, this.value.arkWidth.top, this.value.arkWidth.bottom,
+        this.value.arkColor.leftColor, this.value.arkColor.rightColor, this.value.arkColor.topColor, this.value.arkColor.bottomColor,
+        this.value.arkRadius.topLeft, this.value.arkRadius.topRight, this.value.arkRadius.bottomLeft, this.value.arkRadius.bottomRight,
+        this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left,
+        this.value.arkDashGap.left, this.value.arkDashGap.right, this.value.arkDashGap.top, this.value.arkDashGap.bottom,
+        this.value.arkDashWidth.left, this.value.arkDashWidth.right, this.value.arkDashWidth.top, this.value.arkDashWidth.bottom,
+        this.value.arkWidth.start, this.value.arkWidth.end, this.value.arkColor.startColor, this.value.arkColor.endColor,
+        this.value.arkRadius.topStart, this.value.arkRadius.topEnd, this.value.arkRadius.bottomStart, this.value.arkRadius.bottomEnd,
+        isLocalizedBorderWidth, isLocalizedBorderColor, isLocalizedBorderRadius,
+        this.value.arkDashGap.start, this.value.arkDashGap.end, this.value.arkDashWidth.start, this.value.arkDashWidth.end
+      );
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return this.value.checkObjectDiff(this.stageValue);
+  }
+}
+
+class OutlineColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
+  constructor(value: ResourceColor | EdgeColors) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('outlineColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOutlineColor(node);
+    } else {
+      const valueType: string = typeof this.value;
+      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
+        getUINativeModule().common.setOutlineColor(node, this.value, this.value, this.value, this.value);
+      } else {
+        getUINativeModule().common.setOutlineColor(node, (this.value as EdgeColors).left,
+          (this.value as EdgeColors).right, (this.value as EdgeColors).top,
+          (this.value as EdgeColors).bottom);
+      }
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as EdgeColors).left === (this.value as EdgeColors).left &&
+        (this.stageValue as EdgeColors).right === (this.value as EdgeColors).right &&
+        (this.stageValue as EdgeColors).top === (this.value as EdgeColors).top &&
+        (this.stageValue as EdgeColors).bottom === (this.value as EdgeColors).bottom);
+    } else {
+      return true;
+    }
+  }
+}
