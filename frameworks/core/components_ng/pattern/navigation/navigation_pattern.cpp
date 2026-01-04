@@ -2206,6 +2206,10 @@ void NavigationPattern::StartDefaultAnimation(const RefPtr<NavDestinationGroupNo
             navigationNode->TransitionWithPop(preTopNavDestination, navBarOrHomeDestNode, true);
         }
     }
+    // navBar or HomeDestination push navDestination in split mode
+    if (newTopNavDestination && !preTopNavDestination && (navigationMode_ == NavigationMode::SPLIT)) {
+        ContentChangeReport(newTopNavDestination);
+    }
 }
 
 void NavigationPattern::OnVisibleChange(bool isVisible)
@@ -2984,7 +2988,8 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
             ACE_SCOPED_TRACE_COMMERCIAL("navigation page custom transition end");
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH_INTERACTIVE, true);
             pattern->LoadCompleteManagerStopCollect();
-            if (proxy->GetIsSuccess()) {
+            bool isSuccess = proxy->GetIsSuccess();
+            if (isSuccess) {
                 pattern->ClearRecoveryList();
                 pattern->OnCustomAnimationFinish(preDestination, topDestination, isPopPage);
             } else {
@@ -2995,7 +3000,9 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
             }
             proxy->FireEndCallback();
             pattern->RemoveProxyById(proxyId);
-            pattern->ContentChangeReport(topDestination);
+            if (isSuccess) {
+                pattern->ContentChangeReport(topDestination);
+            }
         };
         auto finishCallback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
             auto pattern = weakNavigation.Upgrade();
