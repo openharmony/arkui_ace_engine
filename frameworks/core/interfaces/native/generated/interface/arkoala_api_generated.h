@@ -23799,6 +23799,8 @@ typedef struct GENERATED_ArkUIEffectComponentModifier {
                                    Ark_Int32 flags);
     void (*setEffectComponentOptions)(Ark_NativePointer node,
                                       const Opt_EffectComponentOptions* options);
+    void (*setAlwaysSnapshot)(Ark_NativePointer node,
+                              const Opt_Boolean* value);
 } GENERATED_ArkUIEffectComponentModifier;
 
 typedef struct GENERATED_ArkUIEllipseModifier {

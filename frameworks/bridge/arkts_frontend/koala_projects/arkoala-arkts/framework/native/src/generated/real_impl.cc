@@ -2743,6 +2743,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // EffectComponentInterfaceModifier
+    namespace EffectComponentAttributeModifier {
+    void SetAlwaysSnapshotImpl(Ark_NativePointer node,
+                               const Opt_Boolean* value)
+    {
+    }
+    } // EffectComponentAttributeModifier
     namespace EllipseModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -9006,6 +9012,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIEffectComponentModifier ArkUIEffectComponentModifierImpl {
             EffectComponentModifier::ConstructImpl,
             EffectComponentInterfaceModifier::SetEffectComponentOptionsImpl,
+            EffectComponentAttributeModifier::SetAlwaysSnapshotImpl,
         };
         return &ArkUIEffectComponentModifierImpl;
     }
