@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test/mock/adapter/mock_uisession_manager.h"
+#include "test/mock/adapter/mock_ui_session_manager.h"
 #include "test/mock/core/common/mock_font_manager.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pattern/mock_nestable_scroll_container.h"

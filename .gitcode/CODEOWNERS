@@ -3547,6 +3547,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.a
 frameworks/core/interfaces/native/implementation/stepper_modifier.cpp @arkui_navigation
 
 [Test source]
+test/mock/adapter @arkui_framework_xnode
 test/mock/base @arkui_framework_xnode
 test/mock/core/event/ @ArkUI_Event
 test/mock/core/accessibility/ @ArkUI_ability_group
