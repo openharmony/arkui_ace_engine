@@ -820,6 +820,10 @@ struct ArkUIAniVisualEffectModifier {
     void (*destroyMaterial)(OHOS::Ace::UiMaterial* ptr);
 };
 
+struct ArkUIAniDetachedFreeRootModifier {
+    ani_long (*constructDetachedFreeRoot)(ani_int);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -860,6 +864,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniParallelizeUIModifier* (*getParallelizeUIModifier)();
     const ArkUIAniSaveButtonModifier* (*getSaveButtonAniModifier)();
     const ArkUIAniPasteButtonModifier* (*getPasteButtonAniModifier)();
+    const ArkUIAniDetachedFreeRootModifier* (*getArkUIAniDetachedFreeRootModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);
