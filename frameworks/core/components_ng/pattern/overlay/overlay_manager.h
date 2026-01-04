@@ -791,6 +791,8 @@ public:
     bool CloseImageGeneratorSheet();
     void UpdateImageGeneratorSheetScale(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle,
         int32_t targetId, std::function<void(const int32_t)>&& onWillDismiss, std::function<void()>&& sheetSpringBack);
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool isShow);
+
 private:
     RefPtr<PipelineContext> GetPipelineContext() const;
     void SetSheetProperty(
@@ -994,7 +996,6 @@ private:
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
     int32_t RemoveOverlayManagerNode();
     void UpdateMenuAnimationOptions(const RefPtr<FrameNode>& menu, AnimationOption& option);
-    void ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool isShow);
     RefPtr<FrameNode> GetLastChildNotRemovingForAtm(const RefPtr<UINode>& atomicNode);
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
