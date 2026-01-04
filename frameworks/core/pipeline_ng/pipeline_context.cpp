@@ -2783,8 +2783,21 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 
     auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
     CHECK_NULL_VOID(manager);
+    auto container = Container::GetContainer(instanceId_);
+    auto rotation = -1;
+    if (container) {
+        auto displayInfo = container->GetDisplayInfo();
+        if (displayInfo) {
+            rotation = static_cast<int32_t>(displayInfo->GetRotation());
+        }
+    }
+    auto screenInfoNotChange = !manager->GetLastRootHeight().has_value() ||
+        !manager->GetLastAvoidOrientation().has_value() || rotation == -1 ||
+        (rotation == manager->GetLastAvoidOrientation().value_or(-1) &&
+        NearEqual(rootHeight_, manager->GetLastRootHeight().value_or(-1.0)));
     if (!forceChange && NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length()) &&
-        prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern()) {
+        prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern() &&
+        screenInfoNotChange) {
         safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
         TAG_LOGD(
             AceLogTag::ACE_KEYBOARD, "KeyboardHeight as same as last time, don't need to calculate keyboardOffset");
@@ -2806,6 +2819,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 
     manager->UpdatePrevHasTextFieldPattern();
     prevKeyboardAvoidMode_ = safeAreaManager_->GetKeyBoardAvoidMode();
+    manager->SetLastRootHeight(rootHeight_);
+    manager->SetLastAvoidOrientation(rotation);
 
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
