@@ -801,6 +801,20 @@ build_component_ng("pattern_ng") {
     "container_modal/interfaces:customtitle",
   ]
 
+ if (enable_player_framework) {
+   sources += [
+     "video/resource/ext_surface.cpp",
+     "video/resource/ext_texture.cpp",
+     "video/resource/player.cpp",
+     "video/resource/resource.cpp",
+     "video/resource/texture.cpp",
+   ]
+
+   if (!build_ohos_sdk) {
+     external_deps += [ "player_framework:media_client" ]
+   }
+ }
+
   if (!build_ohos_sdk && !is_arkui_x) {
     # arkts 1.2
     deps += [ "container_modal/static/source:WindowTitlebarComponent" ]

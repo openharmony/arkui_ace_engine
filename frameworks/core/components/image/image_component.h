@@ -36,7 +36,7 @@ namespace OHOS::Ace {
 constexpr int32_t COLOR_FILTER_MATRIX_SIZE = 20;
 constexpr int32_t IMAGE_SOURCE_SIZE = 2;
 // A component can show image.
-class ACE_EXPORT ImageComponent : public RenderComponent, public Measurable {
+class ACE_FORCE_EXPORT ImageComponent : public RenderComponent, public Measurable {
     DECLARE_ACE_TYPE(ImageComponent, RenderComponent, Measurable);
 
 public:

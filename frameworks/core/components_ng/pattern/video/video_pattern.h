@@ -19,7 +19,7 @@
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "core/components/video/video_controller_v2.h"
+#include "core/components_ng/pattern/video/video_controller_v2.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/video/video_accessibility_property.h"

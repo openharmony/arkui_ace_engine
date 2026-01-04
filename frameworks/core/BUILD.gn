@@ -666,9 +666,6 @@ template("ace_core_source_set") {
         "$ace_root/frameworks/core/components/select:ace_core_components_select_$platform",
         "$ace_root/frameworks/core/components/tool_bar:ace_core_components_tool_bar_$platform",
       ]
-      if (enable_player_framework) {
-        deps += [ "$ace_root/frameworks/core/components/video:ace_core_components_video_$platform" ]
-      }
     }
 
     if ((current_os == "mingw" || current_os == "mac" ||
@@ -937,7 +934,6 @@ template("ace_core_ng_source_set") {
       "components/theme/theme_manager_multi_thread.cpp",
       "components/theme/theme_utils.cpp",
       "components/theme/ui_material_theme.cpp",
-      "components/video/resource/player.cpp",
 
       # v2 inspector
       "components_v2/grid/grid_event.cpp",
@@ -990,9 +986,6 @@ template("ace_core_ng_source_set") {
         "components/common/properties/scroll_bar.cpp",
         "components/custom_paint/rosen_render_offscreen_canvas.cpp",
         "components/declaration/common/event.cpp",
-        "components/video/resource/ext_surface.cpp",
-        "components/video/resource/ext_texture.cpp",
-        "components/video/resource/resource.cpp",
       ]
     }
 

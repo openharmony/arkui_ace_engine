@@ -17,6 +17,7 @@
       construction?vtable?for?OHOS::IRemoteObject-in-OHOS::Ace::PluginComponentManager::UIServiceListener;
       construction?vtable?for?OHOS::IRemoteStub?OHOS::Ace::IUIService?-in-OHOS::Ace::PluginComponentManager::UIServiceListener;
       construction?vtable?for?OHOS::Parcelable-in-OHOS::Ace::PluginComponentManager::UIServiceListener;
+      construction?vtable?for?OHOS::Ace::Resource-in-OHOS::Ace::Player;
 
       guard?variable?for?OHOS::Ace::Animator::TypeId??::myTypeId;
       guard?variable?for?OHOS::Ace::Backend::TypeId??::myTypeId;
@@ -376,6 +377,32 @@
       OHOS::Ace::NG::ArkTSUtils::*;
       "OHOS::Ace::NG::TextPattern::TextPattern()";
       OHOS::Ace::NG::ViewAbstractModelStatic::*;
+      OHOS::Ace::FlexElement::*;
+      OHOS::Ace::FocusGroup::*;
+      OHOS::Ace::ImageComponent::*;
+      OHOS::Ace::Player::*;
+      OHOS::Ace::Resource::*;
+      OHOS::Ace::Texture::*;
+      "OHOS::Ace::AnimatableColor::AnimatableColor(OHOS::Ace::Color const&, OHOS::Ace::AnimationOption const&)";
+      "OHOS::Ace::AnimatableColor::operator=(OHOS::Ace::AnimatableColor const&)";
+      "OHOS::Ace::Framework::ParseBackgroundImagePosition(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::BackgroundImagePosition&)";
+      OHOS::Ace::MultiModalScene::UnSubscribeVoiceEvent*;
+      "OHOS::Ace::RosenRenderContext::GetRSNode()";
+      "OHOS::Ace::RsNodeAdapter::CreateSurfaceNode(OHOS::Rosen::RSSurfaceNodeConfig const&)";
+      "OHOS::Ace::StackElement::PopVideo()";
+      "OHOS::Ace::MultiModalManager::GetCurrentMultiModalScene()";
+      "OHOS::Ace::SliderComponent::InitStyle(OHOS::Ace::RefPtr<OHOS::Ace::SliderTheme> const&)";
+      "OHOS::Ace::SliderComponent::SliderComponent(double, double, double, double)";
+      "OHOS::Ace::ButtonComponent::SetClickFunction(std::__h::function<void ()>&&)";
+      "OHOS::Ace::ButtonComponent::SetClickedEventId(OHOS::Ace::EventMarker const&)";
+      "OHOS::Ace::Framework::ViewStackProcessor::GetFlexItemComponent()";
+      "OHOS::Ace::RenderFlex::Create()";
+      "OHOS::Ace::RenderFlexItem::Create()";
+      "OHOS::Ace::RenderGestureListener::Create()";
+      "OHOS::Ace::StackElement::PushComponent(OHOS::Ace::RefPtr<OHOS::Ace::Component> const&, bool)";
+      "OHOS::Ace::AlignComponent::AlignComponent(std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::Component>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::Component>>> const&, OHOS::Ace::Alignment const&)";
+      "OHOS::Ace::ButtonComponent::ButtonComponent(std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::Component>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::Component>>> const&)";
+      "OHOS::Ace::MultiModalScene::SubscribeVoiceEvent(OHOS::Ace::VoiceEvent const&, std::__h::function<void (OHOS::Ace::AceMultimodalEvent const&)> const&)";
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
@@ -383,6 +410,10 @@
       virtual?thunk?to?OHOS::Ace::PluginFrontend::~PluginFrontend*;
       virtual?thunk?to?OHOS::Ace::Component::~Component*;
 
+      vtable?for?OHOS::Ace::ImageComponent;
+      vtable?for?OHOS::Ace::PaddingComponent;
+      vtable?for?OHOS::Ace::FlexElement;
+      vtable?for?OHOS::Ace::DisplayComponent;
       vtable?for?OHOS::Ace::AceApplicationInfo;
       vtable?for?OHOS::Ace::Animator;
       vtable?for?OHOS::Ace::BaseId;
@@ -430,7 +461,17 @@
       vtable?for?OHOS::Ace::GaugeModel;
       vtable?for?OHOS::Ace::Framework::GaugeModelImpl;
       vtable?for?OHOS::Ace::NG::TextLayoutProperty;
+      vtable?for?OHOS::Ace::Player;
+      vtable?for?OHOS::Ace::Resource;
+      vtable?for?OHOS::Ace::Texture;
 
+      VTT?for?OHOS::Ace::Player;
+      VTT?for?OHOS::Ace::Texture;
+      VTT?for?OHOS::Ace::Resource;
+      VTT?for?OHOS::Ace::FlexElement;
+      VTT?for?OHOS::Ace::ImageComponent;
+      VTT?for?OHOS::Ace::PaddingComponent;
+      VTT?for?OHOS::Ace::DisplayComponent;
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;
       VTT?for?OHOS::Ace::Framework::MediaQueryInfo;
@@ -598,6 +639,8 @@
       "OHOS::Ace::Singleton<OHOS::Ace::ColorInverter>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::DumpLog>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void ()>>::GetInstance()";
+      "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)>>::GetInstance()";
+      "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventIdManager>::GetInstance()";
 
       construction?vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm-in-OHOS::Ace::NG::MovingPhotoLayoutAlgorithm;
       construction?vtable?for?OHOS::Ace::NG::EventHub-in-OHOS::Ace::NG::MovingPhotoEventHub;
@@ -612,6 +655,7 @@
 
       non-virtual?thunk?to?OHOS::Ace::NG::UINode::*;
       non-virtual?thunk?to?OHOS::Ace::NG::FrameNode::*;
+      non-virtual?thunk?to?OHOS::Ace::FlexElement::*;
 
       virtual?thunk?to?OHOS::Ace::NG::UINode::*;
       virtual?thunk?to?OHOS::Ace::NG::FrameNode::*;
@@ -656,6 +700,8 @@
       VTT?for?OHOS::Ace::NG::LayoutProperty;
       VTT?for?OHOS::Ace::NG::LongPressRecognizer;
       VTT?for?OHOS::Ace::NG::TouchEventActuator;
+      VTT?for?OHOS::Ace::BoxComponent;
+      VTT?for?OHOS::Ace::FocusNode;
 
       OHOS::Ace::Component::*;
       OHOS::Ace::SoleChildElement::*;

@@ -163,7 +163,7 @@ public:
 
     void ClearFocusState() override;
 
-    const std::shared_ptr<Rosen::RSNode>& GetRSNode();
+    ACE_FORCE_EXPORT const std::shared_ptr<Rosen::RSNode>& GetRSNode();
 
     void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode);
 

@@ -518,7 +518,8 @@ inline GradientDirection StrToGradientDirection(const std::string& direction)
 
 std::string CurveIntToString(int curve);
 
-bool ParseBackgroundImagePosition(const std::string& value, BackgroundImagePosition& backgroundImagePosition);
+ACE_FORCE_EXPORT bool ParseBackgroundImagePosition(
+    const std::string& value, BackgroundImagePosition& backgroundImagePosition);
 
 bool ParseBackgroundImageSize(const std::string& value, BackgroundImageSize& backgroundImageSize);
 

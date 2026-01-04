@@ -131,7 +131,6 @@ template("bridge_common") {
         "dom/dom_stepper_item.cpp",
         "dom/dom_tool_bar.cpp",
         "dom/dom_tool_bar_item.cpp",
-        "dom/dom_video.cpp",
       ]
     }
 

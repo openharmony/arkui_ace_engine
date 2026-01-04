@@ -41,7 +41,7 @@ class ACE_EXPORT ButtonComponent : public ComponentGroup, public LabelTarget, pu
     DECLARE_ACE_TYPE(ButtonComponent, ComponentGroup, LabelTarget, Measurable);
 
 public:
-    explicit ButtonComponent(const std::list<RefPtr<Component>>& children);
+    ACE_FORCE_EXPORT explicit ButtonComponent(const std::list<RefPtr<Component>>& children);
     ~ButtonComponent() override = default;
 
     RefPtr<RenderNode> CreateRenderNode() override;
@@ -96,10 +96,10 @@ public:
     void SetProgressFocusColor(const Color& color);
     void SetFocusAnimationColor(const Color& color);
     void SetBorderEdge(const BorderEdge& borderEdge);
-    void SetClickedEventId(const EventMarker& eventId);
+    ACE_FORCE_EXPORT void SetClickedEventId(const EventMarker& eventId);
     void SetKeyEnterEventId(const EventMarker& eventId);
     void SetRemoteMessageEventId(const EventMarker& eventId);
-    void SetClickFunction(std::function<void()>&& clickCallback);
+    ACE_FORCE_EXPORT void SetClickFunction(std::function<void()>&& clickCallback);
     void SetDeclaration(const RefPtr<ButtonDeclaration>& declaration);
     void ApplyTheme(const RefPtr<ButtonTheme>& theme);
 
