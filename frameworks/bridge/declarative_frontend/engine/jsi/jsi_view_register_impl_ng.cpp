@@ -547,6 +547,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
+    JSDrawingRenderingContext::JSBind(globalObj);
     JSDumpLog::JSBind(globalObj);
     JSDumpRegister::JSBind(globalObj);
     JSKeyboardAvoid::JSBind(globalObj);
