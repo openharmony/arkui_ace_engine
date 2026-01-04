@@ -1538,7 +1538,8 @@ void SetPasteMenuItemEvent(const RefPtr<FrameNode>& menuItem, const RefPtr<Frame
     menuItemPattern->SetPasteButton(pasteNode);
 }
 
-RefPtr<FrameNode> CreateRelativeContainer(const RefPtr<FrameNode>& menuItem, const RefPtr<FrameNode>& pasteNode)
+RefPtr<FrameNode> CreateRelativeContainer(const RefPtr<FrameNode>& menuItem, const RefPtr<FrameNode>& pasteNode,
+    bool isUsingMouse)
 {
     auto relativeContainer =
         FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -1546,8 +1547,8 @@ RefPtr<FrameNode> CreateRelativeContainer(const RefPtr<FrameNode>& menuItem, con
     CHECK_NULL_RETURN(relativeContainer, nullptr);
     auto relativeContainerLayoutProperty = relativeContainer->GetLayoutProperty();
     CHECK_NULL_RETURN(relativeContainerLayoutProperty, nullptr);
-    relativeContainerLayoutProperty->UpdateUserDefinedIdealSize(
-        { CalcLength(0.0, DimensionUnit::AUTO), CalcLength(0.0, DimensionUnit::AUTO) });
+    relativeContainerLayoutProperty->UpdateUserDefinedIdealSize({ isUsingMouse ? CalcLength(0.0, DimensionUnit::AUTO) :
+        CalcLength(EXTENSION_MENU_ITEM_DEFAULT_WIDTH), CalcLength(0.0, DimensionUnit::AUTO) });
     auto menuItemRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(menuItemRow, nullptr);
@@ -1658,7 +1659,7 @@ RefPtr<FrameNode> CreateMenuItemPaste(const std::string& content, const std::str
     SetupMenuItemChildrenAndFocus(menuItem, rowText, theme, param, cfg);
 
     SetPasteMenuItemEvent(menuItem, pasteNode, param, theme);
-    auto relativeContainer = CreateRelativeContainer(menuItem, pasteNode);
+    auto relativeContainer = CreateRelativeContainer(menuItem, pasteNode, isUsingMouse);
     CHECK_NULL_RETURN(relativeContainer, nullptr);
     CreateMenuItemPasteDivider(innerMenuNode, menuItem, isUsingMouse, index);
     menuItem->MarkModifyDone();
