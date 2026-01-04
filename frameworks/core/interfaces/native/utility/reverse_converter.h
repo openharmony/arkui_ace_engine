@@ -41,6 +41,7 @@ namespace OHOS::Ace {
 class CheckboxGroupResult;
 class DatePickerChangeEvent;
 class DragEvent;
+class DragSpringLoadingContext;
 class ItemDragInfo;
 class LoadImageFailEvent;
 class LoadImageSuccessEvent;
@@ -303,6 +304,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src);
     void AssignArkValue(Ark_DragBehavior& dst, const DragBehavior& src);
     void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>& info);
+    void AssignArkValue(
+        Ark_dragController_SpringLoadingContext& dst, const RefPtr<OHOS::Ace::DragSpringLoadingContext>& src);
     void AssignArkValue(Ark_Edge& dst, const ScrollEdge& src);
     void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
     void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src);

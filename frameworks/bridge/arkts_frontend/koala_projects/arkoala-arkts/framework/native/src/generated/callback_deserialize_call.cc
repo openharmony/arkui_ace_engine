@@ -3356,6 +3356,24 @@ void deserializeAndCallSyncCallback_SpringBackAction_Void(Ark_VMContext vmContex
         SpringBackAction_serializer::read(thisDeserializer));
     callSyncMethod(vmContext, resourceId, value0);
 }
+void deserializeAndCallCallback_SpringLoadingContext_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_dragController_SpringLoadingContext value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_SpringLoadingContext_Void))));
+    thisDeserializer.readPointer();
+    Ark_dragController_SpringLoadingContext value0 = static_cast<Ark_dragController_SpringLoadingContext>(dragController_SpringLoadingContext_serializer::read(thisDeserializer));
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_SpringLoadingContext_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_dragController_SpringLoadingContext value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_SpringLoadingContext_Void))));
+    Ark_dragController_SpringLoadingContext value0 = static_cast<Ark_dragController_SpringLoadingContext>(dragController_SpringLoadingContext_serializer::read(thisDeserializer));
+    callSyncMethod(vmContext, resourceId, value0);
+}
 void deserializeAndCallCallback_StateStylesChange(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -7795,6 +7813,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_Callback_Size_Void: return deserializeAndCallCallback_Size_Void(thisArray, thisLength);
         case Kind_Callback_SizeResult_Void: return deserializeAndCallCallback_SizeResult_Void(thisArray, thisLength);
         case Kind_Callback_SpringBackAction_Void: return deserializeAndCallCallback_SpringBackAction_Void(thisArray, thisLength);
+        case Kind_Callback_SpringLoadingContext_Void: return deserializeAndCallCallback_SpringLoadingContext_Void(thisArray, thisLength);
         case Kind_Callback_StateStylesChange: return deserializeAndCallCallback_StateStylesChange(thisArray, thisLength);
         case Kind_Callback_String_PasteEvent_Void: return deserializeAndCallCallback_String_PasteEvent_Void(thisArray, thisLength);
         case Kind_Callback_String_SurfaceRect_Void: return deserializeAndCallCallback_String_SurfaceRect_Void(thisArray, thisLength);
@@ -8144,6 +8163,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Callback_Size_Void: return deserializeAndCallSyncCallback_Size_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_SizeResult_Void: return deserializeAndCallSyncCallback_SizeResult_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_SpringBackAction_Void: return deserializeAndCallSyncCallback_SpringBackAction_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_SpringLoadingContext_Void: return deserializeAndCallSyncCallback_SpringLoadingContext_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_StateStylesChange: return deserializeAndCallSyncCallback_StateStylesChange(vmContext, thisArray, thisLength);
         case Kind_Callback_String_PasteEvent_Void: return deserializeAndCallSyncCallback_String_PasteEvent_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_String_SurfaceRect_Void: return deserializeAndCallSyncCallback_String_SurfaceRect_Void(vmContext, thisArray, thisLength);

@@ -364,6 +364,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/framework/ohos.arkui.ArcList.ets",
   "arkui-preprocessed/arkui/framework/ohos.arkui.ArcScrollBar.ets",
   "arkui-preprocessed/arkui/framework/ohos.arkui.UIContext.ets",
+  "arkui-preprocessed/arkui/framework/ohos.arkui.dragController.ets",
   "arkui-preprocessed/arkui/framework/ohos.arkui.drawableDescriptor.ets",
   "arkui-preprocessed/arkui/framework/ohos.arkui.observer.ets",
   "arkui-preprocessed/arkui/framework/ohos.arkui.shape.ets",

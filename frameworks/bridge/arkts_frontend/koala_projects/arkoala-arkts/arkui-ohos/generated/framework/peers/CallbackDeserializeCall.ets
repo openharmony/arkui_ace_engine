@@ -34,6 +34,7 @@ import { NavDestinationContext_serializer, NavDestinationTransition_serializer, 
 import { NavigationTransitionProxy_serializer, NavigationAnimatedTransition_serializer, PopInfo_serializer, NavContentInfo_serializer, NavigationMode, NavigationTitleMode, NavigationTransitionProxy, NavigationAnimatedTransition, PopInfo, InterceptionModeCallback, InterceptionShowCallback, NavBar, NavigationOperation, NavContentInfo, UpdateTransitionCallback } from "./../../component/navigation"
 import { OnScrollFrameBeginHandlerResult_serializer, OffsetResult_serializer, OnScrollFrameBeginHandlerResult, OffsetResult, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnDidZoomCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback } from "./../../component/scroll"
 import { TabContentAnimatedTransition_serializer, TabContentTransitionProxy_serializer, TabsAnimationEvent_serializer, TabContentAnimatedTransition, TabContentTransitionProxy, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentDidScrollCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../../component/tabs"
+import { dragController_SpringLoadingContext_serializer } from "./../ohos.arkui.dragController"
 import { SurfaceRect_serializer, NativeXComponentPointer, SurfaceRect } from "./../../component/xcomponent"
 import { SwiperContentTransitionProxy_serializer, SwiperContentWillScrollResult_serializer, SwiperAnimationEvent_serializer, SwiperContentTransitionProxy, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult, OnSwiperAnimationEndCallback, SwiperAnimationEvent, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback } from "./../../component/swiper"
 import { Resource_serializer } from "./../resource"
@@ -72,6 +73,7 @@ import { HitTestMode, ResponseType, Edge, ScrollSource } from "./../../component
 import { MarqueeState } from "./../../component/text"
 import { CustomBuilder, CustomBuilderT, PageMapBuilder } from "./../../component/builder"
 import { RefreshStatus } from "./../../component/refresh"
+import { dragController } from "@ohos.arkui.dragController"
 import { SwipeActionState } from "./../../component/listItem"
 import { Resource } from "global.resource"
 import { AsyncCallback, ErrorCallback, BusinessError } from "@ohos.base"
@@ -1645,6 +1647,12 @@ export function deserializeAndCallCallback_SpringBackAction_Void(thisDeserialize
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: SpringBackAction) => void))
     let value0 : SpringBackAction = (SpringBackAction_serializer.read(thisDeserializer) as SpringBackAction)
+    _call(value0)
+}
+export function deserializeAndCallCallback_SpringLoadingContext_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: dragController.SpringLoadingContext) => void))
+    let value0 : dragController.SpringLoadingContext = (dragController_SpringLoadingContext_serializer.read(thisDeserializer) as dragController.SpringLoadingContext)
     _call(value0)
 }
 export function deserializeAndCallCallback_StateStylesChange(thisDeserializer: DeserializerBase): void {
@@ -3977,6 +3985,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_Size_Void: return deserializeAndCallCallback_Size_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_SizeResult_Void: return deserializeAndCallCallback_SizeResult_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_SpringBackAction_Void: return deserializeAndCallCallback_SpringBackAction_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_SpringLoadingContext_Void: return deserializeAndCallCallback_SpringLoadingContext_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_StateStylesChange: return deserializeAndCallCallback_StateStylesChange(thisDeserializer);
         case CallbackKind.Kind_Callback_String_PasteEvent_Void: return deserializeAndCallCallback_String_PasteEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_String_SurfaceRect_Void: return deserializeAndCallCallback_String_SurfaceRect_Void(thisDeserializer);

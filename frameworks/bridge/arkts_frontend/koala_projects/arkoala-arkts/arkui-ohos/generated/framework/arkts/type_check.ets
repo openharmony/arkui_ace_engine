@@ -50,6 +50,7 @@ import { FocusBoxStyle, FocusPriority, KeyProcessingMode } from "./../../compone
 import { default as matrix4 } from "@ohos.matrix4"
 import { CustomBuilder, CustomBuilderT } from "./../../component/builder"
 import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
+import { dragController } from "@ohos.arkui.dragController"
 import { default as image } from "@ohos.multimedia.image"
 import { ComponentContent, ComponentContentBase } from "arkui.ComponentContent"
 import { StyledString, GestureStyle, GestureStyleInterface, LeadingMarginSpan, LeadingMarginSpanDrawInfo, LetterSpacingStyle, LineHeightStyle, StyleOptions, MutableStyledString, ImageAttachment, CustomSpan, SpanStyle, StyledStringKey, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback, UrlStyle, BaselineOffsetStyle, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, TextShadowStyle, DecorationStyle, DecorationStyleInterface, TextStyle, TextStyleInterface, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInterface, BackgroundColorStyle, ColorFilterType, AttachmentType, ImageAttachmentInterface, ResourceImageAttachmentOptions, StyledStringValue } from "./../../component/styledString"
@@ -968,6 +969,18 @@ export class TypeChecker {
     }
     static isDragBehavior(value: Object | string | number | undefined): boolean {
         return value instanceof DragBehavior
+    }
+    static isdragController_DragSpringLoadingConfiguration(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+        return value instanceof dragController.DragSpringLoadingConfiguration
+    }
+    static isdragController_DragSpringLoadingState(value: Object | string | number | undefined): boolean {
+        return value instanceof dragController.DragSpringLoadingState
+    }
+    static isdragController_SpringLoadingContext(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+        return value instanceof dragController.SpringLoadingContext
+    }
+    static isdragController_SpringLoadingDragInfos(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof dragController.SpringLoadingDragInfos
     }
     static isDragEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof DragEvent
@@ -4307,6 +4320,12 @@ export class TypeChecker {
     }
     static DragBehavior_FromNumeric(ordinal: int32): DragBehavior {
         return DragBehavior.fromValue(ordinal)
+    }
+    static dragController_DragSpringLoadingState_ToNumeric(value: dragController.DragSpringLoadingState): int32 {
+        return value.valueOf()
+    }
+    static dragController_DragSpringLoadingState_FromNumeric(ordinal: int32): dragController.DragSpringLoadingState {
+        return dragController.DragSpringLoadingState.fromValue(ordinal)
     }
     static DraggingSizeChangeEffect_ToNumeric(value: DraggingSizeChangeEffect): int32 {
         return value.valueOf()

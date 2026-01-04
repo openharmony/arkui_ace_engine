@@ -2338,6 +2338,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                         const Opt_DropOptions* dropOptions)
     {
     }
+    void SetOnDragSpringLoadingImpl(Ark_NativePointer node,
+                                const Opt_Callback_SpringLoadingContext_Void* callback_,
+                                const Opt_dragController_DragSpringLoadingConfiguration* configuration)
+    {
+    }
     void SetDragPreview1Impl(Ark_NativePointer node,
                              const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
                              const Opt_PreviewConfiguration* config)
@@ -8961,6 +8966,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetSharedTransitionImpl,
             CommonMethodModifier::SetChainModeImpl,
             CommonMethodModifier::SetOnDrop1Impl,
+            CommonMethodModifier::SetOnDragSpringLoadingImpl,
             CommonMethodModifier::SetDragPreview1Impl,
             CommonMethodModifier::SetOverlayImpl,
             CommonMethodModifier::SetBlendModeImpl,

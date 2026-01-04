@@ -47,6 +47,15 @@ void ANIDragActionEnableDropDisallowedBadge(
     [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, bool enabled);
 void ANICleanDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragActionPtr);
 void ANICleanDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragPreviewPtr);
+void ANICleanSpringLoadingContext([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
+ani_object ExtractorFromPtrToDragSpringLoadingContext(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer);
+ani_enum_item SpringLoadingContextGetState(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer);
+ani_int SpringLoadingContextGetCurrentNotifySequence(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer);
+ani_object SpringLoadingContextGetDragInfos(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer);
+ani_object SpringLoadingContextGetCurrentConfig(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer);
+void SpringLoadingContextAbort(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer);
+void SpringLoadingContextUpdateConfiguration(ani_env* env, [[maybe_unused]] ani_object object,
+    ani_long pointer, ani_object config);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_DRAG_CONTROLLER_MODULE_H

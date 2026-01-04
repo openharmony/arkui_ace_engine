@@ -36,6 +36,7 @@ import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescript
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer } from "./component/gesture"
 import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
+import { dragController } from "@ohos.arkui.dragController"
 import { ComponentContent } from "arkui.ComponentContent"
 import { StyledString } from "./component/styledString"
 export class CommonMethodModifier implements CommonMethod {
@@ -262,6 +263,8 @@ export class CommonMethodModifier implements CommonMethod {
     _chainMode_0_1value?: ChainStyle | undefined
     _onDrop_1_0value?: OnDragEventCallback | undefined
     _onDrop_1_1value?: DropOptions | undefined
+    _onDragSpringLoading_0_0value?: ((value0: dragController.SpringLoadingContext) => void) | null | undefined
+    _onDragSpringLoading_0_1value?: dragController.DragSpringLoadingConfiguration | undefined
     _dragPreview_1_0value?: CustomBuilder | DragItemInfo | string | undefined
     _dragPreview_1_1value?: PreviewConfiguration | undefined
     _dragPreviewOptions_0_0value?: DragPreviewOptions | undefined
@@ -4090,6 +4093,24 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[208] != 0)
+        {
+            switch (flagArray[208] as int32) {
+                case 1: {
+                    peer.setOnDragSpringLoadingAttribute((this._onDragSpringLoading_0_0value as ((value0: dragController.SpringLoadingContext) => void) | null | undefined), (this._onDragSpringLoading_0_1value as dragController.DragSpringLoadingConfiguration | undefined));
+                    flagArray[208] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[208] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[208] = 0;
+                    peer.setOnDragSpringLoadingAttribute((undefined as ((value0: dragController.SpringLoadingContext) => void) | null | undefined), (undefined as dragController.DragSpringLoadingConfiguration | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: CommonMethodModifier): void {
         this._state = modifier._state;
@@ -6829,6 +6850,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[208] != 0)
+        {
+            switch (flagArray[208] as int32) {
+                case 1:
+                case 3: {
+                    this.onDragSpringLoading(modifier._onDragSpringLoading_0_0value, modifier._onDragSpringLoading_0_1value);
+                    break;
+                }
+                default: {
+                    this.onDragSpringLoading((undefined as ((value0: dragController.SpringLoadingContext) => void) | null | undefined), (undefined as dragController.DragSpringLoadingConfiguration | undefined));
+                }
+            }
+        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true))
@@ -9436,6 +9470,19 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._flagArray[207] = 3
+        }
+        return this
+    }
+    onDragSpringLoading(callback_: ((value0: dragController.SpringLoadingContext) => void) | null | undefined, configuration?: dragController.DragSpringLoadingConfiguration): this {
+        if (((this._flagArray[208]) == (0)) || (true) || (true))
+        {
+            this._flagArray[208] = 1
+            this._onDragSpringLoading_0_0value = callback_
+            this._onDragSpringLoading_0_1value = configuration
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[208] = 3
         }
         return this
     }
