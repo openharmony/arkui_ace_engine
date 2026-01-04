@@ -1839,6 +1839,10 @@ BindSheetDismissReason Convert(const Ark_DismissReason& src)
             return BindSheetDismissReason::TOUCH_OUTSIDE;
         case Ark_DismissReason::ARK_DISMISS_REASON_CLOSE_BUTTON:
             return BindSheetDismissReason::CLOSE_BUTTON;
+        case Ark_DismissReason::ARK_DISMISS_REASON_SLIDE_DOWN:
+            return BindSheetDismissReason::SLIDE_DOWN;
+        case Ark_DismissReason::ARK_DISMISS_REASON_SLIDE:
+            return BindSheetDismissReason::SLIDE;
         default:
             LOGE("Unexpected enum value in Ark_DismissReason: %{public}d", src);
             break;

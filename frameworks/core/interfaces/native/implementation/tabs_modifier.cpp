@@ -640,6 +640,11 @@ void SetBarHeight1Impl(Ark_NativePointer node, const Opt_Length* height, const O
     TabsModelStatic::SetTabBarHeight(frameNode, valueOpt);
     auto noMinHeightLimitOpt = Converter::OptConvert<bool>(*noMinHeightLimit);
     TabsModelStatic::SetNoMinHeightLimit(frameNode, *noMinHeightLimitOpt);
+    bool adaptiveHeight = false;
+    if (noMinHeightLimitOpt && valueOpt->Unit() == DimensionUnit::AUTO) {
+        adaptiveHeight = true;
+    }
+    TabsModelStatic::SetBarAdaptiveHeight(frameNode, adaptiveHeight);
 }
 void SetBarBackgroundBlurStyle1Impl(Ark_NativePointer node,
                                     const Opt_BlurStyle* style,

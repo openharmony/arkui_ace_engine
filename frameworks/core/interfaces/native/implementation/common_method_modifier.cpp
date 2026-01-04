@@ -1609,9 +1609,15 @@ template<>
 RotateAngleOpt Convert(const Ark_RotateAngleOptions& src)
 {
     RotateAngleOpt options;
-    options.vec4f.emplace_back(OptConvert<float>(src.angleX));
-    options.vec4f.emplace_back(OptConvert<float>(src.angleY));
-    options.vec4f.emplace_back(OptConvert<float>(src.angleZ));
+    std::optional<float> angleX = 0.0f;
+    std::optional<float> angleY = 0.0f;
+    std::optional<float> angleZ = 0.0f;
+    ConvertAngleWithDefault(src.angleX, angleX, 0.0f);
+    ConvertAngleWithDefault(src.angleY, angleY, 0.0f);
+    ConvertAngleWithDefault(src.angleZ, angleZ, 0.0f);
+    options.vec4f.emplace_back(angleX);
+    options.vec4f.emplace_back(angleY);
+    options.vec4f.emplace_back(angleZ);
     options.vec4f.emplace_back(OptConvert<float>(src.perspective));
 
     auto centerX =  OptConvert<Dimension>(src.centerX);
