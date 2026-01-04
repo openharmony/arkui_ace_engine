@@ -213,6 +213,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             GetStateMgmtInfoInner(data, reply, option);
             break;
         }
+        case GET_WEBINFO_BY_REQUEST: {
+            GetWebInfoByRequestInner(data, reply, option);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -575,6 +579,16 @@ int32_t UiContentStub::GetStateMgmtInfoInner(MessageParcel& data, MessageParcel&
     std::string propertyName = data.ReadString();
     std::string jsonPath = data.ReadString();
     reply.WriteInt32(GetStateMgmtInfo(componentName, propertyName, jsonPath, nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetWebInfoByRequestInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t processId = data.ReadInt32();
+    UiSessionManager::GetInstance()->SaveProcessId("GetWebInfoByRequest", processId);
+    int32_t webId = data.ReadInt32();
+    std::string request = data.ReadString();
+    reply.WriteInt32(GetWebInfoByRequest(webId, request, nullptr));
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

@@ -5898,6 +5898,25 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     RegisterHighlightSpecifiedContentCallback(taskExecutor);
     RegisterSelectTextCallback(taskExecutor);
     SaveGetStateMgmtInfoFunction(taskExecutor);
+    SaveGetWebInfoByRequestFunction(taskExecutor);
+}
+
+void UIContentImpl::SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto&& getWebInfoCallback = [weakTaskExecutor = taskExecutor](int32_t webId, const std::string& request) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [webId, request]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                auto uiTranslateManager = pipeline->GetUiTranslateManagerImpl();
+                uint32_t windowId = pipeline->GetWindowId();
+                uiTranslateManager->GetWebInfoByRequest(windowId, webId, request);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionWebInfoByRequest");
+    };
+    UiSessionManager::GetInstance()->SaveGetWebInfoByRequestFunction(getWebInfoCallback);
 }
 
 void UIContentImpl::RegisterGetSpecifiedContentOffsetsCallback(const WeakPtr<TaskExecutor>& taskExecutor)
