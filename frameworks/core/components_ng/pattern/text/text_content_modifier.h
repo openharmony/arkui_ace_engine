@@ -183,6 +183,7 @@ private:
     bool DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas& canvas, float x, float y, const RectF& rect);
     void PaintCustomSpan(DrawingContext& drawingContext);
     void DrawTextRacing(DrawingContext& drawingContext, const FadeoutInfo& info, RefPtr<ParagraphManager> pManager);
+    void RemoveWhitespaceCharacters(std::u16string& reportParagraph);
     void ReportFaultEvent(RSCanvas& canvas, const RefPtr<ParagraphManager>& pManager,
         const RefPtr<TextPattern>& textPattern, const std::u16string& paragraphContent);
     void DrawText(RSCanvas& canvas, const RefPtr<ParagraphManager>& pManager, const RefPtr<TextPattern>& textPattern);
