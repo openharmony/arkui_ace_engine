@@ -3930,7 +3930,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     auto taskId = viewportConfigMgr_->MakeTaskId();
     auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_,
                     instanceId = instanceId_, info, isDynamicRender = isDynamicRender_, animationOpt, avoidAreas,
-                    taskId, viewportConfigMgr = viewportConfigMgr_]() {
+                    taskId, weak = WeakPtr(viewportConfigMgr_)]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         auto avoidAreaMap = UpdateSafeArea(pipelineContext, avoidAreas);
@@ -3991,7 +3991,10 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         SubwindowManager::GetInstance()->OnWindowSizeChanged(container->GetInstanceId(),
             Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
             static_cast<WindowSizeChangeReason>(reason));
-        viewportConfigMgr->UpdateViewConfigTaskDone(taskId);
+        auto viewportConfigMgr = weak.Upgrade();
+        if (viewportConfigMgr) {
+            viewportConfigMgr->UpdateViewConfigTaskDone(taskId);
+        }
         if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
             TAG_LOGD(ACE_KEYBOARD, "KeyboardAvoid in the UpdateViewportConfig task");
             KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
