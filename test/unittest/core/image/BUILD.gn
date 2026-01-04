@@ -336,6 +336,7 @@ ohos_unittest("image_loader_test") {
     "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_file_cache.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/unittest/core/rosen/mock_internal_resource.cpp",
     "image_loader_test.cpp",
   ]
