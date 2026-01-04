@@ -12,11 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_RATING_RATING_COMPOSED_ELEMENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_RATING_RATING_COMPOSED_ELEMENT_H
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_RATING_COMPOSED_ELEMENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_RATING_COMPOSED_ELEMENT_H
-
-#include "core/components/rating/render_rating.h"
+#include "compatible/components/rating/render_rating.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -44,4 +43,4 @@ private:
 
 } // namespace OHOS::Ace::V2
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_Rating_COMPOSED_ELEMENT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_RATING_Rating_COMPOSED_ELEMENT_H

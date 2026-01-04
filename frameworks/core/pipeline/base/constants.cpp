@@ -524,13 +524,8 @@ const char RATING_ON_CHANGE[] = "onChange";
 const int32_t DEFAULT_RATING_STAR_NUM = 5;
 const int32_t DEFAULT_INDICATOR_VALUE = 0;
 const int32_t DEFAULT_NO_INDICATOR_VALUE = 0;
-const uint32_t RATING_FOCUS_BOARD_COLOR = 0xE6FFFFFF;
 const double DEFAULT_RATING_SCORE = 0.0;
-const double DEFAULT_RATING_WIDTH = -1.0;
-const double DEFAULT_RATING_HEIGHT = -1.0;
 const double DEFAULT_RATING_STEP_SIZE = 0.5;
-const double DEFAULT_RATING_HORIZONTAL_PADDING = 0.0;
-const double DEFAULT_RATING_VERTICAL_PADDING = 0.0;
 
 // loading progress constants
 const char LOADING_PROGRESS_NAME[] = "LoadingProgress";

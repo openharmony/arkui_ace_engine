@@ -18,14 +18,6 @@
 namespace OHOS::Ace {
 RefPtr<RenderNode> RenderRating::Create()
 {
-    if (SystemProperties::GetRosenBackendEnabled()) {
-#ifdef ENABLE_ROSEN_BACKEND
-        return AceType::MakeRefPtr<RosenRenderRating>();
-#else
-        return nullptr;
-#endif
-    } else {
-        return nullptr;
-    }
+    return AceType::MakeRefPtr<RosenRenderRating>();
 }
 } // namespace OHOS::Ace

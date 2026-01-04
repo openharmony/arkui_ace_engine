@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components/rating/rosen_render_rating.h"
+#include "compatible/components/rating/rosen_render_rating.h"
 
 #include "core/components_ng/render/drawing.h"
 
@@ -21,6 +21,9 @@
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
+namespace {
+const uint32_t RATING_FOCUS_BOARD_COLOR = 0xE6FFFFFF;
+} // namespace
 
 void RosenRenderRating::Paint(RenderContext& context, const Offset& offset)
 {

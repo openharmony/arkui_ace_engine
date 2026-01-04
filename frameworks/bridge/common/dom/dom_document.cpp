@@ -74,7 +74,6 @@
 #include "frameworks/bridge/common/dom/dom_picker_dialog.h"
 #include "frameworks/bridge/common/dom/dom_piece.h"
 #include "frameworks/bridge/common/dom/dom_popup.h"
-#include "frameworks/bridge/common/dom/dom_rating.h"
 #include "frameworks/bridge/common/dom/dom_select.h"
 #include "frameworks/bridge/common/dom/dom_tab_bar.h"
 #include "frameworks/bridge/common/dom/dom_tab_content.h"
@@ -170,9 +169,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_POPUP, &DOMNodeCreator<DOMPopup> },
 #endif
         { DOM_NODE_TAG_PROGRESS, &DOMNodeCreator<DOMProgress> },
-#ifndef WEARABLE_PRODUCT
-        { DOM_NODE_TAG_RATING, &DOMNodeCreator<DOMRating> },
-#endif
         { DOM_NODE_TAG_RECT, &DOMNodeCreator<DOMSvgRect> },
         { DOM_NODE_TAG_REFRESH, &DOMNodeCreator<DOMRefresh> },
 #ifdef WEB_SUPPORTED

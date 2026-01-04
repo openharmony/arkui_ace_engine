@@ -16,6 +16,7 @@
 #include "core/components_v2/inspector/inspector_composed_component.h"
 
 #include "compatible/components/component_loader.h"
+
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_v2/inspector/actionsheetdialog_composed_element.h"
 #include "core/components_v2/inspector/alertdialog_composed_element.h"
@@ -54,7 +55,6 @@
 #include "core/components_v2/inspector/picker_text_dialog_composed_element.h"
 #include "core/components_v2/inspector/progress_composed_element.h"
 #include "core/components_v2/inspector/radio_composed_element.h"
-#include "core/components_v2/inspector/rating_composed_element.h"
 #include "core/components_v2/inspector/refresh_composed_element.h"
 #include "core/components_v2/inspector/relative_container_composed_element.h"
 #include "core/components_v2/inspector/row_composed_element.h"
@@ -168,7 +168,8 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { INDEXER_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::IndexerComposedElement>(id); } },
     { SLIDER_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SliderComposedElement>(id); } },
-    { RATING_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::RatingComposedElement>(id); } },
+    { RATING_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_RATING, id); } },
     { PROGRESS_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ProgressComposedElement>(id); } },
     { DATA_PANEL_COMPONENT_TAG,
@@ -352,7 +353,7 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { ARC_LIST_COMPONENT_TAG, ARC_LIST_ETS_TAG },
     { ARC_LIST_ITEM_COMPONENT_TAG, ARC_LIST_ITEM_ETS_TAG },
     { ARC_SCROLL_BAR_COMPONENT_TAG, ARC_SCROLL_BAR_ETS_TAG },
-	{ ARC_INDEXER_COMPONENT_TAG, ARC_INDEXER_ETS_TAG },
+    { ARC_INDEXER_COMPONENT_TAG, ARC_INDEXER_ETS_TAG },
 };
 
 thread_local int32_t InspectorComposedComponent::composedElementId_ = 1;

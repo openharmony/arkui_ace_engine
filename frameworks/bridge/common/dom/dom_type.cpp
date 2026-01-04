@@ -740,16 +740,6 @@ const char DOM_REFRESH_PROGRESS_COLOR[] = "progressColor";
 const char DOM_REFRESH_EVENT_PULL_DOWN[] = "pulldown";
 const char DOM_REFRESH_TIME_OFFSET[] = "timeoffset";
 
-// rating attribute and style constants
-const char DOM_STAR_NUM[] = "numstars";
-const char DOM_RATING_SCORE[] = "rating";
-const char DOM_RATING_STEP[] = "stepsize";
-const char DOM_RATING_INDICATOR[] = "indicator";
-const char DOM_BACKGROUND_SRC[] = "starBackground";
-const char DOM_FOREGROUND_SRC[] = "starForeground";
-const char DOM_SECONDARY_SRC[] = "starSecondary";
-const char DOM_RTL_FLIP[] = "rtlFlip";
-
 // marquee attribute and style constants
 const char DOM_MARQUEE_LOOP[] = "loop";
 const char DOM_MARQUEE_SCROLL_AMOUNT[] = "scrollamount";

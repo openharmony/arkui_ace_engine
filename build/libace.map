@@ -403,6 +403,11 @@
       "OHOS::Ace::AlignComponent::AlignComponent(std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::Component>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::Component>>> const&, OHOS::Ace::Alignment const&)";
       "OHOS::Ace::ButtonComponent::ButtonComponent(std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::Component>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::Component>>> const&)";
       "OHOS::Ace::MultiModalScene::SubscribeVoiceEvent(OHOS::Ace::VoiceEvent const&, std::__h::function<void (OHOS::Ace::AceMultimodalEvent const&)> const&)";
+      OHOS::Ace::RenderFocusAnimation::*;
+      OHOS::Ace::AccessibilityNode::*;
+      OHOS::Ace::DragRecognizer::*;
+      OHOS::Ace::RosenUniversalPainter::*;
+      OHOS::Ace::GestureRecognizer::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
@@ -618,6 +623,9 @@
       *OHOS::Ace::NG::Converter::AssignCast*;
       *OHOS::Ace::NG::Converter::AssignArkValue*;
       *OHOS::Ace::NG::Converter::OptConvertFromArkNumStrRes*;
+      OHOS::Ace::TouchEventTarget::*;
+      OHOS::Ace::ImageComponent::*;
+      "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>)>>::GetInstance()";
 
       OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
       "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";
@@ -628,6 +636,7 @@
       OHOS::Ace::NG::ComponentSnapshot::*;
       virtual?thunk?to?OHOS::Ace::Kit::ContentModifier::*;
       vtable?for?OHOS::Ace::UiMaterial;
+      vtable?for?OHOS::Ace::RawRecognizer;
       VTT?for?OHOS::Ace::UiMaterial;
 
       "OHOS::Ace::ElementRegister::GetInstance()";
@@ -692,6 +701,7 @@
       vtable?for?OHOS::Ace::LayeredDrawableDescriptor;
       vtable?for?OHOS::Ace::PixelMapDrawableDescriptor;
       vtable?for?OHOS::Ace::AnimatedDrawableDescriptor;
+      vtable?for?OHOS::Ace::ImageComponent;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
@@ -702,6 +712,7 @@
       VTT?for?OHOS::Ace::NG::TouchEventActuator;
       VTT?for?OHOS::Ace::BoxComponent;
       VTT?for?OHOS::Ace::FocusNode;
+      VTT?for?OHOS::Ace::ImageComponent;
 
       OHOS::Ace::Component::*;
       OHOS::Ace::SoleChildElement::*;
@@ -733,6 +744,10 @@
       OHOS::Ace::DOM_CLICK;
       OHOS::Ace::DOM_CATCH_BUBBLE_CLICK;
       OHOS::Ace::ScreenSystemManager::GetInstance*;
+      OHOS::Ace::DOM_CHANGE;
+      OHOS::Ace::DEFAULT_RATING_STEP_SIZE;
+      OHOS::Ace::DEFAULT_RATING_SCORE;
+      OHOS::Ace::DEFAULT_RATING_STAR_NUM;
       virtual?thunk?to?OHOS::Ace::Framework::DOMNode::*;
       virtual?thunk?to?OHOS::Ace::RenderElement::*;
       virtual?thunk?to?OHOS::Ace::Element::*;
@@ -750,6 +765,8 @@
       non-virtual?thunk?to?OHOS::Ace::V2::InspectorComposedElement::*;
       non-virtual?thunk?to?OHOS::Ace::V2::ColumnComposedElement::ToJsonObject*;
       VTT?for?OHOS::Ace::NG::NavigationStack;
+      VTT?for?OHOS::Ace::RawRecognizer;
+      VTT?for?OHOS::Ace::DragRecognizer;
 
       OHOS::Ace::LinearColor::TRANSPARENT;
 

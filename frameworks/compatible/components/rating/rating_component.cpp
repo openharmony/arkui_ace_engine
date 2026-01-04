@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "core/components/rating/rating_component.h"
+#include "compatible/components/rating/rating_component.h"
 
-#include "core/components/rating/rating_element.h"
+#include "compatible/components/rating/rating_element.h"
 
 namespace OHOS::Ace {
 

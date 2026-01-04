@@ -13,12 +13,21 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/common/dom/dom_rating.h"
+#include "compatible/components/rating/dom_rating.h"
 
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
 
+const char DOM_STAR_NUM[] = "numstars";
+const char DOM_RATING_SCORE[] = "rating";
+const char DOM_RATING_STEP[] = "stepsize";
+const char DOM_RATING_INDICATOR[] = "indicator";
+const char DOM_BACKGROUND_SRC[] = "starBackground";
+const char DOM_FOREGROUND_SRC[] = "starForeground";
+const char DOM_SECONDARY_SRC[] = "starSecondary";
+const char DOM_RTL_FLIP[] = "rtlFlip";
+    
 DOMRating::DOMRating(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
     ratingChild_ = AceType::MakeRefPtr<RatingComponent>();

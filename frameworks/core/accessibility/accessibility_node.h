@@ -55,7 +55,7 @@ using NodeId = int32_t;
 constexpr int32_t DEFAULT_INDEX = -1;
 constexpr uint64_t DEFAULT_ACTIONS = std::numeric_limits<uint64_t>::max();
 
-class ACE_EXPORT AccessibilityNode : public AceType {
+class ACE_FORCE_EXPORT AccessibilityNode : public AceType {
     DECLARE_ACE_TYPE(AccessibilityNode, AceType);
 
 public:
