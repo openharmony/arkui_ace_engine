@@ -307,7 +307,7 @@ void MoonProgressModifier::RegisterVisibleChange()
     std::vector<double> ratioList = { 0.0 };
     auto node = maskNode_.Upgrade();
     CHECK_NULL_VOID(node);
-    pipeline->AddVisibleAreaChangeNode(node, ratioList, callback, false);
+    pipeline->AddVisibleAreaChangeNode(node, ratioList, callback, false, true);
     pipeline->AddWindowStateChangedCallback(node->GetId());
     hasVisibleChangeRegister_ = true;
 }
