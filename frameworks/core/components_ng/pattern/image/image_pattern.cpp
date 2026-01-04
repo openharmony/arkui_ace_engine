@@ -2299,7 +2299,7 @@ std::string ImagePattern::GetSrcTypeToString(SrcType srcType)
         { SrcType::MEMORY, "memory" }, { SrcType::BASE64, "base64" }, { SrcType::INTERNAL, "internal" },
         { SrcType::RESOURCE, "resource" }, { SrcType::DATA_ABILITY, "dataAbility" },
         { SrcType::DATA_ABILITY_DECODED, "dataAbilityDecoded" }, { SrcType::RESOURCE_ID, "resourceId" },
-        { SrcType::PIXMAP, "pixmap" }, { SrcType::ASTC, "astc" }, { SrcType::STREAM, "stream" } };
+        { SrcType::PIXMAP, "pixmap" }, { SrcType::ASTC, "astc" } };
 
     auto iter = typeMap.find(srcType);
     if (iter != typeMap.end()) {

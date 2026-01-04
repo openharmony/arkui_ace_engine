@@ -93,57 +93,6 @@ HWTEST_F(ImageLoaderTest, BuildImageData, TestSize.Level1)
 }
 
 /**
- * @tc.name: LoadImageData
- * @tc.desc: Test for LoadImageData
- * @tc.type: FUNC
- */
-HWTEST_F(ImageLoaderTest, LoadImageData, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create unique_ptr buffer.
-     */
-    auto bufferSize = 1;
-    std::unique_ptr<uint8_t[]> buffer = std::make_unique<uint8_t[]>(bufferSize);
-    for (size_t i = 0; i < bufferSize; ++i) {
-        buffer[i] = static_cast<uint8_t>(i);
-    }
-    /**
-     * @tc.steps: step2. Test get GetBufferSize = 1
-     */
-    ImageSourceInfo sourceInfo(std::move(buffer), bufferSize);
-    auto bufferSizeValue = sourceInfo.GetBufferSize();
-    EXPECT_EQ(bufferSizeValue, 1);
-    /**
-     * @tc.steps: step2. Test get GetBuffer != nullptr
-     */
-    auto bufferPtr = sourceInfo.GetBuffer();
-    EXPECT_NE(bufferPtr, nullptr);
-
-    NG::ImageLoadResultInfo loadResultInfo;
-    StreamImageLoader streamImageLoader;
-    /**
-     * @tc.steps: step3. Test get imageData == nullptr
-     */
-    auto imageData = streamImageLoader.LoadImageData(ImageSourceInfo(nullptr, 0), loadResultInfo, nullptr);
-    EXPECT_EQ(imageData, nullptr);
-    /**
-     * @tc.steps: step4. Test get imageData == nullptr
-     */
-    imageData = streamImageLoader.LoadImageData(ImageSourceInfo(nullptr, 1), loadResultInfo, nullptr);
-    EXPECT_EQ(imageData, nullptr);
-    /**
-     * @tc.steps: step5. Test get imageData == nullptr
-     */
-    imageData = streamImageLoader.LoadImageData(ImageSourceInfo(""), loadResultInfo, nullptr);
-    EXPECT_EQ(imageData, nullptr);
-    /**
-     * @tc.steps: step6. Test get imageData != nullptr
-     */
-    imageData = streamImageLoader.LoadImageData(sourceInfo, loadResultInfo, nullptr);
-    EXPECT_NE(imageData, nullptr);
-}
-
-/**
  * @tc.name: TestImageSourceInfoGetKey001
  * @tc.desc: Test ImageSourceInfo GetKey
  * @tc.type: FUNC
