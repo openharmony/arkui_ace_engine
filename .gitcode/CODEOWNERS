@@ -3651,6 +3651,7 @@ test/unittest/core/pattern/loading_progress/ @huawei_g_five
 test/unittest/core/pattern/marquee/ @huawei_g_five
 test/unittest/core/pattern/menu/ @arkuipopupwindow_all
 test/unittest/core/pattern/model/ @arkui_component3d
+test/unittest/core/pattern/movingphoto/ @arkuiadvancedcomponent
 test/unittest/core/pattern/navigation/ @arkui_navigation
 test/unittest/core/pattern/navigator/ @arkui_navigation
 test/unittest/core/pattern/navrouter/ @arkui_navigation
