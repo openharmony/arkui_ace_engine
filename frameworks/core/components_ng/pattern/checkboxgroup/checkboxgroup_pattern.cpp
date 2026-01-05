@@ -70,10 +70,24 @@ void CheckBoxGroupPattern::OnDetachFromFrameNodeImpl(FrameNode* frameNode)
     groupManager->RemoveCheckBoxGroup(group, frameNode->GetId());
 }
 
+bool CheckBoxGroupPattern::IsArkTSStatic()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->GetFrontendType() == FrontendType::ARK_TS
+ 	         || pipeline->GetFrontendType() == FrontendType::DYNAMIC_HYBRID_STATIC
+ 	         || pipeline->GetFrontendType() == FrontendType::STATIC_HYBRID_DYNAMIC;
+}
+
 void CheckBoxGroupPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     FireBuilder();
+    if (!IsArkTSStatic()) {
+        UpdateState();
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -809,10 +823,12 @@ void CheckBoxGroupPattern::OnAttachToMainTree()
 void CheckBoxGroupPattern::OnAttachToMainTreeImpl(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(host);
-    UpdateGroupManager();
+    if (IsArkTSStatic()) {
+        UpdateGroupManager();
+        UpdateState();
+    }
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
-    UpdateState();
     auto parent = host->GetParent();
     while (parent) {
         if (parent->GetTag() == V2::NAVDESTINATION_CONTENT_ETS_TAG) {

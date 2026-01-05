@@ -254,6 +254,7 @@ private:
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
     void UpdateGroupManager();
+    bool IsArkTSStatic();
     std::optional<CheckBoxGroupMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
     std::optional<std::string> preGroup_;
