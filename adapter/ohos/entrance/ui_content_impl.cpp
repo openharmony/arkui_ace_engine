@@ -5854,11 +5854,12 @@ void sendCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
 
 void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)
 {
+    const int32_t GET_INSPECTOR_TREE_TIMEOUT_TIME = 1500;
     // set get inspector tree function for ui session manager
     auto callback = [weakTaskExecutor = taskExecutor](bool onlyNeedVisible, ParamConfig config) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
+        taskExecutor->PostSyncTaskTimeout(
             [onlyNeedVisible, config]() {
                 auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
@@ -5868,8 +5869,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
                     pipeline->GetInspectorTree(false, config);
                 }
             },
-            TaskExecutor::TaskType::UI, "UiSessionGetInspectorTree",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            TaskExecutor::TaskType::UI, GET_INSPECTOR_TREE_TIMEOUT_TIME, "UiSessionGetInspectorTree");
     };
     UiSessionManager::GetInstance()->SaveInspectorTreeFunction(callback);
     auto webCallback = [weakTaskExecutor = taskExecutor](bool isRegister) {
