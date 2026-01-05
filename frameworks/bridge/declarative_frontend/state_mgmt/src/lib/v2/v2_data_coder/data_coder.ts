@@ -74,9 +74,14 @@ class DataCoder {
     }
 
     try {
-      const dst = { root: origTarget };
-      const src = { root: source };
-      this.restorePropValue(dst, 'root', src, 'root', { factory });
+      if (!nullOrUndef(source) && globalThis.isSendable(source)) {
+        // The root is Sendable; only properties are restored
+        this.restoreObject(origTarget, source, {});
+      } else {
+        const dst = { root: origTarget };
+        const src = { root: source };
+        this.restorePropValue(dst, 'root', src, 'root', { factory });
+      }
     } finally {
       this.visited_.clear();
     }
