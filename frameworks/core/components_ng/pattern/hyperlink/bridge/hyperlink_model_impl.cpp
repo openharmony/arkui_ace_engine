@@ -39,7 +39,9 @@ void HyperlinkModelImpl::Create(const std::string& address, const std::string& s
 void HyperlinkModelImpl::PopNew()
 {
     if (ViewStackModel::GetInstance()->IsPrebuilding()) {
-        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[HyperlinkModelImpl][pop]", &HyperlinkModelImpl::PopNew);
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd(
+            "[HyperlinkModelImpl][pop]", &HyperlinkModelImpl::PopNew
+        );
     }
     ViewStackModel::GetInstance()->PopContainer();
 }

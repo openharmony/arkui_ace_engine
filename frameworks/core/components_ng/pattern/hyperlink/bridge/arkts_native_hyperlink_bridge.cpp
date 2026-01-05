@@ -28,7 +28,8 @@ constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 } // namespace
 
-void HyperlinkBridge::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object, EcmaVM *vm) {
+void HyperlinkBridge::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+{
     LOGI("Start RegisterHyperlinkAttributes nativeModule");
 
     const char* functionNames[] = {
@@ -43,7 +44,12 @@ void HyperlinkBridge::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::Pop),
     };
 
-    auto hyperlink = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, functionValues);
+    auto hyperlink = panda::ObjectRef::NewWithNamedProperties(
+                        vm,
+                        ArraySize(functionNames),
+                        functionNames,
+                        functionValues
+    );
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "hyperlink"), hyperlink);
 
     LOGI("Finish RegisterHyperlinkAttributes nativeModule");
@@ -107,7 +113,8 @@ ArkUINativeModuleValue HyperlinkBridge::ResponseRegion(ArkUIRuntimeCallInfo* run
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue HyperlinkBridge::CreateHyperlink(ArkUIRuntimeCallInfo* runtimeCallInfo) {
+ArkUINativeModuleValue HyperlinkBridge::CreateHyperlink(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
     LOGI("[Hyperlink] HyperlinkBridge::CreateHyperlink arrived");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -163,7 +170,8 @@ ArkUINativeModuleValue HyperlinkBridge::CreateHyperlink(ArkUIRuntimeCallInfo* ru
     return panda::JSValueRef::Undefined(vm);
 }
 
-void HyperlinkBridge::PopNew() {
+void HyperlinkBridge::PopNew()
+{
     if (ViewStackModel::GetInstance()->IsPrebuilding()) {
         return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[HyperlinkBridge][pop]", &HyperlinkBridge::PopNew);
     }
@@ -177,7 +185,8 @@ void HyperlinkBridge::PopNew() {
     nodeModifiers->getHyperlinkModifier()->pop();
 }
 
-ArkUINativeModuleValue HyperlinkBridge::Pop(ArkUIRuntimeCallInfo* runtimeCallInfo) {
+ArkUINativeModuleValue HyperlinkBridge::Pop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
 

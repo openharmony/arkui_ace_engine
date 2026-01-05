@@ -106,7 +106,7 @@ class JSHyperlink extends JSViewAbstract {
       console.log("[Hyperlink] JSHyperlink::create params undefined")
       getUINativeModule().hyperlink.create('', '');
     }
-    console.log("[Hyperlink] JSHyperlink::create end")
+    console.log("[Hyperlink] JSHyperlink::create end");
   }
 
   static color(color) {

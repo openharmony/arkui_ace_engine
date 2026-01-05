@@ -35,7 +35,7 @@ namespace NG {
 const ArkUIHyperlinkModifier* GetHyperlinkDynamicModifier();
 const CJUIHyperlinkModifier* GetCJUIHyperlinkModifier();
 #ifdef INCLUDE_GENERATED_SOURCES
-namespace GeneratedModifier{
+namespace GeneratedModifier {
 const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier();
 } // namespace GeneratedModifier
 #endif

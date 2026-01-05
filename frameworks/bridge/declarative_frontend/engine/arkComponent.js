@@ -41864,7 +41864,7 @@ if (globalThis.Hyperlink === undefined) {
   globalThis.Hyperlink = {
     create: function(address, content) {
       getUINativeModule().loadNativeModule("hyperlink");
-      var module = globalThis.requireNapi('arkui.components.arkhyperlink');
+      let module = globalThis.requireNapi('arkui.components.arkhyperlink');
       module.exportView();
       if (address !== undefined) {
       console.log(`[Hyperlink] JSHyperlink::create ${typeof address}: ${address}, ${typeof content}: ${content}`)
