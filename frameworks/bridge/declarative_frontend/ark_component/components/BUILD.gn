@@ -30,7 +30,11 @@ template("arkui_abc") {
   }
 }
 
-arkui_modules = [ "gauge" ]
+arkui_modules = [ 
+    "gauge",
+    "checkbox",
+    "checkboxgroup",
+]
 
 module_targets = []
 

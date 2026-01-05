@@ -17,6 +17,8 @@
 
 #include "cj_lambda.h"
 
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 
@@ -52,26 +54,43 @@ std::function<void(const BaseEventInfo* info)> FormatOnChangeFunction(void (*cal
 }
 } // namespace
 
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::CheckBoxGroupModelNG* GetCheckBoxGroupModel()
+{
+    static NG::CheckBoxGroupModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("CheckboxGroup");
+        if (module == nullptr) {
+            LOGF("Can't find checkboxgroup dynamic module");
+            abort();
+        }
+        model = reinterpret_cast<NG::CheckBoxGroupModelNG*>(module->GetModel());
+    }
+    return model;
+}
+} // namespace OHOS::Ace
+
 extern "C" {
 void FfiOHOSAceFrameworkCheckBoxGroupCreate(const char* name)
 {
     auto checkboxGroupName = std::optional<std::string>(name);
-    CheckBoxGroupModel::GetInstance()->Create(checkboxGroupName);
+    GetCheckBoxGroupModel()->Create(checkboxGroupName);
 }
 
 void FfiOHOSAceFrameworkCheckBoxGroupSelectAll(bool value)
 {
-    CheckBoxGroupModel::GetInstance()->SetSelectAll(value);
+    GetCheckBoxGroupModel()->SetSelectAll(value);
 }
 
 void FfiOHOSAceFrameworkCheckBoxGroupSetSelectedColor(uint32_t color)
 {
-    CheckBoxGroupModel::GetInstance()->SetSelectedColor(Color(color));
+    GetCheckBoxGroupModel()->SetSelectedColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkCheckBoxGroupResetSelectedColor()
 {
-    CheckBoxGroupModel::GetInstance()->ResetSelectedColor();
+    GetCheckBoxGroupModel()->ResetSelectedColor();
 }
 
 void FfiOHOSAceFrameworkCheckBoxGroupSetWidth(double width, uint32_t unit)
@@ -119,47 +138,47 @@ void FfiOHOSAceFrameworkCheckBoxGroupSetPaddings(CJEdge params)
 
 void FfiOHOSAceFrameworkCheckBoxGroupSetOnChange(void (*callback)(FFiCheckboxGroupResult info))
 {
-    CheckBoxGroupModel::GetInstance()->SetOnChange(FormatOnChangeFunction(callback));
+    GetCheckBoxGroupModel()->SetOnChange(FormatOnChangeFunction(callback));
 }
 
 void FfiCheckBoxGroupSetResponseRegion(CJResponseRegion value)
 {
     std::vector<DimensionRect> result;
     ParseCJResponseRegion(value, result);
-    CheckBoxGroupModel::GetInstance()->SetResponseRegion(result);
+    GetCheckBoxGroupModel()->SetResponseRegion(result);
 }
 
 void FfiCheckBoxGroupSetResponseRegionArray(VectorStringPtr vecContent)
 {
     std::vector<DimensionRect> result;
     ParseVectorStringPtr(vecContent, result);
-    CheckBoxGroupModel::GetInstance()->SetResponseRegion(result);
+    GetCheckBoxGroupModel()->SetResponseRegion(result);
 }
 
 void FfiOHOSAceFrameworkCheckBoxGroupSetUnSelectedColor(uint32_t value)
 {
-    CheckBoxGroupModel::GetInstance()->SetUnSelectedColor(Color(value));
+    GetCheckBoxGroupModel()->SetUnSelectedColor(Color(value));
 }
 
 void FfiOHOSAceFrameworkCheckBoxGroupSetMark(
     uint32_t strokeColor, double size, int32_t sizeUnit, double strokeWidth, int32_t strokeWidthUnit)
 {
-    CheckBoxGroupModel::GetInstance()->SetCheckMarkColor(Color(strokeColor));
+    GetCheckBoxGroupModel()->SetCheckMarkColor(Color(strokeColor));
     Dimension sizeValue(size, static_cast<DimensionUnit>(sizeUnit));
     CalcDimension sizeVal = CalcDimension(sizeValue);
     if ((sizeVal.Unit() != DimensionUnit::PERCENT) && (sizeVal.ConvertToVp() >= 0)) {
-        CheckBoxGroupModel::GetInstance()->SetCheckMarkSize(sizeValue);
+        GetCheckBoxGroupModel()->SetCheckMarkSize(sizeValue);
     } else {
-        CheckBoxGroupModel::GetInstance()->SetCheckMarkSize(
+        GetCheckBoxGroupModel()->SetCheckMarkSize(
             Dimension(CHECK_BOX_GROUP_MARK_SIZE_INVALID_VALUE, DimensionUnit::VP));
     }
 
     Dimension widthValue(strokeWidth, static_cast<DimensionUnit>(strokeWidthUnit));
     CalcDimension widthVal = CalcDimension(widthValue);
     if ((widthVal.Unit() != DimensionUnit::PERCENT) && (widthVal.ConvertToVp() >= 0)) {
-        CheckBoxGroupModel::GetInstance()->SetCheckMarkWidth(widthValue);
+        GetCheckBoxGroupModel()->SetCheckMarkWidth(widthValue);
     } else {
-        CheckBoxGroupModel::GetInstance()->SetCheckMarkWidth(
+        GetCheckBoxGroupModel()->SetCheckMarkWidth(
             Dimension(CHECK_BOX_GROUP_MARK_WIDTH_INVALID_VALUE, DimensionUnit::VP));
     }
 }
@@ -167,6 +186,6 @@ void FfiOHOSAceFrameworkCheckBoxGroupSetMark(
 void FfiOHOSAceFrameworkCheckBoxGroupSetCheckboxShape(int32_t value)
 {
     CheckBoxStyle curCheckBoxGroupStyle = static_cast<CheckBoxStyle>(value);
-    CheckBoxGroupModel::GetInstance()->SetCheckboxGroupStyle(curCheckBoxGroupStyle);
+    GetCheckBoxGroupModel()->SetCheckboxGroupStyle(curCheckBoxGroupStyle);
 }
 }

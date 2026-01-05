@@ -17,10 +17,11 @@
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_CHECKBOXGROUP_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
+#include "core/components_ng/pattern/checkboxgroup/bridge/checkboxgroup_custom_modifier.h"
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier();
 const CJUICheckboxGroupModifier* GetCJUICheckboxGroupModifier();
+const ArkUICheckboxGroupCustomModifier* GetCheckboxGroupCustomModifier();
 void SetCheckboxGroupChange(ArkUINodeHandle node, void* extraParam);
 void ResetCheckboxGroupChange(ArkUINodeHandle node);
 }

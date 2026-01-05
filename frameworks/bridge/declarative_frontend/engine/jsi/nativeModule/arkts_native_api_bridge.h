@@ -92,7 +92,6 @@ private:
     static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterWaterFlowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterCheckboxAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDataPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterScrollAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGridItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -134,7 +133,6 @@ private:
     static void RegisterStackAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCounterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterCheckboxGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterBlankAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSpanAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

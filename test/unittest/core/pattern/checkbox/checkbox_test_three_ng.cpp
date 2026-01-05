@@ -1069,4 +1069,45 @@ HWTEST_F(CheckBoxThreeTestNG, CheckBoxPatternTest0118, TestSize.Level1)
     checkBoxPattern->CheckBoxGroupIsTrue();
     EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::NONE);
 }
+
+/**
+ * @tc.name: UpdatePaintPropertyBySettingData
+ * @tc.desc: Test CheckBoxModelNG UpdatePaintPropertyBySettingData.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxThreeTestNG, UpdatePaintPropertyBySettingData, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Update with empty CheckboxSettingData.
+     * @tc.expected: Color properties have no value.
+     */
+    CheckboxSettingData checkboxData;
+    CheckBoxModelNG::UpdatePaintPropertyBySettingData(AceType::RawPtr(frameNode), checkboxData, true);
+    EXPECT_FALSE(checkBoxPaintProperty->GetCheckBoxSelectedColor().has_value());
+    EXPECT_FALSE(checkBoxPaintProperty->GetCheckBoxUnSelectedColor().has_value());
+    EXPECT_FALSE(checkBoxPaintProperty->GetCheckBoxCheckMarkColor().has_value());
+
+    /**
+     * @tc.steps: step3. Update with all colors set to BLUE.
+     * @tc.expected: Color properties equal Color::BLUE.
+     */
+    checkboxData.selectedColor = Color::BLUE;
+    checkboxData.unselectedColor = Color::BLUE;
+    checkboxData.strokeColor = Color::BLUE;
+    CheckBoxModelNG::UpdatePaintPropertyBySettingData(AceType::RawPtr(frameNode), checkboxData, true);
+    EXPECT_EQ(Color::BLUE, checkBoxPaintProperty->GetCheckBoxSelectedColor());
+    EXPECT_EQ(Color::BLUE, checkBoxPaintProperty->GetCheckBoxUnSelectedColor());
+    EXPECT_EQ(Color::BLUE, checkBoxPaintProperty->GetCheckBoxCheckMarkColor());
+}
 } // namespace OHOS::Ace::NG

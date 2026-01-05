@@ -138,8 +138,6 @@
       OHOS::Ace::NG::WaterFlowSections::*;
       OHOS::Ace::WaterFlowItemModel::*;
       OHOS::Ace::OffscreenContextModel::*;
-      OHOS::Ace::CheckBoxModel::*;
-      OHOS::Ace::CheckBoxGroupModel::*;
       OHOS::Ace::CircleModel::*;
       OHOS::Ace::LinearSplitModel::*;
       OHOS::Ace::CounterModel::*;
@@ -408,6 +406,22 @@
       OHOS::Ace::DragRecognizer::*;
       OHOS::Ace::RosenUniversalPainter::*;
       OHOS::Ace::GestureRecognizer::*;
+      OHOS::Ace::CheckboxComponent::*;
+      OHOS::Ace::NG::GroupManager::*;
+      OHOS::Ace::NG::PaintProperty::*;
+      OHOS::Ace::Recorder::NodeDataCache::*;
+      "OHOS::Ace::NG::PageEventHub::GetGroupManager() const";
+      "OHOS::Ace::NG::PaintWrapper::FlushContentModifier()";
+      "OHOS::Ace::ToRSColor(OHOS::Ace::LinearColor const&)";
+      "OHOS::Ace::ToRSColor(OHOS::Ace::Color const&)";
+      "OHOS::Ace::NG::InputEventActuator::InputEventActuator(OHOS::Ace::WeakPtr<OHOS::Ace::NG::InputEventHub> const&)";
+      "OHOS::Ace::NG::CommonBridge::SetMargin(panda::JsiRuntimeCallInfo*)";
+      "OHOS::Ace::NG::CommonBridge::ResetMargin(panda::JsiRuntimeCallInfo*)";
+      "OHOS::Ace::NG::CommonBridge::SetSize(panda::JsiRuntimeCallInfo*)";
+      "OHOS::Ace::CheckableComponent::CreateElement()";
+      "OHOS::Ace::CheckableComponent::CreateRenderNode()";
+      "SendArkUISyncEvent";
+      OHOS::Ace::NG::ViewAbstractModelNG::RegisterEdgeMarginsResObj*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
@@ -426,6 +440,7 @@
       vtable?for?OHOS::Ace::Framework::MediaQueryInfo;
       vtable?for?OHOS::Ace::Framework::RevSourceMap;
       vtable?for?OHOS::Ace::Framework::StandardFunctionCodec;
+      vtable?for?OHOS::Ace::Framework::ViewAbstractModelImpl;
       vtable?for?OHOS::Ace::Localization;
       vtable?for?OHOS::Ace::Platform::AceApplicationInfoImpl;
       vtable?for?OHOS::Ace::Platform::AceContainer;
@@ -512,6 +527,7 @@
       VTT?for?OHOS::Ace::PixelMapDrawableDescriptor;
       VTT?for?OHOS::Ace::AnimatedDrawableDescriptor;
       VTT?for?OHOS::Ace::FocusNode*;
+      VTT?for?OHOS::Ace::CheckableComponent;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
@@ -626,6 +642,7 @@
       OHOS::Ace::TouchEventTarget::*;
       OHOS::Ace::ImageComponent::*;
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>)>>::GetInstance()";
+      *OHOS::Ace::NG::Converter::ConvContext::Store*;
 
       OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
       "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";

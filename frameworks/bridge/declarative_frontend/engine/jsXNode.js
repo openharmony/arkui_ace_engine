@@ -2088,12 +2088,16 @@ const __creatorMap__ = new Map([
         }],
     ['Checkbox', (context) => {
             return new TypedFrameNode(context, 'Checkbox', (node, type) => {
-                return new ArkCheckboxComponent(node, type);
+                getUINativeModule().loadNativeModule('Checkbox');
+                let module = globalThis.requireNapi('arkui.components.arkcheckbox');
+                return module.createComponent(node, type);
             });
         }],
     ['CheckboxGroup', (context) => {
             return new TypedFrameNode(context, 'CheckboxGroup', (node, type) => {
-                return new ArkCheckboxGroupComponent(node, type);
+                getUINativeModule().loadNativeModule('CheckboxGroup');
+                let module = globalThis.requireNapi('arkui.components.arkcheckboxgroup');
+                return module.createComponent(node, type);
             });
         }],
     ['Radio', (context) => {
@@ -2260,7 +2264,9 @@ const __attributeMap__ = new Map([
         if (!node.getNodePtr()) {
             return undefined;
         }
-        node._componentAttribute = new ArkCheckboxComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        getUINativeModule().loadNativeModule('Checkbox');
+        let module = globalThis.requireNapi('arkui.components.arkcheckbox');
+        node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
     }],
     ['Radio', (node) => {

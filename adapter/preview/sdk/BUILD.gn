@@ -133,12 +133,16 @@ if (is_ohos_standard_system) {
   ohos_copy("copy_component_model_abc_library") {
     deps = [
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:gauge",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:checkbox",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:checkboxgroup",
     ]
     out_path = get_label_info(
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
             "root_out_dir")
     sources = [
       "${out_path}/arkui/ace_engine/arkgauge.abc",
+      "${out_path}/arkui/ace_engine/arkcheckbox.abc",
+      "${out_path}/arkui/ace_engine/arkcheckboxgroup.abc",
     ]
 
     # Output path description: 

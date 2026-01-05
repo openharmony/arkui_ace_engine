@@ -15,13 +15,6 @@
 
 const overrideMap = new Map();
 overrideMap.set(
-  'ArkCheckboxComponent',
-  new Map([
-    ['Symbol(width)', CheckboxWidthModifier],
-    ['Symbol(height)', CheckboxHeightModifier],
-  ])
-);
-overrideMap.set(
   'ArkTextComponent',
   new Map([
     ['Symbol(foregroundColor)', TextForegroundColorModifier]
@@ -295,20 +288,156 @@ class CalendarPickerModifier extends ArkCalendarPickerComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class CheckboxModifier extends ArkCheckboxComponent {
+
+class LazyArkCheckboxComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkCheckboxComponent.module === undefined) {
+      LazyArkCheckboxComponent.module = globalThis.requireNapi('arkui.components.arkcheckbox');
+    }
+    this.lazyComponent = LazyArkCheckboxComponent.module.createComponent(nativePtr, classType);
+    console.log('LazyArkCheckboxComponent lazyload nativeModule');
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    this.lazyComponent.initialize(value);
+    return this;
+  }
+  shape(value) {
+    this.lazyComponent.shape(value);
+    return this;
+  }
+  width(value) {
+    this.lazyComponent.width(value);
+    return this;
+  }
+  height(value) {
+  this.lazyComponent.height(value);
+    return this;
+  }
+  select(value) {
+    this.lazyComponent.select(value);
+    return this;
+  }
+  selectedColor(value) {
+    this.lazyComponent.selectedColor(value);
+    return this;
+  }
+  unselectedColor(value) {
+    this.lazyComponent.unselectedColor(value);
+    return this;
+  }
+  mark(value) {
+    this.lazyComponent.mark(value);
+    return this;
+  }
+  padding(value) {
+    this.lazyComponent.padding(value);
+    return this;
+  }
+  size(value) {
+    this.lazyComponent.size(value);
+    return this;
+  }
+  responseRegion(value) {
+    this.lazyComponent.responseRegion(value);
+    return this;
+  }
+  margin(value) {
+    this.lazyComponent.margin(value);
+    return this;
+  }
+  contentModifier(value) {
+    this.lazyComponent.contentModifier(value);
+    return this;
+  }
+  onChange(callback) {
+    this.lazyComponent.onChange(callback);
+    return this;
+  }
+}
+
+class CheckboxModifier extends LazyArkCheckboxComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class CheckboxGroupModifier extends ArkCheckboxGroupComponent {
+
+class LazyArkCheckboxGroupComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkCheckboxGroupComponent.module === undefined) {
+      LazyArkCheckboxGroupComponent.module = globalThis.requireNapi('arkui.components.arkcheckboxgroup');
+    }
+    this.lazyComponent = LazyArkCheckboxGroupComponent.module.createComponent(nativePtr, classType);
+    console.log('LazyArkCheckboxGroupComponent lazyload nativeModule');
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    this.lazyComponent.initialize(value);
+    return this;
+  }
+  selectAll(value) {
+    this.lazyComponent.selectAll(value);
+    return this;
+  }
+  selectedColor(value) {
+    this.lazyComponent.selectedColor(value);
+    return this;
+  }
+  unselectedColor(value) {
+  this.lazyComponent.unselectedColor(value);
+    return this;
+  }
+  mark(value) {
+    this.lazyComponent.mark(value);
+    return this;
+  }
+  onChange(value) {
+    this.lazyComponent.onChange(value);
+    return this;
+  }
+  size(value) {
+    this.lazyComponent.size(value);
+    return this;
+  }
+  width(value) {
+    this.lazyComponent.width(value);
+    return this;
+  }
+  height(value) {
+    this.lazyComponent.height(value);
+    return this;
+  }
+  checkboxShape(value) {
+    this.lazyComponent.checkboxShape(value);
+    return this;
+  }
+}
+
+class CheckboxGroupModifier extends LazyArkCheckboxGroupComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

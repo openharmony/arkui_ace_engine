@@ -151,7 +151,7 @@ private:
     bool followCursor_ = false;
 };
 
-class ACE_EXPORT InputEventActuator : public virtual AceType {
+class ACE_FORCE_EXPORT InputEventActuator : public virtual AceType {
     DECLARE_ACE_TYPE(InputEventActuator, AceType);
 public:
     explicit InputEventActuator(const WeakPtr<InputEventHub>& inputEventHub);

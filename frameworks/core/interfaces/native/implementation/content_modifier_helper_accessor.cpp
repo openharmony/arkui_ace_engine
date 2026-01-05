@@ -17,10 +17,6 @@
 
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
-#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
-#include "core/components_ng/pattern/checkbox/checkbox_model_static.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_static.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/components_ng/pattern/gauge/bridge/content_modifier_helper.h"
@@ -37,7 +33,8 @@
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_static.h"
-#include "core/interfaces/native/implementation/checkbox_group_configuration_peer.h"
+#include "core/components_ng/pattern/checkbox/bridge/checkbox_content_modifier_helper.h"
+#include "core/components_ng/pattern/checkboxgroup/bridge/checkboxgroup_content_modifier_helper.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/menu_item_configuration_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -46,6 +43,37 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+const GENERATED_ArkUICheckboxContentModifier* GetCheckboxContentModifier()
+{
+    static const GENERATED_ArkUICheckboxContentModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Checkbox");
+        if (module == nullptr) {
+            LOGF("Can't find checkbox dynamic module");
+            abort();
+        }
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUICheckboxContentModifier*>(
+            module->GetCustomModifier("contentModifier"));
+    }
+    return cachedModifier;
+}
+
+const GENERATED_ArkUICheckboxGroupContentModifier* GetCheckboxGroupContentModifier()
+{
+    static const GENERATED_ArkUICheckboxGroupContentModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("CheckboxGroup");
+        if (module == nullptr) {
+            LOGF("Can't find checkboxgroup dynamic module");
+            abort();
+        }
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUICheckboxGroupContentModifier*>(
+            module->GetCustomModifier("contentModifier"));
+    }
+    return cachedModifier;
+}
+} // namespace
 namespace ContentModifierHelperAccessor {
 void ContentModifierButtonImpl(Ark_NativePointer node,
                                const Ark_Object* contentModifier,
@@ -88,36 +116,17 @@ void ContentModifierCheckBoxImpl(Ark_NativePointer node,
                                  const Ark_Object* contentModifier,
                                  const CheckBoxModifierBuilder* builder)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
-    auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
-        CheckBoxConfiguration config) -> RefPtr<FrameNode> {
-        Ark_ContentModifier contentModifier = (*objectKeeper).get();
-        Ark_CheckBoxConfiguration arkConfig;
-        arkConfig.contentModifier = contentModifier;
-        arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.name = Converter::ArkValue<Ark_String>(config.name_, Converter::FC);
-        arkConfig.selected = Converter::ArkValue<Ark_Boolean>(config.selected_);
-        auto handler = [frameNode](Ark_Boolean retValue) {
-            CheckBoxModelStatic::TriggerChange(frameNode, Converter::Convert<bool>(retValue));
-        };
-        auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>(handler);
-        arkConfig.triggerChange = triggerCallback.ArkValue();
-        auto boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-        arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            boxNode->AddChild(uiNode);
-            boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
-            }, node, arkConfig);
-        return boxNode;
-    };
-    CheckBoxModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+    CHECK_NULL_VOID(node);
+    auto modifier = GetCheckboxContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->contentModifierCheckboxImpl(node, contentModifier, builder);
 }
 void ResetContentModifierCheckBoxImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CheckBoxModelNG::SetBuilderFunc(frameNode, nullptr);
+    CHECK_NULL_VOID(node);
+    auto modifier = GetCheckboxContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->resetContentModifierCheckboxImpl(node);
 }
 void ContentModifierDataPanelImpl(Ark_NativePointer node,
                                   const Ark_Object* contentModifier,
@@ -152,7 +161,7 @@ void ResetContentModifierDataPanelImpl(Ark_NativePointer node)
 void ContentModifierGaugeImpl(
     Ark_NativePointer node, const Ark_Object* contentModifier, const GaugeModifierBuilder* builder)
 {
-    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("gauge");
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Gauge");
     CHECK_NULL_VOID(module);
     auto* modifier =
         reinterpret_cast<const GENERATED_ArkUIGaugeContentModifier*>(module->GetCustomModifier("contentModifier"));
@@ -161,7 +170,7 @@ void ContentModifierGaugeImpl(
 }
 void ResetContentModifierGaugeImpl(Ark_NativePointer node)
 {
-    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("gauge");
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Gauge");
     CHECK_NULL_VOID(module);
     auto* modifier =
         reinterpret_cast<const GENERATED_ArkUIGaugeContentModifier*>(module->GetCustomModifier("contentModifier"));
@@ -476,39 +485,17 @@ void ContentModifierCheckBoxGroupImpl(Ark_NativePointer node,
                                     const Ark_Object* contentModifier,
                                     const CheckBoxGroupModifierBuilder* builder)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(contentModifier);
-    CHECK_NULL_VOID(builder);
-    auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
-    auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
-        CheckBoxGroupConfiguration config) -> RefPtr<FrameNode> {
-        Ark_ContentModifier contentModifier = (*objectKeeper).get();
-        Ark_CheckBoxGroupConfiguration arkConfig = PeerUtils::CreatePeer<CheckBoxGroupConfigurationPeer>();
-        arkConfig->contentModifier_ = contentModifier;
-        arkConfig->enabled_ = config.enabled_;
-        arkConfig->name_ = config.name_;
-        arkConfig->status_ = Converter::ArkValue<Ark_SelectStatus>(static_cast<int>(config.status_));
-        arkConfig->node_ = node;
-        auto handler = [frameNode](Ark_Boolean retValue) {
-            CheckBoxGroupModelStatic::TriggerChange(frameNode, Converter::Convert<bool>(retValue));
-        };
-        auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>(handler);
-        arkConfig->triggerChange_ = triggerCallback.ArkValue();
-        auto boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-        arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            boxNode->AddChild(uiNode);
-            boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
-            }, node, arkConfig);
-        return boxNode;
-    };
-    CheckBoxGroupModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+    CHECK_NULL_VOID(node);
+    auto modifier = GetCheckboxGroupContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->contentModifierCheckboxGroupImpl(node, contentModifier, builder);
 }
 void ResetContentModifierCheckBoxGroupImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CheckBoxGroupModelNG::SetBuilderFunc(frameNode, nullptr);
+    CHECK_NULL_VOID(node);
+    auto modifier = GetCheckboxGroupContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->resetContentModifierCheckboxGroupImpl(node);
 }
 } // ContentModifierHelperAccessor
 const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAccessor()

@@ -2333,7 +2333,7 @@ void AssignCast(std::optional<int32_t>& dst, const Ark_PageFlipMode& src)
 }
 
 template<>
-void AssignCast(std::optional<CheckBoxStyle>& dst, const Ark_CheckBoxShape& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<CheckBoxStyle>& dst, const Ark_CheckBoxShape& src)
 {
     switch (src) {
         case ARK_CHECK_BOX_SHAPE_CIRCLE: dst = CheckBoxStyle::CIRCULAR_STYLE; break;

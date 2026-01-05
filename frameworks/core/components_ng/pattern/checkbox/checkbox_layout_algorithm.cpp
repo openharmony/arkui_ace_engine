@@ -21,7 +21,9 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+const char CHECKBOX_ETS_TAG[] = "Toggle";
+}
 PaddingPropertyF CheckBoxLayoutAlgorithm::GetBorderWidth(LayoutWrapper* layoutWrapper)
 {
     PaddingPropertyF padding;
@@ -99,7 +101,7 @@ void CheckBoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<CheckBoxPattern>();
     CHECK_NULL_VOID(pattern);
-    if (layoutWrapper->GetHostTag() == V2::CHECKBOX_ETS_TAG && !pattern->UseContentModifier()) {
+    if (layoutWrapper->GetHostTag() == CHECKBOX_ETS_TAG && !pattern->UseContentModifier()) {
         // Checkbox does not have child nodes. If a child is added to a toggle, then hide the child.
         for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
             child->GetGeometryNode()->Reset();
