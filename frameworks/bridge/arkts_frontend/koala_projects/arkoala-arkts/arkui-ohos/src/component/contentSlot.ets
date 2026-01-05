@@ -76,14 +76,11 @@ export class ArkContentSlotComponent extends ComponentBase implements ContentSlo
 export function ContentSlotImpl(
     /** @memo */
     style: ((attributes: ContentSlotAttribute) => void) | undefined,
-    /** @memo */
-    content_?: (() => void) | undefined,
 ): void {
     const receiver = remember(() => {
         return new ArkContentSlotComponent()
     })
     NodeAttach<ArkContentSlotPeer>((): ArkContentSlotPeer => ArkContentSlotPeer.create(receiver), (_: ArkContentSlotPeer) => {
         style?.(receiver)
-        content_?.()
     })
 }
