@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/common/dom/dom_label.h"
+#include "compatible/components/label/dom_label.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -51,5 +51,4 @@ RefPtr<Component> DOMLabel::GetSpecializedComponent()
 {
     return labelComponent_;
 }
-
 } // namespace OHOS::Ace::Framework

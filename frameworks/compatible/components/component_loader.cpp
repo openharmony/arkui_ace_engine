@@ -25,6 +25,7 @@
 #include "compatible/components/grid_container/grid_container_loader.h"
 #include "compatible/components/grid_row/grid_row_loader.h"
 #include "compatible/components/marquee/marquee_loader.h"
+#include "compatible/components/label/label_loader.h"
 #include "compatible/components/qrcode/qrcode_loader.h"
 #include "compatible/components/rating/rating_loader.h"
 #include "frameworks/base/log/log_wrapper.h"
@@ -47,6 +48,7 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "grid-container", []() -> ComponentLoader* { return new GridContainerLoader(); } },
         { "grid-row", []() -> ComponentLoader* { return new GridRowLoader(); } },
         { "marquee", []() -> ComponentLoader* { return new MarqueeLoader(); } },
+        { "label", []() -> ComponentLoader* { return new LabelLoader(); } },
         { "video", []() -> ComponentLoader* { return new VideoLoader(); } },
         { "qrcode", []() -> ComponentLoader* { return new QRCodeLoader(); } },
         { "rating", []() -> ComponentLoader* { return new RatingLoader(); } }

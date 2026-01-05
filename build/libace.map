@@ -649,6 +649,7 @@
       "OHOS::Ace::Singleton<OHOS::Ace::DumpLog>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void ()>>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)>>::GetInstance()";
+      "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (OHOS::Ace::TouchEventInfo const&)>>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventIdManager>::GetInstance()";
 
       construction?vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm-in-OHOS::Ace::NG::MovingPhotoLayoutAlgorithm;
@@ -764,6 +765,11 @@
       vtable?for?OHOS::Ace::ClickRecognizer;
       non-virtual?thunk?to?OHOS::Ace::V2::InspectorComposedElement::*;
       non-virtual?thunk?to?OHOS::Ace::V2::ColumnComposedElement::ToJsonObject*;
+      OHOS::Ace::Framework::DOMText::*;
+      VTT?for?OHOS::Ace::Framework::DOMText;
+      "OHOS::Ace::RenderTouchListener::Create()";
+      VTT?for?OHOS::Ace::TextDeclaration;
+      vtable?for?OHOS::Ace::TextDeclaration;
       VTT?for?OHOS::Ace::NG::NavigationStack;
       VTT?for?OHOS::Ace::RawRecognizer;
       VTT?for?OHOS::Ace::DragRecognizer;
