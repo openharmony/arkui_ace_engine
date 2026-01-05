@@ -50,6 +50,7 @@ public:
     static void SetAnimationDuration(FrameNode* frameNode, float duration);
     static void SetAnimateMode(FrameNode* frameNode, const std::optional<TabAnimateMode>& modeOpt);
     static void SetEdgeEffect(FrameNode* frameNode, const std::optional<int32_t>& edgeEffect);
+    static void SetNestedScroll(FrameNode* frameNode, int32_t nestedScrollMode);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChange);
     static void SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected);
     static void SetOnTabBarClick(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onTabBarClick);

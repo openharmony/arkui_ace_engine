@@ -515,6 +515,21 @@ void TabsModelStatic::SetEdgeEffect(FrameNode* frameNode, const std::optional<in
     }
 }
 
+void TabsModelStatic::SetNestedScroll(FrameNode* frameNode, int32_t nestedScrollMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    NestedScrollOptions option;
+    option.forward = static_cast<NestedScrollMode>(nestedScrollMode);
+    option.backward = static_cast<NestedScrollMode>(nestedScrollMode);
+    swiperPattern->SetNestedScroll(option);
+}
+
 void TabsModelStatic::SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChange)
 {
     CHECK_NULL_VOID(frameNode);

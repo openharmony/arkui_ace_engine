@@ -558,6 +558,20 @@ void ResetTabEdgeEffect(ArkUINodeHandle node)
     TabsModelNG::SetEdgeEffect(frameNode, NUM_0);
 }
 
+void SetTabsNestedScroll(ArkUINodeHandle node, ArkUI_Int32 (*values)[1])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetNestedScroll(frameNode, (*values)[0]);
+}
+
+void ResetTabsNestedScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetNestedScroll(frameNode, NUM_0);
+}
+
 void SetTabPageFlipMode(ArkUINodeHandle node, ArkUI_Int32 pageFlipMode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -895,6 +909,8 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetTabClip = ResetTabClip,
         .setTabEdgeEffect = SetTabEdgeEffect,
         .resetTabEdgeEffect = ResetTabEdgeEffect,
+        .setTabsNestedScroll = SetTabsNestedScroll,
+        .resetTabsNestedScroll = ResetTabsNestedScroll,   
         .setTabPageFlipMode = SetTabPageFlipMode,
         .resetTabPageFlipMode = ResetTabPageFlipMode,
         .setTabWidthAuto = SetTabWidthAuto,

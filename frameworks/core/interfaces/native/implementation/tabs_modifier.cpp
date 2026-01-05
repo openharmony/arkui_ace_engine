@@ -132,6 +132,20 @@ void AssignTo(std::optional<TabContentAnimatedTransition>& dst, const Opt_TabCon
 }
 
 template<>
+inline void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_TabsNestedScrollMode& src)
+{
+    switch (src) {
+        case ARK_TABS_NESTED_SCROLL_MODE_SELF_ONLY:
+            dst = NestedScrollMode::SELF_ONLY;
+            break;
+        case ARK_TABS_NESTED_SCROLL_MODE_SELF_FIRST:
+            dst = NestedScrollMode::SELF_FIRST;
+            break;
+        default: LOGW("Unexpected enum value in Ark_TabsNestedScrollMode: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<TabsCacheMode>& dst, const Ark_TabsCacheMode& src)
 {
     switch (src) {
@@ -365,6 +379,18 @@ void SetOnUnselectedImpl(Ark_NativePointer node,
         arkCallback.Invoke(index);
     };
     TabsModelStatic::SetOnUnselected(frameNode, std::move(onUnselected));
+}
+void SetNestedScrollImpl(Ark_NativePointer node,
+                         const Opt_TabsNestedScrollMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto nestedModeOpt = Converter::OptConvertPtr<NestedScrollMode>(value);
+    if (!nestedModeOpt) {
+        TabsModelStatic::SetNestedScroll(frameNode, static_cast<int>(NestedScrollMode::SELF_ONLY));
+        return;
+    }
+    TabsModelStatic::SetNestedScroll(frameNode, static_cast<int>(*nestedModeOpt));
 }
 void SetOnAnimationStartImpl(Ark_NativePointer node,
                              const Opt_OnTabsAnimationStartCallback* value)
@@ -692,6 +718,7 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::SetOnSelectedImpl,
         TabsAttributeModifier::SetOnTabBarClickImpl,
         TabsAttributeModifier::SetOnUnselectedImpl,
+        TabsAttributeModifier::SetNestedScrollImpl,
         TabsAttributeModifier::SetOnAnimationStartImpl,
         TabsAttributeModifier::SetOnAnimationEndImpl,
         TabsAttributeModifier::SetOnGestureSwipeImpl,

@@ -200,6 +200,10 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, TabEdgeEffectModifier.identity, TabEdgeEffectModifier, value);
     return this;
   }
+  nestedScroll(value: TabsNestedScrollMode): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, TabsNestedScrollModifier.identity, TabsNestedScrollModifier, value);
+    return this;
+  }
   pageFlipMode(value: PageFlipMode): this {
     modifierWithKey(this._modifiersWithKeys, TabPageFlipModeModifier.identity, TabPageFlipModeModifier, value);
     return this;
@@ -704,6 +708,23 @@ class TabEdgeEffectModifier extends ModifierWithKey<EdgeEffect> {
     }
   }
   checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TabsNestedScrollModifier extends ModifierWithKey<TabsNestedScrollMode> {
+  constructor(value: TabsNestedScrollMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabsNestedScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetNestedScroll(node);
+    } else {
+      getUINativeModule().tabs.setNestedScroll(node, this.value);
+    }
+  }
+  checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }

@@ -962,6 +962,30 @@ void JSTabs::SetCachedMaxCount(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetCachedMaxCount(cachedMaxCount, cacheMode);
 }
 
+void JSTabs::SetNestedScroll(const JSCallbackInfo& info)
+{
+    // default value
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        TabsModel::GetInstance()->SetNestedScroll(nestedOpt);
+        return;
+    }
+    int32_t value = -1;
+    JSViewAbstract::ParseJsInt32(info[0], value);
+    auto mode = static_cast<NestedScrollMode>(value);
+    if (mode < NestedScrollMode::SELF_ONLY || mode > NestedScrollMode::SELF_FIRST) {
+        TabsModel::GetInstance()->SetNestedScroll(nestedOpt);
+        return;
+    }
+    nestedOpt.forward = mode;
+    nestedOpt.backward = mode;
+    TabsModel::GetInstance()->SetNestedScroll(nestedOpt);
+    info.ReturnSelf();
+}
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JsTabContentTransitionProxy::JSBind(globalObj);
@@ -1011,6 +1035,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("pageFlipMode", &JSTabs::SetPageFlipMode);
     JSClass<JSTabs>::StaticMethod("onSelected", &JSTabs::SetOnSelected);
     JSClass<JSTabs>::StaticMethod("cachedMaxCount", &JSTabs::SetCachedMaxCount);
+    JSClass<JSTabs>::StaticMethod("nestedScroll", &JSTabs::SetNestedScroll);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

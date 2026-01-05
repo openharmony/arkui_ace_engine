@@ -4644,6 +4644,8 @@ struct ArkUITabsModifier {
     void (*resetTabClip)(ArkUINodeHandle node);
     void (*setTabEdgeEffect)(ArkUINodeHandle node, ArkUI_Uint32 edgeEffect);
     void (*resetTabEdgeEffect)(ArkUINodeHandle node);
+    void (*setTabsNestedScroll)(ArkUINodeHandle node, ArkUI_Int32 (*value)[1]);
+    void (*resetTabsNestedScroll)(ArkUINodeHandle node);
     void (*setTabPageFlipMode)(ArkUINodeHandle node, ArkUI_Int32 pageFlipMode);
     void (*resetTabPageFlipMode)(ArkUINodeHandle node);
     void (*setTabWidthAuto)(ArkUINodeHandle node);

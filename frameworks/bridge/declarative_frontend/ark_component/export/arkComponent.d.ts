@@ -1998,6 +1998,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     barGridAlign(value: BarGridColumnOptions): TabsAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     edgeEffect(value: EdgeEffect): TabsAttribute;
+    nestedScroll(value: TabsNestedScrollMode): TabsAttribute;
     pageFlipMode(value: PageFlipMode): TabsAttribute;
     cachedMaxCount(count: number, mode: CacheMode): TabsAttribute;
 }

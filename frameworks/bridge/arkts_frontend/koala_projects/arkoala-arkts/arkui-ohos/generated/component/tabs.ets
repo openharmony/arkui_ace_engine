@@ -401,6 +401,18 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_setOnUnselected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setNestedScrollAttribute(value: TabsNestedScrollMode | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as TabsNestedScrollMode)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TabsAttribute_setNestedScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOnAnimationStartAttribute(value: OnTabsAnimationStartCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -772,6 +784,9 @@ export interface TabsAttribute extends CommonMethod {
     onUnselected(value: ((value0: int32) => void) | undefined): this {
         throw new Error("Unimplemented method onUnselected")
     }
+    nestedScroll(value: TabsNestedScrollMode | undefined): this {
+        throw new Error("Unimplemented method nestedScroll")
+    }
     onAnimationStart(value: OnTabsAnimationStartCallback | undefined): this {
         throw new Error("Unimplemented method onAnimationStart")
     }
@@ -843,6 +858,7 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     onSelected_value?: ((value0: int32) => void) | undefined
     onTabBarClick_value?: ((value0: int32) => void) | undefined
     onUnselected_value?: ((value0: int32) => void) | undefined
+    nestedScroll_value?: TabsNestedScrollMode | undefined
     onAnimationStart_value?: OnTabsAnimationStartCallback | undefined
     onAnimationEnd_value?: OnTabsAnimationEndCallback | undefined
     onGestureSwipe_value?: OnTabsGestureSwipeCallback | undefined
@@ -898,6 +914,9 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
         return this
     }
     onUnselected(value: ((value0: int32) => void) | undefined): this {
+        return this
+    }
+    nestedScroll(value: TabsNestedScrollMode | undefined): this {
         return this
     }
     onAnimationStart(value: OnTabsAnimationStartCallback | undefined): this {
@@ -961,6 +980,11 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
 export interface TabContentAnimatedTransition {
     timeout?: int32;
     transition: ((value0: TabContentTransitionProxy) => void);
+}
+
+export enum TabsNestedScrollMode {
+    SELF_ONLY = 0,
+    SELF_FIRST = 1
 }
 
 export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAttribute {
@@ -1079,6 +1103,14 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         if (this.checkPriority("onUnselected")) {
             const value_casted = value as (((value0: int32) => void) | undefined)
             this.getPeer()?.setOnUnselectedAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public nestedScroll(value: TabsNestedScrollMode | undefined): this {
+        if (this.checkPriority("nestedScroll")) {
+            const value_casted = value as (TabsNestedScrollMode | undefined)
+            this.getPeer()?.setNestedScrollAttribute(value_casted)
             return this
         }
         return this
