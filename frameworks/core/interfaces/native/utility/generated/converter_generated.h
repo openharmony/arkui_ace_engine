@@ -2144,6 +2144,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_LengthMetrics_Length& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_NavDestinationContext_NavBar& src)
 {
     switch (src.selector) {
@@ -5026,6 +5041,7 @@ ASSIGN_OPT(Opt_Union_I32_LengthConstrain)
 ASSIGN_OPT(Opt_Union_Length_Array_RadiusItem)
 ASSIGN_OPT(Opt_Union_Length_LayoutPolicy)
 ASSIGN_OPT(Opt_Union_Length_Number)
+ASSIGN_OPT(Opt_Union_LengthMetrics_Length)
 ASSIGN_OPT(Opt_Union_MenuItemOptions_CustomBuilder)
 ASSIGN_OPT(Opt_Union_NavDestinationContext_NavBar)
 ASSIGN_OPT(Opt_Union_ResourceColor_EdgeColors)

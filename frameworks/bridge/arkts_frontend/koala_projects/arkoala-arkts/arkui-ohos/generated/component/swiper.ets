@@ -40,6 +40,241 @@ import { SwiperModifier } from "./../SwiperModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { LengthMetrics } from "arkui.Graphics"
 import { LengthMetrics_serializer } from "./../Graphics"
+export class IndicatorInternal {
+    public static fromPtr(ptr: KPointer): Indicator {
+        return new Indicator(ptr)
+    }
+}
+export class Indicator implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, Indicator.getFinalizer())
+    }
+    constructor() {
+        this(Indicator.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._Indicator_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._Indicator_getFinalizer()
+    }
+    static dot_serialize(): DotIndicator {
+        const retval  = ArkUIGeneratedNativeModule._Indicator_dot()
+        const obj : DotIndicator = DotIndicatorInternal.fromPtr(retval)
+        return obj
+    }
+    static digit_serialize(): DigitIndicator {
+        const retval  = ArkUIGeneratedNativeModule._Indicator_digit()
+        const obj : DigitIndicator = DigitIndicatorInternal.fromPtr(retval)
+        return obj
+    }
+    public left(value: Length | undefined): this {
+        const value_casted = value as (Length | undefined)
+        this.left_serialize(value_casted)
+        return this
+    }
+    public top(value: Length | undefined): this {
+        const value_casted = value as (Length | undefined)
+        this.top_serialize(value_casted)
+        return this
+    }
+    public right(value: Length | undefined): this {
+        const value_casted = value as (Length | undefined)
+        this.right_serialize(value_casted)
+        return this
+    }
+    public bottom(value: Length | undefined): this {
+        const value_casted = value as (Length | undefined)
+        this.bottom0_serialize(value_casted)
+        return this
+    }
+    public bottom(bottom: LengthMetrics | Length | undefined, ignoreSize: boolean): this {
+        const bottom_casted = bottom as (LengthMetrics | Length | undefined)
+        const ignoreSize_casted = ignoreSize as (boolean)
+        this.bottom1_serialize(bottom_casted, ignoreSize_casted)
+        return this
+    }
+    public start(value: LengthMetrics | undefined): this {
+        const value_casted = value as (LengthMetrics | undefined)
+        this.start_serialize(value_casted)
+        return this
+    }
+    public end(value: LengthMetrics | undefined): this {
+        const value_casted = value as (LengthMetrics | undefined)
+        this.end_serialize(value_casted)
+        return this
+    }
+    public static dot(): DotIndicator {
+        return Indicator.dot_serialize()
+    }
+    public static digit(): DigitIndicator {
+        return Indicator.digit_serialize()
+    }
+    left_serialize(value: Length | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._Indicator_left(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+    top_serialize(value: Length | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._Indicator_top(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+    right_serialize(value: Length | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._Indicator_right(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+    bottom0_serialize(value: Length | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._Indicator_bottom0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+    bottom1_serialize(bottom: LengthMetrics | Length | undefined, ignoreSize: boolean): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (bottom !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const bottomTmpValue  = bottom!
+            if (bottomTmpValue instanceof LengthMetrics) {
+                thisSerializer.writeInt8((0).toByte())
+                const bottomTmpValueForIdx0  = bottomTmpValue as LengthMetrics
+                LengthMetrics_serializer.write(thisSerializer, bottomTmpValueForIdx0)
+            } else if (bottomTmpValue instanceof Length) {
+                thisSerializer.writeInt8((1).toByte())
+                const bottomTmpValueForIdx1  = bottomTmpValue as Length
+                if (bottomTmpValueForIdx1 instanceof string) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const bottomTmpValueForIdx1ForIdx0  = bottomTmpValueForIdx1 as string
+                    thisSerializer.writeString(bottomTmpValueForIdx1ForIdx0)
+                } else if (bottomTmpValueForIdx1 instanceof double) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const bottomTmpValueForIdx1ForIdx1  = bottomTmpValueForIdx1 as double
+                    thisSerializer.writeFloat64(bottomTmpValueForIdx1ForIdx1)
+                } else if (bottomTmpValueForIdx1 instanceof Resource) {
+                    thisSerializer.writeInt8((2).toByte())
+                    const bottomTmpValueForIdx1ForIdx2  = bottomTmpValueForIdx1 as Resource
+                    Resource_serializer.write(thisSerializer, bottomTmpValueForIdx1ForIdx2)
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._Indicator_bottom1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), ignoreSize ? 1 : 0)
+        thisSerializer.release()
+        return this
+    }
+    start_serialize(value: LengthMetrics | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._Indicator_start(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+    end_serialize(value: LengthMetrics | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._Indicator_end(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+}
 export interface SwiperContentTransitionProxy {
     selectedIndex: int32
     index: int32
@@ -1375,189 +1610,37 @@ export function SwiperImpl(
     })
 }
 
-export class Indicator {
-    _left?: Length | undefined
-    _top?: Length | undefined
-    _right?: Length | undefined
-    _bottom?: Length | undefined | LengthMetrics | Length | undefined | undefined
-    _start?: LengthMetrics | undefined
-    _end?: LengthMetrics | undefined
-    constructor() {
+export class DigitIndicator_serializer {
+    public static write(buffer: SerializerBase, value: DigitIndicator): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
     }
-    static dot(): DotIndicator {
-        return new DotIndicator()
-    }
-    static digit(): DigitIndicator {
-        return new DigitIndicator()
-    }
-    left(value: Length | undefined): this {
-        this._left = value
-        return this
-    }
-    top(value: Length | undefined): this {
-        this._top = value
-        return this
-    }
-    right(value: Length | undefined): this {
-        this._right = value
-        return this
-    }
-    public bottom(bottom: Length | undefined | LengthMetrics | Length | undefined, ignoreSize?: boolean): this {
-        this._bottom = bottom
-        return this
-    }
-    start(value: LengthMetrics | undefined): this {
-        this._start = value
-        return this
-    }
-    end(value: LengthMetrics | undefined): this {
-        this._end = value
-        return this
+    public static read(buffer: DeserializerBase): DigitIndicator {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return DigitIndicatorInternal.fromPtr(ptr)
     }
 }
-export class DotIndicator {
-    _left?: Length | undefined
-    _top?: Length | undefined
-    _right?: Length | undefined
-    _bottom?: Length | undefined | LengthMetrics | Length | undefined | undefined
-    _start?: LengthMetrics | undefined
-    _end?: LengthMetrics | undefined
-    _itemWidth?: Length | undefined
-    _itemHeight?: Length | undefined
-    _selectedItemWidth?: Length | undefined
-    _selectedItemHeight?: Length | undefined
-    _mask?: boolean | undefined
-    _color?: ResourceColor | undefined
-    _selectedColor?: ResourceColor | undefined
-    _maxDisplayCount?: int32 | undefined
-    _space?: LengthMetrics | undefined
-    constructor() {
+export class DotIndicator_serializer {
+    public static write(buffer: SerializerBase, value: DotIndicator): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
     }
-    static dot(): DotIndicator {
-        return new DotIndicator()
-    }
-    static digit(): DigitIndicator {
-        return new DigitIndicator()
-    }
-    left(value: Length | undefined): this {
-        this._left = value
-        return this
-    }
-    top(value: Length | undefined): this {
-        this._top = value
-        return this
-    }
-    right(value: Length | undefined): this {
-        this._right = value
-        return this
-    }
-    public bottom(bottom: Length | undefined | LengthMetrics | Length | undefined, ignoreSize?: boolean): this {
-        this._bottom = bottom
-        return this
-    }
-    start(value: LengthMetrics | undefined): this {
-        this._start = value
-        return this
-    }
-    end(value: LengthMetrics | undefined): this {
-        this._end = value
-        return this
-    }
-    itemWidth(value: Length | undefined): this {
-        this._itemWidth = value
-        return this
-    }
-    itemHeight(value: Length | undefined): this {
-        this._itemHeight = value
-        return this
-    }
-    selectedItemWidth(value: Length | undefined): this {
-        this._selectedItemWidth = value
-        return this
-    }
-    selectedItemHeight(value: Length | undefined): this {
-        this._selectedItemHeight = value
-        return this
-    }
-    mask(value: boolean | undefined): this {
-        this._mask = value
-        return this
-    }
-    color(value: ResourceColor | undefined): this {
-        this._color = value
-        return this
-    }
-    selectedColor(value: ResourceColor | undefined): this {
-        this._selectedColor = value
-        return this
-    }
-    maxDisplayCount(maxDisplayCount: int32 | undefined): this {
-        this._maxDisplayCount = maxDisplayCount
-        return this
-    }
-    space(space: LengthMetrics | undefined): this {
-        this._space = space
-        return this
+    public static read(buffer: DeserializerBase): DotIndicator {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return DotIndicatorInternal.fromPtr(ptr)
     }
 }
-export class DigitIndicator {
-    _left?: Length | undefined
-    _top?: Length | undefined
-    _right?: Length | undefined
-    _bottom?: Length | undefined | LengthMetrics | Length | undefined | undefined
-    _start?: LengthMetrics | undefined
-    _end?: LengthMetrics | undefined
-    _fontColor?: ResourceColor | undefined
-    _selectedFontColor?: ResourceColor | undefined
-    _digitFont?: Font | undefined
-    _selectedDigitFont?: Font | undefined
-    constructor() {
+export class Indicator_serializer {
+    public static write(buffer: SerializerBase, value: Indicator): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
     }
-    static dot(): DotIndicator {
-        return new DotIndicator()
-    }
-    static digit(): DigitIndicator {
-        return new DigitIndicator()
-    }
-    left(value: Length | undefined): this {
-        this._left = value
-        return this
-    }
-    top(value: Length | undefined): this {
-        this._top = value
-        return this
-    }
-    right(value: Length | undefined): this {
-        this._right = value
-        return this
-    }
-    public bottom(bottom: Length | undefined | LengthMetrics | Length | undefined, ignoreSize?: boolean): this {
-        this._bottom = bottom
-        return this
-    }
-    start(value: LengthMetrics | undefined): this {
-        this._start = value
-        return this
-    }
-    end(value: LengthMetrics | undefined): this {
-        this._end = value
-        return this
-    }
-    fontColor(value: ResourceColor | undefined): this {
-        this._fontColor = value
-        return this
-    }
-    selectedFontColor(value: ResourceColor | undefined): this {
-        this._selectedFontColor = value
-        return this
-    }
-    digitFont(value: Font | undefined): this {
-        this._digitFont = value
-        return this
-    }
-    selectedDigitFont(value: Font | undefined): this {
-        this._selectedDigitFont = value
-        return this
+    public static read(buffer: DeserializerBase): Indicator {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return IndicatorInternal.fromPtr(ptr)
     }
 }
 export class SwiperAnimationEvent_serializer {
@@ -1900,427 +1983,389 @@ export class ArrowStyle_serializer {
         return value
     }
 }
-export class DotIndicator_serializer {
-    public static write(buffer: SerializerBase, value: DotIndicator): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderFor_left  = value._left
-        if (valueHolderFor_left !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_leftTmpValue  = valueHolderFor_left!
-            if (valueHolderFor_leftTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_leftTmpValueForIdx0  = valueHolderFor_leftTmpValue as string
-                valueSerializer.writeString(valueHolderFor_leftTmpValueForIdx0)
-            } else if (valueHolderFor_leftTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_leftTmpValueForIdx1  = valueHolderFor_leftTmpValue as double
-                valueSerializer.writeFloat64(valueHolderFor_leftTmpValueForIdx1)
-            } else if (valueHolderFor_leftTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_leftTmpValueForIdx2  = valueHolderFor_leftTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_leftTmpValueForIdx2)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_top  = value._top
-        if (valueHolderFor_top !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_topTmpValue  = valueHolderFor_top!
-            if (valueHolderFor_topTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_topTmpValueForIdx0  = valueHolderFor_topTmpValue as string
-                valueSerializer.writeString(valueHolderFor_topTmpValueForIdx0)
-            } else if (valueHolderFor_topTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_topTmpValueForIdx1  = valueHolderFor_topTmpValue as double
-                valueSerializer.writeFloat64(valueHolderFor_topTmpValueForIdx1)
-            } else if (valueHolderFor_topTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_topTmpValueForIdx2  = valueHolderFor_topTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_topTmpValueForIdx2)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_right  = value._right
-        if (valueHolderFor_right !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_rightTmpValue  = valueHolderFor_right!
-            if (valueHolderFor_rightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_rightTmpValueForIdx0  = valueHolderFor_rightTmpValue as string
-                valueSerializer.writeString(valueHolderFor_rightTmpValueForIdx0)
-            } else if (valueHolderFor_rightTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_rightTmpValueForIdx1  = valueHolderFor_rightTmpValue as double
-                valueSerializer.writeFloat64(valueHolderFor_rightTmpValueForIdx1)
-            } else if (valueHolderFor_rightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_rightTmpValueForIdx2  = valueHolderFor_rightTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_rightTmpValueForIdx2)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_bottom  = value._bottom
-        if (valueHolderFor_bottom !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_bottomTmpValue  = valueHolderFor_bottom!
-            if (valueHolderFor_bottomTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_bottomTmpValueForIdx0  = valueHolderFor_bottomTmpValue as string
-                valueSerializer.writeString(valueHolderFor_bottomTmpValueForIdx0)
-            } else if (valueHolderFor_bottomTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_bottomTmpValueForIdx1  = valueHolderFor_bottomTmpValue as double
-                valueSerializer.writeFloat64(valueHolderFor_bottomTmpValueForIdx1)
-            } else if (valueHolderFor_bottomTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_bottomTmpValueForIdx2  = valueHolderFor_bottomTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_bottomTmpValueForIdx2)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_start  = value._start
-        if (valueHolderFor_start !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_startTmpValue  = valueHolderFor_start!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderFor_startTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_end  = value._end
-        if (valueHolderFor_end !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_endTmpValue  = valueHolderFor_end!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderFor_endTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_itemWidth  = value._itemWidth
-        if (valueHolderFor_itemWidth !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_itemWidthTmpValue  = valueHolderFor_itemWidth!
-            if (valueHolderFor_itemWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_itemWidthTmpValueForIdx0  = valueHolderFor_itemWidthTmpValue as string
-                valueSerializer.writeString(valueHolderFor_itemWidthTmpValueForIdx0)
-            } else if (valueHolderFor_itemWidthTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_itemWidthTmpValueForIdx1  = valueHolderFor_itemWidthTmpValue as double
-                valueSerializer.writeFloat64(valueHolderFor_itemWidthTmpValueForIdx1)
-            } else if (valueHolderFor_itemWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_itemWidthTmpValueForIdx2  = valueHolderFor_itemWidthTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_itemWidthTmpValueForIdx2)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_itemHeight  = value._itemHeight
-        if (valueHolderFor_itemHeight !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_itemHeightTmpValue  = valueHolderFor_itemHeight!
-            if (valueHolderFor_itemHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_itemHeightTmpValueForIdx0  = valueHolderFor_itemHeightTmpValue as string
-                valueSerializer.writeString(valueHolderFor_itemHeightTmpValueForIdx0)
-            } else if (valueHolderFor_itemHeightTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_itemHeightTmpValueForIdx1  = valueHolderFor_itemHeightTmpValue as double
-                valueSerializer.writeFloat64(valueHolderFor_itemHeightTmpValueForIdx1)
-            } else if (valueHolderFor_itemHeightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_itemHeightTmpValueForIdx2  = valueHolderFor_itemHeightTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_itemHeightTmpValueForIdx2)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_selectedItemWidth  = value._selectedItemWidth
-        if (valueHolderFor_selectedItemWidth !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_selectedItemWidthTmpValue  = valueHolderFor_selectedItemWidth!
-            if (valueHolderFor_selectedItemWidthTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_selectedItemWidthTmpValueForIdx0  = valueHolderFor_selectedItemWidthTmpValue as string
-                valueSerializer.writeString(valueHolderFor_selectedItemWidthTmpValueForIdx0)
-            } else if (valueHolderFor_selectedItemWidthTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_selectedItemWidthTmpValueForIdx1  = valueHolderFor_selectedItemWidthTmpValue as double
-                valueSerializer.writeFloat64(valueHolderFor_selectedItemWidthTmpValueForIdx1)
-            } else if (valueHolderFor_selectedItemWidthTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_selectedItemWidthTmpValueForIdx2  = valueHolderFor_selectedItemWidthTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_selectedItemWidthTmpValueForIdx2)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_selectedItemHeight  = value._selectedItemHeight
-        if (valueHolderFor_selectedItemHeight !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_selectedItemHeightTmpValue  = valueHolderFor_selectedItemHeight!
-            if (valueHolderFor_selectedItemHeightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_selectedItemHeightTmpValueForIdx0  = valueHolderFor_selectedItemHeightTmpValue as string
-                valueSerializer.writeString(valueHolderFor_selectedItemHeightTmpValueForIdx0)
-            } else if (valueHolderFor_selectedItemHeightTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_selectedItemHeightTmpValueForIdx1  = valueHolderFor_selectedItemHeightTmpValue as double
-                valueSerializer.writeFloat64(valueHolderFor_selectedItemHeightTmpValueForIdx1)
-            } else if (valueHolderFor_selectedItemHeightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_selectedItemHeightTmpValueForIdx2  = valueHolderFor_selectedItemHeightTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_selectedItemHeightTmpValueForIdx2)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_mask  = value._mask
-        if (valueHolderFor_mask !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_maskTmpValue  = valueHolderFor_mask!
-            valueSerializer.writeBoolean(valueHolderFor_maskTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_color  = value._color
-        if (valueHolderFor_color !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_colorTmpValue  = valueHolderFor_color!
-            if (valueHolderFor_colorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_colorTmpValueForIdx0  = valueHolderFor_colorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderFor_colorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderFor_colorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_colorTmpValueForIdx1  = valueHolderFor_colorTmpValue as int32
-                valueSerializer.writeInt32(valueHolderFor_colorTmpValueForIdx1)
-            } else if (valueHolderFor_colorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_colorTmpValueForIdx2  = valueHolderFor_colorTmpValue as string
-                valueSerializer.writeString(valueHolderFor_colorTmpValueForIdx2)
-            } else if (valueHolderFor_colorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toByte())
-                const valueHolderFor_colorTmpValueForIdx3  = valueHolderFor_colorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_colorTmpValueForIdx3)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_selectedColor  = value._selectedColor
-        if (valueHolderFor_selectedColor !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_selectedColorTmpValue  = valueHolderFor_selectedColor!
-            if (valueHolderFor_selectedColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_selectedColorTmpValueForIdx0  = valueHolderFor_selectedColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderFor_selectedColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderFor_selectedColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_selectedColorTmpValueForIdx1  = valueHolderFor_selectedColorTmpValue as int32
-                valueSerializer.writeInt32(valueHolderFor_selectedColorTmpValueForIdx1)
-            } else if (valueHolderFor_selectedColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_selectedColorTmpValueForIdx2  = valueHolderFor_selectedColorTmpValue as string
-                valueSerializer.writeString(valueHolderFor_selectedColorTmpValueForIdx2)
-            } else if (valueHolderFor_selectedColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toByte())
-                const valueHolderFor_selectedColorTmpValueForIdx3  = valueHolderFor_selectedColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_selectedColorTmpValueForIdx3)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_maxDisplayCount  = value._maxDisplayCount
-        if (valueHolderFor_maxDisplayCount !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_maxDisplayCountTmpValue  = valueHolderFor_maxDisplayCount!
-            valueSerializer.writeInt32(valueHolderFor_maxDisplayCountTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_space  = value._space
-        if (valueHolderFor_space !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_spaceTmpValue  = valueHolderFor_space!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderFor_spaceTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): DotIndicator {
-        throw new Error("Can not deserialize builder class")
+export class DigitIndicatorInternal {
+    public static fromPtr(ptr: KPointer): DigitIndicator {
+        return new DigitIndicator(ptr)
     }
 }
-export class DigitIndicator_serializer {
-    public static write(buffer: SerializerBase, value: DigitIndicator): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderFor_left  = value._left
-        if (valueHolderFor_left !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_leftTmpValue  = valueHolderFor_left!
-            if (valueHolderFor_leftTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_leftTmpValueForIdx0  = valueHolderFor_leftTmpValue as string
-                valueSerializer.writeString(valueHolderFor_leftTmpValueForIdx0)
-            } else if (valueHolderFor_leftTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_leftTmpValueForIdx1  = valueHolderFor_leftTmpValue as double
-                valueSerializer.writeFloat64(valueHolderFor_leftTmpValueForIdx1)
-            } else if (valueHolderFor_leftTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_leftTmpValueForIdx2  = valueHolderFor_leftTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_leftTmpValueForIdx2)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_top  = value._top
-        if (valueHolderFor_top !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_topTmpValue  = valueHolderFor_top!
-            if (valueHolderFor_topTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_topTmpValueForIdx0  = valueHolderFor_topTmpValue as string
-                valueSerializer.writeString(valueHolderFor_topTmpValueForIdx0)
-            } else if (valueHolderFor_topTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_topTmpValueForIdx1  = valueHolderFor_topTmpValue as double
-                valueSerializer.writeFloat64(valueHolderFor_topTmpValueForIdx1)
-            } else if (valueHolderFor_topTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_topTmpValueForIdx2  = valueHolderFor_topTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_topTmpValueForIdx2)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_right  = value._right
-        if (valueHolderFor_right !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_rightTmpValue  = valueHolderFor_right!
-            if (valueHolderFor_rightTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_rightTmpValueForIdx0  = valueHolderFor_rightTmpValue as string
-                valueSerializer.writeString(valueHolderFor_rightTmpValueForIdx0)
-            } else if (valueHolderFor_rightTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_rightTmpValueForIdx1  = valueHolderFor_rightTmpValue as double
-                valueSerializer.writeFloat64(valueHolderFor_rightTmpValueForIdx1)
-            } else if (valueHolderFor_rightTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_rightTmpValueForIdx2  = valueHolderFor_rightTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_rightTmpValueForIdx2)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_bottom  = value._bottom
-        if (valueHolderFor_bottom !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_bottomTmpValue  = valueHolderFor_bottom!
-            if (valueHolderFor_bottomTmpValue instanceof string) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_bottomTmpValueForIdx0  = valueHolderFor_bottomTmpValue as string
-                valueSerializer.writeString(valueHolderFor_bottomTmpValueForIdx0)
-            } else if (valueHolderFor_bottomTmpValue instanceof double) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_bottomTmpValueForIdx1  = valueHolderFor_bottomTmpValue as double
-                valueSerializer.writeFloat64(valueHolderFor_bottomTmpValueForIdx1)
-            } else if (valueHolderFor_bottomTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_bottomTmpValueForIdx2  = valueHolderFor_bottomTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_bottomTmpValueForIdx2)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_start  = value._start
-        if (valueHolderFor_start !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_startTmpValue  = valueHolderFor_start!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderFor_startTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_end  = value._end
-        if (valueHolderFor_end !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_endTmpValue  = valueHolderFor_end!
-            LengthMetrics_serializer.write(valueSerializer, valueHolderFor_endTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_fontColor  = value._fontColor
-        if (valueHolderFor_fontColor !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_fontColorTmpValue  = valueHolderFor_fontColor!
-            if (valueHolderFor_fontColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_fontColorTmpValueForIdx0  = valueHolderFor_fontColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderFor_fontColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderFor_fontColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_fontColorTmpValueForIdx1  = valueHolderFor_fontColorTmpValue as int32
-                valueSerializer.writeInt32(valueHolderFor_fontColorTmpValueForIdx1)
-            } else if (valueHolderFor_fontColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_fontColorTmpValueForIdx2  = valueHolderFor_fontColorTmpValue as string
-                valueSerializer.writeString(valueHolderFor_fontColorTmpValueForIdx2)
-            } else if (valueHolderFor_fontColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toByte())
-                const valueHolderFor_fontColorTmpValueForIdx3  = valueHolderFor_fontColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_fontColorTmpValueForIdx3)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_selectedFontColor  = value._selectedFontColor
-        if (valueHolderFor_selectedFontColor !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_selectedFontColorTmpValue  = valueHolderFor_selectedFontColor!
-            if (valueHolderFor_selectedFontColorTmpValue instanceof Color) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderFor_selectedFontColorTmpValueForIdx0  = valueHolderFor_selectedFontColorTmpValue as Color
-                valueSerializer.writeInt32(valueHolderFor_selectedFontColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderFor_selectedFontColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderFor_selectedFontColorTmpValueForIdx1  = valueHolderFor_selectedFontColorTmpValue as int32
-                valueSerializer.writeInt32(valueHolderFor_selectedFontColorTmpValueForIdx1)
-            } else if (valueHolderFor_selectedFontColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderFor_selectedFontColorTmpValueForIdx2  = valueHolderFor_selectedFontColorTmpValue as string
-                valueSerializer.writeString(valueHolderFor_selectedFontColorTmpValueForIdx2)
-            } else if (valueHolderFor_selectedFontColorTmpValue instanceof Resource) {
-                valueSerializer.writeInt8((3).toByte())
-                const valueHolderFor_selectedFontColorTmpValueForIdx3  = valueHolderFor_selectedFontColorTmpValue as Resource
-                Resource_serializer.write(valueSerializer, valueHolderFor_selectedFontColorTmpValueForIdx3)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_digitFont  = value._digitFont
-        if (valueHolderFor_digitFont !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_digitFontTmpValue  = valueHolderFor_digitFont!
-            Font_serializer.write(valueSerializer, valueHolderFor_digitFontTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderFor_selectedDigitFont  = value._selectedDigitFont
-        if (valueHolderFor_selectedDigitFont !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderFor_selectedDigitFontTmpValue  = valueHolderFor_selectedDigitFont!
-            Font_serializer.write(valueSerializer, valueHolderFor_selectedDigitFontTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
+export class DigitIndicator extends Indicator implements MaterializedBase {
+    constructor(peerPtr: KPointer) {
+        super(peerPtr)
     }
-    public static read(buffer: DeserializerBase): DigitIndicator {
-        throw new Error("Can not deserialize builder class")
+    constructor() {
+        this(DigitIndicator.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._DigitIndicator_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._DigitIndicator_getFinalizer()
+    }
+    public fontColor(value: ResourceColor | undefined): this {
+        const value_casted = value as (ResourceColor | undefined)
+        this.fontColor_serialize(value_casted)
+        return this
+    }
+    public selectedFontColor(value: ResourceColor | undefined): this {
+        const value_casted = value as (ResourceColor | undefined)
+        this.selectedFontColor_serialize(value_casted)
+        return this
+    }
+    public digitFont(value: Font | undefined): this {
+        const value_casted = value as (Font | undefined)
+        this.digitFont_serialize(value_casted)
+        return this
+    }
+    public selectedDigitFont(value: Font | undefined): this {
+        const value_casted = value as (Font | undefined)
+        this.selectedDigitFont_serialize(value_casted)
+        return this
+    }
+    fontColor_serialize(value: ResourceColor | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+            } else if (valueTmpValue instanceof int32) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((3).toByte())
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+                }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DigitIndicator_fontColor(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+    selectedFontColor_serialize(value: ResourceColor | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+            } else if (valueTmpValue instanceof int32) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((3).toByte())
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+         ArkUIGeneratedNativeModule._DigitIndicator_selectedFontColor(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+    digitFont_serialize(value: Font | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            Font_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DigitIndicator_digitFont(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+    selectedDigitFont_serialize(value: Font | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            Font_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DigitIndicator_selectedDigitFont(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+}
+export class DotIndicatorInternal {
+    public static fromPtr(ptr: KPointer): DotIndicator {
+        return new DotIndicator(ptr)
+    }
+}
+export class DotIndicator extends Indicator implements MaterializedBase {
+    constructor(peerPtr: KPointer) {
+        super(peerPtr)
+    }
+    constructor() {
+        this(DotIndicator.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._DotIndicator_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._DotIndicator_getFinalizer()
+    }
+    public itemWidth(value: Length | undefined): this {
+        const value_casted = value as (Length | undefined)
+        this.itemWidth_serialize(value_casted)
+        return this
+    }
+    public itemHeight(value: Length | undefined): this {
+        const value_casted = value as (Length | undefined)
+        this.itemHeight_serialize(value_casted)
+        return this
+    }
+    public selectedItemWidth(value: Length | undefined): this {
+        const value_casted = value as (Length | undefined)
+        this.selectedItemWidth_serialize(value_casted)
+        return this
+    }
+    public selectedItemHeight(value: Length | undefined): this {
+        const value_casted = value as (Length | undefined)
+        this.selectedItemHeight_serialize(value_casted)
+        return this
+    }
+    public mask(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.mask_serialize(value_casted)
+        return this
+    }
+    public color(value: ResourceColor | undefined): this {
+        const value_casted = value as (ResourceColor | undefined)
+        this.color_serialize(value_casted)
+        return this
+    }
+    public selectedColor(value: ResourceColor | undefined): this {
+        const value_casted = value as (ResourceColor | undefined)
+        this.selectedColor_serialize(value_casted)
+        return this
+    }
+    public maxDisplayCount(maxDisplayCount: int32 | undefined): this {
+        const maxDisplayCount_casted = maxDisplayCount as (int32 | undefined)
+        this.maxDisplayCount_serialize(maxDisplayCount_casted)
+        return this
+    }
+    public space(space: LengthMetrics | undefined): this {
+        const space_casted = space as (LengthMetrics | undefined)
+        this.space_serialize(space_casted)
+        return this
+    }
+    itemWidth_serialize(value: Length | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DotIndicator_itemWidth(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+    itemHeight_serialize(value: Length | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DotIndicator_itemHeight(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+    selectedItemWidth_serialize(value: Length | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DotIndicator_selectedItemWidth(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+    selectedItemHeight_serialize(value: Length | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DotIndicator_selectedItemHeight(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+    mask_serialize(value: boolean | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DotIndicator_mask(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+    color_serialize(value: ResourceColor | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+            } else if (valueTmpValue instanceof int32) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((3).toByte())
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DotIndicator_color(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+    selectedColor_serialize(value: ResourceColor | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof Color) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as Color
+                thisSerializer.writeInt32(valueTmpValueForIdx0.getOrdinal())
+            } else if (valueTmpValue instanceof int32) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as int32
+                thisSerializer.writeInt32(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((3).toByte())
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DotIndicator_selectedColor(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+    maxDisplayCount_serialize(maxDisplayCount: int32 | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (maxDisplayCount !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const maxDisplayCountTmpValue  = maxDisplayCount!
+            thisSerializer.writeInt32(maxDisplayCountTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DotIndicator_maxDisplayCount(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
+    }
+    space_serialize(space: LengthMetrics | undefined): this {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (space !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const spaceTmpValue  = space!
+            LengthMetrics_serializer.write(thisSerializer, spaceTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DotIndicator_space(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return this
     }
 }

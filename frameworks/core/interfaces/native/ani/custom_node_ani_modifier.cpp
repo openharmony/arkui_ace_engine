@@ -247,6 +247,7 @@ bool QueryNavDestinationInfo1(ArkUI_Int32 uniqueId, ArkUINavDestinationInfo& inf
     info.navigationId = navDestinationResult->navigationId;
     info.state = static_cast<ani_size>(navDestinationResult->state);
     info.mode = static_cast<ani_size>(navDestinationResult->mode);
+    info.param = navDestinationResult->interopParam;
     if (navDestinationResult->size.has_value()) {
         info.width = navDestinationResult->size.value().Width();
         info.height = navDestinationResult->size.value().Height();

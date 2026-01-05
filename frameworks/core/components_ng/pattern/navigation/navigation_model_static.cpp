@@ -934,6 +934,7 @@ void NavigationModelStatic::SetCustomToolBar(FrameNode* frameNode, const RefPtr<
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     NavigationToolbarUtil::SetCustomToolBar(navBarNode, customNode);
+    navBarNode->MarkModifyDone();
 }
 
 void NavigationModelStatic::SetTitleHeight(FrameNode* frameNode, const Dimension& height, bool isValid)
