@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
+
 #include <optional>
 
 #include "base/utils/utils.h"
@@ -24,6 +25,24 @@
 namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
+
+void ParsePreviewBadge(const JSRef<JSVal>& result, NG::PreviewBadge& badge)
+{
+    if (result->IsEmpty()) {
+        return;
+    }
+    if (result->IsNumber()) {
+        int64_t number = result->ToNumber<int64_t>();
+        if (number < 0 || number > INT_MAX) {
+            badge.mode = NG::PreviewBadgeMode::AUTO;
+        } else {
+            badge.mode = NG::PreviewBadgeMode::USER_SET;
+            badge.count = result->ToNumber<int32_t>();
+        }
+    } else if (result->IsBoolean()) {
+        badge.mode = result->ToBoolean() ? NG::PreviewBadgeMode::AUTO : NG::PreviewBadgeMode::NO_BADGE;
+    }
+}
 } // namespace
 
 EdgeEffect JSScrollable::ParseEdgeEffect(const JSRef<JSVal>& jsValue, EdgeEffect defaultValue)
@@ -134,6 +153,39 @@ std::optional<PresetFillType> JSScrollable::ParsePresetFillType(const JSRef<JSVa
         return static_cast<PresetFillType>(presetFillType);
     } else {
         return std::nullopt;
+    }
+}
+
+void JSScrollable::ParseEditModeOptions(const JSCallbackInfo& info, NG::EditModeOptions& options)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto value = info[0];
+    if (value->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(value);
+        auto gatherAnimation = obj->GetProperty("enableGatherSelectedItemsAnimation");
+        if (gatherAnimation->IsBoolean()) {
+            options.enableGatherSelectedItemsAnimation = gatherAnimation->ToBoolean();
+        }
+
+        auto getPreviewBadge = obj->GetProperty("onGetPreviewBadge");
+        if (getPreviewBadge->IsFunction()) {
+            WeakPtr<NG::FrameNode> targetNode =
+                AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            auto onGetPreviewBadge =
+                [execCtx = info.GetExecutionContext(),
+                    func = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(getPreviewBadge)),
+                    node = targetNode]() {
+                    JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                    PipelineContext::SetCallBackNode(node);
+                    NG::PreviewBadge badge;
+                    auto result = func->ExecuteJS();
+                    ParsePreviewBadge(result, badge);
+                    return badge;
+                };
+            options.getPreviewBadge = std::move(onGetPreviewBadge);
+        }
     }
 }
 } // namespace OHOS::Ace::Framework

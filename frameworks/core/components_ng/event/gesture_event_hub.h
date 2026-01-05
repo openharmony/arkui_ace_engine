@@ -243,7 +243,11 @@ public:
     void SetRedirectClick(bool redirectClick);
     bool ActLongClick();
     void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false, bool isDisableMouseLeft = false,
-        int32_t duration = 500, bool withMultiSelect = false);
+        int32_t duration = 500);
+    void ReplaceLongPressEventActuator(RefPtr<LongPressEventActuator> longPressEventActuator)
+    {
+        longPressEventActuator_ = longPressEventActuator;
+    }
     RefPtr<LongPressEventActuator> GetLongPressEventActuator()
     {
         return longPressEventActuator_;

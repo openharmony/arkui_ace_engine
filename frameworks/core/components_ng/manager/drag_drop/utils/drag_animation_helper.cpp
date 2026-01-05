@@ -369,7 +369,7 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
     CHECK_NULL_VOID(dragDropManager);
     auto frameNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
     CHECK_NULL_VOID(frameNode);
-    auto badgeNumber = frameNode->GetDragPreviewOption().GetCustomerBadgeNumber();
+    auto badgeNumber = SelectableUtils::GetBadgeNumber(frameNode);
     auto childSize = badgeNumber.has_value() ? static_cast<size_t>(badgeNumber.value()) :
                                         manager->GetGatherNodeChildrenInfo().size() + 1;
     TAG_LOGI(AceLogTag::ACE_DRAG, "Badge node number %{public}d, children count %{public}d",

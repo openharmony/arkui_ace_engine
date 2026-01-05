@@ -1343,12 +1343,11 @@ void GestureEventHub::SetRedirectClick(bool redirectClick)
     redirectClick_ = redirectClick;
 }
 
-void GestureEventHub::SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag, bool isDisableMouseLeft,
-    int32_t duration, bool withMultiSelect)
+void GestureEventHub::SetLongPressEvent(
+    const RefPtr<LongPressEvent>& event, bool isForDrag, bool isDisableMouseLeft, int32_t duration)
 {
     if (!longPressEventActuator_) {
-        longPressEventActuator_ =
-            LongPressEventActuatorFactory::CreateLongPressEventActuator(WeakClaim(this), withMultiSelect);
+        longPressEventActuator_ = MakeRefPtr<LongPressEventActuator>(WeakClaim(this));
         longPressEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
     }
     longPressEventActuator_->SetLongPressEvent(event, isForDrag, isDisableMouseLeft);

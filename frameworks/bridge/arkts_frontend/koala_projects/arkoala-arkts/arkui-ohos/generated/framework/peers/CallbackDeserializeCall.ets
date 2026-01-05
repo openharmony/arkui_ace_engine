@@ -1885,6 +1885,48 @@ export function deserializeAndCallCallback_UIExtensionProxy_Void(thisDeserialize
     let value0 : UIExtensionProxy = (UIExtensionProxy_serializer.read(thisDeserializer) as UIExtensionProxy)
     _call(value0)
 }
+export function deserializeAndCallCallback_Union_Boolean_I32(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as (() => boolean | int32))
+    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
+    let continuationResult : ((value: boolean | int32) => void) = (value: boolean | int32):void => {
+        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        if (value instanceof boolean) {
+            continuationBufferBufArgsSerializer.writeInt8((0).toByte());
+            const valueForIdx0  = value as boolean;
+            continuationBufferBufArgsSerializer.writeBoolean(valueForIdx0);
+        } else if (value instanceof int32) {
+            continuationBufferBufArgsSerializer.writeInt8((1).toByte());
+            const valueForIdx1  = value as int32;
+            continuationBufferBufArgsSerializer.writeInt32(valueForIdx1);
+        }
+        InteropNativeModule._CallCallbackSync(10, -1389552, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    const _callResult  = _call()
+    continuationResult(_callResult)
+}
+export function deserializeAndCallCallback_Union_Boolean_I32_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: boolean | int32) => void))
+    const valueTmpBufUnionSelector : int32 = thisDeserializer.readInt8()
+    let valueTmpBuf : boolean | int32 | undefined
+    if (valueTmpBufUnionSelector == (0).toByte()) {
+        valueTmpBuf = thisDeserializer.readBoolean()
+    } else if (valueTmpBufUnionSelector == (1).toByte()) {
+        valueTmpBuf = thisDeserializer.readInt32()
+    } else {
+        throw new Error("One of the branches for valueTmpBuf has to be chosen through deserialisation.")
+    }
+    let value : boolean | int32 = (valueTmpBuf as boolean | int32)
+    _call(value)
+}
 export function deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: CustomBuilder | DragItemInfo) => void))
@@ -3855,6 +3897,8 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_Tuple_I32_I32_I32_I32_Void: return deserializeAndCallCallback_Tuple_I32_I32_I32_I32_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Tuple_I32_I32_Void: return deserializeAndCallCallback_Tuple_I32_I32_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_UIExtensionProxy_Void: return deserializeAndCallCallback_UIExtensionProxy_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Union_Boolean_I32: return deserializeAndCallCallback_Union_Boolean_I32(thisDeserializer);
+        case CallbackKind.Kind_Callback_Union_Boolean_I32_Void: return deserializeAndCallCallback_Union_Boolean_I32_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Union_DrawingRenderingContext_Undefined_Void: return deserializeAndCallCallback_Union_DrawingRenderingContext_Undefined_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Union_Object_Idlize_Stdlib_Null_Undefined_Void: return deserializeAndCallCallback_Union_Object_Idlize_Stdlib_Null_Undefined_Void(thisDeserializer);

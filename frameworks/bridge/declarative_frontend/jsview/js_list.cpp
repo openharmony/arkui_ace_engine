@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -651,16 +651,7 @@ void JSList::SetSyncLoad(const JSCallbackInfo& args)
 void JSList::SetEditModeOptions(const JSCallbackInfo& info)
 {
     NG::EditModeOptions options;
-    if (info.Length() >= 1) {
-        auto value = info[0];
-        if (value->IsObject()) {
-            JSRef<JSObject> obj = JSRef<JSObject>::Cast(value);
-            auto gatherAnimation = obj->GetProperty("enableGatherSelectedItemsAnimation");
-            if (gatherAnimation->IsBoolean()) {
-                options.enableGatherSelectedItemsAnimation = gatherAnimation->ToBoolean();
-            }
-        }
-    }
+    JSScrollable::ParseEditModeOptions(info, options);
     ListModel::GetInstance()->SetEditModeOptions(options);
 }
 

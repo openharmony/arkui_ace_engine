@@ -9255,6 +9255,7 @@ export enum EffectEdge {
 }
 export interface EditModeOptions {
     enableGatherSelectedItemsAnimation?: boolean;
+    onGetPreviewBadge?: (() => boolean | int32);
 }
 export interface BackgroundBrightnessOptions {
     rate: double;
@@ -12492,6 +12493,14 @@ export class EditModeOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForOnGetPreviewBadge  = value.onGetPreviewBadge
+        if (valueHolderForOnGetPreviewBadge !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnGetPreviewBadgeTmpValue  = valueHolderForOnGetPreviewBadge!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnGetPreviewBadgeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): EditModeOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -12501,7 +12510,29 @@ export class EditModeOptions_serializer {
             enableGatherSelectedItemsAnimationTmpBuf = valueDeserializer.readBoolean()
         }
         const enableGatherSelectedItemsAnimationTmpResult : boolean | undefined = enableGatherSelectedItemsAnimationTmpBuf
-        let value : EditModeOptions = ({enableGatherSelectedItemsAnimation: enableGatherSelectedItemsAnimationTmpResult} as EditModeOptions)
+        const onGetPreviewBadgeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onGetPreviewBadgeTmpBuf : (() => boolean | int32) | undefined = undefined
+        if ((onGetPreviewBadgeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onGetPreviewBadgeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onGetPreviewBadgeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onGetPreviewBadgeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onGetPreviewBadgeTmpBuf = ():boolean | int32 => {
+                const onGetPreviewBadgeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onGetPreviewBadgeTmpBuf_BufArgsSerializer.writeInt32(onGetPreviewBadgeTmpBuf_BufResource.resourceId);
+                onGetPreviewBadgeTmpBuf_BufArgsSerializer.writePointer(onGetPreviewBadgeTmpBuf_BufCall);
+                onGetPreviewBadgeTmpBuf_BufArgsSerializer.writePointer(onGetPreviewBadgeTmpBuf_BufCallSync);
+                let onGetPreviewBadgeTmpBuf_BufContinuationValue : boolean | int32 | undefined;
+                const onGetPreviewBadgeTmpBuf_BufContinuationCallback : ((value: boolean | int32) => void) = (value: boolean | int32):void => {
+                onGetPreviewBadgeTmpBuf_BufContinuationValue = value;
+            }
+                onGetPreviewBadgeTmpBuf_BufArgsSerializer.holdAndWriteCallback(onGetPreviewBadgeTmpBuf_BufContinuationCallback);
+                InteropNativeModule._CallCallbackSync(10, 250356603, onGetPreviewBadgeTmpBuf_BufArgsSerializer.asBuffer(), onGetPreviewBadgeTmpBuf_BufArgsSerializer.length());
+                onGetPreviewBadgeTmpBuf_BufArgsSerializer.release();
+                return (onGetPreviewBadgeTmpBuf_BufContinuationValue as boolean | int32);
+            }
+        }
+        const onGetPreviewBadgeTmpResult : (() => boolean | int32) | undefined = onGetPreviewBadgeTmpBuf
+        let value : EditModeOptions = ({enableGatherSelectedItemsAnimation: enableGatherSelectedItemsAnimationTmpResult, onGetPreviewBadge: onGetPreviewBadgeTmpResult} as EditModeOptions)
         return value
     }
 }

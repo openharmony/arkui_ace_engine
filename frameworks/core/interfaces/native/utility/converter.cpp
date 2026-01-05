@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/scrollable/selectable_container_pattern.h" // PreviewBadge
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/interfaces/native/implementation/circle_shape_peer.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
@@ -3317,6 +3318,25 @@ void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& 
         }
         dst->SetColor(*colorOpt);
     }
+}
+
+template<>
+void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Boolean& from)
+{
+    PreviewBadge ret;
+    ret.mode = from ? PreviewBadgeMode::AUTO : PreviewBadgeMode::NO_BADGE;
+    dst = ret;
+}
+
+template<>
+void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Int32& from)
+{
+    PreviewBadge ret;
+    if (from >= 0) {
+        ret.mode = PreviewBadgeMode::USER_SET;
+        ret.count = from;
+    }
+    dst = ret;
 }
 
 template<>
