@@ -3272,16 +3272,16 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/res
 frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.h @arkui_framework_resource
 
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/UIContextImpl.ets @arkui_framework_xnode
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/BuilderNode.ts @arkuieco3
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/FrameNode.ts @arkuieco3
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/RenderNode.ts @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/BuilderNode.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/FrameNode.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/RenderNode.ets @arkuieco3
 frameworks/core/interfaces/native/implementation/frame_node_accessor.cpp @arkui_framework_xnode
 frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ArkUIEntry.ts @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/theme/ @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Graphics.ts @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Graphics.ets @arkui_framework_xnode
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/NodeController.ts @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/NodeController.ets @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/resources.ts @arkui_framework_resource
 frameworks/bridge/arkts_frontend/koala_projects/inner_api/ @arkui_framework_resource
 frameworks/bridge/arkts_frontend/arkts_frontend.cpp @arkui_framework_xnode
