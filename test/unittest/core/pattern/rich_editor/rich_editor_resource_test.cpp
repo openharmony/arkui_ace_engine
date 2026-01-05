@@ -139,12 +139,18 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToSpanNodeTest003, TestSize.
 
 HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToSpanNodeTest004, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. test old flow
+     */
     RefPtr<SpanNode> spanNode = AceType::MakeRefPtr<SpanNode>(1);
     TextStyle textStyle;
     RefPtr<ResourceObject> colorResObj = AceType::MakeRefPtr<ResourceObject>();
     textStyle.AddResource(StyleManager::TEXT_COLOR_KEY, colorResObj, StyleManager::TEXT_STYLE_TEXT_COLOR_UPDATER);
     g_isConfigChangePerform = true;
 
+    /**
+     * @tc.steps: step2. test new flow
+     */
     StyleManager::AddTextColorResource(spanNode, textStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 1);
 
