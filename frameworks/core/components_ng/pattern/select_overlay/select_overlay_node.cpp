@@ -278,6 +278,7 @@ void PreparePasteButtonLayoutProperty(RefPtr<OHOS::Ace::NG::SecurityComponentLay
     CHECK_NULL_VOID(buttonLayoutProperty);
     CHECK_NULL_VOID(textOverlayTheme);
     auto descriptionId = static_cast<int32_t>(PasteButtonPasteDescription::PASTE);
+    buttonLayoutProperty->UpdateBackgroundBorderRadius(BorderRadiusProperty(textOverlayTheme->GetMenuButtonRadius()));
 
     buttonLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
     buttonLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
@@ -302,7 +303,7 @@ RefPtr<FrameNode> BuildPasteButton(const std::shared_ptr<SelectOverlayInfo>& inf
 {
     auto descriptionId = static_cast<int32_t>(PasteButtonPasteDescription::PASTE);
     auto pasteButton = PasteButtonModelNG::GetInstance()->CreateNode(descriptionId,
-        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::CAPSULE),
+        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL),
         true, static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL));
     CHECK_NULL_RETURN(pasteButton, nullptr);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
