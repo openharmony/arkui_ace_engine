@@ -480,7 +480,8 @@ export class SegmentButtonOptions {
       direction: options.direction,
       borderRadiusMode: options.borderRadiusMode,
       backgroundBorderRadius: options.backgroundBorderRadius,
-      itemBorderRadius: options.itemBorderRadius
+      itemBorderRadius: options.itemBorderRadius,
+      backgroundSystemMaterial: options.backgroundSystemMaterial
     })
   }
 }
