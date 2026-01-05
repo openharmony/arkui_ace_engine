@@ -1444,23 +1444,24 @@ void UINode::DumpSimplifyTreeWithParamConfig(
         (config.cacheNodes && !cacheChildren.empty());
     if (hasChildren) {
         auto array = JsonUtil::CreateArray();
-        for (const auto& item : nodeChildren) {
-            auto child = JsonUtil::CreateSharedPtrJson();
-            item->DumpSimplifyTreeWithParamConfig(depth + 1, child, onlyNeedVisible, config);
-            array->PutRef(std::move(child));
+        if (config.cacheNodes && !cacheChildren.empty()) {
+            for (const auto& item : cacheChildren) {
+                CHECK_NULL_CONTINUE(item);
+                auto child = JsonUtil::CreateSharedPtrJson();
+                item->DumpSimplifyTreeWithParamConfig(depth + 1, child, false, config);
+                array->PutRef(std::move(child));
+            }
+        } else {
+            for (const auto& item : nodeChildren) {
+                auto child = JsonUtil::CreateSharedPtrJson();
+                item->DumpSimplifyTreeWithParamConfig(depth + 1, child, onlyNeedVisible, config);
+                array->PutRef(std::move(child));
+            }
         }
         for (const auto& [item, index, branch] : disappearingChildren_) {
             auto child = JsonUtil::CreateSharedPtrJson();
             item->DumpSimplifyTreeWithParamConfig(depth + 1, child, onlyNeedVisible, config);
             array->PutRef(std::move(child));
-        }
-        if (config.cacheNodes) {
-            for (const auto& item : cacheChildren) {
-                CHECK_NULL_CONTINUE(item);
-                auto child = JsonUtil::CreateSharedPtrJson();
-                item->DumpSimplifyTreeWithParamConfig(depth + 1, child, onlyNeedVisible, config);
-                array->PutRef(std::move(child));
-            }
         }
         current->PutRef("$children", std::move(array));
     }

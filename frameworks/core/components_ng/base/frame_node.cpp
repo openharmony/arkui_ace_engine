@@ -1122,6 +1122,12 @@ void FrameNode::DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json)
     if (!propInspectorId_->empty()) {
         json->Put("compid", propInspectorId_.value_or("").c_str());
     }
+    if (!IsActive()) {
+        json->Put("active", "false");
+    }
+    if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        json->Put("visible", "false");
+    }
 }
 
 void FrameNode::DumpSimplifyCommonInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config)

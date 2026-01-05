@@ -84,7 +84,8 @@ void ContentChangeManagerTestNg::TearDownTestCase()
 HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. test whether can get content change manager
+     * @tc.steps: step1. test whether can get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
      */
     auto contentChangeMgr = GetContentChangeManager();
     ASSERT_NE(contentChangeMgr, nullptr);
@@ -129,7 +130,8 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest001, TestSize.Level
 HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. test whether can get content change manager
+     * @tc.steps: step1. test whether can get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
      */
     auto contentChangeMgr = GetContentChangeManager();
     ASSERT_NE(contentChangeMgr, nullptr);
@@ -179,7 +181,8 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest002, TestSize.Level
 HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. test whether can get content change manager
+     * @tc.steps: step1. test whether can get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
      */
     auto contentChangeMgr = GetContentChangeManager();
     ASSERT_NE(contentChangeMgr, nullptr);
