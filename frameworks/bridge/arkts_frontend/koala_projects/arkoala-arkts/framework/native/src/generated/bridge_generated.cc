@@ -11067,7 +11067,7 @@ void impl_NavDestinationAttribute_setTitle(Ark_NativePointer thisPtr, KSerialize
         Opt_NavigationTitleOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavDestinationModifier()->setTitle(self, static_cast<Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource*>(&valueValueTemp), static_cast<Opt_NavigationTitleOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavDestinationAttribute_setTitle, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavDestinationAttribute_setTitle, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavDestinationAttribute_setHideTitleBar1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -11185,7 +11185,7 @@ void impl_NavDestinationAttribute_setMenus(Ark_NativePointer thisPtr, KSerialize
         Opt_NavigationMenuOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavDestinationModifier()->setMenus(self, static_cast<Opt_Union_Array_NavigationMenuItem_CustomBuilder*>(&itemsValueTemp), static_cast<Opt_NavigationMenuOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavDestinationAttribute_setMenus, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavDestinationAttribute_setMenus, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavDestinationAttribute_setToolbarConfiguration(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -11224,7 +11224,7 @@ void impl_NavDestinationAttribute_setToolbarConfiguration(Ark_NativePointer this
         Opt_NavigationToolbarOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavDestinationModifier()->setToolbarConfiguration(self, static_cast<Opt_Union_Array_ToolbarItem_CustomBuilder*>(&toolbarParamValueTemp), static_cast<Opt_NavigationToolbarOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavDestinationAttribute_setToolbarConfiguration, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavDestinationAttribute_setToolbarConfiguration, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavDestinationAttribute_setHideToolBar(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -11763,7 +11763,7 @@ void impl_NavigationAttribute_setTitle(Ark_NativePointer thisPtr, KSerializerBuf
         Opt_NavigationTitleOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavigationModifier()->setTitle(self, static_cast<Opt_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_NavigationCustomTitle*>(&valueValueTemp), static_cast<Opt_NavigationTitleOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavigationAttribute_setTitle, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavigationAttribute_setTitle, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavigationAttribute_setHideTitleBar1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -11822,7 +11822,7 @@ void impl_NavigationAttribute_setMenus(Ark_NativePointer thisPtr, KSerializerBuf
         Opt_NavigationMenuOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavigationModifier()->setMenus(self, static_cast<Opt_Union_Array_NavigationMenuItem_CustomBuilder*>(&itemsValueTemp), static_cast<Opt_NavigationMenuOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavigationAttribute_setMenus, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavigationAttribute_setMenus, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavigationAttribute_setToolbarConfiguration(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -11861,7 +11861,7 @@ void impl_NavigationAttribute_setToolbarConfiguration(Ark_NativePointer thisPtr,
         Opt_NavigationToolbarOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetNodeModifiers()->getNavigationModifier()->setToolbarConfiguration(self, static_cast<Opt_Union_Array_ToolbarItem_CustomBuilder*>(&valueValueTemp), static_cast<Opt_NavigationToolbarOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(NavigationAttribute_setToolbarConfiguration, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V3(NavigationAttribute_setToolbarConfiguration, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavigationAttribute_setHideToolBar1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
