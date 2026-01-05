@@ -144,6 +144,16 @@ struct TextDetectConfig {
     std::unordered_map<std::string, ResourceUpdater> detectConfigResMap_;
 };
 
+// support new material.
+struct ExternalDrawCallbackInfo {
+    float paintX = 0.0f;
+    float paintY = 0.0f;
+    float width = 0.0f;
+    float height = 0.0f;
+    bool isFontChanged = false;
+    float fontSize = 0.0f;
+};
+
 class ACE_EXPORT SpanStringBase : public AceType {
     DECLARE_ACE_TYPE(SpanStringBase, AceType);
 };

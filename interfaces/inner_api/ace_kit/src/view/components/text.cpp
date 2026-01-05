@@ -64,7 +64,20 @@ std::optional<void*> Text::GetParagraph()
 
 void Text::SetDrawCallback(DrawCallback&& drawCallback)
 {
-    NG::TextModelNG::SetExternalDrawCallback(reinterpret_cast<AceNode*>(node_->GetHandle()), std::move(drawCallback));
+    auto drawCallbackNg = [callback = std::move(drawCallback)](const ExternalDrawCallbackInfo& info) {
+        if (callback) {
+            DrawCallbackInfo callbackInfo;
+            callbackInfo.paintX = info.paintX;
+            callbackInfo.paintY = info.paintY;
+            callbackInfo.width = info.width;
+            callbackInfo.height = info.height;
+            callbackInfo.isFontChanged = info.isFontChanged;
+            callbackInfo.fontSize = info.fontSize;
+            return callback(callbackInfo);
+        }
+        return false;
+    };
+    NG::TextModelNG::SetExternalDrawCallback(reinterpret_cast<AceNode*>(node_->GetHandle()), std::move(drawCallbackNg));
 }
 
 std::u16string Text::GetContent()

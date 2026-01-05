@@ -1974,7 +1974,7 @@ void TextModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
 }
 
 void TextModelNG::SetExternalDrawCallback(
-    FrameNode* frameNode, std::function<bool(float, float, float, float)>&& callback)
+    FrameNode* frameNode, std::function<bool(const ExternalDrawCallbackInfo&)>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
