@@ -477,10 +477,15 @@ void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
 {
     for (const auto& item : currentNode->GetChildren()) {
         auto node = AceType::DynamicCast<NG::FrameNode>(item);
-        if (node && node->CheckVisibleAndActive() && node->GetTag() == V2::IMAGE_ETS_TAG) {
-            auto imagePattern = node->GetPattern<NG::ImagePattern>();
-            CHECK_NULL_VOID(imagePattern);
-            imagePattern->AddPixelMapToUiManager();
+        if (node) {
+            if (!node->CheckVisibleAndActive()) {
+                continue;
+            }
+            if (node->GetTag() == V2::IMAGE_ETS_TAG) {
+                auto imagePattern = node->GetPattern<NG::ImagePattern>();
+                CHECK_NULL_CONTINUE(imagePattern);
+                imagePattern->AddPixelMapToUiManager();
+            }
         }
         TravelFindPixelMap(item);
     }
