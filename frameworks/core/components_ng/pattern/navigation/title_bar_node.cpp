@@ -101,4 +101,10 @@ void TitleBarNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     auto titleBarOptions = titleBarPattern->GetTitleBarOptions();
     titleBarOptions.ToJsonValue(json, filter);
 }
+
+bool TitleBarNode::IsChildEmpty() const
+{
+    bool isMenuEmpty = menu_ ? menu_->GetChildren().empty() : true;
+    return !title_ && !subtitle_ && !backButton_ && isMenuEmpty;
+}
 } // namespace OHOS::Ace::NG
