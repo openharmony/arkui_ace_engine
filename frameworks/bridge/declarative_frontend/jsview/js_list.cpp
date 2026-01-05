@@ -98,6 +98,18 @@ void SyncChildrenSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChi
     childrenSize->SyncChildrenSizeOver();
 }
 
+void CallSetNativeMainSize(const JSRef<JSObject>& childrenSizeObj,
+    const JSClass<JSListChildrenMainSize>& nativeMainSize)
+{
+    auto property = childrenSizeObj->GetProperty("setNativeMainSize");
+    if (property->IsFunction()) {
+        auto setnativeMainSizeFunc = JSRef<JSFunc>::Cast(property);
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>::Cast(nativeMainSize);
+        setnativeMainSizeFunc->Call(childrenSizeObj, 1, params);
+    }
+}
+
 void InitNativeMainSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChildrenMainSize> listChildrenMainSize,
     NG::FrameNode* node = nullptr)
 {
@@ -107,6 +119,9 @@ void InitNativeMainSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListC
     }
     auto nativeMainSizeObj = JSRef<JSObject>::Cast(nativeMainSize);
     JSListChildrenMainSize* jsChildrenMainSize = nativeMainSizeObj->Unwrap<JSListChildrenMainSize>();
+    if (jsChildrenMainSize == nullptr) {
+        return;
+    }
     auto frameNode = AceType::WeakClaim(node ? node : NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     jsChildrenMainSize->SetHost(frameNode);
 
@@ -146,13 +161,7 @@ void InitNativeMainSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListC
     };
     jsChildrenMainSize->SetOnDefaultSizeUpdate(updateSizeCallback);
 
-    auto property = childrenSizeObj->GetProperty("setNativeMainSize");
-    if (property->IsFunction()) {
-        auto setnativeMainSizeFunc = JSRef<JSFunc>::Cast(property);
-        JSRef<JSVal> params[1];
-        params[0] = JSRef<JSVal>::Cast(nativeMainSize);
-        setnativeMainSizeFunc->Call(childrenSizeObj, 1, params);
-    }
+    CallSetNativeMainSize(childrenSizeObj, nativeMainSize);
 }
 } // namespace
 
