@@ -481,6 +481,7 @@ public:
         OHOS::Rosen::Window* window, const std::string& name, ani_object storage, uint32_t focusWindowId) override;
 
     void SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor);
+    void SetXComponentDisplayConstraintEnabled(bool isEnable) override;
 
 protected:
     void RunIntentPageIfNeeded();
