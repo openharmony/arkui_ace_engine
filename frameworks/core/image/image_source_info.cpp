@@ -208,6 +208,19 @@ ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, s
     GenerateCacheKey();
 }
 
+ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<uint8_t[]>& buffer, size_t bufferSize)
+    : buffer_(buffer), bufferSize_(bufferSize)
+{
+    isSvg_ = true;
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        localColorMode_ = pipelineContext->GetLocalColorMode();
+    }
+    srcType_ = SrcType::STREAM;
+
+    GenerateCacheKey();
+}
+
 SrcType ImageSourceInfo::ResolveSrcType() const
 {
     if (pixmap_) {
@@ -231,7 +244,8 @@ void ImageSourceInfo::GenerateCacheKey()
         .append(moduleName_)
         .append(std::to_string(static_cast<int32_t>(resourceId_)))
         .append(std::to_string(static_cast<int32_t>(Container::CurrentColorMode())))
-        .append(std::to_string(static_cast<int32_t>(localColorMode_)));
+        .append(std::to_string(static_cast<int32_t>(localColorMode_)))
+        .append(std::to_string(reinterpret_cast<std::size_t>(buffer_.get())));
     if (srcType_ == SrcType::BASE64) {
         name.append("SrcType:BASE64");
     }
@@ -250,6 +264,10 @@ bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
     }
     // only svg uses fillColor
     if (isSvg_ && fillColor_ != info.fillColor_) {
+        return false;
+    }
+
+    if (buffer_ != info.buffer_) {
         return false;
     }
     return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmapBuffer_ == info.pixmap_->GetPixels() &&
@@ -418,6 +436,16 @@ const std::optional<Color>& ImageSourceInfo::GetFillColor() const
 const RefPtr<PixelMap>& ImageSourceInfo::GetPixmap() const
 {
     return pixmap_;
+}
+
+const std::shared_ptr<uint8_t[]>& ImageSourceInfo::GetBuffer() const
+{
+    return buffer_;
+}
+
+size_t ImageSourceInfo::GetBufferSize() const
+{
+    return bufferSize_;
 }
 
 bool ImageSourceInfo::SupportObjCache() const
