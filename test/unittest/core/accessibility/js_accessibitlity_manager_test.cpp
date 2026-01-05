@@ -1275,6 +1275,26 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager023, TestSize.Level1)
     EXPECT_EQ(nodeInfo.GetAccessibilityScrollable(), true);
 }
 
+/**
+ * @tc.name: JsAccessibilityManager024
+ * @tc.desc: dump event test  DumpProcessEventParameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager024, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    bool accessibilityEnableBackup = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    frameNode->OnAccessibilityEvent(
+            AccessibilityEventType::CLICK, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID, true);
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(accessibilityEnableBackup);
+    MockPipelineContext::TearDown();
+}
+
 class MockRenderContextTest : public RenderContext {
 public:
     RectF GetPaintRectWithoutTransform() override

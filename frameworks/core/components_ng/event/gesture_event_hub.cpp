@@ -761,7 +761,7 @@ OnAccessibilityEventFunc GestureEventHub::GetOnAccessibilityEventFunc()
         CHECK_NULL_VOID(gestureHub);
         auto node = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(node);
-        node->OnAccessibilityEvent(eventType);
+        node->OnAccessibilityEvent(eventType, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID, true);
     };
     return callback;
 }
@@ -848,7 +848,8 @@ bool GestureEventHub::ActClick(std::shared_ptr<JsonValue> secComphandle)
     if (clickRecognizer) {
         click = clickRecognizer->GetTapActionFunc();
         click(info);
-        host->OnAccessibilityEvent(AccessibilityEventType::CLICK);
+        host->OnAccessibilityEvent(
+            AccessibilityEventType::CLICK, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID, true);
         return true;
     }
     return false;
