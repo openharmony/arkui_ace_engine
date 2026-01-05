@@ -46,9 +46,8 @@ public:
     bool GetHasSendArkWebQueryResult() const;
     void SendArkUIImagesById();
     void SendArkWebImagesById();
-    void DoSendArkWebImagesById();
+    void DoSendArkWebImagesById(bool triggerFromArkWebCallback = false);
     void MarkCurrentWebImageQueryDone(int32_t currentWebId);
-    void AddArkUIComponentPixelMap(int32_t componentId, std::shared_ptr<Media::PixelMap>& componentPixelMap);
     void AddArkWebImageMap(int32_t webId, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>& webImageMap);
     void PostToUI(const std::function<void()>& task) override;
 
