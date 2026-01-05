@@ -41,7 +41,6 @@ public:
     inline RoundRect(const Rect& r, scalar xRad, scalar yRad) noexcept;
     inline RoundRect(const Rect& r, const std::vector<Point>& radiusXY) noexcept;
 
-
     inline void SetRect(const Rect& rect);
     inline const Rect& GetRect() const;
 

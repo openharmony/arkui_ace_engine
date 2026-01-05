@@ -48,7 +48,7 @@ inline scalar ConvertSigmaToRadius(scalar sigma)
  */
 inline scalar ConvertRadiansToDegrees(scalar radians)
 {
-    return radians * (180 / FLOAT_PI);
+    return radians * (180 / FLOAT_PI); // 180 : degrees of pi radians
 }
 } // namespace Drawing
 } // namespace Rosen

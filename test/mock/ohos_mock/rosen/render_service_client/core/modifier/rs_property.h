@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include <memory>
-
 #ifndef RENDER_SERVICE_CLIENT_CORE_MODIFIER_RS_PROPERTY_H
 #define RENDER_SERVICE_CLIENT_CORE_MODIFIER_RS_PROPERTY_H
+
+#include <memory>
+
 namespace OHOS {
 namespace Rosen {
 enum class ThresholdType {
@@ -44,4 +45,4 @@ public:
 };
 }
 }
-#endif
+#endif // RENDER_SERVICE_CLIENT_CORE_MODIFIER_RS_PROPERTY_H

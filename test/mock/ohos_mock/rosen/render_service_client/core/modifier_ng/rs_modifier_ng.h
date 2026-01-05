@@ -35,7 +35,6 @@ public:
         return id_;
     }
 
-    // void OnAttach(RSNode& node);
     void OnDetach();
     void AttachProperty(const std::shared_ptr<RSPropertyBase>& property) {}
     void AttachProperty(RSPropertyType type, std::shared_ptr<RSPropertyBase> property) {}
@@ -62,12 +61,7 @@ public:
         return false;
     }
 
-    void ResetRSNodeExtendModifierDirty()
-    {
-        // if (auto node = node_.lock()) {
-        //     node->ResetExtendModifierDirty();
-        // }
-    }
+    void ResetRSNodeExtendModifierDirty() {}
 
 protected:
     RSModifier() : id_(0) {}
@@ -76,77 +70,13 @@ protected:
     // only accept properties on white list ?
     std::map<RSPropertyType, std::shared_ptr<RSPropertyBase>> properties_;
     ModifierId id_;
-    // std::weak_ptr<RSNode> node_;
 
     virtual void UpdateToRender() {}
     virtual void MarkNodeDirty() {}
 
-    // template<typename T>
-    // inline T Getter(RSPropertyType type, const T& defaultValue) const
-    // {
-    //     auto it = properties_.find(type);
-    //     if (it == properties_.end()) {
-    //         return defaultValue;
-    //     }
-    //     auto property = std::static_pointer_cast<RSProperty<T>>(it->second);
-    //     return property->Get();
-    // }
-
-    // template<typename T>
-    // inline T GetterWithoutCheck(const std::shared_ptr<RSPropertyBase> property) const
-    // {
-    //     return std::static_pointer_cast<RSProperty<T>>(property)->Get();
-    // }
-
-    // template<template<typename> class PropertyType = RSAnimatableProperty, typename T>
-    // inline void Setter(RSPropertyType type, const T& value)
-    // {
-    //     auto it = properties_.find(type);
-    //     if (it != properties_.end()) {
-    //         auto property = std::static_pointer_cast<PropertyType<T>>(it->second);
-    //         property->Set(value);
-    //     } else {
-    //         std::shared_ptr<RSPropertyBase> property = std::make_shared<PropertyType<T>>(value);
-    //         AttachProperty(type, property);
-    //     }
-    // }
-
-    // template<typename T>
-    // inline std::optional<T> GetterOptional(RSPropertyType type) const
-    // {
-    //     auto it = properties_.find(type);
-    //     if (it == properties_.end()) {
-    //         return std::nullopt;
-    //     }
-    //     auto property = std::static_pointer_cast<RSProperty<T>>(it->second);
-    //     return property->Get();
-    // }
-
-    // template<template<typename> class PropertyType = RSProperty, typename T>
-    // inline void SetterOptional(RSPropertyType type, const std::optional<T>& value)
-    // {
-    //     if (!value.has_value()) {
-    //         DetachProperty(type);
-    //         return;
-    //     }
-    //     auto it = properties_.find(type);
-    //     if (it != properties_.end()) {
-    //         auto property = std::static_pointer_cast<PropertyType<T>>(it->second);
-    //         property->Set(value.value());
-    //     } else {
-    //         std::shared_ptr<RSPropertyBase> property = std::make_shared<PropertyType<T>>(value.value());
-    //         AttachProperty(type, property);
-    //     }
-    // }
-
 private:
-    // static ModifierId GenerateModifierId();
-    // void SetPropertyThresholdType(RSPropertyType type, std::shared_ptr<RSPropertyBase> property);
     bool isDirty_ { false };
 
-    // friend class OHOS::Rosen::RSModifierExtractor;
-    // friend class OHOS::Rosen::RSModifierManager;
-    // friend class OHOS::Rosen::RSNode;
     friend class OHOS::Rosen::RSPropertyBase;
 };
 } // namespace ModifierNG
