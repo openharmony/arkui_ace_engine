@@ -996,6 +996,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     needRenderNodeByUniqueId_.clear();
     taskScheduler_->FlushAfterRenderTask();
     window_->FlushLayoutSize(width_, height_);
+    window_->FlushVsync();
     if (IsFocusWindowIdSetted()) {
         FireAllUIExtensionEvents();
     }
