@@ -245,6 +245,7 @@ export enum CallbackKind {
     Kind_OnDidChangeCallback = 1648184341,
     Kind_OnDragEventCallback = 1451593190,
     Kind_OnFirstMeaningfulPaintCallback = 767275770,
+    Kind_OnFirstScreenPaintCallback = -203561522,
     Kind_OnFoldStatusChangeCallback = 2050387049,
     Kind_OnFullScreenEnterCallback = 81230317,
     Kind_OnHoverCallback = -2025767812,

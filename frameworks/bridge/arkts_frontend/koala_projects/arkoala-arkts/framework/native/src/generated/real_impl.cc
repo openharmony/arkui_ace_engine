@@ -8362,6 +8362,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                       const Opt_TextSelectionChangeCallback* value)
     {
     }
+    void SetOnFirstScreenPaintImpl(Ark_NativePointer node,
+                                   const Opt_OnFirstScreenPaintCallback* value)
+    {
+    }
     void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
                                     const Opt_Boolean* value)
     {
@@ -10858,6 +10862,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::SetZoomControlAccessImpl,
             WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
             WebAttributeModifier::SetOnTextSelectionChangeImpl,
+            WebAttributeModifier::SetOnFirstScreenPaintImpl,
             WebAttributeModifier::SetEnableImageAnalyzerImpl,
             WebAttributeModifier::SetEnableAutoFillImpl,
             WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,

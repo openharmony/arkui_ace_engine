@@ -1644,6 +1644,8 @@ typedef struct OnDragEventCallback OnDragEventCallback;
 typedef struct Opt_OnDragEventCallback Opt_OnDragEventCallback;
 typedef struct OnFirstMeaningfulPaintCallback OnFirstMeaningfulPaintCallback;
 typedef struct Opt_OnFirstMeaningfulPaintCallback Opt_OnFirstMeaningfulPaintCallback;
+typedef struct OnFirstScreenPaintCallback OnFirstScreenPaintCallback;
+typedef struct Opt_OnFirstScreenPaintCallback Opt_OnFirstScreenPaintCallback;
 typedef struct OnFoldStatusChangeCallback OnFoldStatusChangeCallback;
 typedef struct Opt_OnFoldStatusChangeCallback Opt_OnFoldStatusChangeCallback;
 typedef struct OnFullScreenEnterCallback OnFullScreenEnterCallback;
@@ -2065,6 +2067,8 @@ typedef struct Ark_FingerInfo Ark_FingerInfo;
 typedef struct Opt_FingerInfo Opt_FingerInfo;
 typedef struct Ark_FirstMeaningfulPaint Ark_FirstMeaningfulPaint;
 typedef struct Opt_FirstMeaningfulPaint Opt_FirstMeaningfulPaint;
+typedef struct Ark_FirstScreenPaint Ark_FirstScreenPaint;
+typedef struct Opt_FirstScreenPaint Opt_FirstScreenPaint;
 typedef struct Ark_FocusMovement Ark_FocusMovement;
 typedef struct Opt_FocusMovement Opt_FocusMovement;
 typedef struct Ark_FolderStackOptions Ark_FolderStackOptions;
@@ -12890,6 +12894,16 @@ typedef struct Opt_OnFirstMeaningfulPaintCallback {
     Ark_Tag tag;
     OnFirstMeaningfulPaintCallback value;
 } Opt_OnFirstMeaningfulPaintCallback;
+typedef struct OnFirstScreenPaintCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_FirstScreenPaint firstScreenPaint);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_FirstScreenPaint firstScreenPaint);
+} OnFirstScreenPaintCallback;
+typedef struct Opt_OnFirstScreenPaintCallback {
+    Ark_Tag tag;
+    OnFirstScreenPaintCallback value;
+} Opt_OnFirstScreenPaintCallback;
 typedef struct OnFoldStatusChangeCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -14781,6 +14795,16 @@ typedef struct Opt_FirstMeaningfulPaint {
     Ark_Tag tag;
     Ark_FirstMeaningfulPaint value;
 } Opt_FirstMeaningfulPaint;
+typedef struct Ark_FirstScreenPaint {
+    /* kind: Interface */
+    Ark_String url;
+    Ark_Int64 navigationStartTime;
+    Ark_Int64 firstScreenPaintTime;
+} Ark_FirstScreenPaint;
+typedef struct Opt_FirstScreenPaint {
+    Ark_Tag tag;
+    Ark_FirstScreenPaint value;
+} Opt_FirstScreenPaint;
 typedef struct Ark_FocusMovement {
     /* kind: Interface */
     Opt_String forward;
@@ -26615,6 +26639,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                           const Opt_Boolean* value);
     void (*setOnTextSelectionChange)(Ark_NativePointer node,
                                      const Opt_TextSelectionChangeCallback* value);
+    void (*setOnFirstScreenPaint)(Ark_NativePointer node,
+                                  const Opt_OnFirstScreenPaintCallback* value);
     void (*setEnableImageAnalyzer)(Ark_NativePointer node,
                                    const Opt_Boolean* value);
     void (*setEnableAutoFill)(Ark_NativePointer node,

@@ -21,7 +21,7 @@ import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkWebPeer, MixedMode, WebRotateEffect, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageEndEvent, OnPageBeginEvent, OnLoadStartedEvent, OnLoadFinishedEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnOverrideErrorPageCallback, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnWindowNewEvent, OnWindowNewExtEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnPdfScrollEvent, OnPdfLoadEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, MouseInfoCallback, NativeEmbedMouseInfo, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebBypassVsyncCondition, GestureFocusMode, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo, BlankScreenDetectionConfig, TextSelectionChangeCallback, OnMicrophoneCaptureStateChangeCallback, MicrophoneCaptureStateChangeInfo, OnCameraCaptureStateChangeCallback, CameraCaptureStateChangeInfo, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt } from "./component/web"
+import { ArkWebPeer, MixedMode, WebRotateEffect, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, BlurOnKeyboardHideMode, OnPageEndEvent, OnPageBeginEvent, OnLoadStartedEvent, OnLoadFinishedEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnOverrideErrorPageCallback, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnFullScreenEnterCallback, FullScreenEnterEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, WebResourceResponse, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnContextMenuHideCallback, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnSslErrorEventCallback, SslErrorEvent, OnClientAuthenticationEvent, OnWindowNewEvent, OnWindowNewExtEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnLoadInterceptEvent, OnOverScrollEvent, OnPdfScrollEvent, OnPdfLoadEvent, OnSafeBrowsingCheckResultCallback, ThreatType, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, NativeEmbedTouchInfo, MouseInfoCallback, NativeEmbedMouseInfo, OnNativeEmbedObjectParamChangeCallback, NativeEmbedParamDataInfo, OnOverrideUrlLoadingCallback, WebResourceRequest, NativeMediaPlayerConfig, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo, OnAdsBlockedCallback, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebBypassVsyncCondition, GestureFocusMode, OnDetectBlankScreenCallback, BlankScreenDetectionEventInfo, BlankScreenDetectionConfig, TextSelectionChangeCallback, OnFirstScreenPaintCallback, FirstScreenPaint, OnMicrophoneCaptureStateChangeCallback, MicrophoneCaptureStateChangeInfo, OnCameraCaptureStateChangeCallback, CameraCaptureStateChangeInfo, WebAttribute, WebElementType, WebResponseType, SelectionMenuOptionsExt } from "./component/web"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, KeyEvent, NestedScrollOptions } from "./component/common"
 import { CopyOptions } from "./component/enums"
@@ -316,6 +316,8 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
     _enableSelectedDataDetector_0_0value?: boolean | undefined
     _onTextSelectionChange_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onTextSelectionChange_0_0value?: TextSelectionChangeCallback | undefined
+    _onFirstScreenPaint_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onFirstScreenPaint_0_0value?: OnFirstScreenPaintCallback | undefined
     _enableImageAnalyzer_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableImageAnalyzer_0_0value?: boolean | undefined
     _enableAutoFill_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -2892,6 +2894,24 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (this._onFirstScreenPaint_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onFirstScreenPaint_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnFirstScreenPaintAttribute((this._onFirstScreenPaint_0_0value as OnFirstScreenPaintCallback | undefined));
+                    this._onFirstScreenPaint_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onFirstScreenPaint_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onFirstScreenPaint_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnFirstScreenPaintAttribute((undefined as OnFirstScreenPaintCallback | undefined));
+                }
+            }
+        }
         if (this._registerNativeEmbedRule_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._registerNativeEmbedRule_0_flag) {
@@ -4752,6 +4772,19 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
                 }
             }
         }
+        if (modifier._onFirstScreenPaint_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onFirstScreenPaint_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onFirstScreenPaint(modifier._onFirstScreenPaint_0_0value);
+                    break;
+                }
+                default: {
+                    this.onFirstScreenPaint((undefined as OnFirstScreenPaintCallback | undefined));
+                }
+            }
+        }
         if (modifier._registerNativeEmbedRule_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._registerNativeEmbedRule_0_flag) {
@@ -6338,6 +6371,17 @@ export class WebModifier extends CommonMethodModifier implements WebAttribute,At
         } else
         {
             this._onCameraCaptureStateChange_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onFirstScreenPaint(value: OnFirstScreenPaintCallback | undefined): this {
+        if (((this._onFirstScreenPaint_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onFirstScreenPaint_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onFirstScreenPaint_0_0value = value
+        } else
+        {
+            this._onFirstScreenPaint_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

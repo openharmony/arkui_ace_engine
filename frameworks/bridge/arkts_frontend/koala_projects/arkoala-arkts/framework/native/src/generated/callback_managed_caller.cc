@@ -6206,6 +6206,27 @@ void callManagedOnFirstMeaningfulPaintCallbackSync(Ark_VMContext vmContext, Ark_
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedOnFirstScreenPaintCallback(Ark_Int32 resourceId, Ark_FirstScreenPaint firstScreenPaint)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_OnFirstScreenPaintCallback);
+    argsSerializer.writeInt32(resourceId);
+    FirstScreenPaint_serializer::write(argsSerializer, firstScreenPaint);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedOnFirstScreenPaintCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_FirstScreenPaint firstScreenPaint)
+{
+    uint8_t dataBuffer[4096];
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_OnFirstScreenPaintCallback);
+    argsSerializer.writeInt32(resourceId);
+    FirstScreenPaint_serializer::write(argsSerializer, firstScreenPaint);
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
+}
 void callManagedOnFoldStatusChangeCallback(Ark_Int32 resourceId, Ark_OnFoldStatusChangeInfo event)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -8895,6 +8916,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_OnDidChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnDidChangeCallback);
         case Kind_OnDragEventCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnDragEventCallback);
         case Kind_OnFirstMeaningfulPaintCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnFirstMeaningfulPaintCallback);
+        case Kind_OnFirstScreenPaintCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnFirstScreenPaintCallback);
         case Kind_OnFoldStatusChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnFoldStatusChangeCallback);
         case Kind_OnFullScreenEnterCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnFullScreenEnterCallback);
         case Kind_OnHoverCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnHoverCallback);
@@ -9229,6 +9251,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_OnDidChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnDidChangeCallbackSync);
         case Kind_OnDragEventCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnDragEventCallbackSync);
         case Kind_OnFirstMeaningfulPaintCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnFirstMeaningfulPaintCallbackSync);
+        case Kind_OnFirstScreenPaintCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnFirstScreenPaintCallbackSync);
         case Kind_OnFoldStatusChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnFoldStatusChangeCallbackSync);
         case Kind_OnFullScreenEnterCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnFullScreenEnterCallbackSync);
         case Kind_OnHoverCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnHoverCallbackSync);
