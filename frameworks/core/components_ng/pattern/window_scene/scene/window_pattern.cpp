@@ -576,8 +576,8 @@ void WindowPattern::SetImagePatternSyncLoad(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(node);
     auto imagePattern = node->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
-    imagePattern->SetSyncLoad(syncStartingWindow_);
     ACE_SCOPED_TRACE("WindowPattern::SetImagePatternSyncLoad set sync [%d]", syncStartingWindow_);
+    imagePattern->SetSyncLoad(syncStartingWindow_);
 }
 
 void WindowPattern::HideStartingWindow()

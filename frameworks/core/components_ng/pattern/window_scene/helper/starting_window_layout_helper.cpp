@@ -156,8 +156,8 @@ void StartingWindowLayoutHelper::SetImagePatternSyncLoad(const RefPtr<FrameNode>
     CHECK_NULL_VOID(node);
     auto imagePattern = node->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
-    imagePattern->SetSyncLoad(syncLoadStartingWindow);
     ACE_SCOPED_TRACE("StartingWindowLayoutHelper::SetImagePatternSyncLoad set sync [%d]", syncLoadStartingWindow);
+    imagePattern->SetSyncLoad(syncLoadStartingWindow);
 }
 
 RefPtr<FrameNode> StartingWindowLayoutHelper::CreateStartingWindowNode(
