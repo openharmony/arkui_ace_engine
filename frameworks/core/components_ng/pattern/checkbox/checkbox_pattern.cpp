@@ -164,12 +164,25 @@ void CheckBoxPattern::UpdateIndicator()
     }
 }
 
+bool CheckBoxPattern::IsArkTSStatic()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->GetFrontendType() == FrontendType::ARK_TS
+ 	         || pipeline->GetFrontendType() == FrontendType::DYNAMIC_HYBRID_STATIC
+ 	         || pipeline->GetFrontendType() == FrontendType::STATIC_HYBRID_DYNAMIC;
+}
+
 void CheckBoxPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     FireBuilder();
     UpdateIndicator();
-    UpdateState();
+    if (!IsArkTSStatic()) {
+        UpdateState();
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = GetContext();
@@ -1197,6 +1210,10 @@ void CheckBoxPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (IsArkTSStatic()) {
+        UpdateGroupManager();
+        UpdateState();
+    }
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
     UpdateNavIdAndState(host);
 }
@@ -1213,6 +1230,13 @@ std::string CheckBoxPattern::GetGroupNameWithNavId()
     auto groupManager = GetGroupManager();
     CHECK_NULL_RETURN(groupManager, eventHub->GetGroupName());
     return eventHub->GetGroupName() + groupManager->GetLastNavId();
+}
+
+void CheckBoxPattern::UpdateGroupManager()
+{
+    auto manager = GroupManager::GetGroupManager();
+    CHECK_NULL_VOID(manager.Upgrade());
+    groupManager_ = manager;
 }
 
 RefPtr<GroupManager> CheckBoxPattern::GetGroupManager()

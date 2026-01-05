@@ -243,6 +243,8 @@ private:
     void InitDefaultMargin();
     void ResetDefaultMargin();
     void UpdateNavIdAndState(const RefPtr<FrameNode>& host);
+    void UpdateGroupManager();
+    bool IsArkTSStatic();
 
     CheckboxSettingData checkboxSettingData_;
 
