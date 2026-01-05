@@ -178,6 +178,7 @@ RefPtr<FrameNode> StartingWindowLayoutHelper::CreateStartingWindowNode(
     if (!startingWindowInfo_.backgroundImagePath_.empty()) {
         auto bgImgNode = CreateBackgroundImageNode(startingWindowInfo_.backgroundImageFit_,
             ImageSourceInfo(startingWindowInfo_.backgroundImagePath_, bundleName, moduleName));
+        CHECK_NULL_RETURN(bgImgNode, nullptr);
         SetImagePatternSyncLoad(bgImgNode, syncLoadStartingWindow);
         startingWindow->AddChild(bgImgNode);
     }
