@@ -258,7 +258,9 @@ import { ArkUIAniModule } from 'arkui.ani';
 import { KPointer } from '@koalaui/interop';
 import { ArkParticleComponent, ParticleAttribute } from './../../component/particle';
 import { ParticleModifier } from './../../ParticleModifier';
-import { ArkUnionEffectContainerComponent, UnionEffectContainerAttribute, UnionEffectContainerModifier, ArkLazyGridLayoutAttributeComponent } from '#generated';
+import { ArkLazyGridLayoutAttributeComponent } from '#generated';
+import { ArkUnionEffectContainerComponent, UnionEffectContainerAttribute } from './../../component/unionEffectContainer';
+import { UnionEffectContainerModifier } from './../../UnionEffectContainerModifier';
 
 export function hookAlphabetIndexerAttributeModifier(component: ArkAlphabetIndexerComponent, modifier: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined):void {
      if (modifier === undefined) {
@@ -2655,7 +2657,7 @@ export function hookLazyVGridLayoutAttributeModifier(component: ArkLazyVGridLayo
 }
 
 export function hookUnionEffectContainerAttributeModifier(component: ArkUnionEffectContainerComponent,
-    modifier: AttributeModifier<UnionEffectContainerAttribute> | AttributeModifier<CommonMethod> | undefined) {
+    modifier: AttributeModifier<UnionEffectContainerAttribute> | AttributeModifier<CommonMethod> | undefined): void {
     if (modifier === undefined) {
         return;
     }
@@ -2684,7 +2686,8 @@ export function hookUnionEffectContainerAttributeModifier(component: ArkUnionEff
         componentNew.setPeer(component.getPeer());
         return componentNew;
     };
-    applyAttributeModifierBase(modifier as Object as AttributeModifier<GridAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<UnionEffectContainerAttribute>, attributeSet,
+        constructParam, updaterReceiver, component.getPeer());
 }
 
 export function hookGridAttributeModifier(component: ArkGridComponent,

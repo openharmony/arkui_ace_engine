@@ -3507,6 +3507,7 @@ frameworks/core/interfaces/native/implementation/rating_modifier.cpp @arkuipopup
 frameworks/core/interfaces/native/implementation/rating_ops_accessor.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/toggle_modifier.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/implementation/toggle_ops_accessor.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/implementation/union_effect_container_modifier.cpp @arkuicodepulse
 
 interfaces/ets/ani/observer/ @arkui_framework_resource
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.observer.ts @arkui_framework_resource
