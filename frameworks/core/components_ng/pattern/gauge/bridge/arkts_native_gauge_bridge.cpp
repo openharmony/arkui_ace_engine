@@ -280,7 +280,7 @@ void GaugeBridge::RegisterGaugeAttributes(Local<panda::ObjectRef> object, EcmaVM
 
     auto gauge = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "gauge"), gauge);
-    LOGE("Finish RegisterColumnAttributes nativeModule");
+    LOGE("Finish RegisterGaugeAttributes nativeModule");
 }
 
 ArkUINativeModuleValue GaugeBridge::SetColors(ArkUIRuntimeCallInfo* runtimeCallInfo)
