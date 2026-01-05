@@ -95,15 +95,7 @@ void TextOverlayModifier::onDrawHighlight(DrawingContext& drawingContext)
 {
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
-    const auto& selection = textPattern->GetTextSelector();
-    CHECK_NULL_VOID(selection.highlightStart.has_value() && selection.highlightEnd.has_value());
-    CHECK_NULL_VOID(selection.highlightStart.value() != selection.highlightEnd.value());
-    auto pManager = textPattern->GetParagraphManager();
-    CHECK_NULL_VOID(pManager);
-
-    auto paragraphsRects = pManager->GetTextBoxesForSelect(
-        selection.highlightStart.has_value(), selection.highlightStart.value());
-    CHECK_NULL_VOID(!paragraphsRects.empty());
+    CHECK_NULL_VOID(!highlightRects_.empty());
 
     auto pipeline = textPattern->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -120,7 +112,7 @@ void TextOverlayModifier::onDrawHighlight(DrawingContext& drawingContext)
     brush.SetColor(colorValue);
     auto paintOffset = paintOffset_->Get();
     canvas.AttachBrush(brush);
-    for (const auto& selectedRect : paragraphsRects) {
+    for (const auto& selectedRect : highlightRects_) {
         auto rects = selectedRect.first;
         for (const auto& rect : rects) {
             auto rectValue = rect;

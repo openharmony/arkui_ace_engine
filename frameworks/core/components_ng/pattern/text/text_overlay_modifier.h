@@ -21,6 +21,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class Pattern;
@@ -59,11 +60,22 @@ public:
     void SetSingleLine(bool value);
 
     std::vector<RectF> GetSelectedRects() const;
-    void SetHightlightOpacity(float value)
+    void SetHighlightOpacity(float value)
     {
         CHECK_NULL_VOID(highlightOpacityAnimation_);
         highlightOpacityAnimation_->Set(value);
     }
+
+    void SetHighlightRects(const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& highlightRects)
+    {
+        highlightRects_ = highlightRects;
+    }
+
+    void ResetHighlightRects()
+    {
+        highlightRects_.clear();
+    }
+
 protected:
     std::optional<RectF> contentRect_;
     RefPtr<PropertyBool> showSelect_;
@@ -76,9 +88,10 @@ private:
     RefPtr<PropertyInt> cursorColor_;
     RefPtr<PropertyInt> selectedColor_;
     RefPtr<PropertyBool> changeSelectedRects_;
-    RefPtr<PropertyBool> isClip_;;
+    RefPtr<PropertyBool> isClip_;
     std::vector<RectF> selectedRects_;
     std::vector<RectF> selectedUrlRects_;
+    std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> highlightRects_;
     RefPtr<PropertyInt> selectedUrlColor_;
     RefPtr<AnimatablePropertyFloat> highlightOpacityAnimation_;
     bool isSingleLineMode_ = false;
