@@ -332,6 +332,64 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm003, TestSize.Level2)
 }
 
 /**
+ * @tc.name: RichEditorLayoutAlgorithm004
+ * @tc.desc: test MeasureContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm004, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. get RichEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. mock RichEditorTheme
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto richEditorTheme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(richEditorTheme));
+
+    /**
+     * @tc.steps: step3. init layoutAlgorithm
+     */
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+        parentLayoutConstraint.selfIdealSize.SetHeight(std::nullopt);
+    parentLayoutConstraint.selfIdealSize.SetWidth(1.0f);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step4. add spans
+     */
+    AddImageSpan();
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    auto paragraphManager = AceType::MakeRefPtr<ParagraphManager>();
+    layoutAlgorithm->paragraphManager_ = paragraphManager;
+    ParagraphStyle testStyle = {};
+    EXPECT_CALL(*paragraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(testStyle));
+    layoutAlgorithm->spans_.emplace_back(richEditorPattern->spans_);
+
+    /**
+     * @tc.steps: step5. test MeasureContent
+     */
+    layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    ASSERT_NE(layoutAlgorithm->spans_.size(), 0);
+}
+
+/**
  * @tc.name: UpdateFrameSizeWithLayoutPolicy001
  * @tc.desc: test LayoutPolicy MATCH_PARENT
  * @tc.type: FUNC
