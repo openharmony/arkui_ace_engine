@@ -1052,6 +1052,9 @@ abstract class ViewPU extends PUV2ViewBase
     } else {
       this.flushDelayCompleteRerender();
     }
+    if (this.__isReuseNodeNeedAttach__Internal) {
+      this.__lifecycle__Internal.handleEvent(LifeCycleEvent.ON_ATTACH);
+    }
     this.traverseChildDoRecycleOrReuse(PUV2ViewBase.doReuse);
     this.runReuse_ = false;
   }
