@@ -203,7 +203,6 @@ void UITaskScheduler::FlushPostponedLayoutTask(bool forceUseMainThread)
         CHECK_NULL_CONTINUE(layoutProperty);
         //Mark container dirty to prevent skipMeasure or skipLayout.
         layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
-        container->SetLayoutDirtyMarked(true);
         container->CreateLayoutTask(forceUseMainThread, LayoutType::TRAVERSE_FOR_IGNORE);
         continue;
     }
