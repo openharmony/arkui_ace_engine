@@ -2226,4 +2226,30 @@ HWTEST_F(WaterFlowTestNg, ScrollBarOverDrag002, TestSize.Level1)
     scrollBarPattern->scrollBar_->HandleDragEnd(info);
     EXPECT_LE(std::abs(pattern_->GetTotalOffset()), std::abs(MAIN_DELTA + MAIN_DELTA));
 }
+
+/**
+ * @tc.name: reachEndWithContentOffset
+ * @tc.desc: Test reachEndWithContentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, reachEndWithContentOffset, TestSize.Level1)
+{
+    bool isOnReachEnd = false;
+    auto onReachEnd = [&isOnReachEnd]() { isOnReachEnd = true; };
+
+    WaterFlowModelNG model = CreateWaterFlow();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    CreateWaterFlowItems(10);
+    CreateDone();
+    eventHub_->SetOnReachEnd(onReachEnd);
+    for (int i = 0; i < 24; i++) {
+        ScrollBy(0, 30);
+        EXPECT_FALSE(isOnReachEnd);
+    }
+    ScrollBy(0, 30);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -730);
+    EXPECT_TRUE(pattern_->layoutInfo_->offsetEnd_);
+    EXPECT_TRUE(isOnReachEnd);
+}
 } // namespace OHOS::Ace::NG
