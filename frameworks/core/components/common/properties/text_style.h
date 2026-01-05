@@ -845,6 +845,36 @@ public:                                                                         
         symbolTextStyle_->Set##name(newValue);                                        \
     }
 
+// implement lazy loading and deep copy
+template<class K, class V>
+class ResourceMap {
+public:
+    ResourceMap() = default;
+    ResourceMap(const ResourceMap<K, V>& other)
+    {
+        CopyMap(other);
+    }
+    ResourceMap& operator=(const ResourceMap<K, V>& other)
+    {
+        CopyMap(other);
+        return *this;
+    }
+    std::unique_ptr<std::unordered_map<K, V>>& GetData() const
+    {
+        return map_;
+    }
+    std::unique_ptr<std::unordered_map<K, V>> map_;
+private:
+    void CopyMap(const ResourceMap<K, V>& other)
+    {
+        if (other.map_) {
+            map_ = std::make_unique<std::unordered_map<K, V>>(*other.map_);
+        } else {
+            map_.reset();
+        }
+    }
+};
+
 class ACE_EXPORT TextStyle final {
 public:
     TextStyle() = default;
@@ -1353,7 +1383,7 @@ private:
         RefPtr<ResourceObject> resObj;
         std::function<void(const RefPtr<ResourceObject>&, TextStyle&)> updateFunc;
     };
-    std::unordered_map<std::string, resourceUpdater> resMap_;
+    ResourceMap<std::string, resourceUpdater> resMap_;
 };
 
 namespace StringUtils {
