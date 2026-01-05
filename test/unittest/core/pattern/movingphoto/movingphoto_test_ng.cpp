@@ -34,7 +34,7 @@
 #include "core/common/ai/image_analyzer_mgr.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/video/video_theme.h"
-#include "core/components_ng/pattern/video_utils.h"
+#include "core/components_ng/pattern/video/video_utils.h"
 #include "core/components/image/image_event.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
