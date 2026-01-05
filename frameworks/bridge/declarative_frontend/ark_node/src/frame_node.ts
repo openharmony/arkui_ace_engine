@@ -586,6 +586,9 @@ class FrameNode extends Disposable {
   }
 
   isOnMainTree(): boolean {
+    if (this.isDisposed()) {
+      throw { message: 'The current node has been disposed.', code: 100026 };
+    }
     return getUINativeModule().frameNode.isOnMainTree(this.getNodePtr());
   }
 

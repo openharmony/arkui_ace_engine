@@ -365,6 +365,9 @@ export class FrameNode implements MaterializedBase {
         return node;
     }
     public getChild(index: int32, expandMode?: ExpandMode | undefined): FrameNode | null {
+        if (this.isDisposed()) {
+            return null;
+        }
         let expand_casted: number = 1;
         if (expandMode !== undefined && expandMode !== null) {
             expand_casted = expandMode;
@@ -457,6 +460,9 @@ export class FrameNode implements MaterializedBase {
         }
         this.nodePtr_ = undefined;
         this.renderNode_?.resetNodePtr();
+    }
+    public isDisposed(): boolean {
+        return (this.nodePtr_ == undefined);
     }
     public resetNodePtr(): void {
         if (this.peer?.ptr) {
@@ -577,7 +583,18 @@ export class FrameNode implements MaterializedBase {
     public invalidate(): void {
         FrameNodeExtender.invalidate(this);
     };
+    public disposeTreeRecursively(): void {
+        let theChildCount = this.getChildrenCount();
+        for (let i = 0;i < theChildCount; i++) {
+            const childI = this.getChild(i);
+            if (childI) {
+                childI.disposeTreeRecursively();
+            }
+        }
+        this.nodePtr_ = undefined;
+    }
     public disposeTree(): void {
+        this.disposeTreeRecursively();
         FrameNodeExtender.disposeTree(this);
     };
     public setCrossLanguageOptions(options: CrossLanguageOptions): void {
@@ -831,6 +848,10 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.isOnRenderTree(this);
     }
     public isOnMainTree(): boolean {
+        if (this.nodePtr_ == undefined) {
+            const error = Error("The current FrameNode has been disposed. Code: 100026");
+            throw new BusinessError(100026, error);
+        }
         return FrameNodeExtender.isOnMainTree(this);
     }
       public invalidateAttributes(): void {
