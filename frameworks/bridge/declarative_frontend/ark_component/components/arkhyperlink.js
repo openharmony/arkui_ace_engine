@@ -97,12 +97,11 @@ class HyperlinkResponseRegionModifier extends ModifierWithKey {
 HyperlinkResponseRegionModifier.identity = Symbol('hyperlinkResponseRegion');
 
 class JSHyperlink extends JSViewAbstract {
-  static create(params) {
+  static create(address, content) {
     console.log("[Hyperlink] JSHyperlink::create")
-    if (params !== undefined) {
-      console.log("[Hyperlink] JSHyperlink::create params defined")
-      console.log(`[Hyperlink] JSHyperlink::create ${params.address}, ${params.content}`)
-      getUINativeModule().hyperlink.create(params.address, params.content);
+    if (address !== undefined) {
+      console.log(`[Hyperlink] JSHyperlink::create ${typeof address}: ${address}, ${typeof content}: ${content}`)
+      getUINativeModule().hyperlink.create(address, content);
     } else {
       console.log("[Hyperlink] JSHyperlink::create params undefined")
       getUINativeModule().hyperlink.create('', '');
