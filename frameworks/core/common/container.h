@@ -378,11 +378,7 @@ public:
         return useNewPipeline_;
     }
 
-    static bool IsCurrentUseNewPipeline()
-    {
-        auto container = Current();
-        return container ? container->useNewPipeline_ : AceForwardCompatibility::IsUseNG();
-    }
+    static bool IsCurrentUseNewPipeline();
 
     // SetCurrentUsePartialUpdate is called when initial render on a page
     // starts, see zyz_view_register loadDocument() implementation

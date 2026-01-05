@@ -174,7 +174,7 @@ template("build_component_ng") {
         }
       }
 
-      if (defined(invoker.ark_sources) && defined(vendor_configs.ace_engine_advanced) &&
+      if (!defined(invoker.ark_sources) && defined(vendor_configs.ace_engine_advanced) &&
           (platform == "ohos" || platform == "ohos_ng")) {
         include_dirs += vendor_configs.ace_advance_dirs
       }
@@ -207,17 +207,16 @@ template("build_component_ng") {
           "${ace_root}/interfaces/native/runtime",
         ]
 
-        defines += [ "INCLUDE_GENERATED_SOURCES" ]
 
         
         if (is_arkui_x) {
           configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
-          deps += [ "$ark_ets_path:libark_jsruntime_static" ]
         } else {
           external_deps += [
             "ets_runtime:libark_jsruntime",
             "napi:ace_napi",
           ]
+          defines += [ "INCLUDE_GENERATED_SOURCES" ]
         }
       }
 

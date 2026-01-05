@@ -259,4 +259,10 @@ Window* Container::GetWindow() const
     auto context = GetPipelineContext();
     return context ? context->GetWindow() : nullptr;
 }
+
+bool Container::IsCurrentUseNewPipeline()
+{
+    auto container = Current();
+    return container ? container->useNewPipeline_ : AceForwardCompatibility::IsUseNG();
+}
 } // namespace OHOS::Ace
