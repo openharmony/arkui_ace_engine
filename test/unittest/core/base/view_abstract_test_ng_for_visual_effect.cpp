@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#define private public
+#define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
 #include "core/components/common/properties/ui_material.h"
@@ -349,5 +352,34 @@ HWTEST_F(ViewAbstractTestNg, SetSystemMaterial002, TestSize.Level1)
      */
     ViewAbstract::SetSystemMaterial(nodePtr, nullptr);
     EXPECT_EQ(renderContextOfNode->GetSystemMaterial(), nullptr);
+}
+
+/**
+ * @tc.name: SetSystemMaterialImmediate001
+ * @tc.desc: Test the SetSystemMaterialImmediate function of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetSystemMaterialImmediate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Check node state.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("", -1, AceType::MakeRefPtr<Pattern>());
+    auto pattern = node->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    /**
+     * @tc.steps: step2. call SetSystemMaterialImmediate. set SEMI_TRANSPARENT
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    auto type = static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT);
+    material->SetType(type);
+    ViewAbstract::SetSystemMaterialImmediate(AceType::RawPtr(node), AceType::RawPtr(material));
+    if (!pattern->resourceMgr_) {
+        g_isConfigChangePerform = false;
+    }
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+    EXPECT_FALSE(pattern->resourceMgr_->Empty());
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG
