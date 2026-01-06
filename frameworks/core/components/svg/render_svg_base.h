@@ -19,7 +19,7 @@
 #include "frameworks/core/animation/animator.h"
 #include "frameworks/core/animation/keyframe_animation.h"
 #include "frameworks/core/animation/svg_animate.h"
-#include "frameworks/core/components/common/svg_paint_state.h"
+#include "frameworks/core/components/common/properties/svg_paint_state.h"
 #include "frameworks/core/components/declaration/svg/svg_base_declaration.h"
 #include "frameworks/core/components/svg/svg_animate_component.h"
 #include "frameworks/core/components/svg/svg_transform.h"

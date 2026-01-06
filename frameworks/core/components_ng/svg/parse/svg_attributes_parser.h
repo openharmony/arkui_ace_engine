@@ -22,7 +22,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/paint_state.h"
-#include "core/components/common/svg_paint_state.h"
+#include "core/components/common/properties/svg_paint_state.h"
 #include "core/components_ng/svg/base/svg_length_scale_rule.h"
 
 namespace OHOS::Ace::NG {

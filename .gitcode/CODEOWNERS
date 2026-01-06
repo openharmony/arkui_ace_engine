@@ -2091,7 +2091,7 @@ frameworks/core/components/common/properties/shadow.cpp @arkuicodepulse
 frameworks/core/components/common/properties/shadow.h @arkuicodepulse
 frameworks/core/components/common/properties/shared_transition_option.h @arkuicodepulse
 frameworks/core/components/common/properties/state_attributes.h @arkui_framework_xnode
-frameworks/core/components/common/svg_paint_state.h @arkui001
+frameworks/core/components/common/properties/svg_paint_state.h @arkui001
 frameworks/core/components/common/properties/swiper_indicator.h @arkui_navigation
 frameworks/core/components/common/properties/test/
 frameworks/core/components/common/properties/text_layout_info.h @huawei_g_five

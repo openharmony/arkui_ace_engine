@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_SVG_SVG_BASE_DECLARATION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_SVG_SVG_BASE_DECLARATION_H
 
-#include "core/components/common/svg_paint_state.h"
+#include "core/components/common/properties/svg_paint_state.h"
 #include "core/components/declaration/common/declaration.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 

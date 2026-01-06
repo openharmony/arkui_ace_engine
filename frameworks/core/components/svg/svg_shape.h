@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_SVG_SHAPE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_SVG_SHAPE_H
 
-#include "frameworks/core/components/common/svg_paint_state.h"
+#include "frameworks/core/components/common/properties/svg_paint_state.h"
 
 namespace OHOS::Ace {
 
