@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_paint_method.h"
 
 #include "core/components/common/properties/color.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"

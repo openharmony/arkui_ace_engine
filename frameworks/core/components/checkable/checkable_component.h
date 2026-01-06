@@ -366,7 +366,7 @@ class ACE_FORCE_EXPORT CheckboxComponent : public CheckableComponent, public Che
     DECLARE_ACE_TYPE(CheckboxComponent, CheckableComponent, LabelTarget);
 
 public:
-    explicit CheckboxComponent(const RefPtr<CheckboxTheme>& theme);
+    ACE_FORCE_EXPORT explicit CheckboxComponent(const RefPtr<CheckboxTheme>& theme);
     ~CheckboxComponent() override = default;
     void SetGroupName(const std::string& groupName)
     {

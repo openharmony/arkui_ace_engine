@@ -31,7 +31,7 @@ namespace {
 constexpr char TIMEPICKER_OPTIONS_NUMERIC_VAL[] = "numeric";
 constexpr char TIMEPICKER_OPTIONS_TWO_DIGIT_VAL[] = "2-digit";
 
-FFiTimePickerResult TimePickerChangeEventToFfi(const DatePickerChangeEvent& eventInfo)
+FFiTimePickerResult TimePickerChangeEventToFfi(const OHOS::Ace::NG::DatePickerChangeEvent& eventInfo)
 {
     FFiTimePickerResult result;
     auto infoStr = eventInfo.GetSelectedStr();
@@ -599,7 +599,7 @@ void FfiOHOSAceFrameworkTimePickerDateTimeOptions(const char* hourType, const ch
 void FfiOHOSAceFrameworkTimePickerSetOnChange(void (*callback)(int64_t hour, int64_t minute, int64_t second))
 {
     auto onChange = [lambda = CJLambda::Create(callback)](const BaseEventInfo* index) -> void {
-        auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<OHOS::Ace::NG::DatePickerChangeEvent>(index);
         const auto infoResult = TimePickerChangeEventToFfi(*eventInfo);
         lambda(infoResult.hour, infoResult.minute, infoResult.second);
     };

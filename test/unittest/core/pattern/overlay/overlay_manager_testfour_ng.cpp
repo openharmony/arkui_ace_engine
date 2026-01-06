@@ -35,7 +35,7 @@
 #include "core/common/frontend.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/picker/datepicker_model_static.h"
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 
 namespace OHOS::Ace::NG {

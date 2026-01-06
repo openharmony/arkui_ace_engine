@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-class TriangleComponent : public RenderComponent {
+class ACE_FORCE_EXPORT TriangleComponent : public RenderComponent {
     DECLARE_ACE_TYPE(TriangleComponent, RenderComponent);
 
 public:

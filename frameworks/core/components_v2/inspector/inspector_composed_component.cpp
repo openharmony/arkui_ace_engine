@@ -30,8 +30,6 @@
 #include "core/components_v2/inspector/counter_composed_element.h"
 #include "core/components_v2/inspector/customdialog_composed_element.h"
 #include "core/components_v2/inspector/data_panel_composed_element.h"
-#include "core/components_v2/inspector/date_picker_composed_element.h"
-#include "core/components_v2/inspector/date_picker_dialog_composed_element.h"
 #include "core/components_v2/inspector/divider_composed_element.h"
 #include "core/components_v2/inspector/flex_composed_element.h"
 #include "core/components_v2/inspector/gauge_composed_element.h"
@@ -51,7 +49,6 @@
 #include "core/components_v2/inspector/navigator_composed_element.h"
 #include "core/components_v2/inspector/panel_composed_element.h"
 #include "core/components_v2/inspector/pattern_lock_composed_element.h"
-#include "core/components_v2/inspector/picker_text_dialog_composed_element.h"
 #include "core/components_v2/inspector/progress_composed_element.h"
 #include "core/components_v2/inspector/radio_composed_element.h"
 #include "core/components_v2/inspector/refresh_composed_element.h"
@@ -77,12 +74,9 @@
 #include "core/components_v2/inspector/tabs_composed_element.h"
 #include "core/components_v2/inspector/text_clock_composed_element.h"
 #include "core/components_v2/inspector/text_composed_element.h"
-#include "core/components_v2/inspector/text_picker_composed_element.h"
 #include "core/components_v2/inspector/textarea_composed_element.h"
 #include "core/components_v2/inspector/textinput_composed_element.h"
 #include "core/components_v2/inspector/texttimer_composed_element.h"
-#include "core/components_v2/inspector/time_picker_composed_element.h"
-#include "core/components_v2/inspector/time_picker_dialog_composed_element.h"
 #include "core/components_v2/inspector/toggle_composed_element.h"
 #include "core/components_v2/inspector/water_flow_composed_element.h"
 #include "core/components_v2/inspector/water_flow_item_composed_element.h"
@@ -185,9 +179,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { REFRESH_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::RefreshComposedElement>(id); } },
     { DATE_PICKER_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::DatePickerComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DATE_PICKER_COMPONENT_LOADER_TAG, id); } },
     { TIME_PICKER_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::TimePickerComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(TIME_PICKER_COMPONENT_LOADER_TAG, id); } },
     { RADIO_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::RadioComposedElement>(id); } },
     { GAUGE_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::GaugeComposedElement>(id); } },
     { GRIDCONTAINER_COMPONENT_TAG,
@@ -209,9 +203,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { TEXTCLOCK_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::TextClockComposedElement>(id); } },
     { TEXT_PICKER_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::TextPickerComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(TEXT_PICKER_COMPONENT_LOADER_TAG, id); } },
     { PICKER_TEXT_DIALOG_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::PickerTextDialogComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(PICKER_TEXT_DIALOG_COMPONENT_LOADER_TAG, id); } },
     { CANVAS_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { DIALOG_COMPONENT_TAG,
@@ -223,7 +217,7 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { CUSTOM_DIALOG_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::CustomDialogComposedElement>(id); } },
     { DATE_PICKER_DIALOG_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::DatePickerDialogComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DATE_PICKER_DIALOG_COMPONENT_LOADER_TAG, id); } },
     { SIDE_BAR_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::SideBarComposedElement>(id); } },
     { LOADING_PROGRESS_COMPONENT_TAG,
@@ -231,7 +225,7 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { CHECKBOXGROUP_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::CheckboxGroupComposedElement>(id); } },
     { TIME_PICKER_DIALOG_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::TimePickerDialogComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(TIME_PICKER_DIALOG_COMPONENT_LOADER_TAG, id); } },
     { WEB_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { RICH_TEXT_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },

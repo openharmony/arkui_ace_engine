@@ -19,8 +19,8 @@
 #include <mutex>
 
 #include "core/components/dialog/dialog_properties.h"
-#include "core/components/picker/picker_data.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 
 namespace OHOS::Ace {

@@ -26,6 +26,8 @@
 #include "compatible/components/grid_row/grid_row_loader.h"
 #include "compatible/components/image-animator/image_animator_loader.h"
 #include "compatible/components/marquee/marquee_loader.h"
+#include "compatible/components/picker-view/picker_view_loader.h"
+#include "compatible/components/picker/picker_loader.h"
 #include "compatible/components/label/label_loader.h"
 #include "compatible/components/svg/svg_loader.h"
 #include "compatible/components/qrcode/qrcode_loader.h"
@@ -80,6 +82,14 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "stop", []() -> ComponentLoader* { return new SvgStopLoader(); } },
         { "video", []() -> ComponentLoader* { return new VideoLoader(); } },
         { "qrcode", []() -> ComponentLoader* { return new QRCodeLoader(); } },
+        { "picker", []() -> ComponentLoader* { return new PickerLoader(); } },
+        { "picker-view", []() -> ComponentLoader* { return new PickerViewLoader(); } },
+        { "datePicker", []() -> ComponentLoader* { return new DatePickerLoader(); } },
+        { "datePickerDialog", []() -> ComponentLoader* { return new DatePickerDialogLoader(); } },
+        { "timePicker", []() -> ComponentLoader* { return new TimePickerLoader(); } },
+        { "timePickerDialog", []() -> ComponentLoader* { return new TimePickerDialogLoader(); } },
+        { "textPicker", []() -> ComponentLoader* { return new TextPickerLoader(); } },
+        { "textPickerDialog", []() -> ComponentLoader* { return new TextPickerDialogLoader(); } },
         { "rating", []() -> ComponentLoader* { return new RatingLoader(); } }
     };
     auto loaderIter = sLoaderMap.find(nameStr);

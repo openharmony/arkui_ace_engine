@@ -225,20 +225,7 @@ inline FontWeight ConvertStrToFontWeight(const std::string& weight, FontWeight d
     return StringUtils::StringToFontWeight(weight, defaultFontWeight);
 }
 
-inline TextDecoration ConvertStrToTextDecoration(const std::string& textDecoration)
-{
-    // this map should be sorted by key.
-    static const LinearMapNode<TextDecoration> textDecorationTable[] = {
-        { DOM_TEXT_DECORATION_INHERIT, TextDecoration::INHERIT },
-        { DOM_TEXT_DECORATION_LINETHROUGH, TextDecoration::LINE_THROUGH },
-        { DOM_TEXT_DECORATION_NONE, TextDecoration::NONE },
-        { DOM_TEXT_DECORATION_OVERLINE, TextDecoration::OVERLINE },
-        { DOM_TEXT_DECORATION_UNDERLINE, TextDecoration::UNDERLINE },
-    };
-
-    auto index = BinarySearchFindIndex(textDecorationTable, ArraySize(textDecorationTable), textDecoration.c_str());
-    return index < 0 ? TextDecoration::NONE : textDecorationTable[index].value;
-}
+ACE_FORCE_EXPORT TextDecoration ConvertStrToTextDecoration(const std::string& textDecoration);
 
 inline TextDecorationStyle ConvertStrToTextDecorationStyle(const std::string& textDecorationStyle)
 {
@@ -283,10 +270,7 @@ inline VerticalAlign ConvertStrToTextVerticalAlign(const std::string& align)
     return index < 0 ? VerticalAlign::NONE : textVerticalAlignTable[index].value;
 }
 
-inline FontStyle ConvertStrToFontStyle(const std::string& fontStyle)
-{
-    return fontStyle == DOM_TEXT_FONT_STYLE_ITALIC ? FontStyle::ITALIC : FontStyle::NORMAL;
-}
+ACE_FORCE_EXPORT FontStyle ConvertStrToFontStyle(const std::string& fontStyle);
 
 ACE_FORCE_EXPORT TextAlign ConvertStrToTextAlign(const std::string& align);
 

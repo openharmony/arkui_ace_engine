@@ -87,8 +87,8 @@ public:
     void SetRectRadius(const Dimension& radius);
     void SetCatchMode(bool catchMode);
     void SetProgressDiameter(const Dimension& diameter);
-    void SetBackgroundColor(const Color& color);
-    void SetClickedColor(const Color& color);
+    ACE_FORCE_EXPORT void SetBackgroundColor(const Color& color);
+    ACE_FORCE_EXPORT void SetClickedColor(const Color& color);
     void SetDisabledColor(const Color& color);
     void SetFocusColor(const Color& color);
     void SetHoverColor(const Color& color);
@@ -277,7 +277,7 @@ private:
 class ButtonBuilder {
 public:
     static RefPtr<ButtonComponent> Build(const RefPtr<ThemeManager>& themeManager, const std::string& text);
-    static RefPtr<ButtonComponent> Build(const RefPtr<ThemeManager>& themeManager, const std::string& text,
+    ACE_FORCE_EXPORT static RefPtr<ButtonComponent> Build(const RefPtr<ThemeManager>& themeManager, const std::string& text,
         TextStyle& textStyle, const Color& textFocusColor = Color(), bool useTextFocus = false);
 };
 

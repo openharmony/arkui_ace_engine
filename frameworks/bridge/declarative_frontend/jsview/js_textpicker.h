@@ -18,7 +18,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "core/components/picker/picker_text_component.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/common/resource/resource_object.h"
@@ -148,8 +148,6 @@ public:
     static std::map<std::string, NG::DialogGestureEvent> DialogCancelEvent(const JSCallbackInfo& info);
 
 private:
-    static void ParseText(RefPtr<PickerTextComponent>& component, const JSRef<JSObject>& paramObj);
-    static void AddEvent(RefPtr<PickerTextComponent>& picker, const JSCallbackInfo& info);
     static bool ParseShowData(const JSRef<JSObject>& paramObj, NG::TextPickerSettingData& settingData);
     static void ParseTextProperties(const JSRef<JSObject>& paramObj, NG::PickerTextProperties& result);
     static void ParseShowDataMultiContent(const std::vector<NG::TextCascadePickerOptions>& options,
