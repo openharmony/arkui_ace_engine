@@ -228,7 +228,7 @@ export class TypeChecker {
     static isAccessibilityHoverType(value: Object | string | number | undefined): boolean {
         return value instanceof AccessibilityHoverType
     }
-    static isAccessibilityOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
+    static isAccessibilityOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
         return value instanceof AccessibilityOptions
     }
     static isAccessibilityRoleType(value: Object | string | number | undefined): boolean {
