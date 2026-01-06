@@ -4633,5 +4633,9 @@ HWTEST_F(ListLayoutTestNg, SupportEmptyBranchInLazyLoading001, TestSize.Level1)
 
     auto wrapper2 = layoutAlgorithm->GetListItem(AceType::RawPtr(frameNode_), 0);
     EXPECT_NE(wrapper2, nullptr);
+
+    // set value of SupportLazyLoadingEmptyBranch only affects the first time setting
+    model.SetSupportEmptyBranchInLazyLoading(false);
+    EXPECT_EQ(layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false), true);
 }
 } // namespace OHOS::Ace::NG
