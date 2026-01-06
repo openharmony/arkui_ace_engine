@@ -31,6 +31,7 @@
 #include "session_manager/include/scene_session_manager.h"
 
 namespace OHOS::Ace::NG {
+bool StartingWindowLayoutHelper::syncLoad_ = false;
 namespace {
 constexpr Dimension FIXED_TOP_SAFE_AREA_HEIGHT_VP = 36.0_vp;
 constexpr Dimension FIXED_BOTTOM_SAFE_AREA_HEIGHT_VP = 28.0_vp;
@@ -110,6 +111,7 @@ RefPtr<FrameNode> CreateUpperAreaNode(const ImageSourceInfo& imageSource)
     auto upperAreaNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(upperAreaNode, nullptr);
+    StartingWindowLayoutHelper::SetImagePatternSyncLoad(upperAreaNode);
     auto upperAreaLayoutProperty = upperAreaNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(upperAreaLayoutProperty, nullptr);
     upperAreaLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -124,6 +126,7 @@ RefPtr<FrameNode> CreateBrandNode(const ImageSourceInfo& brandImageSource)
     auto brandNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(brandNode, nullptr);
+    StartingWindowLayoutHelper::SetImagePatternSyncLoad(brandNode);
     auto brandLayoutProperty = brandNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(brandLayoutProperty, nullptr);
     brandLayoutProperty->UpdateImageSourceInfo(brandImageSource);
@@ -138,6 +141,7 @@ RefPtr<FrameNode> CreateBackgroundImageNode(
     auto bgImgNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(bgImgNode, nullptr);
+    StartingWindowLayoutHelper::SetImagePatternSyncLoad(bgImgNode);
     auto bgImgLayoutProperty = bgImgNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(bgImgLayoutProperty, nullptr);
     bgImgLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -151,19 +155,20 @@ RefPtr<FrameNode> CreateBackgroundImageNode(
     return bgImgNode;
 }
 
-void StartingWindowLayoutHelper::SetImagePatternSyncLoad(const RefPtr<FrameNode>& node, bool syncLoadStartingWindow)
+void StartingWindowLayoutHelper::SetImagePatternSyncLoad(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
     auto imagePattern = node->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
-    ACE_SCOPED_TRACE("StartingWindowLayoutHelper::SetImagePatternSyncLoad set sync [%d]", syncLoadStartingWindow);
-    imagePattern->SetSyncLoad(syncLoadStartingWindow);
+    ACE_SCOPED_TRACE("StartingWindowLayoutHelper::SetImagePatternSyncLoad set sync [%d]", syncLoad_);
+    imagePattern->SetSyncLoad(syncLoad_);
 }
 
 RefPtr<FrameNode> StartingWindowLayoutHelper::CreateStartingWindowNode(
     const Rosen::StartingWindowInfo& startingWindowInfo, const std::string& bundleName, const std::string& moduleName,
     bool syncLoadStartingWindow)
 {
+    syncLoad_ = syncLoadStartingWindow;
     startingWindowInfo_ = startingWindowInfo;
     // -root node of starting window
     auto startingWindow = FrameNode::CreateFrameNode(
@@ -179,7 +184,6 @@ RefPtr<FrameNode> StartingWindowLayoutHelper::CreateStartingWindowNode(
         auto bgImgNode = CreateBackgroundImageNode(startingWindowInfo_.backgroundImageFit_,
             ImageSourceInfo(startingWindowInfo_.backgroundImagePath_, bundleName, moduleName));
         CHECK_NULL_RETURN(bgImgNode, nullptr);
-        SetImagePatternSyncLoad(bgImgNode, syncLoadStartingWindow);
         startingWindow->AddChild(bgImgNode);
     }
 
@@ -195,11 +199,9 @@ RefPtr<FrameNode> StartingWindowLayoutHelper::CreateStartingWindowNode(
         startingWindowInfo_.iconPath_.empty() ? startingWindowInfo_.illustrationPath_ : startingWindowInfo_.iconPath_,
         bundleName, moduleName));
     CHECK_NULL_RETURN(upperAreaNode, nullptr);
-    SetImagePatternSyncLoad(upperAreaNode, syncLoadStartingWindow);
     columnNode->AddChild(upperAreaNode);
     auto brandNode = CreateBrandNode(ImageSourceInfo(startingWindowInfo_.brandingPath_, bundleName, moduleName));
     CHECK_NULL_RETURN(brandNode, nullptr);
-    SetImagePatternSyncLoad(brandNode, syncLoadStartingWindow);
     columnNode->AddChild(brandNode);
     columnNode->MarkModifyDone();
 
