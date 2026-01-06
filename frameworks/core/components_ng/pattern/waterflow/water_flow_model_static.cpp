@@ -143,7 +143,7 @@ void WaterFlowModelStatic::ResetSections(FrameNode* frameNode)
 
 void WaterFlowModelStatic::SetColumnsTemplate(FrameNode* frameNode, const std::optional<std::string>& value)
 {
-    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ItemFillPolicy, frameNode);
     if (!value) {
         auto layout = frameNode->GetLayoutPropertyPtr<WaterFlowLayoutProperty>();
         CHECK_NULL_VOID(layout);
