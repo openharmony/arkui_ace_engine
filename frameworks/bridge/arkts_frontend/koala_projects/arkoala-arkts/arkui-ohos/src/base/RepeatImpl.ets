@@ -72,6 +72,10 @@ class RepeatItemImpl<T> implements RepeatItem<T> {
         return this.arr_[this.index_];
     }
 
+    get arr(): RepeatArray<T> {
+        return this.arr_;
+    }
+
     get index(): int32 {
         return this.index_;
     }
@@ -234,6 +238,22 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
 }
 
 /** @memo:intrinsic */
+function getCurrentEnv(): [int32, object | undefined] {
+    return [ObserveSingleton.RenderingComponentV2, ExtendableComponent.current];
+}
+
+/** @memo:intrinsic */
+function wrapBuilder(env: [int32, object | undefined], builder_: () => void): void {
+    const lastRenderingComponent = ObserveSingleton.RenderingComponentV2;
+    const lastExtendableComponent = ExtendableComponent.current;
+    ObserveSingleton.instance.renderingComponent = env[0];
+    ExtendableComponent.current = env[1];
+    builder_();
+    ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
+    ExtendableComponent.current = lastExtendableComponent;
+}
+
+/** @memo:intrinsic */
 function virtualRender<T>(
     arr: RepeatArray<T>,
     attributes: RepeatAttributeImpl<T>,
@@ -262,16 +282,9 @@ function virtualRender<T>(
          */
         if (attributes.reusable_) {
             const tag = _type + repeatId + '@Repeat';
-            const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
-            const currentExtendableComponent = ExtendableComponent.current;
+            const env = getCurrentEnv();
             NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
-                const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
-                const lastExtendableComponent = ExtendableComponent.current;
-                ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
-                ExtendableComponent.current = currentExtendableComponent;
-                itemBuilder(ri);
-                ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
-                ExtendableComponent.current = lastExtendableComponent;
+                wrapBuilder(env, () => { itemBuilder(ri); })
             }, tag); // using type as reuseKey
         } else {
             itemBuilder(ri);
@@ -296,26 +309,32 @@ function nonVirtualRender<T>(
             return `${idx}__${JSON.stringify(e)}`
         } catch (e) {
             throw new Error(
-                'Repeat: use of default key generator not possible on provided data structure.' +
-                'Need to specify key(). Application Error!')
+                'unstable key generator function. Need to specify Repeat.key()' +
+                'Application Error: ' + (e as Error).message)
         }
     };
     const keyGen = (ele: T, i: int32): KoalaCallsiteKey =>
         keyGenerator ? hashCodeFromString(keyGenerator!(ele, i)) : hashCodeFromString(defaultKey(ele, i));
+
     /** @memo */
     const itemGen = (ele: T, i: int32) => {
         /** @memo */
         const itemGenerator = attributes.itemGenFuncs_.get(REPEAT_EACH_FUNC_TYPE)!;
         const ri = new RepeatItemImpl<T>(arr, i);
+        const env = getCurrentEnv();
         NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
-            itemGenerator(ri);
+            wrapBuilder(env, () => { itemGenerator(ri); })
         });
     };
+
+    const env = getCurrentEnv();
     NodeAttach(() => ForEachNodePeer.create(true), (node: ForEachNodePeer) => {
-        for (let i = 0; i < arr.length; i++) {
-            const e: T = arr[i];
-            memoEntry2<T, int32, void>(__context(), keyGen(e, i), itemGen, e, i);
-        }
+        wrapBuilder(env, () => {
+            for (let i = 0; i < arr.length; i++) {
+                const e: T = arr[i];
+                memoEntry2<T, int32, void>(__context(), keyGen(e, i), itemGen, e, i);
+            }
+        })
         nodeHolder.node = node;
     });
 

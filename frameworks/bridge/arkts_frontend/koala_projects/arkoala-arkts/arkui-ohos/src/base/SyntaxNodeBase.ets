@@ -93,7 +93,7 @@ export class LazyNodePeer extends PeerNode {
     }
 
     override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
-        if (this.disposing) {
+        if (this.disposing) { // do not recycle if repeat is disposed
             return false
         }
         if (!this._reusePool) {
