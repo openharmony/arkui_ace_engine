@@ -349,12 +349,12 @@ HWTEST_F(RichEditorStyleManagerTest, TextStyleUpdateTest002, TestSize.Level0) {
 
     TextStyle textStyle1;
     textStyle1.CopyResource(textStyle);
-    EXPECT_EQ(textStyle1.resMap_.size(), 1);
+    EXPECT_EQ(textStyle1.resMap_.Size(), 1);
     EXPECT_NE(textStyle1.GetResource(key), nullptr);
 
     TextStyle textStyle2;
     textStyle2.AppendResource(textStyle);
-    EXPECT_EQ(textStyle2.resMap_.size(), 1);
+    EXPECT_EQ(textStyle2.resMap_.Size(), 1);
     EXPECT_NE(textStyle2.GetResource(key), nullptr);
 }
 
