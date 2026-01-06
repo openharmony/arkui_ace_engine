@@ -37,6 +37,8 @@ public:
     static void SetIsThreadSafeNodeScope(bool isThreadSafeNodeScope);
     static bool IsThreadSafeNodeScope();
     static bool IsParallelScope();
+    static void SetNeedMarkNodeTreeFree(bool isNeedMarkNodeTreeFree);
+    static bool IsNeedMarkNodeTreeFree();
     bool PostAsyncUITask(int32_t contextId, std::function<void()>&& asyncUITask,
         std::function<void()>&& onFinishTask);
     bool PostUITask(int32_t contextId, std::function<void()>&& uiTask);
@@ -53,6 +55,7 @@ private:
     MultiThreadBuildManager();
     void InitAsyncUITaskQueue();
     static thread_local bool isThreadSafeNodeScope_;
+    static thread_local bool isNeedMarkNodeTreeFree_;
     static thread_local bool isUIThread_;
     static thread_local bool isParallelizeUI_;
     ACE_DISALLOW_COPY_AND_MOVE(MultiThreadBuildManager);

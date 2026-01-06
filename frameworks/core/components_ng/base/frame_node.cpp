@@ -498,7 +498,15 @@ FrameNode::FrameNode(
 {
     isLayoutNode_ = isLayoutNode;
     frameProxy_ = std::make_unique<FrameProxy>(this);
-    renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam(), isLayoutNode);
+    if (IsFree()) {
+        renderContext_->SetIsFree(IsFree());
+        renderContext_->SetHostNode(WeakClaim(this));
+    }
+    if (tag == V2::XCOMPONENT_ETS_TAG) {
+        renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam(), isLayoutNode);
+    } else {
+        renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam(), isLayoutNode, this);
+    }
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     // first create make layout property dirty.
@@ -4912,6 +4920,7 @@ bool FrameNode::OnRemoveFromParent(bool allowTransition)
     if (!allowTransition || RemoveImmediately()) {
         // directly remove, reset parent and depth
         ResetParent();
+        MarkNodeTreeFree(!allowTransition);
         return true;
     }
     // delayed remove, will move self into disappearing children
@@ -8016,6 +8025,27 @@ void FrameNode::OnContentChangeUnregister()
 {
     if (pattern_) {
         pattern_->OnContentChangeUnregister();
+    }
+}
+
+void FrameNode::SetIsFree(bool isFree)
+{
+    if (renderContext_) {
+        renderContext_->SetIsFree(isFree);
+    }
+    UINode::SetIsFree(isFree);
+    SetOverlayNodeIsFree(isFree);
+}
+
+void FrameNode::SetOverlayNodeIsFree(bool isFree)
+{
+    if (!overlayNode_) {
+        return;
+    }
+    if (isFree) {
+        overlayNode_->MarkNodeTreeFree();
+    } else {
+        overlayNode_->MarkNodeTreeNotFree();
     }
 }
 

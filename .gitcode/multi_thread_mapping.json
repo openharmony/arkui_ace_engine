@@ -24,7 +24,21 @@
             "RosenRenderContext::SetFrontBlurFilter": "RosenRenderContext::SetFrontBlurFilterMultiThread",
             "RosenRenderContext::SetPositionToRSNode": "RosenRenderContext::SetPositionToRSNodeMultiThread",
             "RosenRenderContext::AnimateHoverEffectScale": "RosenRenderContext::AnimateHoverEffectScaleMultiThread",
-            "RosenRenderContext::AnimateHoverEffectBoard": "RosenRenderContext::AnimateHoverEffectBoardMultiThread"
+            "RosenRenderContext::AnimateHoverEffectBoard": "RosenRenderContext::AnimateHoverEffectBoardMultiThread",
+            "RosenRenderContext::SetNeedCallbackAreaChange": "RosenRenderContext::SetNeedCallbackAreaChangeMultiThread",
+            "RosenRenderContext::UpdateBackBlurRadius": "RosenRenderContext::UpdateBackBlurRadiusMultiThread",
+            "RosenRenderContext::UpdateBackBlurStyle": "RosenRenderContext::UpdateBackBlurStyleMultiThread",
+            "RosenRenderContext::UpdateBackgroundEffect": "RosenRenderContext::UpdateBackgroundEffectMultiThread",
+            "RosenRenderContext::UpdateMotionBlur": "RosenRenderContext::UpdateMotionBlurMultiThread",
+            "RosenRenderContext::UpdateBackBlur": "RosenRenderContext::UpdateBackBlurMultiThread",
+            "RosenRenderContext::UpdateNodeBackBlur": "RosenRenderContext::UpdateNodeBackBlurMultiThread",
+            "RosenRenderContext::UpdateFrontBlur": "RosenRenderContext::UpdateFrontBlurMultiThread",
+            "RosenRenderContext::UpdateFrontBlurRadius": "RosenRenderContext::UpdateFrontBlurRadiusMultiThread",
+            "RosenRenderContext::UpdateFrontBlurStyle": "RosenRenderContext::UpdateFrontBlurStyleMultiThread",
+            "RosenRenderContext::ResetBackBlurStyle": "RosenRenderContext::ResetBackBlurStyleMultiThread",
+            "RosenRenderContext::SetHostNode": "RosenRenderContext::SetHostNodeMultiThread",
+            "RosenRenderContext::SetRSUIContext": "RosenRenderContext::SetRSUIContextMultiThread",
+            "RosenRenderContext::UpdateForeBlurStyleForColorMode": "RosenRenderContext::UpdateForeBlurStyleForColorModeMultiThread"
         }
     },
     {
@@ -492,9 +506,6 @@
         "file": "frameworks/core/components_ng/base/frame_node_multi_thread.cpp",
         "normal_file": "frameworks/core/components_ng/base/frame_node.cpp",
         "mapping": {
-            "FrameNode::MarkModifyDone": "FrameNode::MarkModifyDoneMultiThread",
-            "FrameNode::MarkDirtyNode": "FrameNode::MarkDirtyNodeMultiThread",
-            "FrameNode::RebuildRenderContextTree": "FrameNode::RebuildRenderContextTreeMultiThread",
             "FrameNode::MarkNeedRender": "FrameNode::MarkNeedRenderMultiThread"
         }
     },
