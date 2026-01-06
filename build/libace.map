@@ -757,7 +757,7 @@
       OHOS::Ace::DebugBoundaryPainter::*;
       OHOS::Ace::Edge::IsValid*;
       OHOS::Ace::Edge::GetLayoutSizeInPx*;
-      OHOS::Ace::RosenRenderContext::GetCanvas*;
+      OHOS::Ace::RosenRenderContext::*;
       OHOS::Ace::TouchEventTarget::SetCoordinateOffset*;
       OHOS::Ace::DOM_CLICK;
       OHOS::Ace::DOM_CATCH_BUBBLE_CLICK;
@@ -790,6 +790,23 @@
       VTT?for?OHOS::Ace::NG::NavigationStack;
       VTT?for?OHOS::Ace::RawRecognizer;
       VTT?for?OHOS::Ace::DragRecognizer;
+      OHOS::Ace::SvgTransform::*;
+      OHOS::Ace::Border::*;
+      OHOS::Ace::AnimatableColor::*;
+      OHOS::Ace::ImageComponent::*;
+      OHOS::Ace::TransformComponent::*;
+      VTT?for?OHOS::Ace::TransformComponent;
+      vtable?for?OHOS::Ace::TransformComponent;
+      OHOS::Ace::RenderTransform::*;
+      OHOS::Ace::AnimatorGroup::*;
+      VTT?for?OHOS::Ace::AnimatorGroup;
+      vtable?for?OHOS::Ace::AnimatorGroup;
+      OHOS::Ace::RosenSvgPainter::*;
+      OHOS::Ace::SvgAnimate::*;
+      bool?OHOS::Ace::SvgAnimate::CreatePropertyAnimate*;
+      OHOS::Ace::RosenRenderTransform::SyncTransformToRsNode*;
+      VTT?for?OHOS::Ace::RosenRenderContext;
+      vtable?for?OHOS::Ace::RosenRenderContext;
 
       OHOS::Ace::LinearColor::TRANSPARENT;
 

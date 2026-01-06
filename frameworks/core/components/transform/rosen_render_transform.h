@@ -29,7 +29,7 @@ public:
     ~RosenRenderTransform() override = default;
 
     void Update(const RefPtr<Component>& component) override;
-    static void SyncTransformToRsNode(const std::shared_ptr<RSNode>& rsNode, const Matrix4& transformMatrix);
+    ACE_FORCE_EXPORT static void SyncTransformToRsNode(const std::shared_ptr<RSNode>& rsNode, const Matrix4& transformMatrix);
     void SyncOriginToRsNode(const std::shared_ptr<RSNode>& rsNode);
 
     bool HasGeometryProperties() const override

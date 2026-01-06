@@ -16,8 +16,6 @@ import(
 
 build_component("image") {
   sources = [
-    "image_animator_component.cpp",
-    "image_animator_element.cpp",
     "image_component.cpp",
     "image_element.cpp",
     "render_image.cpp",

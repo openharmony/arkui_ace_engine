@@ -42,7 +42,7 @@ enum class SvgAnimateType {
     TRANSFORM,
 };
 
-class SvgAnimate : public AceType {
+class ACE_FORCE_EXPORT SvgAnimate : public AceType {
     DECLARE_ACE_TYPE(SvgAnimate, AceType);
 
 public:

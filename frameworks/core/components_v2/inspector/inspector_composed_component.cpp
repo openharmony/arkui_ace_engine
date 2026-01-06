@@ -38,7 +38,6 @@
 #include "core/components_v2/inspector/grid_composed_element.h"
 #include "core/components_v2/inspector/grid_item_composed_element.h"
 #include "core/components_v2/inspector/hyperlink_composed_element.h"
-#include "core/components_v2/inspector/image_animator_composed_element.h"
 #include "core/components_v2/inspector/image_composed_element.h"
 #include "core/components_v2/inspector/indexer_composed_element.h"
 #include "core/components_v2/inspector/list_composed_element.h"
@@ -139,7 +138,7 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { SHAPE_CONTAINER_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ShapeContainerComposedElement>(id); } },
     { IMAGE_ANIMATOR_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::ImageAnimatorComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_IMAGE_ANIMATOR, id); } },
     { IMAGE_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ImageComposedElement>(id); } },
     { QRCODE_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_QRCODE, id); } },
