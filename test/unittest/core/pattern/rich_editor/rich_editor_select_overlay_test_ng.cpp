@@ -1634,4 +1634,37 @@ HWTEST_F(RichEditorSelectOverlayTestNg, IsHandlesShow001, TestSize.Level0)
     auto ret = richEditorPattern->IsHandlesShow();
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: ChangeHandleHeight001
+ * @tc.desc: test RichEditorSelectOverlay ChangeHandleHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, ChangeHandleHeight001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto selectOverlay = richEditorPattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+
+    richEditorPattern->textSelector_.Update(0, 5);
+    auto& firstHandle = richEditorPattern->textSelector_.firstHandle;
+    auto& secondHandle = richEditorPattern->textSelector_.secondHandle;
+    float handleHeight = 100.0f;
+    firstHandle.SetHeight(handleHeight);
+    secondHandle.SetHeight(handleHeight);
+
+    GestureEvent info;
+    selectOverlay->ChangeHandleHeight(info, true);
+    EXPECT_TRUE(NearEqual(firstHandle.Height(), handleHeight));
+    selectOverlay->ChangeHandleHeight(info, false);
+    EXPECT_TRUE(NearEqual(secondHandle.Height(), handleHeight));
+    selectOverlay->handleLevelMode_ = HandleLevelMode::EMBED;
+    selectOverlay->ChangeHandleHeight(info, false);
+    EXPECT_TRUE(NearEqual(secondHandle.Height(), handleHeight));
+    selectOverlay->hasTransform_ = true;
+    selectOverlay->ChangeHandleHeight(info, true);
+    EXPECT_TRUE(NearEqual(firstHandle.Height(), handleHeight));
+}
 } // namespace OHOS::Ace::NG
