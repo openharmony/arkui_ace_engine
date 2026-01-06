@@ -759,13 +759,13 @@ auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_
     auto optParam = Converter::OptConvert<NG::MenuParam>(menuOption->previewAnimationOptions);
     if (optParam) {
         menuParam.previewAnimationOptions = optParam->previewAnimationOptions;
+        menuParam.hasPreviewTransitionEffect = optParam->hasPreviewTransitionEffect;
+        menuParam.previewTransition = optParam->previewTransition;
         if (menuParam.previewMode != MenuPreviewMode::CUSTOM ||
             optParam->hasPreviewTransitionEffect || optParam->hasTransitionEffect ||
             menuParam.contextMenuRegisterType == NG::ContextMenuRegisterType::CUSTOM_TYPE) {
             return;
         }
-        menuParam.hasPreviewTransitionEffect = optParam->hasPreviewTransitionEffect;
-        menuParam.previewTransition = optParam->previewTransition;
         menuParam.hoverImageAnimationOptions = optParam->hoverImageAnimationOptions;
         menuParam.isShowHoverImage = optParam->isShowHoverImage;
         menuParam.hoverScaleInterruption = optParam->hoverScaleInterruption;
