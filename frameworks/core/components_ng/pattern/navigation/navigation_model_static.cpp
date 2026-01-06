@@ -999,4 +999,9 @@ void NavigationModelStatic::UpdateDefineColor(FrameNode* frameNode, bool isDefin
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DefinedDividerColor, isDefined, frameNode);
 }
+
+void NavigationModelStatic::UpdateDividerColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DividerColor, color, frameNode);
+}
 } // namespace OHOS::Ace::NG

@@ -74,6 +74,7 @@ public:
     static void SetRecoverable(FrameNode* frameNode, const std::optional<bool>& recoverable);
     static void SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable);
     static void UpdateDefineColor(FrameNode* frameNode, bool isDefined);
+    static void UpdateDividerColor(FrameNode* frameNode, const Color& color);
 
 private:
     static bool navBarWidthDoubleBind_;
