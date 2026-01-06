@@ -1306,13 +1306,13 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         ResetAnimationParam();
         auto pipeline = GetContext();
         if (pipeline) {
-            pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
+            pipeline->AddAfterRenderTask([weak = WeakClaim(this), isInit, jumpIndex = jumpIndex_]() {
                 auto swiper = weak.Upgrade();
                 CHECK_NULL_VOID(swiper);
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
                 AceAsyncTraceEndCommercial(
                     0, swiper->hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
-                swiper->LoadCompleteManagerStopCollect();
+                swiper->LoadCompleteManagerStopCollect(isInit ? std::nullopt : jumpIndex);
             });
         }
         UpdateCurrentIndex(algo->GetCurrentIndex());
@@ -8096,15 +8096,22 @@ void SwiperPattern::LoadCompleteManagerStartCollect()
     }
 }
 
-void SwiperPattern::LoadCompleteManagerStopCollect()
+void SwiperPattern::LoadCompleteManagerStopCollect(std::optional<int32_t> jumpIndex)
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->GetLoadCompleteManager()->StopCollect();
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
-    if (!IsAutoPlay() && (!targetIndex_.has_value() || targetIndex_.value() != currentIndex_)) {
-        mgr->OnSwiperChangeEnd(GetHost(), hasTabsAncestor_);
+    if (IsAutoPlay()) {
+        return;
     }
+    if (jumpIndex.has_value() && jumpIndex.value() == currentIndex_) {
+        return;
+    }
+    if (targetIndex_.has_value() && targetIndex_.value() == currentIndex_) {
+        return;
+    }
+    mgr->OnSwiperChangeEnd(GetHost(), hasTabsAncestor_);
 }
 } // namespace OHOS::Ace::NG
