@@ -859,6 +859,10 @@ public:
         CopyMap(other);
         return *this;
     }
+    size_t Size()
+    {
+        return map_ ? map_->size() : 0;
+    }
     std::unique_ptr<std::unordered_map<K, V>> map_;
 private:
     void CopyMap(const ResourceMap<K, V>& other)

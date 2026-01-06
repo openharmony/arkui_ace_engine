@@ -74,7 +74,7 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToTextStyleTest001, TestSize
     g_isConfigChangePerform = false;
 
     StyleManager::AddTextColorResource(textStyle, nullptr);
-    EXPECT_EQ(textStyle.resMap_.size(), 0);
+    EXPECT_EQ(textStyle.resMap_.Size(), 0);
 }
 
 HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToTextStyleTest002, TestSize.Level0)
@@ -83,7 +83,7 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToTextStyleTest002, TestSize
     g_isConfigChangePerform = true;
 
     StyleManager::AddTextColorResource(textStyle, nullptr);
-    EXPECT_EQ(textStyle.resMap_.size(), 0);
+    EXPECT_EQ(textStyle.resMap_.Size(), 0);
 }
 
 HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToTextStyleTest003, TestSize.Level0)
@@ -93,7 +93,7 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToTextStyleTest003, TestSize
     g_isConfigChangePerform = false;
 
     StyleManager::AddTextColorResource(textStyle, colorResObj);
-    EXPECT_EQ(textStyle.resMap_.size(), 1);
+    EXPECT_EQ(textStyle.resMap_.Size(), 1);
 }
 
 HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToTextStyleTest004, TestSize.Level0)
@@ -103,10 +103,10 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToTextStyleTest004, TestSize
     g_isConfigChangePerform = true;
 
     StyleManager::AddTextColorResource(textStyle, colorResObj);
-    EXPECT_EQ(textStyle.resMap_.size(), 1);
+    EXPECT_EQ(textStyle.resMap_.Size(), 1);
 
     StyleManager::AddTextColorResource(textStyle, colorResObj);
-    EXPECT_EQ(textStyle.resMap_.size(), 1);
+    EXPECT_EQ(textStyle.resMap_.Size(), 1);
 }
 
 HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToSpanNodeTest001, TestSize.Level0)
@@ -139,18 +139,12 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToSpanNodeTest003, TestSize.
 
 HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToSpanNodeTest004, TestSize.Level0)
 {
-    /**
-     * @tc.steps: step1. test old flow
-     */
     RefPtr<SpanNode> spanNode = AceType::MakeRefPtr<SpanNode>(1);
     TextStyle textStyle;
     RefPtr<ResourceObject> colorResObj = AceType::MakeRefPtr<ResourceObject>();
     textStyle.AddResource(StyleManager::TEXT_COLOR_KEY, colorResObj, StyleManager::TEXT_STYLE_TEXT_COLOR_UPDATER);
     g_isConfigChangePerform = true;
 
-    /**
-     * @tc.steps: step2. test new flow
-     */
     StyleManager::AddTextColorResource(spanNode, textStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 1);
 
@@ -167,7 +161,7 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextDecorationColorResToTextStyleTest001
     g_isConfigChangePerform = false;
 
     StyleManager::AddTextDecorationColorResource(textStyle, nullptr);
-    EXPECT_EQ(textStyle.resMap_.size(), 0);
+    EXPECT_EQ(textStyle.resMap_.Size(), 0);
 }
 
 HWTEST_F(RichEditorStyleManagerTest, AddTextDecorationColorResToTextStyleTest002, TestSize.Level0)
@@ -176,7 +170,7 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextDecorationColorResToTextStyleTest002
     g_isConfigChangePerform = true;
 
     StyleManager::AddTextDecorationColorResource(textStyle, nullptr);
-    EXPECT_EQ(textStyle.resMap_.size(), 0);
+    EXPECT_EQ(textStyle.resMap_.Size(), 0);
 }
 
 HWTEST_F(RichEditorStyleManagerTest, AddTextDecorationColorResToTextStyleTest003, TestSize.Level0)
@@ -186,7 +180,7 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextDecorationColorResToTextStyleTest003
     g_isConfigChangePerform = false;
 
     StyleManager::AddTextDecorationColorResource(textStyle, colorResObj);
-    EXPECT_EQ(textStyle.resMap_.size(), 1);
+    EXPECT_EQ(textStyle.resMap_.Size(), 1);
 }
 
 HWTEST_F(RichEditorStyleManagerTest, AddTextDecorationColorResToTextStyleTest004, TestSize.Level0)
@@ -196,10 +190,10 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextDecorationColorResToTextStyleTest004
     g_isConfigChangePerform = true;
 
     StyleManager::AddTextDecorationColorResource(textStyle, colorResObj);
-    EXPECT_EQ(textStyle.resMap_.size(), 1);
+    EXPECT_EQ(textStyle.resMap_.Size(), 1);
 
     StyleManager::AddTextDecorationColorResource(textStyle, colorResObj);
-    EXPECT_EQ(textStyle.resMap_.size(), 1);
+    EXPECT_EQ(textStyle.resMap_.Size(), 1);
 }
 
 HWTEST_F(RichEditorStyleManagerTest, AddTextDecorationColorResToSpanNodeTest001, TestSize.Level0)
@@ -269,11 +263,11 @@ HWTEST_F(RichEditorStyleManagerTest, AddSymbolColorResToTextStyleTest001, TestSi
 
     g_isConfigChangePerform = false;
     StyleManager::AddSymbolColorResource(textStyle, resObjArr);
-    EXPECT_EQ(textStyle.resMap_.size(), 3);
+    EXPECT_EQ(textStyle.resMap_.Size(), 3);
 
     g_isConfigChangePerform = true;
     StyleManager::AddSymbolColorResource(textStyle, resObjArr);
-    EXPECT_EQ(textStyle.resMap_.size(), 3);
+    EXPECT_EQ(textStyle.resMap_.Size(), 3);
 }
 
 HWTEST_F(RichEditorStyleManagerTest, AddSymbolColorResToSpanNodeTest001, TestSize.Level0) {
@@ -295,7 +289,7 @@ HWTEST_F(RichEditorStyleManagerTest, AddSymbolColorResToSpanNodeTest001, TestSiz
     g_isConfigChangePerform = true;
     StyleManager::AddSymbolColorResource(textStyle, resObjArr);
     textStyle.SetSymbolColorList(symbolColorList);
-    EXPECT_EQ(textStyle.resMap_.size(), 3);
+    EXPECT_EQ(textStyle.resMap_.Size(), 3);
     EXPECT_EQ(textStyle.GetSymbolColorList().size(), 3);
 
     g_isConfigChangePerform = false;
@@ -350,7 +344,7 @@ HWTEST_F(RichEditorStyleManagerTest, TextStyleUpdateTest002, TestSize.Level0) {
     const auto& key = StyleManager::TEXT_COLOR_KEY;
     const auto& updater = StyleManager::TEXT_STYLE_TEXT_COLOR_UPDATER;
     textStyle.AddResource(key, colorResObj, updater);
-    EXPECT_EQ(textStyle.resMap_.size(), 1);
+    EXPECT_EQ(textStyle.resMap_.Size(), 1);
     EXPECT_NE(textStyle.GetResource(key), nullptr);
 
     TextStyle textStyle1;
