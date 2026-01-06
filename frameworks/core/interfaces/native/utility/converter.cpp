@@ -1793,6 +1793,21 @@ TranslateOptions Convert(const Ark_TranslateOptions& src)
 }
 
 template<>
+TwoDimensionScrollResult Convert(const Ark_OffsetResult& src)
+{
+    auto xOffset = OptConvert<Dimension>(src.xOffset);
+    auto yOffset = OptConvert<Dimension>(src.yOffset);
+    TwoDimensionScrollResult result;
+    if (xOffset.has_value()) {
+        result.xOffset = xOffset.value();
+    }
+    if (yOffset.has_value()) {
+        result.yOffset = yOffset.value();
+    }
+    return result;
+}
+
+template<>
 bool Convert(const Ark_EdgeEffectOptions& src)
 {
     return static_cast<bool>(src.alwaysEnabled);
@@ -3610,6 +3625,14 @@ PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src)
     std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
     dst.second = Converter::Convert<std::vector<NG::TextCascadePickerOptions>>(src);
     dst.first = true;
+    return dst;
+}
+
+template<>
+PresetFillType Convert(const Ark_ItemFillPolicy& src)
+{
+    PresetFillType dst;
+    dst = Converter::OptConvert<PresetFillType>(src.fillType.value).value_or(dst);
     return dst;
 }
 

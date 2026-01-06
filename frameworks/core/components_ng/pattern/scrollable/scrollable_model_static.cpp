@@ -17,6 +17,7 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
+#include "core/components_ng/pattern/scrollable/scrollable_layout_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -184,6 +185,14 @@ void ScrollableModelStatic::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEv
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
 
+void ScrollableModelStatic::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& ScrollFrameBegin)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollFrameBegin(std::move(ScrollFrameBegin));
+}
+
 void ScrollableModelStatic::SetMaxFlingSpeed(FrameNode* frameNode, const std::optional<double>& max)
 {
     CHECK_NULL_VOID(frameNode);
@@ -281,6 +290,70 @@ void ScrollableModelStatic::ResetBackToTopMultiThread(FrameNode* frameNode)
         pattern->ResetBackToTop();
     });
     pattern->UseDefaultBackToTop(true);
+}
+
+void ScrollableModelStatic::SetScrollBarMargin(FrameNode* frameNode, const ScrollBarMargin& scrollBarMargin)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMargin, scrollBarMargin, frameNode);
+}
+
+
+void ScrollableModelStatic::SetContentStartOffset(FrameNode* frameNode, const std::optional<float>& offset)
+{
+    if (offset.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollableLayoutProperty, ContentStartOffset, offset.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ScrollableLayoutProperty, ContentStartOffset, frameNode);
+    }
+}
+
+void ScrollableModelStatic::SetContentEndOffset(FrameNode* frameNode, const std::optional<float>& offset)
+{
+    if (offset.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollableLayoutProperty, ContentEndOffset, offset.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ScrollableLayoutProperty, ContentEndOffset, frameNode);
+    }
+}
+
+void ScrollableModelStatic::SetOnWillStartDragging(FrameNode* frameNode, OnWillStartDraggingEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillStartDragging(std::move(event));
+}
+
+void ScrollableModelStatic::SetOnWillStopDragging(FrameNode* frameNode, OnWillStopDraggingEvent&& onWillStopDragging)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillStopDragging(std::move(onWillStopDragging));
+}
+
+void ScrollableModelStatic::SetOnDidStopDragging(FrameNode* frameNode, OnDidStopDraggingEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidStopDragging(std::move(event));
+}
+void ScrollableModelStatic::SetOnWillStartFling(FrameNode* frameNode, OnWillStartFlingEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillStartFling(std::move(event));
+}
+
+void ScrollableModelStatic::SetOnDidStopFling(FrameNode* frameNode, OnDidStopFlingEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDidStopFling(std::move(event));
 }
 } // namespace OHOS::Ace::NG
  

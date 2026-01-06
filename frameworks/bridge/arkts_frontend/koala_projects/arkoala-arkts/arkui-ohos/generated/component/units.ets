@@ -25,7 +25,7 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { Resource } from "global.resource"
 import { extractors } from "#handwritten"
 import { LengthMetrics, LengthMetricsUnit, ColorMetrics } from "arkui.Graphics"
-import { Color, BorderStyle, FontWeight, FontStyle, DividerMode } from "./enums"
+import { Color, BorderStyle, FontWeight, FontStyle, DividerMode, PresetFillType } from "./enums"
 import { OutlineStyle, AccessibilityRoleType } from "./common"
 import { LengthMetrics_serializer } from "./../Graphics"
 import { Resource_serializer } from "./../framework/resource"
@@ -259,6 +259,14 @@ export interface AccessibilityOptions {
 export interface AccessibilityActionOptions {
     scrollStep?: int32;
 }
+export interface CacheCountInfo {
+    minCount: int32;
+    maxCount: int32;
+}
+export type ResponsiveFillType = PresetFillType;
+export interface ItemFillPolicy {
+    fillType?: PresetFillType;
+}
 export class ColorFilter_serializer {
     public static write(buffer: SerializerBase, value: ColorFilter): void {
         let valueSerializer : SerializerBase = buffer
@@ -409,6 +417,22 @@ export class Bias_serializer {
         }
         const verticalTmpResult : double | undefined = verticalTmpBuf
         let value : Bias = ({horizontal: horizontalTmpResult, vertical: verticalTmpResult} as Bias)
+        return value
+    }
+}
+export class CacheCountInfo_serializer {
+    public static write(buffer: SerializerBase, value: CacheCountInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForMinCount  = value.minCount
+        valueSerializer.writeInt32(valueHolderForMinCount)
+        const valueHolderForMaxCount  = value.maxCount
+        valueSerializer.writeInt32(valueHolderForMaxCount)
+    }
+    public static read(buffer: DeserializerBase): CacheCountInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const minCountTmpResult : int32 = valueDeserializer.readInt32()
+        const maxCountTmpResult : int32 = valueDeserializer.readInt32()
+        let value : CacheCountInfo = ({minCount: minCountTmpResult, maxCount: maxCountTmpResult} as CacheCountInfo)
         return value
     }
 }
@@ -601,6 +625,30 @@ export class EdgeStyles_serializer {
         }
         const leftTmpResult : BorderStyle | undefined = leftTmpBuf
         let value : EdgeStyles = ({top: topTmpResult, right: rightTmpResult, bottom: bottomTmpResult, left: leftTmpResult} as EdgeStyles)
+        return value
+    }
+}
+export class ItemFillPolicy_serializer {
+    public static write(buffer: SerializerBase, value: ItemFillPolicy): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForFillType  = value.fillType
+        if (valueHolderForFillType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFillTypeTmpValue  = (valueHolderForFillType as PresetFillType)
+            valueSerializer.writeInt32(valueHolderForFillTypeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ItemFillPolicy {
+        let valueDeserializer : DeserializerBase = buffer
+        const fillTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fillTypeTmpBuf : PresetFillType | undefined = undefined
+        if ((fillTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fillTypeTmpBuf = PresetFillType.fromValue(valueDeserializer.readInt32())
+        }
+        const fillTypeTmpResult : PresetFillType | undefined = fillTypeTmpBuf
+        let value : ItemFillPolicy = ({fillType: fillTypeTmpResult} as ItemFillPolicy)
         return value
     }
 }
@@ -1500,6 +1548,44 @@ export class Offset_serializer {
         }
         const dyTmpResult : Length = (dyTmpBuf as string | double | Resource)
         let value : Offset = ({dx: dxTmpResult, dy: dyTmpResult} as Offset)
+        return value
+    }
+}
+export class ScrollBarMargin_serializer {
+    public static write(buffer: SerializerBase, value: ScrollBarMargin): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForStart  = value.start
+        if (valueHolderForStart !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStartTmpValue  = valueHolderForStart!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForStartTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEnd  = value.end
+        if (valueHolderForEnd !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEndTmpValue  = valueHolderForEnd!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForEndTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ScrollBarMargin {
+        let valueDeserializer : DeserializerBase = buffer
+        const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let startTmpBuf : LengthMetrics | undefined = undefined
+        if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            startTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const startTmpResult : LengthMetrics | undefined = startTmpBuf
+        const endTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let endTmpBuf : LengthMetrics | undefined = undefined
+        if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            endTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const endTmpResult : LengthMetrics | undefined = endTmpBuf
+        let value : ScrollBarMargin = ({start: startTmpResult, end: endTmpResult} as ScrollBarMargin)
         return value
     }
 }

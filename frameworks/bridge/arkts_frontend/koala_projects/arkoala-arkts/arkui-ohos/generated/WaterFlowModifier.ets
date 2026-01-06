@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethod, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod, OnWillScrollCallback, OnScrollCallback } from "./component/common"
+import { CommonMethod, NestedScrollOptions, OnWillStopDraggingCallback, OnDidStopDraggingCallback, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod, OnWillScrollCallback, OnScrollCallback } from "./component/common"
 import { BarState, Color, CrownSensitivity, EdgeEffect, FlexDirection, ScrollSource } from "./component/enums"
 import { Resource } from "global.resource"
 import { extractors, AttributeModifier } from "#handwritten"
@@ -28,7 +28,7 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkWaterFlowPeer, WaterFlowAttribute } from "./component/waterFlow"
 import { int32 } from "@koalaui/common"
-import { ConstraintSizeOptions, Length } from "./component/units"
+import { VoidCallback, ItemFillPolicy, ConstraintSizeOptions, Length, ScrollBarMargin } from "./component/units"
 import { OnScrollFrameBeginCallback } from "./component/scroll"
 import { ScrollState } from "./component/list"
 export class WaterFlowModifier extends CommonMethodModifier implements WaterFlowAttribute,AttributeModifier<WaterFlowAttribute> {
@@ -44,7 +44,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
     applyDisabledAttribute(instance: WaterFlowAttribute): void { }
     applySelectedAttribute(instance: WaterFlowAttribute): void { }
     _columnsTemplate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _columnsTemplate_0_0value?: string | undefined
+    _columnsTemplate_0_0value?: string | ItemFillPolicy | undefined
     _itemConstraintSize_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _itemConstraintSize_0_0value?: ConstraintSizeOptions | undefined
     _rowsTemplate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -57,6 +57,8 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
     _layoutDirection_0_0value?: FlexDirection | undefined
     _cachedCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _cachedCount_0_0value?: int32 | undefined
+    _syncLoad_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _syncLoad_0_0value?: boolean | undefined
     _onScrollFrameBegin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onScrollFrameBegin_0_0value?: OnScrollFrameBeginCallback | undefined
     _onScrollIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -71,15 +73,31 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
     _scrollBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollBar_0_0value?: BarState | undefined
     _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarColor_0_0value?: Color | int32 | string | undefined
+    _scrollBarColor_0_0value?: Color | int32 | string | Resource | undefined
     _scrollBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollBarWidth_0_0value?: double | string | undefined
+    _scrollBarMargin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _scrollBarMargin_0_0value?: ScrollBarMargin | undefined
     _nestedScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _nestedScroll_0_0value?: NestedScrollOptions | undefined
     _enableScrollInteraction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableScrollInteraction_0_0value?: boolean | undefined
     _friction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _friction_0_0value?: double | Resource | undefined
+    _contentStartOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentStartOffset_0_0value?: double | Resource | undefined
+    _contentEndOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentEndOffset_0_0value?: double | Resource | undefined
+    _onWillStartDragging_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillStartDragging_0_0value?: VoidCallback | undefined
+    _onWillStopDragging_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillStopDragging_0_0value?: OnWillStopDraggingCallback | undefined
+    _onDidStopDragging_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onDidStopDragging_0_0value?: OnDidStopDraggingCallback | undefined
+    _onWillStartFling_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillStartFling_0_0value?: VoidCallback | undefined
+    _onDidStopFling_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onDidStopFling_0_0value?: VoidCallback | undefined
     _onReachStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onReachStart_0_0value?: (() => void) | undefined
     _onReachEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -110,7 +128,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             switch (this._columnsTemplate_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setColumnsTemplateAttribute((this._columnsTemplate_0_0value as string | undefined));
+                    peer.setColumnsTemplateAttribute((this._columnsTemplate_0_0value as string | ItemFillPolicy | undefined));
                     this._columnsTemplate_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -120,7 +138,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     this._columnsTemplate_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setColumnsTemplateAttribute((undefined as string | undefined));
+                    peer.setColumnsTemplateAttribute((undefined as string | ItemFillPolicy | undefined));
                 }
             }
         }
@@ -229,6 +247,24 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 default: {
                     this._cachedCount_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setCachedCount0Attribute((undefined as int32 | undefined));
+                }
+            }
+        }
+        if (this._syncLoad_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._syncLoad_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSyncLoadAttribute((this._syncLoad_0_0value as boolean | undefined));
+                    this._syncLoad_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._syncLoad_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._syncLoad_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSyncLoadAttribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -344,7 +380,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             switch (this._scrollBarColor_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | int32 | string | undefined));
+                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | int32 | string | Resource | undefined));
                     this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -354,7 +390,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     this._scrollBarColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setScrollBarColorAttribute((undefined as Color | int32 | string | undefined));
+                    peer.setScrollBarColorAttribute((undefined as Color | int32 | string | Resource | undefined));
                 }
             }
         }
@@ -373,6 +409,24 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 default: {
                     this._scrollBarWidth_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setScrollBarWidthAttribute((undefined as double | string | undefined));
+                }
+            }
+        }
+        if (this._scrollBarMargin_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._scrollBarMargin_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setScrollBarMarginAttribute((this._scrollBarMargin_0_0value as ScrollBarMargin | undefined));
+                    this._scrollBarMargin_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._scrollBarMargin_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._scrollBarMargin_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setScrollBarMarginAttribute((undefined as ScrollBarMargin | undefined));
                 }
             }
         }
@@ -427,6 +481,132 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 default: {
                     this._friction_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setFrictionAttribute((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (this._contentStartOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentStartOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setContentStartOffsetAttribute((this._contentStartOffset_0_0value as double | Resource | undefined));
+                    this._contentStartOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentStartOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentStartOffset_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setContentStartOffsetAttribute((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (this._contentEndOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentEndOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setContentEndOffsetAttribute((this._contentEndOffset_0_0value as double | Resource | undefined));
+                    this._contentEndOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentEndOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentEndOffset_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setContentEndOffsetAttribute((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (this._onWillStartDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillStartDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillStartDraggingAttribute((this._onWillStartDragging_0_0value as VoidCallback | undefined));
+                    this._onWillStartDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillStartDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillStartDragging_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillStartDraggingAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._onWillStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillStopDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillStopDraggingAttribute((this._onWillStopDragging_0_0value as OnWillStopDraggingCallback | undefined));
+                    this._onWillStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillStopDragging_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillStopDraggingAttribute((undefined as OnWillStopDraggingCallback | undefined));
+                }
+            }
+        }
+        if (this._onDidStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onDidStopDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnDidStopDraggingAttribute((this._onDidStopDragging_0_0value as OnDidStopDraggingCallback | undefined));
+                    this._onDidStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onDidStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onDidStopDragging_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnDidStopDraggingAttribute((undefined as OnDidStopDraggingCallback | undefined));
+                }
+            }
+        }
+        if (this._onWillStartFling_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillStartFling_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillStartFlingAttribute((this._onWillStartFling_0_0value as VoidCallback | undefined));
+                    this._onWillStartFling_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillStartFling_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillStartFling_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillStartFlingAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._onDidStopFling_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onDidStopFling_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnDidStopFlingAttribute((this._onDidStopFling_0_0value as VoidCallback | undefined));
+                    this._onDidStopFling_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onDidStopFling_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onDidStopFling_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnDidStopFlingAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
@@ -623,7 +803,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                     break;
                 }
                 default: {
-                    this.columnsTemplate((undefined as string | undefined));
+                    this.columnsTemplate((undefined as string | ItemFillPolicy | undefined));
                 }
             }
         }
@@ -702,6 +882,19 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     this.cachedCount((undefined as int32 | undefined));
+                }
+            }
+        }
+        if (modifier._syncLoad_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._syncLoad_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.syncLoad(modifier._syncLoad_0_0value);
+                    break;
+                }
+                default: {
+                    this.syncLoad((undefined as boolean | undefined));
                 }
             }
         }
@@ -792,7 +985,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                     break;
                 }
                 default: {
-                    this.scrollBarColor((undefined as Color | int32 | string | undefined));
+                    this.scrollBarColor((undefined as Color | int32 | string | Resource | undefined));
                 }
             }
         }
@@ -806,6 +999,19 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     this.scrollBarWidth((undefined as double | string | undefined));
+                }
+            }
+        }
+        if (modifier._scrollBarMargin_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._scrollBarMargin_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.scrollBarMargin(modifier._scrollBarMargin_0_0value);
+                    break;
+                }
+                default: {
+                    this.scrollBarMargin((undefined as ScrollBarMargin | undefined));
                 }
             }
         }
@@ -845,6 +1051,97 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
                 }
                 default: {
                     this.friction((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._contentStartOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentStartOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentStartOffset(modifier._contentStartOffset_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentStartOffset((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._contentEndOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentEndOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentEndOffset(modifier._contentEndOffset_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentEndOffset((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._onWillStartDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillStartDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillStartDragging(modifier._onWillStartDragging_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillStartDragging((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onWillStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillStopDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillStopDragging(modifier._onWillStopDragging_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillStopDragging((undefined as OnWillStopDraggingCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onDidStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onDidStopDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onDidStopDragging(modifier._onDidStopDragging_0_0value);
+                    break;
+                }
+                default: {
+                    this.onDidStopDragging((undefined as OnDidStopDraggingCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onWillStartFling_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillStartFling_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillStartFling(modifier._onWillStartFling_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillStartFling((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onDidStopFling_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onDidStopFling_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onDidStopFling(modifier._onDidStopFling_0_0value);
+                    break;
+                }
+                default: {
+                    this.onDidStopFling((undefined as VoidCallback | undefined));
                 }
             }
         }
@@ -979,7 +1276,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
             }
         }
     }
-    columnsTemplate(value: string | undefined): this {
+    columnsTemplate(value: string | ItemFillPolicy | undefined): this {
         if (((this._columnsTemplate_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._columnsTemplate_0_0value) !== (value)))
         {
             this._columnsTemplate_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1056,6 +1353,17 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         }
         return this
     }
+    syncLoad(value: boolean | undefined): this {
+        if (((this._syncLoad_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._syncLoad_0_0value) !== (value)))
+        {
+            this._syncLoad_0_flag = AttributeUpdaterFlag.UPDATE
+            this._syncLoad_0_0value = value
+        } else
+        {
+            this._syncLoad_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         if (((this._onScrollFrameBegin_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
@@ -1123,7 +1431,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         }
         return this
     }
-    scrollBarColor(value: Color | int32 | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
         if (((this._scrollBarColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1142,6 +1450,17 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         } else
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    scrollBarMargin(value: ScrollBarMargin | undefined): this {
+        if (((this._scrollBarMargin_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._scrollBarMargin_0_0value) !== (value)))
+        {
+            this._scrollBarMargin_0_flag = AttributeUpdaterFlag.UPDATE
+            this._scrollBarMargin_0_0value = value
+        } else
+        {
+            this._scrollBarMargin_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -1175,6 +1494,83 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         } else
         {
             this._friction_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentStartOffset(value: double | Resource | undefined): this {
+        if (((this._contentStartOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._contentStartOffset_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentStartOffset_0_0value = value
+        } else
+        {
+            this._contentStartOffset_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentEndOffset(value: double | Resource | undefined): this {
+        if (((this._contentEndOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._contentEndOffset_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentEndOffset_0_0value = value
+        } else
+        {
+            this._contentEndOffset_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onWillStartDragging(value: VoidCallback | undefined): this {
+        if (((this._onWillStartDragging_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillStartDragging_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillStartDragging_0_0value = value
+        } else
+        {
+            this._onWillStartDragging_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
+        if (((this._onWillStopDragging_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillStopDragging_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillStopDragging_0_0value = value
+        } else
+        {
+            this._onWillStopDragging_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
+        if (((this._onDidStopDragging_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onDidStopDragging_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onDidStopDragging_0_0value = value
+        } else
+        {
+            this._onDidStopDragging_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onWillStartFling(value: VoidCallback | undefined): this {
+        if (((this._onWillStartFling_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillStartFling_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillStartFling_0_0value = value
+        } else
+        {
+            this._onWillStartFling_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onDidStopFling(value: VoidCallback | undefined): this {
+        if (((this._onDidStopFling_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onDidStopFling_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onDidStopFling_0_0value = value
+        } else
+        {
+            this._onDidStopFling_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

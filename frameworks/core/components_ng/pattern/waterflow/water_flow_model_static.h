@@ -51,6 +51,8 @@ public:
     static void SetFooter(FrameNode* frameNode, const RefPtr<NG::UINode>& footer);
     static void ResetFooter(FrameNode* frameNode);
     static void ResetItemLayoutConstraint(FrameNode* frameNode);
+    static void SetItemFillPolicy(FrameNode* frameNode, PresetFillType fillType);
+    static void SetSyncLoad(FrameNode* frameNode, bool syncLoad);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_STATIC_H
