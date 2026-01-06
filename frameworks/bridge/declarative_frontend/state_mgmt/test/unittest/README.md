@@ -3,7 +3,7 @@
 Tests can be run on an RK board or a phone. The HAP must be installed, and tests will run automatically when the application starts.
 
 ## Building
-HAP can be build and signed by build server with the following command
+HAP can be build and signed by build server with the following command. Current .cer file will expire 24.04.2028.
  ```bash
  ./build.sh --product-name rk3568 --build-target statemgmt_ut_hap
  NOTE: When adding new tests and changing .ts files. Its often necessary to remove .hvigor folder to build system to detect changes. You can use this command to always detect .ts file changes.
