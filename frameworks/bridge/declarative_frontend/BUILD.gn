@@ -607,7 +607,6 @@ template("declarative_js_engine") {
         config.rich_components_support) {
       sources += [
         "jsview/js_piece.cpp",
-        "jsview/js_rating.cpp",
       ]
       if (defined(config.video_components_support) &&
           config.video_components_support) {
@@ -995,7 +994,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_popups.cpp",
       "jsview/js_progress.cpp",
       "jsview/js_radio.cpp",
-      "jsview/js_rating.cpp",
       "jsview/js_rect.cpp",
       "jsview/js_rect_shape.cpp",
       "jsview/js_recycle_view.cpp",

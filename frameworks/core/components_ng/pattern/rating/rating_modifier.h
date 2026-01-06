@@ -27,6 +27,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+const char RATING_ETS_TAG[] = "Rating";
 class RatingModifier : public ContentModifier {
     DECLARE_ACE_TYPE(RatingModifier, ContentModifier);
 

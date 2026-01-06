@@ -34,6 +34,7 @@ arkui_modules = [
     "gauge",
     "checkbox",
     "checkboxgroup",
+    "rating",
 ]
 
 module_targets = []

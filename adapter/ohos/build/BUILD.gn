@@ -17,6 +17,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 component_modules = [
   "gauge",
   "checkbox",
+  "rating",
 ]
 component_modules_libs = []
 

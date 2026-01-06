@@ -19,6 +19,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
@@ -608,10 +609,15 @@ void* createCheckBoxGroupNode(ArkUI_Int32 nodeId)
 
 void* createRatingNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = RatingModelNG::CreateFrameNode(nodeId);
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Rating");
+    CHECK_NULL_RETURN(module, nullptr);
+    auto arkUIRatingModifier = reinterpret_cast<const ArkUIRatingModifier*>(module->GetDynamicModifier());
+    CHECK_NULL_RETURN(arkUIRatingModifier, nullptr);
+    auto arkUINodeHandle = arkUIRatingModifier->createFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* CreateCustomNode(ArkUI_CharPtr tag)

@@ -79,9 +79,10 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         }
     }
     static const std::unordered_map<std::string, std::string> soMap = {
-        {"Gauge", "gauge"},
         {"Checkbox", "checkbox"},
         {"CheckboxGroup", "checkbox"},
+        {"Gauge", "gauge"},
+        {"Rating", "rating"},
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);

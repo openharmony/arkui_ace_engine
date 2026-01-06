@@ -102,7 +102,7 @@ struct SymbolData;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
-std::optional<double> FloatToDouble(const std::optional<float>& src);
+ACE_FORCE_EXPORT std::optional<double> FloatToDouble(const std::optional<float>& src);
 template<typename T>
 std::optional<int32_t> EnumToInt(const std::optional<T>& src)
 {
@@ -747,7 +747,7 @@ namespace Converter {
     template<> TranslateOptions Convert(const Ark_TranslateOptions& src);
     template<> TwoDimensionScrollResult Convert(const Ark_OffsetResult& src);
     template<> bool Convert(const Ark_EdgeEffectOptions& src);
-    template<> double Convert(const Ark_Float64& src);
+    template<> ACE_FORCE_EXPORT double Convert(const Ark_Float64& src);
     template<> float Convert(const Ark_Float32& src);
     template<> ACE_FORCE_EXPORT float Convert(const Ark_Float64& src);
     template<> int Convert(const Ark_Float64& src);
@@ -1013,6 +1013,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<std::string>& dst, const Ark_uniformTypeDescriptor_UniformDataType& src);
     template<> void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src);
     template<> void AssignCast(std::optional<uint32_t>& dst, const Ark_Number& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<float>& dst, const Ark_Float64& src);
 
     // Long declarations goes below. DO NOT ADD SHORT DECLARATIONS HERE!
     template<> void AssignCast(std::optional<AccessibilityActionInterceptResult>& dst,

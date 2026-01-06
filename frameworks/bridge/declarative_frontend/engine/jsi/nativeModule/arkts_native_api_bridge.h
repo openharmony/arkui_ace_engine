@@ -17,7 +17,6 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_API_BRIDGE_H
 
 #include "ecmascript/napi/include/jsnapi.h"
-
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
@@ -87,7 +86,6 @@ private:
     static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRadioAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSliderAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterRatingAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTimepickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
