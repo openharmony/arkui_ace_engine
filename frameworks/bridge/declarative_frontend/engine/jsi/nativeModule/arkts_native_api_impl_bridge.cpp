@@ -7102,6 +7102,10 @@ void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnVisibleAreaChange));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnVisibleAreaChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnVisibleAreaChange));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnVisibleAreaApproximateChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnVisibleAreaApproximateChange));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnVisibleAreaApproximateChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOnVisibleAreaApproximateChange));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnPreDrag"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOnPreDrag));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPreDrag"),

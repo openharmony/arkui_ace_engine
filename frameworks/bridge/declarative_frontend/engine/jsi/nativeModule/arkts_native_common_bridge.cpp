@@ -84,6 +84,7 @@ constexpr uint32_t DEFAULT_DURATION = 1000;
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
 constexpr int32_t BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN = 1000;
+constexpr int32_t DEFAULT_EXPECTED_UPDATE_INTERVAL = 1000;
 constexpr SharedTransitionEffectType DEFAULT_SHARED_EFFECT = SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE;
 constexpr int32_t DEFAULT_TAP_FINGER = 1;
 constexpr int32_t DEFAULT_TAP_COUNT = 1;
@@ -11295,6 +11296,78 @@ ArkUINativeModuleValue CommonBridge::ResetOnVisibleAreaChange(ArkUIRuntimeCallIn
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     ViewAbstract::ResetVisibleChange(frameNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOnVisibleAreaApproximateChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondArg->IsUndefined()) {
+        NG::ViewAbstract::ClearJSFrameNodeOnVisibleAreaApproximateChange(frameNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    CHECK_NULL_RETURN(secondArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    auto obj = secondArg->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    panda::Local<panda::FunctionRef> func = obj;
+    auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
+    auto onVisibleAreaApproximateChange = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                                              node = AceType::WeakClaim(frameNode),
+                                              containerId](bool visible, double ratio) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty() && function->IsFunction(vm));
+
+        Local<JSValueRef> visibleValues = panda::BooleanRef::New(vm, visible);
+        Local<JSValueRef> ratioValues = panda::NumberRef::New(vm, ratio);
+        panda::Local<panda::JSValueRef> params[2] = { visibleValues, ratioValues };
+        function->Call(vm, function.ToLocal(), params, 2);
+    };
+    Local<JSValueRef> ratiosArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    if (ratiosArg->IsUndefined() || !ratiosArg->IsArray(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::ArrayRef> ratioList = ratiosArg;
+    uint32_t size = ratioList->Length(vm);
+    std::vector<double> ratioVec;
+    for (uint32_t i = 0; i < size; i++) {
+        double radioNumber = 0.0;
+        auto const radio = panda::ArrayRef::GetValueAt(vm, ratioList, i);
+        radioNumber = radio->IsNumber() ? radio->ToNumber(vm)->Value() : 0.0;
+        radioNumber = std::clamp(radioNumber, VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
+        ratioVec.push_back(radioNumber);
+    }
+    Local<JSValueRef> intervalArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    int32_t intervalMs = DEFAULT_EXPECTED_UPDATE_INTERVAL;
+    if (intervalArg->IsNumber()) {
+        intervalMs = static_cast<int32_t>(intervalArg->ToNumber(vm)->Value()) < 0
+            ? DEFAULT_EXPECTED_UPDATE_INTERVAL : static_cast<int32_t>(intervalArg->ToNumber(vm)->Value());
+    }
+    Local<JSValueRef> measureFromViewportArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    bool measureFromViewport = false;
+    if (measureFromViewportArg->IsBoolean()) {
+        measureFromViewport = measureFromViewportArg->ToBoolean(vm)->Value();
+    }
+    NG::ViewAbstract::SetFrameNodeCommonOnVisibleAreaApproximateChange(
+        frameNode, std::move(onVisibleAreaApproximateChange), ratioVec, intervalMs, measureFromViewport);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOnVisibleAreaApproximateChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    NG::ViewAbstract::ClearJSFrameNodeOnVisibleAreaApproximateChange(frameNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

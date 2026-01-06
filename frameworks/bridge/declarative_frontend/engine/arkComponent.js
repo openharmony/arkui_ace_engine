@@ -3754,6 +3754,24 @@ class OnVisibleAreaChangeModifier extends ModifierWithKey {
   }
 }
 OnVisibleAreaChangeModifier.identity = Symbol('onVisibleAreaChange');
+
+class OnVisibleAreaApproximateChangeModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnVisibleAreaApproximateChange(node);
+    }
+    else {
+      getUINativeModule().common.setOnVisibleAreaApproximateChange(node, this.value.event, this.value.ratios,
+        this.value.expectedUpdateInterval ? this.value.expectedUpdateInterval : 1000,
+        this.value.measureFromViewport ? this.value.measureFromViewport : false);
+    }
+  }
+}
+OnVisibleAreaApproximateChangeModifier.identity = Symbol('onVisibleAreaApproximateChange');
+
 class PreDragModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -5323,6 +5341,23 @@ class ArkComponent {
     }
     return this;
   }
+
+  onVisibleAreaApproximateChange(options, event) {
+    let onVisibleAreaApproximateChange = new ArkOnVisibleAreaApproximateChange();
+    onVisibleAreaApproximateChange.ratios = options.ratios;
+    onVisibleAreaApproximateChange.event = event;
+    onVisibleAreaApproximateChange.expectedUpdateInterval = options.expectedUpdateInterval;
+    onVisibleAreaApproximateChange.measureFromViewport = options.measureFromViewport;
+    this._onVisibleAreaApproximateChange = onVisibleAreaApproximateChange;
+    if (typeof options.ratios === 'undefined' || typeof event === 'undefined') {
+      modifierWithKey(this._modifiersWithKeys, OnVisibleAreaApproximateChangeModifier.identity, OnVisibleAreaApproximateChangeModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, OnVisibleAreaApproximateChangeModifier.identity, OnVisibleAreaApproximateChangeModifier,
+        onVisibleAreaApproximateChange);
+    }
+    return this;
+  }
+
   onTouchIntercept(callback) {
     this._touchInterceptEvent = callback;
     modifierWithKey(this._modifiersWithKeys, OnTouchInterceptModifier.identity, OnTouchInterceptModifier, callback);
@@ -20529,6 +20564,20 @@ class ArkOnVisibleAreaChange {
     return this.ratios === another.ratios && this.event === another.event && this.measureFromViewport === another.measureFromViewport;
   }
 }
+
+class ArkOnVisibleAreaApproximateChange {
+  constructor(ratios, event, expectedUpdateInterval, measureFromViewport) {
+    this.ratios = ratios;
+    this.event = event;
+    this.expectedUpdateInterval = expectedUpdateInterval;
+    this.measureFromViewport = measureFromViewport;
+  }
+  isEqual(another) {
+    return this.ratios === another.ratios && this.event === another.event && this.expectedUpdateInterval === another.expectedUpdateInterval
+      && this.measureFromViewport === another.measureFromViewport;
+  }
+}
+
 class ArkSliderStepOptions {
   constructor(value, options) {
     this.showSteps = value;
