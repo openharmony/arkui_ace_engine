@@ -13553,8 +13553,7 @@ void RichEditorPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vec
 
     textSelector_.Update(start, end);
     auto length = end - start;
-    CHECK_NULL_VOID(length > 0);
-    DeleteBackward(length, TextChangeReason::AI_WRITE);
+    IF_TRUE(length > 0, DeleteBackward(length, TextChangeReason::AI_WRITE));
     InsertSpanByBackData(spanString);
     BeforeIMEInsertValue(UtfUtils::Str8ToStr16(spanString->GetString()));
     InsertValueByOperationType(u"", OperationType::AI_WRITE);

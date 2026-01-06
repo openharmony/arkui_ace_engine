@@ -753,4 +753,64 @@ HWTEST_F(RichEditorAITestOneNg, GetAIWriteAdapter001, TestSize.Level2)
     auto aiWriteAdapter = richEditorPattern->GetAIWriteAdapter();
     EXPECT_NE(aiWriteAdapter, nullptr);
 }
+
+/**
+ * @tc.name: HandleAIWriteResult001
+ * @tc.desc: test HandleAIWriteResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, HandleAIWriteResult001, TestSize.Level2)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto controller = pattern->GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+
+    TextSpanOptions initOptions;
+    initOptions.value = INIT_VALUE_1;
+    controller->AddTextSpan(initOptions);
+
+    int32_t start = 0;
+    int32_t end = 0;
+
+    std::vector<uint8_t> buffer;
+    auto replaceSpan = AceType::MakeRefPtr<SpanString>(u"xyz");
+    replaceSpan->EncodeTlv(buffer);
+
+    pattern->HandleAIWriteResult(start, end, buffer);
+    auto styled = pattern->ToStyledString(0, pattern->GetTextContentLength());
+    ASSERT_NE(styled, nullptr);
+    EXPECT_EQ(styled->GetString(), "xyzhello1");
+}
+
+/**
+ * @tc.name: HandleAIWriteResult002
+ * @tc.desc: test HandleAIWriteResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, HandleAIWriteResult002, TestSize.Level2)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto controller = pattern->GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+
+    TextSpanOptions initOptions;
+    initOptions.value = INIT_VALUE_1;
+    controller->AddTextSpan(initOptions);
+
+    int32_t start = 0;
+    int32_t end = 3;
+
+    std::vector<uint8_t> buffer;
+    auto replaceSpan = AceType::MakeRefPtr<SpanString>(u"abc");
+    replaceSpan->EncodeTlv(buffer);
+
+    pattern->HandleAIWriteResult(start, end, buffer);
+    auto styled = pattern->ToStyledString(0, pattern->GetTextContentLength());
+    ASSERT_NE(styled, nullptr);
+    EXPECT_EQ(styled->GetString(), "abclo1");
+}
 }
