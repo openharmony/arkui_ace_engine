@@ -253,17 +253,6 @@ CLIPBOARD_FAIL:
   BUNDLE_NAME: {type: STRING, desc: package name}
   ERROR_TYPE: {type: STRING, desc: error type}
 
-TEXT_DRAW_CMD_LIST_ERROR:
-  __BASE: {type: FAULT, level: CRITICAL, desc: Text draw cmdlist is empty}
-  BUNDLE_NAME: {type: STRING, desc: package name}
-  FRAME_NODE_ID: {type: INT32, desc: frame node id}
-  LONGEST_LINE_WITH_INDENT: {type: FLOAT, desc: longest line with indent}
-  MAX_INTRINSIC_WIDTH: {type: FLOAT, desc: max intrinsic width}
-  MAX_WIDTH: {type: FLOAT, desc: max width}
-  HEIGHT: {type: FLOAT, desc: height}
-  LINE_COUNT: {type: UINT64, desc: line count}
-  PARAGRAPHS_SIZE: {type: INT32, desc: paragraphs size}
-
 GENERAL_INTERACTION_ERROR:
   __BASE: {type: FAULT, level: CRITICAL, desc: Wrong in input event sequence}
   BUNDLE_NAME: {type: STRING, desc: application package name}
