@@ -143,6 +143,34 @@ void SelectPattern::OnAttachToMainTree()
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
+void SelectPattern::UpdateMenuBorderStyle(const RefPtr<FrameNode>& menu)
+{
+    CHECK_NULL_VOID(menu);
+    auto renderContext = menu->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto context = menu->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>(menu->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    if (!theme->GetMenuItemNeedFocus()) {
+        return;
+    }
+    if (!renderContext->HasBorderColor()) {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(theme->GetMenuNormalBorderColor());
+        renderContext->UpdateBorderColor(borderColor);
+    }
+    if (!renderContext->HasBorderWidth()) {
+        auto menuLayoutProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+        CHECK_NULL_VOID(menuLayoutProperty);
+        auto menuBorderWidth = theme->GetMenuNormalBorderWidth();
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(menuBorderWidth);
+        menuLayoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
+    }
+}
+
 void SelectPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -157,6 +185,7 @@ void SelectPattern::OnModifyDone()
     }
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
+    UpdateMenuBorderStyle(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->UpdateSelectIndex(selected_);

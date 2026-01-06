@@ -296,13 +296,7 @@ void MenuPattern::OnModifyDone()
         BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
         UpdateBorderRadius(host, borderRadius);
     }
-    auto pipelineContext = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipelineContext);
-    auto selecTheme = pipelineContext->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(selecTheme);
-    if (selecTheme->GetMenuItemNeedFocus()) {
-        UpdateMenuBorderAndBackgroundBlur();
-    }
+
     SetAccessibilityAction();
 
     if (previewMode_ != MenuPreviewMode::NONE) {
@@ -315,36 +309,6 @@ void MenuPattern::OnModifyDone()
         auto gestureHub = hub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         InitPanEvent(gestureHub);
-    }
-}
-
-void MenuPattern::UpdateMenuBorderAndBackgroundBlur()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    if (!renderContext->HasBorderColor()) {
-        BorderColorProperty borderColor;
-        borderColor.SetColor(theme->GetMenuNormalBorderColor());
-        renderContext->UpdateBorderColor(borderColor);
-    }
-    if (!renderContext->HasBorderWidth()) {
-        auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
-        auto menuBorderWidth = theme->GetMenuNormalBorderWidth();
-        BorderWidthProperty borderWidth;
-        borderWidth.SetBorderWidth(menuBorderWidth);
-        menuLayoutProperty->UpdateBorderWidth(borderWidth);
-        renderContext->UpdateBorderWidth(borderWidth);
-        auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
-        CHECK_NULL_VOID(scroll);
-        auto scrollRenderContext = scroll->GetRenderContext();
-        CHECK_NULL_VOID(scrollRenderContext);
-        scrollRenderContext->UpdateOffset(OffsetT<Dimension>(menuBorderWidth, menuBorderWidth));
     }
 }
 
