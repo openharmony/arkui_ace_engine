@@ -137,6 +137,7 @@ void ContentChangeManager::OnTextChangeEnd(const RectF& rect)
         textAABB_.CombineRectTInner(rect);
     }
 }
+
 void ContentChangeManager::OnVsyncStart()
 {
     if (!IsContentChangeDetectEnable()) {
