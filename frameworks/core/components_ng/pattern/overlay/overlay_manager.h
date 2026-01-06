@@ -720,6 +720,7 @@ public:
     bool IsRootExpansive() const;
     void DumpOverlayInfo() const;
     void ReloadBuilderNodeConfig();
+    void UpdatePopupCustomNode();
 
     bool IsMenuShow() const
     {

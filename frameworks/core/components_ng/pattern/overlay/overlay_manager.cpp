@@ -3393,8 +3393,30 @@ RefPtr<UINode> OverlayManager::RebuildCustomBuilder(RefPtr<UINode>& contentNode)
     return customNode;
 }
 
+
+void OverlayManager::UpdatePopupCustomNode()
+{
+    if (popupMap_.empty()) {
+        return;
+    }
+    auto iter = popupMap_.begin();
+    while (iter != popupMap_.end()) {
+        auto bubbleNode = (*iter).second.popupNode;
+        if (bubbleNode) {
+            auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
+            CHECK_NULL_VOID(bubblePattern);
+            auto customNode = bubblePattern->GetCustomNode();
+            if (customNode && customNode->GetUpdateNodeConfig()) {
+                customNode->GetUpdateNodeConfig()();
+            }
+        }
+        iter++;
+    }
+}
+
 void OverlayManager::ReloadBuilderNodeConfig()
 {
+    UpdatePopupCustomNode();
     if (dialogMap_.empty()) {
         return;
     }
