@@ -4129,6 +4129,16 @@ void AssignCast(std::optional<OHOS::Rosen::Filter*>& dst, const Ark_uiEffect_Fil
 }
 
 template<>
+void AssignCast(std::optional<OHOS::Rosen::Blender*>& dst, const Ark_uiEffect_BrightnessBlender& src)
+{
+    if (!src) {
+        dst = std::nullopt;
+        return;
+    }
+    dst = reinterpret_cast<OHOS::Rosen::Blender*>(src);
+}
+
+template<>
 void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_Material& src)
 {
     if (!src) {

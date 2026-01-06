@@ -5724,25 +5724,31 @@ void SetBlendModeImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetBlendApplyType(frameNode, blendApplyType);
 }
 void SetAdvancedBlendModeImpl(Ark_NativePointer node,
-                              const Ark_Union_BlendMode_Blender* effect,
+                              const Opt_Union_BlendMode_Blender* effect,
                               const Opt_BlendApplyType* type)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(effect);
     BlendMode blendMode = BlendMode::NONE;
     BlendApplyType blendApplyType = BlendApplyType::FAST;
-    Converter::VisitUnionPtr(effect,
+    Converter::VisitUnionPtr(
+        effect,
         [&blendMode, &blendApplyType, frameNode](const Ark_BlendMode& value) {
             blendMode = Converter::OptConvert<BlendMode>(value).value_or(blendMode);
-            blendApplyType = BlendApplyType::OFFSCREEN;
             ViewAbstractModelStatic::SetBlendMode(frameNode, blendMode);
         },
-        [](const Ark_uiEffect_BrightnessBlender& value) {
-            LOGE("CommonMethodModifier::AdvancedBlendModeImpl Ark_uiEffect_BrightnessBlender is not supported yet.");
+        [frameNode](const Ark_uiEffect_BrightnessBlender& value) {
+            auto ptrOpt = Converter::OptConvert<OHOS::Rosen::Blender*>(value);
+            if (!ptrOpt || !(ptrOpt.value())) {
+                ViewAbstractModelStatic::SetBlender(frameNode, nullptr);
+                return;
+            }
+            ViewAbstractModelStatic::SetBlender(frameNode, ptrOpt.value());
         },
-        []() {}
-    );
+        [&blendMode, frameNode]() {
+            ViewAbstractModelStatic::SetBlendMode(frameNode, blendMode);
+            ViewAbstractModelStatic::SetBlender(frameNode, nullptr);
+        });
     std::optional<BlendApplyType> blendApplyTypeOpt = Converter::OptConvertPtr<BlendApplyType>(type);
     blendApplyType = blendApplyTypeOpt.value_or(blendApplyType);
     ViewAbstractModelStatic::SetBlendApplyType(frameNode, blendApplyType);

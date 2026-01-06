@@ -5466,16 +5466,22 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBlendMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAdvancedBlendModeAttribute(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): void {
+    setAdvancedBlendModeAttribute(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (effect instanceof BlendMode) {
-            thisSerializer.writeInt8((0).toByte())
-            const effectForIdx0  = effect as BlendMode
-            thisSerializer.writeInt32(effectForIdx0.valueOf())
-        } else if (effect instanceof uiEffect.Blender) {
-            thisSerializer.writeInt8((1).toByte())
-            const effectForIdx1  = effect as uiEffect.Blender
-            uiEffect_BrightnessBlender_serializer.write(thisSerializer, effectForIdx1)
+        if (effect !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const effectTmpValue  = effect!
+            if (effectTmpValue instanceof BlendMode) {
+                thisSerializer.writeInt8((0).toByte())
+                const effectTmpValueForIdx0  = effectTmpValue as BlendMode
+                thisSerializer.writeInt32(effectTmpValueForIdx0.valueOf())
+            } else if (effectTmpValue instanceof uiEffect.Blender) {
+                thisSerializer.writeInt8((1).toByte())
+                const effectTmpValueForIdx1  = effectTmpValue as uiEffect.Blender
+                uiEffect_BrightnessBlender_serializer.write(thisSerializer, effectTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         if (type !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -8093,7 +8099,7 @@ export interface CommonMethod {
     blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
         throw new Error("Unimplemented method blendMode")
     }
-    advancedBlendMode(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): this {
+    advancedBlendMode(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): this {
         throw new Error("Unimplemented method advancedBlendMode")
     }
     geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {
@@ -8916,7 +8922,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
         return this
     }
-    advancedBlendMode(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): this {
+    advancedBlendMode(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): this {
         return this
     }
     geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {
@@ -10970,9 +10976,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public advancedBlendMode(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): this {
+    public advancedBlendMode(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): this {
         if (this.checkPriority("advancedBlendMode")) {
-            const effect_casted = effect as (BlendMode | uiEffect.Blender)
+            const effect_casted = effect as (BlendMode | uiEffect.Blender | undefined)
             const type_casted = type as (BlendApplyType | undefined)
             this.getPeer()?.setAdvancedBlendModeAttribute(effect_casted, type_casted)
             return this

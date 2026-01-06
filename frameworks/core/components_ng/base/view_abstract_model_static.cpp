@@ -1482,6 +1482,11 @@ void ViewAbstractModelStatic::SetBlendMode(FrameNode* frameNode, const std::opti
     ViewAbstract::SetBlendMode(frameNode, blendMode.value_or(BlendMode::NONE));
 }
 
+void ViewAbstractModelStatic::SetBlender(FrameNode* frameNode, const OHOS::Rosen::Blender* blender)
+{
+    ViewAbstract::SetBlender(frameNode, blender);
+}
+
 void ViewAbstractModelStatic::SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG::FocusBoxStyle>& style)
 {
     CHECK_NULL_VOID(frameNode);

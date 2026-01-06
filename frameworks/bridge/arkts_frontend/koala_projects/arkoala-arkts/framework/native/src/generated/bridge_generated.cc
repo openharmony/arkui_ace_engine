@@ -5214,19 +5214,25 @@ KOALA_INTEROP_DIRECT_V3(CommonMethod_setBlendMode, Ark_NativePointer, KSerialize
 void impl_CommonMethod_setAdvancedBlendMode(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
-        const Ark_Int8 effectValueTempTmpBufUnionSelector = thisDeserializer.readInt8();
-        Ark_Union_BlendMode_Blender effectValueTempTmpBuf = {};
-        effectValueTempTmpBuf.selector = effectValueTempTmpBufUnionSelector;
-        if (effectValueTempTmpBufUnionSelector == 0) {
-            effectValueTempTmpBuf.selector = 0;
-            effectValueTempTmpBuf.value0 = static_cast<Ark_BlendMode>(thisDeserializer.readInt32());
-        } else if (effectValueTempTmpBufUnionSelector == 1) {
-            effectValueTempTmpBuf.selector = 1;
-            effectValueTempTmpBuf.value1 = uiEffect_BrightnessBlender_serializer::read(thisDeserializer);
-        } else {
-            INTEROP_FATAL("One of the branches for effectValueTempTmpBuf has to be chosen through deserialisation.");
+        const auto effectValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Union_BlendMode_Blender effectValueTempTmpBuf = {};
+        effectValueTempTmpBuf.tag = effectValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((effectValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int8 effectValueTempTmpBuf_UnionSelector = thisDeserializer.readInt8();
+            Ark_Union_BlendMode_Blender effectValueTempTmpBuf_ = {};
+            effectValueTempTmpBuf_.selector = effectValueTempTmpBuf_UnionSelector;
+            if (effectValueTempTmpBuf_UnionSelector == 0) {
+                effectValueTempTmpBuf_.selector = 0;
+                effectValueTempTmpBuf_.value0 = static_cast<Ark_BlendMode>(thisDeserializer.readInt32());
+            } else if (effectValueTempTmpBuf_UnionSelector == 1) {
+                effectValueTempTmpBuf_.selector = 1;
+                effectValueTempTmpBuf_.value1 = static_cast<Ark_uiEffect_BrightnessBlender>(uiEffect_BrightnessBlender_serializer::read(thisDeserializer));
+            } else {
+                INTEROP_FATAL("One of the branches for effectValueTempTmpBuf_ has to be chosen through deserialisation.");
+            }
+            effectValueTempTmpBuf.value = static_cast<Ark_Union_BlendMode_Blender>(effectValueTempTmpBuf_);
         }
-        Ark_Union_BlendMode_Blender effectValueTemp = static_cast<Ark_Union_BlendMode_Blender>(effectValueTempTmpBuf);;
+        Opt_Union_BlendMode_Blender effectValueTemp = effectValueTempTmpBuf;;
         const auto typeValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_BlendApplyType typeValueTempTmpBuf = {};
         typeValueTempTmpBuf.tag = typeValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
@@ -5234,7 +5240,7 @@ void impl_CommonMethod_setAdvancedBlendMode(Ark_NativePointer thisPtr, KSerializ
             typeValueTempTmpBuf.value = static_cast<Ark_BlendApplyType>(thisDeserializer.readInt32());
         }
         Opt_BlendApplyType typeValueTemp = typeValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setAdvancedBlendMode(self, static_cast<Ark_Union_BlendMode_Blender*>(&effectValueTemp), static_cast<Opt_BlendApplyType*>(&typeValueTemp));
+        GetNodeModifiers()->getCommonMethodModifier()->setAdvancedBlendMode(self, static_cast<Opt_Union_BlendMode_Blender*>(&effectValueTemp), static_cast<Opt_BlendApplyType*>(&typeValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setAdvancedBlendMode, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setGeometryTransition1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
