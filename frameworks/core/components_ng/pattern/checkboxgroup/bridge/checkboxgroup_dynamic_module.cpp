@@ -17,7 +17,7 @@
 #include "core/components_ng/pattern/checkboxgroup/bridge/checkboxgroup_dynamic_module.h"
 #include "core/components_ng/pattern/checkboxgroup/bridge/arkts_native_checkboxgroup_bridge.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
-#ifndef ARKUI_WEARABLE
+#ifdef INCLUDE_GENERATED_SOURCES
 #include "core/components_ng/pattern/checkboxgroup/bridge/checkboxgroup_content_modifier_helper.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_static.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
@@ -35,7 +35,7 @@ const ArkUICheckboxGroupModifier* GetCheckboxGroupDynamicModifier();
 const CJUICheckboxGroupModifier* GetCJUICheckboxGroupModifier();
 const ArkUICheckboxGroupCustomModifier* GetCheckboxGroupDynamicCustomModifier();
 constexpr const char* CUSTOM_MODIFIER = "customModifier";
-#ifndef ARKUI_WEARABLE
+#ifdef INCLUDE_GENERATED_SOURCES
 namespace GeneratedModifier {
 constexpr const char* CONTENT_MODIFIER = "contentModifier";
 constexpr const char* CONFIGURATION_ACCESSOR = "configurationAccessor";
@@ -59,7 +59,7 @@ const void* CheckBoxGroupDynamicModule::GetDynamicModifier()
 
 const void* CheckBoxGroupDynamicModule::GetStaticModifier()
 {
-#ifndef ARKUI_WEARABLE
+#ifdef INCLUDE_GENERATED_SOURCES
     return NG::GeneratedModifier::GetCheckboxGroupStaticModifier();
 #else
     return nullptr;
@@ -82,7 +82,7 @@ const void* CheckBoxGroupDynamicModule::GetCustomModifier(const std::string& nam
     if (name == NG::CUSTOM_MODIFIER) {
         return NG::GetCheckboxGroupDynamicCustomModifier();
     }
-#ifndef ARKUI_WEARABLE
+#ifdef INCLUDE_GENERATED_SOURCES
     if (name == NG::GeneratedModifier::CONTENT_MODIFIER) {
         return NG::GeneratedModifier::GetCheckboxGroupStaticContentModifier();
     }
