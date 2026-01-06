@@ -153,21 +153,69 @@ void ContentChangeManager::OnVsyncEnd(const RectF& rootRect)
         return;
     }
 
+    ReportSwiperEvent();
+    StopTextAABBCollecting(rootRect);
+}
+
+void ContentChangeManager::ReportSwiperEvent()
+{
     std::set<std::pair<WeakPtr<FrameNode>, bool>> changedSwiperNodes;
     changedSwiperNodes_.swap(changedSwiperNodes);
     for (auto [weak, hasTabsAncestor] : changedSwiperNodes) {
         auto node = weak.Upgrade();
-        if (!node) {
-            continue;
-        }
-        ACE_SCOPED_TRACE("[ContentChangeManager] On%sChanged Reporting", hasTabsAncestor ? "Tabs" : "Swiper");
-        auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
-        node->DumpSimplifyTreeWithParamConfig(0, simpleTree, true, {false, false, false});
-        UiSessionManager::GetInstance()->ReportContentChangeEvent(
-            hasTabsAncestor ? ChangeType::TABS : ChangeType::SWIPER, simpleTree->ToString());
-    }
+        CHECK_NULL_CONTINUE(node);
 
-    StopTextAABBCollecting(rootRect);
+        auto pattern = node->GetPattern();
+        CHECK_NULL_CONTINUE(pattern);
+
+        auto keyChildren = pattern->GetKeyFrameNodeWhenContentChanged();
+
+        std::unordered_set<int32_t> visibleNode;
+        std::unordered_set<int32_t> subTreeNode;
+        visibleNode.emplace(node->GetId());
+
+        for (auto& keyChild : keyChildren) {
+            subTreeNode.emplace(keyChild->GetId());
+            visibleNode.emplace(keyChild->GetId());
+            auto parent = keyChild->GetParent();
+                while (parent && !visibleNode.count(parent->GetId())) {
+                    visibleNode.emplace(parent->GetId());
+                    parent = parent->GetParent();
+                }
+        }
+
+        std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker = [&visibleNode, &subTreeNode]
+            (const RefPtr<UINode>& node) -> std::pair<bool, bool> {
+                CHECK_NULL_RETURN(node, std::make_pair(false, false));
+                bool needDump = visibleNode.count(node->GetId());
+                CHECK_EQUAL_RETURN(needDump, false, std::make_pair(false, false));
+                bool isSubTreeRoot = subTreeNode.count(node->GetId());
+                return std::make_pair(needDump, isSubTreeRoot);
+        };
+
+        auto rootNode = JsonUtil::CreateSharedPtrJson(true);
+        node->DumpSimplifyTreeWithParamConfig(0, rootNode, true, {false, false, false}, dumpChecker);
+
+        if (hasTabsAncestor) {
+            auto parent = node->GetParent();
+            while (parent) {
+                auto jsonNode = JsonUtil::CreateSharedPtrJson(true);
+                parent->DumpSimplifyTreeNode(jsonNode, {false, false, false});
+                auto array = JsonUtil::CreateArray(true);
+                array->PutRef(std::move(rootNode));
+                jsonNode->PutRef("$children", std::move(array));
+                rootNode = jsonNode;
+                if (parent->GetTag() == V2::TABS_ETS_TAG) {
+                    break;
+                }
+                parent = parent->GetParent();
+            }
+        }
+
+        ACE_SCOPED_TRACE("[ContentChangeManager] On%sChanged Reporting", hasTabsAncestor ? "Tabs" : "Swiper");
+        UiSessionManager::GetInstance()->ReportContentChangeEvent(
+            hasTabsAncestor ? ChangeType::TABS : ChangeType::SWIPER, rootNode->ToString());
+    }
 }
 
 bool ContentChangeManager::IsTextAABBCollecting() const

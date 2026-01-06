@@ -872,9 +872,9 @@ public:
     virtual void OnContentChangeRegister(const ContentChangeConfig& config) {}
     virtual void OnContentChangeUnregister() {}
     virtual void ContentChangeByDetaching(PipelineContext*) {}
-    virtual RefPtr<FrameNode> GetKeyFrameNodeWhenContentChanged()
+    virtual std::list<RefPtr<FrameNode>> GetKeyFrameNodeWhenContentChanged()
     {
-        return nullptr;
+        return std::list<RefPtr<FrameNode>>();
     }
     virtual void OnDetachFromMainRenderTree() {}
     virtual void OnAttachToMainRenderTree() {}

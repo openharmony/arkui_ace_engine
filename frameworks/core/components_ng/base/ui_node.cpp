@@ -1421,18 +1421,35 @@ void UINode::DumpSimplifyTreeBase(std::shared_ptr<JsonValue>& current)
     }
 }
 
+void UINode::DumpSimplifyTreeNode(std::shared_ptr<JsonValue>& current, ParamConfig config)
+{
+    DumpSimplifyTreeBase(current);
+    DumpSimplifyInfo(current);
+    DumpSimplifyInfoOnlyForParamConfig(current, config);
+}
+
 void UINode::DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& current, ParamConfig config)
 {
     DumpSimplifyInfo(current);
     DumpSimplifyInfoOnlyForParamConfig(current, config);
 }
 
-void UINode::DumpSimplifyTreeWithParamConfig(
-    int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible, ParamConfig config)
+void UINode::DumpSimplifyTreeWithParamConfigInner(int32_t depth, std::shared_ptr<JsonValue>& current,
+    bool onlyNeedVisible, ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker)
 {
+    auto [needDump, justDumpSubTree] = dumpChecker(Claim(this));
+    CHECK_EQUAL_VOID(needDump, false);
+
     if (onlyNeedVisible && !CheckVisibleAndActive()) {
         return;
     }
+
+    if (justDumpSubTree) {
+        dumpChecker = [](const RefPtr<UINode>&) {
+            return std::make_pair(true, false);
+        };
+    }
+
     DumpSimplifyTreeBase(current);
     auto nodeChildren = GetChildren();
     DumpSimplifyInfoWithParamConfig(current, config);
@@ -1447,24 +1464,42 @@ void UINode::DumpSimplifyTreeWithParamConfig(
         if (config.cacheNodes && !cacheChildren.empty()) {
             for (const auto& item : cacheChildren) {
                 CHECK_NULL_CONTINUE(item);
+                auto [dumpChild, _] = dumpChecker(item);
+                CHECK_NULL_CONTINUE(dumpChild);
                 auto child = JsonUtil::CreateSharedPtrJson();
-                item->DumpSimplifyTreeWithParamConfig(depth + 1, child, false, config);
+                item->DumpSimplifyTreeWithParamConfigInner(depth + 1, child, false, config, dumpChecker);
                 array->PutRef(std::move(child));
             }
         } else {
             for (const auto& item : nodeChildren) {
+                auto [dumpChild, _] = dumpChecker(item);
+                CHECK_NULL_CONTINUE(dumpChild);
                 auto child = JsonUtil::CreateSharedPtrJson();
-                item->DumpSimplifyTreeWithParamConfig(depth + 1, child, onlyNeedVisible, config);
+                item->DumpSimplifyTreeWithParamConfigInner(depth + 1, child, onlyNeedVisible, config, dumpChecker);
                 array->PutRef(std::move(child));
             }
         }
         for (const auto& [item, index, branch] : disappearingChildren_) {
+            auto [dumpChild, _] = dumpChecker(item);
+            CHECK_NULL_CONTINUE(dumpChild);
             auto child = JsonUtil::CreateSharedPtrJson();
-            item->DumpSimplifyTreeWithParamConfig(depth + 1, child, onlyNeedVisible, config);
+            item->DumpSimplifyTreeWithParamConfigInner(depth + 1, child, onlyNeedVisible, config, dumpChecker);
             array->PutRef(std::move(child));
         }
         current->PutRef("$children", std::move(array));
     }
+}
+
+void UINode::DumpSimplifyTreeWithParamConfig(int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible,
+    ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker)
+{
+    if (!dumpChecker) {
+        dumpChecker = [](const RefPtr<UINode>&) {
+            return std::make_pair(true, false);
+        };
+    }
+
+    DumpSimplifyTreeWithParamConfigInner(depth, current, onlyNeedVisible, config, dumpChecker);
 }
 
 void UINode::DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current)
