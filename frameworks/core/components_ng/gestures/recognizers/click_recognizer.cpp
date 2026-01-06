@@ -271,12 +271,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         touchDownTime_ = event.time;
     }
     if (IsRefereeFinished()) {
-        auto node = GetAttachedNode().Upgrade();
-        TAG_LOGI(AceLogTag::ACE_GESTURE,
-            "Click recognizer handle touch down event refereeState is %{public}d, node tag = %{public}s, id = "
-            SEC_PLD(%{public}s) ".",
-            refereeState_, node ? node->GetTag().c_str() : "null",
-            SEC_PARAM(node ? std::to_string(node->GetId()).c_str() : "invalid"));
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Click not READY, info:%{public}s", GetGestureInfoString().c_str());
         return;
     }
     InitGlobalValue(event.sourceType);
@@ -337,7 +332,8 @@ bool ClickRecognizer::IsFormRenderClickRejected(const TouchEvent& event)
 
 void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Click try accept");
+    auto node = GetAttachedNode().Upgrade();
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Click try accept %{public}s", node ? node->GetTag().c_str() : "");
     time_ = event.time;
     if (!useCatchMode_) {
         OnAccepted();
@@ -812,5 +808,19 @@ void ClickRecognizer::SetDistanceThreshold(Dimension distanceThreshold)
     if (appTheme && distanceThreshold_.ConvertToPx() == std::numeric_limits<double>::infinity()) {
         distanceThreshold_ = appTheme->GetClickDistanceThreshold();
     }
+}
+
+std::string ClickRecognizer::GetGestureInfoString() const
+{
+    std::string gestureInfoStr = MultiFingersRecognizer::GetGestureInfoString();
+    gestureInfoStr.append(",TPC:");
+    gestureInfoStr.append(std::to_string(tappedCount_));
+    gestureInfoStr.append(",ETF:");
+    gestureInfoStr.append(std::to_string(equalsToFingers_));
+    gestureInfoStr.append(",UCM:");
+    gestureInfoStr.append(std::to_string(useCatchMode_));
+    gestureInfoStr.append(",CTPN:");
+    gestureInfoStr.append(std::to_string(currentTouchPointsNum_));
+    return gestureInfoStr;
 }
 } // namespace OHOS::Ace::NG

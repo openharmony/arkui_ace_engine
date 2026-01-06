@@ -77,7 +77,7 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
         auto currentTimeStamp = point.second.GetTimeStamp().time_since_epoch().count();
         
         auto it = latestTimeStamps.find(originalId);
-        if (it == latestTimeStamps.end() || currentTimeStamp > it->second) {
+        if (it == latestTimeStamps.end() || static_cast<uint64_t>(currentTimeStamp) > it->second) {
             latestTimeStamps[originalId] = currentTimeStamp;
 
             FingerInfo fingerInfo = { originalId, point.second.operatingHand,
@@ -214,5 +214,47 @@ int32_t MultiFingersRecognizer::GetOriginalTouchPointsSize() const
         originalIds.insert(point.second.originalId);
     }
     return static_cast<int32_t>(originalIds.size());
+}
+
+std::string MultiFingersRecognizer::GetGestureInfoString() const
+{
+    std::string gestureInfoStr = NGGestureRecognizer::GetGestureInfoString();
+    gestureInfoStr.append(",TP:[");
+    for (const auto& item : touchPoints_) {
+        gestureInfoStr.push_back(',');
+        gestureInfoStr.append(std::to_string(item.first));
+        gestureInfoStr.append("->(").append(std::to_string(item.second.id));
+        gestureInfoStr.append(",").append(std::to_string(item.second.originalId));
+        gestureInfoStr.append(")");
+    }
+    if (!activeFingers_.empty()) {
+        gestureInfoStr.append("],AF:[");
+        for (const auto& item : activeFingers_) {
+            gestureInfoStr.push_back(',');
+            gestureInfoStr.append(std::to_string(item));
+        }
+    }
+    if (backupTouchPointsForSucceedBlock_.has_value()) {
+        gestureInfoStr.append("],BTP:[");
+        for (const auto& item : backupTouchPointsForSucceedBlock_.value()) {
+            gestureInfoStr.push_back(',');
+            gestureInfoStr.append(std::to_string(item.first));
+            gestureInfoStr.append("->(").append(std::to_string(item.second.id));
+            gestureInfoStr.append(",").append(std::to_string(item.second.originalId));
+            gestureInfoStr.append(")");
+        }
+    }
+    gestureInfoStr.append("]");
+    return gestureInfoStr;
+}
+
+void MultiFingersRecognizer::CheckCurrentFingers() const
+{
+    int32_t touchPointSize = static_cast<int32_t>(touchPoints_.size());
+    if (currentFingers_ < 0) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "CheckCF:%{public}d", currentFingers_);
+    } else if (currentFingers_ > touchPointSize) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "CheckCF:%{public}d not %{public}d", currentFingers_, touchPointSize);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -215,6 +215,7 @@ protected:
     bool CheckAllFailed();
 
     void OnResetStatus() override;
+    std::string GetGestureInfoString() const override;
 
     std::list<RefPtr<NGGestureRecognizer>> recognizers_;
     bool remainChildOnResetStatus_ = false;

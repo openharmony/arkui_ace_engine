@@ -116,6 +116,8 @@ public:
         return angle_;
     }
 
+protected:
+    std::string GetGestureInfoString() const override;
 private:
     class PanVelocity {
     public:

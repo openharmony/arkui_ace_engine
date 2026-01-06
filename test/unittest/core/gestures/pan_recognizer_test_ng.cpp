@@ -1060,4 +1060,33 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest021, TestSize.Level1)
     result = panRecognizer->IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 }
+
+/**
+ * @tc.name: GetGestureInfoString001
+ * @tc.desc: Test PanRecognizer function: GetGestureInfoString
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+
+    panRecognizer->isFlushTouchEventsEnd_ = true;
+    panRecognizer->isForDrag_ = true;
+    panRecognizer->isAllowMouse_ = false;
+    panRecognizer->isStartTriggered_ = true;
+    panRecognizer->lastAction_ = 1;
+    panRecognizer->angle_ = 60.0;
+
+    std::string result = panRecognizer->GetGestureInfoString();
+    EXPECT_THAT(result, HasSubstr("FTE:1"));
+    EXPECT_THAT(result, HasSubstr("FD:1"));
+    EXPECT_THAT(result, HasSubstr("AM:0"));
+    EXPECT_THAT(result, HasSubstr("ST:1"));
+    EXPECT_THAT(result, HasSubstr("LA:1"));
+    EXPECT_THAT(result, HasSubstr("AG:60"));
+}
 } // namespace OHOS::Ace::NG

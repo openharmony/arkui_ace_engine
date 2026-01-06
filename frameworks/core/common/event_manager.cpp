@@ -358,6 +358,8 @@ bool EventManager::PostEventTouchTest(
             postEventRefereeNG_->CleanAll();
         }
     }
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "ITK Post Id:%{public}d, fId:%{public}d, T:%{public}d",
+        touchPoint.touchEventId, touchPoint.id, (int)touchPoint.type);
     onTouchTestDoneFrameNodeList_.clear();
     ResponseLinkResult responseLinkResult;
     // For root node, the parent local point is the same as global point.

@@ -290,4 +290,12 @@ bool RecognizerGroup::IsReady()
     }
     return true;
 }
+
+std::string RecognizerGroup::GetGestureInfoString() const
+{
+    std::string gestureInfoStr = MultiFingersRecognizer::GetGestureInfoString();
+    gestureInfoStr.append(",RCRS:");
+    gestureInfoStr.append(std::to_string(remainChildOnResetStatus_));
+    return gestureInfoStr;
+}
 } // namespace OHOS::Ace::NG
