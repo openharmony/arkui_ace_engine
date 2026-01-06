@@ -194,6 +194,27 @@ ani_object CreateSizeInPixelObject(ani_env* env, const NG::DrawingContext& conte
     return sizeInPixelObject;
 }
 
+ani_object CreateAniObject(ani_env* env, ani_double leftValue, ani_double rightValue, ani_double topValue,
+    ani_double bottomValue)
+{
+    ani_class aniClass;
+    if (env->FindClass("@ohos.graphics.common2D.common2D.RectInternal", &aniClass) != ANI_OK) {
+        return Rosen::Drawing::CreateAniUndefined(env);
+    }
+
+    ani_method aniConstructor;
+    if (env->Class_FindMethod(aniClass, "<ctor>", "dddd:", &aniConstructor) != ANI_OK) {
+        return Rosen::Drawing::CreateAniUndefined(env);
+    }
+
+    ani_object aniObject;
+    if (env->Object_New(aniClass, aniConstructor, &aniObject, leftValue, rightValue, topValue, bottomValue) != ANI_OK) {
+        return Rosen::Drawing::CreateAniUndefined(env);
+    }
+
+    return aniObject;
+}
+
 ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context)
 {
     ani_status status;
@@ -229,6 +250,15 @@ ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context)
     if (!aniCanvas) {
         HILOGE("Create AniCanvas failed !");
     }
+    ani_object obj = CreateAniObject(env,
+        0,
+        0,
+        context.width,
+        context.height);
+    ani_ref aniRef;
+    env->GetUndefined(&aniRef);
+    ani_object undefined = static_cast<ani_object>(aniRef);
+    OHOS::Rosen::Drawing::AniCanvas::ClipRect(env, aniCanvas, obj, undefined, undefined);
     env->Object_SetPropertyByName_Ref(result, "canvas_", (ani_ref)aniCanvas);
 #endif
 

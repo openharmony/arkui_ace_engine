@@ -12170,6 +12170,7 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawOverlayC
         napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
         if (unwrapCanvas) {
             unwrapCanvas->SaveCanvas();
+            unwrapCanvas->ClipCanvas(context.width, context.height);
         }
         JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
         contextObj->SetPropertyObject("canvas", jsCanvasVal);
