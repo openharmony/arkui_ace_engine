@@ -87,6 +87,7 @@ uint32_t BlurStyleTheme::GetKeyOfBlurStyle(BlurStyle style, ThemeColorMode color
 
 std::optional<BlurParameter> BlurStyleTheme::GetBlurParameter(BlurStyle style, ThemeColorMode colorMode)
 {
+    std::lock_guard<std::mutex> lock(blurMultiThreadMutex_);
     auto key = GetKeyOfBlurStyle(style, colorMode);
     auto iter = blurParams_.find(key);
     if (iter != blurParams_.end()) {
