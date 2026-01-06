@@ -51,7 +51,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(ContentEndOffset, float, PROPERTY_UPDATE_MEASURE);
     virtual void OnContentEndOffsetUpdate(float /* contentEndOffset */) const {}
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SupportLazyLoadingEmptyBranch, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(SupportLazyLoadingEmptyBranch, bool);
+public:
+    void UpdateSupportLazyLoadingEmptyBranch(const bool& value);
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
