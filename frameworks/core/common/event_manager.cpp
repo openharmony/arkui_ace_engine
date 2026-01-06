@@ -99,7 +99,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         coastingAxisEventGenerator_->NotifyTouchTestResult(hitTestResult, point);
     }
     TouchTestResult savePrevHitTestResult = touchTestResults_[touchPoint.id];
-    SetResponseLinkRecognizers(hitTestResult, responseLinkResult);
+    SetResponseLinkRecognizers(hitTestResult, responseLinkResult, touchPoint.passThrough);
     ExecuteTouchTestDoneCallback(touchPoint, responseLinkResult);
     if (needAppend) {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -238,7 +238,7 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
         onTouchTestDoneFrameNodeList_.clear();
         frameNode->TouchTest(point, point, point, touchRestrict,
             reHitTestResult, touchPoint.id, reResponseLinkResult);
-        SetResponseLinkRecognizers(reHitTestResult, reResponseLinkResult);
+        SetResponseLinkRecognizers(reHitTestResult, reResponseLinkResult, touchPoint.passThrough);
         ExecuteTouchTestDoneCallback(touchPoint, reResponseLinkResult);
         if (!refereeNG_->IsReady()) {
             TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
@@ -410,7 +410,7 @@ void EventManager::TouchTest(
     ResponseLinkResult responseLinkResult;
     onTouchTestDoneFrameNodeList_.clear();
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, event.id, responseLinkResult);
-    SetResponseLinkRecognizers(hitTestResult, responseLinkResult);
+    SetResponseLinkRecognizers(hitTestResult, responseLinkResult, event.passThrough);
     ExecuteTouchTestDoneCallback(event, responseLinkResult);
     axisTouchTestResults_[event.id] = std::move(hitTestResult);
     LogTouchTestResultRecognizers(axisTouchTestResults_[event.id], event.touchEventId);
@@ -1541,7 +1541,7 @@ void EventManager::MouseTest(
                 coastingAxisEventGenerator_) {
                 coastingAxisEventGenerator_->NotifyTouchTestResult(testResult, point);
             }
-            SetResponseLinkRecognizers(testResult, responseLinkResult);
+            SetResponseLinkRecognizers(testResult, responseLinkResult, event.passThrough);
             mouseTestResults_[event.GetPointerId(event.id)] = testResult;
         }
     } else {
@@ -1551,7 +1551,7 @@ void EventManager::MouseTest(
         }
         frameNode->TouchTest(
             point, point, point, touchRestrict, testResult, event.GetPointerId(event.id), responseLinkResult);
-        SetResponseLinkRecognizers(testResult, responseLinkResult);
+        SetResponseLinkRecognizers(testResult, responseLinkResult, event.passThrough);
     }
     UpdateHoverNode(event, testResult);
     LogPrintMouseTest();
@@ -2245,11 +2245,17 @@ void EventManager::CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImm
 }
 
 void EventManager::SetResponseLinkRecognizers(
-    const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers)
+    const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers, bool isPostEvent)
 {
     for (const auto& item : result) {
+        if (isPostEvent) {
+            item->SetIsPostEventResult(true);
+        }
         auto group = AceType::DynamicCast<NG::RecognizerGroup>(item);
         if (group) {
+            if (isPostEvent) {
+                group->SetIsPostEventResultRecursively(true);
+            }
             group->SetResponseLinkRecognizersRecursively(responseLinkRecognizers);
             continue;
         }

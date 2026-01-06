@@ -62,6 +62,10 @@ HWTEST_F(RotationRecognizerTestNg, RotationRecognizerTest001, TestSize.Level1)
      * @tc.steps: step2. call OnAccepted function and compare result.
      * @tc.expected: step2. result equals.
      */
+    rotationRecognizer->inputEventType_ = InputEventType::AXIS;
+    rotationRecognizer->OnAccepted();
+    EXPECT_EQ(rotationRecognizer->refereeState_, RefereeState::SUCCEED);
+    rotationRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
     rotationRecognizer->OnAccepted();
     EXPECT_EQ(rotationRecognizer->refereeState_, RefereeState::SUCCEED);
 

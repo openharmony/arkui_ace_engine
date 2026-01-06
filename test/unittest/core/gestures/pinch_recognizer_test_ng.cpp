@@ -53,6 +53,10 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerTest001, TestSize.Level1)
      * @tc.steps: step2. call OnAccepted function and compare result.
      * @tc.expected: step2. result equals.
      */
+    pinchRecognizer->inputEventType_ = InputEventType::AXIS;
+    pinchRecognizer->OnAccepted();
+    EXPECT_EQ(pinchRecognizer->refereeState_, RefereeState::SUCCEED);
+    pinchRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
     pinchRecognizer->OnAccepted();
     EXPECT_EQ(pinchRecognizer->refereeState_, RefereeState::SUCCEED);
 
@@ -299,7 +303,12 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerComputePinchCenterTest001, TestSi
      */
     TouchEvent touchEvent;
     pinchRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    pinchRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
     auto result = pinchRecognizer->ComputePinchCenter();
+    pinchRecognizer->OnFlushTouchEventsEnd();
+    EXPECT_EQ(pinchRecognizer->isFlushTouchEventsEnd_, true);
+    pinchRecognizer->inputEventType_ = InputEventType::AXIS;
+    result = pinchRecognizer->ComputePinchCenter();
     pinchRecognizer->OnFlushTouchEventsEnd();
     EXPECT_EQ(pinchRecognizer->isFlushTouchEventsEnd_, true);
 }
