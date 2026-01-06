@@ -13,22 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_CONTAINER_PATTERN_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_CONTAINER_PATTERN_H
-
-#include "ui/base/geometry/calc_dimension.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_EFFECT_CONTAINER_PATTERN_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_EFFECT_CONTAINER_PATTERN_H
 
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT UnionContainerPattern : public Pattern {
-    DECLARE_ACE_TYPE(UnionContainerPattern, Pattern);
+class ACE_EXPORT UnionEffectContainerPattern : public Pattern {
+    DECLARE_ACE_TYPE(UnionEffectContainerPattern, Pattern);
 
 public:
-    UnionContainerPattern() = default;
-    ~UnionContainerPattern() override = default;
+    UnionEffectContainerPattern() = default;
+    ~UnionEffectContainerPattern() override = default;
 
     bool IsAtomicNode() const override
     {
@@ -45,16 +43,16 @@ public:
         return RenderContext::ContextParam { RenderContext::ContextType::UNION };
     }
 
-    void SetSpacing(const CalcDimension& spacing);
+    void SetSpacing(const float& spacing);
 
-    const CalcDimension& GetSpacing() const
+    float GetSpacing() const
     {
         return spacing_;
     }
 
 private:
-    CalcDimension spacing_;
-    ACE_DISALLOW_COPY_AND_MOVE(UnionContainerPattern);
+    float spacing_ { 0.0f };
+    ACE_DISALLOW_COPY_AND_MOVE(UnionEffectContainerPattern);
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_CONTAINER_PATTERN_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_EFFECT_CONTAINER_PATTERN_H

@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/union_container/union_container_pattern.h"
+#include "core/components_ng/pattern/union_effect_container/union_effect_container_pattern.h"
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
-void UnionContainerPattern::SetSpacing(const CalcDimension& spacing)
+void UnionEffectContainerPattern::SetSpacing(const float& spacing)
 {
-    if (spacing.IsNegative() || spacing.Unit() == DimensionUnit::PERCENT) {
-        spacing_ = CalcDimension();
+    constexpr float MIN_SPACING = 0.0f;
+    if (std::isnan(spacing) || LessOrEqual(spacing, MIN_SPACING)) {
+        spacing_ = MIN_SPACING;
     } else {
         spacing_ = spacing;
     }
@@ -31,10 +32,6 @@ void UnionContainerPattern::SetSpacing(const CalcDimension& spacing)
     CHECK_NULL_VOID(renderContext);
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
     CHECK_NULL_VOID(rosenRenderContext);
-    auto spaceInPx = spacing.ConvertToPx();
-    if (NonPositive(spaceInPx) || std::isnan(spaceInPx)) {
-        spaceInPx = 0.0f;
-    }
-    rosenRenderContext->SetUnionSpacing(spaceInPx);
+    rosenRenderContext->SetUnionSpacing(spacing_);
 }
 } // namespace OHOS::Ace::NG

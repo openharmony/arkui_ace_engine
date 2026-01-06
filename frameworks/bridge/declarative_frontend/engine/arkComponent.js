@@ -1817,6 +1817,20 @@ class UseEffectModifier extends ModifierWithKey {
   }
 }
 UseEffectModifier.identity = Symbol('useEffect');
+class UseUnionEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetUseUnionEffect(node);
+    }
+    else {
+      getUINativeModule().common.setUseUnionEffect(node, this.value);
+    }
+  }
+}
+UseUnionEffectModifier.identity = Symbol('useUnionEffect');
 class ForegroundEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -5586,6 +5600,10 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ChainWeightModifier.identity, ChainWeightModifier, weight);
     return this;
   }
+  useUnionEffect(value) {
+    modifierWithKey(this._modifiersWithKeys, UseUnionEffectModifier.identity, UseUnionEffectModifier, value);
+    return this;
+  }
 }
 const isNull = (val) => typeof val === 'object' && val === null;
 const isArray = (val) => Array.isArray(val);
@@ -6665,6 +6683,46 @@ class ColumnPointLightModifier extends ModifierWithKey {
   }
 }
 ColumnPointLightModifier.identity = Symbol('columnPointLight');
+
+class CommonPointLightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetPointLightStyle(node);
+    } else {
+      let positionX;
+      let positionY;
+      let positionZ;
+      let intensity;
+      let color;
+      let illuminated;
+      let bloom;
+      if (!isUndefined(this.value.lightSource) && this.value.lightSource != null) {
+        positionX = this.value.lightSource.positionX;
+        positionY = this.value.lightSource.positionY;
+        positionZ = this.value.lightSource.positionZ;
+        intensity = this.value.lightSource.intensity;
+        color = this.value.lightSource.color;
+      }
+      illuminated = this.value.illuminated;
+      bloom = this.value.bloom;
+      getUINativeModule().common.setPointLightStyle(node, positionX, positionY, positionZ, intensity, color,
+        illuminated, bloom);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.lightSource?.positionX, this.value.lightSource?.positionX) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionY, this.value.lightSource?.positionY) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.positionZ, this.value.lightSource?.positionZ) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.intensity, this.value.lightSource?.intensity) ||
+    !isBaseOrResourceEqual(this.stageValue.lightSource?.color, this.value.lightSource?.color) ||
+    !isBaseOrResourceEqual(this.stageValue.illuminated, this.value.illuminated) ||
+    !isBaseOrResourceEqual(this.stageValue.bloom, this.value.bloom);
+  }
+}
+CommonPointLightModifier.identity = Symbol('commonPointLight');
 
 class ColumnReverseModifier extends ModifierWithKey {
   constructor(value) {
@@ -13549,6 +13607,9 @@ class ArkSpanComponent {
     throw new Error('Method not implemented.');
   }
   materialFilter(filter) {
+    throw new Error('Method not implemented.');
+  }
+  useUnionEffect(value) {
     throw new Error('Method not implemented.');
   }
   attributeModifier(modifier) {
@@ -40101,6 +40162,26 @@ if (globalThis.EffectComponent !== undefined) {
       return new ArkEffectComponentComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.CommonModifier(nativePtr, classType);
+    });
+  };
+}
+
+/// <reference path='./import.ts' />
+class ArkUnionEffectContainerComponent extends ArkComponent {
+  pointLight(value) {
+    modifierWithKey(this._modifiersWithKeys, CommonPointLightModifier.identity,
+      CommonPointLightModifier, value);
+    return this;
+  }
+}
+// @ts-ignore
+if (globalThis.UnionEffectContainer !== undefined) {
+  // @ts-ignore
+  globalThis.UnionEffectContainer.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkUnionEffectContainerComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.UnionEffectContainerModifier(nativePtr, classType);
     });
   };
 }

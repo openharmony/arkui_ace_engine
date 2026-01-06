@@ -13,17 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_CONTAINER_MODEL_NG_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_CONTAINER_MODEL_NG_H
-
-#include "core/components_ng/pattern/union_container/union_container_model.h"
-
-#include "ui/base/macros.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_UNION_EFFECT_CONTAINER_OPTIONS_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_UNION_EFFECT_CONTAINER_OPTIONS_H
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT UnionContainerModelNG : public OHOS::Ace::UnionContainerModel {
-public:
-    void Create(const UnionContainerOptions& options) override;
+struct UnionEffectContainerOptions {
+    float spacing = 0.0f;
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_CONTAINER_MODEL_NG_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_UNION_EFFECT_CONTAINER_OPTIONS_H

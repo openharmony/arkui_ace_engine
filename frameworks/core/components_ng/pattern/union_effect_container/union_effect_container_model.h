@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_CONTAINER_MODEL_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_CONTAINER_MODEL_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_EFFECT_CONTAINER_MODEL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_EFFECT_CONTAINER_MODEL_H
 
 #include <memory>
 #include <mutex>
 
 namespace OHOS::Ace {
 namespace NG {
-struct UnionContainerOptions;
+struct UnionEffectContainerOptions;
 } // namespace OHOS::Ace::NG
-class UnionContainerModel {
+class UnionEffectContainerModel {
 public:
-    static UnionContainerModel* GetInstance();
-    virtual ~UnionContainerModel() = default;
+    static UnionEffectContainerModel* GetInstance();
+    virtual ~UnionEffectContainerModel() = default;
 
-    virtual void Create(const NG::UnionContainerOptions& options) {}
+    virtual void Create(const NG::UnionEffectContainerOptions& options) {}
 
 private:
-    static std::unique_ptr<UnionContainerModel> instance_;
+    static std::unique_ptr<UnionEffectContainerModel> instance_;
     static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_CONTAINER_MODEL_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_EFFECT_CONTAINER_MODEL_H

@@ -161,7 +161,7 @@
 #include "bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "bridge/declarative_frontend/jsview/js_toggle.h"
 #include "bridge/declarative_frontend/jsview/js_toolbaritem.h"
-#include "bridge/declarative_frontend/jsview/js_union_container.h"
+#include "bridge/declarative_frontend/jsview/js_union_effect_container.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "bridge/declarative_frontend/jsview/js_water_flow.h"
@@ -830,7 +830,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "PinchRecognizer", JSPinchRecognizer::JSBind },
     { "RotationRecognizer", JSRotationRecognizer::JSBind },
     { "TouchRecognizer", JSTouchRecognizer::JSBind },
-    { "UnionContainer", JSUnionContainer::JSBind },
+    { "UnionEffectContainer", JSUnionEffectContainer::JSBind },
 };
 
 void RegisterBindFuncs(BindingTarget globalObj, bool isCustomEnvSupported)

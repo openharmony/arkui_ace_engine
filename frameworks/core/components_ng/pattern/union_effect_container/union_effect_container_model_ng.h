@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_UNION_CONTAINER_OPTIONS_H
-#define FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_UNION_CONTAINER_OPTIONS_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_EFFECT_CONTAINER_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_EFFECT_CONTAINER_MODEL_NG_H
 
-#include "base/geometry/calc_dimension.h"
-#include "core/common/resource/resource_object.h"
+#include "core/components_ng/pattern/union_effect_container/union_effect_container_model.h"
+
+#include "ui/base/macros.h"
 
 namespace OHOS::Ace::NG {
-struct UnionContainerOptions {
-    CalcDimension spacing;
-    RefPtr<ResourceObject> spacingResObj;
+class ACE_EXPORT UnionEffectContainerModelNG : public OHOS::Ace::UnionEffectContainerModel {
+public:
+    void Create(const UnionEffectContainerOptions& options) override;
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_UNION_CONTAINER_OPTIONS_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UNION_EFFECT_CONTAINER_MODEL_NG_H

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cmath>
 #include "gmock/gmock-actions.h"
 #include "gtest/gtest.h"
 
@@ -22,15 +23,15 @@
 #include "test/mock/core/render/mock_render_context_creator.h"
 #include "test/mock/core/render/mock_rosen_render_context.h"
 
-#include "core/components_ng/pattern/union_container/union_container_model_ng.h"
-#include "core/components_ng/pattern/union_container/union_container_pattern.h"
-#include "core/components_ng/property/union_container_options.h"
+#include "core/components_ng/pattern/union_effect_container/union_effect_container_model_ng.h"
+#include "core/components_ng/pattern/union_effect_container/union_effect_container_pattern.h"
+#include "core/components_ng/property/union_effect_container_options.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-class UnionContainerModelNgTest : public testing::Test {
+class UnionEffectContainerModelNgTest : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -38,17 +39,17 @@ public:
     void TearDown();
 };
 
-void UnionContainerModelNgTest::SetUpTestSuite()
+void UnionEffectContainerModelNgTest::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
 }
 
-void UnionContainerModelNgTest::TearDownTestSuite()
+void UnionEffectContainerModelNgTest::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
 }
 
-void UnionContainerModelNgTest::SetUp()
+void UnionEffectContainerModelNgTest::SetUp()
 {
     ViewStackProcessor::GetInstance()->ClearStack();
     RenderContextCreateFunction func = []() -> RefPtr<RenderContext> {
@@ -58,7 +59,7 @@ void UnionContainerModelNgTest::SetUp()
     MockRenderContextCreator::SetRenderContextCreateFunction(std::move(func));
 }
 
-void UnionContainerModelNgTest::TearDown()
+void UnionEffectContainerModelNgTest::TearDown()
 {
     ViewStackProcessor::GetInstance()->ClearStack();
     MockRenderContextCreator::ResetRenderContextCreateFunction();
@@ -69,40 +70,41 @@ void UnionContainerModelNgTest::TearDown()
  * @tc.desc: Create function with normal spacing.
  * @tc.type: FUNC
  */
-HWTEST_F(UnionContainerModelNgTest, Create001, TestSize.Level1)
+HWTEST_F(UnionEffectContainerModelNgTest, Create001, TestSize.Level1)
 {
-    UnionContainerModelNG model;
-    double spacingRaw = 10.0;
-    UnionContainerOptions options { .spacing = CalcDimension(spacingRaw, DimensionUnit::PX) };
+    UnionEffectContainerModelNG model;
+    float spacingRaw = 10.0f;
+    UnionEffectContainerOptions options { .spacing = spacingRaw };
     model.Create(options);
     auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(node, nullptr);
-    auto pattern = node->GetPattern<UnionContainerPattern>();
+    auto pattern = node->GetPattern<UnionEffectContainerPattern>();
     ASSERT_NE(pattern, nullptr);
     auto spacing = pattern->GetSpacing();
-    EXPECT_TRUE(NearEqual(spacing, CalcDimension(spacingRaw, DimensionUnit::PX)));
+    EXPECT_TRUE(NearEqual(spacing, spacingRaw));
 }
 
 /**
  * @tc.name: Create002
- * @tc.desc: Create function with percent spacing.
+ * @tc.desc: Create function with nan spacing.
  * @tc.type: FUNC
  */
-HWTEST_F(UnionContainerModelNgTest, Create002, TestSize.Level1)
+HWTEST_F(UnionEffectContainerModelNgTest, Create002, TestSize.Level1)
 {
     /**
-     * @tc.steps1: set percent spacing
+     * @tc.steps1: set nan spacing
      * @tc.expected: the spacing should be invalid and equal to default 0.
      */
-    UnionContainerModelNG model;
-    double spacingPercent = 20;
-    UnionContainerOptions options { .spacing = CalcDimension(spacingPercent, DimensionUnit::PERCENT) };
+    UnionEffectContainerModelNG model;
+    float spacingNan = nanf("");
+    UnionEffectContainerOptions options { .spacing = spacingNan };
     model.Create(options);
     auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(node, nullptr);
-    auto pattern = node->GetPattern<UnionContainerPattern>();
+    auto pattern = node->GetPattern<UnionEffectContainerPattern>();
     ASSERT_NE(pattern, nullptr);
-    EXPECT_TRUE(NearEqual(pattern->GetSpacing().Value(), 0.0));
+    EXPECT_FALSE(std::isnan(pattern->GetSpacing()));
+    EXPECT_TRUE(NearEqual(pattern->GetSpacing(), 0.0));
 }
 
 /**
@@ -110,20 +112,20 @@ HWTEST_F(UnionContainerModelNgTest, Create002, TestSize.Level1)
  * @tc.desc: Create function with negative spacing.
  * @tc.type: FUNC
  */
-HWTEST_F(UnionContainerModelNgTest, Create003, TestSize.Level1)
+HWTEST_F(UnionEffectContainerModelNgTest, Create003, TestSize.Level1)
 {
     /**
      * @tc.steps1: set negative spacing
      * @tc.expected: the spacing should be invalid and equal to default 0.
      */
-    UnionContainerModelNG model;
-    double spacingRaw = -20;
-    UnionContainerOptions options { .spacing = CalcDimension(spacingRaw, DimensionUnit::PX) };
+    UnionEffectContainerModelNG model;
+    float spacingRaw = -20;
+    UnionEffectContainerOptions options { .spacing = spacingRaw };
     model.Create(options);
     auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(node, nullptr);
-    auto pattern = node->GetPattern<UnionContainerPattern>();
+    auto pattern = node->GetPattern<UnionEffectContainerPattern>();
     ASSERT_NE(pattern, nullptr);
-    EXPECT_TRUE(NearEqual(pattern->GetSpacing().Value(), 0.0));
+    EXPECT_TRUE(NearEqual(pattern->GetSpacing(), 0.0));
 }
 } // namespace OHOS::Ace::NG
