@@ -1908,7 +1908,7 @@ const ArkUI_AttributeItem* GetMotionPath(ArkUI_NodeHandle node)
     g_attributeItem.size = NUM_0;
     auto* fullImpl = GetFullImpl();
     if (!fullImpl->getNodeModifiers()->getCommonModifier()->getMotionPath(node->uiNodeHandle, &motionPathOptions)) {
-        auto optionPath = new (std::nothrow) char[1];
+        auto optionPath = new char[1];
         optionPath[0] = '\0';
         motionPathOptions.path = optionPath;
         motionPathOptions.from = 0.0f;
