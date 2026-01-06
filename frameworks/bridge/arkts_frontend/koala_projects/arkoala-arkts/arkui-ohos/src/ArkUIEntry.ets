@@ -214,7 +214,7 @@ export class Application {
     private withLog = false
     private useNativeLog = true
     private rootPointer: KPointer = nullptr
-    private static firstRegisterArkuiApiHandler: boolean = true
+    public static firstRegisterArkuiApiHandler: boolean = true
 
     constructor(useNativeLog: boolean, moduleName: string, startUrl: string, startParam: string, name: string,
         userView: UserView | undefined, entryPoint: EntryPoint | undefined) {
