@@ -153,12 +153,12 @@ class JSHyperlink extends JSViewAbstract {
     __Common__.onHover(value);
   }
 
-  static onKey(value) {
-    __Common__.onKey(value);
+  static onKeyEvent(value) {
+    __Common__.onKeyEvent(value);
   }
 
-  static onDelete(value) {
-    __Common__.onDelete(value);
+  static onDeleteEvent(value) {
+    __Common__.onKeyEvent(value);
   }
 
   static attributeModifier(modifier) {
