@@ -389,10 +389,12 @@ bool RichEditorLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPt
         auto& group = *groupIter;
         bool needReLayout = false;
         bool needReLayoutParagraph = false;
-        ReLayoutParagraphBySpan(layoutWrapper, textStyles, group, needReLayout, needReLayoutParagraph);
+        std::optional<TextStyle> firstValidTextStyle;
+        ReLayoutParagraphBySpan(layoutWrapper, textStyles, group, needReLayout, needReLayoutParagraph,
+            firstValidTextStyle);
         if (!needReLayout && needReLayoutParagraph) {
             ACE_SCOPED_TRACE("ReLayoutParagraph");
-            paragraph->ReLayout(maxSize.Width(), pIter->paragraphStyle, textStyles);
+            paragraph->ReLayout(maxSize.Width(), pIter->paragraphStyle, textStyles, firstValidTextStyle);
         } else {
             ACE_SCOPED_TRACE("LayoutParagraph");
             auto width = isSingleLineMode_ ? std::numeric_limits<double>::infinity() : maxSize.Width();
@@ -438,11 +440,13 @@ void RichEditorLayoutAlgorithm::ReLayoutParagraphByLayoutPolicy(LayoutWrapper* l
 
 void RichEditorLayoutAlgorithm::ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper,
     std::vector<TextStyle>& textStyles, std::list<RefPtr<SpanItem>>& group,
-    bool& needReLayout, bool& needReLayoutParagraph)
+    bool& needReLayout, bool& needReLayoutParagraph, std::optional<TextStyle>& firstValidTextStyle)
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     textStyles.reserve(group.size());
+    bool hasFoundFirstValidText = false;
+    firstValidTextStyle.reset();
     for (const auto& child : group) {
         if (!child) {
             continue;
@@ -452,10 +456,15 @@ void RichEditorLayoutAlgorithm::ReLayoutParagraphBySpan(LayoutWrapper* layoutWra
         child->ResetReLayout();
         CHECK_NULL_CONTINUE(!needReLayout);
         child->UpdateSpanTextStyle(inheritTextStyle_, frameNode);
+        TextStyle currentTextStyle;
         if (child->GetTextStyle().has_value()) {
-            textStyles.emplace_back(child->GetTextStyle().value());
-        } else {
-            textStyles.emplace_back(TextStyle());
+            currentTextStyle = child->GetTextStyle().value();
+        }
+        textStyles.emplace_back(currentTextStyle);
+        if (!hasFoundFirstValidText && (child->spanItemType == SpanItemType::NORMAL
+            || child->spanItemType == SpanItemType::SYMBOL)) {
+            firstValidTextStyle = currentTextStyle;
+            hasFoundFirstValidText = true;
         }
     }
 }

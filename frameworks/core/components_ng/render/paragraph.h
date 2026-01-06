@@ -308,6 +308,11 @@ public:
     virtual void Layout(float width) = 0;
     // interfaces for reLayout
     virtual void ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles) = 0;
+    virtual void ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles,
+        const std::optional<TextStyle>& firstValidTextStyle)
+    {
+        ReLayout(width, paraStyle, textStyles);
+    }
     virtual void ReLayoutForeground(const TextStyle& textStyle) = 0;
     virtual float GetHeight() = 0;
     virtual float GetTextWidth() = 0;
