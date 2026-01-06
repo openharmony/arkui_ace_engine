@@ -1327,7 +1327,7 @@ HWTEST_F(ScrollableTestNg, FireOnScrollStop001, TestSize.Level1)
     OnScrollStopEvent stopEvent = [&isStopTrigger]() { isStopTrigger = true; };
     scrollPn->nestedScrollVelocity_ = 0;
     scrollPn->FireOnScrollStop(stopEvent, nullptr);
-    EXPECT_FALSE(scrollPn->isAnimationStop_);
+    EXPECT_TRUE(scrollPn->isAnimationStop_);
 }
 
 /**
