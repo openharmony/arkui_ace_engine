@@ -73,14 +73,13 @@ Ark_TransitionEffect Construct4Impl(const Ark_RotateOptions* effect)
 {
     CHECK_NULL_RETURN(effect, nullptr);
     TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
-    auto emptyDimension = Dimension();
     auto defaultDimension = Dimension(50.0f, DimensionUnit::PERCENT);
     auto x = Converter::OptConvert<float>(effect->x.value).value_or(0);
     auto y = Converter::OptConvert<float>(effect->y.value).value_or(0);
     auto z = Converter::OptConvert<float>(effect->z.value).value_or(0);
     auto centerX = Converter::OptConvert<CalcDimension>(effect->centerX).value_or(defaultDimension);
     auto centerY = Converter::OptConvert<CalcDimension>(effect->centerY).value_or(defaultDimension);
-    auto centerZ = Converter::OptConvert<CalcDimension>(effect->centerZ).value_or(emptyDimension);
+    auto centerZ = Converter::OptConvert<CalcDimension>(effect->centerZ).value_or(defaultDimension);
     auto perspective = Converter::OptConvert<float>(effect->perspective).value_or(0);
     auto angle = Converter::OptConvert<float>(effect->angle).value_or(0);
     RotateOptions rotateOpts(x, y, z, angle, centerX, centerY, centerZ, perspective);
