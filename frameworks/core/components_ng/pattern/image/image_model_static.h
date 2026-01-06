@@ -18,7 +18,6 @@
 
 #include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
-#include "core/components/declaration/image/image_animator_declaration.h"
 #include "core/components/image/image_event.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/drawable/drawable_descriptor.h"

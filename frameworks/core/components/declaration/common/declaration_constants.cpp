@@ -179,65 +179,6 @@ const std::shared_ptr<TextTimerEvent> DeclarationConstants::DEFAULT_TEXTTIMER_EV
 const std::shared_ptr<TextTimerMethod> DeclarationConstants::DEFAULT_TEXTTIMER_METHOD =
     std::make_shared<TextTimerMethod>();
 
-// default value of svg
-const std::shared_ptr<SvgAnimateAttribute> DeclarationConstants::DEFAULT_SVG_ANIMATE_ATTR =
-    std::make_shared<SvgAnimateAttribute>();
-const std::shared_ptr<SvgAttribute> DeclarationConstants::DEFAULT_SVG_ATTR = std::make_shared<SvgAttribute>();
-const std::shared_ptr<SvgBaseAttribute> DeclarationConstants::DEFAULT_SVG_BASE_ATTR =
-    std::make_shared<SvgBaseAttribute>();
-const std::shared_ptr<SvgCircleAttribute> DeclarationConstants::DEFAULT_SVG_CIRCLE_ATTR =
-    std::make_shared<SvgCircleAttribute>();
-const std::shared_ptr<SvgEllipseAttribute> DeclarationConstants::DEFAULT_SVG_ELLIPSE_ATTR =
-    std::make_shared<SvgEllipseAttribute>();
-const std::shared_ptr<SvgImageAttribute> DeclarationConstants::DEFAULT_SVG_IMAGE_ATTR =
-    std::make_shared<SvgImageAttribute>();
-const std::shared_ptr<SvgLineAttribute> DeclarationConstants::DEFAULT_SVG_LINE_ATTR =
-    std::make_shared<SvgLineAttribute>();
-const std::shared_ptr<SvgMaskAttribute> DeclarationConstants::DEFAULT_SVG_MASK_ATTR =
-    std::make_shared<SvgMaskAttribute>();
-const std::shared_ptr<SvgPathAttribute> DeclarationConstants::DEFAULT_SVG_PATH_ATTR =
-    std::make_shared<SvgPathAttribute>();
-const std::shared_ptr<SvgPatternAttribute> DeclarationConstants::DEFAULT_SVG_PATTERN_ATTR =
-    std::make_shared<SvgPatternAttribute>();
-const std::shared_ptr<SvgPolygonAttribute> DeclarationConstants::DEFAULT_SVG_POLYGON_ATTR =
-    std::make_shared<SvgPolygonAttribute>();
-const std::shared_ptr<SvgRectAttribute> DeclarationConstants::DEFAULT_SVG_RECT_ATTR =
-    std::make_shared<SvgRectAttribute>();
-const std::shared_ptr<SvgTextAttribute> DeclarationConstants::DEFAULT_SVG_TEXT_ATTR =
-    std::make_shared<SvgTextAttribute>();
-const std::shared_ptr<SvgTextPathAttribute> DeclarationConstants::DEFAULT_SVG_TEXT_PATH_ATTR =
-    std::make_shared<SvgTextPathAttribute>();
-const std::shared_ptr<SvgStopAttribute> DeclarationConstants::DEFAULT_SVG_STOP_ATTR =
-    std::make_shared<SvgStopAttribute>();
-const std::shared_ptr<SvgGradientAttribute> DeclarationConstants::DEFAULT_SVG_GRADIENT_ATTR =
-    std::make_shared<SvgGradientAttribute>();
-const std::shared_ptr<SvgFilterAttribute> DeclarationConstants::DEFAULT_SVG_FILTER_ATTR =
-    std::make_shared<SvgFilterAttribute>();
-const std::shared_ptr<SvgFeColorMatrixAttribute> DeclarationConstants::DEFAULT_SVG_FE_COLORMATRIX_ATTR =
-    std::make_shared<SvgFeColorMatrixAttribute>();
-const std::shared_ptr<SvgFeAttribute> DeclarationConstants::DEFAULT_SVG_FE_COMPONENT_TRANSFER_ATTR =
-    std::make_shared<SvgFeAttribute>();
-const std::shared_ptr<SvgFeCompositeAttribute> DeclarationConstants::DEFAULT_SVG_FE_COMPOSITE_ATTR =
-    std::make_shared<SvgFeCompositeAttribute>();
-const std::shared_ptr<SvgFeOffsetAttribute> DeclarationConstants::DEFAULT_SVG_FE_OFFSET_ATTR =
-    std::make_shared<SvgFeOffsetAttribute>();
-const std::shared_ptr<SvgFeFloodAttribute> DeclarationConstants::DEFAULT_SVG_FE_FLOOD_ATTR =
-    std::make_shared<SvgFeFloodAttribute>();
-const std::shared_ptr<SvgFeFuncAttribute> DeclarationConstants::DEFAULT_SVG_FE_FUNC_ATTR =
-    std::make_shared<SvgFeFuncAttribute>();
-const std::shared_ptr<SvgFeGaussianBlurAttribute> DeclarationConstants::DEFAULT_SVG_FE_GAUSSIAN_BLUR_ATTR =
-    std::make_shared<SvgFeGaussianBlurAttribute>();
-const std::shared_ptr<SvgFeMergeAttribute> DeclarationConstants::DEFAULT_SVG_FE_MERGE_ATTR =
-    std::make_shared<SvgFeMergeAttribute>();
-const std::shared_ptr<SvgFeMergeNodeAttribute> DeclarationConstants::DEFAULT_SVG_FE_MERGE_NODE_ATTR =
-    std::make_shared<SvgFeMergeNodeAttribute>();
-const std::shared_ptr<SvgFeBlendAttribute> DeclarationConstants::DEFAULT_SVG_FE_BLEND_ATTR =
-    std::make_shared<SvgFeBlendAttribute>();
-
-// default value of image_animator
-const std::shared_ptr<ImageAnimatorAttribute> DeclarationConstants::DEFAULT_IMAGE_ANIMATOR_ATTR =
-    std::make_shared<ImageAnimatorAttribute>();
-
 // default value of web
 const std::shared_ptr<WebAttribute> DeclarationConstants::DEFAULT_WEB_ATTR = std::make_shared<WebAttribute>();
 const std::shared_ptr<WebEvent> DeclarationConstants::DEFAULT_WEB_EVENT = std::make_shared<WebEvent>();

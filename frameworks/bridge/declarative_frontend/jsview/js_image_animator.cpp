@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,8 @@
 #include "bridge/declarative_frontend/jsview/js_image_animator.h"
 
 #include "base/log/ace_scoring_log.h"
-#include "bridge/declarative_frontend/jsview/models/image_animator_model_impl.h"
+#include "compatible/components/component_loader.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
@@ -33,7 +34,12 @@ ImageAnimatorModel* ImageAnimatorModel::GetInstance()
         if (Container::IsCurrentUseNewPipeline()) {
             instance_.reset(new NG::ImageAnimatorModelNG());
         } else {
-            instance_.reset(new Framework::ImageAnimatorModelImpl());
+            static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("image-animator");
+            if (!loader) {
+                LOGF("Can't find image-animator loader");
+                return;
+            }
+            instance_.reset(reinterpret_cast<ImageAnimatorModel*>(loader->CreateModel()));
         }
 #endif
     });

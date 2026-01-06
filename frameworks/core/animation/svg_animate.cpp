@@ -15,7 +15,7 @@
 
 #include "core/animation/svg_animate.h"
 
-#include "frameworks/core/components/svg/svg_transform.h"
+#include "frameworks/core/components_ng/svg/svg_transform_utils.h"
 
 namespace OHOS::Ace {
 
@@ -562,11 +562,11 @@ bool SvgAnimate::SplineWithKeyTimes(const RefPtr<KeyframeAnimation<T>>& animatio
     return true;
 }
 
-template bool SvgAnimate::CreatePropertyAnimate(
+template ACE_FORCE_EXPORT bool SvgAnimate::CreatePropertyAnimate(
     std::function<void(double)>&& callback, const double& originalValue, const RefPtr<Animator>& animator);
-template bool SvgAnimate::CreatePropertyAnimate(
+template ACE_FORCE_EXPORT bool SvgAnimate::CreatePropertyAnimate(
     std::function<void(Dimension)>&& callback, const Dimension& originalValue, const RefPtr<Animator>& animator);
-template bool SvgAnimate::CreatePropertyAnimate(
+template ACE_FORCE_EXPORT bool SvgAnimate::CreatePropertyAnimate(
     std::function<void(Color)>&& callback, const Color& originalValue, const RefPtr<Animator>& animator);
 
 } // namespace OHOS::Ace

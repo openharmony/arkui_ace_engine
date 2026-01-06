@@ -28,7 +28,7 @@ namespace OHOS::Ace {
 // Border of a box, contains four borderEdges: left, top, right, bottom.
 // And four radius: topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius.
 // Each borderEdge is a BorderEdge object and each radius is a Radius object.
-class ACE_EXPORT Border final {
+class ACE_FORCE_EXPORT Border final {
 public:
     Border() = default;
     explicit Border(const BorderEdge& edge) : Border(edge, edge, edge, edge) {}

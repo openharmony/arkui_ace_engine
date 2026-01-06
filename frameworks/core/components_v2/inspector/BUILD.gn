@@ -36,7 +36,6 @@ build_component("inspector_v2") {
     "grid_composed_element.cpp",
     "grid_item_composed_element.cpp",
     "hyperlink_composed_element.cpp",
-    "image_animator_composed_element.cpp",
     "image_composed_element.cpp",
     "indexer_composed_element.cpp",
     "inspector.cpp",
