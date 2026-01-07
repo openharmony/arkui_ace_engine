@@ -28,31 +28,29 @@ void RichEditorModelNG::Create(bool isStyledStringMode)
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, nodeId,
         [isStyledStringMode]() { return AceType::MakeRefPtr<RichEditorPattern>(isStyledStringMode); });
     stack->Push(frameNode);
-    CreateRichEditorNodeBase(nodeId, isStyledStringMode, frameNode);
+    InitRichEditorModel(nodeId, isStyledStringMode, frameNode);
     isStyledStringMode_ = isStyledStringMode;
 }
  
-void RichEditorModelNG::CreateRichEditorStyledStringNode(int32_t nodeId, RefPtr<FrameNode>& richEditorNode)
+RefPtr<FrameNode> RichEditorModelNG::CreateRichEditorStyledStringNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<RichEditorPattern>(true); });
-    CreateRichEditorNodeBase(nodeId, true, frameNode);
-    richEditorNode = frameNode;
- 
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
-    auto host = richEditorPattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
+    InitRichEditorModel(nodeId, true, frameNode);
+
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(richEditorPattern, nullptr);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto richEditorTheme = pipelineContext->GetTheme<RichEditorTheme>();
-    CHECK_NULL_VOID(richEditorTheme);
-    auto renderContext = richEditorNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_RETURN(richEditorTheme, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(richEditorTheme->GetBgColor());
+    return frameNode;
 }
- 
-void RichEditorModelNG::CreateRichEditorNodeBase(
-    int32_t nodeId, bool isStyledStringMode, const RefPtr<FrameNode>& frameNode)
+
+void RichEditorModelNG::InitRichEditorModel(bool isStyledStringMode, const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, TextAlign::START);
@@ -485,9 +483,9 @@ void RichEditorModelNG::SetEnterKeyType(FrameNode* frameNode, const TextInputAct
 
 TextInputAction RichEditorModelNG::GetEnterKeyType(FrameNode* frameNode)
 {
-    TextInputAction value = TextInputAction::UNSPECIFIED;
-    CHECK_NULL_RETURN(frameNode, value);
+    CHECK_NULL_RETURN(frameNode, TextInputAction::UNSPECIFIED);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, TextInputAction::UNSPECIFIED);
     return pattern->GetTextInputActionValue(pattern->GetDefaultTextInputAction());
 }
 

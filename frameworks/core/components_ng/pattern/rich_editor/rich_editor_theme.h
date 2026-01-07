@@ -65,19 +65,14 @@ public:
 
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RichEditorTheme>& theme) const
         {
-            if (!theme) {
-                return;
-            }
+            CHECK_NULL_VOID(theme);
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_RICH_EDITOR);
-            if (!pattern) {
-                return;
-            }
+            CHECK_NULL_VOID(pattern);
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
             theme->dragCornerRadius_ = pattern->GetAttr<Dimension>("drag_corner_radius", 18.0_vp);
             theme->defaultCaretHeight_ = pattern->GetAttr<Dimension>("default_caret_height", 18.5_vp);
             theme->disabledAlpha_ = static_cast<float>(pattern->GetAttr<double>("text_color_disabled_alpha", 0.0));
-            
             theme->previewUnderlineWidth_ = pattern->GetAttr<Dimension>("preview_underline_width", 2.0_vp);
             auto showHandle = pattern->GetAttr<std::string>("rich_editor_show_handle", "0");
             theme->richeditorShowHandle_ = StringUtils::StringToInt(showHandle);
@@ -101,13 +96,9 @@ public:
 
         void ParsePatternColor(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RichEditorTheme>& theme) const
         {
-            if (!theme) {
-                return;
-            }
+            CHECK_NULL_VOID(theme);
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_RICH_EDITOR);
-            if (!pattern) {
-                return;
-            }
+            CHECK_NULL_VOID(pattern);
             auto dragBackgroundColor = pattern->GetAttr<Color>("drag_background_color", Color::WHITE);
             if (Container::CurrentColorMode() == ColorMode::DARK) {
                 dragBackgroundColor = dragBackgroundColor.ChangeOpacity(DRAG_BACKGROUND_OPACITY);

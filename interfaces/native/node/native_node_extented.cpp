@@ -1564,9 +1564,7 @@ ArkUI_DecorationStyleOptions* OH_ArkUI_DecorationStyleOptions_Create()
  
 void OH_ArkUI_DecorationStyleOptions_Dispose(ArkUI_DecorationStyleOptions* options)
 {
-    if (!options) {
-        return;
-    }
+    CHECK_NULL_VOID(options);
     delete options;
     options = nullptr;
 }

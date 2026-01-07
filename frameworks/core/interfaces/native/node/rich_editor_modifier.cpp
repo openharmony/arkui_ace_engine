@@ -51,6 +51,7 @@ void NodeModifier::ResetRichEditorDetectEnable(ArkUINodeHandle node)
 void SetRichEditorDataDetectorConfigWithEvent(
     ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig)
 {
+    CHECK_NULL_VOID(arkUITextDetectConfig);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextDetectConfig textDetectConfig;
@@ -193,7 +194,7 @@ void ResetRichEditorCaretColor(ArkUINodeHandle node)
 
 ArkUI_Uint32 GetRichEditorCaretColor(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
     return RichEditorModelNG::GetCaretColor(frameNode).GetValue();
 }

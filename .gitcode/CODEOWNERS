@@ -3140,6 +3140,7 @@ interfaces/native/node/progress_option.h @arkui001
 interfaces/native/node/render_node.cpp @arkui_framework_xnode
 interfaces/native/node/render_node.h @arkui_framework_xnode
 interfaces/native/node/resource.h @arkui_framework_resource
+interfaces/native/node/rich_editor_properties.def @arkui_rich_editor
 interfaces/native/node/styled_string.h @huawei_g_five
 interfaces/native/node/style_modifier.cpp @arkui_framework_xnode
 interfaces/native/node/style_modifier.h @arkui_framework_xnode

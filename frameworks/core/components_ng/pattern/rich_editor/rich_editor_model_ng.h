@@ -23,7 +23,6 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT RichEditorModelNG : public OHOS::Ace::RichEditorModel {
 public:
     void Create(bool isStyledStringMode = false) override;
-    static void CreateRichEditorStyledStringNode(int32_t nodeId, RefPtr<FrameNode>& richEditorNode);
     RefPtr<RichEditorBaseControllerBase> GetRichEditorController() override;
     void SetOnReady(std::function<void()>&& func) override;
     void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) override;
@@ -80,6 +79,7 @@ public:
     void SetSingleLine(bool enabled) override;
     void ResetSingleLine() override;
 
+    static RefPtr<FrameNode> CreateRichEditorStyledStringNode(int32_t nodeId);
     static void SetSelectDetectEnable(FrameNode* frameNode, const bool value);
     static bool GetSelectDetectEnable(FrameNode* frameNode);
     static void ResetSelectDetectEnable(FrameNode* frameNode);
@@ -149,7 +149,7 @@ public:
 
 private:
     void SetDraggable(bool draggable);
-    static void CreateRichEditorNodeBase(int32_t nodeId, bool isStyledStringMode, const RefPtr<FrameNode>& frameNode);
+    static void InitRichEditorModel(bool isStyledStringMode, const RefPtr<FrameNode>& frameNode);
     bool isStyledStringMode_ = false;
 };
 } // namespace OHOS::Ace::NG

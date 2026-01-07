@@ -166,8 +166,7 @@ void* createTextInputNode(ArkUI_Int32 nodeId)
 
 void* createRichEditorNode(ArkUI_Int32 nodeId)
 {
-    RefPtr<FrameNode> frameNode;
-    RichEditorModelNG::CreateRichEditorStyledStringNode(nodeId, frameNode);
+    RefPtr<FrameNode> frameNode = RichEditorModelNG::CreateRichEditorStyledStringNode(nodeId, frameNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
