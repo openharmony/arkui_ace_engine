@@ -134,7 +134,10 @@ std::optional<bool> ListPositionMap::GetLazyForEachChildIsGroup(RefPtr<UINode> n
         while (child != children.end() && !((*child)->GetFrameChildByIndex(0, false))) {
             child++;
         }
-        auto frameNode = AceType::DynamicCast<FrameNode>((*child)->GetFrameChildByIndex(0, false));
+        auto framenode = nullptr;
+        if (child != children.end()) {
+            frameNode = AceType::DynamicCast<FrameNode>((*child)->GetFrameChildByIndex(0, false));
+        }
         if (frameNode) {
             isGroup = frameNode->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
         }
