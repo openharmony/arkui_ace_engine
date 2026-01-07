@@ -1171,7 +1171,6 @@ export class CursorControllerImpl extends CursorController {
 
     public setCursor(value: PointerStyle): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        // GlobalScope.cursorControl_setCursor(value)
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 }
@@ -1339,16 +1338,6 @@ export class UIContextImpl extends UIContext {
         return this.detachedRootEntryManager_;
     }
     dispatchCallback(buffer: KSerializerBuffer, length: int32): void {
-        // if (length <= 0) {
-        //     return
-        // }
-
-        // if (this.position + length > this.bufferSize) {
-        //     throw Error("Callback buffer of UIContextImpl is full!")
-        // }
-
-        // InteropNativeModule._CopyBuffer(this.buffer.buffer + this.position, length, buffer)
-        // this.position += length
     }
 
     callCallbacks(): void {

@@ -394,7 +394,6 @@ export class Application {
             ObserveSingleton.instance.makeDelayedMutableStateChanges();
         }
         // Here we request to draw a frame and call custom components callbacks.
-        // ArkUINativeModule._MeasureLayoutAndDraw(this.rootPointer)
 
         // Here we request to draw a frame and call custom components callbacks.
         rootState!.value;
