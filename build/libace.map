@@ -1053,6 +1053,10 @@
       OHOS::Ace::Edge::GetOffsetInPx*;
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (unsigned int)>>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::shared_ptr<OHOS::Ace::BaseEventInfo> const&)>>::GetInstance()";
+      vtable?for?OHOS::Ace::MenuComponent;
+      VTT?for?OHOS::Ace::MenuComponent;
+      OHOS::Ace::SelectPopupComponent::InitTheme*;
+      OHOS::Ace::SelectPopupComponent::SelectPopupComponent*;
     };
   local:
     *;

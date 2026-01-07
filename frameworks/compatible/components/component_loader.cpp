@@ -30,6 +30,7 @@
 #include "compatible/components/picker-view/picker_view_loader.h"
 #include "compatible/components/picker/picker_loader.h"
 #include "compatible/components/label/label_loader.h"
+#include "compatible/components/navigation_menu/navigation_menu_loader.h"
 #include "compatible/components/svg/svg_loader.h"
 #include "compatible/components/tab_bar/tab_loader.h"
 #include "compatible/components/qrcode/qrcode_loader.h"
@@ -57,6 +58,7 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "grid-row", []() -> ComponentLoader* { return new GridRowLoader(); } },
         { "marquee", []() -> ComponentLoader* { return new MarqueeLoader(); } },
         { "label", []() -> ComponentLoader* { return new LabelLoader(); } },
+        { "navigation-menu", []() -> ComponentLoader* { return new NavigationMenuLoader(); } },
         { "image-animator", []() -> ComponentLoader* { return new ImageAnimatorLoader(); } },
         { "svg", []() -> ComponentLoader* { return new SvgLoader(); } },
         { "animate", []() -> ComponentLoader* { return new SvgAnimateLoader(); } },
