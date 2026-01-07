@@ -17,7 +17,7 @@
 
 #include <array>
 
-#include "bridge/declarative_frontend/jsview/models/stepper_item_model_impl.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
 
 namespace OHOS::Ace {
@@ -36,7 +36,10 @@ StepperItemModel* StepperItemModel::GetInstance()
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::StepperItemModelNG());
             } else {
-                instance_.reset(new Framework::StepperItemModelImpl());
+                static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("stepper-item");
+                static StepperItemModel* instance =
+                    loader ? reinterpret_cast<StepperItemModel*>(loader->CreateModel()) : nullptr;
+                instance_.reset(instance);
             }
 #endif
         }

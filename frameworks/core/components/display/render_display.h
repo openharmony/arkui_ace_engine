@@ -38,7 +38,7 @@ public:
             context_, std::bind(&RenderDisplay::OnOpacityAnimationCallback, this));
     }
 
-    void UpdateVisibleType(VisibleType type);
+    ACE_FORCE_EXPORT void UpdateVisibleType(VisibleType type);
 
     void SetVisible(bool visible, bool inRecursion = false) override;
 

@@ -49,6 +49,8 @@
 #include "compatible/components/toolbaritem/tool_bar_item_loader.h"
 #include "compatible/components/swiper/swiper_loader.h"
 
+#include "compatible/components/stepper/stepper_loader.h"
+#include "compatible/components/stepper/stepper_item_loader.h"
 #include "compatible/components/video/video_loader.h"
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_Compatible_GetLoader(const char* name)
@@ -103,6 +105,8 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "refresh", []() -> ComponentLoader* { return new RefreshLoader(); } },
         { "video", []() -> ComponentLoader* { return new VideoLoader(); } },
         { "qrcode", []() -> ComponentLoader* { return new QRCodeLoader(); } },
+        { "stepper", []() -> ComponentLoader* { return new StepperLoader(); } },
+        { "stepper-item", []() -> ComponentLoader* { return new StepperItemLoader(); } },
         { "picker", []() -> ComponentLoader* { return new PickerLoader(); } },
         { "picker-view", []() -> ComponentLoader* { return new PickerViewLoader(); } },
         { "datePicker", []() -> ComponentLoader* { return new DatePickerLoader(); } },

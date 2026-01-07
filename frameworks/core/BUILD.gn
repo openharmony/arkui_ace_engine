@@ -418,7 +418,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/split_container:ace_core_components_split_container_$platform",
       "$ace_root/frameworks/core/components/stack:ace_core_components_stack_$platform",
       "$ace_root/frameworks/core/components/stage:ace_core_components_stage_$platform",
-      "$ace_root/frameworks/core/components/stepper:ace_core_components_stepper_$platform",
       "$ace_root/frameworks/core/components/text:ace_core_components_text_$platform",
       "$ace_root/frameworks/core/components/text_clock:ace_core_components_text_clock_$platform",
       "$ace_root/frameworks/core/components/text_span:ace_core_components_text_span_$platform",

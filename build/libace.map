@@ -114,6 +114,11 @@
 
       OHOS::Ace::ColumnModel::*;
       OHOS::Ace::FlexModel::*;
+      "OHOS::Ace::RenderDisplay::UpdateVisibleType(OHOS::Ace::VisibleType)";
+      "OHOS::Ace::TextStyle::SetAdaptTextSize(OHOS::Ace::Dimension const&, OHOS::Ace::Dimension const&, OHOS::Ace::Dimension const&)";
+      "OHOS::Ace::ScrollComponent::ScrollComponent(OHOS::Ace::RefPtr<OHOS::Ace::Component> const&)";
+      "OHOS::Ace::Framework::ConvertStrToFlexAlign(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)::flexMap";
+      "OHOS::Ace::Framework::ConvertStrToTextDecoration(std::__h::basic_string<char, std::__h:r_traits<char>, std::__h::allocator<char>> const&)::textDecorationTable";
       OHOS::Ace::ViewAbstractModel::*;
       OHOS::Ace::ViewStackModel::*;
       OHOS::Ace::BackgroundImageSize::*;
@@ -514,6 +519,7 @@
       virtual?thunk?to?OHOS::Ace::Frontend::~Frontend*;
       virtual?thunk?to?OHOS::Ace::PluginFrontend::~PluginFrontend*;
       virtual?thunk?to?OHOS::Ace::Component::~Component*;
+      virtual?thunk?to?OHOS::Ace::FlexElement::AcceptFocusByRectOfLastFocus*;
 
       vtable?for?OHOS::Ace::ImageComponent;
       vtable?for?OHOS::Ace::PaddingComponent;
@@ -563,6 +569,10 @@
       vtable?for?OHOS::Ace::NG::PasteButtonModelNG;
       vtable?for?OHOS::Ace::NG::SecurityComponentModelNG;
       vtable?for?OHOS::Ace::NG::Pattern;
+      vtable?for?OHOS::Ace::LoadingProgressComponent;
+      vtable?for?OHOS::Ace::FocusNode;
+      vtable?for?OHOS::Ace::Framework::StepperModelImpl;
+      vtable?for?OHOS::Ace::Framework::StepperItemModelImpl;
       vtable?for?OHOS::Ace::NG::GaugeModelNG;
       vtable?for?OHOS::Ace::GaugeModel;
       vtable?for?OHOS::Ace::Framework::GaugeModelImpl;
@@ -615,6 +625,7 @@
       VTT?for?OHOS::Ace::PixelMapDrawableDescriptor;
       VTT?for?OHOS::Ace::AnimatedDrawableDescriptor;
       VTT?for?OHOS::Ace::FocusNode*;
+      VTT?for?OHOS::Ace::LoadingProgressComponent;
       VTT?for?OHOS::Ace::CheckableComponent;
       VTT?for?OHOS::Ace::RatingComponent;
       VTT?for?OHOS::Ace::PaddingComponent;
@@ -1335,6 +1346,7 @@
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (OHOS::Ace::ClickInfo const&)>>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::shared_ptr<OHOS::Ace::BaseEventInfo> const&)>>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)>>::GetInstance()";
+      "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)>>::GetInstance()";
 
       VTT?for?OHOS::Ace::NG::NavigationStack;
       VTT?for?OHOS::Ace::RawRecognizer;

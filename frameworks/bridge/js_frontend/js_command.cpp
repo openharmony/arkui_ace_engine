@@ -126,9 +126,9 @@ void JsCommandDomElementOperator::UpdateForBadge(const RefPtr<DOMNode>& node) co
 void JsCommandDomElementOperator::UpdateForStepperLabel(const RefPtr<DOMNode>& node) const
 {
     if (stepperLabel_) {
-        auto domStepperItem = AceType::DynamicCast<DOMStepperItem>(node);
-        if (domStepperItem) {
-            domStepperItem->SetLabel(*stepperLabel_);
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("stepper-item");
+        if (loader) {
+            loader->UpdateDomConfig(node, stepperLabel_.get());
         }
     }
 }

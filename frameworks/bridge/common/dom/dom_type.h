@@ -633,27 +633,10 @@ ACE_EXPORT extern const char DOM_OUTSET[];
 ACE_EXPORT extern const char DOM_INSET[];
 
 // stepper attribute style  event and method constants
-ACE_EXPORT extern const char DOM_STEPPER_INDEX[];
 ACE_EXPORT extern const char DOM_STEPPER_LABEL[];
 ACE_EXPORT extern const char DOM_STEPPER_LEFT_LABEL[];
 ACE_EXPORT extern const char DOM_STEPPER_RIGHT_LABEL[];
 ACE_EXPORT extern const char DOM_STEPPER_INITIAL_STATUS[];
-ACE_EXPORT extern const char DOM_STEPPER_TEXT_COLOR[];
-ACE_EXPORT extern const char DOM_STEPPER_FONT_SIZE[];
-ACE_EXPORT extern const char DOM_STEPPER_FONT_STYLE[];
-ACE_EXPORT extern const char DOM_STEPPER_FONT_WEIGHT[];
-ACE_EXPORT extern const char DOM_STEPPER_FONT_FAMILY[];
-ACE_EXPORT extern const char DOM_STEPPER_TEXT_DECORATION[];
-ACE_EXPORT extern const char DOM_STEPPER_EVENT_FINISH[];
-ACE_EXPORT extern const char DOM_STEPPER_EVENT_SKIP[];
-ACE_EXPORT extern const char DOM_STEPPER_EVENT_CHANGE[];
-ACE_EXPORT extern const char DOM_STEPPER_EVENT_NEXT[];
-ACE_EXPORT extern const char DOM_STEPPER_EVENT_BACK[];
-ACE_EXPORT extern const char DOM_STEPPER_SET_RIGHT_BUTTON_STATUS[];
-
-// stepper-item attribute style and event constants
-ACE_EXPORT extern const char DOM_STEPPER_ITEM_EVENT_APPEAR[];
-ACE_EXPORT extern const char DOM_STEPPER_ITEM_EVENT_DISAPPEAR[];
 ACE_FORCE_EXPORT extern const char DOM_DURATION[];
 
 // switch attribute and style constants

@@ -628,27 +628,10 @@ const char DOM_OUTSET[] = "outset";
 const char DOM_INSET[] = "inset";
 
 // stepper attribute style and event constants
-const char DOM_STEPPER_INDEX[] = "index";
 const char DOM_STEPPER_LABEL[] = "label";
 const char DOM_STEPPER_LEFT_LABEL[] = "prevLabel";
 const char DOM_STEPPER_RIGHT_LABEL[] = "nextLabel";
 const char DOM_STEPPER_INITIAL_STATUS[] = "status";
-const char DOM_STEPPER_TEXT_COLOR[] = "color";
-const char DOM_STEPPER_FONT_SIZE[] = "fontSize";
-const char DOM_STEPPER_FONT_STYLE[] = "fontStyle";
-const char DOM_STEPPER_FONT_WEIGHT[] = "fontWeight";
-const char DOM_STEPPER_FONT_FAMILY[] = "fontFamily";
-const char DOM_STEPPER_TEXT_DECORATION[] = "textDecoration";
-const char DOM_STEPPER_EVENT_FINISH[] = "finish";
-const char DOM_STEPPER_EVENT_SKIP[] = "skip";
-const char DOM_STEPPER_EVENT_CHANGE[] = "change";
-const char DOM_STEPPER_EVENT_NEXT[] = "next";
-const char DOM_STEPPER_EVENT_BACK[] = "back";
-const char DOM_STEPPER_SET_RIGHT_BUTTON_STATUS[] = "setNextButtonStatus";
-
-// stepper-item attribute style and event constants
-const char DOM_STEPPER_ITEM_EVENT_APPEAR[] = "appear";
-const char DOM_STEPPER_ITEM_EVENT_DISAPPEAR[] = "disappear";
 const char DOM_DURATION[] = "duration";
 
 // switch attribute and style constants
