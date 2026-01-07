@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
+#include "core/components_ng/pattern/effect_component/effect_component_pattern.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -706,6 +707,17 @@ void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src)
         case ARK_EDGE_EFFECT_FADE: dst = EdgeEffect::FADE; break;
         case ARK_EDGE_EFFECT_NONE: dst = EdgeEffect::NONE; break;
         default: LOGE("Unexpected enum value in Ark_EdgeEffect: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<EffectLayer>& dst, const Ark_EffectLayer& src)
+{
+    switch (src) {
+        case ARK_EFFECT_LAYER_NONE: dst = EffectLayer::NONE; break;
+        case ARK_EFFECT_LAYER_CHARGE_MOTION: dst = EffectLayer::CHARGE; break;
+        case ARK_EFFECT_LAYER_CHARGE_TEXT: dst = EffectLayer::TEXT; break;
+        default: LOGE("Unexpected enum value in Ark_EffectLayer: %{public}d", src); break;
     }
 }
 
@@ -1675,6 +1687,16 @@ void AssignCast(std::optional<MessageLevel>& dst, const Ark_MessageLevel& src)
         case ARK_MESSAGE_LEVEL_LOG: dst = MessageLevel::LOG; break;
         case ARK_MESSAGE_LEVEL_WARN: dst = MessageLevel::WARN; break;
         default: LOGE("Unexpected enum value in Ark_MessageLevel: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ColorSpace>& dst, const Ark_ColorSpace& src)
+{
+    switch (src) {
+        case ARK_COLOR_SPACE_SRGB: dst = ColorSpace::SRGB; break;
+        case ARK_COLOR_SPACE_DISPLAY_P3: dst = ColorSpace::DISPLAY_P3; break;
+        default: LOGE("Unexpected enum value in Ark_ColorSpace: %{public}d", src); break;
     }
 }
 

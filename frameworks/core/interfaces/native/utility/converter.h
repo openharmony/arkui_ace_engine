@@ -45,6 +45,7 @@ class ResponseRegion;
 enum class CanvasUnit;
 enum class ChainEdgeEffect;
 enum class CheckBoxStyle;
+enum class EffectLayer;
 enum class GestureFocusMode;
 enum class ImageAnalyzerType;
 enum class LayoutStyle;
@@ -815,6 +816,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const Ark_Color& src);
     template<> void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const Ark_String& src);
+    template<> void AssignCast(std::optional<ColorSpace>& dst, const Ark_ColorSpace& src);
     template<> void AssignCast(std::optional<ConsoleMessageSource>& dst, const Ark_ConsoleMessageSource& src);
     template<> void AssignCast(std::optional<ContentClipMode>& dst, const Ark_ContentClipMode& src);
     template<> void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src);
@@ -837,6 +839,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<DraggingSizeChangeEffect>& dst, const Ark_DraggingSizeChangeEffect& src);
     template<> void AssignCast(std::optional<DynamicRangeMode>& dst, const Ark_DynamicRangeMode& src);
     template<> void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
+    template<> void AssignCast(std::optional<EffectLayer>& dst, const Ark_EffectLayer& src);
     template<> void AssignCast(std::optional<EffectType>& dst, const Ark_EffectType& src);
     template<> void AssignCast(std::optional<EllipsisMode>& dst, const Ark_EllipsisMode& src);
     template<> void AssignCast(std::optional<FinishCallbackType>& dst, const Ark_FinishCallbackType& src);
