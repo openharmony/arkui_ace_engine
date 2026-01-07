@@ -27,6 +27,7 @@
     "pages/Examples/BindMenu_NonIsShow",
     "pages/Examples/BindMenu_IsShow",
     "pages/Examples/BindContextMenu_RightClick",
+    "pages/Examples/BindContextMenu_LongPress",
 
     "pages/LifeCycle/Index",
     "pages/LifeCycle/aboutToAppear/BindMenu",
