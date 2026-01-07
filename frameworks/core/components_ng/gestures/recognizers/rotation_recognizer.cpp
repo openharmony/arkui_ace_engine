@@ -367,6 +367,7 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         HandleGestureAccept(info, type, GestureListenerType::ROTATION);
+        ACE_BENCH_MARK_TRACE("RotationGesture_end");
         callbackFunction(info);
         HandleReports(info, type);
     }

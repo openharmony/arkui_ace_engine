@@ -524,6 +524,7 @@ void KeyEventManager::SetIsKeyConsumed(bool value)
 
 bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
 {
+    ACE_BENCH_MARK_TRACE("OnKeyEvent_start type:%d", event.action);
     SetPressedKeyCodes(event.pressedCodes);
 
     // onKeyPreIme
@@ -563,6 +564,7 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
 
 bool KeyEventManager::OnFocusAxisEvent(const FocusAxisEvent& event)
 {
+    ACE_BENCH_MARK_TRACE("OnFocusAxisEvent_start type:%d", event.action);
     auto container = Container::GetContainer(GetInstanceId());
     CHECK_NULL_RETURN(container, false);
     auto pipeline = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
@@ -577,6 +579,7 @@ bool KeyEventManager::OnFocusAxisEvent(const FocusAxisEvent& event)
 
 bool KeyEventManager::OnCrownEvent(const CrownEvent& event)
 {
+    ACE_BENCH_MARK_TRACE("OnCrownEvent_start type:%d", event.action);
     auto container = Container::GetContainer(GetInstanceId());
     CHECK_NULL_RETURN(container, false);
     auto pipeline = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());

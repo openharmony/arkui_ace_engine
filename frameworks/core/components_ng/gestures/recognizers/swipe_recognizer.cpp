@@ -441,6 +441,7 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         HandleGestureAccept(info, type, GestureListenerType::SWIPE);
+        ACE_BENCH_MARK_TRACE("SwipeGesture_end");
         callbackFunction(info);
         HandleReports(info, type);
     }

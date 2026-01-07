@@ -1960,6 +1960,8 @@ void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
 
 void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t areaChangeMinDepth)
 {
+    ACE_BENCH_MARK_TRACE("TriggerOnAreaChange_node(%s/%d/%s/%s) active:%d isOnMainTree:%d", tag_.c_str(), nodeId_,
+        std::to_string(accessibilityId_).c_str(), GetInspectorId().value_or("").c_str(), isActive_, IsOnMainTree());
     if (!IsActive()) {
         if (IsDebugInspectorId()) {
             TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnAreaChange Node(%{public}s/%{public}d) is inActive", tag_.c_str(),
@@ -2186,6 +2188,9 @@ void FrameNode::TriggerVisibleAreaChangeCallback(
     ProcessThrottledVisibleCallback(forceDisappear);
     auto hasInnerCallback = eventHub_->HasVisibleAreaCallback(false);
     auto hasUserCallback = eventHub_->HasVisibleAreaCallback(true);
+    ACE_BENCH_MARK_TRACE("TriggerVisibleAreaChange_node(%s/%d/%s/%s) [%d/%d/%d/%d]", tag_.c_str(), nodeId_,
+        std::to_string(accessibilityId_).c_str(), GetInspectorId().value_or("").c_str(), isActive_, IsOnMainTree(),
+        hasInnerCallback, hasUserCallback);
     if (!hasInnerCallback && !hasUserCallback) {
         ClearCachedIsFrameDisappear();
         return;

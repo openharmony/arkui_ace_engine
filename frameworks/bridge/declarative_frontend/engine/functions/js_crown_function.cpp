@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "base/log/ace_trace.h"
+
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_crown_function.h"
 
 namespace OHOS::Ace::Framework {
@@ -35,6 +37,7 @@ JSRef<JSObject> JsCrownFunction::createCrownEvent(CrownEventInfo& event)
 void JsCrownFunction::Execute(OHOS::Ace::CrownEventInfo& event)
 {
     JSRef<JSVal> param = JSRef<JSVal>::Cast(createCrownEvent(event));
+    ACE_BENCH_MARK_TRACE("OnCrownEvent_end type:%d", event.GetAction());
     JsFunction::ExecuteJS(1, &param);
 }
 

@@ -916,6 +916,7 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         HandleCallbackReports(info, type, PanGestureState::BEFORE);
+        ACE_BENCH_MARK_TRACE("PanGesture_end");
         callbackFunction(info);
         HandleCallbackReports(info, type, PanGestureState::AFTER);
     }

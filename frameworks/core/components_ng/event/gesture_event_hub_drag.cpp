@@ -590,6 +590,7 @@ bool GestureEventHub::IsNeedSwitchToSubWindow(const PreparedInfoForDrag& dragInf
 
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
+    ACE_BENCH_MARK_TRACE("OnDragStart_start");
     TAG_LOGD(AceLogTag::ACE_DRAG, "Start handle onDragStart.");
     auto frameNode = GetFrameNode();
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -1056,6 +1057,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         summarys.c_str(), info.GetPointerEventId(), detailedSummarys.c_str(), dragSummaryInfo.tag.c_str(),
         dragData.isDragDelay);
     dragDropManager->GetGatherPixelMap(dragData, scale, width, height);
+    ACE_BENCH_MARK_TRACE("onDragStart_end");
     {
         ACE_SCOPED_TRACE("drag: call msdp start drag");
         ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback());

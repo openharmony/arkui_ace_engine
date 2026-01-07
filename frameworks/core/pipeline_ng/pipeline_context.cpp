@@ -683,6 +683,7 @@ void PipelineContext::FlushDragEventVoluntarily()
 
 void PipelineContext::FlushDragEvents()
 {
+    ACE_BENCH_MARK_TRACE("onDragEnter/onDragMove/onDragLeave_start");
     auto manager = GetDragDropManager();
     if (!manager) {
         TAG_LOGE(AceLogTag::ACE_DRAG, "GetDragDrapManager error, manager is nullptr");
@@ -3302,6 +3303,7 @@ void PipelineContext::OnTouchEvent(
     const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe)
 {
     CHECK_RUN_ON(UI);
+    ACE_BENCH_MARK_TRACE("OnTouchEvent_start type:%d", static_cast<int32_t>(point.type));
 
     HandlePenHoverOut(point);
     if (CheckSourceTypeChange(point.sourceType)) {
@@ -4448,6 +4450,8 @@ void PipelineContext::UpdateLastMoveEvent(const MouseEvent& event)
 void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
 {
     CHECK_RUN_ON(UI);
+    ACE_BENCH_MARK_TRACE("OnMouseEvent_start type:%d button:%d", static_cast<int32_t>(event.action),
+        static_cast<int32_t>(event.button));
     UpdateLastMoveEvent(event);
     lastMouseEvent_->node = node;
     if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE) {
@@ -4835,6 +4839,7 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node)
 {
+    ACE_BENCH_MARK_TRACE("OnAxisEvent_start type:%d", event.action);
     eventManager_->NotifyAxisEvent(event);
     if (!axisEventChecker_.IsAxisEventSequenceCorrect(event)) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,

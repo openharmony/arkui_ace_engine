@@ -1754,6 +1754,7 @@ void DragDropManager::onDragCancel()
 void DragDropManager::FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
     RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams)
 {
+    ACE_BENCH_MARK_TRACE("onDragEnter/onDragMove/onDragLeave_end");
     switch (type) {
         case DragEventType::ENTER: {
             eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_ENTER, event, extraParams);

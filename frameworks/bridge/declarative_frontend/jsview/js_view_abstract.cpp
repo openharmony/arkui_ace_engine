@@ -10985,6 +10985,7 @@ void JSViewAbstract::JsOnAxisEvent(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto eventObj = NG::CommonBridge::CreateAxisEventInfo(vm, info);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        ACE_BENCH_MARK_TRACE("OnAxisEvent_end type:%d", info.GetAction());
         func->Call(vm, func.ToLocal(), params, 1);
     };
     ViewAbstractModel::GetInstance()->SetOnAxisEvent(std::move(onAxisEvent));
@@ -11521,6 +11522,7 @@ void JSViewAbstract::JsOnFocusAxisEvent(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto eventObj = NG::CommonBridge::CreateFocusAxisEventInfo(vm, info);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        ACE_BENCH_MARK_TRACE("OnFocusAxisEvent_end type:%d", info.GetAction());
         func->Call(vm, func.ToLocal(), params, 1);
     };
     ViewAbstractModel::GetInstance()->SetOnFocusAxisEvent(std::move(onFocusAxisEvent));
