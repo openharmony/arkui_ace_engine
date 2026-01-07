@@ -2441,6 +2441,7 @@ frameworks/core/components_ng/base/node_render_status_monitor.cpp @ArkUI_Event
 frameworks/core/components_ng/base/observer_handler.cpp @arkui_framework_resource
 frameworks/core/components_ng/base/observer_handler.h @arkui_framework_resource
 frameworks/core/components_ng/base/symbol_modifier.h @arkui_framework_xnode
+frameworks/core/components_ng/base/ui_node_multi_thread.cpp @arkui_framework_xnode
 frameworks/core/components_ng/base/ui_node.cpp @arkui_architecture
 frameworks/core/components_ng/base/ui_node.h @arkui_architecture
 frameworks/core/components_ng/base/view_abstract.cpp @ArkUI_Event
@@ -2756,6 +2757,7 @@ frameworks/core/components_ng/render/adapter/rosen_modifier_property.cpp @arkui_
 frameworks/core/components_ng/render/adapter/rosen_modifier_property.h @arkui_framework_xnode
 frameworks/core/components_ng/render/adapter/rosen_particle_context.cpp @arkuicodepulse
 frameworks/core/components_ng/render/adapter/rosen_particle_context.h @arkuicodepulse
+frameworks/core/components_ng/render/adapter/rosen_render_context_multi_thread.cpp @arkui_framework_xnode
 frameworks/core/components_ng/render/adapter/rosen_render_context.cpp @arkui_framework_xnode
 frameworks/core/components_ng/render/adapter/rosen_render_context.h @arkui_framework_xnode
 frameworks/core/components_ng/render/adapter/rosen_render_surface.cpp @ArkUI_ability_group

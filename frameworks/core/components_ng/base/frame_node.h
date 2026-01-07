@@ -806,7 +806,10 @@ public:
     void SetOverlayNode(const RefPtr<FrameNode>& overlayNode)
     {
         overlayNode_ = overlayNode;
+        SetOverlayNodeIsFree(IsFree());
     }
+
+    void SetOverlayNodeIsFree(bool isFree);
 
     RefPtr<FrameNode> GetOverlayNode() const
     {
@@ -1496,6 +1499,7 @@ public:
 
     void OnContentChangeRegister(const ContentChangeConfig& config);
     void OnContentChangeUnregister();
+    void SetIsFree(bool isFree) override;
     bool IsPendingOnMainRenderTree() const
     {
         return isPendingState_;
