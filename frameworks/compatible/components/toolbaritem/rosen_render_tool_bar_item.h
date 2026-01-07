@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_ROSEN_RENDER_TOOL_BAR_ITEM_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_ROSEN_RENDER_TOOL_BAR_ITEM_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_TOOL_BAR_ITEM_ROSEN_RENDER_TOOL_BAR_ITEM_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_TOOL_BAR_ITEM_ROSEN_RENDER_TOOL_BAR_ITEM_H
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #endif
 
-#include "core/components/tool_bar/render_tool_bar_item.h"
+#include "compatible/components/toolbaritem/render_tool_bar_item.h"
 
 namespace OHOS::Ace {
 class RosenRenderToolBarItem : public RenderToolBarItem {
@@ -40,4 +40,4 @@ private:
 };
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_ROSEN_RENDER_TOOL_BAR_ITEM_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_TOOL_BAR_ITEM_ROSEN_RENDER_TOOL_BAR_ITEM_H

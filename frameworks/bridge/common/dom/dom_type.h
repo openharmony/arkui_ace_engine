@@ -942,18 +942,6 @@ ACE_EXPORT extern const char DOM_PANEL_ATTR_HALF_HEIGHT[];
 ACE_EXPORT extern const char DOM_PANEL_ATTR_FULL_HEIGHT[];
 ACE_EXPORT extern const char DOM_PANEL_EVENT_SIZE_CHANGED[];
 
-// tool-bar-item constants
-ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_ICON[];
-ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_VALUE[];
-ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_TEXT_COLOR[];
-ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_COLOR[];
-ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_FONT_SIZE[];
-ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_FONT_STYLE[];
-ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_FONT_WEIGHT[];
-ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_TEXT_DECORATION[];
-ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_FONT_FAMILY[];
-ACE_EXPORT extern const char DOM_TOOL_BAR_ITEM_ALLOW_SCALE[];
-
 // card transition
 ACE_EXPORT extern const char DOM_TRANSITION_EFFECT[];
 ACE_EXPORT extern const char DOM_TRANSITION_CARD_COMPOSEID[];

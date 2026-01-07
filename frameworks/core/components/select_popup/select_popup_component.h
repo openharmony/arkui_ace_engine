@@ -87,7 +87,7 @@ public:
         return options_.size();
     }
 
-    RefPtr<OptionComponent> GetSelectOption(std::size_t index) const;
+    ACE_FORCE_EXPORT RefPtr<OptionComponent> GetSelectOption(std::size_t index) const;
 
     std::vector<RefPtr<OptionComponent>> GetSelectOptions() const
     {
@@ -99,7 +99,7 @@ public:
         options_.clear();
     }
 
-    void AppendSelectOption(const RefPtr<OptionComponent>& selectOption);
+    ACE_FORCE_EXPORT void AppendSelectOption(const RefPtr<OptionComponent>& selectOption);
 
     void RemoveSelectOption(const RefPtr<OptionComponent>& selectOption);
 
@@ -248,7 +248,7 @@ public:
     }
 
     void HideDialog(uint32_t index);
-    void ShowDialog(
+    ACE_FORCE_EXPORT void ShowDialog(
         const RefPtr<StackElement>& stackElement, const Offset& leftTop, const Offset& rightBottom, bool isMenu);
     void ShowContextMenu(const Offset& offset);
     void CloseContextMenu();

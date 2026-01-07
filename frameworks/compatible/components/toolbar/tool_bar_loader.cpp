@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,25 @@
  * limitations under the License.
  */
 
-#include "core/components/tool_bar/rosen_render_tool_bar.h"
-#include "render_service_client/core/ui/rs_node.h"
+#include "compatible/components/toolbar/tool_bar_loader.h"
+
+#include "base/memory/ace_type.h"
+#include "compatible/components/toolbar/dom_tool_bar.h"
 
 namespace OHOS::Ace {
-void RosenRenderToolBar::Update(const RefPtr<Component>& component)
+
+RefPtr<Framework::DOMNode> ToolBarLoader::CreateDomNode(int32_t nodeId, const std::string& nodeName)
 {
-    RenderToolBar::Update(component);
-    auto rsNode = GetRSNode();
-    if (rsNode == nullptr) {
-        return;
-    }
-    rsNode->SetClipToFrame(true);
+    return AceType::MakeRefPtr<Framework::DOMToolBarItem>(nodeId, nodeName);
+}
+
+void* ToolBarLoader::CreateModel()
+{
+    return nullptr;
+}
+
+RefPtr<V2::InspectorComposedElement> ToolBarLoader::CreateInspectorElement(const std::string& id)
+{
+    return nullptr;
 }
 } // namespace OHOS::Ace

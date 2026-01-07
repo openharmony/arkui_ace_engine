@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "core/components/tool_bar/tool_bar_item_element.h"
+#include "compatible/components/toolbaritem/tool_bar_item_element.h"
 
-#include "core/components/tool_bar/render_tool_bar_item.h"
+#include "compatible/components/toolbaritem/render_tool_bar_item.h"
 #include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {

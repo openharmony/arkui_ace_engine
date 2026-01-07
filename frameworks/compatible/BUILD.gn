@@ -38,6 +38,7 @@ ohos_source_set("ace_compatible_source") {
     ]
   configs = [ "$ace_root:ace_config" ]
   defines += [ "ENABLE_ROSEN_BACKEND" ]
+
   sources = [
     "components/badge/badge_component.cpp",
     "components/badge/badge_composed_element.cpp",
@@ -329,6 +330,20 @@ ohos_source_set("ace_compatible_source") {
     "components/tab_bar/v2/tabs_component.cpp",
     "components/tab_bar/v2/tabs_composed_element.cpp",
     "components/tab_bar/v2/tabs_element.cpp",
+    "components/toolbar/dom_tool_bar.cpp",
+    "components/toolbar/render_tool_bar_creator.cpp",
+    "components/toolbar/render_tool_bar.cpp",
+    "components/toolbar/rosen_render_tool_bar.cpp",
+    "components/toolbar/tool_bar_component.cpp",
+    "components/toolbar/tool_bar_loader.cpp",
+    "components/toolbaritem/dom_tool_bar_item.cpp",
+    "components/toolbaritem/render_tool_bar_item_creator.cpp",
+    "components/toolbaritem/render_tool_bar_item.cpp",
+    "components/toolbaritem/rosen_render_tool_bar_item.cpp",
+    "components/toolbaritem/tool_bar_item_component.cpp",
+    "components/toolbaritem/tool_bar_item_element.cpp",
+    "components/toolbaritem/tool_bar_item_loader.cpp",
+    "components/toolbaritem/tool_bar_item_type.cpp",
     "components/video/dom_video.cpp",
     "components/video/render_texture_creator.cpp",
     "components/video/render_texture.cpp",

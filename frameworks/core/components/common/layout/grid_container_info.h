@@ -111,7 +111,7 @@ public:
     ACE_FORCE_EXPORT GridSizeType GetSizeType() const;
     ACE_FORCE_EXPORT int32_t GetColumns() const;
     ACE_FORCE_EXPORT Dimension ACE_EXPORT GetGutterWidth() const;
-    Dimension GetMarginLeft() const;
+    ACE_FORCE_EXPORT Dimension GetMarginLeft() const;
     Dimension GetMarginRight() const;
     void SetGutterWidth(const Dimension& gutterWidth)
     {
@@ -136,7 +136,7 @@ public:
      * Use system screen width build column width.
      */
     void ACE_EXPORT BuildColumnWidth();
-    void BuildColumnWidth(double width);
+    ACE_FORCE_EXPORT void BuildColumnWidth(double width);
 
 private:
     GridContainerInfo() = default;

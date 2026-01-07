@@ -84,8 +84,6 @@ template("bridge_common") {
         "dom/dom_select.cpp",
         "dom/dom_stepper.cpp",
         "dom/dom_stepper_item.cpp",
-        "dom/dom_tool_bar.cpp",
-        "dom/dom_tool_bar_item.cpp",
       ]
     }
 
