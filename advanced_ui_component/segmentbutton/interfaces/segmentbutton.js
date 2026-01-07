@@ -491,6 +491,7 @@ let SegmentButtonOptions = (SegmentButtonOptions_1 = class SegmentButtonOptions 
       borderRadiusMode: options.borderRadiusMode,
       backgroundBorderRadius: options.backgroundBorderRadius,
       itemBorderRadius: options.itemBorderRadius,
+      backgroundSystemMaterial: options.backgroundSystemMaterial,
     });
   }
 });
