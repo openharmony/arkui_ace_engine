@@ -1593,7 +1593,7 @@ export class TypeChecker {
     static isKeyboardOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof KeyboardOptions
     }
-    static isKeyEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean): boolean {
+    static isKeyEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean): boolean {
         return value instanceof KeyEvent
     }
     static isKeyframeAnimateParam(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
@@ -1917,7 +1917,7 @@ export class TypeChecker {
     static isMouseButton(value: Object | string | number | undefined): boolean {
         return value instanceof MouseButton
     }
-    static isMouseEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean): boolean {
+    static isMouseEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean): boolean {
         return value instanceof MouseEvent
     }
     static isMultiAppMode(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {

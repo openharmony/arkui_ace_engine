@@ -955,10 +955,10 @@ export interface KeyEvent {
     deviceId: int32
     metaKey: int32
     timestamp: int64
-    stopPropagation: (() => void)
     intentionCode: IntentionCode
     getModifierKeyState?: ModifierKeyStateGetter | undefined
     unicode?: int64 | undefined
+    stopPropagation(): void
 }
 export class KeyEventInternal implements MaterializedBase,KeyEvent {
     peer?: Finalizable | undefined = undefined
@@ -1007,12 +1007,6 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     set timestamp(timestamp: int64) {
         this.setTimestamp(timestamp)
     }
-    get stopPropagation(): (() => void) {
-        return this.getStopPropagation()
-    }
-    set stopPropagation(stopPropagation: (() => void)) {
-        this.setStopPropagation(stopPropagation)
-    }
     get intentionCode(): IntentionCode {
         return this.getIntentionCode()
     }
@@ -1053,6 +1047,10 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     }
     public static fromPtr(ptr: KPointer): KeyEventInternal {
         return new KeyEventInternal(ptr)
+    }
+    public stopPropagation(): void {
+        this.stopPropagation_serialize()
+        return
     }
     private getType(): KeyType {
         return this.getType_serialize()
@@ -1110,14 +1108,6 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         this.setTimestamp_serialize(timestamp_casted)
         return
     }
-    private getStopPropagation(): (() => void) {
-        return this.getStopPropagation_serialize()
-    }
-    private setStopPropagation(stopPropagation: (() => void)): void {
-        const stopPropagation_casted = stopPropagation as ((() => void))
-        this.setStopPropagation_serialize(stopPropagation_casted)
-        return
-    }
     private getIntentionCode(): IntentionCode {
         return this.getIntentionCode_serialize()
     }
@@ -1141,6 +1131,9 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         const unicode_casted = unicode as (int64 | undefined)
         this.setUnicode_serialize(unicode_casted)
         return
+    }
+    stopPropagation_serialize(): void {
+        ArkUIGeneratedNativeModule._KeyEvent_stopPropagation(this.peer!.ptr)
     }
     private getType_serialize(): KeyType {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getType(this.peer!.ptr)
@@ -1190,37 +1183,6 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     }
     private setTimestamp_serialize(timestamp: int64): void {
         ArkUIGeneratedNativeModule._KeyEvent_setTimestamp(this.peer!.ptr, timestamp)
-    }
-    private getStopPropagation_serialize(): (() => void) {
-        const retval = ArkUIGeneratedNativeModule._KeyEvent_getStopPropagation(this.peer!.ptr)
-        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType = retvalDeserializer.readInt8().toInt()
-        let buffer: (() => void) | undefined = undefined
-        
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_BufResource: CallbackResource = retvalDeserializer.readCallbackResource()
-            const buffer_BufCall: KPointer = retvalDeserializer.readPointer()
-            const buffer_BufCallSync: KPointer = retvalDeserializer.readPointer()
-            
-            buffer = (): void => {
-                const buffer_BufArgsSerializer: SerializerBase = SerializerBase.hold();
-                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
-                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
-                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
-                buffer_BufArgsSerializer.release();
-                return;
-            }
-        }
-        
-        const returnResult: (() => void) = (buffer || (() => {})) as (() => void);
-        return returnResult;
-    }
-    private setStopPropagation_serialize(stopPropagation: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._KeyEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
     }
     private getIntentionCode_serialize(): IntentionCode {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getIntentionCode(this.peer!.ptr)
@@ -25418,12 +25380,12 @@ export interface MouseEvent extends BaseEvent {
     windowY: double
     x: double
     y: double
-    stopPropagation: (() => void)
     rawDeltaX?: double | undefined
     rawDeltaY?: double | undefined
     pressedButtons?: Array<MouseButton> | undefined
     globalDisplayX?: double | undefined
     globalDisplayY?: double | undefined
+    stopPropagation(): void
 }
 export class MouseEventInternal extends BaseEventInternal implements MaterializedBase,MouseEvent {
     get button(): MouseButton {
@@ -25473,12 +25435,6 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     }
     set y(y: double) {
         this.setY(y)
-    }
-    get stopPropagation(): (() => void) {
-        return this.getStopPropagation()
-    }
-    set stopPropagation(stopPropagation: (() => void)) {
-        this.setStopPropagation(stopPropagation)
     }
     get rawDeltaX(): double | undefined {
         return this.getRawDeltaX()
@@ -25530,6 +25486,10 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     }
     public static fromPtr(ptr: KPointer): MouseEventInternal {
         return new MouseEventInternal(ptr)
+    }
+    public stopPropagation(): void {
+        this.stopPropagation_serialize()
+        return
     }
     private getButton(): MouseButton {
         return this.getButton_serialize()
@@ -25595,14 +25555,6 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         this.setY_serialize(y_casted)
         return
     }
-    private getStopPropagation(): (() => void) {
-        return this.getStopPropagation_serialize()
-    }
-    private setStopPropagation(stopPropagation: (() => void)): void {
-        const stopPropagation_casted = stopPropagation as ((() => void))
-        this.setStopPropagation_serialize(stopPropagation_casted)
-        return
-    }
     private getRawDeltaX(): double | undefined {
         return this.getRawDeltaX_serialize()
     }
@@ -25642,6 +25594,9 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         const globalDisplayY_casted = globalDisplayY as (double | undefined)
         this.setGlobalDisplayY_serialize(globalDisplayY_casted)
         return
+    }
+    stopPropagation_serialize(): void {
+        ArkUIGeneratedNativeModule._MouseEvent_stopPropagation(this.peer!.ptr)
     }
     private getButton_serialize(): MouseButton {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getButton(this.peer!.ptr)
@@ -25698,37 +25653,6 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     }
     private setY_serialize(y: double): void {
         ArkUIGeneratedNativeModule._MouseEvent_setY(this.peer!.ptr, y)
-    }
-    private getStopPropagation_serialize(): (() => void) {
-        const retval = ArkUIGeneratedNativeModule._MouseEvent_getStopPropagation(this.peer!.ptr)
-        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType = retvalDeserializer.readInt8().toInt()
-        let buffer: (() => void) | undefined = undefined
-        
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_BufResource: CallbackResource = retvalDeserializer.readCallbackResource()
-            const buffer_BufCall: KPointer = retvalDeserializer.readPointer()
-            const buffer_BufCallSync: KPointer = retvalDeserializer.readPointer()
-            
-            buffer = (): void => {
-                const buffer_BufArgsSerializer: SerializerBase = SerializerBase.hold();
-                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
-                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
-                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
-                buffer_BufArgsSerializer.release();
-                return;
-            }
-        }
-        
-        const returnResult: (() => void) = (buffer || (() => {})) as (() => void);
-        return returnResult;
-    }
-    private setStopPropagation_serialize(stopPropagation: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._MouseEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
     }
     private getRawDeltaX_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getRawDeltaX(this.peer!.ptr)

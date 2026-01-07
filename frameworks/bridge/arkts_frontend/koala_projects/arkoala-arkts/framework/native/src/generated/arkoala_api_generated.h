@@ -28515,6 +28515,7 @@ typedef struct GENERATED_ArkUIKeyEventAccessor {
     void (*destroyPeer)(Ark_KeyEvent peer);
     Ark_KeyEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
+    void (*stopPropagation)(Ark_KeyEvent peer);
     Ark_KeyType (*getType)(Ark_KeyEvent peer);
     void (*setType)(Ark_KeyEvent peer,
                     Ark_KeyType type);
@@ -28536,9 +28537,6 @@ typedef struct GENERATED_ArkUIKeyEventAccessor {
     Ark_Int64 (*getTimestamp)(Ark_KeyEvent peer);
     void (*setTimestamp)(Ark_KeyEvent peer,
                          Ark_Int64 timestamp);
-    Callback_Void (*getStopPropagation)(Ark_KeyEvent peer);
-    void (*setStopPropagation)(Ark_KeyEvent peer,
-                               const Callback_Void* stopPropagation);
     Ark_IntentionCode (*getIntentionCode)(Ark_KeyEvent peer);
     void (*setIntentionCode)(Ark_KeyEvent peer,
                              Ark_IntentionCode intentionCode);
@@ -28799,6 +28797,7 @@ typedef struct GENERATED_ArkUIMouseEventAccessor {
     void (*destroyPeer)(Ark_MouseEvent peer);
     Ark_MouseEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
+    void (*stopPropagation)(Ark_MouseEvent peer);
     Ark_MouseButton (*getButton)(Ark_MouseEvent peer);
     void (*setButton)(Ark_MouseEvent peer,
                       Ark_MouseButton button);
@@ -28823,9 +28822,6 @@ typedef struct GENERATED_ArkUIMouseEventAccessor {
     Ark_Float64 (*getY)(Ark_MouseEvent peer);
     void (*setY)(Ark_MouseEvent peer,
                  Ark_Float64 y);
-    Callback_Void (*getStopPropagation)(Ark_MouseEvent peer);
-    void (*setStopPropagation)(Ark_MouseEvent peer,
-                               const Callback_Void* stopPropagation);
     Opt_Float64 (*getRawDeltaX)(Ark_MouseEvent peer);
     void (*setRawDeltaX)(Ark_MouseEvent peer,
                          const Opt_Float64* rawDeltaX);

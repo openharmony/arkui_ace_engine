@@ -4847,6 +4847,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _KeyEvent_getFinalizer(): KPointer
     @ani.unsafe.Direct
+    native static _KeyEvent_stopPropagation(ptr: KPointer): void
+    @ani.unsafe.Direct
     native static _KeyEvent_getType(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _KeyEvent_setType(ptr: KPointer, type: KInt): void
@@ -4874,10 +4876,6 @@ export class ArkUIGeneratedNativeModule {
     native static _KeyEvent_getTimestamp(ptr: KPointer): int64
     @ani.unsafe.Direct
     native static _KeyEvent_setTimestamp(ptr: KPointer, timestamp: KLong): void
-    @ani.unsafe.Quick
-    native static _KeyEvent_getStopPropagation(ptr: KPointer): KInteropReturnBuffer
-    @ani.unsafe.Direct
-    native static _KeyEvent_setStopPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _KeyEvent_getIntentionCode(ptr: KPointer): int32
     @ani.unsafe.Direct
@@ -5116,6 +5114,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _MouseEvent_getFinalizer(): KPointer
     @ani.unsafe.Direct
+    native static _MouseEvent_stopPropagation(ptr: KPointer): void
+    @ani.unsafe.Direct
     native static _MouseEvent_getButton(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _MouseEvent_setButton(ptr: KPointer, button: KInt): void
@@ -5147,10 +5147,6 @@ export class ArkUIGeneratedNativeModule {
     native static _MouseEvent_getY(ptr: KPointer): double
     @ani.unsafe.Direct
     native static _MouseEvent_setY(ptr: KPointer, y: KDouble): void
-    @ani.unsafe.Quick
-    native static _MouseEvent_getStopPropagation(ptr: KPointer): KInteropReturnBuffer
-    @ani.unsafe.Direct
-    native static _MouseEvent_setStopPropagation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _MouseEvent_getRawDeltaX(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
