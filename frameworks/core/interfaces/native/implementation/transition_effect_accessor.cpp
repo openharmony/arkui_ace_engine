@@ -73,7 +73,7 @@ Ark_TransitionEffect Construct4Impl(const Ark_RotateOptions* effect)
 {
     CHECK_NULL_RETURN(effect, nullptr);
     TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
-    auto defaultDimension = Dimension(50.0f, DimensionUnit::PERCENT);
+    auto defaultDimension = Dimension(0.5f, DimensionUnit::PERCENT);
     auto x = Converter::OptConvert<float>(effect->x.value).value_or(0);
     auto y = Converter::OptConvert<float>(effect->y.value).value_or(0);
     auto z = Converter::OptConvert<float>(effect->z.value).value_or(0);
