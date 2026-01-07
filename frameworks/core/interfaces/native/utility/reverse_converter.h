@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_REVERSE_CONVERTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_REVERSE_CONVERTER_H
 
+#include "ui/base/macros.h"
 #pragma once
 
 // SORTED_SECTION
@@ -297,7 +298,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_CrownAction& dst, const CrownAction& src);
     void AssignArkValue(Ark_Color& dst, const Color& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
-    void AssignArkValue(Ark_Date& dst, const std::string& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_Date& dst, const std::string& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Dimension& dst, const Dimension& src, ConvContext *ctx);
     void AssignArkValue(Ark_Dimension& dst, const char* src);
     void AssignArkValue(Ark_Dimension& dst, const float& src);
@@ -448,7 +449,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextVerticalAlign& dst, const TextVerticalAlign& src);
     void AssignArkValue(Ark_TextVerticalAlign& dst, const int32_t& src);
     void AssignArkValue(Ark_ThreatType& dst, const ThreatType& src);
-    void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src);
     void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src);
     void AssignArkValue(Ark_TouchType& dst, const TouchType& src);
     void AssignArkValue(Ark_TransitionEdge& dst, const TransitionEdge& src);

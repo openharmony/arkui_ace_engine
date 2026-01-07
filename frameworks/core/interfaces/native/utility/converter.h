@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -133,7 +133,7 @@ namespace Converter {
     constexpr double PERCENT_100 = 100.0;
 
     template<typename To, typename From>
-    To Convert(const From& src);
+    ACE_FORCE_EXPORT To Convert(const From& src);
     template<typename To, typename From>
     std::optional<To> OptConvert(const From& value);
 
@@ -192,7 +192,7 @@ namespace Converter {
     }
 
     template<typename To, typename From>
-    To Convert(const From& src)
+    ACE_FORCE_EXPORT To Convert(const From& src)
     {
         To result;
         AssignTo(result, src);
@@ -270,7 +270,7 @@ namespace Converter {
     }
 
     template<typename T>
-    void AssignCast(std::optional<T>& dst, const Ark_Undefined&)
+    ACE_FORCE_EXPORT void AssignCast(std::optional<T>& dst, const Ark_Undefined&)
     {
         dst = std::nullopt;
     }
@@ -576,7 +576,7 @@ namespace Converter {
     template<> Ark_CharPtr Convert(const Ark_Function& src);
     template<> Ark_CharPtr Convert(const Ark_Undefined& src);
     template<> BlurOption Convert(const Ark_BlurOptions& src);
-    template<> BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src);
+    template<> ACE_FORCE_EXPORT BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src);
     template<> BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src);
     template<> bool Convert(const Ark_LineSpacingOptions& src);
     template<> BorderColorProperty Convert(const Ark_EdgeColors& src);
@@ -609,7 +609,7 @@ namespace Converter {
     template<> BorderWidthProperty Convert(const Ark_String& src);
     template<> ButtonInfo Convert(const Ark_AlertDialogButtonBaseOptions& src);
     template<> ButtonInfo Convert(const Ark_AlertDialogButtonOptions& src);
-    template<> ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src);
+    template<> ACE_FORCE_EXPORT ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src);
     template<> CalcDimension Convert(const Ark_Float64& src);
     template<> CalcDimension Convert(const Ark_LengthMetrics& src);
     template<> CalcDimension Convert(const Ark_Number& src);
@@ -630,13 +630,13 @@ namespace Converter {
     template<> Dimension Convert(const Ark_LengthMetrics& src);
     template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_Number& src);
     template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_String& src);
-    template<> DimensionOffset Convert(const Ark_Offset& src);
+    template<> ACE_FORCE_EXPORT DimensionOffset Convert(const Ark_Offset& src);
     template<> DimensionOffset Convert(const Ark_Position& src);
-    template<> DimensionRect Convert(const Ark_Rectangle &src);
+    template<> ACE_FORCE_EXPORT DimensionRect Convert(const Ark_Rectangle &src);
     template<> DragPreviewOption Convert(const Ark_DragPreviewOptions &src);
     template<> EdgesParam Convert(const Ark_Edges& src);
     template<> EdgesParam Convert(const Ark_LocalizedEdges& src);
-    template<> EffectOption Convert(const Ark_BackgroundEffectOptions& src);
+    template<> ACE_FORCE_EXPORT EffectOption Convert(const Ark_BackgroundEffectOptions& src);
     template<> EventLocationInfo Convert(const Ark_EventLocationInfo& src);
     template<> EventTarget Convert(const Ark_EventTarget& src);
     template<> FingerInfo Convert(const Ark_FingerInfo& src);
@@ -697,7 +697,7 @@ namespace Converter {
     template<> PickerRangeType Convert(const Array_TextPickerRangeContent& src);
     template<> PickerSelectedType Convert(const Ark_Int32& src);
     template<> PickerSelectedType Convert(const Array_Int32& src);
-    template<> PickerTextStyle Convert(const Ark_PickerTextStyle& src);
+    template<> ACE_FORCE_EXPORT PickerTextStyle Convert(const Ark_PickerTextStyle& src);
     template<> PickerTextStyle Convert(const Ark_TextPickerTextStyle& src);
     template<> PickerTime Convert(const Ark_TimePickerResult& src);
     template<> PickerValueType Convert(const Ark_Resource& src);
@@ -811,7 +811,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<BlendApplyType>& dst, const Ark_BlendApplyType& src);
     template<> void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src);
     template<> void AssignCast(std::optional<BlurOnKeyboardHideMode>& dst, const Ark_BlurOnKeyboardHideMode& src);
-    template<> void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src);
     template<> void AssignCast(std::optional<BlurStyleActivePolicy>& dst, const Ark_BlurStyleActivePolicy& src);
     template<> void AssignCast(std::optional<BlurStyleOption>& dst, const Ark_BlurStyle& src);
     template<> void AssignCast(std::optional<BorderImageRepeat>& dst, const Ark_RepeatMode& src);
@@ -834,11 +834,11 @@ namespace Converter {
     template<> void AssignCast(std::optional<ContentClipMode>& dst, const Ark_ContentClipMode& src);
     template<> void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src);
     template<> void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
-    template<> void AssignCast(std::optional<CrownSensitivity>& dst, const Ark_CrownSensitivity& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<CrownSensitivity>& dst, const Ark_CrownSensitivity& src);
     template<> void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src);
     template<> void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DateTimeType>& dst, const Ark_intl_DateTimeOptions& src);
-    template<> void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src);
     template<> void AssignCast(std::optional<DialogButtonDirection>& dst, const Ark_DialogButtonDirection& src);
     template<> void AssignCast(std::optional<DialogButtonStyle>& dst, const Ark_DialogButtonStyle& src);
     template<> void AssignCast(std::optional<Dimension>& dst, const Ark_ArrowPointPosition& src);
@@ -881,7 +881,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<HapticFeedbackMode>& dst, const Ark_HapticFeedbackMode& src);
     template<> void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src);
     template<> void AssignCast(std::optional<HoverEffectType>& dst, const Ark_HoverEffect& src);
-    template<> void AssignCast(std::optional<HoverModeAreaType>& dst, const Ark_HoverModeAreaType& src);
+    template<>
+    ACE_FORCE_EXPORT void AssignCast(std::optional<HoverModeAreaType>& dst, const Ark_HoverModeAreaType& src);
     template<> void AssignCast(std::optional<ImageAnalyzerType>& dst, const Ark_ImageAnalyzerType& src);
     template<> void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageAnalyzerType& src);
     template<> void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageFit& src);
@@ -935,9 +936,9 @@ namespace Converter {
     template<> void AssignCast(std::optional<ParticleDisturbanceShapeType>& dst, const Ark_DisturbanceFieldShape& src);
     template<> void AssignCast(std::optional<ParticleEmitterShape>& dst, const Ark_ParticleEmitterShape& src);
     template<> void AssignCast(std::optional<ParticleType>& dst, const Ark_ParticleType& src);
-    template<> void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src);
     template<> void AssignCast(std::optional<PickerIndicatorType>& dst, const Ark_PickerIndicatorType& src);
-    template<> void AssignCast(std::optional<PickerTime>& dst, const Ark_Date& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<PickerTime>& dst, const Ark_Date& src);
     template<> void AssignCast(std::optional<Placement>& dst, const Ark_Placement& src);
     template<> void AssignCast(std::optional<PopupLinearGradientProperties>& dst, const Ark_PopupBorderLinearGradient& src);
     template<> void AssignCast(std::optional<PresetFillType>& dst, const Ark_PresetFillType& src);
@@ -956,7 +957,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src);
     template<> void AssignCast(std::optional<SelectionMenuType>& dst, const Ark_MenuType& src);
     template<> void AssignCast(std::optional<SessionType>& dst, const Ark_EmbeddedType& src);
-    template<> void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src);
     template<> void AssignCast(std::optional<ShadowColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<ShadowStyle>& dst, const Ark_ShadowStyle& src);
     template<> void AssignCast(std::optional<ShadowType>& dst, const Ark_ShadowType& src);
@@ -1005,7 +1006,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<TextSpanType>& dst, const Ark_RichEditorSpanType& src);
     template<> void AssignCast(std::optional<TextSpanType>& dst, const Ark_TextSpanType& src);
     template<> void AssignCast(std::optional<ThemeColorMode>& dst, const Ark_ThemeColorMode& src);
-    template<> void AssignCast(std::optional<TimePickerFormat>& dst, const Ark_TimePickerFormat& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<TimePickerFormat>& dst, const Ark_TimePickerFormat& src);
     template<> void AssignCast(std::optional<ToggleType>& dst, const Ark_ToggleType& src);
     template<> void AssignCast(std::optional<TouchType>& dst, const Ark_TouchType& src);
     template<> void AssignCast(std::optional<TransitionEdge>& dst, const Ark_TransitionEdge& src);

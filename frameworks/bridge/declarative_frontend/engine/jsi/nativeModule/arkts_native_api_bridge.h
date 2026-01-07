@@ -81,7 +81,6 @@ private:
     static void RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterAlphabetIndexerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterTimepickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDataPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

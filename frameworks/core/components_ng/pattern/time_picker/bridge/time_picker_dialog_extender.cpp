@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/time_picker/bridge/time_picker_dialog_extender.h"
+
 #include <functional>
 #include <utility>
-
-#include "arkoala_api_generated.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/picker/picker_model.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "frameworks/core/interfaces/native/implementation/time_picker_dialog_extender.h"
 
 namespace OHOS::Ace::NG {
 namespace TimePickerDialogExtender {
@@ -33,8 +33,7 @@ std::optional<PickerTime> ProcessBindableTimeSelected(const Opt_Union_Date_Binda
 {
     std::optional<PickerTime> result;
     Converter::VisitUnion(
-        value,
-        [&result](const Ark_Date& src) { result = Converter::OptConvert<PickerTime>(src); },
+        value, [&result](const Ark_Date& src) { result = Converter::OptConvert<PickerTime>(src); },
         [&result](const Ark_Bindable_Date& src) {
             result = Converter::OptConvert<PickerTime>(src.value);
             // Implement callback functionality
@@ -46,8 +45,7 @@ std::optional<PickerDate> ProcessBindableDateSelected(const Opt_Union_Date_Binda
 {
     std::optional<PickerDate> result;
     Converter::VisitUnion(
-        value,
-        [&result](const Ark_Date& src) { result = Converter::OptConvert<PickerDate>(src); },
+        value, [&result](const Ark_Date& src) { result = Converter::OptConvert<PickerDate>(src); },
         [&result](const Ark_Bindable_Date& src) {
             result = Converter::OptConvert<PickerDate>(src.value);
             // Implement callback functionality

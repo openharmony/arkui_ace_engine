@@ -92,6 +92,7 @@ public:
     static void PreloadAceModuleForCustomRuntime(void* runtime);
     static void RemoveInvalidEnv(void* env);
     static void PreloadAceModuleWorker(void* runtime);
+    static void PreLoadArkuiModule(const shared_ptr<JsRuntime>& runtime);
     // crossPlatform Resets the module pre-load flag
     static void ResetModulePreLoadFlag();
     // crossPlatform Prepares for resetting the module pre-load flag

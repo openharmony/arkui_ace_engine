@@ -16,8 +16,12 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H
 
+#include "ark_native_engine.h"
+#include "ecmascript/cross_vm/jsnapi_expo_hybrid.h"
+#include "jsnapi_expo.h"
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -69,6 +73,8 @@ public:
     static bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
         RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo);
+    static bool ParseJsColor(
+        const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& color,
         std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
@@ -415,6 +421,7 @@ public:
     static NodeInfo MakeNativeNodeInfo(ArkUINodeHandle node);
     static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
         Color& color, bool state, const NodeInfo& nodeInfo);
+    static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj, Color& color, bool state);
     static bool ParseContentTransitionEffect(
         const EcmaVM* vm, const Local<JSValueRef>& value, ContentTransitionType& contentTransitionType);
     static bool GetResourceId(
@@ -425,6 +432,25 @@ public:
     static void ParseMarginOrPaddingCorner(const EcmaVM* vm, const Local<JSValueRef>& value,
         std::optional<CalcDimension>& top, std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left,
         std::optional<CalcDimension>& right);
+    static void ParseShadowOffsetXY(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Shadow& shadow);
+    static void ParseShadowPropsUpdate(
+        const EcmaVM* vm, const Local<JSValueRef>& jsObj, double& radius, Shadow& shadow);
+    static bool GetShadowFromTheme(
+        const EcmaVM* vm, ShadowStyle shadowStyle, Shadow& shadow, const bool configChangePerform);
+    static bool ParseJsShadowColorStrategy(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, ShadowColorStrategy& strategy);
+    static bool ParseShadowProps(const EcmaVM* vm, const Local<JSValueRef>& jsValue, Shadow& shadow,
+        const bool configChangePerform = false, bool needResObj = false);
+    static void ParseBlurStyleOption(const EcmaVM* vm, const Local<JSValueRef>& jsOption, BlurStyleOption& styleOption);
+    static void ParseEffectOption(const EcmaVM* vm, const Local<JSValueRef>& jsOption, EffectOption& effectOption);
+    static void GetEffectOptionColor(const EcmaVM* vm, const Local<JSValueRef>& jsOption, EffectOption& effectOption);
+    static void GetEffectOptionInactiveColorUpdate(
+        const RefPtr<ResourceObject>& inactiveColorObj, EffectOption& effectOption);
+    static void GetEffectOptionInactiveColor(
+        const EcmaVM* vm, const Local<JSValueRef>& jsOption, EffectOption& effectOption);
+    static void ParseBlurOption(const EcmaVM* vm, const Local<JSValueRef>& jsBlurOption, BlurOption& blurOption);
+    static void ParseInactiveColor(const EcmaVM* vm, const Local<JSValueRef>& jsOption, BlurStyleOption& styleOption);
+    static void JsOpacity(const EcmaVM* vm, const Local<JSValueRef>& jsOpacity);
     static bool HasProperty(const EcmaVM* vm, const Local<panda::ObjectRef>& obj, const std::string& propertyName);
     static Local<JSValueRef> GetProperty(
         const EcmaVM* vm, const Local<panda::ObjectRef>& obj, const std::string& propertyName);
@@ -453,6 +479,9 @@ public:
     static bool IsJsView(const EcmaVM* vm, const Local<JSValueRef>& value);
     static bool GetNativeNode(const EcmaVM* vm, const Local<JSValueRef>& value, ArkUINodeHandle& nativeNode);
 
+    template<typename T>
+    static T GetPropertyValue(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t propertyIndex, T defaultValue);
 private:
     static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);
 };

@@ -15,9 +15,12 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
+#include "ark_native_engine.h"
 #include "arkts_utils.h"
 #include "ecmascript/napi/include/jsnapi.h"
 #include "jsnapi_expo.h"
+#include "native_engine.h"
+#include "ui/base/utils/utils.h"
 
 #include "base/utils/utils.h"
 #include "base/i18n/localization.h"
@@ -33,6 +36,7 @@
 #include "frameworks/core/common/resource/resource_configuration.h"
 #include "frameworks/core/common/resource/resource_parse_utils.h"
 #include "frameworks/core/components/text_overlay/text_overlay_theme.h"
+#include "frameworks/core/components/theme/shadow_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -274,6 +278,49 @@ void ArkTSUtils::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
     resObj->SetColor((colorMode == ColorMode::DARK) ? curColor : color);
 }
 
+void ArkTSUtils::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj, Color& color, bool state)
+{
+    if (!state || !SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto node = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+    CHECK_NULL_VOID(node);
+
+    auto instanceId = Container::CurrentIdSafely();
+    auto nodeTag = node->GetTag();
+    auto invertFunc = ColorInverter::GetInstance().GetInvertFunc(instanceId, nodeTag);
+    CHECK_NULL_VOID(invertFunc);
+
+    auto localColorMode = node->GetLocalColorMode();
+    if (localColorMode == ColorMode::LIGHT) {
+        resObj = nullptr;
+        return;
+    }
+    bool hasDarkRes = CheckDarkResource(resObj);
+    if (localColorMode == ColorMode::DARK) {
+        if (!hasDarkRes) {
+            color = Color(invertFunc(color.GetValue()));
+        }
+        resObj = nullptr;
+        return;
+    }
+    auto colorMode = Container::CurrentColorMode();
+    Color curColor = color;
+    if ((colorMode == ColorMode::DARK) && !hasDarkRes) {
+        color = Color(invertFunc(color.GetValue()));
+    }
+    if (!resObj) {
+        resObj = AceType::MakeRefPtr<ResourceObject>();
+        resObj->SetIsResource(false);
+        resObj->SetInstanceId(instanceId);
+    }
+    resObj->SetNodeTag(nodeTag);
+    resObj->SetColorMode(colorMode);
+    resObj->SetHasDarkRes(hasDarkRes);
+    resObj->SetColor(((colorMode == ColorMode::DARK) ? curColor : color));
+}
+
 bool ArkTSUtils::ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result)
 {
     RefPtr<ResourceObject> resourceObject;
@@ -303,6 +350,32 @@ bool ArkTSUtils::ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, 
         }
         state = ParseJsColorFromResource(vm, value, result, resourceObject);
         CompleteResourceObjectFromColor(resourceObject, result, state, nodeInfo);
+        return state;
+    }
+    return state;
+}
+
+bool ArkTSUtils::ParseJsColor(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result, RefPtr<ResourceObject>& resObj)
+{
+    bool state = false;
+    if (jsValue->IsNumber()) {
+        result = Color(ColorAlphaAdapt(jsValue->ToNumber(vm)->Int32Value(vm)));
+        CompleteResourceObjectFromColor(resObj, result, true);
+        return true;
+    }
+    if (jsValue->IsString(vm)) {
+        state = Color::ParseColorString(jsValue->ToString(vm)->ToString(vm), result);
+        CompleteResourceObjectFromColor(resObj, result, state);
+        return state;
+    }
+    if (jsValue->IsObject(vm)) {
+        if (ParseColorMetricsToColor(vm, jsValue, result, resObj)) {
+            CompleteResourceObjectFromColor(resObj, result, true);
+            return true;
+        }
+        state = ParseJsColorFromResource(vm, jsValue, result, resObj);
+        CompleteResourceObjectFromColor(resObj, result, state);
         return state;
     }
     return state;
@@ -739,7 +812,7 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
 bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
     RefPtr<ResourceObject>& resourceObject)
 {
-    auto obj = jsObj ->ToObject(vm);
+    auto obj = jsObj->ToObject(vm);
     auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
     if (!resId->IsNumber()) {
         return false;
@@ -3713,5 +3786,425 @@ bool ArkTSUtils::GetNativeNode(const EcmaVM* vm, const Local<JSValueRef>& value,
     }
 
     return false;
+}
+
+void ArkTSUtils::ParseShadowOffsetXY(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Shadow& shadow)
+{
+    CalcDimension offsetX;
+    RefPtr<ResourceObject> xResObj;
+    if (ArkTSUtils::ParseJsResource(vm, ArkTSUtils::GetProperty(vm, jsObj, "offsetX"), offsetX, xResObj)) {
+        if (SystemProperties::ConfigChangePerform() && xResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& xResObj, Shadow& shadow) {
+                CalcDimension xValue;
+                ResourceParseUtils::ParseResResource(xResObj, xValue);
+                shadow.SetOffsetX(xValue.Value());
+            };
+            shadow.AddResource("shadow.offsetX", xResObj, std::move(updateFunc));
+        }
+        shadow.SetOffsetX(offsetX.Value());
+    } else {
+        if (ParseJsDimensionVp(vm, GetProperty(vm, jsObj, "offsetX"), offsetX)) {
+            shadow.SetOffsetX(offsetX.Value());
+        }
+    }
+    CalcDimension offsetY;
+    RefPtr<ResourceObject> yResObj;
+    auto jsOffsetY = GetProperty(vm, jsObj, static_cast<int32_t>(Framework::ArkUIIndex::OFFSET_Y));
+    if (ParseJsResource(vm, jsOffsetY, offsetY, yResObj)) {
+        if (yResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& yResObj, Shadow& shadow) {
+                CalcDimension yValue;
+                ResourceParseUtils::ParseResResource(yResObj, yValue);
+                shadow.SetOffsetY(yValue.Value());
+            };
+            shadow.AddResource("shadow.offsetY", yResObj, std::move(updateFunc));
+        }
+        shadow.SetOffsetY(offsetY.Value());
+    } else {
+        if (ParseJsDimensionVp(vm, jsOffsetY, offsetY)) {
+            shadow.SetOffsetY(offsetY.Value());
+        }
+    }
+}
+
+void ArkTSUtils::ParseShadowPropsUpdate(
+    const EcmaVM* vm, const Local<JSValueRef>& jsObj, double& radius, Shadow& shadow)
+{
+    if (jsObj->IsUndefined()) {
+        return;
+    }
+    RefPtr<ResourceObject> radiusResObj;
+    ParseJsDouble(
+        vm, GetProperty(vm, jsObj, static_cast<int32_t>(Framework::ArkUIIndex::RADIUS)), radius, radiusResObj);
+    if (SystemProperties::ConfigChangePerform() && radiusResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
+            double radius = 0.0;
+            ResourceParseUtils::ParseResDouble(radiusResObj, radius);
+            if (LessNotEqual(radius, 0.0)) {
+                radius = 0.0;
+            }
+            shadow.SetBlurRadius(radius);
+        };
+        shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
+    }
+}
+
+bool ArkTSUtils::GetShadowFromTheme(
+    const EcmaVM* vm, ShadowStyle shadowStyle, Shadow& shadow, const bool configChangePerform)
+{
+    CHECK_NULL_RETURN(vm, false);
+    ViewAbstractModel::GetInstance()->RemoveResObj("shadowStyle");
+    auto colorMode = Container::CurrentColorMode();
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    if (!shadowTheme) {
+        return false;
+    }
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    if (configChangePerform) {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_RETURN(frameNode, false);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_RETURN(pattern, false);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [shadowStyle, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto colorMode = Container::CurrentColorMode();
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+            if (!shadowTheme) {
+                return;
+            }
+            Shadow shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadow, frameNode);
+        };
+        updateFunc(resObj);
+        pattern->AddResObj("shadowStyle", resObj, std::move(updateFunc));
+        return false;
+    }
+    return true;
+}
+
+bool ArkTSUtils::ParseJsShadowColorStrategy(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, ShadowColorStrategy& strategy)
+{
+    CHECK_NULL_RETURN(vm, false);
+    if (jsValue->IsString(vm)) {
+        std::string colorStr = jsValue->ToString(vm)->ToString(vm);
+        if (colorStr.compare("average") == 0) {
+            strategy = ShadowColorStrategy::AVERAGE;
+            return true;
+        } else if (colorStr.compare("primary") == 0) {
+            strategy = ShadowColorStrategy::PRIMARY;
+            return true;
+        }
+    }
+    return false;
+}
+
+void ArkTSUtils::ParseBlurOption(const EcmaVM* vm, const Local<JSValueRef>& jsBlurOption, BlurOption& blurOption)
+{
+    auto blurOptionProperty = GetProperty(vm, jsBlurOption, "grayscale");
+    if (blurOptionProperty->IsArray(vm)) {
+        Local<panda::ArrayRef> params = blurOptionProperty->ToObject(vm);
+        auto grey1 = panda::ArrayRef::GetValueAt(vm, params, 0)->ToNumber(vm)->Int32Value(vm);
+        auto grey2 = panda::ArrayRef::GetValueAt(vm, params, 1)->ToNumber(vm)->Int32Value(vm);
+        std::vector<float> greyVec(2); // 2 number
+        greyVec[0] = grey1;
+        greyVec[1] = grey2;
+        blurOption.grayscale = greyVec;
+    }
+}
+
+void ArkTSUtils::ParseInactiveColor(const EcmaVM* vm, const Local<JSValueRef>& jsOption, BlurStyleOption& styleOption)
+{
+    RefPtr<ResourceObject> inactiveColorResObj;
+    if (ParseJsColor(vm, GetProperty(vm, jsOption, "inactiveColor"), styleOption.inactiveColor, inactiveColorResObj)) {
+        styleOption.isValidColor = true;
+    }
+
+    if (SystemProperties::ConfigChangePerform() && inactiveColorResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, BlurStyleOption& styleOption) {
+            Color inactiveColorValue;
+            ResourceParseUtils::ParseResColor(resObj, inactiveColorValue);
+            styleOption.inactiveColor = inactiveColorValue;
+            styleOption.isValidColor = true;
+        };
+        styleOption.AddResource(
+            "backgroundBlurStyle.backgroundBlurStyleOptions.inactiveColor", inactiveColorResObj, std::move(updateFunc));
+    }
+}
+
+void ArkTSUtils::ParseBlurStyleOption(const EcmaVM* vm, const Local<JSValueRef>& jsOption, BlurStyleOption& styleOption)
+{
+    if (jsOption->IsUndefined()) {
+        return;
+    }
+    auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
+    ParseJsInt32(vm, GetProperty(vm, jsOption, "colorMode"), colorMode);
+    if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
+        colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
+        styleOption.colorMode = static_cast<ThemeColorMode>(colorMode);
+    }
+    auto adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+    ParseJsInt32(vm, GetProperty(vm, jsOption, "adaptiveColor"), adaptiveColor);
+    if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+        adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+        styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
+    }
+
+    // policy
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    ParseJsInt32(vm, GetProperty(vm, jsOption, "policy"), policy);
+    if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
+        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
+        styleOption.policy = static_cast<BlurStyleActivePolicy>(policy);
+    }
+
+    // blurType
+    auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
+    ParseJsInt32(vm, GetProperty(vm, jsOption, "type"), blurType);
+    if (blurType >= static_cast<int32_t>(BlurType::WITHIN_WINDOW) &&
+        blurType <= static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
+        styleOption.blurType = static_cast<BlurType>(blurType);
+    }
+
+    // inactiveColor
+    ParseInactiveColor(vm, jsOption, styleOption);
+
+    // scale
+    if (GetProperty(vm, jsOption, "scale")->IsNumber()) {
+        double scale = GetProperty(vm, jsOption, "scale")->ToNumber(vm)->Int32Value(vm);
+        styleOption.scale = std::clamp(scale, 0.0, 1.0);
+    }
+
+    if (GetProperty(vm, jsOption, "blurOptions")->IsObject(vm)) {
+        auto jsBlurOption = GetProperty(vm, jsOption, "blurOptions")->ToObject(vm);
+        BlurOption blurOption;
+        ParseBlurOption(vm, jsBlurOption, blurOption);
+        styleOption.blurOption = blurOption;
+    }
+}
+
+void ArkTSUtils::JsOpacity(const EcmaVM* vm, const Local<JSValueRef>& jsOpacity)
+{
+    ViewAbstractModel::GetInstance()->RemoveResObj("viewAbstract.opacity");
+    double opacity = 0.0;
+    RefPtr<ResourceObject> opacityResObj;
+    if (!ParseJsDouble(vm, jsOpacity, opacity, opacityResObj)) {
+        ViewAbstractModel::GetInstance()->SetOpacity(1.0f);
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && opacityResObj) {
+        ViewAbstractModel::GetInstance()->CreateWithOpacityResourceObj(opacityResObj);
+        return;
+    }
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        opacity = std::clamp(opacity, 0.0, 1.0);
+    } else {
+        if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
+            opacity = 1.0;
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetOpacity(opacity);
+}
+
+void ArkTSUtils::GetEffectOptionColor(const EcmaVM* vm, const Local<JSValueRef>& jsOption, EffectOption& effectOption)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        ParseJsColor(vm, GetProperty(vm, jsOption, "color"), effectOption.color);
+    } else {
+        RefPtr<ResourceObject> colorResObj;
+        ParseJsColor(vm, GetProperty(vm, jsOption, "color"), effectOption.color, colorResObj);
+        if (colorResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, EffectOption& effectOption) {
+                Color effectOptionColor;
+                ResourceParseUtils::ParseResColor(colorResObj, effectOptionColor);
+                effectOption.color = effectOptionColor;
+            };
+            effectOption.AddResource("backgroundEffect.color", colorResObj, std::move(updateFunc));
+        }
+    }
+}
+
+void ArkTSUtils::GetEffectOptionInactiveColorUpdate(
+    const RefPtr<ResourceObject>& inactiveColorObj, EffectOption& effectOption)
+{
+    if (inactiveColorObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& inactiveColorObj, EffectOption& effectOption) {
+            Color effectOptionInactiveColor;
+            ResourceParseUtils::ParseResColor(inactiveColorObj, effectOptionInactiveColor);
+            effectOption.inactiveColor = effectOptionInactiveColor;
+        };
+        effectOption.AddResource("backgroundEffect.inactiveColor", inactiveColorObj, std::move(updateFunc));
+    }
+}
+
+void ArkTSUtils::GetEffectOptionInactiveColor(
+    const EcmaVM* vm, const Local<JSValueRef>& jsOption, EffectOption& effectOption)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (ParseJsColor(vm, GetProperty(vm, jsOption, "inactiveColor"), effectOption.inactiveColor)) {
+            effectOption.isValidColor = true;
+        }
+    } else {
+        RefPtr<ResourceObject> inactiveColorObj;
+        if (ParseJsColor(
+                vm, GetProperty(vm, jsOption, "inactiveColor"), effectOption.inactiveColor, inactiveColorObj)) {
+            GetEffectOptionInactiveColorUpdate(inactiveColorObj, effectOption);
+            effectOption.isValidColor = true;
+        }
+    }
+}
+
+void ArkTSUtils::ParseEffectOption(const EcmaVM* vm, const Local<JSValueRef>& jsOption, EffectOption& effectOption)
+{
+    CHECK_NULL_VOID(vm);
+    CalcDimension radius;
+    if (!ParseJsDimensionVp(vm, GetProperty(vm, jsOption, "radius"), radius) || LessNotEqual(radius.Value(), 0.0f)) {
+        radius.SetValue(0.0f);
+    }
+    effectOption.radius = radius;
+
+    double saturation = 1.0f;
+    if (GetProperty(vm, jsOption, "saturation")->IsNumber()) {
+        saturation = GetProperty(vm, jsOption, "saturation")->ToNumber(vm)->Value();
+        saturation = (saturation > 0.0f || NearZero(saturation)) ? saturation : 1.0f;
+    }
+    effectOption.saturation = saturation;
+
+    double brightness = 1.0f;
+    if (GetProperty(vm, jsOption, "brightness")->IsNumber()) {
+        brightness = GetProperty(vm, jsOption, "brightness")->ToNumber(vm)->Int32Value(vm);
+        brightness = (brightness > 0.0f || NearZero(brightness)) ? brightness : 1.0f;
+    }
+    effectOption.brightness = brightness;
+
+    GetEffectOptionColor(vm, jsOption, effectOption);
+
+    auto adaptiveColorValue = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+    auto adaptiveColor = AdaptiveColor::DEFAULT;
+    ParseJsInt32(vm, GetProperty(vm, jsOption, "adaptiveColor"), adaptiveColorValue);
+    if (adaptiveColorValue >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+        adaptiveColorValue <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+        adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorValue);
+    }
+    effectOption.adaptiveColor = adaptiveColor;
+
+    // policy
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    ParseJsInt32(vm, GetProperty(vm, jsOption, "policy"), policy);
+    if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
+        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
+        effectOption.policy = static_cast<BlurStyleActivePolicy>(policy);
+    }
+
+    // blurType
+    auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
+    ParseJsInt32(vm, GetProperty(vm, jsOption, "type"), blurType);
+    if (blurType >= static_cast<int32_t>(BlurType::WITHIN_WINDOW) &&
+        blurType <= static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
+        effectOption.blurType = static_cast<BlurType>(blurType);
+    }
+
+    // inactiveColor
+    GetEffectOptionInactiveColor(vm, jsOption, effectOption);
+
+    BlurOption blurOption;
+    if (GetProperty(vm, jsOption, "blurOptions")->IsObject(vm)) {
+        auto jsBlurOption = GetProperty(vm, jsOption, "blurOptions")->ToString(vm);
+        ParseBlurOption(vm, jsBlurOption, blurOption);
+        effectOption.blurOption = blurOption;
+    }
+}
+
+template<typename T>
+T ArkTSUtils::GetPropertyValue(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t propertyIndex, T defaultValue)
+{
+    static_assert(
+        !std::is_const_v<T> && !std::is_reference_v<T>, "Cannot convert value to reference or cv-qualified types!");
+
+    Local<panda::StringRef> stringRef = panda::ExternalStringCache::GetCachedString(vm, propertyIndex);
+    auto jsObj = jsValue->ToObject(vm);
+    Local<JSValueRef> valueRef = jsObj->Get(vm, stringRef);
+    if constexpr (std::is_same<T, bool>::value) {
+        return valueRef->IsBoolean() ? valueRef->BooleaValue(vm) : defaultValue;
+    } else if constexpr (std::is_arithmetic<T>::value) {
+        return valueRef->IsNumber() ? Framework::JsiValueConvertor::fromJsiValue<T>(vm, valueRef) : defaultValue;
+    } else if constexpr (std::is_same_v<T, std::string>) {
+        return valueRef->IsString(vm) ? valueRef->ToString(vm)->ToString(vm) : defaultValue;
+    } else {
+        LOGW("Get property value failed.");
+    }
+    return defaultValue;
+}
+
+bool ArkTSUtils::ParseShadowProps(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, Shadow& shadow, const bool configChangePerform, bool needResObj)
+{
+    CHECK_NULL_RETURN(vm, false);
+    int32_t shadowStyle = 0;
+    if (ArkTSUtils::ParseJsIntegerWithResource(vm, jsValue, shadowStyle)) {
+        auto style = static_cast<ShadowStyle>(shadowStyle);
+        return GetShadowFromTheme(vm, style, shadow, configChangePerform);
+    }
+    if (!jsValue->IsObject(vm)) {
+        return false;
+    }
+    auto jsObj = jsValue->ToObject(vm);
+    double radius = 0.0;
+    ParseShadowPropsUpdate(vm, jsObj, radius, shadow);
+    if (LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
+    }
+    shadow.SetBlurRadius(radius);
+    ParseShadowOffsetXY(vm, jsObj, shadow);
+
+    Color color;
+    ShadowColorStrategy shadowColorStrategy;
+    auto jsColor = ArkTSUtils::GetProperty(vm, jsObj, static_cast<int32_t>(Framework::ArkUIIndex::COLOR));
+    RefPtr<ResourceObject> colorResObj;
+    if (ParseJsShadowColorStrategy(vm, jsColor, shadowColorStrategy)) {
+        shadow.SetShadowColorStrategy(shadowColorStrategy);
+    } else if (ArkTSUtils::ParseJsColor(vm, jsColor, color, colorResObj)) {
+        if (needResObj && colorResObj) {
+            auto jsObj = jsColor->ToObject(vm);
+            CompleteResourceObject(vm, jsObj);
+            colorResObj = GetResourceObject(vm, jsObj);
+        }
+        if ((SystemProperties::ConfigChangePerform() || needResObj) && colorResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, Shadow& shadow) {
+                Color colorValue;
+                ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+                shadow.SetColor(colorValue);
+            };
+            shadow.AddResource("shadow.colorValue", colorResObj, std::move(updateFunc));
+        }
+        shadow.SetColor(color);
+    }
+
+    int32_t type = static_cast<int32_t>(ShadowType::COLOR);
+    ArkTSUtils::ParseJsIntegerWithResource(
+        vm, ArkTSUtils::GetProperty(vm, jsObj, static_cast<int32_t>(Framework::ArkUIIndex::TYPE)), type);
+    if (type != static_cast<int32_t>(ShadowType::BLUR)) {
+        type = static_cast<int32_t>(ShadowType::COLOR);
+    }
+    shadow.SetShadowType(static_cast<ShadowType>(type));
+    bool isFilled = GetPropertyValue<bool>(vm, jsObj, static_cast<int32_t>(Framework::ArkUIIndex::FILL), false);
+    shadow.SetIsFilled(isFilled);
+    return true;
 }
 } // namespace OHOS::Ace::NG

@@ -50,6 +50,7 @@ arkui_modules = [
   "radio",
   "slider",
   "hyperlink",
+  "timepicker",
 ]
 
 if (qrcodegen_support) {

@@ -457,13 +457,11 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSPolyline::JSBind(globalObj);
     JSEllipse::JSBind(globalObj);
     JSTextPicker::JSBind(globalObj);
-    JSTimePicker::JSBind(globalObj);
     JSDatePicker::JSBind(globalObj);
     JSContainerPicker::JSBind(globalObj);
     JSPageTransition::JSBind(globalObj);
 #ifndef ARKUI_WEARABLE
     JSTextPickerDialog::JSBind(globalObj);
-    JSTimePickerDialog::JSBind(globalObj);
     JSDatePickerDialog::JSBind(globalObj);
 #endif
     JSIndexer::JSBind(globalObj);
