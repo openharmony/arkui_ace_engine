@@ -2875,6 +2875,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setCompositingFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setMaterialFilterAttribute(value: uiEffect.Filter | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            uiEffect_Filter_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setMaterialFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOpacityAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -3693,6 +3705,18 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setUseEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setUseUnionEffectAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setUseUnionEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setRenderGroupAttribute(value: boolean | undefined): void {
@@ -7695,6 +7719,9 @@ export interface CommonMethod {
     compositingFilter(value: uiEffect.Filter | undefined): this {
         throw new Error("Unimplemented method compositingFilter")
     }
+    materialFilter(value: uiEffect.Filter | undefined): this {
+        throw new Error("Unimplemented method materialFilter")
+    }
     opacity(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method opacity")
     }
@@ -7855,6 +7882,9 @@ export interface CommonMethod {
     }
     useEffect(value: boolean | undefined): this {
         throw new Error("Unimplemented method useEffect")
+    }
+    useUnionEffect(value: boolean | undefined): this {
+        throw new Error("Unimplemented method useUnionEffect")
     }
     renderGroup(value: boolean | undefined): this {
         throw new Error("Unimplemented method renderGroup")
@@ -8307,6 +8337,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     backgroundFilter_value?: uiEffect.Filter | undefined
     foregroundFilter_value?: uiEffect.Filter | undefined
     compositingFilter_value?: uiEffect.Filter | undefined
+    materialFilter_value?: uiEffect.Filter | undefined
     opacity_value?: double | Resource | undefined
     border_value?: BorderOptions | undefined
     borderStyle_value?: BorderStyle | EdgeStyles | undefined
@@ -8357,6 +8388,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     hueRotate_value?: double | string | undefined
     useShadowBatching_value?: boolean | undefined
     useEffect_value?: boolean | undefined
+    useUnionEffect_value?: boolean | undefined
     renderGroup_value?: boolean | undefined
     freeze_value?: boolean | undefined
     translate_value?: TranslateOptions | undefined
@@ -8520,6 +8552,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
     compositingFilter(value: uiEffect.Filter | undefined): this {
         return this
     }
+    materialFilter(value: uiEffect.Filter | undefined): this {
+        return this
+    }
     opacity(value: double | Resource | undefined): this {
         return this
     }
@@ -8677,6 +8712,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     useEffect(value: boolean | undefined): this {
+        return this
+    }
+    useUnionEffect(value: boolean | undefined): this {
         return this
     }
     renderGroup(value: boolean | undefined): this {
@@ -9712,6 +9750,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public materialFilter(value: uiEffect.Filter | undefined): this {
+        if (this.checkPriority("materialFilter")) {
+            const value_casted = value as (uiEffect.Filter | undefined)
+            this.getPeer()?.setMaterialFilterAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public opacity(value: double | Resource | undefined): this {
         if (this.checkPriority("opacity")) {
             const value_casted = value as (double | Resource | undefined)
@@ -10136,6 +10182,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("useEffect")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setUseEffect0Attribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public useUnionEffect(value: boolean | undefined): this {
+        if (this.checkPriority("useUnionEffect")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setUseUnionEffectAttribute(value_casted)
             return this
         }
         return this

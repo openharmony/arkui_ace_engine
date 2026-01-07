@@ -76,6 +76,7 @@ export class CommonMethodModifier implements CommonMethod {
     _backgroundFilter_0_0value?: uiEffect.Filter | undefined
     _foregroundFilter_0_0value?: uiEffect.Filter | undefined
     _compositingFilter_0_0value?: uiEffect.Filter | undefined
+    _materialFilter_0_0value?: uiEffect.Filter | undefined
     _opacity_0_0value?: double | Resource | undefined
     _border_0_0value?: BorderOptions | undefined
     _borderStyle_0_0value?: BorderStyle | EdgeStyles | undefined
@@ -126,6 +127,7 @@ export class CommonMethodModifier implements CommonMethod {
     _hueRotate_0_0value?: double | string | undefined
     _useShadowBatching_0_0value?: boolean | undefined
     _useEffect_0_0value?: boolean | undefined
+    _useUnionEffect_0_0value?: boolean | undefined
     _renderGroup_0_0value?: boolean | undefined
     _freeze_0_0value?: boolean | undefined
     _translate_0_0value?: TranslateOptions | undefined
@@ -4052,6 +4054,42 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[206] != 0)
+        {
+            switch (flagArray[206] as int32) {
+                case 1: {
+                    peer.setUseUnionEffectAttribute((this._useUnionEffect_0_0value as boolean | undefined));
+                    flagArray[206] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[206] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[206] = 0;
+                    peer.setUseUnionEffectAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[207] != 0)
+        {
+            switch (flagArray[207] as int32) {
+                case 1: {
+                    peer.setMaterialFilterAttribute((this._materialFilter_0_0value as uiEffect.Filter | undefined));
+                    flagArray[207] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[207] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[207] = 0;
+                    peer.setMaterialFilterAttribute((undefined as uiEffect.Filter | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: CommonMethodModifier): void {
         this._state = modifier._state;
@@ -6765,6 +6803,32 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[206] != 0)
+        {
+            switch (flagArray[206] as int32) {
+                case 1:
+                case 3: {
+                    this.useUnionEffect(modifier._useUnionEffect_0_0value);
+                    break;
+                }
+                default: {
+                    this.useUnionEffect((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[207] != 0)
+        {
+            switch (flagArray[207] as int32) {
+                case 1:
+                case 3: {
+                    this.materialFilter(modifier._materialFilter_0_0value);
+                    break;
+                }
+                default: {
+                    this.materialFilter((undefined as uiEffect.Filter | undefined));
+                }
+            }
+        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true))
@@ -9142,6 +9206,30 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._flagArray[205] = 3
+        }
+        return this
+    }
+    useUnionEffect(value: boolean | undefined): this {
+        if (((this._flagArray[206]) == (0)) || ((this._useUnionEffect_0_0value) !== (value)))
+        {
+            this._flagArray[206] = 1
+            this._useUnionEffect_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[206] = 3
+        }
+        return this
+    }
+    materialFilter(value: uiEffect.Filter | undefined): this {
+        if (((this._flagArray[207]) == (0)) || (true))
+        {
+            this._flagArray[207] = 1
+            this._materialFilter_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[207] = 3
         }
         return this
     }
