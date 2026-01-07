@@ -143,8 +143,8 @@ export class TabsController implements MaterializedBase {
         this.changeIndex_serialize(value_casted)
         return
     }
-    public preloadItems(indices: KInt32ArrayPtr | undefined): Promise<void> {
-        const indices_casted = indices as (KInt32ArrayPtr | undefined)
+    public preloadItems(indices: Array<int32> | undefined): Promise<void> {
+        const indices_casted = indices as (Array<int32> | undefined)
         return this.preloadItems_serialize(indices_casted)
     }
     public setTabBarTranslate(translate: TranslateOptions): void {
@@ -160,7 +160,7 @@ export class TabsController implements MaterializedBase {
     changeIndex_serialize(value: int32): void {
         ArkUIGeneratedNativeModule._TabsController_changeIndex(this.peer!.ptr, value)
     }
-    preloadItems_serialize(indices: KInt32ArrayPtr | undefined): Promise<void> {
+    preloadItems_serialize(indices: Array<int32> | undefined): Promise<void> {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (indices !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
