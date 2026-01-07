@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,7 @@ using ComponentLoaderFunc = ComponentLoader* (*)(const char* name);
 using DynamicModuleCreateFunc = DynamicModule* (*)();
 
 constexpr const char* COMPATIABLE_COMPONENT_LOADER = "OHOS_ACE_Compatible_GetLoader";
-constexpr const char* DYNAMIC_MODULE_CREATE = "OHOS_ACE_DynamicModule_Create";
+constexpr const char* DYNAMIC_MODULE_CREATE = "OHOS_ACE_DynamicModule_Create_";
 
 class ACE_FORCE_EXPORT DynamicModuleHelper final {
 public:

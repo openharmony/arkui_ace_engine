@@ -59,6 +59,9 @@ public:
     static void SetScrollEnabled(FrameNode* frameNode, const std::optional<bool>& scrollEnabled);
     static void SetFriction(FrameNode* frameNode, const std::optional<double>& value);
     static void SetAlignItems(FrameNode* frameNode, const std::optional<GridItemAlignment>& itemAlign);
+    static void SetItemFillPolicy(FrameNode* frameNode, PresetFillType policy);
+    static void SetFocusWrapMode(FrameNode* frameNode, const std::optional<FocusWrapMode>& focusWrapMode);
+    static void SetSyncLoad(FrameNode* frameNode, bool syncLoad);
 
     static void SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& options);
     static void SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdateFunc&& value);

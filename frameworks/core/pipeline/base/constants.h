@@ -519,16 +519,11 @@ extern const char RATING_HORIZONTAL_PADDING[];
 extern const char RATING_VERTICAL_PADDING[];
 extern const char RATING_INDICATOR[];
 extern const char RATING_ON_CHANGE[];
-extern const int32_t DEFAULT_RATING_STAR_NUM;
+ACE_FORCE_EXPORT extern const int32_t DEFAULT_RATING_STAR_NUM;
 extern const int32_t DEFAULT_INDICATOR_VALUE;
 extern const int32_t DEFAULT_NO_INDICATOR_VALUE;
-extern const uint32_t RATING_FOCUS_BOARD_COLOR;
-extern const double DEFAULT_RATING_SCORE;
-extern const double DEFAULT_RATING_WIDTH;
-extern const double DEFAULT_RATING_HEIGHT;
-extern const double DEFAULT_RATING_STEP_SIZE;
-extern const double DEFAULT_RATING_HORIZONTAL_PADDING;
-extern const double DEFAULT_RATING_VERTICAL_PADDING;
+ACE_FORCE_EXPORT extern const double DEFAULT_RATING_SCORE;
+ACE_FORCE_EXPORT extern const double DEFAULT_RATING_STEP_SIZE;
 
 // loading progress constants
 extern const char LOADING_PROGRESS_NAME[];

@@ -17,13 +17,13 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { ArkThemeScopeManager } from "#arktheme"
-import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable } from "@koalaui/interop"
 import { Bindable_Boolean_serializer, ArkCommonMethodPeer, CommonMethod, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { AttributeModifier, hookListItemAttributeModifier, AttributeUpdater } from "#handwritten"
+import { AttributeModifier, hookListItemAttributeModifier, AttributeUpdater, extractors } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -37,6 +37,69 @@ import { ListItemModifier } from "./../ListItemModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent_serializer } from "./../ComponentContent"
 import { Resource_serializer } from "./../framework/resource"
+import { FrameNode } from "arkui.FrameNode"
+import { BusinessError } from '#external';
+
+const ERROR_CODE_PARAM_ERROR = 100023;
+const ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE = 106203;
+
+export class ListItemSwipeActionManagerInternal {
+    public static fromPtr(ptr: KPointer): ListItemSwipeActionManager {
+        return new ListItemSwipeActionManager(ptr)
+    }
+}
+export class ListItemSwipeActionManager implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, ListItemSwipeActionManager.getFinalizer())
+    }
+    constructor() {
+        this(ListItemSwipeActionManager.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._ListItemSwipeActionManager_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._ListItemSwipeActionManager_getFinalizer()
+    }
+    static expand_serialize(node: FrameNode, direction: ListItemSwipeActionDirection): int32 {
+        const retval = ArkUIGeneratedNativeModule._ListItemSwipeActionManager_expand(extractors.toFrameNodePtr(node), direction.valueOf())
+        return retval
+    }
+    static collapse_serialize(node: FrameNode): int32 {
+        const retval = ArkUIGeneratedNativeModule._ListItemSwipeActionManager_collapse(extractors.toFrameNodePtr(node))
+        return retval
+    }
+    public static expand(node: FrameNode, direction: ListItemSwipeActionDirection): void {
+        const node_casted = node as (FrameNode)
+        const direction_casted = direction as (ListItemSwipeActionDirection)
+        let flag = ListItemSwipeActionManager.expand_serialize(node_casted, direction_casted)
+        if (flag === ERROR_CODE_PARAM_ERROR) {
+            const error = Error('The component type of the node is incorrect');
+            throw new BusinessError(100023, error);
+        } else if (flag === ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE) {
+            const error = Error('The node not mounted to component tree');
+            throw new BusinessError(106203, error);
+        }
+        return
+    }
+    public static collapse(node: FrameNode): void {
+        const node_casted = node as (FrameNode)
+        let flag = ListItemSwipeActionManager.collapse_serialize(node_casted)
+        if (flag === ERROR_CODE_PARAM_ERROR) {
+            const error = Error('The component type of the node is incorrect');
+            throw new BusinessError(100023, error);
+        } else if (flag === ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE) {
+            const error = Error('The node not mounted to component tree');
+            throw new BusinessError(106203, error);
+        }
+        return
+    }
+}
 export class ArkListItemPeer extends ArkCommonMethodPeer {
     attributeSet?: ListItemModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -129,6 +192,10 @@ export enum SwipeActionState {
     COLLAPSED = 0,
     EXPANDED = 1,
     ACTIONING = 2
+}
+export enum ListItemSwipeActionDirection {
+    START = 0,
+    END = 1
 }
 export interface SwipeActionItem {
     builder?: CustomBuilder;
@@ -258,6 +325,17 @@ export class ArkListItemComponent extends ArkCommonMethodComponent implements Li
     }
     public applyOptionsFinish(traceName: string): void {
         super.applyOptionsFinish(traceName)
+    }
+}
+export class ListItemSwipeActionManager_serializer {
+    public static write(buffer: SerializerBase, value: ListItemSwipeActionManager): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): ListItemSwipeActionManager {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return ListItemSwipeActionManagerInternal.fromPtr(ptr)
     }
 }
 export class ListItemOptions_serializer {

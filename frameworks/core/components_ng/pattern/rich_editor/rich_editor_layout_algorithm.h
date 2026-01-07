@@ -184,7 +184,8 @@ private:
         SizeF& maxSize);
     void ReLayoutParagraphByLayoutPolicy(LayoutWrapper* layoutWrapper, float maxWidth);
     void ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, std::vector<TextStyle>& textStyles,
-        std::list<RefPtr<SpanItem>>& group, bool& needReLayout, bool& needReLayoutParagraph);
+        std::list<RefPtr<SpanItem>>& group, bool& needReLayout, bool& needReLayoutParagraph,
+        std::optional<TextStyle>& firstValidTextStyle);
     inline uint64_t Hash(uint64_t hash, const RefPtr<SpanItem>& span);
     uint64_t Hash(const std::list<RefPtr<SpanItem>>& spanGroup);
     RefPtr<Paragraph> GetOrCreateParagraph(const std::list<RefPtr<SpanItem>>& group,

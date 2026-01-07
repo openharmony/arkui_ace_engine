@@ -141,6 +141,7 @@ public:
     MOCK_METHOD1(SetContentNodeGrayScale, void(float grayscale));
     MOCK_METHOD1(EnableContainerModalGesture, void(bool isEnable));
     MOCK_METHOD1(UpdateConfigurationSyncForAll, void(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config));
+    MOCK_METHOD1(SetXComponentDisplayConstraintEnabled, void(bool isEnable));
 };
 } // namespace Ace
 } // namespace OHOS

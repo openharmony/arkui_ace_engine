@@ -1923,4 +1923,26 @@ HWTEST_F(ListGroupAlgTestNg, SupportLazyEmptryBranch001, TestSize.Level1)
     auto wrapper1 = layoutAlgorithm->GetListItem(AceType::RawPtr(listItemGroupNode), 0);
     EXPECT_NE(wrapper1, nullptr);
 }
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap001
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap can clear lanesItemRange when change stackFromEnd.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetStackFromEnd(true);
+    model.SetLanes(2);
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateListItems(2, V2::ListItemStyle::NONE);
+    CreateDone();
+    EXPECT_FALSE(pattern_->lanesItemRange_.empty());
+
+    ListModelNG::SetListStackFromEnd(AceType::RawPtr(frameNode_), false);
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->lanesItemRange_.empty());
+}
 } // namespace OHOS::Ace::NG

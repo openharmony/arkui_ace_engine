@@ -2744,6 +2744,11 @@ void OverlayManager::HideAllMenusWithoutAnimation(bool showInSubwindow)
         EraseMenuInfo(targetId);
         SetIsMenuShow(false);
         PublishMenuStatus(false);
+        auto pipeline = menuNode->GetContext();
+        CHECK_NULL_CONTINUE(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_CONTINUE(overlayManager);
+        overlayManager->ContentChangeReport(menuNode, false);
     }
 }
 

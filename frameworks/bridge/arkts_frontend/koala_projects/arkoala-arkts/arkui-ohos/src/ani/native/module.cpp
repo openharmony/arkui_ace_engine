@@ -1459,6 +1459,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToUiEffectFilterPtr)
         },
         ani_native_function {
+            "_Extractors_ToUiEffectBrightnessBlenderPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToUiEffectBrightnessBlenderPtr)
+        },
+        ani_native_function {
             "_Extractors_ToUiEffectVisualEffectPtr",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToUiEffectVisualEffectPtr)

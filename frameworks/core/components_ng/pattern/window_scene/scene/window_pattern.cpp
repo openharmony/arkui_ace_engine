@@ -176,6 +176,13 @@ public:
         windowPattern->OnRestart();
     }
 
+    void OnRemovePrelaunchStartingWindow() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnRemovePrelaunchStartingWindow();
+    }
+
 private:
     WeakPtr<WindowPattern> windowPattern_;
 };
@@ -293,20 +300,21 @@ bool WindowPattern::CheckAndAddStartingWindowForPrelaunch()
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         CHECK_EQUAL_RETURN(HasStartingPage(), false, false);
         if (session_->GetShowRecent() && CheckSnapshotWindow()) {
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckForPrelaunch disconnect CreateSnapshotWindow");
             CreateSnapshotWindow();
             AddChild(host, snapshotWindow_, snapshotWindowName_);
-            isPrelaunch_ = true;
+            isPrelaunch_.store(true, std::memory_order_release);
             return true;
         }
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckAndAddStartingWindowForPrelaunch CreateBlankWindow");
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckForPrelaunch disconnect CreateBlankWindow");
         CreateBlankWindow(startingWindow_);
         AddChild(host, startingWindow_, startingWindowName_);
-        isPrelaunch_ = true;
+        isPrelaunch_.store(true, std::memory_order_release);
         return true;
     }
 
     if (session_->GetShowRecent()) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckAndAddStartingWindowForPrelaunch CreateStartingWindow");
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "CheckForPrelaunch showRecent CreateStartingWindow");
         CreateStartingWindow();
         AddChild(host, startingWindow_, startingWindowName_);
         return true;
@@ -321,7 +329,7 @@ bool WindowPattern::CheckAndAddStartingWindowForPrelaunch()
         CreateBlankWindow(startingWindow_);
         AddChild(host, startingWindow_, startingWindowName_);
         surfaceNode->SetBufferAvailableCallback(callback_);
-        isPrelaunch_ = true;
+        isPrelaunch_.store(true, std::memory_order_release);
         return true;
     }
     attachToFrameNodeFlag_ = true;

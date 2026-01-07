@@ -1066,4 +1066,40 @@ int32_t UIContentServiceProxy::GetStateMgmtInfo(const std::string& componentName
     }
     return NO_ERROR;
 }
+
+int32_t UIContentServiceProxy::GetWebInfoByRequest(
+    int32_t webId,
+    const std::string& request,
+    const GetWebInfoByRequestCallback& finishCallback)
+{
+    if (report_ == nullptr) {
+        LOGW("reportServiceStub is nullptr,connect is not execute");
+        return FAILED;
+    }
+    report_->RegisterGetWebInfoByRequestCallback(finishCallback);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetWebInfoByRequest write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(processId_)) {
+        LOGW("GetWebInfoByRequest write interface processId failed");
+        return FAILED;
+    }
+    if (!data.WriteInt32(webId)) {
+        LOGW("GetWebInfoByRequest write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteString(request)) {
+        LOGW("GetWebInfoByRequest write componentName failed");
+        return FAILED;
+    }
+    if (Remote()->SendRequest(GET_WEBINFO_BY_REQUEST, data, reply, option) != ERR_NONE) {
+        LOGW("GetStateMgmtInfo send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
 } // namespace OHOS::Ace

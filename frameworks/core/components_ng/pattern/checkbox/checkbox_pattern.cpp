@@ -28,6 +28,8 @@ namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 constexpr int32_t DEFAULT_CHECKBOX_ANIMATION_DURATION = 100;
+const char CHECKBOX_ETS_TAG[] = "Toggle";
+const char NAVDESTINATION_CONTENT_ETS_TAG[] = "NavDestinationContent";
 } // namespace
 
 RefPtr<NodePaintMethod> CheckBoxPattern::CreateNodePaintMethod()
@@ -164,12 +166,25 @@ void CheckBoxPattern::UpdateIndicator()
     }
 }
 
+bool CheckBoxPattern::IsArkTSStatic()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->GetFrontendType() == FrontendType::ARK_TS
+ 	         || pipeline->GetFrontendType() == FrontendType::DYNAMIC_HYBRID_STATIC
+ 	         || pipeline->GetFrontendType() == FrontendType::STATIC_HYBRID_DYNAMIC;
+}
+
 void CheckBoxPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     FireBuilder();
     UpdateIndicator();
-    UpdateState();
+    if (!IsArkTSStatic()) {
+        UpdateState();
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = GetContext();
@@ -1065,7 +1080,7 @@ RefPtr<FrameNode> CheckBoxPattern::BuildContentModifierNode()
     } else {
         isSelected = false;
     }
-    if (host->GetHostTag() == V2::CHECKBOX_ETS_TAG && toggleMakeFunc_.has_value()) {
+    if (host->GetHostTag() == CHECKBOX_ETS_TAG && toggleMakeFunc_.has_value()) {
         return (toggleMakeFunc_.value())(ToggleConfiguration(enabled, isSelected));
     }
     CheckBoxConfiguration checkBoxConfiguration(name, isSelected, enabled);
@@ -1178,7 +1193,7 @@ void CheckBoxPattern::UpdateNavIdAndState(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(groupManager);
     auto parent = host->GetParent();
     while (parent) {
-        if (parent->GetTag() == V2::NAVDESTINATION_CONTENT_ETS_TAG) {
+        if (parent->GetTag() == NAVDESTINATION_CONTENT_ETS_TAG) {
             currentNavId_ = std::to_string(parent->GetId());
             groupManager->SetLastNavId(currentNavId_);
             UpdateState();
@@ -1197,6 +1212,10 @@ void CheckBoxPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (IsArkTSStatic()) {
+        UpdateGroupManager();
+        UpdateState();
+    }
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
     UpdateNavIdAndState(host);
 }
@@ -1213,6 +1232,13 @@ std::string CheckBoxPattern::GetGroupNameWithNavId()
     auto groupManager = GetGroupManager();
     CHECK_NULL_RETURN(groupManager, eventHub->GetGroupName());
     return eventHub->GetGroupName() + groupManager->GetLastNavId();
+}
+
+void CheckBoxPattern::UpdateGroupManager()
+{
+    auto manager = GroupManager::GetGroupManager();
+    CHECK_NULL_VOID(manager.Upgrade());
+    groupManager_ = manager;
 }
 
 RefPtr<GroupManager> CheckBoxPattern::GetGroupManager()

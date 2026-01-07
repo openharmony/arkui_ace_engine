@@ -905,9 +905,9 @@ bool InitSCTextInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
         auto theme = pipeline->GetTheme<SecurityComponentTheme>();
         CHECK_NULL_RETURN(theme, false);
         if (textProp->GetFontSize().has_value()) {
-            buttonInfo.fontSize_ = textProp->GetFontSize()->Value();
+            buttonInfo.fontSize_ = textProp->GetFontSize()->ConvertToFp();
         } else {
-            buttonInfo.fontSize_ = theme->GetFontSize().Value();
+            buttonInfo.fontSize_ = theme->GetFontSize().ConvertToFp();
         }
         if (textProp->GetTextColor().has_value()) {
             buttonInfo.fontColor_.value = textProp->GetTextColor().value().GetValue();

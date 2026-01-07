@@ -31,7 +31,7 @@ using RenderNodeAnimationCallback = std::function<void()>;
 /*
  * AnimatableColor is a Color with AnimationOption and Animator.
  */
-class AnimatableColor final : public Color {
+class ACE_FORCE_EXPORT AnimatableColor final : public Color {
 public:
     ACE_FORCE_EXPORT AnimatableColor();
     explicit AnimatableColor(uint32_t value, const AnimationOption& option = AnimationOption());

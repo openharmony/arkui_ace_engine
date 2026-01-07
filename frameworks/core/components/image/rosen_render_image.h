@@ -21,9 +21,11 @@
 
 #endif
 
+#include "compatible/components/svg/svg_compatible_modifier.h"
+
 #include "core/components/image/render_image.h"
 #include "core/image/image_provider.h"
-#include "frameworks/core/components/svg/parse/svg_dom.h"
+#include "frameworks/compatible/components/svg/parse/svg_dom.h"
 
 namespace OHOS::Ace {
 
@@ -152,7 +154,7 @@ private:
 #endif
     void CreateSvgNodes();
     void SyncCreateSvgNodes(bool isReady = false);
-    void RebuildSvgRenderTree(const SvgRenderTree& svgRenderTree, const RefPtr<SvgDom>& svgDom);
+    void RebuildSvgRenderTree(std::unique_ptr<SvgRenderTree>& svgRenderTree, const RefPtr<SvgDom>& svgDom);
     void CancelBackgroundTasks();
     void CacheImageObject();
     void CacheSvgImageObject();
@@ -185,7 +187,7 @@ private:
     FailedCallback failedCallback_;
     OnPostBackgroundTask onPostBackgroundTask_;
 
-    SvgRenderTree svgRenderTree_;
+    std::unique_ptr<SvgRenderTree> svgRenderTree_;
 
     CancelableTask fetchImageObjTask_;
     bool backgroundTaskCanceled_ = false;

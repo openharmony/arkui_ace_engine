@@ -333,6 +333,7 @@ public:
         const std::optional<ForegroundColorStrategy>& strategy);
     static void SetForegroundEffect(FrameNode* frameNode, const std::optional<float>& radius);
     static void SetBlendMode(FrameNode* frameNode, const std::optional<BlendMode>& blendMode);
+    static void SetBlender(FrameNode* frameNode, const OHOS::Rosen::Blender* blender);
     static void SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG::FocusBoxStyle>& style);
     static void SetFocusScopeId(FrameNode* frameNode, const std::optional<std::string>& focusScopeId,
         const std::optional<bool>& isGroup, const std::optional<bool>& arrowKeyStepOut);

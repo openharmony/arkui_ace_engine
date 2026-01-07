@@ -284,8 +284,6 @@ export class ArkRectComponent extends ArkCommonShapeMethodComponent implements R
 export function RectImpl(
     @memo
     style: ((attributes: RectAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkRectComponent>((): ArkRectComponent => {
         return new ArkRectComponent()
@@ -294,7 +292,6 @@ export function RectImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

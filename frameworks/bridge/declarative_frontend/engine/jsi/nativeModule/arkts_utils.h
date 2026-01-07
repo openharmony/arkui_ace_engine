@@ -268,9 +268,27 @@ public:
         const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result);
     static void ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
                              ArkUISizeType& result, RefPtr<ResourceObject>& resObj);
+    static void ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
+                             ArkUISizeType& result, std::vector<RefPtr<ResourceObject>>& resObjs);
+    static void ParseMargin(
+        const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result);
+    static void ParseMargin(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
+        ArkUISizeType& result, RefPtr<ResourceObject>& resObj);
+    static void ParseMargin(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
+                             ArkUISizeType& result, std::vector<RefPtr<ResourceObject>>& resObjs);
     static bool ParseResponseRegion(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue,
         ArkUI_Float32* regionValues, int32_t* regionUnits, uint32_t length);
+    static bool CheckLengthMetrics(EcmaVM* vm, const Local<panda::ObjectRef>& jsObject);
+    static bool ParseLocalizedMargin(
+        const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result);
+    static bool ParseLocalizedPadding(
+        const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result);
+    static bool ParseJsDimensionRect(const EcmaVM* vm, const Local<panda::JSValueRef>& jsValue, DimensionRect& result);
+    static bool ParseJsResponseRegion(const EcmaVM* vm, const Local<panda::JSValueRef>& jsValue,
+        ArkUI_Float32* values, int32_t* units, uint32_t length);
+    static bool HandleCallbackJobs(
+        const EcmaVM* vm, panda::TryCatch& trycatch, const Local<JSValueRef>& resultException);
     template<typename T>
     static RefPtr<T> GetTheme()
     {

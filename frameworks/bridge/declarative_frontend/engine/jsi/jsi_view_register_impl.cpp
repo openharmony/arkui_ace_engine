@@ -42,8 +42,6 @@
 #include "bridge/declarative_frontend/jsview/js_calendar.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_picker.h"
-#include "bridge/declarative_frontend/jsview/js_checkbox.h"
-#include "bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "bridge/declarative_frontend/jsview/js_circle.h"
 #include "bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "bridge/declarative_frontend/jsview/js_clipboard.h"
@@ -162,7 +160,7 @@
 #include "bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "bridge/declarative_frontend/jsview/js_toggle.h"
 #include "bridge/declarative_frontend/jsview/js_toolbaritem.h"
-#include "bridge/declarative_frontend/jsview/js_union_container.h"
+#include "bridge/declarative_frontend/jsview/js_union_effect_container.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "bridge/declarative_frontend/jsview/js_water_flow.h"
@@ -190,7 +188,6 @@
 
 #ifndef WEARABLE_PRODUCT
 #include "bridge/declarative_frontend/jsview/js_piece.h"
-#include "bridge/declarative_frontend/jsview/js_rating.h"
 #if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_video.h"
@@ -508,7 +505,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "QRCode", JSQRCode::JSBind },
 #endif
     { "Piece", JSPiece::JSBind },
-    { "Rating", JSRating::JSBind },
     { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
     { "Marquee", JSMarquee::JSBind },
@@ -526,8 +522,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Sheet", JSSheet::JSBind },
     { "TextTimer", JSTextTimer::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
-    { "Checkbox", JSCheckbox::JSBind },
-    { "CheckboxGroup", JSCheckboxGroup::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "LinearGradient", JSLinearGradientBinding::JSBind },
@@ -692,7 +686,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #ifndef WEARABLE_PRODUCT
     { "Piece", JSPiece::JSBind },
-    { "Rating", JSRating::JSBind },
 #if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
     { "Video", JSVideo::JSBind },
@@ -756,8 +749,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextAreaController", JSTextAreaController::JSBind },
     { "TextInputController", JSTextInputController::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
-    { "Checkbox", JSCheckbox::JSBind },
-    { "CheckboxGroup", JSCheckboxGroup::JSBind },
     { "Refresh", JSRefresh::JSBind },
     { "WaterFlow", JSWaterFlow::JSBind },
     { "FlowItem", JSWaterFlowItem::JSBind },
@@ -834,7 +825,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "PinchRecognizer", JSPinchRecognizer::JSBind },
     { "RotationRecognizer", JSRotationRecognizer::JSBind },
     { "TouchRecognizer", JSTouchRecognizer::JSBind },
-    { "UnionContainer", JSUnionContainer::JSBind },
+    { "UnionEffectContainer", JSUnionEffectContainer::JSBind },
 };
 
 void RegisterBindFuncs(BindingTarget globalObj, bool isCustomEnvSupported)

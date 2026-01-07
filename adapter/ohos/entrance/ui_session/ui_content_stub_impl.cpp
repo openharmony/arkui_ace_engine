@@ -282,4 +282,13 @@ int32_t UIContentServiceStubImpl::GetStateMgmtInfo(const std::string& componentN
     UiSessionManager::GetInstance()->GetStateMgmtInfo(componentName, propertyName, jsonPath);
     return NO_ERROR;
 }
+
+int32_t UIContentServiceStubImpl::GetWebInfoByRequest(
+    int32_t webId,
+    const std::string& request,
+    const GetWebInfoByRequestCallback& finishCallback)
+{
+    UiSessionManager::GetInstance()->GetWebInfoByRequest(webId, request);
+    return NO_ERROR;
+}
 } // namespace OHOS::Ace

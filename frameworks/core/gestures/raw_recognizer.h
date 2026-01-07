@@ -46,7 +46,7 @@ constexpr uint32_t TOUCH_CANCEL = 3;
 // The RawRecognizer does not participate in the gesture decision and is not affected by the gesture disambiguation.
 // If there are other gesture recognizers that have accepted the gesture, the RawRecognizer can also accept the
 // original event.
-class RawRecognizer : public TouchEventTarget {
+class ACE_FORCE_EXPORT RawRecognizer : public TouchEventTarget {
     DECLARE_ACE_TYPE(RawRecognizer, TouchEventTarget);
 
 public:

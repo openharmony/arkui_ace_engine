@@ -44,7 +44,6 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/transition_property.h"
@@ -9367,7 +9366,9 @@ void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
     if (frameNode->GetTag() == V2::SWITCH_ETS_TAG) {
         ToggleModelNG::OnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
     } else if (frameNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
-        CheckBoxModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+        auto checkboxModifier = GetArkUINodeModifiers()->getCheckboxModifier();
+        CHECK_NULL_VOID(checkboxModifier);
+        return checkboxModifier->setCheckboxOnChange(node, reinterpret_cast<void*>(&onChange));
     } else {
         RadioModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
     }
@@ -9637,6 +9638,20 @@ void ResetSystemMaterial(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetSystemMaterial(frameNode, nullptr);
+}
+
+void SetUseUnionEffect(ArkUINodeHandle node, bool useUnion)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetUseUnion(frameNode, useUnion);
+}
+
+void ResetUseUnionEffect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetUseUnion(frameNode, false);
 }
 
 void SetFreeze(ArkUINodeHandle node, ArkUI_Bool freeze)
@@ -10999,6 +11014,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .setMaterialFilter = SetMaterialFilter,
         .resetMaterialFilter = ResetMaterialFilter,
         .getIgnoreLayoutSafeAreaOpts = GetIgnoreLayoutSafeAreaOpts,
+        .setUseUnionEffect = SetUseUnionEffect,
+        .resetUseUnionEffect = ResetUseUnionEffect,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -244,6 +244,16 @@ void AssignCast(std::optional<CrownSensitivity>& dst, const Ark_CrownSensitivity
 }
 
 template<>
+void AssignCast(std::optional<FocusWrapMode>& dst, const Ark_FocusWrapMode& src)
+{
+    switch (src) {
+        case ARK_FOCUS_WRAP_MODE_DEFAULT: dst = FocusWrapMode::DEFAULT; break;
+        case ARK_FOCUS_WRAP_MODE_WRAP_WITH_ARROW: dst = FocusWrapMode::WRAP_WITH_ARROW; break;
+        default: LOGE("Unexpected enum value in Ark_FocusWrapMode: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src)
 {
     switch (src) {
@@ -410,6 +420,17 @@ void AssignCast(std::optional<LineJoinStyle>& dst, const Ark_LineJoinStyle& src)
 }
 
 template<>
+void AssignCast(std::optional<PresetFillType>& dst, const Ark_PresetFillType& src)
+{
+    switch (src) {
+        case ARK_PRESET_FILL_TYPE_BREAKPOINT_DEFAULT: dst = PresetFillType::BREAKPOINT_DEFAULT; break;
+        case ARK_PRESET_FILL_TYPE_BREAKPOINT_SM1MD2LG3: dst = PresetFillType::BREAKPOINT_SM1MD2LG3; break;
+        case ARK_PRESET_FILL_TYPE_BREAKPOINT_SM2MD3LG5: dst = PresetFillType::BREAKPOINT_SM2MD3LG5; break;
+        default: LOGE("Unexpected enum value in Ark_PresetFillType: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<ShadowColorStrategy>& dst, const Ark_ColoringStrategy& src)
 {
     switch (src) {
@@ -477,6 +498,16 @@ void AssignCast(std::optional<SheetType>& dst, const Ark_SheetType& src)
         case ARK_SHEET_TYPE_SIDE: dst = SheetType::SHEET_SIDE; break;
         case ARK_SHEET_TYPE_CONTENT_COVER: dst = SheetType::SHEET_CONTENT_COVER; break;
         default: LOGE("Unexpected enum value in Ark_SheetType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ScrollSnapAnimationSpeed>& dst, const Ark_ScrollSnapAnimationSpeed& src)
+{
+    switch (src) {
+        case ARK_SCROLL_SNAP_ANIMATION_SPEED_NORMAL: dst = ScrollSnapAnimationSpeed::NORMAL; break;
+        case ARK_SCROLL_SNAP_ANIMATION_SPEED_SLOW: dst = ScrollSnapAnimationSpeed::SLOW; break;
+        default: LOGE("Unexpected enum value in Ark_ScrollSnapAnimationSpeed: %{public}d", src);
     }
 }
 
@@ -1005,6 +1036,16 @@ void AssignCast(std::optional<V2::ListItemGroupStyle>& dst, const Ark_ListItemGr
         case ARK_LIST_ITEM_GROUP_STYLE_NONE: dst = V2::ListItemGroupStyle::NONE; break;
         case ARK_LIST_ITEM_GROUP_STYLE_CARD: dst = V2::ListItemGroupStyle::CARD; break;
         default: LOGE("Unexpected enum value in Ark_ListItemGroupStyle: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ListItemSwipeActionDirection>& dst, const Ark_ListItemSwipeActionDirection& src)
+{
+    switch (src) {
+        case ARK_LIST_ITEM_SWIPE_ACTION_DIRECTION_START: dst = ListItemSwipeActionDirection::START; break;
+        case ARK_LIST_ITEM_SWIPE_ACTION_DIRECTION_END: dst = ListItemSwipeActionDirection::END; break;
+        default: LOGE("Unexpected enum value in Ark_ListItemSwipeActionDirection: %{public}d", src);
     }
 }
 
@@ -1619,6 +1660,7 @@ void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src)
         case ARK_SCROLL_DIRECTION_VERTICAL: dst = Axis::VERTICAL; break;
         case ARK_SCROLL_DIRECTION_HORIZONTAL: dst = Axis::HORIZONTAL; break;
         case ARK_SCROLL_DIRECTION_NONE: dst = Axis::NONE; break;
+        case ARK_SCROLL_DIRECTION_FREE: dst = Axis::FREE; break;
         default: LOGE("Unexpected enum value in Ark_ScrollDirection: %{public}d", src);
     }
 }
@@ -2333,7 +2375,7 @@ void AssignCast(std::optional<int32_t>& dst, const Ark_PageFlipMode& src)
 }
 
 template<>
-void AssignCast(std::optional<CheckBoxStyle>& dst, const Ark_CheckBoxShape& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<CheckBoxStyle>& dst, const Ark_CheckBoxShape& src)
 {
     switch (src) {
         case ARK_CHECK_BOX_SHAPE_CIRCLE: dst = CheckBoxStyle::CIRCULAR_STYLE; break;

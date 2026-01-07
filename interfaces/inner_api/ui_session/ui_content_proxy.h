@@ -91,6 +91,12 @@ public:
     virtual int32_t GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
         const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback) override;
 
+
+    virtual int32_t GetWebInfoByRequest(
+        int32_t webId,
+        const std::string& request,
+        const GetWebInfoByRequestCallback& finishCallback) override;
+
 private:
     static inline BrokerDelegator<UIContentServiceProxy> delegator_;
     sptr<UiReportStub> report_ = nullptr;

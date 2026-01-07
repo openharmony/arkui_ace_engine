@@ -179,6 +179,14 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         auto rects = pManager->GetTextBoxesForSelect(selection.GetTextStart(), selection.GetTextEnd());
         selectedRects = CalculateSelectedRect(rects, contentRect.Width());
     }
+    if (selection.highlightStart.has_value() && selection.highlightEnd.has_value() &&
+        selection.highlightStart.value() != selection.highlightEnd.value()) {
+        auto lighHightRects =
+            pManager->GetTextBoxesForSelect(selection.highlightStart.value(), selection.highlightEnd.value());
+        textOverlayModifier_->SetHighlightRects(lighHightRects);
+    } else {
+        textOverlayModifier_->ResetHighlightRects();
+    }
     textOverlayModifier_->SetContentRect(contentRect);
     textOverlayModifier_->SetShowSelect(textPattern->GetShowSelect());
     textOverlayModifier_->SetSelectedRects(selectedRects);

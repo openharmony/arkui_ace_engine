@@ -46,7 +46,7 @@ struct MergedConfig {
     std::unordered_map<std::string, std::unordered_set<ExposureCfg, ExposureCfgHash>> exposureNodes;
 };
 
-class NodeDataCache final {
+class ACE_FORCE_EXPORT NodeDataCache final {
 public:
     static NodeDataCache& Get();
 

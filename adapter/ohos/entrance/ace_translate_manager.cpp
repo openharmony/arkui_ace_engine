@@ -16,7 +16,7 @@
 #include "core/common/ace_translate_manager.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-
+#include "base/utils/time_util.h"
 #include "base/error/error_code.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
@@ -55,6 +55,30 @@ void UiTranslateManagerImpl::GetWebViewCurrentLanguage()
         result->Put("currentLanguage", currentLanguage.c_str());
         UiSessionManager::GetInstance()->SendCurrentLanguage(result->ToString());
     }
+}
+
+void UiTranslateManagerImpl::GetWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request)
+{
+#ifdef WEB_SUPPORTED
+    auto iter = listenerMap_.find(webId);
+    if (iter != listenerMap_.end()) {
+        auto frameNode = iter->second.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<NG::WebPattern>();
+        CHECK_NULL_VOID(pattern);
+        const auto& finishCallback = []
+            (uint32_t windowId, int32_t webId, const std::string& request, const std::string& result,
+                WebRequestErrorCode errorCode) {
+                UiSessionManager::GetInstance()->SendWebInfoByRequest(windowId, webId, request, result, errorCode);
+            };
+        pattern->GetWebInfoByRequest(windowId, webId, request, finishCallback);
+    } else {
+        UiSessionManager::GetInstance()->SendWebInfoByRequest(
+            windowId, webId, request, "", WebRequestErrorCode::INVALID_WEB_ID);
+    }
+#else
+    LOGW("GetWebInfoByRequest not supportted on this platform.");
+#endif
 }
 
 void UiTranslateManagerImpl::GetTranslateText(std::string extraData, bool isContinued)
@@ -145,12 +169,6 @@ void UiTranslateManagerImpl::SendPixelMap()
     UiSessionManager::GetInstance()->SendPixelMap(pixelMap_);
 }
 
-void UiTranslateManagerImpl::AddArkUIComponentPixelMap(
-    int32_t componentId, std::shared_ptr<Media::PixelMap>& componentPixelMap)
-{
-    arkUIComponentImages_.emplace(componentId, componentPixelMap);
-}
-
 void UiTranslateManagerImpl::AddArkWebImageMap(
     int32_t webId, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>& webImageMap)
 {
@@ -169,18 +187,20 @@ void UiTranslateManagerImpl::TraverseAddArkUIComponentImages(const size_t compon
         return;
     }
     std::weak_ptr<UiTranslateManagerImpl> weak = shared_from_this();
-    bool finishInTime = taskExecutor_->PostSyncTaskTimeout(
-        [weak, componentQueryCnt, arkUIIds]() {
-            auto uiTranslateManagerImpl = weak.lock();
-            CHECK_NULL_VOID(uiTranslateManagerImpl);
-            ACE_SCOPED_TRACE("TraverseAddArkUIComponentImages GetPixelMapFromFrameNode");
-            for (size_t i = 0; i < componentQueryCnt; ++i) {
-                std::shared_ptr<Media::PixelMap> componentPixelMap = nullptr;
-                uiTranslateManagerImpl->GetPixelMapFromFrameNode(arkUIIds[i], componentPixelMap);
-                uiTranslateManagerImpl->AddArkUIComponentPixelMap(arkUIIds[i], componentPixelMap);
-            }
-        },
-        TaskExecutor::TaskType::UI, QUERY_IMAGES_TIMEOUT_TIME, "ArkUIAddComponentImagesDuringMultiQuery");
+    bool finishInTime = true;
+    int64_t startTime = GetCurrentTimestamp();
+    ACE_SCOPED_TRACE("TraverseAddArkUIComponentImages GetPixelMapFromFrameNode");
+    for (size_t i = 0; i < componentQueryCnt; ++i) {
+        int64_t currentTime = GetCurrentTimestamp();
+        if (currentTime - startTime >= QUERY_IMAGES_TIMEOUT_TIME) {
+            finishInTime = false;
+            LOGW("UiTranslateManagerImpl::TraverseAddArkUIComponentImages ArkUI image query timeout");
+            break;
+        }
+        std::shared_ptr<Media::PixelMap> componentPixelMap = nullptr;
+        GetPixelMapFromFrameNode(arkUIIds[i], componentPixelMap);
+        arkUIComponentImages_.emplace(arkUIIds[i], componentPixelMap);
+    }
     if (arkUIQueryErrorCode_ == MultiImageQueryErrorCode::OK && !finishInTime) {
         arkUIQueryErrorCode_ = MultiImageQueryErrorCode::TIMEOUT;
     }
@@ -264,7 +284,7 @@ void UiTranslateManagerImpl::PostArkWebQueryTasks(std::weak_ptr<UiTranslateManag
             return;
         }
         uiTranslateManagerImpl->SetArkWebQueryErrorCode(MultiImageQueryErrorCode::TIMEOUT);
-        uiTranslateManagerImpl->DoSendArkWebImagesById();
+        uiTranslateManagerImpl->DoSendArkWebImagesById(false);
     };
     taskExecutor_->PostDelayedTask(setRejectTimeoutArkWebImageQuery,
         TaskExecutor::TaskType::UI, QUERY_IMAGES_TIMEOUT_TIME, "ArkUISetRejectTimeoutArkWebImageQuery");
@@ -393,7 +413,7 @@ void UiTranslateManagerImpl::SendArkUIImagesById()
     arkUIQueryErrorCode_ = MultiImageQueryErrorCode::OK;
 }
 
-void UiTranslateManagerImpl::DoSendArkWebImagesById()
+void UiTranslateManagerImpl::DoSendArkWebImagesById(bool triggerFromArkWebCallback)
 {
     if (hasSendArkWebQueryResult_) {
         return;
@@ -404,6 +424,9 @@ void UiTranslateManagerImpl::DoSendArkWebImagesById()
                 arkWebImages_[webId].emplace(webImageId, nullptr);
             }
         }
+    }
+    if (taskExecutor_ != nullptr && triggerFromArkWebCallback) {
+        taskExecutor_->RemoveTask(TaskExecutor::TaskType::UI, "ArkUISetRejectTimeoutArkWebImageQuery");
     }
     UiSessionManager::GetInstance()->SendArkWebImagesById(windowId_, arkWebImages_, arkWebQueryErrorCode_);
     arkWebImages_.clear();
@@ -427,7 +450,7 @@ void UiTranslateManagerImpl::SendArkWebImagesById()
 {
     bool allWebQueryTasksFinish = CheckAllWebQueryTaskFinish();
     if (allWebQueryTasksFinish) {
-        DoSendArkWebImagesById();
+        DoSendArkWebImagesById(true);
     }
 }
 

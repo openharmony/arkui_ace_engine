@@ -201,7 +201,7 @@ namespace OHOS::Ace::NG::Converter {
 
     class ConvContext {
     public:
-        Ark_String Store(const std::string_view& src);
+        Ark_String ACE_FORCE_EXPORT Store(const std::string_view& src);
         void *Allocate(std::size_t size);
         void Clear();
         template<typename T>
@@ -393,12 +393,13 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src);
     void AssignArkValue(Ark_ScrollSource& dst, const ScrollSource& src);
     void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src);
-    void AssignArkValue(Ark_SelectStatus& dst, const int32_t& src);
+    void ACE_FORCE_EXPORT AssignArkValue(Ark_SelectStatus& dst, const int32_t& src);
     void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx);
     void AssignArkValue(Ark_ShadowType& dst, const ShadowType& src);
     void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src);
     void AssignArkValue(Ark_SheetType& dst, const SheetType& src);
     void AssignArkValue(Ark_Size& dst, const SizeF& src);
+    void AssignArkValue(Ark_SizeResult& dst, const SizeF& src);
     void AssignArkValue(Ark_SliderChangeMode& dst, const SliderModel::SliderChangeMode& src);
     void AssignArkValue(Ark_SourceTool& dst, const SourceTool& src);
     void AssignArkValue(Ark_SourceType& dst, const SourceType& src);

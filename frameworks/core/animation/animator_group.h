@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT AnimatorGroup : public AceType, public StatusListenable {
+class ACE_FORCE_EXPORT AnimatorGroup : public AceType, public StatusListenable {
     DECLARE_ACE_TYPE(AnimatorGroup, AceType);
 public:
     enum class AnimatorGroupStatus {

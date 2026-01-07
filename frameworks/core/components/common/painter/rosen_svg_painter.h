@@ -18,11 +18,12 @@
 
 #include "include/core/SkTypeface.h"
 
+#include "compatible/components/svg/svg_compatible_modifier.h"
 #include "core/components_ng/render/drawing.h"
 #include "frameworks/base/geometry/matrix4.h"
+#include "frameworks/compatible/components/svg/render_svg_base.h"
 #include "frameworks/core/components/common/properties/motion_path_evaluator.h"
 #include "frameworks/core/components/common/properties/svg_paint_state.h"
-#include "frameworks/core/components/svg/render_svg_base.h"
 #include "frameworks/core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -53,7 +54,7 @@ struct RenderInfo {
     bool antiAlias = true;
 };
 
-class RosenSvgPainter {
+class ACE_FORCE_EXPORT RosenSvgPainter {
 public:
     RosenSvgPainter() = default;
     ~RosenSvgPainter() = default;

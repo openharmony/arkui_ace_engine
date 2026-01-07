@@ -78,17 +78,28 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
             return iter->second.get();
         }
     }
-
+    static const std::unordered_map<std::string, std::string> soMap = {
+        {"Checkbox", "checkbox"},
+        {"CheckboxGroup", "checkbox"},
+        {"Gauge", "gauge"},
+        {"Rating", "rating"},
+    };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
+    auto it = soMap.find(name);
+    if (it == soMap.end()) {
+        LOGI("No shared library mapping found for nativeModule: %{public}s", name.c_str());
+        return nullptr;
+    }
 #ifdef WINDOWS_PLATFORM
-    std::wstring nameW = std::wstring(name.begin(), name.end());
+    std::wstring nameW = std::wstring(it->second.begin(), it->second.end());
     auto libName = DYNAMIC_MODULE_LIB_PREFIX + nameW + DYNAMIC_MODULE_LIB_POSTFIX;
 #else
-    auto libName = DYNAMIC_MODULE_LIB_PREFIX + name + DYNAMIC_MODULE_LIB_POSTFIX;
+    auto libName = DYNAMIC_MODULE_LIB_PREFIX + it->second + DYNAMIC_MODULE_LIB_POSTFIX;
 #endif
     LIBHANDLE handle = LOADLIB(libName.c_str());
     CHECK_NULL_RETURN(handle, nullptr);
-    auto* createSym = reinterpret_cast<DynamicModuleCreateFunc>(LOADSYM(handle, DYNAMIC_MODULE_CREATE));
+    auto* createSym =
+        reinterpret_cast<DynamicModuleCreateFunc>(LOADSYM(handle, (DYNAMIC_MODULE_CREATE + name).c_str()));
     CHECK_NULL_RETURN(createSym, nullptr);
     DynamicModule* module = createSym();
     CHECK_NULL_RETURN(module, nullptr);

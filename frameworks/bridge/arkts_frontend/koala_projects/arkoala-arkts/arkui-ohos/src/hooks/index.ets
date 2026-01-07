@@ -84,6 +84,8 @@ import { WebHandWritten } from "./WebHandWritten";
 import { ArkSaveButtonComponent, ArkSaveButtonPeer, SaveButtonCallback, ArkPasteButtonComponent, ArkPasteButtonPeer, PasteButtonCallback } from '#generated';
 import { SaveButtonOpsHandWritten } from './SaveButtonOpsHandWritten';
 import { PasteButtonOpsHandWritten } from './PasteButtonOpsHandWritten';
+import { ArkGaugeComponent, ArkGaugePeer, GaugeIndicatorOptions } from "#generated";
+import { GaugeExtender } from "#generated"
 
 export function hookId(component: object, value?: string) {}
 
@@ -796,4 +798,28 @@ export function hookSaveButtonOnClick(
 export function hookPasteButtonOnClick(
   receiver: ArkPasteButtonComponent | ArkPasteButtonPeer, value: PasteButtonCallback | undefined): void {
     PasteButtonOpsHandWritten.hookPasteButtonOnClickImpl(receiver, value);
+}
+
+export function hookGaugeIndicator(receiver: ArkGaugeComponent | ArkGaugePeer,
+  value: GaugeIndicatorOptions | null | undefined): void {
+
+  const gaugePeer: ArkGaugePeer =
+    receiver instanceof ArkGaugeComponent ? (receiver as ArkGaugeComponent).getPeer() :
+      (receiver as ArkGaugePeer);
+  if (!gaugePeer) {
+    return;
+  }
+
+  let value_casted: GaugeIndicatorOptions | undefined;
+  if (value === undefined) {
+    value_casted = {
+      icon: undefined,
+      space: undefined
+    }
+  } else if (value === null) {
+    value_casted = undefined;
+  } else {
+    value_casted = value as (GaugeIndicatorOptions | undefined)
+  }
+  GaugeExtender.setIndicator(gaugePeer.peer.ptr, value_casted)
 }

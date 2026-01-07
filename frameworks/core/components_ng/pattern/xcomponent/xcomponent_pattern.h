@@ -369,7 +369,7 @@ public:
     void UnlockCanvasAndPost(RSCanvas* canvas);
     void SetSurfaceIsOpaque(bool isOpaque);
     ArkUI_AccessibilityProvider* GetNativeProvider();
-
+    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
 protected:
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
@@ -500,6 +500,8 @@ private:
     void RegisterRenderContextCallBack();
     void RequestFocus();
 #endif
+
+    void AddLayoutTask();
 
     std::vector<OH_NativeXComponent_HistoricalPoint> SetHistoryPoint(const std::list<TouchLocationInfo>& touchInfoList);
     std::optional<std::string> libraryname_;

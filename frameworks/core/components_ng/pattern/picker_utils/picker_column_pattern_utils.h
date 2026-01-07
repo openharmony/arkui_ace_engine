@@ -19,7 +19,7 @@
 #include <utility>
 #include <string>
 
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 

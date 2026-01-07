@@ -623,7 +623,7 @@ void RichEditorSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool 
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     initSelector_ = { pattern->textSelector_.GetTextStart(), pattern->textSelector_.GetTextEnd() };
-    IF_TRUE(!IsSingleHandle(), pattern->ChangeHandleHeight(event, isFirst, IsOverlayMode()));
+    IF_TRUE(!IsSingleHandle(), ChangeHandleHeight(event, isFirst));
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE);
@@ -631,6 +631,29 @@ void RichEditorSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool 
     if (IsSingleHandle()) {
         pattern->ShowCaretWithoutTwinkling();
         manager->SetIsHandleLineShow(false);
+    }
+}
+
+void RichEditorSelectOverlay::ChangeHandleHeight(const GestureEvent& event, bool isFirst)
+{
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto touchOffset = event.GetGlobalLocation();
+    if (hasTransform_) {
+        auto transformOffset = OffsetF(touchOffset.GetX(), touchOffset.GetY());
+        RevertLocalPointWithTransform(transformOffset);
+        transformOffset += GetPaintOffsetWithoutTransform();
+        touchOffset = Offset(transformOffset.GetX(), transformOffset.GetY());
+    }
+    auto& textSelector = pattern->textSelector_;
+    auto& currentHandle = isFirst ? textSelector.firstHandle : textSelector.secondHandle;
+    bool isChangeFirstHandle = isFirst ? (!textSelector.StartGreaterDest()) : textSelector.StartGreaterDest();
+    if (isChangeFirstHandle) {
+        pattern->ChangeFirstHandleHeight(touchOffset, currentHandle);
+    } else {
+        if (!TextSelectOverlay::ChangeSecondHandleHeight(event, IsOverlayMode())) {
+            pattern->ChangeSecondHandleHeight(touchOffset, currentHandle);
+        }
     }
 }
 

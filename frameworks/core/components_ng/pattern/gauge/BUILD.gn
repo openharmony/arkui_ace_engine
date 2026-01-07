@@ -32,9 +32,9 @@ build_component_ng("gauge_pattern_ng") {
     "bridge/gauge_dynamic_module.cpp",
   ]
   if (!is_arkui_x) {
-    ark_sources += [
-      "bridge/gauge_model_impl.cpp",
-      "bridge/gauge_static_modifier.cpp",
-    ]
+    if (!ace_engine_feature_wearable) {
+      ark_sources += [ "bridge/gauge_static_modifier.cpp" ]
+    }
+    ark_sources += [ "bridge/gauge_model_impl.cpp" ]
   }
 }

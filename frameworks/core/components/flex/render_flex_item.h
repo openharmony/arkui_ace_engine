@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT RenderFlexItem final : public RenderProxy {
+class ACE_FORCE_EXPORT RenderFlexItem final : public RenderProxy {
     DECLARE_ACE_TYPE(RenderFlexItem, RenderProxy);
 
 public:

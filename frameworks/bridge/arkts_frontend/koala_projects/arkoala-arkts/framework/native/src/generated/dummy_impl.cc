@@ -6473,18 +6473,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetIndicatorImpl(Ark_NativePointer node,
-                          const Opt_GaugeIndicatorOptions* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setIndicator(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void SetPrivacySensitiveImpl(Ark_NativePointer node,
                                  const Opt_Boolean* value)
     {
@@ -6535,7 +6523,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // GridInterfaceModifier
     namespace GridAttributeModifier {
     void SetColumnsTemplateImpl(Ark_NativePointer node,
-                                const Opt_String* value)
+                                const Opt_Union_String_ItemFillPolicy* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6595,7 +6583,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetScrollBarColorImpl(Ark_NativePointer node,
-                               const Opt_Union_Color_I32_String* value)
+                               const Opt_Union_Color_I32_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -6854,6 +6842,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setEditModeOptions(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetFocusWrapModeImpl(Ark_NativePointer node,
+                              const Opt_FocusWrapMode* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setFocusWrapMode(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetSyncLoadImpl(Ark_NativePointer node,
+                         const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSyncLoad(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -8292,7 +8304,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetContentStartOffsetImpl(Ark_NativePointer node,
-                                   const Opt_Float64* value)
+                                   const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -8304,7 +8316,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetContentEndOffsetImpl(Ark_NativePointer node,
-                                 const Opt_Float64* value)
+                                 const Opt_Union_F64_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -8447,6 +8459,42 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetFocusWrapModeImpl(Ark_NativePointer node,
+                              const Opt_FocusWrapMode* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setFocusWrapMode(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetSyncLoadImpl(Ark_NativePointer node,
+                         const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSyncLoad(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetScrollSnapAnimationSpeedImpl(Ark_NativePointer node,
+                                         const Opt_ScrollSnapAnimationSpeed* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setScrollSnapAnimationSpeed(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetOnScrollIndexImpl(Ark_NativePointer node,
                               const Opt_Callback_I32_I32_I32_Void* value)
     {
@@ -8580,7 +8628,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetLanesImpl(Ark_NativePointer node,
-                      const Opt_Union_I32_LengthConstrain* value,
+                      const Opt_Union_I32_LengthConstrain_ItemFillPolicy* value,
                       const Opt_Dimension* gutter)
     {
         if (!needGroupedLog(1))
@@ -8595,7 +8643,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetCachedCount1Impl(Ark_NativePointer node,
-                             const Opt_Int32* count,
+                             const Opt_Union_I32_CacheCountInfo* count,
                              const Opt_Boolean* show)
     {
         if (!needGroupedLog(1))
@@ -11155,6 +11203,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetMaxPullDownDistanceImpl(Ark_NativePointer node,
+                                    const Opt_Float64* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setMaxPullDownDistance(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // RefreshAttributeModifier
     namespace RelativeContainerModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -12166,6 +12226,54 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetMaxZoomScaleImpl(Ark_NativePointer node,
+                             const Opt_Float64* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setMaxZoomScale(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetMinZoomScaleImpl(Ark_NativePointer node,
+                             const Opt_Float64* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setMinZoomScale(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetZoomScaleImpl(Ark_NativePointer node,
+                          const Opt_Union_F64_Bindable* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setZoomScale(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetEnableBouncesZoomImpl(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setEnableBouncesZoom(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetOnWillScrollImpl(Ark_NativePointer node,
                              const Opt_ScrollOnWillScrollCallback* value)
     {
@@ -12226,6 +12334,42 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnDidZoomImpl(Ark_NativePointer node,
+                          const Opt_ScrollOnDidZoomCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnDidZoom(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnZoomStartImpl(Ark_NativePointer node,
+                            const Opt_VoidCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnZoomStart(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnZoomStopImpl(Ark_NativePointer node,
+                           const Opt_VoidCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnZoomStop(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetScrollBarImpl(Ark_NativePointer node,
                           const Opt_BarState* value)
     {
@@ -12239,7 +12383,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetScrollBarColorImpl(Ark_NativePointer node,
-                               const Opt_Union_Color_I32_String* value)
+                               const Opt_Union_Color_I32_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -12270,6 +12414,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setOnScrollFrameBegin(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetScrollBarMarginImpl(Ark_NativePointer node,
+                                const Opt_ScrollBarMargin* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setScrollBarMargin(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -12392,7 +12548,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetScrollBarColorImpl(Ark_NativePointer node,
-                               const Opt_Union_Color_Number_String* value)
+                               const Opt_Union_Color_I32_String_Resource* value)
     {
         if (!needGroupedLog(1))
         {
@@ -12447,6 +12603,90 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setFriction(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetContentStartOffsetImpl(Ark_NativePointer node,
+                                   const Opt_Union_F64_Resource* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setContentStartOffset(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetContentEndOffsetImpl(Ark_NativePointer node,
+                                 const Opt_Union_F64_Resource* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setContentEndOffset(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnWillStartDraggingImpl(Ark_NativePointer node,
+                                    const Opt_VoidCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnWillStartDragging(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnWillStopDraggingImpl(Ark_NativePointer node,
+                                   const Opt_OnWillStopDraggingCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnWillStopDragging(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnDidStopDraggingImpl(Ark_NativePointer node,
+                                  const Opt_OnDidStopDraggingCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnDidStopDragging(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnWillStartFlingImpl(Ark_NativePointer node,
+                                 const Opt_VoidCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnWillStartFling(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnDidStopFlingImpl(Ark_NativePointer node,
+                               const Opt_VoidCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnDidStopFling(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -12619,6 +12859,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setEnableNestedScroll(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetScrollBarColorImpl(Ark_NativePointer node,
+                               const Opt_ColorMetrics* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setScrollBarColor(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -20071,7 +20323,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // WaterFlowInterfaceModifier
     namespace WaterFlowAttributeModifier {
     void SetColumnsTemplateImpl(Ark_NativePointer node,
-                                const Opt_String* value)
+                                const Opt_Union_String_ItemFillPolicy* value)
     {
         if (!needGroupedLog(1))
         {
@@ -20150,6 +20402,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setCachedCount0(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetSyncLoadImpl(Ark_NativePointer node,
+                         const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSyncLoad(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -21955,6 +22219,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnFirstScreenPaintImpl(Ark_NativePointer node,
+                                   const Opt_OnFirstScreenPaintCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnFirstScreenPaint(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetRegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                         const Opt_String* tag,
                                         const Opt_String* type)
@@ -22807,7 +23083,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GaugeAttributeModifier::SetStrokeWidthImpl,
             GaugeAttributeModifier::SetDescriptionImpl,
             GaugeAttributeModifier::SetTrackShadowImpl,
-            GaugeAttributeModifier::SetIndicatorImpl,
             GaugeAttributeModifier::SetPrivacySensitiveImpl,
         };
         return &ArkUIGaugeModifierImpl;
@@ -22845,6 +23120,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GridAttributeModifier::SetFrictionImpl,
             GridAttributeModifier::SetAlignItemsImpl,
             GridAttributeModifier::SetEditModeOptionsImpl,
+            GridAttributeModifier::SetFocusWrapModeImpl,
+            GridAttributeModifier::SetSyncLoadImpl,
             GridAttributeModifier::SetOnScrollFrameBeginImpl,
             GridAttributeModifier::SetOnWillScrollImpl,
             GridAttributeModifier::SetOnDidScrollImpl,
@@ -23057,6 +23334,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ListAttributeModifier::SetMaintainVisibleContentPositionImpl,
             ListAttributeModifier::SetStackFromEndImpl,
             ListAttributeModifier::SetEditModeOptionsImpl,
+            ListAttributeModifier::SetFocusWrapModeImpl,
+            ListAttributeModifier::SetSyncLoadImpl,
+            ListAttributeModifier::SetScrollSnapAnimationSpeedImpl,
             ListAttributeModifier::SetOnScrollIndexImpl,
             ListAttributeModifier::SetOnScrollVisibleContentChangeImpl,
             ListAttributeModifier::SetOnItemMoveImpl,
@@ -23427,6 +23707,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RefreshAttributeModifier::SetPullUpToCancelRefreshImpl,
             RefreshAttributeModifier::SetOnOffsetChangeImpl,
             RefreshAttributeModifier::SetPullDownRatioImpl,
+            RefreshAttributeModifier::SetMaxPullDownDistanceImpl,
         };
         return &ArkUIRefreshModifierImpl;
     }
@@ -23579,11 +23860,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollModifier::ConstructImpl,
             ScrollInterfaceModifier::SetScrollOptionsImpl,
             ScrollAttributeModifier::SetScrollableImpl,
+            ScrollAttributeModifier::SetMaxZoomScaleImpl,
+            ScrollAttributeModifier::SetMinZoomScaleImpl,
+            ScrollAttributeModifier::SetZoomScaleImpl,
+            ScrollAttributeModifier::SetEnableBouncesZoomImpl,
             ScrollAttributeModifier::SetOnWillScrollImpl,
             ScrollAttributeModifier::SetOnDidScrollImpl,
             ScrollAttributeModifier::SetOnScrollEdgeImpl,
             ScrollAttributeModifier::SetOnScrollStartImpl,
             ScrollAttributeModifier::SetOnScrollStopImpl,
+            ScrollAttributeModifier::SetOnDidZoomImpl,
+            ScrollAttributeModifier::SetOnZoomStartImpl,
+            ScrollAttributeModifier::SetOnZoomStopImpl,
             ScrollAttributeModifier::SetScrollBarImpl,
             ScrollAttributeModifier::SetScrollBarColorImpl,
             ScrollAttributeModifier::SetScrollBarWidthImpl,
@@ -23606,9 +23894,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollableCommonMethodModifier::SetScrollBarImpl,
             ScrollableCommonMethodModifier::SetScrollBarColorImpl,
             ScrollableCommonMethodModifier::SetScrollBarWidthImpl,
+            ScrollableCommonMethodModifier::SetScrollBarMarginImpl,
             ScrollableCommonMethodModifier::SetNestedScrollImpl,
             ScrollableCommonMethodModifier::SetEnableScrollInteractionImpl,
             ScrollableCommonMethodModifier::SetFrictionImpl,
+            ScrollableCommonMethodModifier::SetContentStartOffsetImpl,
+            ScrollableCommonMethodModifier::SetContentEndOffsetImpl,
+            ScrollableCommonMethodModifier::SetOnWillStartDraggingImpl,
+            ScrollableCommonMethodModifier::SetOnWillStopDraggingImpl,
+            ScrollableCommonMethodModifier::SetOnDidStopDraggingImpl,
+            ScrollableCommonMethodModifier::SetOnWillStartFlingImpl,
+            ScrollableCommonMethodModifier::SetOnDidStopFlingImpl,
             ScrollableCommonMethodModifier::SetOnReachStartImpl,
             ScrollableCommonMethodModifier::SetOnReachEndImpl,
             ScrollableCommonMethodModifier::SetOnScrollStartImpl,
@@ -23629,6 +23925,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollBarModifier::ConstructImpl,
             ScrollBarInterfaceModifier::SetScrollBarOptionsImpl,
             ScrollBarAttributeModifier::SetEnableNestedScrollImpl,
+            ScrollBarAttributeModifier::SetScrollBarColorImpl,
         };
         return &ArkUIScrollBarModifierImpl;
     }
@@ -24415,6 +24712,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WaterFlowAttributeModifier::SetRowsGapImpl,
             WaterFlowAttributeModifier::SetLayoutDirectionImpl,
             WaterFlowAttributeModifier::SetCachedCount0Impl,
+            WaterFlowAttributeModifier::SetSyncLoadImpl,
             WaterFlowAttributeModifier::SetOnScrollFrameBeginImpl,
             WaterFlowAttributeModifier::SetOnScrollIndexImpl,
             WaterFlowAttributeModifier::SetOnWillScrollImpl,
@@ -30995,6 +31293,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // DragEventAccessor
+    namespace DragUtilsAccessor {
+    Ark_Int64 GetForegroundColorValueImpl(const Ark_ResourceColor* resourceColor)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("GetForegroundColorValue(");
+        WriteToString(&out, resourceColor);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    } // DragUtilsAccessor
     namespace DrawingRenderingContextAccessor {
     void DestroyPeerImpl(Ark_DrawingRenderingContext peer)
     {
@@ -32463,7 +32776,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return nullptr;
     }
-    Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
+    Ark_UICommonEvent GetCommonEventImpl(Ark_NativePointer peer)
     {
         if (!needGroupedLog(1))
         {
@@ -32656,6 +32969,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // FullScreenExitHandlerAccessor
+    namespace GaugeExtenderAccessor {
+    void SetIndicatorImpl(Ark_NativePointer node,
+                          const Opt_GaugeIndicatorOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setIndicator(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // GaugeExtenderAccessor
     namespace GestureAccessor {
     void DestroyPeerImpl(Ark_Gesture peer)
     {
@@ -33988,6 +34317,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append("[return reinterpret_cast<Ark_image_PixelMap>(300)] \n");
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_image_PixelMap>(300);
+    }
+    Opt_String GetResourceValueImpl(Ark_ImageAttachment peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getResourceValue(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
     }
     Opt_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
     {
@@ -35687,6 +36028,69 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return 0;
     }
     } // LineHeightStyleAccessor
+    namespace ListItemSwipeActionManagerAccessor {
+    void DestroyPeerImpl(Ark_ListItemSwipeActionManager peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_ListItemSwipeActionManager ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_ListItemSwipeActionManager>(100);
+        }
+        string out("new ListItemSwipeActionManager(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_ListItemSwipeActionManager>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_ListItemSwipeActionManager>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    Ark_Int32 ExpandImpl(Ark_FrameNode node,
+                         Ark_ListItemSwipeActionDirection direction)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("expand(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, direction);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_Int32 CollapseImpl(Ark_FrameNode node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("collapse(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    } // ListItemSwipeActionManagerAccessor
     namespace ListScrollerAccessor {
     void DestroyPeerImpl(Ark_ListScroller peer)
     {
@@ -46325,6 +46729,395 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // UIExtensionProxyAccessor
+    namespace UIGridEventAccessor {
+    void DestroyPeerImpl(Ark_UIGridEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_UIGridEvent ConstructImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_UIGridEvent>(100);
+        }
+        string out("new UIGridEvent(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_UIGridEvent>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_UIGridEvent>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void SetOnWillScrollImpl(Ark_UIGridEvent peer,
+                             const Opt_OnWillScrollCallback* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnWillScroll(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnDidScrollImpl(Ark_UIGridEvent peer,
+                            const Opt_OnScrollCallback* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnDidScroll(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnScrollIndexImpl(Ark_UIGridEvent peer,
+                              const Opt_OnGridScrollIndexCallback* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnScrollIndex(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // UIGridEventAccessor
+    namespace UIListEventAccessor {
+    void DestroyPeerImpl(Ark_UIListEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_UIListEvent ConstructImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_UIListEvent>(100);
+        }
+        string out("new UIListEvent(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_UIListEvent>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_UIListEvent>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void SetOnWillScrollImpl(Ark_UIListEvent peer,
+                             const Opt_OnWillScrollCallback* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnWillScroll(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnDidScrollImpl(Ark_UIListEvent peer,
+                            const Opt_OnScrollCallback* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnDidScroll(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnScrollIndexImpl(Ark_UIListEvent peer,
+                              const Opt_OnListScrollIndexCallback* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnScrollIndex(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnScrollVisibleContentChangeImpl(Ark_UIListEvent peer,
+                                             const Opt_OnScrollVisibleContentChangeCallback* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnScrollVisibleContentChange(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // UIListEventAccessor
+    namespace UIScrollableCommonEventAccessor {
+    void DestroyPeerImpl(Ark_UIScrollableCommonEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_UIScrollableCommonEvent ConstructImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_UIScrollableCommonEvent>(100);
+        }
+        string out("new UIScrollableCommonEvent(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_UIScrollableCommonEvent>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_UIScrollableCommonEvent>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void SetOnReachStartImpl(Ark_UIScrollableCommonEvent peer,
+                             const Opt_Callback_Void* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnReachStart(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnReachEndImpl(Ark_UIScrollableCommonEvent peer,
+                           const Opt_Callback_Void* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnReachEnd(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnScrollStartImpl(Ark_UIScrollableCommonEvent peer,
+                              const Opt_Callback_Void* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnScrollStart(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnScrollStopImpl(Ark_UIScrollableCommonEvent peer,
+                             const Opt_Callback_Void* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnScrollStop(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnScrollFrameBeginImpl(Ark_UIScrollableCommonEvent peer,
+                                   const Opt_OnScrollFrameBeginCallback* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnScrollFrameBegin(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // UIScrollableCommonEventAccessor
+    namespace UIScrollEventAccessor {
+    void DestroyPeerImpl(Ark_UIScrollEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_UIScrollEvent ConstructImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_UIScrollEvent>(100);
+        }
+        string out("new UIScrollEvent(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_UIScrollEvent>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_UIScrollEvent>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void SetOnWillScrollImpl(Ark_UIScrollEvent peer,
+                             const Opt_ScrollOnWillScrollCallback* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnWillScroll(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnDidScrollImpl(Ark_UIScrollEvent peer,
+                            const Opt_ScrollOnScrollCallback* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnDidScroll(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // UIScrollEventAccessor
+    namespace UIWaterFlowEventAccessor {
+    void DestroyPeerImpl(Ark_UIWaterFlowEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_UIWaterFlowEvent ConstructImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_UIWaterFlowEvent>(100);
+        }
+        string out("new UIWaterFlowEvent(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_UIWaterFlowEvent>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_UIWaterFlowEvent>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void SetOnWillScrollImpl(Ark_UIWaterFlowEvent peer,
+                             const Opt_OnWillScrollCallback* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnWillScroll(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnDidScrollImpl(Ark_UIWaterFlowEvent peer,
+                            const Opt_OnScrollCallback* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnDidScroll(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnScrollIndexImpl(Ark_UIWaterFlowEvent peer,
+                              const Opt_OnWaterFlowScrollIndexCallback* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnScrollIndex(");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // UIWaterFlowEventAccessor
     namespace UrlStyleAccessor {
     void DestroyPeerImpl(Ark_UrlStyle peer)
     {
@@ -48746,6 +49539,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DragEventPeer {
         virtual ~DragEventPeer() = default;
     };
+    const GENERATED_ArkUIDragUtilsAccessor* GetDragUtilsAccessor()
+    {
+        static const GENERATED_ArkUIDragUtilsAccessor DragUtilsAccessorImpl {
+            DragUtilsAccessor::GetForegroundColorValueImpl,
+        };
+        return &DragUtilsAccessorImpl;
+    }
     const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContextAccessor()
     {
         static const GENERATED_ArkUIDrawingRenderingContextAccessor DrawingRenderingContextAccessorImpl {
@@ -49007,6 +49807,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct FullScreenExitHandlerPeer {
         virtual ~FullScreenExitHandlerPeer() = default;
     };
+    const GENERATED_ArkUIGaugeExtenderAccessor* GetGaugeExtenderAccessor()
+    {
+        static const GENERATED_ArkUIGaugeExtenderAccessor GaugeExtenderAccessorImpl {
+            GaugeExtenderAccessor::SetIndicatorImpl,
+        };
+        return &GaugeExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIGestureAccessor* GetGestureAccessor()
     {
         static const GENERATED_ArkUIGestureAccessor GestureAccessorImpl {
@@ -49232,6 +50040,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ImageAttachmentAccessor::ConstructImpl,
             ImageAttachmentAccessor::GetFinalizerImpl,
             ImageAttachmentAccessor::GetValueImpl,
+            ImageAttachmentAccessor::GetResourceValueImpl,
             ImageAttachmentAccessor::GetSizeImpl,
             ImageAttachmentAccessor::GetVerticalAlignImpl,
             ImageAttachmentAccessor::GetObjectFitImpl,
@@ -49540,6 +50349,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct LineHeightStylePeer {
         virtual ~LineHeightStylePeer() = default;
+    };
+    const GENERATED_ArkUIListItemSwipeActionManagerAccessor* GetListItemSwipeActionManagerAccessor()
+    {
+        static const GENERATED_ArkUIListItemSwipeActionManagerAccessor ListItemSwipeActionManagerAccessorImpl {
+            ListItemSwipeActionManagerAccessor::DestroyPeerImpl,
+            ListItemSwipeActionManagerAccessor::ConstructImpl,
+            ListItemSwipeActionManagerAccessor::GetFinalizerImpl,
+            ListItemSwipeActionManagerAccessor::ExpandImpl,
+            ListItemSwipeActionManagerAccessor::CollapseImpl,
+        };
+        return &ListItemSwipeActionManagerAccessorImpl;
+    }
+
+    struct ListItemSwipeActionManagerPeer {
+        virtual ~ListItemSwipeActionManagerPeer() = default;
     };
     const GENERATED_ArkUIListScrollerAccessor* GetListScrollerAccessor()
     {
@@ -51251,6 +52075,88 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct UIExtensionProxyPeer {
         virtual ~UIExtensionProxyPeer() = default;
     };
+    const GENERATED_ArkUIUIGridEventAccessor* GetUIGridEventAccessor()
+    {
+        static const GENERATED_ArkUIUIGridEventAccessor UIGridEventAccessorImpl {
+            UIGridEventAccessor::DestroyPeerImpl,
+            UIGridEventAccessor::ConstructImpl,
+            UIGridEventAccessor::GetFinalizerImpl,
+            UIGridEventAccessor::SetOnWillScrollImpl,
+            UIGridEventAccessor::SetOnDidScrollImpl,
+            UIGridEventAccessor::SetOnScrollIndexImpl,
+        };
+        return &UIGridEventAccessorImpl;
+    }
+
+    struct UIGridEventPeer {
+        virtual ~UIGridEventPeer() = default;
+    };
+    const GENERATED_ArkUIUIListEventAccessor* GetUIListEventAccessor()
+    {
+        static const GENERATED_ArkUIUIListEventAccessor UIListEventAccessorImpl {
+            UIListEventAccessor::DestroyPeerImpl,
+            UIListEventAccessor::ConstructImpl,
+            UIListEventAccessor::GetFinalizerImpl,
+            UIListEventAccessor::SetOnWillScrollImpl,
+            UIListEventAccessor::SetOnDidScrollImpl,
+            UIListEventAccessor::SetOnScrollIndexImpl,
+            UIListEventAccessor::SetOnScrollVisibleContentChangeImpl,
+        };
+        return &UIListEventAccessorImpl;
+    }
+
+    struct UIListEventPeer {
+        virtual ~UIListEventPeer() = default;
+    };
+    const GENERATED_ArkUIUIScrollableCommonEventAccessor* GetUIScrollableCommonEventAccessor()
+    {
+        static const GENERATED_ArkUIUIScrollableCommonEventAccessor UIScrollableCommonEventAccessorImpl {
+            UIScrollableCommonEventAccessor::DestroyPeerImpl,
+            UIScrollableCommonEventAccessor::ConstructImpl,
+            UIScrollableCommonEventAccessor::GetFinalizerImpl,
+            UIScrollableCommonEventAccessor::SetOnReachStartImpl,
+            UIScrollableCommonEventAccessor::SetOnReachEndImpl,
+            UIScrollableCommonEventAccessor::SetOnScrollStartImpl,
+            UIScrollableCommonEventAccessor::SetOnScrollStopImpl,
+            UIScrollableCommonEventAccessor::SetOnScrollFrameBeginImpl,
+        };
+        return &UIScrollableCommonEventAccessorImpl;
+    }
+
+    struct UIScrollableCommonEventPeer {
+        virtual ~UIScrollableCommonEventPeer() = default;
+    };
+    const GENERATED_ArkUIUIScrollEventAccessor* GetUIScrollEventAccessor()
+    {
+        static const GENERATED_ArkUIUIScrollEventAccessor UIScrollEventAccessorImpl {
+            UIScrollEventAccessor::DestroyPeerImpl,
+            UIScrollEventAccessor::ConstructImpl,
+            UIScrollEventAccessor::GetFinalizerImpl,
+            UIScrollEventAccessor::SetOnWillScrollImpl,
+            UIScrollEventAccessor::SetOnDidScrollImpl,
+        };
+        return &UIScrollEventAccessorImpl;
+    }
+
+    struct UIScrollEventPeer {
+        virtual ~UIScrollEventPeer() = default;
+    };
+    const GENERATED_ArkUIUIWaterFlowEventAccessor* GetUIWaterFlowEventAccessor()
+    {
+        static const GENERATED_ArkUIUIWaterFlowEventAccessor UIWaterFlowEventAccessorImpl {
+            UIWaterFlowEventAccessor::DestroyPeerImpl,
+            UIWaterFlowEventAccessor::ConstructImpl,
+            UIWaterFlowEventAccessor::GetFinalizerImpl,
+            UIWaterFlowEventAccessor::SetOnWillScrollImpl,
+            UIWaterFlowEventAccessor::SetOnDidScrollImpl,
+            UIWaterFlowEventAccessor::SetOnScrollIndexImpl,
+        };
+        return &UIWaterFlowEventAccessorImpl;
+    }
+
+    struct UIWaterFlowEventPeer {
+        virtual ~UIWaterFlowEventPeer() = default;
+    };
     const GENERATED_ArkUIUrlStyleAccessor* GetUrlStyleAccessor()
     {
         static const GENERATED_ArkUIUrlStyleAccessor UrlStyleAccessorImpl {
@@ -51536,6 +52442,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetDismissDialogActionAccessor,
             GetDismissPopupActionAccessor,
             GetDragEventAccessor,
+            GetDragUtilsAccessor,
             GetDrawingRenderingContextAccessor,
             GetEnvironmentBackendAccessor,
             GetEventEmulatorAccessor,
@@ -51550,6 +52457,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetFrameNodeExtenderAccessor,
             GetFrictionMotionAccessor,
             GetFullScreenExitHandlerAccessor,
+            GetGaugeExtenderAccessor,
             GetGestureAccessor,
             GetGestureEventAccessor,
             GetGestureGroupAccessor,
@@ -51582,6 +52490,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLinearGradientAccessor,
             GetLinearIndicatorControllerAccessor,
             GetLineHeightStyleAccessor,
+            GetListItemSwipeActionManagerAccessor,
             GetListScrollerAccessor,
             GetLongPressGestureEventAccessor,
             GetLongPressRecognizerAccessor,
@@ -51678,6 +52587,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetUICommonEventAccessor,
             GetUIContextAtomicServiceBarAccessor,
             GetUIExtensionProxyAccessor,
+            GetUIGridEventAccessor,
+            GetUIListEventAccessor,
+            GetUIScrollableCommonEventAccessor,
+            GetUIScrollEventAccessor,
+            GetUIWaterFlowEventAccessor,
             GetUrlStyleAccessor,
             GetVideoControllerAccessor,
             GetWaterFlowSectionsAccessor,

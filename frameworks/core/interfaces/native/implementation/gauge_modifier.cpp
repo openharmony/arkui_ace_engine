@@ -25,7 +25,7 @@ const GENERATED_ArkUIGaugeModifier* GetGaugeModifier()
     static const GENERATED_ArkUIGaugeModifier* cachedModifier = nullptr;
 
     if (cachedModifier == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("gauge");
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Gauge");
         CHECK_NULL_RETURN(module, nullptr);
         cachedModifier = reinterpret_cast<const GENERATED_ArkUIGaugeModifier*>(module->GetStaticModifier());
     }

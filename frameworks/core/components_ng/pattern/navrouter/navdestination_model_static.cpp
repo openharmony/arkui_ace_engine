@@ -350,6 +350,7 @@ RefPtr<FrameNode> NavDestinationModelStatic::CreateFrameNode(
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), ctx]() {
             auto pattern = AceType::MakeRefPtr<NavDestinationPattern>(shallowBuilder);
             pattern->SetNavDestinationContext(ctx);
+            pattern->SetIsStatic(true);
             return pattern;
         });
     ctx->SetUniqueId(navDestinationNode->GetId());

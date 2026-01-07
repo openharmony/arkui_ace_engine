@@ -142,8 +142,6 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements P
 export function PathImpl(
     @memo
     style: ((attributes: PathAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkPathComponent>((): ArkPathComponent => {
         return new ArkPathComponent()
@@ -152,7 +150,6 @@ export function PathImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

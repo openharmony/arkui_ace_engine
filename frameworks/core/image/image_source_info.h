@@ -56,7 +56,7 @@ public:
         : ImageSourceInfo("", Dimension(-1), Dimension(-1), InternalResource::ResourceId::NO_ID, pixmap)
     {}
 
-    ImageSourceInfo(std::unique_ptr<uint8_t[]>&& buffer, size_t bufferSize);
+    ImageSourceInfo(const std::shared_ptr<uint8_t[]>& buffer, size_t bufferSize);
 
     ImageSourceInfo() = default;
     ~ImageSourceInfo() = default;

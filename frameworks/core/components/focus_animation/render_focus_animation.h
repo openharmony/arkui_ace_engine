@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class RenderFocusAnimation : public RenderNode {
+class ACE_FORCE_EXPORT RenderFocusAnimation : public RenderNode {
     DECLARE_ACE_TYPE(RenderFocusAnimation, RenderNode);
 
 public:

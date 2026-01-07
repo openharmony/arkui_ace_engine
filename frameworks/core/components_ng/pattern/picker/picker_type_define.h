@@ -19,7 +19,7 @@
 #include <string>
 
 #include "core/components/common/properties/text_style.h"
-#include "core/components/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/common/resource/resource_object.h"
 #include "frameworks/base/i18n/time_format.h"
 
@@ -158,6 +158,23 @@ struct TimePickerSettingData {
     bool showSecond;
     bool isEnableCascade;
     int32_t crownSensitivity;
+};
+
+class ACE_FORCE_EXPORT DatePickerChangeEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(DatePickerChangeEvent, BaseEventInfo);
+
+public:
+    explicit DatePickerChangeEvent(const std::string& str) : BaseEventInfo
+        ("DatePickerChangeEvent"), selectedStr_(str) {}
+    ~DatePickerChangeEvent() = default;
+
+    const std::string& GetSelectedStr() const
+    {
+        return selectedStr_;
+    }
+
+private:
+    std::string selectedStr_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_PICKER_TYPE_DEFINE_H

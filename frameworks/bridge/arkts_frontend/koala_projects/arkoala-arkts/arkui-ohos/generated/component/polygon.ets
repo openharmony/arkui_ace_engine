@@ -176,8 +176,6 @@ export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implement
 export function PolygonImpl(
     @memo
     style: ((attributes: PolygonAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkPolygonComponent>((): ArkPolygonComponent => {
         return new ArkPolygonComponent()
@@ -186,7 +184,6 @@ export function PolygonImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

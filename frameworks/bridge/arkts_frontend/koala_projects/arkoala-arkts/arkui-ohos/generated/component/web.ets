@@ -3058,6 +3058,18 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setOnTextSelectionChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnFirstScreenPaintAttribute(value: OnFirstScreenPaintCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WebAttribute_setOnFirstScreenPaint(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setEnableImageAnalyzerAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -3744,6 +3756,12 @@ export interface BlankScreenDetectionConfig {
     detectionMethods?: Array<BlankScreenDetectionMethod>;
     contentfulNodesCountThreshold?: int32;
 }
+export interface FirstScreenPaint {
+    url: string;
+    navigationStartTime: int64;
+    firstScreenPaintTime: int64;
+}
+export type OnFirstScreenPaintCallback = (firstScreenPaint: FirstScreenPaint) => void;
 export interface WebAttribute extends CommonMethod {
     setWebOptions(value: WebOptions): this {
         throw new Error("Unimplemented method setWebOptions")
@@ -4162,6 +4180,9 @@ export interface WebAttribute extends CommonMethod {
     onTextSelectionChange(value: TextSelectionChangeCallback | undefined): this {
         throw new Error("Unimplemented method onTextSelectionChange")
     }
+    onFirstScreenPaint(value: OnFirstScreenPaintCallback | undefined): this {
+        throw new Error("Unimplemented method onFirstScreenPaint")
+    }
     enableImageAnalyzer(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableImageAnalyzer")
     }
@@ -4323,6 +4344,7 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     zoomControlAccess_value?: boolean | undefined
     enableSelectedDataDetector_value?: boolean | undefined
     onTextSelectionChange_value?: TextSelectionChangeCallback | undefined
+    onFirstScreenPaint_value?: OnFirstScreenPaintCallback | undefined
     enableImageAnalyzer_value?: boolean | undefined
     enableAutoFill_value?: boolean | undefined
     onMicrophoneCaptureStateChange_value?: OnMicrophoneCaptureStateChangeCallback | undefined
@@ -4743,6 +4765,9 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
         return this
     }
     onTextSelectionChange(value: TextSelectionChangeCallback | undefined): this {
+        return this
+    }
+    onFirstScreenPaint(value: OnFirstScreenPaintCallback | undefined): this {
         return this
     }
     enableImageAnalyzer(value: boolean | undefined): this {
@@ -5964,6 +5989,14 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
+    public onFirstScreenPaint(value: OnFirstScreenPaintCallback | undefined): this {
+        if (this.checkPriority("onFirstScreenPaint")) {
+            const value_casted = value as (OnFirstScreenPaintCallback | undefined)
+            this.getPeer()?.setOnFirstScreenPaintAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
         if (this.checkPriority("registerNativeEmbedRule")) {
             const tag_casted = tag as (string | undefined)
@@ -6707,6 +6740,25 @@ export class FirstMeaningfulPaint_serializer {
         }
         const firstMeaningfulPaintTimeTmpResult : int64 | undefined = firstMeaningfulPaintTimeTmpBuf
         let value : FirstMeaningfulPaint = ({navigationStartTime: navigationStartTimeTmpResult, firstMeaningfulPaintTime: firstMeaningfulPaintTimeTmpResult} as FirstMeaningfulPaint)
+        return value
+    }
+}
+export class FirstScreenPaint_serializer {
+    public static write(buffer: SerializerBase, value: FirstScreenPaint): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForUrl  = value.url
+        valueSerializer.writeString(valueHolderForUrl)
+        const valueHolderForNavigationStartTime  = value.navigationStartTime
+        valueSerializer.writeInt64(valueHolderForNavigationStartTime)
+        const valueHolderForFirstScreenPaintTime  = value.firstScreenPaintTime
+        valueSerializer.writeInt64(valueHolderForFirstScreenPaintTime)
+    }
+    public static read(buffer: DeserializerBase): FirstScreenPaint {
+        let valueDeserializer : DeserializerBase = buffer
+        const urlTmpResult : string = (valueDeserializer.readString() as string)
+        const navigationStartTimeTmpResult : int64 = valueDeserializer.readInt64()
+        const firstScreenPaintTimeTmpResult : int64 = valueDeserializer.readInt64()
+        let value : FirstScreenPaint = ({url: urlTmpResult, navigationStartTime: navigationStartTimeTmpResult, firstScreenPaintTime: firstScreenPaintTimeTmpResult} as FirstScreenPaint)
         return value
     }
 }

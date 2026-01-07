@@ -30,11 +30,21 @@ Text::Text(const std::u16string& content)
     node_ = AceType::MakeRefPtr<FrameNodeImpl>(aceNode);
 }
 
+Text::Text(const RefPtr<FrameNode>& node)
+{
+    node_ = node;
+}
+
 Text::~Text() = default;
 
 RefPtr<Text> Text::Create(const std::u16string& content)
 {
     return Referenced::MakeRefPtr<Text>(content);
+}
+
+RefPtr<Text> Text::Create(const RefPtr<FrameNode>& node)
+{
+    return Referenced::MakeRefPtr<Text>(node);
 }
 
 void Text::SetTextColor(const Color& value)
@@ -45,6 +55,29 @@ void Text::SetTextColor(const Color& value)
 void Text::SetFontSize(const Dimension& value)
 {
     NG::TextModelNG::SetFontSize(reinterpret_cast<AceNode*>(node_->GetHandle()), value);
+}
+
+std::optional<void*> Text::GetParagraph()
+{
+    return NG::TextModelNG::GetInnerParagraph(reinterpret_cast<AceNode*>(node_->GetHandle()));
+}
+
+void Text::SetDrawCallback(DrawCallback&& drawCallback)
+{
+    NG::TextModelNG::SetExternalDrawCallback(reinterpret_cast<AceNode*>(node_->GetHandle()), std::move(drawCallback));
+}
+
+std::u16string Text::GetContent()
+{
+    return NG::TextModelNG::GetContent(reinterpret_cast<AceNode*>(node_->GetHandle()));
+}
+
+void Text::MarkRedraw()
+{
+    auto aceNode = reinterpret_cast<AceNode*>(node_->GetHandle());
+    if (aceNode) {
+        aceNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+    }
 }
 
 } // namespace OHOS::Ace::Kit

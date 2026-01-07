@@ -677,7 +677,7 @@ struct ArkUIAniDragControllerModifier {
     bool (*aniHandleDragAction)(ArkUIDragControllerAsync& asyncCtx, std::string &errMsg);
     bool (*aniHandleDragActionStartDrag)(ArkUIDragControllerAsync& asyncCtx);
     void* (*createDragEventPeer)(const ArkUIDragNotifyMessage& dragNotifyMsg);
-    void (*aniDragPreviewSetForegroundColor)(Ark_ResourceColor value, ArkUIDragPreviewAsync& asyncCtx);
+    void (*aniDragPreviewSetForegroundColor)(ani_long value, ArkUIDragPreviewAsync& asyncCtx);
     void (*aniDragPreviewAnimate)(ArkUIDragPreviewAsync& asyncCtx);
     void (*aniDragActionSetDragEventStrictReportingEnabled)(bool enable);
     void (*aniDragActionCancelDataLoading)(const char* key);

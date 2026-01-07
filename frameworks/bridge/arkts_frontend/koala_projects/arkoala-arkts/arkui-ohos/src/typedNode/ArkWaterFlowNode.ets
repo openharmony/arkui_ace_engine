@@ -22,6 +22,7 @@ import {
   WaterFlowOptions,
   ConstraintSizeOptions,
   Length,
+  ItemFillPolicy,
   FlexDirection,
   NestedScrollOptions,
   OnScrollFrameBeginCallback,
@@ -57,8 +58,8 @@ export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttr
     allowChildTypes(): string[] {
         return ['FlowItem'];
     }
-    columnsTemplate(value: string | undefined): this {
-        const value_casted = value as (string | undefined)
+    columnsTemplate(value: string | ItemFillPolicy | undefined): this {
+        const value_casted = value as (string | ItemFillPolicy | undefined)
         this.getPeer()?.setColumnsTemplateAttribute(value_casted)
         this.markDirty()
         return this
@@ -140,6 +141,12 @@ export class ArkWaterFlowNode extends ArkScrollableNode implements WaterFlowAttr
             return this
         }
         throw new Error('Can not select appropriate overload')
+    }
+    syncLoad(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setSyncLoadAttribute(value_casted)
+        this.markDirty()
+        return this
     }
     onReachStart(value: (() => void) | undefined): this {
         const value_casted = value as ((() => void) | undefined)

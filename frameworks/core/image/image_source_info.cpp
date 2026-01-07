@@ -208,8 +208,8 @@ ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, s
     GenerateCacheKey();
 }
 
-ImageSourceInfo::ImageSourceInfo(std::unique_ptr<uint8_t[]>&& buffer, size_t bufferSize)
-    : buffer_(std::move(buffer)), bufferSize_(bufferSize)
+ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<uint8_t[]>& buffer, size_t bufferSize)
+    : buffer_(buffer), bufferSize_(bufferSize)
 {
     isSvg_ = true;
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();

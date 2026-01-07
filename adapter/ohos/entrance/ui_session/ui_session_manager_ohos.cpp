@@ -870,4 +870,32 @@ void UiSessionManagerOhos::ReportGetStateMgmtInfo(std::vector<std::string> resul
         LOGW("report component event failed, process id:%{public}d", processMap_["GetStateMgmtInfo"]);
     }
 }
+
+void UiSessionManagerOhos::SaveGetWebInfoByRequestFunction(GetWebInfoByRequestFunction&& callback)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    getWebInfoByRequestCallback_ = std::move(callback);
+}
+
+void UiSessionManagerOhos::GetWebInfoByRequest(int32_t webId, const std::string& request)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (getWebInfoByRequestCallback_) {
+        getWebInfoByRequestCallback_(webId, request);
+    }
+}
+
+void UiSessionManagerOhos::SendWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request,
+        const std::string& result, WebRequestErrorCode errorCode)
+{
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+    if (!processMap_.count("GetWebInfoByRequest") || !reportObjectMap_.count(processMap_["GetWebInfoByRequest"])) {
+        LOGW("SendWebInfoByRequest no report proxy");
+        return;
+    }
+    auto reportService = iface_cast<ReportService>(reportObjectMap_[processMap_["GetWebInfoByRequest"]]);
+    if (reportService) {
+        reportService->SendWebInfoRequestResult(windowId, webId, request, result, errorCode);
+    }
+}
 } // namespace OHOS::Ace

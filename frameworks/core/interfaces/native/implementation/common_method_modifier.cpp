@@ -759,13 +759,13 @@ auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_
     auto optParam = Converter::OptConvert<NG::MenuParam>(menuOption->previewAnimationOptions);
     if (optParam) {
         menuParam.previewAnimationOptions = optParam->previewAnimationOptions;
+        menuParam.hasPreviewTransitionEffect = optParam->hasPreviewTransitionEffect;
+        menuParam.previewTransition = optParam->previewTransition;
         if (menuParam.previewMode != MenuPreviewMode::CUSTOM ||
             optParam->hasPreviewTransitionEffect || optParam->hasTransitionEffect ||
             menuParam.contextMenuRegisterType == NG::ContextMenuRegisterType::CUSTOM_TYPE) {
             return;
         }
-        menuParam.hasPreviewTransitionEffect = optParam->hasPreviewTransitionEffect;
-        menuParam.previewTransition = optParam->previewTransition;
         menuParam.hoverImageAnimationOptions = optParam->hoverImageAnimationOptions;
         menuParam.isShowHoverImage = optParam->isShowHoverImage;
         menuParam.hoverScaleInterruption = optParam->hoverScaleInterruption;
@@ -1609,9 +1609,15 @@ template<>
 RotateAngleOpt Convert(const Ark_RotateAngleOptions& src)
 {
     RotateAngleOpt options;
-    options.vec4f.emplace_back(OptConvert<float>(src.angleX));
-    options.vec4f.emplace_back(OptConvert<float>(src.angleY));
-    options.vec4f.emplace_back(OptConvert<float>(src.angleZ));
+    std::optional<float> angleX = 0.0f;
+    std::optional<float> angleY = 0.0f;
+    std::optional<float> angleZ = 0.0f;
+    ConvertAngleWithDefault(src.angleX, angleX, 0.0f);
+    ConvertAngleWithDefault(src.angleY, angleY, 0.0f);
+    ConvertAngleWithDefault(src.angleZ, angleZ, 0.0f);
+    options.vec4f.emplace_back(angleX);
+    options.vec4f.emplace_back(angleY);
+    options.vec4f.emplace_back(angleZ);
     options.vec4f.emplace_back(OptConvert<float>(src.perspective));
 
     auto centerX =  OptConvert<Dimension>(src.centerX);
@@ -2085,6 +2091,31 @@ NG::AccessibilityActionOptions Convert(const Ark_AccessibilityActionOptions& src
 {
     auto scrollStep = Converter::OptConvert<int32_t>(src.scrollStep).value_or(1);
     return AccessibilityActionOptions { .scrollStep = scrollStep };
+}
+
+template<>
+NG::AccessibilityGroupOptions Convert(const Ark_AccessibilityOptions& src)
+{
+    auto stateControllerByType = AccessibilityRoleType::ROLE_NONE;
+    auto stateTypePtr = Converter::GetOptPtr(&src.stateControllerRoleType);
+    if (stateTypePtr) {
+        stateControllerByType = static_cast<AccessibilityRoleType>(stateTypePtr.value());
+    }
+    auto actionControllerByType = AccessibilityRoleType::ROLE_NONE;
+    auto actionTypePtr = Converter::GetOptPtr(&src.actionControllerRoleType);
+    if (actionTypePtr) {
+        actionControllerByType = static_cast<AccessibilityRoleType>(actionTypePtr.value());
+    }
+
+    NG::AccessibilityGroupOptions groupOptions = {
+        .accessibilityTextPreferred = Converter::OptConvert<bool>(src.accessibilityPreferred).value_or(false),
+        .stateControllerByType = stateControllerByType,
+        .stateControllerByInspector = Converter::OptConvert<std::string>(src.stateControllerId).value_or(""),
+        .actionControllerByType = actionControllerByType,
+        .actionControllerByInspector = Converter::OptConvert<std::string>(src.actionControllerId).value_or(""),
+    };
+
+    return groupOptions;
 }
 
 void AssignArkValue(Ark_TouchTestInfo& dst, const TouchTestInfo& src, ConvContext *ctx)
@@ -5693,25 +5724,31 @@ void SetBlendModeImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetBlendApplyType(frameNode, blendApplyType);
 }
 void SetAdvancedBlendModeImpl(Ark_NativePointer node,
-                              const Ark_Union_BlendMode_Blender* effect,
+                              const Opt_Union_BlendMode_Blender* effect,
                               const Opt_BlendApplyType* type)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(effect);
     BlendMode blendMode = BlendMode::NONE;
     BlendApplyType blendApplyType = BlendApplyType::FAST;
-    Converter::VisitUnionPtr(effect,
+    Converter::VisitUnionPtr(
+        effect,
         [&blendMode, &blendApplyType, frameNode](const Ark_BlendMode& value) {
             blendMode = Converter::OptConvert<BlendMode>(value).value_or(blendMode);
-            blendApplyType = BlendApplyType::OFFSCREEN;
             ViewAbstractModelStatic::SetBlendMode(frameNode, blendMode);
         },
-        [](const Ark_uiEffect_BrightnessBlender& value) {
-            LOGE("CommonMethodModifier::AdvancedBlendModeImpl Ark_uiEffect_BrightnessBlender is not supported yet.");
+        [frameNode](const Ark_uiEffect_BrightnessBlender& value) {
+            auto ptrOpt = Converter::OptConvert<OHOS::Rosen::Blender*>(value);
+            if (!ptrOpt || !(ptrOpt.value())) {
+                ViewAbstractModelStatic::SetBlender(frameNode, nullptr);
+                return;
+            }
+            ViewAbstractModelStatic::SetBlender(frameNode, ptrOpt.value());
         },
-        []() {}
-    );
+        [&blendMode, frameNode]() {
+            ViewAbstractModelStatic::SetBlendMode(frameNode, blendMode);
+            ViewAbstractModelStatic::SetBlender(frameNode, nullptr);
+        });
     std::optional<BlendApplyType> blendApplyTypeOpt = Converter::OptConvertPtr<BlendApplyType>(type);
     blendApplyType = blendApplyTypeOpt.value_or(blendApplyType);
     ViewAbstractModelStatic::SetBlendApplyType(frameNode, blendApplyType);
@@ -6385,11 +6422,15 @@ void SetAccessibilityGroupWithConfigImpl(Ark_NativePointer node,
     if (isGroupValue) {
         isGroupFlag = *isGroupValue;
     }
-    auto optValue = Converter::GetOptPtr(config);
-    auto accessibilityPreferred = optValue ?
-        Converter::OptConvert<bool>(optValue->accessibilityPreferred) : std::nullopt;
     ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupFlag);
+    auto optValue = Converter::GetOptPtr(config);
+    CHECK_NULL_VOID(optValue);
+    auto accessibilityPreferred =
+        Converter::OptConvert<bool>(optValue->accessibilityPreferred);
     ViewAbstractModelNG::SetAccessibilityTextPreferred(frameNode, accessibilityPreferred.value_or(false));
+
+    NG::AccessibilityGroupOptions groupOptions = Converter::Convert<NG::AccessibilityGroupOptions>(*optValue);
+    ViewAbstractModelNG::SetAccessibilityGroupOptions(frameNode, groupOptions);
 }
 void SetOnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
                                            const Opt_GestureRecognizerJudgeBeginCallback* callback_,

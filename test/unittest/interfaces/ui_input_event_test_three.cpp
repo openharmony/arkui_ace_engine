@@ -24,8 +24,6 @@ namespace {
 constexpr int32_t ARKUI_DEVICE_ID = 1;
 constexpr float ARKUI_X = 2.0;
 constexpr float ARKUI_Y = 3.0;
-constexpr int32_t ARKUI_ACTIONTYPE = 1;
-constexpr int32_t ARKUI_ACTIONTYPE_SET = 0;
 constexpr int32_t ARKUI_FINGERID = 1;
 constexpr int32_t ARKUI_FINGERID_SET = 0;
 constexpr ArkUI_Uint64 ARKUI_MODIFIERKEYSTATE = 1;
@@ -574,57 +572,6 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIn
     y1 = OH_ArkUI_PointerEvent_GetYByIndex(inputEvent, 0);
     EXPECT_EQ(x1, 0);
     EXPECT_EQ(y1, 0);
-}
-
-/**
- * @tc.name: OH_ArkUI_PointerEvent_SetClonedEventActionType001
- * @tc.desc: Test OH_ArkUI_UIInputEvent functions.
- * @tc.type: FUNC
- */
-HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventActionType001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
-     */
-    ArkUI_NodeEvent nodeEvent;
-    ArkUINodeEvent event;
-    ArkUI_UIInputEvent uiInputEvent;
-    event.kind = TOUCH_EVENT;
-    event.touchEvent.actionTouchPoint.nodeX = ARKUI_X;
-    event.touchEvent.actionTouchPoint.nodeY = ARKUI_Y;
-    // deviceid
-    event.touchEvent.deviceId = ARKUI_DEVICE_ID;
-    // modifierkeystates
-    event.touchEvent.modifierKeyState = ARKUI_MODIFIERKEYSTATE;
-    uiInputEvent.inputEvent = &event.touchEvent;
-    uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
-    nodeEvent.origin = &uiInputEvent;
-    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
-    event.touchEvent.action = ARKUI_ACTIONTYPE;
-    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
-
-    auto* touchEvenInput = reinterpret_cast<ArkUITouchEvent*>(inputEvent->inputEvent);
-    event.touchEvent.target.id = touchEvenInput->target.id;
-    event.touchEvent.target.type = touchEvenInput->target.type;
-    event.touchEvent.target.area = touchEvenInput->target.area;
-    event.touchEvent.target.origin = touchEvenInput->target.origin;
-    event.touchEvent.action = touchEvenInput->action;
-    event.touchEvent.changedPointerId = touchEvenInput->changedPointerId;
-    event.touchEvent.actionTouchPoint = touchEvenInput->actionTouchPoint;
-    event.touchEvent.timeStamp = touchEvenInput->timeStamp;
-    event.touchEvent.sourceType = touchEvenInput->sourceType;
-    event.touchEvent.targetDisplayId = touchEvenInput->targetDisplayId;
-    event.touchEvent.deviceId = touchEvenInput->deviceId;
-
-    auto res = OH_ArkUI_PointerEvent_SetClonedEventActionType(inputEvent, ARKUI_ACTIONTYPE_SET);
-    auto action = OH_ArkUI_UIInputEvent_GetAction(inputEvent);
-    EXPECT_EQ(res, 180003);
-    EXPECT_EQ(action, 3);
-    inputEvent->isCloned = true;
-    res = OH_ArkUI_PointerEvent_SetClonedEventActionType(inputEvent, ARKUI_ACTIONTYPE_SET);
-    action = OH_ArkUI_UIInputEvent_GetAction(inputEvent);
-    EXPECT_EQ(res, 0);
-    EXPECT_EQ(action, 1);
 }
 
 /**

@@ -273,6 +273,26 @@ void GridModelStatic::SetAlignItems(FrameNode* frameNode, const std::optional<Gr
     }
 }
 
+void GridModelStatic::SetItemFillPolicy(FrameNode* frameNode, PresetFillType policy)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ItemFillPolicy, policy, frameNode);
+}
+
+void GridModelStatic::SetFocusWrapMode(FrameNode* frameNode, const std::optional<FocusWrapMode>& focusWrapMode)
+{
+    if (focusWrapMode) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, FocusWrapMode, focusWrapMode.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, FocusWrapMode, frameNode);
+    }
+}
+
+void GridModelStatic::SetSyncLoad(FrameNode* frameNode, bool syncLoad)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, SyncLoad, syncLoad, frameNode);
+}
+
 void GridModelStatic::SetOnItemDragStart(
     FrameNode* frameNode, std::function<void(const ItemDragInfo&, int32_t)>&& value)
 {

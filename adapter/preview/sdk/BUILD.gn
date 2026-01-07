@@ -134,6 +134,9 @@ if (is_ohos_standard_system) {
     deps = [
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:gauge",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:hyperlink",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:checkbox",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:checkboxgroup",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:rating",
     ]
     out_path = get_label_info(
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
@@ -141,6 +144,9 @@ if (is_ohos_standard_system) {
     sources = [
       "${out_path}/arkui/ace_engine/arkgauge.abc",
       "${out_path}/arkui/ace_engine/arkhyperlink.abc",
+      "${out_path}/arkui/ace_engine/arkcheckbox.abc",
+      "${out_path}/arkui/ace_engine/arkcheckboxgroup.abc",
+      "${out_path}/arkui/ace_engine/arkrating.abc",
     ]
 
     # Output path description: 

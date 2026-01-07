@@ -33,7 +33,7 @@ public:
 using OnPress = std::function<void(const PressInfo&)>;
 using OnPressCancel = std::function<void()>;
 
-class PressRecognizer : public GestureRecognizer {
+class ACE_FORCE_EXPORT PressRecognizer : public GestureRecognizer {
     DECLARE_ACE_TYPE(PressRecognizer, GestureRecognizer);
 
 public:

@@ -564,6 +564,7 @@ struct ArkUISizeType {
     ArkUI_Float32 value;
     ArkUI_Int32 unit;
     ArkUI_CharPtr string;
+    ArkUI_Bool isSet;
 };
 
 struct ArkUIPaddingType {
@@ -2095,6 +2096,12 @@ struct ArkVelocityFieldOptions {
     ArkFieldRegion region;
 };
 
+struct ArkUICheckboxSettingData {
+    ArkUIOptionalInt selectColor;
+    ArkUIOptionalInt unselectedColor;
+    ArkUIOptionalInt strokeColor;
+};
+
 typedef struct {
     ArkUIDragEvent* dragEvent;
     ArkUI_Int32 status;
@@ -3170,6 +3177,8 @@ struct ArkUICommonModifier {
     void (*setMaterialFilter)(ArkUINodeHandle node, void* filter);
     void (*resetMaterialFilter)(ArkUINodeHandle node);
     ArkUIIgnoreLayoutSafeAreaOpts (*getIgnoreLayoutSafeAreaOpts)(ArkUINodeHandle node);
+    void (*setUseUnionEffect)(ArkUINodeHandle node, bool useUnion);
+    void (*resetUseUnionEffect)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -5883,7 +5892,7 @@ struct ArkUICheckboxModifier {
     void (*resetCheckboxPadding)(ArkUINodeHandle node);
     void (*resetCheckboxResponseRegion)(ArkUINodeHandle node);
     void (*resetCheckboxOnChange)(ArkUINodeHandle node);
-    void (*setIsUserSetMargin)(ArkUINodeHandle node);
+    void (*setIsUserSetMargin)(ArkUINodeHandle node, ArkUI_Bool isUserSet);
 
     ArkUI_Bool (*getSelect)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getSelectedColor)(ArkUINodeHandle node);
@@ -5899,6 +5908,18 @@ struct ArkUICheckboxModifier {
     ArkUI_CharPtr (*getCheckboxGroup)(ArkUINodeHandle node);
     void (*setSelectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
     void (*setUnSelectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
+
+    void (*createCheckbox)(ArkUI_CharPtr namePtr, ArkUI_CharPtr groupPtr);
+    void (*setCheckboxBuilder)(ArkUINodeHandle node, void* builder);
+    void (*resetCheckboxMarkColor)(ArkUINodeHandle node);
+    void (*setCheckboxMarkColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setCheckMarkSize)(ArkUINodeHandle node, ArkUI_Float32 sizeValue, ArkUI_Int32 sizeUnit);
+    void (*setCheckMarkWidth)(ArkUINodeHandle node, ArkUI_Float32 widthValue, ArkUI_Int32 widthUnit);
+    void (*setCheckboxChangeEvent)(ArkUINodeHandle node, void* callback);
+    void (*setCheckboxJsPadding)(const struct ArkUIPaddingType* oldVlaue, const struct ArkUIPaddingType* newVlaue,
+        ArkUI_Bool flag);
+    void (*setCheckboxJsMargin)(
+        const struct ArkUIPaddingType* values, ArkUI_Bool isLengthMetrics, void* rawPtr, ArkUI_Bool parse);
 };
 
 struct ArkUICheckboxGroupModifier {
@@ -5932,6 +5953,20 @@ struct ArkUICheckboxGroupModifier {
     ArkUI_Int32 (*getCheckboxGroupStyle)(ArkUINodeHandle node);
     void (*setCheckboxGroupSelectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
     void (*setCheckboxGroupUnSelectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
+
+    void (*createCheckboxGroup)(ArkUI_CharPtr groupNamePtr);
+    void (*setCheckMarkColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*resetCheckMarkColor)(ArkUINodeHandle node);
+    void (*setCheckMarkSize)(ArkUINodeHandle node, ArkUI_Float32 sizeValue, ArkUI_Int32 unit);
+    void (*setCheckMarkWidth)(ArkUINodeHandle node, ArkUI_Float32 widthValue, ArkUI_Int32 unit);
+    void (*setCheckboxGroupResponseRegion)(
+        ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Uint32 length);
+    void (*resetCheckboxGroupResponseRegion)(ArkUINodeHandle node);
+    void (*setCheckboxGroupPadding)(const struct ArkUIPaddingType* oldVlaue, const struct ArkUIPaddingType* newVlaue,
+        ArkUI_Bool flag);
+    void (*setCheckboxGroupChangeEvent)(void* callback);
+    void (*setCheckboxGroupSize)(
+        ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* resPtr, ArkUI_Bool isWidth);
 };
 
 struct ArkUIImageSpanModifier {
@@ -6550,6 +6585,9 @@ struct ArkUIRatingModifier {
     void (*resetOnChange)(ArkUINodeHandle node);
     void (*setStarStylePtr)(ArkUINodeHandle node, ArkUI_CharPtr backgroundUri,
         ArkUI_CharPtr foregroundUri, ArkUI_CharPtr secondaryUri, const ArkUIRatingStyleStruct& resObj);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
+    void (*createRating)(ArkUI_Float64 rating, ArkUI_Bool indicator);
+    void (*setOnChangeEvent)(void* callback);
 };
 
 struct ArkUIRowSplitModifier {
@@ -7744,9 +7782,9 @@ struct ArkUIFrameNodeModifier {
     void (*applyAttributesFinish)(ArkUINodeHandle node);
     ArkUI_Bool (*isOnRenderTree)(ArkUINodeHandle node);
     ArkUI_Int32 (*convertPositionToWindow)(
-        ArkUINodeHandle node, ArkUI_Float32 position[2], ArkUI_Float32 (*windowPosition)[2], ArkUI_Bool useVp);
+        ArkUINodeHandle node, ArkUI_Float32 (*position)[2], ArkUI_Float32 (*windowPosition)[2], ArkUI_Bool useVp);
     ArkUI_Int32 (*convertPositionFromWindow)(
-        ArkUINodeHandle node, ArkUI_Float32 windowPosition[2], ArkUI_Float32 (*position)[2], ArkUI_Bool useVp);
+        ArkUINodeHandle node, ArkUI_Float32 (*windowPosition)[2], ArkUI_Float32 (*position)[2], ArkUI_Bool useVp);
 };
 
 struct ArkUINodeContentEvent {

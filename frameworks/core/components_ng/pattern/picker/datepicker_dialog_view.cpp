@@ -25,7 +25,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
-#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -35,8 +34,9 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/pipeline/pipeline_base.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 const int32_t MARGIN_HALF = 2;
@@ -1298,19 +1298,27 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     return buttonCancelNode;
 }
 
-void DatePickerDialogView::UpdateCheckboxPaintProperty(const RefPtr<CheckBoxPaintProperty>& checkboxPaintProps,
-    bool isLunar, const CheckboxSettingData& checkboxSettingData)
+void DatePickerDialogView::UpdateCheckboxPaintProperty(
+    FrameNode* frameNode, bool isLunar, const CheckboxSettingData& checkboxSettingData)
 {
-    checkboxPaintProps->UpdateCheckBoxSelect(isLunar);
+    CHECK_NULL_VOID(frameNode);
+    auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+    CHECK_NULL_VOID(checkboxModifier);
+    ArkUICheckboxSettingData settingData;
     if (checkboxSettingData.selectedColor.has_value()) {
-        checkboxPaintProps->UpdateCheckBoxSelectedColor(checkboxSettingData.selectedColor.value());
+        settingData.selectColor.value = checkboxSettingData.selectedColor->GetValue();
+        settingData.selectColor.isSet = true;
     }
     if (checkboxSettingData.unselectedColor.has_value()) {
-        checkboxPaintProps->UpdateCheckBoxUnSelectedColor(checkboxSettingData.unselectedColor.value());
+        settingData.unselectedColor.value = checkboxSettingData.unselectedColor->GetValue();
+        settingData.unselectedColor.isSet = true;
     }
     if (checkboxSettingData.strokeColor.has_value()) {
-        checkboxPaintProps->UpdateCheckBoxCheckMarkColor(checkboxSettingData.strokeColor.value());
+        settingData.strokeColor.value = checkboxSettingData.strokeColor->GetValue();
+        settingData.strokeColor.isSet = true;
     }
+    checkboxModifier->updatePaintPropertyBySettingData(
+        reinterpret_cast<ArkUINodeHandle>(frameNode), &settingData, isLunar);
 }
 
 void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& contentColumn,
@@ -1334,17 +1342,16 @@ void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& conten
     layoutProps->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(lunarSwitchHeight_)));
     UpdateLinearMargin(layoutProps);
-    auto checkbox = FrameNode::CreateFrameNode(
-        V2::CHECK_BOX_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<CheckBoxPattern>());
+    auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+    CHECK_NULL_VOID(checkboxModifier);
+    auto rawFramNode = reinterpret_cast<FrameNode*>(
+        checkboxModifier->createCheckboxFrameNode(ElementRegister::GetInstance()->MakeUniqueId()));
+    CHECK_NULL_VOID(rawFramNode);
+    auto checkbox = AceType::Claim(rawFramNode);
     CHECK_NULL_VOID(checkbox);
-    auto eventHub = checkbox->GetEventHub<CheckBoxEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnChange(std::move(changeEvent));
-    auto checkboxPaintProps = checkbox->GetPaintProperty<CheckBoxPaintProperty>();
-    CHECK_NULL_VOID(checkboxPaintProps);
-    UpdateCheckboxPaintProperty(checkboxPaintProps, isLunar, checkboxSettingData);
-    auto checkboxPattern = checkbox->GetPattern<CheckBoxPattern>();
-    checkboxPattern->SaveCheckboxSettingData(checkboxSettingData);
+    checkboxModifier->setCheckboxOnChange(
+        reinterpret_cast<ArkUINodeHandle>(rawFramNode), reinterpret_cast<void*>(&changeEvent));
+    UpdateCheckboxPaintProperty(rawFramNode, isLunar, checkboxSettingData);
     auto checkboxLayoutProps = checkbox->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(checkboxLayoutProps);
     MarginProperty marginCheckbox;

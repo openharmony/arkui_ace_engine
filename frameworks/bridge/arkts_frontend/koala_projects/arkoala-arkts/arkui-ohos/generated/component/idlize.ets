@@ -37,7 +37,7 @@ import { ModifierStateManager } from '../CommonModifier';
 import { ButtonConfiguration } from "./button"
 import { CheckBoxConfiguration } from "./checkbox"
 import { DataPanelConfiguration } from "./dataPanel"
-import { GaugeConfiguration } from "./gauge"
+import { GaugeConfiguration, GaugeIndicatorOptions_serializer, GaugeIndicatorOptions } from "./gauge"
 import { LoadingProgressConfiguration } from "./loadingProgress"
 import { ProgressConfiguration } from "./progress"
 import { RadioConfiguration } from "./radio"
@@ -132,6 +132,35 @@ export class AlertDialog {
         const options_casted = options as (AlertDialogParamWithConfirm | AlertDialogParamWithButtons | AlertDialogParamWithOptions)
         AlertDialog.show_serialize(options_casted)
         return
+    }
+}
+export class DragUtils {
+    static GetForegroundColorValue_serialize(resourceColor: ResourceColor): int64 {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (resourceColor instanceof Color) {
+            thisSerializer.writeInt8((0).toByte())
+            const resourceColorForIdx0 = resourceColor as Color
+            thisSerializer.writeInt32(resourceColorForIdx0.getOrdinal())
+        } else if (resourceColor instanceof int32) {
+            thisSerializer.writeInt8((1).toByte())
+            const resourceColorForIdx1 = resourceColor as int32
+            thisSerializer.writeInt32(resourceColorForIdx1)
+        } else if (resourceColor instanceof string) {
+            thisSerializer.writeInt8((2).toByte())
+            const resourceColorForIdx2 = resourceColor as string
+            thisSerializer.writeString(resourceColorForIdx2)
+        } else if (resourceColor instanceof Resource) {
+            thisSerializer.writeInt8((3).toByte())
+            const resourceColorForIdx3 = resourceColor as Resource
+            Resource_serializer.write(thisSerializer, resourceColorForIdx3)
+        }
+        const retval  = ArkUIGeneratedNativeModule._DragUtils_GetForegroundColorValue(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    public static GetForegroundColorValue(resourceColor: ResourceColor): int64 {
+        const resourceColor_casted = resourceColor as (ResourceColor)
+        return DragUtils.GetForegroundColorValue_serialize(resourceColor_casted)
     }
 }
 export class DialogExtender {
@@ -4529,6 +4558,26 @@ export class SelectExtender {
         const node_casted = node as (KPointer)
         const options_casted = options as (DividerOptions | undefined)
         SelectExtender.setDivider_serialize(node_casted, options_casted)
+        return
+    }
+}
+export class GaugeExtender {
+    static setIndicator_serialize(node: KPointer, options?: GaugeIndicatorOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            GaugeIndicatorOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GaugeExtender_setIndicator(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    public static setIndicator(node: KPointer, options?: GaugeIndicatorOptions): void {
+        const node_casted = node as (KPointer)
+        const options_casted = options as (GaugeIndicatorOptions | undefined)
+        GaugeExtender.setIndicator_serialize(node_casted, options_casted)
         return
     }
 }

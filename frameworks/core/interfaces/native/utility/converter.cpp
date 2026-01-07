@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/scrollable/selectable_container_pattern.h" // PreviewBadge
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/interfaces/native/implementation/circle_shape_peer.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
@@ -1792,6 +1793,21 @@ TranslateOptions Convert(const Ark_TranslateOptions& src)
 }
 
 template<>
+TwoDimensionScrollResult Convert(const Ark_OffsetResult& src)
+{
+    auto xOffset = OptConvert<Dimension>(src.xOffset);
+    auto yOffset = OptConvert<Dimension>(src.yOffset);
+    TwoDimensionScrollResult result;
+    if (xOffset.has_value()) {
+        result.xOffset = xOffset.value();
+    }
+    if (yOffset.has_value()) {
+        result.yOffset = yOffset.value();
+    }
+    return result;
+}
+
+template<>
 bool Convert(const Ark_EdgeEffectOptions& src)
 {
     return static_cast<bool>(src.alwaysEnabled);
@@ -1839,6 +1855,10 @@ BindSheetDismissReason Convert(const Ark_DismissReason& src)
             return BindSheetDismissReason::TOUCH_OUTSIDE;
         case Ark_DismissReason::ARK_DISMISS_REASON_CLOSE_BUTTON:
             return BindSheetDismissReason::CLOSE_BUTTON;
+        case Ark_DismissReason::ARK_DISMISS_REASON_SLIDE_DOWN:
+            return BindSheetDismissReason::SLIDE_DOWN;
+        case Ark_DismissReason::ARK_DISMISS_REASON_SLIDE:
+            return BindSheetDismissReason::SLIDE;
         default:
             LOGE("Unexpected enum value in Ark_DismissReason: %{public}d", src);
             break;
@@ -2475,7 +2495,8 @@ template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Dimension, Ark_
     const Ark_Dimension&, DimensionUnit);
 template ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Length, Ark_Float64>(
     const Ark_Length&, DimensionUnit);
-template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(const Opt_Length&, DimensionUnit);
+template ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(
+    const Opt_Length&, DimensionUnit);
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Union_F64_String, Ark_Float64>(
     const Opt_Union_F64_String&, DimensionUnit);
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Opt_Union_F64_String_Resource, Ark_Float64>(
@@ -3316,6 +3337,25 @@ void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& 
 }
 
 template<>
+void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Boolean& from)
+{
+    PreviewBadge ret;
+    ret.mode = from ? PreviewBadgeMode::AUTO : PreviewBadgeMode::NO_BADGE;
+    dst = ret;
+}
+
+template<>
+void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Int32& from)
+{
+    PreviewBadge ret;
+    if (from >= 0) {
+        ret.mode = PreviewBadgeMode::USER_SET;
+        ret.count = from;
+    }
+    dst = ret;
+}
+
+template<>
 void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src)
 {
     ShadowStyle shadowStyle = Converter::OptConvert<ShadowStyle>(src).value_or(ShadowStyle::None);
@@ -3585,6 +3625,14 @@ PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src)
     std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
     dst.second = Converter::Convert<std::vector<NG::TextCascadePickerOptions>>(src);
     dst.first = true;
+    return dst;
+}
+
+template<>
+PresetFillType Convert(const Ark_ItemFillPolicy& src)
+{
+    PresetFillType dst;
+    dst = Converter::OptConvert<PresetFillType>(src.fillType.value).value_or(dst);
     return dst;
 }
 
@@ -4101,6 +4149,16 @@ void AssignCast(std::optional<OHOS::Rosen::Filter*>& dst, const Ark_uiEffect_Fil
         return;
     }
     dst = reinterpret_cast<OHOS::Rosen::Filter*>(src);
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Rosen::Blender*>& dst, const Ark_uiEffect_BrightnessBlender& src)
+{
+    if (!src) {
+        dst = std::nullopt;
+        return;
+    }
+    dst = reinterpret_cast<OHOS::Rosen::Blender*>(src);
 }
 
 template<>

@@ -18,8 +18,6 @@
 
 #include "core/animation/animator.h"
 #include "core/components/display/render_display.h"
-#include "core/components/picker/picker_animation.h"
-#include "core/components/picker/render_picker_column.h"
 #include "core/components/triangle/render_triangle.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/pipeline/pipeline_context.h"

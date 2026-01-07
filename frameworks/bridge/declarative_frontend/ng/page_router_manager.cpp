@@ -26,6 +26,7 @@
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_advanced_register.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -2261,6 +2262,7 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
     TAG_LOGI(AceLogTag::ACE_ROUTER,
         "router replace in old lifecycle(API version < 12), replace mode: %{public}d, url: %{public}s",
         static_cast<int32_t>(info.routerMode), info.url.c_str());
+    auto context = PipelineContext::GetCurrentContext();
     PopPage("", false, false);
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
@@ -2268,6 +2270,9 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
             // find page in stack, move position and update params.
             MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
             LoadCompleteManagerStopCollect();
+            if (!pageRouterStack_.empty()) {
+                NotifyPageTransitionEnd(context, pageRouterStack_.back().Upgrade());
+            }
             return;
         }
         auto index = FindPageInRestoreStack(info.url);
@@ -2278,8 +2283,12 @@ void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
             return;
         }
     }
+    auto preStackSize = pageRouterStack_.size();
     LoadPage(GenerateNextPageId(), info, false, false);
     LoadCompleteManagerStopCollect();
+    if (pageRouterStack_.size() > preStackSize) {
+        NotifyPageTransitionEnd(context, pageRouterStack_.back().Upgrade());
+    }
 }
 
 bool PageRouterManager::CheckIndexValid(int32_t index) const
@@ -2366,6 +2375,9 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
             if (pagePattern) {
                 pagePattern->FireOnNewParam(info.params);
             }
+            if (!pageRouterStack_.empty()) {
+                NotifyPageTransitionEnd(pipelineContext, pageRouterStack_.back().Upgrade());
+            }
         } else {
             auto index = FindPageInRestoreStack(info.url);
             if (index != INVALID_PAGE_INDEX) {
@@ -2409,10 +2421,14 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
 #if defined(ENABLE_SPLIT_MODE)
     stageManager->SetIsNewPageReplacing(true);
 #endif
+    auto preStackSize = pageRouterStack_.size();
     PopPage("", false, false);
 #if defined(ENABLE_SPLIT_MODE)
     stageManager->SetIsNewPageReplacing(false);
 #endif
+    if (!pageRouterStack_.empty() && pageRouterStack_.size() < preStackSize) {
+        NotifyPageTransitionEnd(pipelineContext, pageRouterStack_.back().Upgrade());
+    }
 }
 
 void PageRouterManager::RestoreOhmUrl(const RouterPageInfo& target, std::function<void()>&& finishCallback,
@@ -2774,5 +2790,14 @@ std::string PageRouterManager::GetBackTargetName()
     auto pageInfo = pattern->GetPageInfo();
     CHECK_NULL_RETURN(pageInfo, "");
     return pageInfo->GetPageUrl();
+}
+
+void PageRouterManager::NotifyPageTransitionEnd(const RefPtr<PipelineContext>& context, const RefPtr<FrameNode>& page)
+{
+    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(page);
+    auto mgr = context->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnPageTransitionEnd(page);
 }
 } // namespace OHOS::Ace::NG

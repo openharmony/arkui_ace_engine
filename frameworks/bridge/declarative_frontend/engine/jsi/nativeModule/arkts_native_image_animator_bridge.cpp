@@ -19,7 +19,6 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_image_animator.h"
-#include "core/components/declaration/image/image_animator_declaration.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t DEFAULT_DURATION = 1000; // ms

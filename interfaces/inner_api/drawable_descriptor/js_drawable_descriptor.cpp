@@ -402,10 +402,12 @@ napi_value JsDrawableDescriptor::CreatAnimatedDrawable(napi_env env, void* nativ
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(env, &scope);
     if (native == nullptr) {
+        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
     napi_value cons = nullptr;
     if (napi_create_object(env, &cons) != napi_ok) {
+        napi_close_escapable_handle_scope(env, scope);
         return nullptr;
     }
 
@@ -583,7 +585,10 @@ napi_value JsDrawableDescriptor::SetBlendMode(napi_env env, napi_callback_info i
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(env, &scope);
     napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
+    if (napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr) != napi_ok) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
     auto* drawable = reinterpret_cast<LayeredDrawableDescriptor*>(native);

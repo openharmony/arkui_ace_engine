@@ -323,8 +323,10 @@ public:
     void DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyTreeBase(std::shared_ptr<JsonValue>& current);
     void DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current);
-    void DumpSimplifyTreeWithParamConfig(int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible,
-        ParamConfig config = ParamConfig());
+    void DumpSimplifyTreeNode(std::shared_ptr<JsonValue>& current, ParamConfig config);
+    void DumpSimplifyTreeWithParamConfig(int32_t depth, std::shared_ptr<JsonValue>& current,
+        bool onlyNeedVisible, ParamConfig config = ParamConfig(),
+        std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker = nullptr);
     virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
@@ -1337,6 +1339,8 @@ protected:
     std::list<RefPtr<FrameNode>> adoptedChildren_;
 
 private:
+    void DumpSimplifyTreeWithParamConfigInner(int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible,
+        ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker);
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
     void UpdateBuilderNodeColorMode(const RefPtr<UINode>& child);

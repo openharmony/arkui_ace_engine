@@ -216,7 +216,9 @@ template("build_component_ng") {
             "ets_runtime:libark_jsruntime",
             "napi:ace_napi",
           ]
-          defines += [ "INCLUDE_GENERATED_SOURCES" ]
+          if (!ace_engine_feature_wearable) {
+            defines += [ "INCLUDE_GENERATED_SOURCES" ]
+          }
         }
       }
 

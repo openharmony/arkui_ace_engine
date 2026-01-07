@@ -403,15 +403,12 @@ void ResourceAdapterImplV2::DumpColorMode()
 {
     auto manager = GetResourceManager();
     CHECK_NULL_VOID(manager);
-    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
-    CHECK_NULL_VOID(resConfig);
-    manager->GetResConfig(*resConfig);
-    CHECK_NULL_VOID(resConfig);
+    CHECK_NULL_VOID(resConfig_);
     auto container = Container::CurrentSafelyWithCheck();
     CHECK_NULL_VOID(container);
     auto pipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(pipelineContext);
-    auto colorMode = resConfig->GetColorMode();
+    auto colorMode = resConfig_->GetColorMode();
     auto sysColorMode = container->CurrentColorMode();
     auto globalSysColorMode = ConvertColorModeToGlobal(sysColorMode);
     auto localColorMode = pipelineContext->GetLocalColorMode();

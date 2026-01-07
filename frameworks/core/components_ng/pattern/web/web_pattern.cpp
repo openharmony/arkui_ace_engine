@@ -63,7 +63,7 @@
 #include "core/common/udmf/unified_data.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/web/resource/web_delegate.h"
@@ -375,7 +375,7 @@ bool IsSnapshotPathValid(const std::string& snapshotPath)
         TAG_LOGE(AceLogTag::ACE_WEB, "blankless canonical failed:%{public}s", ec.message().c_str());
         return false;
     }
-    
+
     if (snapshotPath.rfind(WEB_SNAPSHOT_PATH_PREFIX, 0) != 0 ||
         // 4为后缀".png"的长度
         snapshotPath.length() <= 4 ||
@@ -4626,7 +4626,7 @@ void WebPattern::RegisterWebDomNativeInterface()
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 if (param.size() != WEB_NATIVE_PARAM_SIZE) {
-                    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern dom scroll size error"); 
+                    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern dom scroll size error");
                     return;
                 }
                 pattern->webDomDocument_->UpdateScrollInfoFromJsonString(param[WEB_NATIVE_PARAM_INDEX]);
@@ -6471,7 +6471,7 @@ void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTi
     textRenderContext->UpdateBorderColor(borderColor);
     overlayManager->ShowIndexerPopup(tooltipId_, tooltipNode);
 }
- 
+
 bool WebPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 {
     if (shadowStyle == ShadowStyle::None) {
@@ -9316,6 +9316,13 @@ void WebPattern::GetImagesByIDs(const std::vector<int32_t>& imageIds, int32_t wi
     const std::function<void(int32_t, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>&,
     MultiImageQueryErrorCode)>& arkWebfinishCallback)
 {
+    return;
+}
+
+void WebPattern::GetWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request, const std::function<
+    void(int32_t, int32_t, const std::string&, const std::string&, WebRequestErrorCode)>& finishCallback)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "GetWebInfoByRequest WebId:%{public}d, request:%{public}s", webId, request.c_str());
     return;
 }
 

@@ -277,4 +277,14 @@ void WaterFlowModelStatic::ResetItemLayoutConstraint(FrameNode* frameNode)
     CHECK_NULL_VOID(layout);
     layout->ResetItemLayoutConstraint();
 }
+
+void WaterFlowModelStatic::SetItemFillPolicy(FrameNode* frameNode, PresetFillType fillType)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ItemFillPolicy, fillType, frameNode);
+}
+
+void WaterFlowModelStatic::SetSyncLoad(FrameNode* frameNode, bool syncLoad)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, SyncLoad, syncLoad, frameNode);
+}
 } // namespace OHOS::Ace::NG

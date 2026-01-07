@@ -18,11 +18,13 @@
 
 import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { ColorMetrics_serializer } from "./../Graphics"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ColorMetrics } from "arkui.Graphics"
 import { AttributeModifier, hookScrollBarAttributeModifier, AttributeUpdater } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
@@ -64,6 +66,18 @@ export class ArkScrollBarPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollBarAttribute_setEnableNestedScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setScrollBarColorAttribute(value: ColorMetrics | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ColorMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollBarAttribute_setScrollBarColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum ScrollBarDirection {
     VERTICAL = 0,
@@ -83,17 +97,24 @@ export interface ScrollBarAttribute extends CommonMethod {
     enableNestedScroll(value: boolean | undefined): this {
         throw new Error("Unimplemented method enableNestedScroll")
     }
+    scrollBarColor(value: ColorMetrics | undefined): this {
+        throw new Error("Unimplemented method scrollBarColor")
+    }
     attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
 }
 export class ArkScrollBarStyle extends ArkCommonMethodStyle implements ScrollBarAttribute {
     enableNestedScroll_value?: boolean | undefined
+    scrollBarColor_value?: ColorMetrics | undefined
     attributeModifier_value?: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined
     setScrollBarOptions(value: ScrollBarOptions): this {
         return this
     }
     enableNestedScroll(value: boolean | undefined): this {
+        return this
+    }
+    scrollBarColor(value: ColorMetrics | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -121,6 +142,14 @@ export class ArkScrollBarComponent extends ArkCommonMethodComponent implements S
         if (this.checkPriority("enableNestedScroll")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setEnableNestedScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public scrollBarColor(value: ColorMetrics | undefined): this {
+        if (this.checkPriority("scrollBarColor")) {
+            const value_casted = value as (ColorMetrics | undefined)
+            this.getPeer()?.setScrollBarColorAttribute(value_casted)
             return this
         }
         return this

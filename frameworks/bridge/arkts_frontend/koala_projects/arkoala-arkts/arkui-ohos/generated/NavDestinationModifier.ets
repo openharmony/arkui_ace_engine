@@ -21,7 +21,7 @@ import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkNavDestinationPeer, NavDestinationMode, NavDestinationContext, NavigationSystemTransitionType, NestedScrollInfo, NavDestinationActiveReason, NavDestinationTransitionDelegate, NavDestinationCommonTitle, NavDestinationCustomTitle, NavDestinationAttribute } from "./component/navDestination"
+import { ArkNavDestinationPeer, VisibilityChangeReason, NavDestinationMode, NavDestinationContext, NavigationSystemTransitionType, NestedScrollInfo, NavDestinationActiveReason, NavDestinationTransitionDelegate, NavDestinationCommonTitle, NavDestinationCustomTitle, NavDestinationAttribute } from "./component/navDestination"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./component/common"
 import { default as window } from "@ohos.window"
@@ -51,9 +51,9 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
     _hideBackButton_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _hideBackButton_0_0value?: boolean | undefined
     _onShown_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onShown_0_0value?: (() => void) | undefined
+    _onShown_0_0value?: ((value0: VisibilityChangeReason) => void) | undefined
     _onHidden_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _onHidden_0_0value?: (() => void) | undefined
+    _onHidden_0_0value?: ((value0: VisibilityChangeReason) => void) | undefined
     _onBackPressed_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onBackPressed_0_0value?: (() => boolean) | undefined
     _onResult_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -160,7 +160,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             switch (this._onShown_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnShownAttribute((this._onShown_0_0value as (() => void) | undefined));
+                    peer.setOnShownAttribute((this._onShown_0_0value as ((value0: VisibilityChangeReason) => void) | undefined));
                     this._onShown_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -170,7 +170,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
                 }
                 default: {
                     this._onShown_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnShownAttribute((undefined as (() => void) | undefined));
+                    peer.setOnShownAttribute((undefined as ((value0: VisibilityChangeReason) => void) | undefined));
                 }
             }
         }
@@ -178,7 +178,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             switch (this._onHidden_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setOnHiddenAttribute((this._onHidden_0_0value as (() => void) | undefined));
+                    peer.setOnHiddenAttribute((this._onHidden_0_0value as ((value0: VisibilityChangeReason) => void) | undefined));
                     this._onHidden_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -188,7 +188,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
                 }
                 default: {
                     this._onHidden_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setOnHiddenAttribute((undefined as (() => void) | undefined));
+                    peer.setOnHiddenAttribute((undefined as ((value0: VisibilityChangeReason) => void) | undefined));
                 }
             }
         }
@@ -717,7 +717,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
                     break;
                 }
                 default: {
-                    this.onShown((undefined as (() => void) | undefined));
+                    this.onShown((undefined as ((value0: VisibilityChangeReason) => void) | undefined));
                 }
             }
         }
@@ -730,7 +730,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
                     break;
                 }
                 default: {
-                    this.onHidden((undefined as (() => void) | undefined));
+                    this.onHidden((undefined as ((value0: VisibilityChangeReason) => void) | undefined));
                 }
             }
         }
@@ -1108,7 +1108,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         }
         return this
     }
-    onShown(value: (() => void) | undefined): this {
+    onShown(value: ((value0: VisibilityChangeReason) => void) | undefined): this {
         if (((this._onShown_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onShown_0_flag = AttributeUpdaterFlag.UPDATE
@@ -1119,7 +1119,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         }
         return this
     }
-    onHidden(value: (() => void) | undefined): this {
+    onHidden(value: ((value0: VisibilityChangeReason) => void) | undefined): this {
         if (((this._onHidden_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onHidden_0_flag = AttributeUpdaterFlag.UPDATE

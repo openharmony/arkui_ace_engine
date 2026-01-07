@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,10 @@ public:
         return nullptr;
     }
     virtual void UpdateDomConfig(const RefPtr<Framework::DOMNode>& node, void* config) {}
+    virtual const void* GetCustomModifier(const std::string& tag = "")
+    {
+        return nullptr;
+    }
 
     static ComponentLoader* GetLoaderByName(const char* name);
 };

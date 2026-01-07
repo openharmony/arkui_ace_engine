@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,11 +29,13 @@ void SelectableItemEventHub::BindContextMenu()
     CHECK_NULL_VOID(gestureHub);
     auto longPress = gestureHub->GetLongPressEventActuator();
     CHECK_NULL_VOID(longPress);
-    if (!AceType::InstanceOf<LongPressEventActuatorWithMultiSelect>(longPress)) {
+    if (AceType::InstanceOf<LongPressEventActuatorWithMultiSelect>(longPress)) {
         return;
     }
-    auto longPressActuator = AceType::DynamicCast<LongPressEventActuatorWithMultiSelect>(longPress);
+    auto longPressActuator = AceType::MakeRefPtr<LongPressEventActuatorWithMultiSelect>(gestureHub);
     CHECK_NULL_VOID(longPressActuator);
+    longPressActuator->CopyLongPressEvent(longPress);
+
     auto callback = [weak = AceType::WeakClaim(this)](RefPtr<LongPressRecognizer>& longPressRecognizer) {
         auto eventHub = weak.Upgrade();
         CHECK_NULL_VOID(eventHub);
@@ -79,6 +81,7 @@ void SelectableItemEventHub::BindContextMenu()
         taskExecutor.PostDelayedTask(eventHub->gatherTask_, GATHER_DELAY_TIME, "ArkUIContextMenuStartGather");
     };
     longPressActuator->SetMultiSelectHandler(callback);
+    gestureHub->ReplaceLongPressEventActuator(longPressActuator);
 }
 
 void SelectableItemEventHub::RestoreGatherNode()

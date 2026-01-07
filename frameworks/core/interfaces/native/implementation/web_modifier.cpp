@@ -2914,6 +2914,27 @@ void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 
+void SetOnFirstScreenPaintImpl(Ark_NativePointer node,
+                               const Opt_OnFirstScreenPaintCallback* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onFirstScreenPaint = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> void {
+        OnFirstScreenPaint(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetOnFirstScreenPaint(frameNode, onFirstScreenPaint);
+#endif // WEB_SUPPORTED
+}
+
 void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
                                  const Opt_Boolean* value)
 {
@@ -3120,6 +3141,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetZoomControlAccessImpl,
         WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
         WebAttributeModifier::SetOnTextSelectionChangeImpl,
+        WebAttributeModifier::SetOnFirstScreenPaintImpl,
         WebAttributeModifier::SetEnableImageAnalyzerImpl,
         WebAttributeModifier::SetEnableAutoFillImpl,
         WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,

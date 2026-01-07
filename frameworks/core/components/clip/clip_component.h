@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-class ClipComponent : public SoleChildComponent {
+class ACE_FORCE_EXPORT ClipComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(ClipComponent, SoleChildComponent);
 
 public:

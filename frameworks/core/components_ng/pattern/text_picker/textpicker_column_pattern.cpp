@@ -27,7 +27,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"

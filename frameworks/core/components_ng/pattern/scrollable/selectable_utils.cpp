@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,20 @@ RefPtr<FrameNode> FindItemParentNode(const RefPtr<FrameNode>& frameNode)
     }
     return AceType::DynamicCast<FrameNode>(uiNode);
 }
+
+PreviewBadge GetSelectedPreviewBadge(const RefPtr<FrameNode>& frameNode)
+{
+    PreviewBadge badge;
+    CHECK_NULL_RETURN(frameNode, badge);
+    auto parent = FindItemParentNode(frameNode);
+    CHECK_NULL_RETURN(parent, badge);
+    auto pattern = parent->GetPattern<SelectableContainerPattern>();
+    CHECK_NULL_RETURN(pattern, badge);
+    if (pattern->GetEditModeOptions().getPreviewBadge) {
+        return pattern->GetEditModeOptions().getPreviewBadge();
+    }
+    return badge;
+}
 } // namespace
 
 bool SelectableUtils::IsSelectableItem(const RefPtr<FrameNode>& frameNode)
@@ -52,6 +66,24 @@ bool SelectableUtils::IsSelectedItemNode(const RefPtr<FrameNode>& frameNode)
     auto itemPattern = frameNode->GetPattern<SelectableItemPattern>();
     CHECK_NULL_RETURN(itemPattern, false);
     return itemPattern->IsSelected();
+}
+
+std::optional<int32_t> SelectableUtils::GetBadgeNumber(const RefPtr<FrameNode>& frameNode)
+{
+    auto badgeNumber = frameNode->GetDragPreviewOption().GetCustomerBadgeNumber();
+    if (badgeNumber.has_value()) {
+        return badgeNumber;
+    }
+    if (IsGatherSelectedItemsAnimationEnabled(frameNode)) {
+        auto badge = GetSelectedPreviewBadge(frameNode);
+        if (badge.mode == PreviewBadgeMode::USER_SET) {
+            badgeNumber = badge.count > 1 ? badge.count : 1;
+        }
+        if (badge.mode == PreviewBadgeMode::NO_BADGE) {
+            badgeNumber = 1;
+        }
+    }
+    return badgeNumber;
 }
 
 std::vector<RefPtr<FrameNode>> SelectableUtils::GetVisibleSelectedItems(const RefPtr<FrameNode>& frameNode)
@@ -75,7 +107,7 @@ std::vector<RefPtr<FrameNode>> SelectableUtils::GetVisibleSelectedItems(const Re
     return scrollPattern->GetVisibleSelectedItems();
 }
 
-bool SelectableUtils::IsGatherSelectedItemsAnimationEnabled(RefPtr<FrameNode>& frameNode)
+bool SelectableUtils::IsGatherSelectedItemsAnimationEnabled(const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_RETURN(frameNode, false);
     CHECK_NULL_RETURN(SelectableUtils::IsSelectedItemNode(frameNode), false);
@@ -83,7 +115,10 @@ bool SelectableUtils::IsGatherSelectedItemsAnimationEnabled(RefPtr<FrameNode>& f
     CHECK_NULL_RETURN(parent, false);
     auto pattern = parent->GetPattern<SelectableContainerPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    return pattern->GetEditModeOptions().enableGatherSelectedItemsAnimation;
+    auto scrollableEvent = pattern->GetScrollableEvent();
+    CHECK_NULL_RETURN(scrollableEvent, pattern->GetEditModeOptions().enableGatherSelectedItemsAnimation);
+    return pattern->GetEditModeOptions().enableGatherSelectedItemsAnimation &&
+           scrollableEvent->IsSwipeActionCollapsed();
 }
 
 void SelectableUtils::BindContextMenu(FrameNode* frameNode)

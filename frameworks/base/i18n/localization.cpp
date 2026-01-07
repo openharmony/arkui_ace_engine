@@ -1034,7 +1034,7 @@ void Localization::ParseLocaleTag(
 
 bool Localization::ConvertToDouble(const std::string& str, double& outValue)
 {
-    char* end;
+    char* end = nullptr;
     errno = 0;
     double value = std::strtod(str.c_str(), &end);
     if (!IsValidValue(end, str)) {

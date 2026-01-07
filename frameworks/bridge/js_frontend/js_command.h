@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,13 +22,13 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/pattern/image/image_properties.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/dom/dom_canvas.h"
 #include "frameworks/bridge/common/dom/dom_chart.h"
 #include "frameworks/bridge/common/dom/dom_clock.h"
 #include "frameworks/bridge/common/dom/dom_configs.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
-#include "frameworks/bridge/common/dom/dom_image_animator.h"
 #include "frameworks/bridge/common/dom/dom_input.h"
 #include "frameworks/bridge/common/dom/dom_proxy.h"
 #include "frameworks/bridge/common/dom/dom_stepper.h"

@@ -25,6 +25,12 @@ enum class MultiImageQueryErrorCode : int32_t {
     INVALID_WEBNODE = 3,
     LAST_TASK_UNFINISH = 4,
 };
+
+enum class WebRequestErrorCode: int32_t {
+    OK = 0,
+    INVALID_WEB_ID,
+    INVALID_REQUEST,
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_ERROR_CODE_H
