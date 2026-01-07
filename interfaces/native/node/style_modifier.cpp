@@ -5098,7 +5098,7 @@ int32_t SetCaretColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     } else if (node->type == ARKUI_NODE_RICH_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorCaretColor(
-            node->uiNodeHandle, item->value[NUM_0].u32);
+            node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     } else {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -5307,7 +5307,7 @@ int32_t SetRichEditorScrollBarColor(ArkUI_NodeHandle node, const ArkUI_Attribute
     }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorScrollBarColor(
-        node->uiNodeHandle, item->value[NUM_0].u32);
+        node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
  

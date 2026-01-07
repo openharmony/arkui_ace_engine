@@ -172,7 +172,7 @@ void NodeModifier::SetRichEditorNapiOnSelectionChange(ArkUINodeHandle node, void
     RichEditorModelNG::SetOnSelectionChange(frameNode, std::move(onSelectionChange));
 }
 
-void SetRichEditorCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+void SetRichEditorCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -839,7 +839,7 @@ void ResetRichEditorUndoStyle(ArkUINodeHandle node)
     RichEditorModelNG::SetSupportStyledUndo(frameNode, false);
 }
 
-void SetRichEditorScrollBarColor(ArkUINodeHandle node, ArkUI_Int32 color)
+void SetRichEditorScrollBarColor(ArkUINodeHandle node, ArkUI_Int32 color, void* resRawPtr)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
