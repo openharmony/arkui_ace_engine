@@ -40,6 +40,7 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         watchFunc?: WatchFuncType
     ) {
         super('Provide', owningView, varName, watchFunc);
+        this.checkValueIsNotFunction(initValue);
         if (isDynamicObject(initValue)) {
             initValue = getObservedObject(initValue);
             this.backing_ = FactoryInternal.mkInteropDecoratorValue(varName, initValue);
@@ -87,6 +88,7 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         if (oldValue === newValue) {
             return;
         }
+        this.checkValueIsNotFunction(newValue);
         let value: T = uiUtils.makeV1Observed(newValue);
         if (isDynamicObject(newValue)) {
             const value = getObservedObject(newValue);
