@@ -28,6 +28,10 @@
     "pages/Examples/BindMenu_IsShow",
     "pages/Examples/BindContextMenu_RightClick",
     "pages/Examples/BindContextMenu_LongPress",
+    "pages/Examples/MenuAccessibilityTestLevel0_0",
+    "pages/Examples/MenuAccessibilityTestLevel0_1",
+    "pages/Examples/MenuAccessibilityTestLevel0_2",
+    "pages/Examples/MenuTestLevel0_10",
 
     "pages/LifeCycle/Index",
     "pages/LifeCycle/aboutToAppear/BindMenu",
