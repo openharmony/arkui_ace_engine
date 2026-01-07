@@ -16,7 +16,6 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
-#include "core/components_ng/pattern/rich_editor/style_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -144,7 +143,7 @@ void SetRichEditorCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* res
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
     RichEditorModelNG::SetCaretColor(frameNode, result);
-    RegisterRichEditorPatternResource(frameNode, StyleManager::CARET_COLOR_KEY, resRawPtr, result);
+    RegisterRichEditorPatternResource(frameNode, "caretColor", resRawPtr, result);
 }
 
 void ResetRichEditorCaretColor(ArkUINodeHandle node)
@@ -157,7 +156,7 @@ void ResetRichEditorCaretColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetCaretColor(frameNode, caretColor);
-    UnregisterRichEditorPatternResource(frameNode, StyleManager::CARET_COLOR_KEY);
+    UnregisterRichEditorPatternResource(frameNode, "caretColor");
 }
 
 void SetRichEditorOnSelect(ArkUINodeHandle node, void* callback)
@@ -280,7 +279,7 @@ void SetRichEditorSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 col
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
     RichEditorModelNG::SetSelectedBackgroundColor(frameNode, result);
-    RegisterRichEditorPatternResource(frameNode, StyleManager::SELECTED_BACKGROUND_COLOR_KEY, resRawPtr, result);
+    RegisterRichEditorPatternResource(frameNode, "selectedBackgroundColor", resRawPtr, result);
 }
 
 void ResetRichEditorSelectedBackgroundColor(ArkUINodeHandle node)
@@ -293,7 +292,7 @@ void ResetRichEditorSelectedBackgroundColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetSelectedBackgroundColor(frameNode, selectedBackgroundColor);
-    UnregisterRichEditorPatternResource(frameNode, StyleManager::SELECTED_DRAG_PREVIEW_COLOR_KEY);
+    UnregisterRichEditorPatternResource(frameNode, "selectedBackgroundColor");
 }
 
 void SetRichEditorOnPaste(ArkUINodeHandle node, void* callback)
@@ -524,7 +523,7 @@ void SetRichEditorPlaceholder(ArkUINodeHandle node, ArkUI_CharPtr* stringParamet
             fontColor.SetValue(static_cast<ArkUI_Uint32>(result));
             options.fontColor = fontColor;
         }
-        RegisterRichEditorPatternResource(frameNode, StyleManager::PLACEHOLDER_FONT_COLOR_KEY, resRawPtr, fontColor);
+        RegisterRichEditorPatternResource(frameNode, "placeholderFontColor", resRawPtr, fontColor);
     }
     std::optional<Dimension> fontSizeOptional = std::nullopt;
     ArkUI_Uint32 step = NORMAL_VALUE_ARRAY_STEP;
@@ -555,7 +554,7 @@ void ResetRichEditorPlaceholder(ArkUINodeHandle node)
     auto richEditorTheme = pipeline->GetTheme<NG::RichEditorTheme>();
     options.fontColor = richEditorTheme ? richEditorTheme->GetPlaceholderColor() : fontColor;
     RichEditorModelNG::SetPlaceholder(frameNode, options);
-    UnregisterRichEditorPatternResource(frameNode, StyleManager::PLACEHOLDER_FONT_COLOR_KEY);
+    UnregisterRichEditorPatternResource(frameNode, "placeholderFontColor");
 }
 
 void SetRichEditorAboutToDelete(ArkUINodeHandle node, void* callback)
@@ -799,7 +798,7 @@ void SetRichEditorScrollBarColor(ArkUINodeHandle node, ArkUI_Int32 color, void* 
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
     RichEditorModelNG::SetScrollBarColor(frameNode, result);
-    RegisterRichEditorPatternResource(frameNode, StyleManager::SCROLL_BAR_COLOR_KEY, resRawPtr, result);
+    RegisterRichEditorPatternResource(frameNode, "scrollBarColor", resRawPtr, result);
 }
  
 void ResetRichEditorScrollBarColor(ArkUINodeHandle node)
@@ -807,7 +806,7 @@ void ResetRichEditorScrollBarColor(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetScrollBarColor(frameNode, std::nullopt);
-    UnregisterRichEditorPatternResource(frameNode, StyleManager::SCROLL_BAR_COLOR_KEY);
+    UnregisterRichEditorPatternResource(frameNode, "scrollBarColor");
 }
 
 void SetRichEditorSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
