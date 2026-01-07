@@ -281,6 +281,7 @@ examples/ScrollableComponentTest/ @arkuiscroll
 examples/ScrollableComponentStatic/ @arkuiscroll
 examples/UIExtension @ArkUI_ability_group
 examples/TextComponentTest/entry/src/main/ets/pages/05-RichEditorSample/ @arkui_rich_editor
+examples/Accessibility/ @ArkUI_ability_group
 
 [Frameworks Base]
 frameworks/base/background_task_helper/background_task_helper.h @arkui_framework_xnode
