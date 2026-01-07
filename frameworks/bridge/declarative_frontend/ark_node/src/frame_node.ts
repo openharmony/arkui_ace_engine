@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference path="./disposable.ts" />
 interface LayoutConstraint {
   maxSize: Size;
   minSize: Size;
@@ -69,12 +68,13 @@ function getFrameNodeRawPtr(frameNode: FrameNode): number {
   return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
 }
 
-class FrameNode extends Disposable {
+class FrameNode {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
   protected _commonEvent: UICommonEvent;
   public _componentAttribute: ArkComponent;
   public _scrollableEvent: UIScrollableCommonEvent;
+  protected _isDisposed: boolean;
   protected _gestureEvent: UIGestureEvent;
   protected _childList: Map<number, FrameNode>;
   protected _nativeRef: NativeStrongRef | NativeWeakRef;
@@ -88,7 +88,6 @@ class FrameNode extends Disposable {
   protected statesChangeHandler_: UIStatesChangeHandlerCallback | undefined;
   protected supportedStates_: number;
   constructor(uiContext: UIContext, type: string, options?: object) {
-    super();
     if (uiContext === undefined) {
       throw Error('Node constructor error, param uiContext error');
     } else {
@@ -101,6 +100,7 @@ class FrameNode extends Disposable {
     this.instanceId_ = uiContext.instanceId_;
     this.uiContext_ = uiContext;
     this._nodeId = -1;
+    this._isDisposed = false;
     this._childList = new Map();
     if (type === 'BuilderRootFrameNode') {
       this.renderNode_ = new RenderNode(type);
@@ -201,7 +201,7 @@ class FrameNode extends Disposable {
     if (this.isDisposed()) {
       return;
     }
-    super.dispose();
+    this._isDisposed = true;
     if (this.nodePtr_) {
       getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
         'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
@@ -215,7 +215,7 @@ class FrameNode extends Disposable {
 
   isDisposed(): boolean {
     let node = this.getNodePtr();
-    return super.isDisposed() && (node === undefined || node === null);
+    return this._isDisposed && (node === undefined || node === null);
   }
 
   static disposeTreeRecursively(node: FrameNode | null): void {
@@ -1018,7 +1018,7 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
   }
 
   dispose() {
-    super.dispose();
+    this._isDisposed = true;
     if (this.nodePtr_) {
       getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
     }
