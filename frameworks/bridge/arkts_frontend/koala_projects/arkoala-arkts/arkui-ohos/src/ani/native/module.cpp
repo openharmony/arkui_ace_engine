@@ -35,7 +35,8 @@
 #include "styled_string/styled_string_module.h"
 #include "image_span/image_span_module.h"
 #include "image/image_module.h"
-#include "list/list_children_main_size_module.h"
+#include "list/list_module.h"
+#include "list/list_item_group_module.h"
 #include "load.h"
 #include "log/log.h"
 #include "utils/convert_utils.h"
@@ -535,6 +536,46 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_SetWaterFlowLayoutMode",
             "li:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowLayoutMode)
+        },
+        ani_native_function {
+            "_SetListItemGroupSpace",
+            "lX{C{std.core.Double}C{std.core.String}}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetListItemGroupSpace)
+        },
+        ani_native_function {
+            "_SetListItemGroupStyle",
+            "li:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetListItemGroupStyle)
+        },
+        ani_native_function {
+            "_SetListItemGroupHeaderContent",
+            "ll:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetListItemGroupHeaderContent)
+        },
+        ani_native_function {
+            "_SetListItemGroupHeader",
+            "ll:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetListItemGroupHeader)
+        },
+        ani_native_function {
+            "_ResetListItemGroupHeader",
+            "l:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ResetListItemGroupHeader)
+        },
+        ani_native_function {
+            "_SetListItemGroupFooterContent",
+            "ll:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetListItemGroupFooterContent)
+        },
+        ani_native_function {
+            "_SetListItemGroupFooter",
+            "ll:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetListItemGroupFooter)
+        },
+        ani_native_function {
+            "_ResetListItemGroupFooter",
+            "l:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ResetListItemGroupFooter)
         },
         ani_native_function {
             "_SetListChildrenMainSize",

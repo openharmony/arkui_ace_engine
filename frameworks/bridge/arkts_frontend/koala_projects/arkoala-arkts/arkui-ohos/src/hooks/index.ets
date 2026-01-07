@@ -59,6 +59,8 @@ import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
 import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkImagePeer, ImageErrorCallback, ArkTabsComponent } from "#generated";
 import { ArkWaterFlowComponent, WaterFlowOptions } from '#generated';
+import { ArkListItemGroupComponent, ListItemGroupOptions } from '#generated';
+import { ListItemGroupHandWritten } from './ListItemGroupHandWritten';
 import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
 import { TabsOpsHandWritten } from "./TabsOpsHandWritten";
 import { WaterFlowHandWritten } from './WaterFlowHandWritten';
@@ -747,6 +749,10 @@ export function hookSliderSetSuffixMethod(node: ArkSliderComponent | ArkSliderPe
 
 export function hookWaterFlowOptionsImpl(node: ArkWaterFlowComponent, options: WaterFlowOptions | undefined): void {
   WaterFlowHandWritten.hookWaterFlowOptionsImpl(node, options)
+}
+
+export function hookListItemGroupOptionsImpl(node: ArkListItemGroupComponent, options: ListItemGroupOptions | undefined): void {
+  ListItemGroupHandWritten.hookListItemGroupOptionsImpl(node, options)
 }
 
 export function hookTextPickerDivider(receiver: ArkTextPickerComponent | ArkTextPickerPeer,
