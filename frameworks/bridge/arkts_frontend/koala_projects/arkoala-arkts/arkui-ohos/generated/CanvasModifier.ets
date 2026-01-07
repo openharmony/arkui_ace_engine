@@ -117,6 +117,7 @@ export class CanvasModifier extends CommonMethodModifier implements CanvasAttrib
         {
             this._onReady_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReady_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReady_0_flag = AttributeUpdaterFlag.SKIP
@@ -128,6 +129,7 @@ export class CanvasModifier extends CommonMethodModifier implements CanvasAttrib
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableAnalyzer_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.SKIP
