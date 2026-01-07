@@ -73,9 +73,11 @@ void FeatureParamManager::MetaDataParseEntry(std::vector<OHOS::AppExecFwk::Metad
 
 void FeatureParamManager::UICorrectionParamParseEntry(const std::string& bundleName)
 {
-    if (!uiCorrectionParser_) {
-        uiCorrectionParser_ = std::make_shared<ConfigParserBase>();
+    if (uiCorrectionParser_ != nullptr) {
+        LOGW("UICorrectionParamParseEntry init twice");
+        return;
     }
+    uiCorrectionParser_ = std::make_shared<ConfigParserBase>();
     if (uiCorrectionParser_->LoadUICorrectionConfigXML() != PARSE_EXEC_SUCCESS) {
         LOGW("ArkUiFeatureParamManager failed to load UI correction config file");
         return;
@@ -87,10 +89,11 @@ void FeatureParamManager::UICorrectionParamParseEntry(const std::string& bundleN
 
 void FeatureParamManager::FeatureParamParseEntry(const std::string& bundleName)
 {
-    if (!featureParser_) {
-        featureParser_ = std::make_shared<ConfigParserBase>();
+    if (featureParser_ != nullptr) {
+        LOGW("FeatureParamParseEntry init twice");
+        return;
     }
-
+    featureParser_ = std::make_shared<ConfigParserBase>();
     if (featureParser_->LoadPerformanceConfigXML() != PARSE_EXEC_SUCCESS) {
         LOGW("ArkUiFeatureParamManager failed to load xml file");
         return;
