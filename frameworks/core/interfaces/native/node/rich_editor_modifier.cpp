@@ -29,13 +29,8 @@ constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
 
 void RegisterRichEditorPatternResource(FrameNode* node, const std::string& key, void* resRawPtr, Color result)
 {
-    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
-    RefPtr<ResourceObject> resObj;
-    if (!resRawPtr) {
-        ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, node->GetTag());
-    } else {
-        resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-    }
+    CHECK_NULL_VOID(node && SystemProperties::ConfigChangePerform());
+    RefPtr<ResourceObject> resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
     auto pattern = node->GetPattern();
     CHECK_NULL_VOID(pattern);
     resObj ? pattern->RegisterResource<Color>(key, resObj, result) : pattern->UnRegisterResource(key);
@@ -43,7 +38,7 @@ void RegisterRichEditorPatternResource(FrameNode* node, const std::string& key, 
 
 void UnregisterRichEditorPatternResource(FrameNode* node, const std::string& key)
 {
-    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    CHECK_NULL_VOID(node && SystemProperties::ConfigChangePerform());
     auto pattern = node->GetPattern();
     CHECK_NULL_VOID(pattern);
     pattern->UnRegisterResource(key);
