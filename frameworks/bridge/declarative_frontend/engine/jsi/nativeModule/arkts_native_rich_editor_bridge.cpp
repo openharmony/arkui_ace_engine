@@ -22,6 +22,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 namespace OHOS::Ace::NG {
 namespace {
@@ -967,7 +968,8 @@ void ParsePlaceholderStyle(EcmaVM* vm, const Local<JSValueRef>& styleArg, Placeh
         }
         auto fontColorArg = styleObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "fontColor"));
         Color fontColorParsed;
-        if (!fontColorArg->IsNull() && ArkTSUtils::ParseJsColor(vm, fontColorArg, fontColorParsed, resObj, nodeInfo)) {
+        if (!fontColorArg->IsNull() &&
+            RichEditorBridge::ParseJsColorAlpha(vm, fontColorArg, fontColorParsed, resObj, nodeInfo)) {
             fontColorOpt = fontColorParsed;
             colorResourceIdOpt = ParseColorResourceId(vm, fontColorArg);
         }
@@ -1142,7 +1144,7 @@ ArkUINativeModuleValue RichEditorBridge::SetCaretColor(ArkUIRuntimeCallInfo* run
     Color color;
     RefPtr<ResourceObject> resourceObject;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
+    if (!ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         nodeModifiers->getRichEditorModifier()->resetRichEditorCaretColor(nativeNode);
     } else {
         nodeModifiers->getRichEditorModifier()->setRichEditorCaretColor(
@@ -1448,7 +1450,7 @@ ArkUINativeModuleValue RichEditorBridge::SetSelectedBackgroundColor(ArkUIRuntime
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     RefPtr<ResourceObject> resourceObject;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
+    if (!ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         nodeModifiers->getRichEditorModifier()->resetRichEditorSelectedBackgroundColor(nativeNode);
     } else {
         nodeModifiers->getRichEditorModifier()->setRichEditorSelectedBackgroundColor(
@@ -2333,5 +2335,24 @@ ArkUINativeModuleValue RichEditorBridge::ResetSingleLine(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getRichEditorModifier()->resetRichEditorSingleLine(nativeNode);
     return panda::JSValueRef::Undefined(vm);
+}
+
+bool RichEditorBridge::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
+    RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo)
+{
+    if (value->IsNumber()) {
+        result = Color(ArkTSUtils::ColorAlphaAdapt(value->Uint32Value(vm)));
+        return true;
+    }
+    if (value->IsString(vm)) {
+        return Color::ParseColorString(value->ToString(vm)->ToString(vm), result);
+    }
+    if (value->IsObject(vm)) {
+        if (ArkTSUtils::ParseColorMetricsToColor(vm, value, result, resourceObject)) {
+            return true;
+        }
+        return ArkTSUtils::ParseJsColorFromResource(vm, value, result, resourceObject);
+    }
+    return false;
 }
 }
