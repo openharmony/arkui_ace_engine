@@ -672,11 +672,13 @@ void ListItemDragManager::HandleOnItemDragCancel()
         scrolling_ = false;
     }
     HandleDragEndAnimation();
-    int32_t to = GetIndex();
-    auto forEach = forEachNode_.Upgrade();
-    CHECK_NULL_VOID(forEach);
-    forEach->FireOnMove(fromIndex_, to);
-    forEach->FireOnDrop(to);
+    if (dragState_ == ListItemDragState::DRAGGING) {
+        int32_t to = GetIndex();
+        auto forEach = forEachNode_.Upgrade();
+        CHECK_NULL_VOID(forEach);
+        forEach->FireOnMove(fromIndex_, to);
+        forEach->FireOnDrop(to);
+    }
     dragState_ = ListItemDragState::IDLE;
     if (isDragAnimationStopped_) {
         SetIsNeedDividerAnimation(true);
