@@ -48,6 +48,7 @@ struct Index {
     { title: "示例22：菜单基本功能_18_预览图缩放/布局", url: "pages/Examples/MenuTestLevel0_24" },
     { title: "示例23：菜单基本功能_19_生命周期通知target/BindMenu_NonIsShow", url: "pages/Examples/BindMenu_NonIsShow" },
     { title: "示例24：菜单基本功能_19_生命周期通知target/BindMenu_IsShow", url: "pages/Examples/BindMenu_IsShow" },
+    { title: "示例25：菜单基本功能_19_生命周期通知target/BindContextMenu_RightClick", url: "pages/Examples/BindContextMenu_RightClick" },
   ]
 
   build() {

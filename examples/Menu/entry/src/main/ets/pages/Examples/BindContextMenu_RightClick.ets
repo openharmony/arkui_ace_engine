@@ -4,13 +4,13 @@ import { pasteboard } from '@kit.BasicServicesKit';
 const TAG = 'ContextMenu';
 
 @Builder
-export function BindMenuBuilder() {
-  BindMenuTest()
+export function BindContextMenuBuilder() {
+  BindContextMenuTest()
 }
 
 @Entry
 @Component
-struct BindMenuTest {
+struct BindContextMenuTest {
   pageInfos: NavPathStack = new NavPathStack();
   controller: webview.WebviewController = new webview.WebviewController();
   private result: WebContextMenuResult | undefined = undefined;
@@ -117,6 +117,9 @@ struct BindMenuTest {
     .height(450)
   }
 
+
+
+
   private iconStr: Resource = $r('app.media.app_icon')
 
   @State isShow: boolean = false
@@ -158,9 +161,9 @@ struct BindMenuTest {
   @Builder
   MyMenu() {
     Menu() {
-      MenuItem({ 
+      MenuItem({
         startIcon: this.iconStr,
-        content: '菜单选项'
+        content: '菜单选项' 
       })
       MenuItem({
         startIcon: this.iconStr,
@@ -189,12 +192,11 @@ struct BindMenuTest {
                 this.linkUrl = event.param.getLinkUrl();
               }
               console.info(TAG, `x: ${this.offsetX}, y: ${this.offsetY}`);
-              this.showMenu = true;
               this.offsetX = 0;
               this.offsetY = Math.max(this.uiContext!.px2vp(event?.param.y() ?? 0) - 0, 0);
               return true;
             })
-            .bindMenu(this.showMenu, this.MenuBuilder(), {
+            .bindContextMenu(this.MenuBuilder, ResponseType.RightClick, {
               enableArrow: false,
               placement: Placement.LeftTop,
               offset: {
@@ -202,11 +204,13 @@ struct BindMenuTest {
                 y: this.offsetY
               },
               mask: false,
+              aboutToAppear: () => {
+                console.log('aboutToAppear----------')
+              },
+
               onDisappear: () => {
-                this.showMenu = false;
                 this.result!.closeContextMenu();
               },
-              showInSubWindow: false
             })
             .fileAccess(true)
             .javaScriptAccess(true)
@@ -215,7 +219,7 @@ struct BindMenuTest {
         .width('100%')
         .height('100%')
       }
-    }.title('BindMenu_IsShow')
+    }.title('BindContextMenu_RightClick')
     .onBackPressed(() => {
       // 弹出路由栈栈顶元素
       this.pageInfos.pop();

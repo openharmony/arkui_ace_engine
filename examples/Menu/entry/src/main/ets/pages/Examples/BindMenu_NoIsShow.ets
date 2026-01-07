@@ -210,7 +210,10 @@ struct BindMenuNonIsShowTest {
                     .bindMenu(this.MenuBuilder(), {
                         enableArrow: false,
                         placement: Placement.LeftTop,
-                        offset: {x: this.offsetX, y: this.offsetY},
+                        offset: {
+                            x: this.offsetX,
+                            y: this.offsetY
+                        },
                         mask: false,
                         onDisappear: () => {
                             this.result!.closeContextMenu();
