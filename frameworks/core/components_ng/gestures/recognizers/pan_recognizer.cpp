@@ -34,6 +34,7 @@ constexpr int32_t DEFAULT_PAN_FINGERS = 1;
 constexpr int32_t AXIS_PAN_FINGERS = 1;
 constexpr float MIN_SPEED_THRESHOLD = 500.0f;
 constexpr float TOUCHPAD_STILL_THRESHOLD = 0.1;
+constexpr float DEFAULT_RECYCLE_ANGLE = 180.0f;
 
 } // namespace
 
@@ -766,7 +767,8 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
         return IsPanGestureAcceptInAllDirection(judgeDistance);
     }
-    if (fabs(averageDistance_.GetX()) > fabs(averageDistance_.GetY())) {
+    if (!NearZero(averageDistance_.GetX()) &&
+        fabs(averageDistance_.GetY() / averageDistance_.GetX()) < std::tan(angle_ * ACE_PI / DEFAULT_RECYCLE_ANGLE)) {
         return IsPanGestureAcceptInHorizontalDirection(judgeDistance);
     }
     return IsPanGestureAcceptInVerticalDirection(judgeDistance);
