@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_REFRESH_RENDER_REFRESH_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_REFRESH_RENDER_REFRESH_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_REFRESH_RENDER_REFRESH_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_REFRESH_RENDER_REFRESH_H
 
 #include "base/memory/ace_type.h"
 #include "base/utils/system_properties.h"
@@ -25,8 +25,8 @@
 #include "core/components/display/render_display.h"
 #include "core/components/progress/loading_progress_component.h"
 #include "core/components/progress/render_loading_progress.h"
-#include "core/components/refresh/refresh_component.h"
-#include "core/components/refresh/refresh_controller.h"
+#include "compatible/components/refresh/refresh_component.h"
+#include "compatible/components/refresh/refresh_controller.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components/text/render_text.h"
 #include "core/components/text/text_component.h"
@@ -203,4 +203,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_REFRESH_RENDER_REFRESH_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_REFRESH_RENDER_REFRESH_H

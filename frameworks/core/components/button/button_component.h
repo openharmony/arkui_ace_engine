@@ -277,8 +277,9 @@ private:
 class ButtonBuilder {
 public:
     static RefPtr<ButtonComponent> Build(const RefPtr<ThemeManager>& themeManager, const std::string& text);
-    ACE_FORCE_EXPORT static RefPtr<ButtonComponent> Build(const RefPtr<ThemeManager>& themeManager, const std::string& text,
-        TextStyle& textStyle, const Color& textFocusColor = Color(), bool useTextFocus = false);
+    ACE_FORCE_EXPORT static RefPtr<ButtonComponent> Build(const RefPtr<ThemeManager>& themeManager,
+        const std::string& text, TextStyle& textStyle, const Color& textFocusColor = Color(),
+        bool useTextFocus = false);
 };
 
 } // namespace OHOS::Ace

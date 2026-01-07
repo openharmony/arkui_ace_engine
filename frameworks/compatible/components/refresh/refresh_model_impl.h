@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_REFRESH_MODEL_IMPL_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_REFRESH_MODEL_IMPL_H
+#ifndef FRAMEWORKS_COMPATILBE_COMPONENTS_REFRESH_REFRESH_MODEL_IMPL_H
+#define FRAMEWORKS_COMPATILBE_COMPONENTS_REFRESH_REFRESH_MODEL_IMPL_H
 
 #include <optional>
 #include <string>
 
-#include "frameworks/core/components/refresh/refresh_component.h"
+#include "frameworks/compatible/components/refresh/refresh_component.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_model.h"
 
 namespace OHOS::Ace::Framework {
@@ -58,4 +58,4 @@ private:
 };
 
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_REFRESH_MODEL_IMPL_H
+#endif // FRAMEWORKS_COMPATILBE_COMPONENTS_REFRESH_REFRESH_MODEL_IMPL_H

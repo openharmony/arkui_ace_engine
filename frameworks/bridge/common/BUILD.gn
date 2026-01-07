@@ -46,7 +46,6 @@ template("bridge_common") {
       "dom/dom_panel.cpp",
       "dom/dom_progress.cpp",
       "dom/dom_proxy.cpp",
-      "dom/dom_refresh.cpp",
       "dom/dom_search.cpp",
       "dom/dom_slider.cpp",
       "dom/dom_span.cpp",

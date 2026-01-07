@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components/refresh/refresh_component.h"
-
-#include "core/components/refresh/refresh_element.h"
-#include "core/components/refresh/render_refresh.h"
+#include "compatible/components/refresh/rosen_render_refresh.h"
 
 namespace OHOS::Ace {
-
-RefPtr<Element> RefreshComponent::CreateElement()
+RefPtr<RenderNode> RenderRefresh::Create()
 {
-    return AceType::MakeRefPtr<RefreshElement>();
+    return AceType::MakeRefPtr<RosenRenderRefresh>();
 }
-
-RefPtr<RenderNode> RefreshComponent::CreateRenderNode()
-{
-    return RenderRefresh::Create();
-}
-
 } // namespace OHOS::Ace
