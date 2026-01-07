@@ -2253,7 +2253,6 @@ ArkUINativeModuleValue RichEditorBridge::SetScrollBarColor(ArkUIRuntimeCallInfo*
         nodeModifiers->getRichEditorModifier()->resetRichEditorScrollBarColor(nativeNode);
     } else {
         auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-        ArkTSUtils::CompleteResourceObjectFromColor(resObj, color, true, nodeInfo);
         nodeModifiers->getRichEditorModifier()->setRichEditorScrollBarColor(
             nativeNode, color.GetValue(), AceType::RawPtr(resObj));
     }
