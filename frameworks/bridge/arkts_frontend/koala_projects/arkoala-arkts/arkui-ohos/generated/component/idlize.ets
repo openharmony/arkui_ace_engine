@@ -68,7 +68,7 @@ import { Scroller, ScrollerInternal } from "./scroll"
 import { CustomBuilder } from "./builder"
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from "./navigation"
 import { TargetInfo_serializer } from "./../framework/ohos.arkui.UIContext"
-import { TargetInfo } from "@ohos.arkui.UIContext"
+import { TargetInfo, CustomKeyboardContinueFeature } from "@ohos.arkui.UIContext"
 import { uiObserver_NavigationInfo_serializer } from "./../framework/ohos.arkui.observer"
 import { default as uiObserver } from "@ohos.arkui.observer"
 import { router_RouterOptions_serializer, router_RouterState_serializer } from "./../framework/ohos.router"
@@ -2608,6 +2608,9 @@ export class IUIContext {
         thisSerializer.release()
         return retval
     }
+    static setCustomKeyboardContinueFeature_serialize(feature: CustomKeyboardContinueFeature): void {
+        ArkUIGeneratedNativeModule._IUIContext_setCustomKeyboardContinueFeature(feature.valueOf())
+    }
     static bindTabsToScrollable_serialize(tabsController: TabsController, scroller: Scroller): void {
         ArkUIGeneratedNativeModule._IUIContext_bindTabsToScrollable(toPeerPtr(tabsController), toPeerPtr(scroller))
     }
@@ -2677,6 +2680,11 @@ export class IUIContext {
         const parentScroller_casted = parentScroller as (Scroller)
         const childScroller_casted = childScroller as (Scroller)
         IUIContext.unbindTabsFromNestedScrollable_serialize(tabsController_casted, parentScroller_casted, childScroller_casted)
+        return
+    }
+    public static setCustomKeyboardContinueFeature(feature: CustomKeyboardContinueFeature): void {
+        const feature_casted = feature as (CustomKeyboardContinueFeature)
+        IUIContext.setCustomKeyboardContinueFeature_serialize(feature_casted)
         return
     }
 }

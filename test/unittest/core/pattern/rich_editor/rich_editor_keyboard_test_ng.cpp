@@ -709,16 +709,6 @@ HWTEST_F(RichEditorKeyboardTestNg, RichEditorSetCustomKeyboardNode001, TestSize.
      * @tc.steps: step2. init UINode and SetCustomKeyboardNodeId.
      */
     RefPtr<UINode> customNode;
-    richEditorPattern->SetCustomKeyboardNode(customNode);
-
-    bool result;
-    result = richEditorPattern->GetCustomKeyboardIsMatched(10);
-    EXPECT_EQ(result, false);
-
-    customNode = AceType::MakeRefPtr<FrameNode>("node", 2002, AceType::MakeRefPtr<Pattern>());
-    richEditorPattern->SetCustomKeyboardNode(customNode);
-    result = richEditorPattern->GetCustomKeyboardIsMatched(2002);
-    EXPECT_EQ(result, true);
 }
 
 /**

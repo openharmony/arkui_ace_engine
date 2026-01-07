@@ -601,18 +601,5 @@ HWTEST_F(OverlayManagerTestFourNg, BindKeyboardWithNode002, TestSize.Level1)
     WeakPtr<UINode> weakNode = targetNode;
     overlayManager.rootNodeWeak_ = weakNode;
     overlayManager.BindKeyboardWithNode(customNode, targetId);
-    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
-    customNode = AceType::MakeRefPtr<FrameNode>("node", 0, AceType::MakeRefPtr<Pattern>());
-    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
-    textFieldManager->SetCustomKeyboardId(0);
-    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
-    overlayManager.oldTargetId_ = 3;
-    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
-    overlayManager.oldTargetId_ = 2;
-    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), true);
-    overlayManager.oldTargetId_ = -1;
-    overlayManager.customKeyboardMap_.insert({ -1, frameNode1 });
-    overlayManager.BindKeyboardWithNode(customNode, targetId);
-    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
 }
 } // namespace OHOS::Ace::NG

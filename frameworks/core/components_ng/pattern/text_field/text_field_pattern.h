@@ -1817,8 +1817,7 @@ public:
     void HandleAIMenuOption(const std::string& labelInfo = "");
     void UpdateAIMenuOptions();
     bool MaybeNeedShowSelectAIDetect();
-    void SetCustomKeyboardNodeId(const RefPtr<UINode>& customKeyboardNode);
-    bool GetCustomKeyboardIsMatched(int32_t customKeyboard);
+    void SetPreKeyboardNode();
     bool NeedCloseKeyboard() override;
     void ProcessCustomKeyboard(bool matched, int32_t nodeId) override;
     void CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension) override;

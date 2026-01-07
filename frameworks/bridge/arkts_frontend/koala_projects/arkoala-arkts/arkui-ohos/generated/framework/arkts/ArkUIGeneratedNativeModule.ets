@@ -4719,6 +4719,8 @@ export class ArkUIGeneratedNativeModule {
     native static _IUIContext_updateBindSheet(bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _IUIContext_closeBindSheet(bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _IUIContext_setCustomKeyboardContinueFeature(feature: KInt): void
+    @ani.unsafe.Direct
     native static _IUIContext_bindTabsToScrollable(tabsController: KPointer, scroller: KPointer): void
     @ani.unsafe.Direct
     native static _IUIContext_unbindTabsFromScrollable(tabsController: KPointer, scroller: KPointer): void

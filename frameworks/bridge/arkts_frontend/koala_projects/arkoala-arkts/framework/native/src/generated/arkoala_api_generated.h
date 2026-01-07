@@ -4516,6 +4516,14 @@ typedef struct Opt_curves_Curve {
     Ark_Tag tag;
     Ark_curves_Curve value;
 } Opt_curves_Curve;
+typedef enum Ark_CustomKeyboardContinueFeature {
+    ARK_CUSTOM_KEYBOARD_CONTINUE_FEATURE_ENABLED = 0,
+    ARK_CUSTOM_KEYBOARD_CONTINUE_FEATURE_DISABLED = 1,
+} Ark_CustomKeyboardContinueFeature;
+typedef struct Opt_CustomKeyboardContinueFeature {
+    Ark_Tag tag;
+    Ark_CustomKeyboardContinueFeature value;
+} Opt_CustomKeyboardContinueFeature;
 typedef enum Ark_DataPanelType {
     ARK_DATA_PANEL_TYPE_LINE = 0,
     ARK_DATA_PANEL_TYPE_CIRCLE = 1,
@@ -28137,6 +28145,7 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
     void (*unbindTabsFromNestedScrollable)(Ark_TabsController tabsController,
                                            Ark_Scroller parentScroller,
                                            Ark_Scroller childScroller);
+    void (*setCustomKeyboardContinueFeature)(Ark_CustomKeyboardContinueFeature feature);
 } GENERATED_ArkUIIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIJsGeolocationAccessor {

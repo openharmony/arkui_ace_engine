@@ -5816,7 +5816,7 @@ void RichEditorPattern::UpdateCaretInfoToController()
 #endif
 }
 
-void RichEditorPattern::SetCustomKeyboardNode(const RefPtr<UINode>& customKeyboardNode)
+void RichEditorPattern::SetPreKeyboardNode()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -5824,16 +5824,6 @@ void RichEditorPattern::SetCustomKeyboardNode(const RefPtr<UINode>& customKeyboa
     CHECK_NULL_VOID(textFieldManager);
     WeakPtr<FrameNode> weakNode = frameNode;
     textFieldManager->SetPreNode(weakNode);
-    auto customKeyboardId = customKeyboardNode ? customKeyboardNode->GetId() : -1;
-    textFieldManager->SetCustomKeyboardId(customKeyboardId);
-}
-
-bool RichEditorPattern::GetCustomKeyboardIsMatched(int32_t customKeyboardId)
-{
-    auto textFieldManager = GetTextFieldManager();
-    CHECK_NULL_RETURN(textFieldManager, false);
-    auto id = textFieldManager->GetCustomKeyboardId();
-    return customKeyboardId == id;
 }
 
 bool RichEditorPattern::HasConnection() const
@@ -5933,11 +5923,10 @@ void RichEditorPattern::RequestCustomKeyboardBuilder()
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+    SetPreKeyboardNode();
     if (customKeyboardBuilder_) {
-        SetCustomKeyboardNode(nullptr);
         overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
     } else {
-        SetCustomKeyboardNode(customKeyboardNode_);
         overlayManager->BindKeyboardWithNode(customKeyboardNode_, frameNode->GetId());
     }
 }
@@ -11581,14 +11570,13 @@ void RichEditorPattern::OnFocusCustomKeyboardChange()
     if (!textFieldManager->NeedCloseKeyboard()) {
         return;
     }
-    if (customKeyboardNode_) {
-        bool matched = GetCustomKeyboardIsMatched(customKeyboardNode_->GetId());
-        textFieldManager->ProcessCustomKeyboard(matched, currentNode->GetId());
-        SetCustomKeyboardNode(customKeyboardNode_);
+    if ((customKeyboardNode_ || customKeyboardBuilder_) && textFieldManager->GetCustomKeyboardContinueFeature()) {
+        textFieldManager->ProcessCustomKeyboard(true, currentNode->GetId());
+        SetPreKeyboardNode();
         return;
     }
     textFieldManager->ProcessCustomKeyboard(false, currentNode->GetId());
-    SetCustomKeyboardNode(nullptr);
+    SetPreKeyboardNode();
 }
 
 void RichEditorPattern::ProcessCustomKeyboard(bool matched, int32_t nodeId)

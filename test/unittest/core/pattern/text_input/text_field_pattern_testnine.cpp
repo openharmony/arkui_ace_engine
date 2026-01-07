@@ -1426,12 +1426,6 @@ HWTEST_F(TextFieldPatternTestNine, SetCustomKeyboardNodeId, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     pipeline->SetTextFieldManager(textFieldManager);
-    RefPtr<UINode> customNode;
-    pattern->SetCustomKeyboardNodeId(customNode);
-    EXPECT_EQ(pattern->GetCustomKeyboardIsMatched(2002), false);
-    customNode = AceType::MakeRefPtr<FrameNode>("node", 2002, AceType::MakeRefPtr<Pattern>());
-    pattern->SetCustomKeyboardNodeId(customNode);
-    EXPECT_EQ(pattern->GetCustomKeyboardIsMatched(2002), true);
 }
 
 /**
