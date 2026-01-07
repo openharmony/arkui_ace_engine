@@ -156,9 +156,33 @@ void BadgePattern::BorderDumpInfo()
     }
 }
 
+void BadgePattern::BorderDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto badgeBorderColor = layoutProperty->GetBadgeBorderColor();
+    auto badgeBorderWidth = layoutProperty->GetBadgeBorderWidth();
+    auto badgeOuterBorderColor = layoutProperty->GetBadgeOuterBorderColor();
+    auto badgeOuterBorderWidth = layoutProperty->GetBadgeOuterBorderWidth();
+
+    if (badgeBorderColor.has_value()) {
+        json->Put("badgeBorderColor", badgeBorderColor.value().ToString().c_str());
+    }
+    if (badgeBorderWidth.has_value()) {
+        json->Put("badgeBorderWidth", badgeBorderWidth.value().ToString().c_str());
+    }
+    if (badgeOuterBorderColor.has_value()) {
+        json->Put("badgeOuterBorderColor", badgeOuterBorderColor.value().ToString().c_str());
+    }
+    if (badgeOuterBorderWidth.has_value()) {
+        json->Put("badgeOuterBorderWidth", badgeOuterBorderWidth.value().ToString().c_str());
+    }
+}
+
 void BadgePattern::DumpInfo()
 {
     auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     auto badgeCount = layoutProperty->GetBadgeCount();
     auto badgeValue = layoutProperty->GetBadgeValue();
     auto circleSize = layoutProperty->GetBadgeCircleSize();
@@ -206,18 +230,15 @@ void BadgePattern::DumpInfo()
 void BadgePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     auto badgeCount = layoutProperty->GetBadgeCount();
     auto badgeValue = layoutProperty->GetBadgeValue();
     auto circleSize = layoutProperty->GetBadgeCircleSize();
     auto badgeTextColor = layoutProperty->GetBadgeTextColor();
     auto badgeFontSize = layoutProperty->GetBadgeFontSize();
-    auto badgePosition = layoutProperty->GetBadgePositionString(layoutProperty->GetBadgePositionValue());
+    auto badgePosition = layoutProperty->GetBadgePosition();
     auto badgeColor = layoutProperty->GetBadgeColor();
     auto badgeFontWeight = layoutProperty->GetBadgeFontWeight();
-    auto badgeBorderColor = layoutProperty->GetBadgeBorderColor();
-    auto badgeBorderWidth = layoutProperty->GetBadgeBorderWidth();
-    auto badgeOuterBorderColor = layoutProperty->GetBadgeOuterBorderColor();
-    auto badgeOuterBorderWidth = layoutProperty->GetBadgeOuterBorderWidth();
     if (badgeCount.has_value()) {
         const int32_t maxCountNum = 99;
         auto badgeMaxCount = layoutProperty->GetBadgeMaxCount().value_or(maxCountNum);
@@ -231,16 +252,26 @@ void BadgePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
             json->Put("badgeValue", badgeValue.value().c_str());
         }
     }
-    json->Put("badgePosition", badgePosition.c_str());
-    json->Put("badgeTextColor", badgeTextColor.value().ToString().c_str());
-    json->Put("circleSize", std::to_string(circleSize->ConvertToPx()).c_str());
-    json->Put("badgeFontSize", badgeFontSize.value().ToString().c_str());
-    json->Put("badgeColor", badgeColor.value().ToString().c_str());
-    json->Put("badgeFontWeight", V2::ConvertWrapFontWeightToStirng(badgeFontWeight.value()).c_str());
-    json->Put("badgeBorderColor", badgeBorderColor.value().ToString().c_str());
-    json->Put("badgeBorderWidth", badgeBorderWidth.value().ToString().c_str());
-    json->Put("badgeOuterBorderColor", badgeOuterBorderColor.value().ToString().c_str());
-    json->Put("badgeOuterBorderWidth", badgeOuterBorderWidth.value().ToString().c_str());
+    if (badgePosition.has_value()) {
+        auto badgePositionString = layoutProperty->GetBadgePositionString(badgePosition.value());
+        json->Put("badgePosition", badgePositionString.c_str());
+    }
+    if (badgeTextColor.has_value()) {
+        json->Put("badgeTextColor", badgeTextColor.value().ToString().c_str());
+    }
+    if (circleSize.has_value()) {
+        json->Put("circleSize", std::to_string(circleSize->ConvertToPx()).c_str());
+    }
+    if (badgeFontSize.has_value()) {
+        json->Put("badgeFontSize", badgeFontSize.value().ToString().c_str());
+    }
+    if (badgeColor.has_value()) {
+        json->Put("badgeColor", badgeColor.value().ToString().c_str());
+    }
+    if (badgeFontWeight.has_value()) {
+        json->Put("badgeFontWeight", V2::ConvertWrapFontWeightToStirng(badgeFontWeight.value()).c_str());
+    }
+    BorderDumpInfo(json);
 }
 
 void BadgePattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
