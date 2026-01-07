@@ -1,10 +1,3 @@
-/*
-* 验证Menu设置font/fontColor和menuItem设置font/fontColor的优先级
-* 验证menuItem设置HMSymbol
-*
-* 验证MenuItem：自有属性 | 自有事件
-* 验证MenuItemGroup： 标题和脚标
- */
 import { SymbolGlyphModifier } from '@kit.ArkUI';
 import { MyComponent } from "../common/MyComponent"
 
@@ -158,14 +151,9 @@ struct MenuTestLevel0_10 {
   //1
     {},
     //2
-    /*    {
-          selected: undefined,
-        },*/
-    //2
     {
       selected: true,
       selectIcon: true,
-
       contentFont: undefined,
       contentFontColor: undefined,
     },
@@ -173,7 +161,6 @@ struct MenuTestLevel0_10 {
     {
       selected: false,
       selectIcon: true,
-
       contentFont: {
         size: -16,
         weight: 0, //预计字重走默认值
@@ -187,7 +174,6 @@ struct MenuTestLevel0_10 {
     {
       selected: true,
       selectIcon: false,
-
       contentFont: {
         size: "0", //预计字体大小为0:
         weight: 300,
@@ -201,7 +187,6 @@ struct MenuTestLevel0_10 {
     {
       selected: true,
       selectIcon: $r("app.media.app_icon"),
-
       contentFont: {
         size: $r("app.float.float_40"),
         weight: 800,
@@ -213,7 +198,6 @@ struct MenuTestLevel0_10 {
     {
       selected: true,
       selectIcon: "svg_album.svg",
-
       contentFont: {
         size: 20,
         weight: 1200, //超出范围的异常值，预计走默认值400
@@ -224,7 +208,6 @@ struct MenuTestLevel0_10 {
     {
       selected: true,
       selectIcon: "/resource/media/svg_money.svg",
-
       contentFont: {
         size: 24,
         weight: "850", //预计走默认值400
@@ -236,7 +219,6 @@ struct MenuTestLevel0_10 {
     {
       selected: true,
       selectIcon: $r("app.string.EntryAbility_label"),
-
       contentFont: {
         size: "100%", //预计字体大小为默认值
         weight: FontWeight.Lighter,
@@ -259,7 +241,6 @@ struct MenuTestLevel0_10 {
     {
       selected: true,
       selectIcon: undefined,
-
       contentFont: {
         size: $r("app.string.EntryAbility_label"), //预计字体大小为默认值,
         weight: FontWeight.Regular,
@@ -269,7 +250,6 @@ struct MenuTestLevel0_10 {
     {
       selected: true,
       selectIcon: "/resource/media/gif.gif",
-
       contentFont: {
         size: 30,
         weight: FontWeight.Medium,
@@ -280,7 +260,6 @@ struct MenuTestLevel0_10 {
     {
       selected: true,
       selectIcon: "/resource/media/mp4_video1.mp4",
-
       contentFont: {
         size: "30aa", //预计字体大小为默认值
         weight: FontWeight.Bold,
@@ -354,14 +333,8 @@ struct MenuTestLevel0_10 {
   @Builder
   SubMenuBuilder() {
     Menu() {
-      MenuItem({ 
-        content: "复制", 
-        labelInfo: "Ctrl+C"
-      })
-      MenuItem({ 
-        content: "粘贴", 
-        labelInfo: "Ctrl+V" 
-      })
+      MenuItem({ content: "复制", labelInfo: "Ctrl+C" })
+      MenuItem({ content: "粘贴", labelInfo: "Ctrl+V" })
     }
   }
 
@@ -370,85 +343,38 @@ struct MenuTestLevel0_10 {
   MenuItemParamBuilder() {
     Menu() {
       //设置不同MenuItem入参的组合
-      MenuItem({ 
-        startIcon: $r("app.media.app_icon")
-      })
+      MenuItem({ startIcon: $r("app.media.app_icon")})
         .menuItemStyle()
-      MenuItem({ 
-        startIcon: $r("app.media.app_icon"), 
-        labelInfo: "label" 
-      })
+      MenuItem({ startIcon: $r("app.media.app_icon"), labelInfo: "label" })
         .menuItemStyle()
-      MenuItem({ 
-        startIcon: $r("app.media.app_icon"), 
-        endIcon: $r("app.media.png_arrow") 
-      })
+      MenuItem({ startIcon: $r("app.media.app_icon"), endIcon: $r("app.media.png_arrow") })
         .menuItemStyle()
-      MenuItem({ 
-        startIcon: $r("app.media.app_icon"), 
-        endIcon: $r("app.media.png_arrow"), 
-        labelInfo: "label" 
-      })
+      MenuItem({ startIcon: $r("app.media.app_icon"), endIcon: $r("app.media.png_arrow"), labelInfo: "label" })
         .menuItemStyle()
-      MenuItem({ 
-        startIcon: $r("app.media.app_icon"), 
-        content: "菜单" 
-      })
+      MenuItem({ startIcon: $r("app.media.app_icon"), content: "菜单" })
         .menuItemStyle()
-      MenuItem({ 
-        startIcon: $r("app.media.app_icon"), 
-        content: "菜单", 
-        labelInfo: "label" 
-      })
+      MenuItem({ startIcon: $r("app.media.app_icon"), content: "菜单", labelInfo: "label" })
         .menuItemStyle()
-      MenuItem({ 
-        startIcon: $r("app.media.app_icon"), 
-        content: "菜单", 
-        endIcon: $r("app.media.app_icon") 
-      })
+      MenuItem({ startIcon: $r("app.media.app_icon"), content: "菜单", endIcon: $r("app.media.app_icon") })
         .menuItemStyle()
-      MenuItem({
-        startIcon: $r("app.media.app_icon"),
-        content: "菜单",
-        endIcon: $r("app.media.app_icon"),
-        labelInfo: "label"
-      })
+      MenuItem({startIcon: $r("app.media.app_icon"),content: "菜单",endIcon: $r("app.media.app_icon"),labelInfo: "label"})
         .menuItemStyle()
 
       MenuItem({})
         .menuItemStyle()
-      MenuItem({ 
-        labelInfo: "label" 
-        })
+      MenuItem({ labelInfo: "label" })
         .menuItemStyle()
-      MenuItem({ 
-        endIcon: $r("app.media.app_icon") 
-        })
+      MenuItem({ endIcon: $r("app.media.app_icon") })
         .menuItemStyle()
-      MenuItem({ 
-        endIcon: $r("app.media.app_icon"), 
-        labelInfo: "label" 
-        })
+      MenuItem({ endIcon: $r("app.media.app_icon"), labelInfo: "label" })
         .menuItemStyle()
-      MenuItem({ 
-        content: "菜单" 
-        })
+      MenuItem({ content: "菜单" })
         .menuItemStyle()
-      MenuItem({ 
-        content: "菜单", 
-        labelInfo: "label" 
-        })
+      MenuItem({ content: "菜单", labelInfo: "label" })
         .menuItemStyle()
-      MenuItem({ 
-        content: "菜单", 
-        endIcon: $r("app.media.app_icon") 
-        })
+      MenuItem({ content: "菜单", endIcon: $r("app.media.app_icon") })
         .menuItemStyle()
-      MenuItem({ 
-        content: "菜单", 
-        endIcon: $r("app.media.app_icon"), 
-        labelInfo: "label" 
-        })
+      MenuItem({ content: "菜单", endIcon: $r("app.media.app_icon"), labelInfo: "label" })
         .menuItemStyle()
     }
     .width(200)
