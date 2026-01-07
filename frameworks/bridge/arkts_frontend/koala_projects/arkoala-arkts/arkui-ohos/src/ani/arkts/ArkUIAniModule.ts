@@ -190,6 +190,7 @@ export class ArkUIAniModule {
     native static _DragEvent_Get_Data(ptr: KLong) : unifiedDataChannel.UnifiedData
     native static _DragEvent_Get_Summary(ptr: KLong) : unifiedDataChannel.Summary | undefined
     native static _DragEvent_Start_Data_Loading(ptr: KLong, data : unifiedDataChannel.GetDataParams) : string | undefined
+    native static _DragEvent_Enable_InternalDropAnimation(ptr: KLong, configuration: string) : void
     native static _DragEvent_Set_PixelMap(ptr: KLong, pixelMap: image.PixelMap) : void
     native static _DragEvent_Set_ExtraInfo(ptr: KLong, extraInfo: string) : void
     native static _DragEvent_Set_CustomNode(ptr: KLong, customNode: KPointer) : void

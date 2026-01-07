@@ -485,6 +485,8 @@ struct ArkUIAniDragModifier {
     void (*setDragAllowDrop)(ArkUINodeHandle node, char** allowDrops, ArkUI_Int32 length);
     void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragInfo dragInfo);
     void (*setDragPreviewOptions)(ArkUINodeHandle node, ArkUIDragPreviewOption options);
+    void (*enableInternalDropAnimation)(ani_ref event, const std::string& configuration, int32_t& ret);
+    bool (*isOnDropPhase)();
     const char* (*getUdKey)(ani_ref event);
     ani_long (*createUnifiedDataPeer)(void* data);
     ani_long (*getUnifiedData)(ani_long peer);

@@ -19,6 +19,8 @@
 
 #include "base/log/log.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
+#include "core/common/interaction/interaction_interface.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/gestures/drag_event.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
@@ -182,6 +184,26 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreviewOption options)
     frameNode->SetDragPreviewOptions(previewOptions);
 }
 
+void EnableInternalDropAnimation(ani_ref event, const std::string& configuration, int32_t& ret)
+{
+    auto peer = reinterpret_cast<Ark_DragEvent>(event);
+    CHECK_NULL_VOID(peer);
+    auto dragEvent = peer->dragInfo;
+    CHECK_NULL_VOID(dragEvent);
+    auto interactionInterface = OHOS::Ace::InteractionInterface::GetInstance();
+    CHECK_NULL_VOID(interactionInterface);
+    ret = interactionInterface->EnableInternalDropAnimation(configuration);
+    if (ret == 0) {
+        dragEvent->SetNeedDoInternalDropAnimation(true);
+    }
+    return;
+}
+
+bool IsOnDropPhase()
+{
+    return NG::DragDropGlobalController::GetInstance().IsOnOnDropPhase();
+}
+
 const char* GetUdKey(ani_ref event)
 {
     auto peer = reinterpret_cast<Ark_DragEvent>(event);
@@ -277,6 +299,8 @@ const ArkUIAniDragModifier* GetDragAniModifier()
         .setDragAllowDrop = OHOS::Ace::NG::SetDragAllowDrop,
         .setDragPreview = OHOS::Ace::NG::SetDragPreview,
         .setDragPreviewOptions = OHOS::Ace::NG::SetDragPreviewOptions,
+        .enableInternalDropAnimation = OHOS::Ace::NG::EnableInternalDropAnimation,
+        .isOnDropPhase = OHOS::Ace::NG::IsOnDropPhase,
         .getUdKey = OHOS::Ace::NG::GetUdKey,
         .createUnifiedDataPeer = OHOS::Ace::NG::CreateUnifiedDataPeer,
         .getUnifiedData = OHOS::Ace::NG::GetUnifiedData,

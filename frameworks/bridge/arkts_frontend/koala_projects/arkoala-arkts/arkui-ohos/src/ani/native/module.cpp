@@ -571,6 +571,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragEveStartDataLoading)
         },
         ani_native_function {
+            "_DragEvent_Enable_InternalDropAnimation",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventEnableInternalDropAnimation)
+        },
+        ani_native_function {
             "_DragEvent_Set_PixelMap",
             "lC{@ohos.multimedia.image.image.PixelMap}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetPixelMap)
