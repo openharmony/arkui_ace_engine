@@ -47,6 +47,10 @@ class AccessibilityElementInfo;
 class AccessibilityEventInfo;
 }
 
+namespace OHOS::Ace {
+struct UiMaterialParam;
+}
+
 namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
 class InspectorFilter;
@@ -879,6 +883,7 @@ public:
     virtual void OnDetachFromMainRenderTree() {}
     virtual void OnAttachToMainRenderTree() {}
     virtual void OnOffscreenProcessResource() {}
+    virtual void OnUiMaterialParamUpdate(const UiMaterialParam& params) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}
