@@ -26,7 +26,7 @@
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/dom/dom_canvas.h"
 #include "frameworks/bridge/common/dom/dom_chart.h"
-#include "frameworks/bridge/common/dom/dom_clock.h"
+#include "frameworks/compatible/components/clock/dom_clock.h"
 #include "frameworks/bridge/common/dom/dom_configs.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/dom/dom_input.h"

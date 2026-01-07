@@ -21,7 +21,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components/clock/clock_theme.h"
+#include "compatible/components/clock/clock_theme.h"
 #include "core/components/close_icon/close_icon_theme.h"
 #include "core/components/counter/counter_theme.h"
 #include "core/components/data_panel/data_panel_theme.h"

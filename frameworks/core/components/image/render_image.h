@@ -46,7 +46,7 @@ class RenderImage : public RenderNode, public DragDropEvent, public TextOverlayB
 public:
     ~RenderImage() override;
 
-    static RefPtr<RenderNode> Create();
+    ACE_FORCE_EXPORT static RefPtr<RenderNode> Create();
     static bool IsSVG(const std::string& src, InternalResource::ResourceId resourceId);
     virtual Size Measure() = 0;
     void SetImageComponentSize(const Size& imageComponentSize)

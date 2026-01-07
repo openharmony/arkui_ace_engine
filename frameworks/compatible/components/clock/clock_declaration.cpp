@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2021 Huawei Device Co., Ltd.
+* Copyright (c) 2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -13,10 +13,9 @@
 * limitations under the License.
 */
 
-#include "core/components/declaration/clock/clock_declaration.h"
+#include "compatible/components/clock/clock_declaration.h"
 
 #include "base/log/event_report.h"
-#include "core/components/declaration/common/declaration_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace {
@@ -25,11 +24,19 @@ using namespace Framework;
 
 using ClockMap = std::unordered_map<std::string, void (*)(const std::string&, ClockDeclaration&)>;
 
+const char DOM_HOURS_WEST[] = "hourswest";
+const char DOM_SHOW_DIGIT[] = "showdigit";
+const char DOM_DIGIT_FONT_FAMILY[] = "fontFamily";
+
+// default value of clock
+const std::shared_ptr<ClockAttribute> DEFAULT_CLOCK_ATTR = std::make_shared<ClockAttribute>();
+const std::shared_ptr<ClockStyle> DEFAULT_CLOCK_STYLE = std::make_shared<ClockStyle>();
+const std::shared_ptr<ClockEvent> DEFAULT_CLOCK_EVENT = std::make_shared<ClockEvent>();
 void ClockDeclaration::InitSpecialized()
 {
-    AddSpecializedAttribute(DeclarationConstants::DEFAULT_CLOCK_ATTR);
-    AddSpecializedStyle(DeclarationConstants::DEFAULT_CLOCK_STYLE);
-    AddSpecializedEvent(DeclarationConstants::DEFAULT_CLOCK_EVENT);
+    AddSpecializedAttribute(DEFAULT_CLOCK_ATTR);
+    AddSpecializedStyle(DEFAULT_CLOCK_STYLE);
+    AddSpecializedEvent(DEFAULT_CLOCK_EVENT);
 }
 
 void ClockDeclaration::InitializeStyle()

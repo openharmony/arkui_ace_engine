@@ -971,6 +971,15 @@
       "OHOS::Ace::ACE_PI";
       "OHOS::Ace::ACE_E";
       OHOS::Ace::PipelineBase::GetImageCache*;
+
+      "OHOS::Ace::RenderImage::Create()";
+      "OHOS::Ace::GetTimeOfNow(int)";
+      "OHOS::Ace::IsDayTime(OHOS::Ace::TimeOfNow const&)";
+      OHOS::Ace::ImageComponent::ImageComponent*;
+      OHOS::Ace::ImageComponent::SetResourceId*;
+      OHOS::Ace::ImageComponent::SetImageFill*;
+      VTT?for?OHOS::Ace::ImageComponent;
+      vtable?for?OHOS::Ace::ImageComponent;
     };
   local:
     *;

@@ -106,9 +106,9 @@ void JsCommandDomElementOperator::UpdateForImageAnimator(const RefPtr<DOMNode>& 
 void JsCommandDomElementOperator::UpdateForClock(const RefPtr<DOMNode>& node) const
 {
     if (clockConfig_) {
-        auto domClock = AceType::DynamicCast<DOMClock>(node);
-        if (domClock) {
-            domClock->SetClockConfig(*clockConfig_);
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("clock");
+        if (loader) {
+            loader->UpdateDomConfig(node, clockConfig_.get());
         }
     }
 }
