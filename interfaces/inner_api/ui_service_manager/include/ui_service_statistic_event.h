@@ -38,14 +38,15 @@ private:
 struct StatisticEventInfoParcel : public Parcelable {
 public:
     StatisticEventInfoParcel() = default;
-    StatisticEventInfoParcel(const std::string& eventName, int32_t eventCount);
+    StatisticEventInfoParcel(const std::string& eventName, const std::string& subEventName, int32_t eventCount);
     bool Marshalling(Parcel& parcel) const override;
     static StatisticEventInfoParcel *Unmarshalling(Parcel& parcel);
     const std::string& GetEventName() const;
+    const std::string& GetSubEventName() const;
     int32_t GetEventCount() const;
-    void SetEventCount(int32_t count);
 private:
     std::string eventName_;
+    std::string subEventName_;
     int32_t eventCount_ = 0;
 };
 } // namespace OHOS::Ace
