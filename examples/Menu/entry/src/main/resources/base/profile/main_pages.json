@@ -24,6 +24,7 @@
     "pages/Examples/MenuTestLevel0_17",
     "pages/Examples/MenuTestLevel0_18",
     "pages/Examples/MenuTestLevel0_24",
+    "pages/Examples/BindMenu_NonIsShow",
 
     "pages/LifeCycle/Index",
     "pages/LifeCycle/aboutToAppear/BindMenu",
