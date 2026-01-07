@@ -1102,7 +1102,7 @@ void SetBackgroundColor(ArkUINodeHandle node, uint32_t color, void* bgColorRawPt
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!bgColorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj, result, frameNode->GetTag(), frameNode->GetForceDarkAllowed());
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(bgColorRawPtr));
         }
