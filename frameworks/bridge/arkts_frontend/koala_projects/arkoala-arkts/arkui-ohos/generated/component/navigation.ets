@@ -2681,10 +2681,10 @@ export class NavigationDividerStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForColorTmpValueForIdx0  = valueHolderForColorTmpValue as Color
                 valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx0.getOrdinal())
-            } else if (valueHolderForColorTmpValue instanceof number) {
+            } else if (valueHolderForColorTmpValue instanceof int32) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as number
-                valueSerializer.writeNumber(valueHolderForColorTmpValueForIdx1)
+                const valueHolderForColorTmpValueForIdx1  = valueHolderForColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForColorTmpValueForIdx1)
             } else if (valueHolderForColorTmpValue instanceof string) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForColorTmpValueForIdx2  = valueHolderForColorTmpValue as string
@@ -2705,10 +2705,10 @@ export class NavigationDividerStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForStartMarginTmpValueForIdx0  = valueHolderForStartMarginTmpValue as string
                 valueSerializer.writeString(valueHolderForStartMarginTmpValueForIdx0)
-            } else if (valueHolderForStartMarginTmpValue instanceof number) {
+            } else if (valueHolderForStartMarginTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForStartMarginTmpValueForIdx1  = valueHolderForStartMarginTmpValue as number
-                valueSerializer.writeNumber(valueHolderForStartMarginTmpValueForIdx1)
+                const valueHolderForStartMarginTmpValueForIdx1  = valueHolderForStartMarginTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForStartMarginTmpValueForIdx1)
             } else if (valueHolderForStartMarginTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForStartMarginTmpValueForIdx2  = valueHolderForStartMarginTmpValue as Resource
@@ -2725,10 +2725,10 @@ export class NavigationDividerStyle_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForEndMarginTmpValueForIdx0  = valueHolderForEndMarginTmpValue as string
                 valueSerializer.writeString(valueHolderForEndMarginTmpValueForIdx0)
-            } else if (valueHolderForEndMarginTmpValue instanceof number) {
+            } else if (valueHolderForEndMarginTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForEndMarginTmpValueForIdx1  = valueHolderForEndMarginTmpValue as number
-                valueSerializer.writeNumber(valueHolderForEndMarginTmpValueForIdx1)
+                const valueHolderForEndMarginTmpValueForIdx1  = valueHolderForEndMarginTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForEndMarginTmpValueForIdx1)
             } else if (valueHolderForEndMarginTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForEndMarginTmpValueForIdx2  = valueHolderForEndMarginTmpValue as Resource
@@ -2745,13 +2745,13 @@ export class NavigationDividerStyle_serializer {
         if ((colorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const colorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let colorTmpBuf_ : Color | int32 | string | Resource | undefined
-            if (colorTmpBuf_UnionSelector == (0).toChar()) {
+            if (colorTmpBuf_UnionSelector == (0).toByte()) {
                 colorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
-            } else if (colorTmpBuf_UnionSelector == (1).toChar()) {
+            } else if (colorTmpBuf_UnionSelector == (1).toByte()) {
                 colorTmpBuf_ = valueDeserializer.readInt32()
-            } else if (colorTmpBuf_UnionSelector == (2).toChar()) {
+            } else if (colorTmpBuf_UnionSelector == (2).toByte()) {
                 colorTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (colorTmpBuf_UnionSelector == (3).toChar()) {
+            } else if (colorTmpBuf_UnionSelector == (3).toByte()) {
                 colorTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for colorTmpBuf_ has to be chosen through deserialisation.")
@@ -2763,34 +2763,34 @@ export class NavigationDividerStyle_serializer {
         let startMarginTmpBuf : Length | undefined = undefined
         if ((startMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const startMarginTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let startMarginTmpBuf_ : string | Double | Resource | undefined
-            if (startMarginTmpBuf_UnionSelector == (0).toChar()) {
+            let startMarginTmpBuf_ : string | double | Resource | undefined
+            if (startMarginTmpBuf_UnionSelector == (0).toByte()) {
                 startMarginTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (startMarginTmpBuf_UnionSelector == (1).toChar()) {
+            } else if (startMarginTmpBuf_UnionSelector == (1).toByte()) {
                 startMarginTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (startMarginTmpBuf_UnionSelector == (2).toChar()) {
+            } else if (startMarginTmpBuf_UnionSelector == (2).toByte()) {
                 startMarginTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for startMarginTmpBuf_ has to be chosen through deserialisation.")
             }
-            startMarginTmpBuf = (startMarginTmpBuf_ as string | Double | Resource)
+            startMarginTmpBuf = (startMarginTmpBuf_ as string | double | Resource)
         }
         const startMarginTmpResult : Length | undefined = startMarginTmpBuf
         const endMarginTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let endMarginTmpBuf : Length | undefined = undefined
         if ((endMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const endMarginTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let endMarginTmpBuf_ : string | number | Resource | undefined
-            if (endMarginTmpBuf_UnionSelector == (0).toChar()) {
+            let endMarginTmpBuf_ : string | double | Resource | undefined
+            if (endMarginTmpBuf_UnionSelector == (0).toByte()) {
                 endMarginTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (endMarginTmpBuf_UnionSelector == (1).toChar()) {
+            } else if (endMarginTmpBuf_UnionSelector == (1).toByte()) {
                 endMarginTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (endMarginTmpBuf_UnionSelector == (2).toChar()) {
+            } else if (endMarginTmpBuf_UnionSelector == (2).toByte()) {
                 endMarginTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for endMarginTmpBuf_ has to be chosen through deserialisation.")
             }
-            endMarginTmpBuf = (endMarginTmpBuf_ as string | number | Resource)
+            endMarginTmpBuf = (endMarginTmpBuf_ as string | double | Resource)
         }
         const endMarginTmpResult : Length | undefined = endMarginTmpBuf
         let value : NavigationDividerStyle = ({color: colorTmpResult, startMargin: startMarginTmpResult, endMargin: endMarginTmpResult} as NavigationDividerStyle)
