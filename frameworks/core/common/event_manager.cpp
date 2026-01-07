@@ -1112,6 +1112,7 @@ void EventManager::CleanHoverStatusForDragBegin()
     MouseEvent falsifyEvent = lastMouseEvent_;
     TouchTestResult testResult;
     falsifyEvent.action = MouseAction::CANCEL;
+    falsifyEvent.isFalsifyCancel = true;
     UpdateHoverNode(falsifyEvent, testResult);
     DispatchMouseEventNG(falsifyEvent);
     DispatchMouseHoverEventNG(falsifyEvent);
