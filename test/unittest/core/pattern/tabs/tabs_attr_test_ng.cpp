@@ -909,7 +909,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModelCreate002, TestSize.Level1)
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
 
     TabsModelNG Mode1NG;
-    Mode1NG.Create(BarPosition::END, 0, nullptr, nullptr);
+    Mode1NG.Create(BarPosition::END, 0, nullptr);
     tabContentPattern->shallowBuilder_->deepRenderFunc_();
     EXPECT_FALSE(frameNode_);
 }

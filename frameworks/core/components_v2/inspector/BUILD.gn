@@ -71,8 +71,6 @@ build_component("inspector_v2") {
     "stepper_item_composed_element.cpp",
     "swiper_composed_element.cpp",
     "switch_composed_element.cpp",
-    "tab_content_composed_element.cpp",
-    "tabs_composed_element.cpp",
     "text_clock_composed_element.cpp",
     "text_composed_element.cpp",
     "textarea_composed_element.cpp",

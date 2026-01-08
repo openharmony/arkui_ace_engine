@@ -16,6 +16,8 @@
 #include "frameworks/bridge/common/dom/dom_navigation_bar.h"
 
 #include "base/log/event_report.h"
+#include "core/common/dynamic_module_helper.h"
+#include "compatible/components/tab_bar/modifier/tab_modifier_api.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
@@ -27,6 +29,16 @@ NavigationBarType GetType(const std::string& value)
     return value == EMPHASIZE ? NavigationBarType::EMPHASIZE : NavigationBarType::NORMAL;
 }
 
+const ArkUIInnerTabBarModifier* GetTabBarInnerModifier()
+{
+    static const ArkUIInnerTabBarModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("tab-bar");
+        CHECK_NULL_RETURN(loader, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIInnerTabBarModifier*>(loader->GetCustomModifier());
+    }
+    return cachedModifier;
+}
 } // namespace
 
 DomNavigationBar::DomNavigationBar(NodeId nodeId, const std::string& nodeName)
@@ -65,10 +77,11 @@ void DomNavigationBar::OnChildNodeRemoved(const RefPtr<DOMNode>& child)
         navigationBarData_->allMenuItems.clear();
         return;
     }
-    auto tabBar = AceType::DynamicCast<TabBarComponent>(child->GetSpecializedComponent());
-    if (tabBar) {
-        navigationBarData_->tabBar = nullptr;
-        return;
+    if (auto modifier = GetTabBarInnerModifier()) {
+        if (modifier->getTabBarComponent(child->GetSpecializedComponent())) {
+            navigationBarData_->tabBar = nullptr;
+            return;
+        }
     }
 
     auto selectPopup = AceType::DynamicCast<SelectComponent>(child->GetSpecializedComponent());
@@ -88,10 +101,12 @@ void DomNavigationBar::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t sl
         navigationBarData_->menu = menu;
         return;
     }
-    auto tabBar = AceType::DynamicCast<TabBarComponent>(child->GetSpecializedComponent());
-    if (tabBar) {
-        navigationBarData_->tabBar = tabBar;
-        return;
+    if (auto modifier = GetTabBarInnerModifier()) {
+        auto tabBar = modifier->getTabBarComponent(child->GetSpecializedComponent());
+        if (tabBar) {
+            navigationBarData_->tabBar = tabBar;
+            return;
+        }
     }
 
     auto selectPopup = AceType::DynamicCast<SelectComponent>(child->GetSpecializedComponent());

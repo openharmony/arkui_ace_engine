@@ -137,7 +137,7 @@ TabsModelNG TabsTestNg::CreateTabs(BarPosition barPosition, int32_t index)
     ResetElmtId();
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     TabsModelNG model;
-    model.Create(barPosition, index, nullptr, nullptr);
+    model.Create(barPosition, index, nullptr);
     ViewAbstract::SetWidth(CalcLength(TABS_WIDTH));
     ViewAbstract::SetHeight(CalcLength(TABS_HEIGHT));
     auto tabNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());

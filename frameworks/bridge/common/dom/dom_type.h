@@ -697,7 +697,6 @@ ACE_EXPORT extern const char DOM_TRACK_COLOR_ON[];
 ACE_EXPORT extern const char DOM_TRACK_COLOR_OFF[];
 
 // tabs attribute and style constants
-ACE_EXPORT extern const char DOM_TAB_BAR_MODE[];
 ACE_EXPORT extern const char DOM_TAB_CONTENT_SCROLLABLE[];
 
 // marquee attribute and style constants

@@ -574,7 +574,8 @@ public:
     Decoration() = default;
     ~Decoration() override = default;
 
-    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback);
+    ACE_FORCE_EXPORT void SetContextAndCallback(
+        const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback);
 
     void AddShadow(const Shadow& shadow);
 
@@ -595,7 +596,7 @@ public:
         animationColor_ = animationColor;
     }
 
-    void SetGradient(const Gradient& gradient, const WeakPtr<PipelineContext>& context = nullptr,
+    ACE_FORCE_EXPORT void SetGradient(const Gradient& gradient, const WeakPtr<PipelineContext>& context = nullptr,
         const RenderNodeAnimationCallback& callback = nullptr);
 
     void SetBorderImageGradient(const Gradient& gradient)

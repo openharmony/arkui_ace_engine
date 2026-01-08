@@ -155,7 +155,7 @@ public:
     // return mainComponent ... outmostWrappingComponent
     // local Component to Element updates will be performed on these any any Component in-between
     // returns the same cComponent twice if no wrapping Components.
-    std::pair<RefPtr<Component>, RefPtr<Component>> FinishReturnMain();
+    ACE_FORCE_EXPORT std::pair<RefPtr<Component>, RefPtr<Component>> FinishReturnMain();
 
     int32_t Size() const
     {
@@ -330,8 +330,8 @@ private:
 
 class ScopedViewStackProcessor final {
 public:
-    ScopedViewStackProcessor();
-    ~ScopedViewStackProcessor();
+    ACE_FORCE_EXPORT ScopedViewStackProcessor();
+    ACE_FORCE_EXPORT ~ScopedViewStackProcessor();
 
 private:
     std::unique_ptr<ViewStackProcessor> instance_;

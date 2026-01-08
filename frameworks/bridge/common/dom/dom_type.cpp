@@ -692,7 +692,6 @@ const char DOM_TRACK_COLOR_ON[] = "trackColorOn";
 const char DOM_TRACK_COLOR_OFF[] = "trackColorOff";
 
 // tabs attribute and style constants
-const char DOM_TAB_BAR_MODE[] = "mode";
 const char DOM_TAB_CONTENT_SCROLLABLE[] = "scrollable";
 
 // marquee attribute and style constants

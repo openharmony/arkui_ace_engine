@@ -405,8 +405,6 @@ extern const char TAB_BAR_NAME[];
 extern const char TAB_CONTENT_NAME[];
 extern const char TAB_NAME[];
 extern const char TAB_TABS[];
-extern const char TAB_INDEX[];
-extern const char TAB_IS_VERTICAL[];
 extern const char TAB_CONTROLLER_ID[];
 extern const char TAB_INDICATOR[];
 extern const char TAB_INDICATOR_WIDTH[];

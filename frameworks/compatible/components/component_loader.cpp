@@ -31,6 +31,7 @@
 #include "compatible/components/picker/picker_loader.h"
 #include "compatible/components/label/label_loader.h"
 #include "compatible/components/svg/svg_loader.h"
+#include "compatible/components/tab_bar/tab_loader.h"
 #include "compatible/components/qrcode/qrcode_loader.h"
 #include "compatible/components/rating/rating_loader.h"
 #include "compatible/components/refresh/refresh_loader.h"
@@ -94,7 +95,10 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "timePickerDialog", []() -> ComponentLoader* { return new TimePickerDialogLoader(); } },
         { "textPicker", []() -> ComponentLoader* { return new TextPickerLoader(); } },
         { "textPickerDialog", []() -> ComponentLoader* { return new TextPickerDialogLoader(); } },
-        { "rating", []() -> ComponentLoader* { return new RatingLoader(); } }
+        { "rating", []() -> ComponentLoader* { return new RatingLoader(); } },
+        { "tabs", []() -> ComponentLoader* { return new TabsLoader(); } },
+        { "tab-bar", []() -> ComponentLoader* { return new TabBarLoader(); } },
+        { "tab-content", []() -> ComponentLoader* { return new TabContentLoader(); } },
     };
     auto loaderIter = sLoaderMap.find(nameStr);
     if (loaderIter != sLoaderMap.end()) {
