@@ -30,13 +30,14 @@ import { ObserveSingleton } from '@ohos.arkui.stateManagement';
 import { setNeedCreate } from "arkui/ArkComponentRoot"
 import { findPeerNode } from "./PeerNode"
 import { InteropNativeModule } from "@koalaui/interop"
+import { __context, __id } from '@koalaui/runtime'
 
 const CUSTOM_TITLE_BAR_CLASS: string = "@ohos.window.titlebar.component.System__Reserved_$$$__UI__TitleBar__Component"
 const CUSTOM_BUTTOEN_BAR_CLASS: string = "@ohos.window.titlebar.component.System__Reserved_$$$__UI__ButtonBar__Component"
 const DEFAULT_TITLE_BAR_CLASS: string = "@ohos.window.titlebar.component.defalut.System__Reserved_$$$__UI__TitleBar__Component"
 const DEFAULT_BUTTOEN_BAR_CLASS: string = "@ohos.window.titlebar.component.defalut.System__Reserved_$$$__UI__ButtonBar__Component"
 
-abstract class DummyCustomComponent extends CustomComponent<DummyCustomComponent, undefined> {}
+abstract class DummyCustomComponent extends CustomComponent<DummyCustomComponent, undefined> { }
 
 export class XBarProxy {
     // static titleBarComponentMap: Map<KLong, CustomComponent> = new Map();
@@ -53,7 +54,8 @@ export class XBarProxy {
 export function createXBarCustomComponent<T extends CustomComponent<T, T_Options>, T_Options>(xbarType: int32, instanceID: int32): KLong {
     console.log(`[createXBarCustomComponent]start createXBarCustomComponent`)
     let componentInstance: T | undefined = undefined
-    const factory = (): T => {
+    /** @memo */
+    const factory = (): void => {
         console.log(`[createXBarCustomComponent]createXBarCustomComponent in factory`)
         let reflectTargetName: string = "";
         switch (xbarType) {
@@ -66,8 +68,11 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
             default:
                 reflectTargetName = CUSTOM_TITLE_BAR_CLASS;
         }
-        let reflectedType: Type | undefined = Type.resolve(reflectTargetName)
-        if (reflectedType === undefined) {
+        let reflectedType: Class | undefined = undefined;
+        let linker = Class.current().getLinker();
+        try {
+            reflectedType = linker.loadClass(reflectTargetName);
+        } catch (e) {
             console.log(`[createXBarCustomComponent]${reflectTargetName} is undefined, load default`)
             switch (xbarType) {
                 case 0:
@@ -79,18 +84,25 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
                 default:
                     reflectTargetName = DEFAULT_TITLE_BAR_CLASS;
             }
-            reflectedType = Type.resolve(reflectTargetName)
-            if (reflectedType === undefined) {
+
+            try {
+                reflectedType = linker.loadClass(reflectTargetName);
+            } catch (e) {
                 console.log(`[createXBarCustomComponent]${reflectTargetName} is undefined`)
                 // return undefined
                 throw new Error(`[createXBarCustomComponent]reflectedType is undefined`)
             }
         }
         try {
-            let type: ClassType = reflectedType as ClassType
-            componentInstance = type.make() as T
+            if (!reflectedType || !reflectedType.getStaticMethod("_invoke")) {
+                throw new Error("Required method or type is missing");
+            }
+            let invokeArgs: FixedArray<Any> = new Any[7];
+            invokeArgs[0] = __context();
+            invokeArgs[1] = __id();
+            invokeArgs[2] = /** @memo */(instance: T) => { componentInstance = instance; };
+            reflectedType!.getStaticMethod("_invoke")!.invoke(invokeArgs);
             console.log(`[createXBarCustomComponent]createXBarCustomComponent end factory`)
-            return componentInstance! as T
         } catch (e) {
             console.log("[createXBarCustomComponent]make instance error!")
             if (e instanceof Error) {
@@ -103,10 +115,6 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
             throw new Error(`[createXBarCustomComponent]make instance error!`)
         }
     }
-    console.log(`[createXBarCustomComponent]instantiateImpl11`)
-    const instantiateImpl = /** @memo */ () => {
-        T._invokeImpl(undefined, factory, undefined, undefined, undefined);
-    };
     console.log(`[createXBarCustomComponent]start getUIContextById ${instanceID}`)
     const uiContext = UIContextUtil.getOrCreateUIContextById(instanceID) as UIContextImpl;
     console.log(`[createXBarCustomComponent]getUIContextById`)
@@ -116,7 +124,7 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
         let r = OBSERVE.renderingComponent;
         OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
         const needCreate = setNeedCreate(true);
-        memoEntry<void>(context, 0, instantiateImpl);
+        memoEntry<void>(context, 0, factory);
         setNeedCreate(needCreate);
         OBSERVE.renderingComponent = r;
         ArkUIAniModule._Common_Restore_InstanceId();
