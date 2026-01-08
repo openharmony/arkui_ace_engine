@@ -241,7 +241,8 @@ void SetTextAreaPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void*
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
@@ -519,7 +520,8 @@ void SetTextAreaCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* color
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }
@@ -570,7 +572,8 @@ void SetTextAreaFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRaw
         CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
@@ -796,7 +799,8 @@ void SetTextAreaBackgroundColor(ArkUINodeHandle node, uint32_t color, void* resR
     Color result = Color(color);
     if (SystemProperties::ConfigChangePerform()) {
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
@@ -1893,18 +1897,19 @@ void RegisterBorderColorRes(FrameNode* frameNode, void* colorRawPtr, NG::BorderC
     }
     if (objs.size() < NUM_4) {
         objs.resize(NUM_4);
-        auto tag = frameNode->GetTag();
+        NodeInfo nodeInfo = ResourceParseUtils::MakeNativeNodeInfo(frameNode);
         if (borderColors.topColor.has_value()) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_0], borderColors.topColor.value(), tag);
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_0], borderColors.topColor.value(), nodeInfo);
         }
         if (borderColors.rightColor.has_value()) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_1], borderColors.rightColor.value(), tag);
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_1], borderColors.rightColor.value(), nodeInfo);
         }
         if (borderColors.bottomColor.has_value()) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_2], borderColors.bottomColor.value(), tag);
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                objs[NUM_2], borderColors.bottomColor.value(), nodeInfo);
         }
         if (borderColors.leftColor.has_value()) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_3], borderColors.leftColor.value(), tag);
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_3], borderColors.leftColor.value(), nodeInfo);
         }
     }
     ParseBorderColor(borderColors, objs[NUM_0], objs[NUM_1], objs[NUM_2], objs[NUM_3]);
@@ -2091,11 +2096,12 @@ void SetTextAreaBorderColor(ArkUINodeHandle node, uint32_t topColorInt, uint32_t
         }
         if (objs.empty()) {
             objs.resize(NUM_4);
-            auto tag = frameNode->GetTag();
-            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_0], borderColors.topColor.value(), tag);
-            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_1], borderColors.rightColor.value(), tag);
-            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_2], borderColors.bottomColor.value(), tag);
-            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_3], borderColors.leftColor.value(), tag);
+            NodeInfo nodeInfo = ResourceParseUtils::MakeNativeNodeInfo(frameNode);
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_0], borderColors.topColor.value(), nodeInfo);
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_1], borderColors.rightColor.value(), nodeInfo);
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                objs[NUM_2], borderColors.bottomColor.value(), nodeInfo);
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_3], borderColors.leftColor.value(), nodeInfo);
         }
         ParseBorderColor(borderColors, objs[NUM_0], objs[NUM_1], objs[NUM_2], objs[NUM_3]);
     }
@@ -2592,7 +2598,8 @@ void SetTextAreaScrollBarColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* r
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, value, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, value, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
@@ -2760,7 +2767,8 @@ void SetTextAreaSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 colo
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }

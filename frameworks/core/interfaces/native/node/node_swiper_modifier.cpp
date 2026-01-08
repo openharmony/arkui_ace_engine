@@ -221,7 +221,8 @@ void GetSwiperArrowResObj(FrameNode* frameNode, SwiperArrowParameters& swiperArr
             : swiperIndicatorTheme->GetSmallArrowBackgroundColor());
     RefPtr<ResourceObject> bgColorResObj;
     if (arrowInfo[ARROW_ISSET_BACKGROUND_COLOR] == "1") {
-        ResourceParseUtils::CompleteResourceObjectFromColor(bgColorResObj, backgroundColor, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            bgColorResObj, backgroundColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     }
     swiperArrowParameters.backgroundColor = backgroundColor;
     swiperArrowParameters.resourceBackgroundColorValueObject = bgColorResObj;
@@ -234,7 +235,8 @@ void GetSwiperArrowResObj(FrameNode* frameNode, SwiperArrowParameters& swiperArr
             : swiperIndicatorTheme->GetSmallArrowColor());
     RefPtr<ResourceObject> arrowColorResObj;
     if (arrowInfo[ARROW_ISSET_COLOR] == "1") {
-        ResourceParseUtils::CompleteResourceObjectFromColor(arrowColorResObj, arrowColor, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            arrowColorResObj, arrowColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     }
     swiperArrowParameters.arrowColor = arrowColor;
     swiperArrowParameters.resourceArrowColorValueObject = arrowColorResObj;
@@ -464,7 +466,8 @@ void GetSwiperIndicatorResObj(FrameNode* frameNode, SwiperParameters& swiperPara
         swiperParameters.colorVal.value_or(swiperIndicatorTheme->GetColor());
     RefPtr<ResourceObject> colorValResObj;
     if (indicator->colorValue.isSet) {
-        ResourceParseUtils::CompleteResourceObjectFromColor(colorValResObj, colorVal, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            colorValResObj, colorVal, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     }
     swiperParameters.colorVal = colorVal;
     swiperParameters.resourceColorValueObject = colorValResObj;
@@ -474,8 +477,8 @@ void GetSwiperIndicatorResObj(FrameNode* frameNode, SwiperParameters& swiperPara
         swiperParameters.selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor());
     RefPtr<ResourceObject> selectedColorResObj;
     if (indicator->selectedColorValue.isSet) {
-        ResourceParseUtils::CompleteResourceObjectFromColor(selectedColorResObj,
-            selectedColorVal, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            selectedColorResObj, selectedColorVal, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     }
     swiperParameters.selectedColorVal = selectedColorVal;
     swiperParameters.resourceSelectedColorValueObject = selectedColorResObj;
@@ -543,7 +546,8 @@ void GetSwiperDigitIndicatorResObj(FrameNode* frameNode,
             swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor());
     RefPtr<ResourceObject> fontColorResObj;
     if (indicator->fontColor.isSet) {
-        ResourceParseUtils::CompleteResourceObjectFromColor(fontColorResObj, fontColor, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            fontColorResObj, fontColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     }
     swiperDigitParameters.fontColor = fontColor;
     swiperDigitParameters.resourceFontColorValueObject = fontColorResObj;
@@ -554,8 +558,8 @@ void GetSwiperDigitIndicatorResObj(FrameNode* frameNode,
             swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor());
     RefPtr<ResourceObject> selectedFontColorResObj;
     if (indicator->selectedFontColor.isSet) {
-        ResourceParseUtils::CompleteResourceObjectFromColor(selectedFontColorResObj,
-            selectedFontColor, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            selectedFontColorResObj, selectedFontColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     }
     swiperDigitParameters.selectedFontColor = selectedFontColor;
     swiperDigitParameters.resourceSelectedFontColorValueObject = selectedFontColorResObj;

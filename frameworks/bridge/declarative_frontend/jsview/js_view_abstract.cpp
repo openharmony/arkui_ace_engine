@@ -6907,7 +6907,7 @@ void JSViewAbstract::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& res
         return;
     }
     bool hasDarkRes = CheckDarkResource(resObj);
-    if (localColorMode == ColorMode::DARK) {
+    if (localColorMode == ColorMode::DARK && node->GetForceDarkAllowed()) {
         if (!hasDarkRes) {
             color = Color(invertFunc(color.GetValue()));
         }

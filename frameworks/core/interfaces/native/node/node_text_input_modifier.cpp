@@ -71,7 +71,8 @@ void SetTextInputCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colo
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         }
@@ -141,7 +142,8 @@ void SetTextInputPlaceholderColor(ArkUINodeHandle node, ArkUI_Uint32 color, void
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject *>(colorRawPtr));
         }
@@ -760,7 +762,8 @@ void SetTextInputSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 colo
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
@@ -908,7 +911,8 @@ void SetTextInputFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRa
         CHECK_NULL_VOID(pattern);
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
@@ -1301,7 +1305,8 @@ void SetTextInputBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, void*
     RefPtr<ResourceObject> resObj;
     if (SystemProperties::ConfigChangePerform()) {
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
@@ -1641,7 +1646,8 @@ void SetTextInputUserUnderlineColorRegister(FrameNode* frameNode, ArkUIUserUnder
         if (colorObj && subColorObj) {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject *>(subColorObj));
         } else {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         }
         if (resObj) {
             pattern->RegisterResource<Color>(key, resObj, result);
@@ -2831,7 +2837,8 @@ void SetTextInputSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 col
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
