@@ -169,6 +169,7 @@ void JsiPaEngine::RegisterConsoleModule(ArkNativeEngine* engine)
     CHECK_NULL_VOID(engine);
 
     napi_env env = reinterpret_cast<napi_env>(engine);
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value globalObj;
     napi_get_global(env, &globalObj);
     napi_valuetype valueType = napi_undefined;
@@ -676,6 +677,7 @@ shared_ptr<JsValue> JsiPaEngine::CallFuncWithDefaultThis(
     auto nativeEngine = GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, runtime->NewUndefined());
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    AbilityRuntime::HandleScope handleScope(env);
     auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     if (arkJSRuntime->HasPendingException()) {
         LOGE("JsiPaEngine CallFunc FAILED!");
@@ -749,7 +751,7 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(
         LOGE("JsiPaEngine CallFunc return value is und efined!");
         return runtime->NewUndefined();
     }
-
+    AbilityRuntime::HandleScope handleScope(env);
     std::vector<napi_value> nativeArgv;
     int32_t length = 0;
 
@@ -813,7 +815,7 @@ shared_ptr<JsValue> JsiPaEngine::CallAsyncFunc(
         LOGE("JsiPaEngine CallFunc return value is und efined!");
         return runtime->NewUndefined();
     }
-
+    AbilityRuntime::HandleScope handleScope(env);
     std::vector<napi_value> nativeArgv;
     int32_t length = 0;
     for (auto item : argv) {
@@ -857,6 +859,8 @@ shared_ptr<JsValue> JsiPaEngine::NapiValueToJsValue(napi_value napiValue)
 
 shared_ptr<JsValue> JsiPaEngine::WantToJsValue(const OHOS::AAFwk::Want& want)
 {
+    napi_env env = reinterpret_cast<napi_env>(GetNativeEngine());
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value napiWant = OHOS::AppExecFwk::WrapWant(reinterpret_cast<napi_env>(GetNativeEngine()), want);
     return NapiValueToJsValue(napiWant);
 }
@@ -885,6 +889,8 @@ void JsiPaEngine::StartData()
     const std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo =
         reinterpret_cast<Ability*>(it->second)->GetAbilityInfo();
     const AppExecFwk::AbilityInfo abilityInfoInstance = *(abilityInfo.get());
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value abilityInfoNapi =
         AppExecFwk::ConvertAbilityInfo(reinterpret_cast<napi_env>(nativeEngine), abilityInfoInstance);
     const std::vector<shared_ptr<JsValue>>& argv = { NapiValueToJsValue(abilityInfoNapi) };
@@ -1138,6 +1144,7 @@ int32_t JsiPaEngine::Delete(
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     OHOS::NativeRdb::DataAbilityPredicates* predicatesPtr = new OHOS::NativeRdb::DataAbilityPredicates();
     *predicatesPtr = predicates;
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value argPredicatesNapiValue = dataAbilityPredicatesNewInstance_(env, predicatesPtr);
     if (argPredicatesNapiValue == nullptr) {
         LOGE("JsiPaEngine Delete argPredicatesNativeValue is nullptr");
@@ -1297,6 +1304,7 @@ sptr<IRemoteObject> JsiPaEngine::OnConnectService(const OHOS::AAFwk::Want& want)
     auto nativeEngine = GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, nullptr);
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    AbilityRuntime::HandleScope handleScope(env);
     auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
     napi_value nativeValue = ArkNativeEngine::ArkValueToNapiValue(env, arkJSValue->GetValue(arkJSRuntime));
     if (nativeValue == nullptr) {
@@ -1363,6 +1371,7 @@ void JsiPaEngine::OnCreate(const OHOS::AAFwk::Want& want)
         auto nativeEngine = GetNativeEngine();
         CHECK_NULL_VOID(nativeEngine);
         napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+        AbilityRuntime::HandleScope handleScope(env);
         napi_value napiValue = ArkNativeEngine::ArkValueToNapiValue(
             env, std::static_pointer_cast<ArkJSValue>(formImageData)->GetValue(arkJSRuntime));
         UnwrapRawImageDataMap(env, napiValue, rawImageDataMap);
