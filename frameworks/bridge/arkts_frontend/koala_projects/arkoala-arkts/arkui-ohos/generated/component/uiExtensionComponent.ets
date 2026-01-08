@@ -31,10 +31,10 @@ import { default as Want } from "@ohos.app.ability.Want"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
-import { ComponentContent } from "arkui.ComponentContent"
+import { ComponentContentBase } from "arkui.ComponentContent"
 import { UIExtensionComponentModifier } from "./../UIExtensionComponentModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ComponentContent_serializer } from "./../ComponentContent"
+import { ComponentContentBase_serializer } from "./../ComponentContent"
 export interface UIExtensionProxy {
     send(data: Record<string, RecordData>): void
     sendSync(data: Record<string, RecordData>): Record<string, RecordData>
@@ -229,8 +229,8 @@ export enum WindowModeFollowStrategy {
 }
 export interface UIExtensionOptions {
     isTransferringCaller?: boolean;
-    placeholder?: ComponentContent;
-    areaChangePlaceholder?: Record<string, ComponentContent>;
+    placeholder?: ComponentContentBase;
+    areaChangePlaceholder?: Record<string, ComponentContentBase>;
     dpiFollowStrategy?: DpiFollowStrategy;
     windowModeFollowStrategy?: WindowModeFollowStrategy;
 }
@@ -404,7 +404,7 @@ export class UIExtensionOptions_serializer {
         if (valueHolderForPlaceholder !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPlaceholderTmpValue  = valueHolderForPlaceholder!
-            ComponentContent_serializer.write(valueSerializer, valueHolderForPlaceholderTmpValue)
+            ComponentContentBase_serializer.write(valueSerializer, valueHolderForPlaceholderTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -417,7 +417,7 @@ export class UIExtensionOptions_serializer {
                 const valueHolderForAreaChangePlaceholderTmpValueKeyVar = pair[0]
                 const valueHolderForAreaChangePlaceholderTmpValueValueVar = pair[1]
                 valueSerializer.writeString(valueHolderForAreaChangePlaceholderTmpValueKeyVar)
-                ComponentContent_serializer.write(valueSerializer, valueHolderForAreaChangePlaceholderTmpValueValueVar)
+                ComponentContentBase_serializer.write(valueSerializer, valueHolderForAreaChangePlaceholderTmpValueValueVar)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -448,25 +448,25 @@ export class UIExtensionOptions_serializer {
         }
         const isTransferringCallerTmpResult : boolean | undefined = isTransferringCallerTmpBuf
         // const placeholderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let placeholderTmpBuf : ComponentContent | undefined = undefined
+        let placeholderTmpBuf : ComponentContentBase | undefined = undefined
         // if ((placeholderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-        //     placeholderTmpBuf = (valueDeserializer.readObject() as ComponentContent)
+        //     placeholderTmpBuf = (valueDeserializer.readObject() as ComponentContentBase)
         // }
-        const placeholderTmpResult : ComponentContent | undefined = undefined
+        const placeholderTmpResult : ComponentContentBase | undefined = undefined
         // const areaChangePlaceholderTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        // let areaChangePlaceholderTmpBuf : Map<string, ComponentContent> | undefined = undefined
+        // let areaChangePlaceholderTmpBuf : Map<string, ComponentContentBase> | undefined = undefined
         // if ((areaChangePlaceholderTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
         //     const areaChangePlaceholderTmpBuf_SizeVar : int32 = valueDeserializer.readInt32()
-        //     let areaChangePlaceholderTmpBuf_ : Map<string, ComponentContent> = new Map<string, ComponentContent>()
+        //     let areaChangePlaceholderTmpBuf_ : Map<string, ComponentContentBase> = new Map<string, ComponentContentBase>()
         //     // TODO: TS map resize
         //     for (let areaChangePlaceholderTmpBuf_IVar = 0; areaChangePlaceholderTmpBuf_IVar < areaChangePlaceholderTmpBuf_SizeVar; areaChangePlaceholderTmpBuf_IVar++) {
         //         const areaChangePlaceholderTmpBuf_KeyVar : string = (valueDeserializer.readString() as string)
-        //         const areaChangePlaceholderTmpBuf_ValueVar : ComponentContent = (valueDeserializer.readObject() as ComponentContent)
+        //         const areaChangePlaceholderTmpBuf_ValueVar : ComponentContentBase = (valueDeserializer.readObject() as ComponentContentBase)
         //         areaChangePlaceholderTmpBuf_.set(areaChangePlaceholderTmpBuf_KeyVar, areaChangePlaceholderTmpBuf_ValueVar)
         //     }
         //     areaChangePlaceholderTmpBuf = areaChangePlaceholderTmpBuf_
         // }
-        const areaChangePlaceholderTmpResult : Map<string, ComponentContent> | undefined = undefined
+        const areaChangePlaceholderTmpResult : Map<string, ComponentContentBase> | undefined = undefined
         const dpiFollowStrategyTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dpiFollowStrategyTmpBuf : DpiFollowStrategy | undefined = undefined
         if ((dpiFollowStrategyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
