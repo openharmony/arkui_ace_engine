@@ -45,7 +45,7 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
      */
     auto translateState = navBarLayoutProperty->GetTitleBarTranslateStateValue(BarTranslateState::NONE);
     if ((translateState == BarTranslateState::NONE && navBarLayoutProperty->GetHideTitleBarValue(false)) ||
-        titleBarNode->GetChildren().empty()) {
+        titleBarNode->IsChildEmpty()) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
         titleBarWrapper->Measure(constraint);
         return 0.0f;
