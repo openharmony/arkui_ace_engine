@@ -2090,8 +2090,6 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
 export function TextAreaImpl(
     @memo
     style: ((attributes: TextAreaAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkTextAreaComponent>((): ArkTextAreaComponent => {
         return new ArkTextAreaComponent()
@@ -2100,7 +2098,6 @@ export function TextAreaImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

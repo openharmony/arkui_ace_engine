@@ -514,8 +514,6 @@ export class ArkTextClockComponent extends ArkCommonMethodComponent implements T
 export function TextClockImpl(
     @memo
     style: ((attributes: TextClockAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkTextClockComponent>((): ArkTextClockComponent => {
         return new ArkTextClockComponent()
@@ -524,7 +522,6 @@ export function TextClockImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

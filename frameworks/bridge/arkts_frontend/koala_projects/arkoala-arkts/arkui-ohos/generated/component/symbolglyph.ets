@@ -504,8 +504,6 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
 export function SymbolGlyphImpl(
     @memo
     style: ((attributes: SymbolGlyphAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkSymbolGlyphComponent>((): ArkSymbolGlyphComponent => {
         return new ArkSymbolGlyphComponent()
@@ -514,7 +512,6 @@ export function SymbolGlyphImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

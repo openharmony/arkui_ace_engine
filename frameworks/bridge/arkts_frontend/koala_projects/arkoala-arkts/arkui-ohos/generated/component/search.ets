@@ -1760,8 +1760,6 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
 export function SearchImpl(
     @memo
     style: ((attributes: SearchAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkSearchComponent>((): ArkSearchComponent => {
         return new ArkSearchComponent()
@@ -1770,7 +1768,6 @@ export function SearchImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
