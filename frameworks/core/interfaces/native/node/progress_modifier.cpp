@@ -183,7 +183,8 @@ void SetProgressColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, colorValue, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, colorValue, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             auto* resourceObj = static_cast<ResourceObject*>(colorRawPtr);
             resObj = AceType::Claim(resourceObj);

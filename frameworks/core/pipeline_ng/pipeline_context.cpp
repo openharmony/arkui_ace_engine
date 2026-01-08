@@ -871,7 +871,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         distributedUI->ApplyOneUpdate();
     } while (false);
 #endif
-    ReloadNodesResource();
     ProcessDelayTasks();
     if (frameCount != UINT64_MAX) {
         DispatchDisplaySync(nanoTimestamp);
@@ -899,6 +898,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     FlushFrameCallbackFromCAPI(nanoTimestamp, frameCount);
     startTimestamp = GetSysTimestamp();
     FlushBuild();
+    ReloadNodesResource();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
         auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
         drawDelegate_->DrawRSFrame(renderContext);
@@ -912,6 +912,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
 
     taskScheduler_->StartRecordFrameInfo(GetCurrentFrameInfo(recvTime_, nanoTimestamp));
     taskScheduler_->FlushTask();
+    ReloadNodesResource();
     UIObserverHandler::GetInstance().HandleLayoutDoneCallBack();
     if (nodeRenderStatusMonitor_) {
         nodeRenderStatusMonitor_->WalkThroughAncestorForStateListener();

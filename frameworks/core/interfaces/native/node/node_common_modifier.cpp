@@ -411,7 +411,8 @@ void SetSweepGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* c
 
         if (isNeedCompleteResObj) {
             RefPtr<ResourceObject> colorResObj;
-            ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, color, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                colorResObj, color, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
             objs.emplace_back(colorResObj);
         }
 
@@ -453,7 +454,8 @@ void SetRadialGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* 
         auto color = Color(static_cast<uint32_t>(colorValue));
         if (isNeedCompleteResObj) {
             RefPtr<ResourceObject> colorResObj;
-            ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, color, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                colorResObj, color, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
             objs.emplace_back(colorResObj);
         }
         auto hasDimension = static_cast<bool>(colorHasDimension);
@@ -498,7 +500,8 @@ void SetGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors
 
         if (!colorRawPtr) {
             RefPtr<ResourceObject> colorResObj;
-            ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, color, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                colorResObj, color, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
             objs.emplace_back(colorResObj);
         }
 
@@ -1105,7 +1108,8 @@ void SetBackgroundColor(ArkUINodeHandle node, uint32_t color, void* bgColorRawPt
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!bgColorRawPtr) {
-            ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj, result, frameNode->GetTag(), frameNode->GetForceDarkAllowed());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                resObj, result, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(bgColorRawPtr));
         }
@@ -1585,11 +1589,11 @@ void SetBorderColor(ArkUINodeHandle node, uint32_t topColorInt, uint32_t rightCo
         auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
         if (objs.empty()) {
             objs.resize(NUM_4);
-            auto tag = frameNode->GetTag();
-            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_0], borderColors.topColor.value(), tag);
-            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_1], borderColors.rightColor.value(), tag);
-            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_2], borderColors.bottomColor.value(), tag);
-            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_3], borderColors.leftColor.value(), tag);
+            NodeInfo nodeInfo = ResourceParseUtils::MakeNativeNodeInfo(frameNode);
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_0], borderColors.topColor.value(), nodeInfo);
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_1], borderColors.rightColor.value(), nodeInfo);
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_2], borderColors.bottomColor.value(), nodeInfo);
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_3], borderColors.leftColor.value(), nodeInfo);
         }
         if (isLengthMetrics) {
             ParseLocalizedBorderColor(borderColors, objs[NUM_0], objs[NUM_3], objs[NUM_2], objs[NUM_1]);
@@ -1899,7 +1903,8 @@ std::vector<RefPtr<ResourceObject>> CreateShadowResourceObjects(uint32_t color, 
     
     auto shadowColor = Color(color);
     RefPtr<ResourceObject> resObj;
-    ResourceParseUtils::CompleteResourceObjectFromColor(resObj, shadowColor, frameNode->GetTag());
+    ResourceParseUtils::CompleteResourceObjectFromColor(
+        resObj, shadowColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     objs.emplace_back(resObj);
     shadow.SetColor(shadowColor);
     return objs;
@@ -2187,7 +2192,8 @@ void SetColorBlend(ArkUINodeHandle node, uint32_t color, void* colorBlendRawPtr)
     ViewAbstractModelNG::RemoveResObj(frameNode, "viewAbstract.colorBlend");
     RefPtr<ResourceObject> colorBlendResObj;
     if (!colorBlendRawPtr) {
-        ResourceParseUtils::CompleteResourceObjectFromColor(colorBlendResObj, finalColor, frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            colorBlendResObj, finalColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     } else {
         colorBlendResObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorBlendRawPtr));
     }
@@ -4105,7 +4111,8 @@ void SetForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t color
         }
         RefPtr<ResourceObject> colorResObj;
         if (!fgColorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, finalColor, frameNode->GetTag());
+            ResourceParseUtils::CompleteResourceObjectFromColor(
+                colorResObj, finalColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         } else {
             colorResObj = AceType::Claim(reinterpret_cast<ResourceObject*>(fgColorRawPtr));
         }
@@ -6758,7 +6765,8 @@ void AddShapeResources(FrameNode* frameNode, RefPtr<T>& shape,
     // Add color resource
     RefPtr<ResourceObject> colorResObj;
     Color fillColor(fill);
-    ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, fillColor, frameNode->GetTag());
+    ResourceParseUtils::CompleteResourceObjectFromColor(
+        colorResObj, fillColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     fill = fillColor.GetValue();
     auto&& colorUpdateFunc = [](const RefPtr<ResourceObject>& resObj, BasicShape& shape) {
         Color color;
@@ -6770,7 +6778,8 @@ void AddShapeResources(FrameNode* frameNode, RefPtr<T>& shape,
     // Add stroke resource
     RefPtr<ResourceObject> strokeResObj;
     Color strokeColor(stroke);
-    ResourceParseUtils::CompleteResourceObjectFromColor(strokeResObj, strokeColor, frameNode->GetTag());
+    ResourceParseUtils::CompleteResourceObjectFromColor(
+        strokeResObj, strokeColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     stroke = strokeColor.GetValue();
     auto&& strokeUpdateFunc = [](const RefPtr<ResourceObject>& resObj, BasicShape& shape) {
         Color color;
@@ -6858,7 +6867,8 @@ void AddMaskPathResources(FrameNode* frameNode, RefPtr<Path>& path, ArkUI_Uint32
     // Add color resource
     RefPtr<ResourceObject> colorResObj;
     Color fillColor(fill);
-    ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, fillColor, frameNode->GetTag());
+    ResourceParseUtils::CompleteResourceObjectFromColor(
+        colorResObj, fillColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     fill = fillColor.GetValue();
     auto&& colorUpdateFunc = [](const RefPtr<ResourceObject>& resObj, BasicShape& shape) {
         Color color;
@@ -6871,7 +6881,8 @@ void AddMaskPathResources(FrameNode* frameNode, RefPtr<Path>& path, ArkUI_Uint32
     RefPtr<ResourceObject> strokeResObj;
     Color strokeColor(stroke);
     stroke = strokeColor.GetValue();
-    ResourceParseUtils::CompleteResourceObjectFromColor(strokeResObj, strokeColor, frameNode->GetTag());
+    ResourceParseUtils::CompleteResourceObjectFromColor(
+        strokeResObj, strokeColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     auto&& strokeUpdateFunc = [](const RefPtr<ResourceObject>& resObj, BasicShape& shape) {
         Color color;
         ResourceParseUtils::ParseResColor(resObj, color);
@@ -6911,7 +6922,8 @@ void AddProgressMaskResources(FrameNode* frameNode,
     // Add progress mask color resource
     RefPtr<ResourceObject> colorResObj;
     Color maskColor(color);
-    ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, maskColor, frameNode->GetTag());
+    ResourceParseUtils::CompleteResourceObjectFromColor(
+        colorResObj, maskColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
     color = maskColor.GetValue();
     auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::ProgressMaskProperty& progressMask) {
         Color color;
@@ -7066,8 +7078,8 @@ void ProcessOptionalColorResources(FrameNode* frameNode,
     if (color.has_value()) {
         RefPtr<ResourceObject> colorResObj;
         auto colorVal = color.value();
-        ResourceParseUtils::CompleteResourceObjectFromColor(colorResObj, colorVal,
-            frameNode->GetTag());
+        ResourceParseUtils::CompleteResourceObjectFromColor(
+            colorResObj, colorVal, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
         color = colorVal;
         vectorResObj.emplace_back(colorResObj);
     } else {
