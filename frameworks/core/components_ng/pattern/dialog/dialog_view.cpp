@@ -553,11 +553,11 @@ void AddColorModeChangeCallback(RefPtr<FrameNode> dialog, const DialogProperties
     }
     UpdateAndAddMaskColorCallback(dialog, dialogProps);
 
-    UpdateAndAddShadowCallback(dialog, dialogProps);
-
     if (dialogProps.customStyle) {
         return;
     }
+
+    UpdateAndAddShadowCallback(dialog, dialogProps);
 
     UpdateAndAddBackgroundColorCallback(dialog, dialogProps);
 

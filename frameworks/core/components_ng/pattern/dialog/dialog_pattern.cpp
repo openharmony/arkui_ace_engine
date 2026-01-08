@@ -1514,6 +1514,7 @@ void DialogPattern::UpdateDialogTextColor(const RefPtr<FrameNode>& textNode, con
     CHECK_NULL_VOID(textProps);
     textProps->UpdateTextColor(textStyle.GetTextColor());
     textNode->MarkModifyDone();
+    textNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void DialogPattern::UpdateAlignmentAndOffset()

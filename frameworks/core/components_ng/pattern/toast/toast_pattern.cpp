@@ -441,6 +441,7 @@ void ToastPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(textLayoutProperty);
     auto toastInfo = GetToastInfo();
     textLayoutProperty->UpdateTextColor(toastInfo.textColor.value_or(textColor));
+    textNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     host->SetNeedCallChildrenUpdate(false);
     ToastView::UpdateToastNodeStyle(host);
 }
