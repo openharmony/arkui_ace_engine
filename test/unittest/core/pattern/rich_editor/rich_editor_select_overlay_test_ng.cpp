@@ -88,10 +88,17 @@ void RichEditorSelectOverlayTestNg::TearDownTestSuite()
  */
 HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectArea, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get RichEditorPattern and set hasTransform_ true
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->selectOverlay_->hasTransform_ = true;
+
+    /**
+     * @tc.steps: step2. get select area
+     */
     RectF rect(10, 10, 100, 100);
     auto selectArea = richEditorPattern->selectOverlay_->GetSelectArea();
     EXPECT_NE(selectArea.GetX(), rect.GetX());
