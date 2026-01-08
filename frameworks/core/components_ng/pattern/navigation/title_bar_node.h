@@ -118,6 +118,10 @@ public:
     {
         return needAvoidContainerModal_;
     }
+    bool IsParentModalOrSheet() const
+    {
+        return isParentModalOrSheet_;
+    }
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void OnAttachToMainTree(bool recursive) override;
@@ -133,6 +137,7 @@ private:
     std::string innerChildId_;
     bool needAvoidContainerModal_ = false;
     bool useContainerModalTitleHeight_ = false;
+    bool isParentModalOrSheet_ = false; // Ancestor node has ModalPage or bindSheet
     int32_t menuBarChangeListenerId_ = -1;
 };
 
