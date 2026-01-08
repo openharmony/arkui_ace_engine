@@ -73,6 +73,7 @@ public:
     }
     virtual Size GetImageSize() = 0;
     virtual uint32_t GetFrameCount() = 0;
+    virtual ImageRotateOrientation GetImageOrientation() = 0;
     virtual std::string GetEncodedFormat() = 0;
     virtual int32_t GetLoopCount() = 0;
     virtual std::vector<int32_t> GetDelayTime() = 0;

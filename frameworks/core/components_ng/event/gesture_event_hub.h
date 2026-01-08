@@ -163,6 +163,7 @@ constexpr float PIXELMAP_DRAG_WGR_TEXT_SCALE = 2.0f;
 constexpr float PIXELMAP_DRAG_WGR_SCALE = 3.0f;
 constexpr float DEFALUT_DRAG_PPIXELMAP_SCALE = 1.05f;
 constexpr float PIXELMAP_DRAG_DEFAULT_HEIGHT = -28.0f;
+constexpr float DEFAULT_PAN_ANGLE = 45.0f;
 
 class EventHub;
 class PipelineContext;
@@ -256,11 +257,12 @@ public:
     void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
     void SetPanEvent(
         const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap);
-    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
-    void AddPanEvent(
-        const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap);
-    void AddPanEvent(const RefPtr<PanEvent>& panEvent,
-        PanDirection direction, int32_t fingers, const PanDistanceMapDimension& distanceMap);
+    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers,
+        Dimension distance, double angle = DEFAULT_PAN_ANGLE);
+    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers,
+        PanDistanceMap distanceMap, double angle = DEFAULT_PAN_ANGLE);
+    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers,
+        const PanDistanceMapDimension& distanceMap, double angle = DEFAULT_PAN_ANGLE);
     void RemovePanEvent(const RefPtr<PanEvent>& panEvent);
     void SetPanEventType(GestureTypeName typeName);
     void SetLongPressEventType(GestureTypeName typeName);

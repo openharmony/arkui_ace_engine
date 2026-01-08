@@ -12,6 +12,7 @@
 # limitations under the License.
 
 uiservice_files = [
+  "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/common_statistic_event.cpp",
   "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/statistic_event_manager.cpp",
   "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_mgr_proxy.cpp",
   "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_service_mgr_stub.cpp",

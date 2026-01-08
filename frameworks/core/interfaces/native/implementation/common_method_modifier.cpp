@@ -1534,7 +1534,7 @@ OHOS::Ace::Color Convert(const Ark_ColorMetrics& src)
     uint8_t blue = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.blue_));
     uint8_t alpha = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.alpha_));
     auto dst = Color::FromARGB(alpha, red, green, blue);
-    dst.SetColorSpace(static_cast<ColorSpace>(src.colorSpace_));
+    dst.SetColorSpace(Converter::OptConvert<ColorSpace>(src.colorSpace_).value_or(ColorSpace::SRGB));
     return dst;
 }
 
@@ -2897,6 +2897,10 @@ void SetBorderRadius1Impl(Ark_NativePointer node, const Opt_Union_Length_BorderR
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderRadiusImpl(node, value);
+        return;
+    }
     auto radiuses = Converter::OptConvertPtr<BorderRadiusProperty>(value);
     if (radiuses) {
         // Implement Reset value
@@ -5538,7 +5542,7 @@ void SetLinearGradientBlurImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto radius = Converter::OptConvertPtr<Dimension>(value);
+    auto radius = Converter::OptConvertPtr<float>(value);
     auto convValue = Converter::OptConvertPtr<NG::LinearGradientBlurPara>(options);
     Validator::ValidateNonNegative(radius);
     NG::LinearGradientBlurPara para(
@@ -5547,9 +5551,9 @@ void SetLinearGradientBlurImpl(Ark_NativePointer node,
         para = convValue.value();
     }
     if (radius.has_value()) {
-        para.blurRadius_ = radius.value();
+        para.blurRadius_ = CalcDimension(radius.value(), DimensionUnit::PX);
     } else {
-        para.blurRadius_ = Dimension(0.0, DimensionUnit::VP);
+        para.blurRadius_ = Dimension(0.0, DimensionUnit::PX);
     }
     ViewAbstractModelStatic::SetLinearGradientBlur(frameNode, std::optional<NG::LinearGradientBlurPara>(para));
 }

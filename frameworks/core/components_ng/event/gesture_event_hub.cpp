@@ -1375,29 +1375,32 @@ void GestureEventHub::SetPanEvent(
 }
 
 void GestureEventHub::AddPanEvent(
-    const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance)
+    const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance, double angle)
 {
     if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
         panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
     }
+    panEventActuator_->SetPanAngle(angle);
     panEventActuator_->AddPanEvent(panEvent);
 }
 
 void GestureEventHub::AddPanEvent(
-    const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap)
+    const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap, double angle)
 {
     if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
         panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distanceMap);
     }
+    panEventActuator_->SetPanAngle(angle);
     panEventActuator_->AddPanEvent(panEvent);
 }
 
 void GestureEventHub::AddPanEvent(const RefPtr<PanEvent>& panEvent,
-    PanDirection direction, int32_t fingers, const PanDistanceMapDimension& distanceMap)
+    PanDirection direction, int32_t fingers, const PanDistanceMapDimension& distanceMap, double angle)
 {
     if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
         panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distanceMap);
     }
+    panEventActuator_->SetPanAngle(angle);
     panEventActuator_->AddPanEvent(panEvent);
 }
 

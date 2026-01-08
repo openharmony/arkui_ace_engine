@@ -176,7 +176,6 @@ template("ace_core_source_set") {
       # declaration
       "components/declaration/button/button_declaration.cpp",
       "components/declaration/canvas/canvas_declaration.cpp",
-      "components/declaration/clock/clock_declaration.cpp",
       "components/declaration/common/declaration.cpp",
       "components/declaration/common/declaration_constants.cpp",
       "components/declaration/common/declaration_creator_manager.cpp",
@@ -285,6 +284,9 @@ template("ace_core_source_set") {
       "drawable/drawable_descriptor_loader.cpp",
       "drawable/layered_drawable_descriptor.cpp",
       "drawable/pixel_map_drawable_descriptor.cpp",
+
+      # refresh
+      "components/refresh/render_refresh_target.cpp",
     ]
 
     if (platform == "ohos" || platform == "ohos_ng") {
@@ -362,7 +364,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/chart:ace_core_components_chart_$platform",
       "$ace_root/frameworks/core/components/checkable:ace_core_components_checkable_$platform",
       "$ace_root/frameworks/core/components/clip:ace_core_components_clip_$platform",
-      "$ace_root/frameworks/core/components/clock:ace_core_components_clock_$platform",
       "$ace_root/frameworks/core/components/common:ace_core_components_common_$platform",
       "$ace_root/frameworks/core/components/container_modal:ace_core_components_container_modal_$platform",
       "$ace_root/frameworks/core/components/counter:ace_core_components_counter_$platform",
@@ -404,7 +405,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/positioned:ace_core_components_positioned_$platform",
       "$ace_root/frameworks/core/components/progress:ace_core_components_progress_$platform",
       "$ace_root/frameworks/core/components/proxy:ace_core_components_proxy_$platform",
-      "$ace_root/frameworks/core/components/refresh:ace_core_components_refresh_$platform",
       "$ace_root/frameworks/core/components/relative_container:ace_core_components_relative_container_$platform",
       "$ace_root/frameworks/core/components/root:ace_core_components_root_$platform",
       "$ace_root/frameworks/core/components/scoring:ace_core_components_scoring_$platform",

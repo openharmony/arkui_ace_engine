@@ -1102,7 +1102,7 @@ void SetBackgroundColor(ArkUINodeHandle node, uint32_t color, void* bgColorRawPt
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!bgColorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj, result, frameNode->GetTag(), frameNode->GetForceDarkAllowed());
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(bgColorRawPtr));
         }
@@ -9640,6 +9640,14 @@ void ResetSystemMaterial(ArkUINodeHandle node)
     ViewAbstract::SetSystemMaterial(frameNode, nullptr);
 }
 
+void SetSystemMaterialImmediate(ArkUINodeHandle node, const void* material)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* castMaterial = reinterpret_cast<const UiMaterial*>(material);
+    ViewAbstract::SetSystemMaterialImmediate(frameNode, castMaterial);
+}
+
 void SetUseUnionEffect(ArkUINodeHandle node, bool useUnion)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -10999,6 +11007,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .setRenderStrategy = SetRenderStrategy,
         .setSystemMaterial = SetSystemMaterial,
         .resetSystemMaterial = ResetSystemMaterial,
+        .setSystemMaterialImmediate = SetSystemMaterialImmediate,
         .setChainWeight = SetChainWeight,
         .resetChainWeight = ResetChainWeight,
         .getChainWeight = GetChainWeight,

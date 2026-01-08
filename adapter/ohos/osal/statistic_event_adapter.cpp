@@ -29,7 +29,7 @@ void StatisticEventAdapter::ReportStatisticEvents(
     AppInfoParcel appInfoParcel(appInfo.bundleName);
     std::vector<StatisticEventInfoParcel> eventParcelList;
     for (auto& [eventType, eventInfo] : events) {
-        eventParcelList.emplace_back(eventInfo.eventName, eventInfo.eventCount);
+        eventParcelList.emplace_back(eventInfo.eventName, eventInfo.subEventName, eventInfo.eventCount);
     }
     Ace::UIServiceMgrClientIdl::GetInstance()->ReportStatisticEvents(appInfoParcel, eventParcelList);
 #else

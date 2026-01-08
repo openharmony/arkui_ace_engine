@@ -19,7 +19,6 @@
 #include <memory>
 
 #include "core/components/declaration/button/button_declaration.h"
-#include "core/components/declaration/clock/clock_declaration.h"
 #include "core/components/declaration/common/attribute.h"
 #include "core/components/declaration/common/event.h"
 #include "core/components/declaration/common/method.h"
@@ -156,11 +155,6 @@ public:
     // default value of richtext
     static const std::shared_ptr<RichTextAttribute> DEFAULT_RICH_TEXT_ATTR;
     static const std::shared_ptr<RichTextEvent> DEFAULT_RICH_TEXT_EVENT;
-
-    // default value of clock
-    static const std::shared_ptr<ClockAttribute> DEFAULT_CLOCK_ATTR;
-    static const std::shared_ptr<ClockStyle> DEFAULT_CLOCK_STYLE;
-    static const std::shared_ptr<ClockEvent> DEFAULT_CLOCK_EVENT;
 
     // default value of xcomponent
     static const std::shared_ptr<XComponentAttribute> DEFAULT_XCOMPONENT_ATTR;

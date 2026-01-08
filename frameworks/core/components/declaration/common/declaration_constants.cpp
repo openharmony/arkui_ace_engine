@@ -190,11 +190,6 @@ const std::shared_ptr<RichTextAttribute> DeclarationConstants::DEFAULT_RICH_TEXT
 const std::shared_ptr<RichTextEvent> DeclarationConstants::DEFAULT_RICH_TEXT_EVENT =
     std::make_shared<RichTextEvent>();
 
-// default value of clock
-const std::shared_ptr<ClockAttribute> DeclarationConstants::DEFAULT_CLOCK_ATTR = std::make_shared<ClockAttribute>();
-const std::shared_ptr<ClockStyle> DeclarationConstants::DEFAULT_CLOCK_STYLE = std::make_shared<ClockStyle>();
-const std::shared_ptr<ClockEvent> DeclarationConstants::DEFAULT_CLOCK_EVENT = std::make_shared<ClockEvent>();
-
 // default value of xcomponent
 const std::shared_ptr<XComponentAttribute> DeclarationConstants::DEFAULT_XCOMPONENT_ATTR =
     std::make_shared<XComponentAttribute>();

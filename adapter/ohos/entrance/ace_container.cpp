@@ -111,11 +111,40 @@ constexpr uint32_t OHOS_THEME_ID = 125829872;
 
 #ifndef NG_BUILD
 constexpr char ARK_ENGINE_SHARED_LIB[] = "libace_engine_ark.z.so";
+
 const char* GetEngineSharedLibrary()
 {
     return ARK_ENGINE_SHARED_LIB;
 }
 #endif
+
+void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context)
+{
+    bool isDebugBoundary = strcmp(value, "true") == 0;
+    SystemProperties::SetDebugBoundaryEnabled(isDebugBoundary);
+    auto container = reinterpret_cast<Platform::AceContainer*>(context);
+    CHECK_NULL_VOID(container);
+    container->RenderLayoutBoundary(isDebugBoundary);
+}
+
+void OnFocusActiveChanged(const char* key, const char* value, void* context)
+{
+    bool focusCanBeActive = true;
+    if (value && strcmp(value, "0") == 0) {
+        focusCanBeActive = false;
+    }
+    if (focusCanBeActive != SystemProperties::GetFocusCanBeActive()) {
+        SystemProperties::SetFocusCanBeActive(focusCanBeActive);
+        if (!focusCanBeActive) {
+            auto container = reinterpret_cast<Platform::AceContainer*>(context);
+            CHECK_NULL_VOID(container);
+            ContainerScope scope(container->GetInstanceId());
+            container->SetIsFocusActive(focusCanBeActive);
+        }
+        LOGI("focusCanBeActive turns to %{public}d", focusCanBeActive);
+    }
+    return;
+}
 
 inline void SetSystemBarPropertyEnableFlag(Rosen::SystemBarProperty& property)
 {
@@ -4557,11 +4586,10 @@ void AceContainer::AddWatchSystemParameter()
         SystemProperties::AddWatchSystemParameter(
             ENABLE_DEBUG_STATEMGR_KEY, rawPtr, SystemProperties::EnableSystemParameterDebugStatemgrCallback);
         SystemProperties::AddWatchSystemParameter(
-            ENABLE_DEBUG_BOUNDARY_KEY, rawPtr, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
+            ENABLE_DEBUG_BOUNDARY_KEY, rawPtr, EnableSystemParameterDebugBoundaryCallback);
         SystemProperties::AddWatchSystemParameter(ENABLE_PERFORMANCE_MONITOR_KEY, rawPtr,
             SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
-        SystemProperties::AddWatchSystemParameter(
-            IS_FOCUS_ACTIVE_KEY, rawPtr, SystemProperties::OnFocusActiveChanged);
+        SystemProperties::AddWatchSystemParameter(IS_FOCUS_ACTIVE_KEY, rawPtr, OnFocusActiveChanged);
     };
     BackgroundTaskExecutor::GetInstance().PostTask(task);
 }
@@ -4582,10 +4610,10 @@ void AceContainer::RemoveWatchSystemParameter()
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_DEBUG_STATEMGR_KEY, this, SystemProperties::EnableSystemParameterDebugStatemgrCallback);
     SystemProperties::RemoveWatchSystemParameter(
-        ENABLE_DEBUG_BOUNDARY_KEY, this, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
+        ENABLE_DEBUG_BOUNDARY_KEY, this, EnableSystemParameterDebugBoundaryCallback);
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_PERFORMANCE_MONITOR_KEY, this, SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
-    SystemProperties::RemoveWatchSystemParameter(IS_FOCUS_ACTIVE_KEY, this, SystemProperties::OnFocusActiveChanged);
+    SystemProperties::RemoveWatchSystemParameter(IS_FOCUS_ACTIVE_KEY, this, OnFocusActiveChanged);
 }
 
 void AceContainer::UpdateResourceOrientation(int32_t orientation)

@@ -23,7 +23,7 @@ namespace OHOS::Ace::Framework {
 
 class JSContainerBase : public JSViewAbstract, public JSInteractableView {
 public:
-    static void Pop();
+    static ACE_FORCE_EXPORT void Pop();
     static void JSBind(BindingTarget globalObj);
 };
 

@@ -1820,6 +1820,8 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
         json->PutExtAttr("imageWidth", std::to_string(loadingCtx_->GetOriginImageSize().Width()).c_str(), filter);
         json->PutExtAttr("imageHeight", std::to_string(loadingCtx_->GetOriginImageSize().Height()).c_str(), filter);
     }
+    bool antiAlias = renderProp->GetAntiAliasValue(false);
+    json->PutExtAttr("antialiased", antiAlias ? "true" : "false", filter);
 }
 
 void ImagePattern::DumpLayoutInfo()

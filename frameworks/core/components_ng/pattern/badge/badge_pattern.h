@@ -71,6 +71,7 @@ private:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
     void BorderDumpInfo();
+    void BorderDumpInfo(std::unique_ptr<JsonValue>& json);
     int32_t textNodeId_ = -2;
 };
 } // namespace OHOS::Ace::NG

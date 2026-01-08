@@ -38,6 +38,7 @@ std::unique_ptr<ffrt::queue> asyncUITaskQueue = nullptr;
 #endif
 } // namespace
 thread_local bool MultiThreadBuildManager::isThreadSafeNodeScope_ = false;
+thread_local bool MultiThreadBuildManager::isNeedMarkNodeTreeFree_ = false;
 thread_local bool MultiThreadBuildManager::isUIThread_ = false;
 thread_local bool MultiThreadBuildManager::isParallelizeUI_ = false;
 
@@ -100,6 +101,16 @@ void MultiThreadBuildManager::SetIsThreadSafeNodeScope(bool isThreadSafeNodeScop
 bool MultiThreadBuildManager::IsThreadSafeNodeScope()
 {
     return isThreadSafeNodeScope_;
+}
+
+void MultiThreadBuildManager::SetNeedMarkNodeTreeFree(bool isNeedMarkNodeTreeFree)
+{
+    isNeedMarkNodeTreeFree_ = isNeedMarkNodeTreeFree;
+}
+
+bool MultiThreadBuildManager::IsNeedMarkNodeTreeFree()
+{
+    return isNeedMarkNodeTreeFree_;
 }
 
 bool MultiThreadBuildManager::IsParallelScope()

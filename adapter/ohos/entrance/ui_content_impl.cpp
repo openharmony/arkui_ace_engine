@@ -1461,7 +1461,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
             "%{public}d, deviceHeight: %{public}d",
             bundleName_.c_str(), moduleName_.c_str(), instanceId_, density, deviceWidth, deviceHeight);
     }
-
+    SystemProperties::ReadSystemParametersCallOnce();
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     ColorMode colorMode = Container::CurrentColorMode();
@@ -1915,10 +1915,6 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     if (!fontWeightScale.empty()) {
         SystemProperties::SetFontWeightScale(string2float(fontWeightScale));
     }
-    auto deviceType = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::DEVICE_TYPE);
-    if (!deviceType.empty()) {
-        SystemProperties::SetConfigDeviceType(deviceType);
-    }
     auto smartGesture = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_SMART_GESTURE_SWITCH);
     if (!smartGesture.empty()) {
         auto canActivate = (smartGesture == OHOS::AppExecFwk::ConfigurationInner::SMART_GESTURE_AUTO);
@@ -2027,6 +2023,7 @@ void UIContentImpl::SetDeviceProperties()
         devicePhysicalWidth = displayInfo->GetPhysicalWidth();
         devicePhysicalHeight = displayInfo->GetPhysicalHeight();
     }
+    SystemProperties::ReadSystemParametersCallOnce();
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     SystemProperties::SetDevicePhysicalWidth(devicePhysicalWidth);
     SystemProperties::SetDevicePhysicalHeight(devicePhysicalHeight);
@@ -3923,7 +3920,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
                     KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
                 }
-            }, TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid", PriorityType::VIP);
+            }, TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
         return;
     }
 
@@ -4381,6 +4378,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         deviceWidth = defaultDisplay->GetWidth();
         deviceHeight = defaultDisplay->GetHeight();
     }
+    SystemProperties::ReadSystemParametersCallOnce();
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
     auto context = context_.lock();

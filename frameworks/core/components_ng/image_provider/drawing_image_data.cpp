@@ -15,11 +15,7 @@
 
 #include "core/components_ng/image_provider/drawing_image_data.h"
 
-#include "include/codec/SkCodec.h"
-#ifdef USE_NEW_SKIA
-#include "include/codec/SkEncodedImageFormat.h"
 #include "include/core/SkStream.h"
-#endif
 
 #include "base/image/image_source.h"
 #include "core/components_ng/svg/svg_dom.h"
@@ -112,58 +108,6 @@ RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
     return svgDom_;
 }
 
-ImageRotateOrientation GetImageRotateOrientation(SkEncodedOrigin origin)
-{
-    switch (origin) {
-        case SkEncodedOrigin::kTopRight_SkEncodedOrigin:
-            return ImageRotateOrientation::UP_MIRRORED;
-        case SkEncodedOrigin::kBottomRight_SkEncodedOrigin:
-            // Rotated 180
-            return ImageRotateOrientation::DOWN;
-        case SkEncodedOrigin::kBottomLeft_SkEncodedOrigin:
-            return ImageRotateOrientation::DOWN_MIRRORED;
-        case SkEncodedOrigin::kLeftTop_SkEncodedOrigin:
-            // Reflected across x-axis, Rotated 90 CCW
-            return ImageRotateOrientation::LEFT_MIRRORED;
-        case SkEncodedOrigin::kRightTop_SkEncodedOrigin:
-            // Rotated 90 CW
-            return ImageRotateOrientation::RIGHT;
-        case SkEncodedOrigin::kRightBottom_SkEncodedOrigin:
-            // Reflected across x-axis, Rotated 90 CW
-            return ImageRotateOrientation::RIGHT_MIRRORED;
-        case SkEncodedOrigin::kLeftBottom_SkEncodedOrigin:
-            // Rotated 90 CCW
-            return ImageRotateOrientation::LEFT;
-        case SkEncodedOrigin::kTopLeft_SkEncodedOrigin:
-            return ImageRotateOrientation::UP;
-        default:
-            return ImageRotateOrientation::UP;
-    }
-}
-
-ImageRotateOrientation GetImageSourceRotateOrientation(std::string origin)
-{
-    if (origin == "Top-right") {
-        return ImageRotateOrientation::UP_MIRRORED;
-    } else if (origin == "Bottom-right") {
-        return ImageRotateOrientation::DOWN;
-    } else if (origin == "Bottom-left") {
-        return ImageRotateOrientation::DOWN_MIRRORED;
-    } else if (origin == "Left-top") {
-        return ImageRotateOrientation::LEFT_MIRRORED;
-    } else if (origin == "Right-top") {
-        return ImageRotateOrientation::RIGHT;
-    } else if (origin == "Right-bottom") {
-        return ImageRotateOrientation::RIGHT_MIRRORED;
-    } else if (origin == "Left-bottom") {
-        return ImageRotateOrientation::LEFT;
-    } else if (origin == "Top-left") {
-        return ImageRotateOrientation::UP;
-    } else {
-        return ImageRotateOrientation::UP;
-    }
-}
-
 ImageCodec DrawingImageData::Parse() const
 {
     auto rsData = GetRSData();
@@ -175,36 +119,19 @@ ImageCodec DrawingImageData::Parse() const
         imageSize.SetSizeT(SizeF(astcSize.first, astcSize.second));
         return { imageSize, ASTC_FRAME_COUNT, ImageRotateOrientation::UP };
     }
-
-    RSDataWrapper* wrapper = new RSDataWrapper { rsData };
-    auto skData = SkData::MakeWithProc(rsData->GetData(), rsData->GetSize(), RSDataWrapperReleaseProc, wrapper);
-    if (!skData) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "skData in Parse is null, rsDataSize = %{public}d, nodeID = %{public}d-%{public}lld.",
-            static_cast<int32_t>(rsData->GetSize()), nodeId_, static_cast<long long>(accessibilityId_));
+    
+    uint32_t errorCode = 0;
+    auto imageSource = 
+        ImageSource::Create(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize(), errorCode);
+    if (!imageSource) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "image source create failed in drawing data parsing.");
         return {};
     }
-    auto codec = SkCodec::MakeFromData(skData);
-    if (!codec) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "codec in Parse is null, rsDataSize = %{public}d, nodeID = %{public}d-%{public}lld.",
-            static_cast<int32_t>(rsData->GetSize()), nodeId_, static_cast<long long>(accessibilityId_));
-        return {};
-    }
-    if (codec->getEncodedFormat() == SkEncodedImageFormat::kHEIF) {
-        uint32_t errorCode = 0;
-        auto imageSource =
-            ImageSource::Create(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize(), errorCode);
-        if (imageSource) {
-            auto orientation = GetImageSourceRotateOrientation(imageSource->GetProperty("Orientation"));
-            auto originImageSize = imageSource->GetImageSize();
-            imageSize.SetSizeT(SizeF(originImageSize.first, originImageSize.second));
-            return { imageSize, imageSource->GetFrameCount(), orientation };
-        }
-    }
-    auto orientation = GetImageRotateOrientation(codec->getOrigin());
-    imageSize.SetSizeT(SizeF(codec->dimensions().fWidth, codec->dimensions().fHeight));
-    return { imageSize, codec->getFrameCount(), orientation };
+    auto originImageSize = imageSource->GetImageSize();
+    auto orientation = imageSource->GetImageOrientation();
+    auto frameCount = imageSource->GetFrameCount();
+    imageSize.SetSizeT(SizeF(originImageSize.first, originImageSize.second));
+    return { imageSize, frameCount, orientation };
 }
 
 std::string DrawingImageData::ToString() const

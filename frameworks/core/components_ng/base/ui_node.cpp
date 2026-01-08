@@ -42,7 +42,7 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     ++count_;
     if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
         isThreadSafeNode_ = true;
-        isFree_ = true;
+        SetIsFree(true);
     }
     if (AceChecker::IsPerformanceCheckEnabled()) {
         auto pos = EngineHelper::GetPositionOnJsCode();
@@ -363,6 +363,7 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
     TraversingCheck(*iter);
     (*iter)->SetAncestor(nullptr);
     auto result = children_.erase(iter);
+    MarkNodeTreeFree();
     return result;
 }
 
@@ -478,6 +479,7 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
     if (isNotV2IfNode) {
         children_.clear();
     }
+    MarkNodeTreeFree();
     MarkNeedSyncRenderTree(true);
 }
 
@@ -566,6 +568,7 @@ bool UINode::OnRemoveFromParent(bool allowTransition)
         return false;
     }
     ResetParent();
+    MarkNodeTreeFree(!allowTransition);
     return true;
 }
 
@@ -736,6 +739,11 @@ void UINode::DoAddChild(
 {
     if (DetectLoop(child, Claim(this))) {
         return;
+    }
+    if (!IsFree() && child->IsFree()) {
+        child->MarkNodeTreeNotFree();
+    } else if (IsFree() && !child->IsFree()) {
+        MarkNodeTreeNotFree();
     }
     children_.insert(it, child);
 
@@ -953,11 +961,7 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     // Forced update colormode when builderNode attach to main tree.
     UpdateBuilderNodeColorMode(Claim(this));
     isRemoving_ = false;
-    if (isThreadSafeNode_) {
-        isFree_ = false;
-        ElementRegister::GetInstance()->AddUINode(Claim(this));
-        ExecuteAfterAttachMainTreeTasks();
-    }
+    MarkNodeNotFree();
     OnAttachToMainTree(recursive);
     // if recursive = false, recursively call AttachToMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
@@ -992,20 +996,6 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     }
 }
 
-bool UINode::CheckThreadSafeNodeTree(bool needCheck)
-{
-    bool needCheckChild = needCheck;
-    if (needCheck && !isThreadSafeNode_ && IsReusableNode()) {
-        // Remind developers that it is unsafe to operate node trees containing unsafe nodes on non UI threads.
-        TAG_LOGW(AceLogTag::ACE_NATIVE_NODE,
-            "CheckIsThreadSafeNodeTree failed. thread safe node tree contains unsafe node: %{public}d", GetId());
-        needCheckChild = false;
-    } else if (isThreadSafeNode_) {
-        needCheckChild = true;
-    }
-    return needCheckChild;
-}
-
 void UINode::DetachFromMainTree(bool recursive, bool needCheckThreadSafeNodeTree)
 {
     if (!onMainTree_) {
@@ -1033,16 +1023,11 @@ void UINode::DetachFromMainTree(bool recursive, bool needCheckThreadSafeNodeTree
     isTraversing_ = true;
     std::list<RefPtr<UINode>> children = GetChildren();
     std::list<RefPtr<FrameNode>> adoptedChildren = GetAdoptedChildren();
-    bool needCheckChild = CheckThreadSafeNodeTree(needCheckThreadSafeNodeTree);
     for (const auto& child : children) {
-        child->DetachFromMainTree(isRecursive, needCheckChild);
+        child->DetachFromMainTree(isRecursive);
     }
     for (const auto& adoptChild : adoptedChildren) {
-        adoptChild->DetachFromMainTree(isRecursive, needCheckChild);
-    }
-    if (isThreadSafeNode_) {
-        ElementRegister::GetInstance()->RemoveItemSilently(GetId());
-        isFree_ = true;
+        adoptChild->DetachFromMainTree(isRecursive);
     }
     isTraversing_ = false;
 }

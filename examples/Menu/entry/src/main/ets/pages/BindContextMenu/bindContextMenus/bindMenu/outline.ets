@@ -27,7 +27,7 @@ struct outlineBindMenu {
     ['1vp', '3vp', '1px', '3px', undefined];
   private outlineColorArr: (ResourceColor | EdgeColors | undefined)[] =
     [Color.Transparent, Color.Red, undefined];
-  private iconStr: ResourceStr = $r('app.media.startIcon');
+  private iconStr: ResourceStr = $r('app.media.app_icon');
   private menuElements: MenuElement[] = [
     {
       value: 'Menu1',
@@ -57,7 +57,7 @@ struct outlineBindMenu {
   @Builder
   preview() {
     Row() {
-      Image($r('app.media.startIcon'))
+      Image($r('app.media.app_icon'))
         .width(24)
         .height(24)
     }

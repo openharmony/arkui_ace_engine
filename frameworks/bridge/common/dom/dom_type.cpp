@@ -695,18 +695,6 @@ const char DOM_TRACK_COLOR_OFF[] = "trackColorOff";
 const char DOM_TAB_BAR_MODE[] = "mode";
 const char DOM_TAB_CONTENT_SCROLLABLE[] = "scrollable";
 
-// refresh attribute and style constants
-const char DOM_REFRESH[] = "refresh";
-const char DOM_REFRESH_OFFSET[] = "offset";
-const char DOM_REFRESH_REFRESHING[] = "refreshing";
-const char DOM_REFRESH_TYPE[] = "type";
-const char DOM_REFRESH_LASTTIME[] = "lasttime";
-const char DOM_REFRESH_FRICTION[] = "friction";
-const char DOM_REFRESH_BACKGROUND_COLOR[] = "backgroundColor";
-const char DOM_REFRESH_PROGRESS_COLOR[] = "progressColor";
-const char DOM_REFRESH_EVENT_PULL_DOWN[] = "pulldown";
-const char DOM_REFRESH_TIME_OFFSET[] = "timeoffset";
-
 // marquee attribute and style constants
 const char DOM_MARQUEE_LOOP[] = "loop";
 const char DOM_MARQUEE_SCROLL_AMOUNT[] = "scrollamount";
@@ -982,12 +970,7 @@ const char DOM_TOGGLE_TEXT_COLOR[] = "textColor";
 const char DOM_TOGGLE_HEIGHT[] = "height";
 const char DOM_TOGGLE_WIDTH[] = "width";
 
-// clock constants
-// clock style
-const char DOM_DIGIT_FONT_FAMILY[] = "fontFamily";
 // clock attr
-const char DOM_HOURS_WEST[] = "hourswest";
-const char DOM_CLOCK_CONFIG[] = "clockconfig";
 const char DOM_DIGIT_COLOR[] = "digitColor";
 const char DOM_DIGIT_COLOR_NIGHT[] = "digitColorNight";
 const char DOM_DIGIT_RADIUS_RATIO[] = "digitRadiusRatio";
@@ -1000,7 +983,6 @@ const char DOM_MINUTE_HAND_SOURCE[] = "minuteHand";
 const char DOM_MINUTE_HAND_SOURCE_NIGHT[] = "minuteHandNight";
 const char DOM_SECOND_HAND_SOURCE[] = "secondHand";
 const char DOM_SECOND_HAND_SOURCE_NIGHT[] = "secondHandNight";
-const char DOM_SHOW_DIGIT[] = "showdigit";
 
 // piece constants
 const char DOM_PIECE_CONTENT[] = "content";

@@ -21,6 +21,7 @@
 
 #include "compatible/components/badge/badge_loader.h"
 #include "compatible/components/canvas/canvas_loader.h"
+#include "compatible/components/clock/clock_loader.h"
 #include "compatible/components/grid_column/grid_col_loader.h"
 #include "compatible/components/grid_container/grid_container_loader.h"
 #include "compatible/components/grid_row/grid_row_loader.h"
@@ -32,6 +33,7 @@
 #include "compatible/components/svg/svg_loader.h"
 #include "compatible/components/qrcode/qrcode_loader.h"
 #include "compatible/components/rating/rating_loader.h"
+#include "compatible/components/refresh/refresh_loader.h"
 #include "frameworks/base/log/log_wrapper.h"
 
 #include "compatible/components/video/video_loader.h"
@@ -48,6 +50,7 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
     std::string nameStr(name);
     static std::unordered_map<std::string, std::function<ComponentLoader*()>> sLoaderMap = {
         { "badge", []() -> ComponentLoader* { return new BadgeLoader(); } },
+        { "clock", []() -> ComponentLoader* { return new ClockLoader(); } },
         { "grid-col", []() -> ComponentLoader* { return new GridColLoader(); } },
         { "grid-container", []() -> ComponentLoader* { return new GridContainerLoader(); } },
         { "grid-row", []() -> ComponentLoader* { return new GridRowLoader(); } },
@@ -80,6 +83,7 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "linearGradient", []() -> ComponentLoader* { return new SvgGradientLoader(); } },
         { "radialGradient", []() -> ComponentLoader* { return new SvgGradientLoader(); } },
         { "stop", []() -> ComponentLoader* { return new SvgStopLoader(); } },
+        { "refresh", []() -> ComponentLoader* { return new RefreshLoader(); } },
         { "video", []() -> ComponentLoader* { return new VideoLoader(); } },
         { "qrcode", []() -> ComponentLoader* { return new QRCodeLoader(); } },
         { "picker", []() -> ComponentLoader* { return new PickerLoader(); } },

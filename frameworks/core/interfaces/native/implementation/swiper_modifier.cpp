@@ -163,21 +163,20 @@ bool IsCustom(std::optional<Dimension> &dimOpt)
 
 bool CheckSwiperParameters(SwiperParameters& p)
 {
-    ResetIfInvalid(p.dimLeft);
-    ResetIfInvalid(p.dimTop);
-    ResetIfInvalid(p.dimRight);
-    ResetIfInvalid(p.dimBottom);
-    ResetIfInvalid(p.dimStart);
-    ResetIfInvalid(p.dimEnd);
+    p.dimLeft = p.dimLeft && (*p.dimLeft).Value() >= 0 ? p.dimLeft : 0.0_vp;
+    p.dimTop = p.dimTop && (*p.dimTop).Value() >= 0 ? p.dimTop : 0.0_vp;
+    p.dimRight = p.dimRight && (*p.dimRight).Value() >= 0 ? p.dimRight : 0.0_vp;
+    p.dimBottom = p.dimBottom && (*p.dimBottom).Value() >= 0 ? p.dimBottom : 0.0_vp;
+    p.dimStart = p.dimStart && (*p.dimStart).Value() >= 0 ? p.dimStart : 0.0_vp;
+    p.dimEnd = p.dimEnd && (*p.dimEnd).Value() >= 0 ? p.dimEnd : 0.0_vp;
 
-    ResetIfInvalid(p.itemWidth);
-    p.itemWidth = p.itemWidth ? p.itemWidth : 6.0_vp;
-    ResetIfInvalid(p.itemHeight);
-    p.itemHeight = p.itemHeight ? p.itemHeight : 6.0_vp;
-    ResetIfInvalid(p.selectedItemWidth);
-    p.selectedItemWidth = p.selectedItemWidth ? p.selectedItemWidth : 6.0_vp;
-    ResetIfInvalid(p.selectedItemHeight);
-    p.selectedItemHeight = p.selectedItemHeight ? p.selectedItemHeight : 6.0_vp;
+    p.itemWidth = p.itemWidth && (*p.itemWidth).Value() >= 0 ? p.itemWidth : 6.0_vp;
+    p.itemHeight = p.itemHeight && (*p.itemHeight).Value() >= 0 ? p.itemHeight : 6.0_vp;
+
+    p.selectedItemWidth = p.selectedItemWidth && (*p.selectedItemWidth).Value() >= 0 ? p.selectedItemWidth : 6.0_vp;
+    p.selectedItemHeight = p.selectedItemHeight && (*p.selectedItemHeight).Value() >= 0 ? p.selectedItemHeight : 6.0_vp;
+
+    p.dimSpace = p.dimSpace && (*p.dimSpace).Value() >= 0 ? p.dimSpace : 8.0_vp;
 
     if (p.maxDisplayCountVal && (*(p.maxDisplayCountVal) < 6 || *(p.maxDisplayCountVal) > 9)) {
         p.maxDisplayCountVal.reset();
@@ -189,17 +188,15 @@ bool CheckSwiperParameters(SwiperParameters& p)
 
 void CheckSwiperDigitalParameters(SwiperDigitalParameters& p)
 {
-    ResetIfInvalid(p.dimLeft);
-    ResetIfInvalid(p.dimTop);
-    ResetIfInvalid(p.dimRight);
-    ResetIfInvalid(p.dimBottom);
-    ResetIfInvalid(p.dimStart);
-    ResetIfInvalid(p.dimEnd);
+    p.dimLeft = p.dimLeft && (*p.dimLeft).Value() >= 0 ? p.dimLeft : 0.0_vp;
+    p.dimTop = p.dimTop && (*p.dimTop).Value() >= 0 ? p.dimTop : 0.0_vp;
+    p.dimRight = p.dimRight && (*p.dimRight).Value() >= 0 ? p.dimRight : 0.0_vp;
+    p.dimBottom = p.dimBottom && (*p.dimBottom).Value() >= 0 ? p.dimBottom : 0.0_vp;
+    p.dimStart = p.dimStart && (*p.dimStart).Value() >= 0 ? p.dimStart : 0.0_vp;
+    p.dimEnd = p.dimEnd && (*p.dimEnd).Value() >= 0 ? p.dimEnd : 0.0_vp;
 
-    ResetIfInvalid(p.fontSize);
-    p.fontSize = p.fontSize ? p.fontSize : 14.0_vp;
-    ResetIfInvalid(p.selectedFontSize);
-    p.selectedFontSize = p.selectedFontSize ? p.selectedFontSize : 14.0_vp;
+    p.fontSize = p.fontSize && (*p.fontSize).Value() >= 0 ? p.fontSize : 14.0_vp;
+    p.selectedFontSize = p.selectedFontSize && (*p.selectedFontSize).Value() >= 0 ? p.selectedFontSize : 14.0_vp;
 }
 } // namespace SwiperAttributeModifierInternal
 } // namespace OHOS::Ace::NG
@@ -286,6 +283,7 @@ void SetIndicator(FrameNode* frameNode, const Ark_DigitIndicator& src)
     auto peerDigitIndicator = src;
     CHECK_NULL_VOID(peerDigitIndicator);
     auto digitParam = peerDigitIndicator->GetDigitParameters();
+    CheckSwiperDigitalParameters(digitParam);
     SwiperModelStatic::SetIndicatorIsBoolean(frameNode, false);
     SwiperModelStatic::SetDigitIndicatorStyle(frameNode, digitParam);
     SwiperModelStatic::SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
@@ -409,7 +407,7 @@ void SetCachedCount0Impl(Ark_NativePointer node,
         SwiperModelStatic::SetCachedCount(frameNode, DEFAULT_CACHED_COUNT);
         return;
     }
-    SwiperModelStatic::SetCachedCount(frameNode, *convValue);
+    SwiperModelStatic::SetCachedCount(frameNode, *convValue < INVALID_VALUE ? DEFAULT_CACHED_COUNT : *convValue);
 }
 void SetEffectModeImpl(Ark_NativePointer node,
                        const Opt_EdgeEffect* value)
@@ -717,6 +715,7 @@ void SetCachedCount1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convCount = Converter::OptConvertPtr<int32_t>(count);
+    Validator::ValidateNonNegative(convCount);
     SwiperModelStatic::SetCachedCount(frameNode, convCount.value_or(DEFAULT_CACHED_COUNT));
     auto convIsShown = Converter::OptConvertPtr<bool>(isShown);
     if (!convIsShown) {
@@ -745,6 +744,9 @@ void SetDisplayCountImpl(Ark_NativePointer node,
 
     if (auto countPtr = std::get_if<int32_t>(&(*optDispCount)); countPtr) {
         int32_t val = *countPtr;
+        if (val < 0) {
+            val = DEFAULT_DISPLAY_COUNT;
+        }
         SwiperModelStatic::SetDisplayCount(frameNode, val);
     } else if (auto descPtr = std::get_if<std::string>(&(*optDispCount)); descPtr) {
         if (descPtr->compare("auto") == 0) {
@@ -769,6 +771,7 @@ void SetPrevMarginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optMargin = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(optMargin);
     auto optIgnore = Converter::OptConvertPtr<bool>(ignoreBlank);
     SwiperModelStatic::SetPreviousMargin(frameNode, optMargin, optIgnore);
 }
@@ -779,6 +782,7 @@ void SetNextMarginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optMargin = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonNegative(optMargin);
     auto optIgnore = Converter::OptConvertPtr<bool>(ignoreBlank);
     SwiperModelStatic::SetNextMargin(frameNode, optMargin, optIgnore);
 }

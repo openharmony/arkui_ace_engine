@@ -39,11 +39,11 @@ public:
 
     ~PickerDate() = default;
 
-    ACE_FORCE_EXPORT static PickerDate Current();
+    static PickerDate Current();
 
-    ACE_FORCE_EXPORT static uint32_t GetMaxDay(uint32_t year, uint32_t month);
+    static uint32_t GetMaxDay(uint32_t year, uint32_t month);
 
-    ACE_FORCE_EXPORT static bool IsLeapYear(uint32_t year);
+    static bool IsLeapYear(uint32_t year);
 
     static PickerDate AdjustDateToRange(const PickerDate& date, const PickerDate& start, const PickerDate& end);
 
@@ -94,10 +94,10 @@ public:
         week_ = value;
     }
 
-    ACE_FORCE_EXPORT std::string ToString(bool jsonFormat, int32_t status = -1) const;
+    std::string ToString(bool jsonFormat, int32_t status = -1) const;
 
-    ACE_FORCE_EXPORT uint32_t ToDays() const;
-    ACE_FORCE_EXPORT void FromDays(uint32_t days);
+    uint32_t ToDays() const;
+    void FromDays(uint32_t days);
 
     bool operator<(const PickerDate& other) const
     {

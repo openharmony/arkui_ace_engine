@@ -426,9 +426,9 @@ void DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(
         }
     }
     auto material = imageContext->GetSystemMaterial();
-    CHECK_NULL_VOID(material);
-    if (Ace::AceType::TypeId(AceType::RawPtr(material)) == Ace::UiMaterial::TypeId()) {
+    if (material && Ace::AceType::TypeId(AceType::RawPtr(material)) == Ace::UiMaterial::TypeId()) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Not support uiMaterial.");
+        option.options.material = nullptr;
         return;
     }
     option.options.material = material;

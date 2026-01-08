@@ -28,4 +28,14 @@ void ScrollableLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, con
     json->PutExtAttr("supportEmptyBranchInLazyLoading", propSupportLazyLoadingEmptyBranch_.value_or(false), filter);
 }
 
+void ScrollableLayoutProperty::UpdateSupportLazyLoadingEmptyBranch(const bool& value)
+{
+    // only support first set
+    if (propSupportLazyLoadingEmptyBranch_.has_value()) {
+        return;
+    }
+    propSupportLazyLoadingEmptyBranch_ = value;
+    UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+}
+
 } // namespace OHOS::Ace::NG

@@ -116,11 +116,11 @@ bool DatePickerPattern::UpdateFocusStyles(const RefPtr<PickerTheme>& pickerTheme
 {
     auto height = pickerTheme->GetDividerSpacing();
     auto buttonSpace = pickerTheme->GetSelectorItemSpace();
-    auto columnNode = DynamicCast<FrameNode>(child->GetLastChild()->GetLastChild());
-    CHECK_NULL_RETURN(columnNode, false);
-    auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
     auto datePickerColumnNode = DynamicCast<FrameNode>(child->GetLastChild());
     CHECK_NULL_RETURN(datePickerColumnNode, false);
+    auto columnNode = DynamicCast<FrameNode>(datePickerColumnNode->GetLastChild());
+    CHECK_NULL_RETURN(columnNode, false);
+    auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
     auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
     CHECK_NULL_RETURN(buttonNode, false);
     auto buttonConfirmLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();

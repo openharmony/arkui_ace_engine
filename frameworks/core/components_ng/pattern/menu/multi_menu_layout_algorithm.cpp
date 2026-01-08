@@ -92,6 +92,7 @@ struct SelectOverlayRightClickMenuLayoutHelper {
         CHECK_NULL_VOID(menuWrapperNode);
         auto childLayoutProperty = child->GetLayoutProperty();
         CHECK_NULL_VOID(childLayoutProperty);
+        /* Only for security component paste button of text selectoverlay right click menu */
         if (menuWrapperNode->GetInspectorIdValue("") != SelectOverlayRrightClickMenuWrapper ||
             !outterMenuPattern->IsSelectOverlayRightClickMenu() ||
             child->GetHostTag() != V2::RELATIVE_CONTAINER_ETS_TAG) {

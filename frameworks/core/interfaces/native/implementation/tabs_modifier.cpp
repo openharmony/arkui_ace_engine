@@ -236,8 +236,17 @@ void SetBarHeight0Impl(Ark_NativePointer node, const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    bool adaptiveHeight = false;
+    if (value && value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto selector = value->value.selector;
+        if (selector == 0) {
+            std::string valueString = Converter::Convert<std::string>(value->value.value0);
+            adaptiveHeight = (valueString == "auto");
+        }
+    }
     auto valueOpt = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(valueOpt);
+    TabsModelStatic::SetBarAdaptiveHeight(frameNode, adaptiveHeight);
     TabsModelStatic::SetTabBarHeight(frameNode, valueOpt);
 }
 void SetAnimationCurveImpl(Ark_NativePointer node,
@@ -635,16 +644,20 @@ void SetBarHeight1Impl(Ark_NativePointer node, const Opt_Length* height, const O
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    bool adaptiveHeight = false;
+    if (height && height->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto selector = height->value.selector;
+        if (selector == 0) {
+            std::string valueString = Converter::Convert<std::string>(height->value.value0);
+            adaptiveHeight = (valueString == "auto");
+        }
+    }
+    TabsModelStatic::SetBarAdaptiveHeight(frameNode, adaptiveHeight);
     auto valueOpt = Converter::OptConvert<Dimension>(*height);
     Validator::ValidateNonNegative(valueOpt);
     TabsModelStatic::SetTabBarHeight(frameNode, valueOpt);
     auto noMinHeightLimitOpt = Converter::OptConvert<bool>(*noMinHeightLimit);
     TabsModelStatic::SetNoMinHeightLimit(frameNode, *noMinHeightLimitOpt);
-    bool adaptiveHeight = false;
-    if (noMinHeightLimitOpt && valueOpt->Unit() == DimensionUnit::AUTO) {
-        adaptiveHeight = true;
-    }
-    TabsModelStatic::SetBarAdaptiveHeight(frameNode, adaptiveHeight);
 }
 void SetBarBackgroundBlurStyle1Impl(Ark_NativePointer node,
                                     const Opt_BlurStyle* style,

@@ -414,12 +414,12 @@ export class Application {
         // Ensure all current state updates took effect.
         manager.syncChanges()
         manager.updateSnapshot()
+        flushBuilderRootNode()
         let detachedRoots = getDetachedRootsByInstanceId(this.instanceId);
         for (const detachedRoot of detachedRoots.values()) {
             detachedRoot.compute()
         }
         updateLazyItems()
-        flushBuilderRootNode()
         this.uiContext!.updateParallelizeItemNode()
         if (partialUpdates.length > 0) {
             // If there are pending partial updates - we apply them one by one and provide update context.
