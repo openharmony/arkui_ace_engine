@@ -498,11 +498,11 @@ using RegisterModuleFunc = void (*)(Local<panda::ObjectRef>, EcmaVM*);
 ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     static const std::unordered_set<std::string> loadModuleName = {
-        {"Gauge"},
-        {"Hyperlink"},
+        {"Gauge" },
         {"Checkbox"},
         {"CheckboxGroup"},
-        {"Rating"}
+        {"Rating"},
+        {"Hyperlink"},
     };
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));

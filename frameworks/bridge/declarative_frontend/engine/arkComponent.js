@@ -41016,12 +41016,12 @@ if (globalThis.Picker !== undefined) {
 if (globalThis.Hyperlink === undefined) {
   globalThis.Hyperlink = {
     create: function(address, content) {
-      getUINativeModule().loadNativeModule("hyperlink");
+      getUINativeModule().loadNativeModule("Hyperlink");
       let module = globalThis.requireNapi('arkui.components.arkhyperlink');
       module.exportView();
       if (address !== undefined) {
-      console.log(`[Hyperlink] JSHyperlink::create ${typeof address}: ${address}, ${typeof content}: ${content}`)
-      getUINativeModule().hyperlink.create(address, content);
+        console.log(`[Hyperlink] JSHyperlink::create ${typeof address}: ${address}, ${typeof content}: ${content}`)
+        getUINativeModule().hyperlink.create(address, content);
       } else {
         getUINativeModule().hyperlink.create('', '');
       }

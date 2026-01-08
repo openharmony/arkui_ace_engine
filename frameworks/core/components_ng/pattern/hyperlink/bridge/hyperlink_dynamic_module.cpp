@@ -24,7 +24,7 @@
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_static.h"
 #endif
 
-extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_DynamicModule_Create()
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_DynamicModule_Create_Hyperlink()
 {
     return new OHOS::Ace::HyperlinkDynamicModule();
 }

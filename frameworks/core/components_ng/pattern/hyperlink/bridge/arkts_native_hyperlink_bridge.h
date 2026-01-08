@@ -23,11 +23,9 @@ class HyperlinkBridge {
 public:
     static void RegisterHyperlinkAttributes(Local<panda::ObjectRef> object, EcmaVM *vm);
     static ArkUINativeModuleValue Create(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue Color(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue Draggable(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue ResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue Pop(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue Draggable(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue Pop(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetDraggable(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetDraggable(ArkUIRuntimeCallInfo* runtimeCallInfo);

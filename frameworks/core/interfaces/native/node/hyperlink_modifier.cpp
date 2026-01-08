@@ -24,7 +24,7 @@ const ArkUIHyperlinkModifier* GetHyperlinkModifier()
     static const ArkUIHyperlinkModifier* cachedModifier = nullptr;
 
     if (cachedModifier == nullptr) {
-        auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("hyperlink");
+        auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("Hyperlink");
         CHECK_NULL_RETURN(module, nullptr);
         cachedModifier = reinterpret_cast<const ArkUIHyperlinkModifier*>(module->GetDynamicModifier());
     }
@@ -37,7 +37,7 @@ const CJUIHyperlinkModifier* GetCJUIHyperlinkModifier()
     static const CJUIHyperlinkModifier* cachedModifier = nullptr;
 
     if (cachedModifier == nullptr) {
-        auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("hyperlink");
+        auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("Hyperlink");
         CHECK_NULL_RETURN(module, nullptr);
         cachedModifier = reinterpret_cast<const CJUIHyperlinkModifier*>(module->GetCjModifier());
     }

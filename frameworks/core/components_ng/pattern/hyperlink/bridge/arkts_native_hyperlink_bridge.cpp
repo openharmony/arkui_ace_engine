@@ -34,27 +34,17 @@ void HyperlinkBridge::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object
     LOGI("Start RegisterHyperlinkAttributes nativeModule");
 
     const char* functionNames[] = {
-        "create",
-        "color",
-        "draggable",
-        "responseRegion",
-        "pop",
-
-        "setColor",
-        "resetColor",
-        "setDraggable",
-        "resetDraggable",
-        "setResponseRegion",
-        "resetResponseRegion",
+        "create", "color", "draggable", "responseRegion",
+        "pop", "setColor", "resetColor", "setDraggable",
+        "resetDraggable", "setResponseRegion", "resetResponseRegion",
     };
 
     Local<JSValueRef> functionValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::Create),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::Color),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::SetColor),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::Draggable),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::ResponseRegion),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::SetResponseRegion),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::Pop),
-
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::SetColor),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::ResetColor),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::SetDraggable),
@@ -116,40 +106,58 @@ ArkUINativeModuleValue HyperlinkBridge::Create(ArkUIRuntimeCallInfo* runtimeCall
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue HyperlinkBridge::Color(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
 
-    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
-    pattern->UnRegisterResource("Color");
+    if (runtimeCallInfo->GetCallArgRef(NUM_1)->IsBoolean()) {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
+        pattern->UnRegisterResource("Color");
 
-    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    class Color color;
-    RefPtr<ResourceObject> resourceObject;
-    
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+        class Color color;
+        RefPtr<ResourceObject> resourceObject;
 
-    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resourceObject, nodeInfo)) {
-        pattern->RegisterResource<class Color>("Color", resourceObject, color);
+        Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+        auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+
+        if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resourceObject, nodeInfo)) {
+            pattern->RegisterResource<class Color>("Color", resourceObject, color);
+        } else {
+            auto pipelineContext = PipelineBase::GetCurrentContext();
+            CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
+
+            auto theme = pipelineContext->GetTheme<HyperlinkTheme>();
+            CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
+
+            color = theme->GetTextColor();
+        }
+
+        GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkColor(
+            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject)
+        );
     } else {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
+        Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+        CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+        auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
 
-        auto theme = pipelineContext->GetTheme<HyperlinkTheme>();
-        CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
+        Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+        class Color color;
+        RefPtr<ResourceObject> resourceObject;
 
-        color = theme->GetTextColor();
+        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resourceObject, nodeInfo)) {
+            GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkColor(nativeNode);
+        } else {
+            GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkColor(
+                nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
+        }
     }
-
-    GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkColor(
-        nativeNode, color.GetValue(), AceType::RawPtr(resourceObject)
-    );
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -169,30 +177,6 @@ ArkUINativeModuleValue HyperlinkBridge::Draggable(ArkUIRuntimeCallInfo* runtimeC
     bool draggable = draggableArg->ToBoolean(vm)->Value();
     GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkDraggable(nativeNode, draggable);
     
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue HyperlinkBridge::ResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo) 
-{	 
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-
-    Local<JSValueRef> regionArrayArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> regionArrayLengthArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    int32_t length = regionArrayLengthArg->Int32Value(vm);
-
-    ArkUI_Float32 regionArray[length];
-    int32_t regionUnits[length];
-    if (!ArkTSUtils::ParseResponseRegion(vm, regionArrayArg, regionArray, regionUnits, length)) {
-        GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkResponseRegion(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
-    }
-    GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkResponseRegion(
-        nativeNode, regionArray, regionUnits, length);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -218,26 +202,6 @@ ArkUINativeModuleValue HyperlinkBridge::Pop(ArkUIRuntimeCallInfo* runtimeCallInf
 
     PopNew();
 
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{	 
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    class Color color;
-    RefPtr<ResourceObject> resourceObject;
-    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
-        GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkColor(nativeNode);
-    } else {
-        GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkColor(
-            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
-    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -284,15 +248,18 @@ ArkUINativeModuleValue HyperlinkBridge::SetResponseRegion(ArkUIRuntimeCallInfo* 
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    int32_t length = thirdArg->Int32Value(vm);
+
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    Local<JSValueRef> regionArrayArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> regionArrayLengthArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    int32_t length = regionArrayLengthArg->Int32Value(vm);
+
     ArkUI_Float32 regionArray[length];
     int32_t regionUnits[length];
-    if (!ArkTSUtils::ParseResponseRegion(vm, secondArg, regionArray, regionUnits, length)) {
+    if (!ArkTSUtils::ParseResponseRegion(vm, regionArrayArg, regionArray, regionUnits, length)) {
         GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkResponseRegion(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }

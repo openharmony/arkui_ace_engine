@@ -61,7 +61,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Checkbox", "checkbox"},
         {"CheckboxGroup", "checkbox"},
         {"Gauge", "gauge"},
-        {"Rating", "rating"}
+        {"Rating", "rating"},
+        {"Hyperlink", "hyperlink"},
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {

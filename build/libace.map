@@ -922,6 +922,20 @@
       "OHOS::Ace::ACE_PI";
       "OHOS::Ace::ACE_E";
       OHOS::Ace::PipelineBase::GetImageCache*;
+
+      OHOS::Ace::V2::HYPERLINK_ETS_TAG;
+      OHOS::Ace::V2::SYMBOL_ETS_TAG;
+      OHOS::Ace::FontManager::*;
+      OHOS::Ace::PipelineBase::*;
+      OHOS::Ace::NG::SelectOverlayClient::*;
+      OHOS::Ace::NG::TextPattern::*;
+      OHOS::Ace::PatternResourceManager::*;
+      virtual?thunk?to?OHOS::Ace::NG::TextPattern::*;
+      vtable?for?OHOS::Ace::NG::TextAccessibilityProperty;
+      vtable?for?OHOS::Ace::HyperlinkComponent;
+      non-virtual?thunk?to?OHOS::Ace::NG::TextPattern::*;
+      VTT?for?OHOS::Ace::NG::TextAccessibilityProperty;
+      VTT?for?OHOS::Ace::HyperlinkComponent;
     };
   local:
     *;
