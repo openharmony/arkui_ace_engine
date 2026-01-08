@@ -142,14 +142,20 @@ void TextStyle::AddResource(
     std::function<void(const RefPtr<ResourceObject>&, TextStyle&)>&& updateFunc)
 {
     CHECK_NULL_VOID(resObj && updateFunc);
-    resMap_[key] = { resObj, std::move(updateFunc) };
+    auto& map = resMap_.map_;
+    if (!map) {
+        map = std::make_unique<std::unordered_map<std::string, resourceUpdater>>();
+    }
+    (*map)[key] = { resObj, std::move(updateFunc) };
 }
 
 const RefPtr<ResourceObject>& TextStyle::GetResource(const std::string& key) const
 {
     static const RefPtr<ResourceObject> invalidResObj = nullptr;
-    auto iter = resMap_.find(key);
-    return iter == resMap_.end() ? invalidResObj : iter->second.resObj;
+    auto& map = resMap_.map_;
+    CHECK_NULL_RETURN(map, invalidResObj);
+    auto iter = map->find(key);
+    return iter == map->end() ? invalidResObj : iter->second.resObj;
 }
 
 void TextStyle::CopyResource(const TextStyle& source)
@@ -159,17 +165,25 @@ void TextStyle::CopyResource(const TextStyle& source)
 
 void TextStyle::AppendResource(const TextStyle& source)
 {
-    resMap_.insert(source.resMap_.begin(), source.resMap_.end());
+    auto& sourceMap = source.resMap_.map_;
+    CHECK_NULL_VOID(sourceMap);
+    auto& map = resMap_.map_;
+    if (!map) {
+        map = std::make_unique<std::unordered_map<std::string, resourceUpdater>>();
+    }
+    map->insert(sourceMap->begin(), sourceMap->end());
 }
 
 void TextStyle::ReloadResources()
 {
-    for (const auto& [key, resourceUpdater] : resMap_) {
-        resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
-    }
     std::for_each(propTextShadows_.begin(), propTextShadows_.end(), [](Shadow& sd) { sd.ReloadResources(); });
     if (propTextBackgroundStyle_.has_value()) {
         propTextBackgroundStyle_->ReloadResources();
+    }
+    auto& map = resMap_.map_;
+    CHECK_NULL_VOID(map);
+    for (const auto& [key, resourceUpdater] : *map) {
+        resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
     }
 }
 
