@@ -862,13 +862,8 @@ void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
 {
     CHECK_NULL_VOID(HasFocus());
 #if defined(CROSS_PLATFORM)
-#if defined(IOS_PLATFORM)
     if (editingValue_ && editingValue_->selection.IsValid() &&
         editingValue_->selection.GetEnd() < selectController_->GetCaretIndex()) {
-#else
-    if (editingValue_ && editingValue_->selection.IsValid() &&
-        editingValue_->selection.GetEnd() < selectController_->GetCaretIndex() && !editingValue_->appendText.empty()) {
-#endif
         SetCaretPosition(editingValue_->selection.GetEnd());
     }
     if (editingValue_ && editingValue_->selection.IsValid()) {
@@ -5668,7 +5663,13 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
         CalcCounterAfterFilterInsertValue(originLength, insertValue,
             static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>())));
     }
+#ifdef ANDROID_PLATFORM
+    if (info.textSelection.baseOffset == info.textSelection.extentOffset) {
+        selectController_->UpdateCaretIndex(info.textSelection.baseOffset);
+    }
+#else
     selectController_->UpdateCaretIndex(caretStart + caretMoveLength);
+#endif
     UpdateObscure(insertValue, hasInsertValue);
     UpdateEditingValueToRecord();
     if (isIME) {
@@ -6508,11 +6509,6 @@ bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<Tex
 #ifdef IOS_PLATFORM
     if (value->discardedMarkedText) {
         return false;
-    }
-#endif
-#ifdef ANDROID_PLATFORM
-    if (value->appendText.empty()) {
-        return true;
     }
 #endif
     InsertValue(UtfUtils::Str8DebugToStr16(value->appendText), true);
@@ -11602,6 +11598,7 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
         info.compose.end = editingValue_->compose.GetEnd();
         info.compose.isActive = editingValue_->compose.IsValid();
         info.unmarkText = editingValue_->unmarkText;
+        info.textSelection = editingValue_->selection;
     }
 #endif
     insertCommands_.emplace(info);
