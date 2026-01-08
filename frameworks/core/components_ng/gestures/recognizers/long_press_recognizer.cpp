@@ -134,7 +134,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     int32_t curDuration = duration_;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (!IsPostEventResult()) {
+    if (!IsPostEventResult() || event.passThrough) {
         int64_t currentTimeStamp = GetSysTimestamp();
         int64_t eventTimeStamp = static_cast<int64_t>(event.time.time_since_epoch().count());
         if (currentTimeStamp > eventTimeStamp) {
