@@ -676,6 +676,10 @@ static ani_object AnimatorTransferStatic(ani_env *aniEnv, ani_object, ani_object
     ani_object animatorObj = {};
     static const char *className = "@ohos.animator.AnimatorResultInner";
     ani_class cls;
+    if (aniEnv == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_ANIMATION, "[ANI] aniEnv is null");
+        return animatorObj;
+    }
     if (ANI_OK != aniEnv->FindClass(className, &cls)) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] find class fail");
         return animatorObj;
@@ -687,10 +691,6 @@ static ani_object AnimatorTransferStatic(ani_env *aniEnv, ani_object, ani_object
         return animatorObj;
     }
 
-    if (aniEnv == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_ANIMATION, "[ANI] aniEnv is null");
-        return nullptr;
-    }
     void *unwrapResult = nullptr;
     bool success = arkts_esvalue_unwrap(aniEnv, input, &unwrapResult);
     if (!success) {
