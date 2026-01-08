@@ -1171,7 +1171,7 @@ bool ListPattern::ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign
             return false;
         case ScrollSnapAlign::START:
             align = ScrollAlign::START;
-            anchorIndex = GetStartIndexExcludeStartOffset(startIndex_);
+            anchorIndex = GetStartIndexExcludeStartOffset();
             break;
         case ScrollSnapAlign::CENTER:
             align = ScrollAlign::CENTER;
@@ -1179,7 +1179,7 @@ bool ListPattern::ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign
             break;
         case ScrollSnapAlign::END:
             align = ScrollAlign::END;
-            anchorIndex = GetEndIndexExcludeEndOffset(startIndex_);
+            anchorIndex = GetEndIndexExcludeEndOffset();
             break;
     }
     if (snapDirection == SnapDirection::FORWARD) {
@@ -1220,23 +1220,23 @@ bool ListPattern::ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign
     return true;
 }
 
-int32_t ListPattern::GetEndIndexExcludeEndOffset(int_32 startIndex)
+int32_t ListPattern::GetEndIndexExcludeEndOffset()
 {
     auto endPos = contentMainSize_ - contentEndOffset_;
     auto iter = itemPosition_.rbegin();
     while (iter != itemPosition_.rend() && GreatOrEqual(iter->second.startPos, endPos)) {
         iter++;
     }
-    return iter == itemPosition_.rend() ? startIndex : iter->first;
+    return iter == itemPosition_.rend() ? endIndex_ : iter->first;
 }
 
-int32_t ListPattern::GetStartIndexExcludeStartOffset(int_32 startIndex)
+int32_t ListPattern::GetStartIndexExcludeStartOffset()
 {
     auto iter = itemPosition_.begin();
     while (iter != itemPosition_.end() && LessOrEqual(iter->second.endPos, contentStartOffset_)) {
         iter++;
     }
-    return iter == itemPosition_.end() ? startIndex : iter->first;
+    return iter == itemPosition_.end() ? startIndex_ : iter->first;
 }
 
 void ListPattern::StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)

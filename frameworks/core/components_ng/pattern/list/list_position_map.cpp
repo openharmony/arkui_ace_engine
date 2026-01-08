@@ -134,7 +134,7 @@ std::optional<bool> ListPositionMap::GetLazyForEachChildIsGroup(RefPtr<UINode> n
         while (child != children.end() && !((*child)->GetFrameChildByIndex(0, false))) {
             child++;
         }
-        auto framenode = nullptr;
+        RefPtr<FrameNode> frameNode;
         if (child != children.end()) {
             frameNode = AceType::DynamicCast<FrameNode>((*child)->GetFrameChildByIndex(0, false));
         }
