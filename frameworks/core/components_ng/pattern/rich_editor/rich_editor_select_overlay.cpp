@@ -420,7 +420,7 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             break;
         case OptionMenuActionId::PASTE:
             pattern->HandleOnPaste();
-            CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
+            CloseOverlay(true, CloseReason::CLOSE_REASON_PASTE);
             break;
         case OptionMenuActionId::SELECT_ALL:
             pattern->HandleMenuCallbackOnSelectAll();
@@ -515,7 +515,8 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
         pattern->floatingCaretState_.Reset();
         pattern->isCursorAlwaysDisplayed_ = false;
     }
-    auto needResetSelection = pattern->GetTextDetectEnable() && !pattern->HasFocus() &&
+    auto isAIEnable = pattern->GetTextDetectEnable() && !pattern->HasFocus();
+    auto needResetSelection = isAIEnable && reason != CloseReason::CLOSE_REASON_PASTE &&
         reason != CloseReason::CLOSE_REASON_DRAG_FLOATING;
     auto isBackPressed = reason == CloseReason::CLOSE_REASON_BACK_PRESSED;
     auto isHoldByOther = reason == CloseReason::CLOSE_REASON_HOLD_BY_OTHER;
