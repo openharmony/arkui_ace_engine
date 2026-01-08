@@ -3271,6 +3271,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Gra
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Graphics.ets @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/NodeController.ets @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/resources.ts @arkui_framework_resource
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/XBarProxy.ts @ArkUI_ability_group
 frameworks/bridge/arkts_frontend/koala_projects/inner_api/ @arkui_framework_resource
 frameworks/bridge/arkts_frontend/arkts_frontend.cpp @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/arkts_frontend.h @arkui_framework_xnode
