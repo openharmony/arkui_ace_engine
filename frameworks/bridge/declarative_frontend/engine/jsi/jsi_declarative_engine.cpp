@@ -830,6 +830,8 @@ void JsiDeclarativeEngineInstance::PreLoadArkuiModule(const shared_ptr<JsRuntime
         { "CalendarPickerDialog", "calendarpicker" },
         { "Hyperlink", "hyperlink" },
         { "Marquee", "marquee" },
+        { "Stepper", "stepper" },
+        { "StepperItem", "stepperitem" },
     };
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> func = global->GetProperty(runtime, "_ArkUIPreload_");
