@@ -528,6 +528,9 @@ export class UIContext {
     public isFollowingSystemFontScale() : boolean {
         throw Error("isFollowingSystemFontScale not implemented in UIContext!")
     }
+    public setCustomKeyboardContinueFeature(feature: CustomKeyboardContinueFeature): void {
+        throw Error("setCustomKeyboardContinueFeature not implemented in UIContext!")
+    }
     public getMaxFontScale() : number {
         throw Error("getMaxFontScale not implemented in UIContext!")
     }
@@ -1088,4 +1091,9 @@ export class SwiperDynamicSyncScene extends DynamicSyncScene {
         super.setFrameRateRange(range);
         ArkUIAniModule._Common_SetFrameRateRange(this.nodePtr, range, this.type);
     }
+}
+
+export const enum CustomKeyboardContinueFeature {
+    ENABLED = 0,
+    DISABLED = 1,
 }

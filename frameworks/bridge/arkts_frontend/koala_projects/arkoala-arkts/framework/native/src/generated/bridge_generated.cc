@@ -33431,6 +33431,10 @@ void impl_IUIContext_closeBindSheet(KVMContext vmContext, Ark_NativePointer bind
         GetAccessors()->getIUIContextAccessor()->closeBindSheet(reinterpret_cast<Ark_VMContext>(vmContext), GetAsyncWorker(), bindSheetContent, static_cast<Callback_Opt_Array_String_Void*>(&outputArgumentForReturningPromiseValueTemp));
 }
 KOALA_INTEROP_CTX_V3(IUIContext_closeBindSheet, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_IUIContext_setCustomKeyboardContinueFeature(Ark_Int32 feature) {
+        GetAccessors()->getIUIContextAccessor()->setCustomKeyboardContinueFeature(static_cast<Ark_CustomKeyboardContinueFeature>(feature));
+}
+KOALA_INTEROP_DIRECT_V1(IUIContext_setCustomKeyboardContinueFeature, Ark_Int32)
 void impl_IUIContext_bindTabsToScrollable(Ark_NativePointer tabsController, Ark_NativePointer scroller) {
         GetAccessors()->getIUIContextAccessor()->bindTabsToScrollable(static_cast<Ark_TabsController>(tabsController), static_cast<Ark_Scroller>(scroller));
 }

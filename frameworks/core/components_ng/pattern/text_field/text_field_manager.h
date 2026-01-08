@@ -43,6 +43,11 @@ struct LaterAvoidInfo {
     int32_t orientation = -1;
 };
 
+enum class CustomKeyboardContinueFeature {
+    ENABLED = 0,
+    DISABLED = 1,
+};
+
 using FillContentMap = std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>;
 
 class ACE_EXPORT TextFieldManagerNG : public ManagerInterface {
@@ -335,6 +340,16 @@ public:
     void SetIsAskCeliaSupported(bool isAskCeliaSupported);
     std::optional<bool> IsAskCeliaSupported();
 
+    bool GetCustomKeyboardContinueFeature() const
+    {
+        return continueFeature_;
+    }
+
+    void SetCustomKeyboardContinueFeature(bool continueFeature)
+    {
+        continueFeature_ = continueFeature;
+    }
+
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);
@@ -369,6 +384,7 @@ private:
     LaterAvoidInfo laterAvoidInfo_;
     bool isScrollableChild_ = false;
     bool isImeAttached_ = false;
+    bool continueFeature_ = false;
     std::unordered_map<int32_t, std::function<void()>> avoidSystemKeyboardCallbacks_;
     std::unordered_map<int32_t, std::function<void()>> avoidCustomKeyboardCallbacks_;
     float lastKeyboardOffset_ = 0.0f;
