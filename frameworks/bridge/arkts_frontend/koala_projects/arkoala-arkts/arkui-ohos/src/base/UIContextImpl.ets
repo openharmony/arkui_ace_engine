@@ -44,7 +44,7 @@ import { TimePickerDialogOptions } from "arkui/component/timePicker"
 import { TextPickerDialogOptions, TextPickerDialogOptionsExt } from "arkui/component/textPicker"
 import { DatePickerDialogOptions } from "arkui/component/datePicker"
 import inspector from '@ohos/arkui/inspector';
-import { ComponentContent } from 'arkui/ComponentContent';
+import { ComponentContent, ComponentContentBase } from 'arkui/ComponentContent';
 import overlayManager from '@ohos/overlayManager';
 import promptAction, { LevelOrder } from '@ohos/promptAction';
 import { ArkUIAniModule } from 'arkui.ani';
@@ -1525,7 +1525,7 @@ export class UIContextImpl extends UIContext {
         }
     }
 
-    public openBindSheet(bindSheetContent: ComponentContent, sheetOptions?: SheetOptions, targetId?: int): Promise<void> {
+    public openBindSheet(bindSheetContent: ComponentContentBase, sheetOptions?: SheetOptions, targetId?: int): Promise<void> {
         let ptr: KPointer = 0;
         if (bindSheetContent.getNodePtr() != undefined) {
             ptr = bindSheetContent.getNodePtr() as KPointer;
@@ -1536,7 +1536,7 @@ export class UIContextImpl extends UIContext {
         return result;
     }
 
-    public updateBindSheet(bindSheetContent: ComponentContent, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
+    public updateBindSheet(bindSheetContent: ComponentContentBase, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
         let ptr: KPointer = 0;
         if (bindSheetContent.getNodePtr() != undefined) {
             ptr = bindSheetContent.getNodePtr() as KPointer;
@@ -1547,7 +1547,7 @@ export class UIContextImpl extends UIContext {
         return result;
     }
 
-    public closeBindSheet(bindSheetContent: ComponentContent): Promise<void> {
+    public closeBindSheet(bindSheetContent: ComponentContentBase): Promise<void> {
         let ptr: KPointer = 0;
         if (bindSheetContent.getNodePtr() != undefined) {
             ptr = bindSheetContent.getNodePtr() as KPointer;
