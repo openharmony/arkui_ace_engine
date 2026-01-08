@@ -584,8 +584,8 @@ void WindowPattern::SetImagePatternSyncLoad(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(node);
     auto imagePattern = node->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
-    imagePattern->SetSyncLoad(syncStartingWindow_);
     ACE_SCOPED_TRACE("WindowPattern::SetImagePatternSyncLoad set sync [%d]", syncStartingWindow_);
+    imagePattern->SetSyncLoad(syncStartingWindow_);
 }
 
 void WindowPattern::HideStartingWindow()
@@ -620,7 +620,6 @@ void WindowPattern::CreateStartingWindow()
         HideStartingWindow();
         startingWindow_ = FrameNode::CreateFrameNode(
             V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        SetImagePatternSyncLoad(startingWindow_);
         return;
     }
 
@@ -644,8 +643,7 @@ void WindowPattern::CreateStartingWindow()
         CHECK_NULL_VOID(startingWindowLayoutHelper_);
         lastParentSize_ = { 0.0f, 0.0f };
         startingWindow_ = startingWindowLayoutHelper_->CreateStartingWindowNode(
-            startingWindowInfo, sessionInfo.bundleName_, sessionInfo.moduleName_);
-        SetImagePatternSyncLoad(startingWindow_);
+            startingWindowInfo, sessionInfo.bundleName_, sessionInfo.moduleName_, syncStartingWindow_);
         return;
     }
     startingWindow_ = FrameNode::CreateFrameNode(
