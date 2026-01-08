@@ -2985,6 +2985,12 @@ HWTEST_F(TextFieldPatternTest, TextFieldShiftMultipleSelection001, TestSize.Leve
     pattern->HandleMouseEvent(info);
     pattern->UpdateCaretByClick(offset);
 
+    /**
+     * 
+     * @tc.step:
+     * check if pattern->IsSelected is false
+     *
+     */
     EXPECT_EQ(pattern->IsSelected(), false);
 }
 
