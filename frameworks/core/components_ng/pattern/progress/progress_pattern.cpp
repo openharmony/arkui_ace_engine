@@ -53,6 +53,12 @@ void ProgressPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
+void ProgressPattern::OnDetachFromMainTree()
+{
+    CHECK_NULL_VOID(progressModifier_);
+    progressModifier_->StopAllLoopAnimation();
+}
+
 void ProgressPattern::InitAnimatableProperty(ProgressAnimatableProperty& progressAnimatableProperty)
 {
     auto pipeline = PipelineBase::GetCurrentContext();

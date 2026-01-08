@@ -79,6 +79,7 @@ public:
     void SetRingProgressLeftPadding(const Dimension& ringProgressLeftPadding);
 
     Color CalculateHoverPressColor(const Color& color);
+    void StopAllLoopAnimation();
 
 private:
     void PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
