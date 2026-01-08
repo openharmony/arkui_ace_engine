@@ -1228,6 +1228,9 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
             cachedItemPosition_.insert(*pos);
             pos = itemPosition_.erase(pos);
         }
+        if (listLayoutProperty_) {
+            UpdateCachedItemPosition(listLayoutProperty_->GetCachedCountWithDefault() * lanes_);
+        }
         return;
     }
     std::list<int32_t> removeIndexes;
@@ -1238,6 +1241,9 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
         recycledItemPosition_.insert_or_assign(pos->first, pos->second);
         cachedItemPosition_.insert(*pos);
         removeIndexes.emplace_back(pos->first);
+    }
+    if (listLayoutProperty_) {
+        UpdateCachedItemPosition(listLayoutProperty_->GetCachedCountWithDefault() * lanes_);
     }
     for (const auto& index : removeIndexes) {
         itemPosition_.erase(index);
