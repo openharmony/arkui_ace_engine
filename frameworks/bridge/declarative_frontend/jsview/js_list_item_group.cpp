@@ -75,7 +75,7 @@ void SyncChildrenSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChi
 }
 
 void CallSetNativeMainSize(const JSRef<JSObject>& childrenSizeObj,
-    const JSClass<JSListChildrenMainSize>& nativeMainSize)
+    const JSRef<JSObject>& nativeMainSize)
 {
     auto property = childrenSizeObj->GetProperty("setNativeMainSize");
     if (property->IsFunction()) {
