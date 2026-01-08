@@ -7849,6 +7849,30 @@ void callManagedReuseIdCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceI
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedRouter_BusinessError_Void(Ark_Int32 resourceId, Ark_Int32 code, Ark_String message)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Router_BusinessError_Void);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(code);
+    argsSerializer.writeString(message);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedRouter_BusinessError_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 code, Ark_String message)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_Router_BusinessError_Void);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(code);
+    argsSerializer.writeString(message);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedRouterFinishCallback(Ark_Int32 resourceId, Ark_NativePointer value)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -9178,6 +9202,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_RestrictedWorker_onexit_Callback: return reinterpret_cast<Ark_NativePointer>(callManagedRestrictedWorker_onexit_Callback);
         case Kind_RestrictedWorker_onmessage_Callback: return reinterpret_cast<Ark_NativePointer>(callManagedRestrictedWorker_onmessage_Callback);
         case Kind_ReuseIdCallback: return reinterpret_cast<Ark_NativePointer>(callManagedReuseIdCallback);
+        case Kind_Router_BusinessError_Void: return reinterpret_cast<Ark_NativePointer>(callManagedRouter_BusinessError_Void);
         case Kind_RouterFinishCallback: return reinterpret_cast<Ark_NativePointer>(callManagedRouterFinishCallback);
         case Kind_SaveButtonCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSaveButtonCallback);
         case Kind_ScrollOnDidZoomCallback: return reinterpret_cast<Ark_NativePointer>(callManagedScrollOnDidZoomCallback);
@@ -9521,6 +9546,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_RestrictedWorker_onexit_Callback: return reinterpret_cast<Ark_NativePointer>(callManagedRestrictedWorker_onexit_CallbackSync);
         case Kind_RestrictedWorker_onmessage_Callback: return reinterpret_cast<Ark_NativePointer>(callManagedRestrictedWorker_onmessage_CallbackSync);
         case Kind_ReuseIdCallback: return reinterpret_cast<Ark_NativePointer>(callManagedReuseIdCallbackSync);
+        case Kind_Router_BusinessError_Void: return reinterpret_cast<Ark_NativePointer>(callManagedRouter_BusinessError_VoidSync);
         case Kind_RouterFinishCallback: return reinterpret_cast<Ark_NativePointer>(callManagedRouterFinishCallbackSync);
         case Kind_SaveButtonCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSaveButtonCallbackSync);
         case Kind_ScrollOnDidZoomCallback: return reinterpret_cast<Ark_NativePointer>(callManagedScrollOnDidZoomCallbackSync);

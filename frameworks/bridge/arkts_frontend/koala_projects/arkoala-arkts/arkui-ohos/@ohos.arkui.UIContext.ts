@@ -118,6 +118,18 @@ export class Router {
         throw Error("pushUrl not implemented in Router!");
     }
 
+    public pushUrl(options: router.RouterOptions, mode: router.RouterMode): Promise<void> {
+        throw Error("pushUrl not implemented in Router!");
+    }
+
+    public pushUrl(options: router.RouterOptions, callback: AsyncCallback<void>): void {
+        throw Error("pushUrl not implemented in Router!");
+    }
+
+    public pushUrl(options: router.RouterOptions, mode: router.RouterMode, callback: AsyncCallback<void>): void {
+        throw Error("pushUrl not implemented in Router!");
+    }
+
     public pushNamedRoute(options: router.NamedRouterOptions): Promise<void> {
         throw Error("pushNamedRoute not implemented in Router!");
     }
@@ -138,6 +150,18 @@ export class Router {
         throw Error("replaceUrl not implemented in Router!");
     }
 
+    public replaceUrl(options: router.RouterOptions, mode: router.RouterMode): Promise<void> {
+        throw Error("replaceUrl not implemented in Router!");
+    }
+
+    public replaceUrl(options: router.RouterOptions, callback: AsyncCallback<void>): void {
+        throw Error("replaceUrl not implemented in Router!");
+    }
+
+    public replaceUrl(options: router.RouterOptions, mode: router.RouterMode, callback: AsyncCallback<void>): void {
+        throw Error("replaceUrl not implemented in Router!");
+    }
+
     public replaceNamedRoute(options: router.NamedRouterOptions): Promise<void> {
         throw Error("replaceNamedRoute not implemented in Router!");
     }
@@ -155,6 +179,10 @@ export class Router {
     }
 
     public back(options?:router.RouterOptions): void {
+        throw Error("back not implemented in Router!");
+    }
+
+    public back(index: int, params?: jsonx.JsonElement): void {
         throw Error("back not implemented in Router!");
     }
 
@@ -731,6 +759,14 @@ export class UIContext {
     static destroyUIContextWithoutWindow() {
         UIContextImpl.destroyUIContextWithoutWindow()
     }
+    public getPageInfoByUniqueId(id: int): PageInfo {
+        throw Error("getPageInfoByUniqueId(int) not implemented in UIContext!")
+    }
+
+    public getPageInfoByUniqueId(id: number): PageInfo {
+        throw Error("getPageInfoByUniqueId(number) not implemented in UIContext!")
+    }
+
     public getFilteredInspectorTree(filters?: Array<string>): string {
         throw Error("getFilteredInspectorTree not implemented in UIContext!")
     }
@@ -782,14 +818,6 @@ export class UIContext {
     public unbindTabsFromNestedScrollable(tabsController: TabsController, parentScroller: Scroller,
         childScroller: Scroller): void {
         throw Error("unbindTabsFromNestedScrollable not implemented in UIContext!")
-    }
-
-    public getPageInfoByUniqueId(id: int): PageInfo {
-        throw Error("getPageInfoByUniqueId(int) not implemented in UIContext!")
-    }
-
-    public getPageInfoByUniqueId(id: number): PageInfo {
-        throw Error("getPageInfoByUniqueId(number) not implemented in UIContext!")
     }
 }
 export abstract class FrameCallback {
