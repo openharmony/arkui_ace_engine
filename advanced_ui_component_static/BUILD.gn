@@ -29,7 +29,7 @@ group("advanced_ui_component_static") {
       #"fullscreenlaunchcomponent:fullScreenLaunch",
       "segmentbutton:segmentButton",
       "segmentbuttonv2:SegmentButtonV2",
-      #"selectionmenu:selectionMenu",
+      "selectionmenu:selectionMenu",
       "splitlayout:splitLayout",
       "swiperefresher:swipeRefresher",
       "multinavigation:multiNavigation",
