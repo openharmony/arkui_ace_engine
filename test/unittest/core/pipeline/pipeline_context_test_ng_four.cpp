@@ -64,6 +64,12 @@ void PipelineContextFourTestNg::SetUpTestSuite()
     customNode_ = CustomNode::CreateCustomNode(customNodeId_, TEST_TAG);
     ElementRegister::GetInstance()->AddUINode(frameNode_);
     auto window = std::make_shared<MockWindow>();
+    EXPECT_CALL(*window, RequestFrame()).Times(AnyNumber());
+    EXPECT_CALL(*window, FlushTasks(testing::_)).Times(AnyNumber());
+    EXPECT_CALL(*window, OnHide()).Times(AnyNumber());
+    EXPECT_CALL(*window, RecordFrameTime(_, _)).Times(AnyNumber());
+    EXPECT_CALL(*window, OnShow()).Times(AnyNumber());
+    EXPECT_CALL(*window, SetRootFrameNode(_)).Times(AnyNumber());
     context_ = AceType::MakeRefPtr<PipelineContext>(
         window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
     context_->SetEventManager(AceType::MakeRefPtr<EventManager>());
@@ -74,6 +80,8 @@ void PipelineContextFourTestNg::SetUpTestSuite()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     context_->SetThemeManager(themeManager);
     auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ContainerModalTheme>()));
+    EXPECT_CALL(*themeManager, GetThemeConstants()).WillRepeatedly(Return(themeConstants));
 }
 
 void PipelineContextFourTestNg::TearDownTestSuite()
