@@ -4095,9 +4095,15 @@ void UIContentImpl::NotifyWindowMode(OHOS::Rosen::WindowMode mode)
     CHECK_NULL_VOID(taskExecutor);
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(pipeline);
-    if (window_) {
-        pipeline->SetIsLayoutFullScreen(window_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
-    }
+    taskExecutor->PostSyncTask(
+        [weak = WeakPtr<NG::PipelineContext>(pipeline), window = window_]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            if (window) {
+                pipeline->SetIsLayoutFullScreen(window->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUINotifyLayoutFullScreen");
     taskExecutor->PostTask(
         [weak = WeakPtr<NG::PipelineContext>(pipeline), mode]() {
             auto pipeline = weak.Upgrade();
