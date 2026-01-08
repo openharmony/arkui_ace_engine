@@ -71,7 +71,6 @@ import { TargetInfo_serializer } from "./../framework/ohos.arkui.UIContext"
 import { TargetInfo, CustomKeyboardContinueFeature } from "@ohos.arkui.UIContext"
 import { uiObserver_NavigationInfo_serializer } from "./../framework/ohos.arkui.observer"
 import { default as uiObserver } from "@ohos.arkui.observer"
-import { router_RouterOptions_serializer, router_RouterState_serializer } from "./../framework/ohos.router"
 import { AsyncCallback, BusinessError } from "@ohos.base"
 import { default as router } from "@ohos.router"
 import { ComponentBase } from "./../ComponentBase"
@@ -5040,8 +5039,13 @@ export class ArkCustomLayoutRootPeer extends PeerNode {
     }
 }
 export type RouterFinishCallback = (value: KPointer) => void;
+export interface RouterOptionsInner {
+    url: string;
+    params?: string;
+    recoverable?: boolean;
+}
 export interface PageRouterOptions {
-    options: router.RouterOptions;
+    options: RouterOptionsInner;
     mode?: router.RouterMode;
 }
 export type Callback_Extender_OnProgress = (value: float) => void;
@@ -6349,6 +6353,47 @@ export class PostMessageOptions_serializer {
         return value
     }
 }
+export class RouterOptionsInner_serializer {
+    public static write(buffer: SerializerBase, value: RouterOptionsInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForUrl  = value.url
+        valueSerializer.writeString(valueHolderForUrl)
+        const valueHolderForParams  = value.params
+        if (valueHolderForParams !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForParamsTmpValue  = valueHolderForParams!
+            valueSerializer.writeString(valueHolderForParamsTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForRecoverable  = value.recoverable
+        if (valueHolderForRecoverable !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRecoverableTmpValue  = valueHolderForRecoverable!
+            valueSerializer.writeBoolean(valueHolderForRecoverableTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): RouterOptionsInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const urlTmpResult : string = (valueDeserializer.readString() as string)
+        const paramsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let paramsTmpBuf : string | undefined = undefined
+        if ((paramsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            paramsTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const paramsTmpResult : string | undefined = paramsTmpBuf
+        const recoverableTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let recoverableTmpBuf : boolean | undefined = undefined
+        if ((recoverableTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            recoverableTmpBuf = valueDeserializer.readBoolean()
+        }
+        const recoverableTmpResult : boolean | undefined = recoverableTmpBuf
+        let value : RouterOptionsInner = ({url: urlTmpResult, params: paramsTmpResult, recoverable: recoverableTmpResult} as RouterOptionsInner)
+        return value
+    }
+}
 export class SizeTLengthMetrics_serializer {
     public static write(buffer: SerializerBase, value: SizeTLengthMetrics): void {
         let valueSerializer : SerializerBase = buffer
@@ -6606,7 +6651,7 @@ export class PageRouterOptions_serializer {
     public static write(buffer: SerializerBase, value: PageRouterOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForOptions  = value.options
-        router_RouterOptions_serializer.write(valueSerializer, valueHolderForOptions)
+        RouterOptionsInner_serializer.write(valueSerializer, valueHolderForOptions)
         const valueHolderForMode  = value.mode
         if (valueHolderForMode !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -6618,7 +6663,7 @@ export class PageRouterOptions_serializer {
     }
     public static read(buffer: DeserializerBase): PageRouterOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const optionsTmpResult : router.RouterOptions = router_RouterOptions_serializer.read(valueDeserializer)
+        const optionsTmpResult : RouterOptionsInner = RouterOptionsInner_serializer.read(valueDeserializer)
         const modeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let modeTmpBuf : router.RouterMode | undefined = undefined
         if ((modeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

@@ -1110,8 +1110,6 @@ typedef struct Array_RichEditorSpan Array_RichEditorSpan;
 typedef struct Opt_Array_RichEditorSpan Opt_Array_RichEditorSpan;
 typedef struct Array_RichEditorTextSpanResult Array_RichEditorTextSpanResult;
 typedef struct Opt_Array_RichEditorTextSpanResult Opt_Array_RichEditorTextSpanResult;
-typedef struct Array_router_RouterState Array_router_RouterState;
-typedef struct Opt_Array_router_RouterState Opt_Array_router_RouterState;
 typedef struct Array_RouterItem Array_RouterItem;
 typedef struct Opt_Array_RouterItem Opt_Array_RouterItem;
 typedef struct Array_SafeAreaEdge Array_SafeAreaEdge;
@@ -2446,15 +2444,13 @@ typedef struct Ark_RoundRect Ark_RoundRect;
 typedef struct Opt_RoundRect Opt_RoundRect;
 typedef struct Ark_RouteMapConfig Ark_RouteMapConfig;
 typedef struct Opt_RouteMapConfig Opt_RouteMapConfig;
-typedef struct Ark_router_RouterOptions Ark_router_RouterOptions;
-typedef struct Opt_router_RouterOptions Opt_router_RouterOptions;
-typedef struct Ark_router_RouterState Ark_router_RouterState;
-typedef struct Opt_router_RouterState Opt_router_RouterState;
 typedef struct Ark_RouterCallbackInfo Ark_RouterCallbackInfo;
 typedef struct Opt_RouterCallbackInfo Opt_RouterCallbackInfo;
 typedef struct RouterItemPeer RouterItemPeer;
 typedef struct RouterItemPeer* Ark_RouterItem;
 typedef struct Opt_RouterItem Opt_RouterItem;
+typedef struct Ark_RouterOptionsInner Ark_RouterOptionsInner;
+typedef struct Opt_RouterOptionsInner Opt_RouterOptionsInner;
 typedef struct Ark_RowOptions Ark_RowOptions;
 typedef struct Opt_RowOptions Opt_RowOptions;
 typedef struct Ark_ScaleOptions Ark_ScaleOptions;
@@ -10224,15 +10220,6 @@ typedef struct Opt_Array_RichEditorTextSpanResult {
     Ark_Tag tag;
     Array_RichEditorTextSpanResult value;
 } Opt_Array_RichEditorTextSpanResult;
-typedef struct Array_router_RouterState {
-    /* kind: ContainerType */
-    Ark_router_RouterState* array;
-    Ark_Int32 length;
-} Array_router_RouterState;
-typedef struct Opt_Array_router_RouterState {
-    Ark_Tag tag;
-    Array_router_RouterState value;
-} Opt_Array_router_RouterState;
 typedef struct Array_RouterItem {
     /* kind: ContainerType */
     Ark_RouterItem* array;
@@ -16528,31 +16515,20 @@ typedef struct Opt_RouterCallbackInfo {
     Ark_Tag tag;
     Ark_RouterCallbackInfo value;
 } Opt_RouterCallbackInfo;
-typedef struct Ark_router_RouterOptions {
-    /* kind: Interface */
-    Ark_String url;
-    Opt_Object params;
-    Opt_Boolean recoverable;
-} Ark_router_RouterOptions;
-typedef struct Opt_router_RouterOptions {
-    Ark_Tag tag;
-    Ark_router_RouterOptions value;
-} Opt_router_RouterOptions;
-typedef struct Ark_router_RouterState {
-    /* kind: Interface */
-    Ark_Number index;
-    Ark_String name;
-    Ark_String path;
-    Ark_Object params;
-} Ark_router_RouterState;
-typedef struct Opt_router_RouterState {
-    Ark_Tag tag;
-    Ark_router_RouterState value;
-} Opt_router_RouterState;
 typedef struct Opt_RouterItem {
     Ark_Tag tag;
     Ark_RouterItem value;
 } Opt_RouterItem;
+typedef struct Ark_RouterOptionsInner {
+    /* kind: Interface */
+    Ark_String url;
+    Opt_String params;
+    Opt_Boolean recoverable;
+} Ark_RouterOptionsInner;
+typedef struct Opt_RouterOptionsInner {
+    Ark_Tag tag;
+    Ark_RouterOptionsInner value;
+} Opt_RouterOptionsInner;
 typedef struct Ark_RowOptions {
     /* kind: Interface */
     Opt_Union_String_Number space;
@@ -19045,7 +19021,7 @@ typedef struct Opt_OverlayOptions {
 } Opt_OverlayOptions;
 typedef struct Ark_PageRouterOptions {
     /* kind: Interface */
-    Ark_router_RouterOptions options;
+    Ark_RouterOptionsInner options;
     Opt_router_RouterMode mode;
 } Ark_PageRouterOptions;
 typedef struct Opt_PageRouterOptions {

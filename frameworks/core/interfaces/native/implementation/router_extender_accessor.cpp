@@ -307,6 +307,9 @@ void PushNamedRoute0Impl(Ark_VMContext vmContext,
     if (options->options.recoverable.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         routerOptions.recoverable = Converter::Convert<bool>(options->options.recoverable.value);
     }
+    if (options->options.params.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        routerOptions.params = Converter::Convert<std::string>(options->options.params.value);
+    }
     if (options->mode.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         routerOptions.routerMode = static_cast<uint32_t>(options->mode.value);
     }
@@ -358,6 +361,9 @@ void ReplaceNamedRoute0Impl(Ark_VMContext vmContext,
     routerOptions.isNamedRouterMode = true;
     if (options->options.recoverable.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         routerOptions.recoverable = Converter::Convert<bool>(options->options.recoverable.value);
+    }
+    if (options->options.params.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        routerOptions.params = Converter::Convert<std::string>(options->options.params.value);
     }
     if (options->mode.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         routerOptions.routerMode = static_cast<uint32_t>(options->mode.value);

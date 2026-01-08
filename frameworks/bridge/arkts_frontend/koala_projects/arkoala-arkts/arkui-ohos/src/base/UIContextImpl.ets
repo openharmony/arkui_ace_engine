@@ -660,7 +660,7 @@ export class RouterImpl extends Router {
         return result;
     }
 
-    public getParams(): Object {
+    public getParams(): jsonx.JsonElement {
         if (this.router_ === undefined) {
             throw Error("router set in uiContext is empty");
         }

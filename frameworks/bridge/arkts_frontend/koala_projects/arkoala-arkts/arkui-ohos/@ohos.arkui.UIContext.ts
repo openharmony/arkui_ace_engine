@@ -168,7 +168,7 @@ export class Router {
         throw Error("getStackSize not implemented in Router!")
     }
 
-    public getParams(): Object {
+    public getParams(): jsonx.JsonElement {
         throw Error("getParams not implemented in Router!");
     }
 
