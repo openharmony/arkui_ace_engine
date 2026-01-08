@@ -5542,7 +5542,7 @@ void SetLinearGradientBlurImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto radius = Converter::OptConvertPtr<Dimension>(value);
+    auto radius = Converter::OptConvertPtr<float>(value);
     auto convValue = Converter::OptConvertPtr<NG::LinearGradientBlurPara>(options);
     Validator::ValidateNonNegative(radius);
     NG::LinearGradientBlurPara para(
@@ -5551,9 +5551,9 @@ void SetLinearGradientBlurImpl(Ark_NativePointer node,
         para = convValue.value();
     }
     if (radius.has_value()) {
-        para.blurRadius_ = radius.value();
+        para.blurRadius_ = CalcDimension(radius.value(), DimensionUnit::PX);
     } else {
-        para.blurRadius_ = Dimension(0.0, DimensionUnit::VP);
+        para.blurRadius_ = Dimension(0.0, DimensionUnit::PX);
     }
     ViewAbstractModelStatic::SetLinearGradientBlur(frameNode, std::optional<NG::LinearGradientBlurPara>(para));
 }
