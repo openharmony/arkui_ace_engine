@@ -671,7 +671,7 @@ void GetSnapshotByUniqueId(int32_t uniqueId,
 #endif
 }
 
-static ani_object ANI_GetWithUniqueId([[maybe_unused]] ani_env* env, ani_double id, ani_object options)
+static ani_object ANI_GetWithUniqueId([[maybe_unused]] ani_env* env, ani_int id, ani_object options)
 {
     int32_t uniqueId = static_cast<int32_t>(id);
     OHOS::Ace::NG::SnapshotOptions snapshotOptions;
@@ -691,7 +691,7 @@ std::pair<int32_t, std::shared_ptr<OHOS::Media::PixelMap>> GetSyncSnapshotByUniq
     return { OHOS::Ace::ERROR_CODE_INTERNAL_ERROR, nullptr };
 }
 
-static ani_object ANI_GetSyncWithUniqueId([[maybe_unused]] ani_env* env, ani_double id, ani_object options)
+static ani_object ANI_GetSyncWithUniqueId([[maybe_unused]] ani_env* env, ani_int id, ani_object options)
 {
     int32_t uniqueId = static_cast<int32_t>(id);
     OHOS::Ace::NG::SnapshotOptions snapshotOptions;
