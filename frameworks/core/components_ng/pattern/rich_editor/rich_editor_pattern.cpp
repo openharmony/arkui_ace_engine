@@ -9157,6 +9157,10 @@ void RichEditorPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, 
 
 void RichEditorPattern::HandleOnPaste()
 {
+    if (auto focusHub = GetFocusHub(); focusHub && !HasFocus()) {
+        focusHub->RequestFocusImmediately();
+        isOnlyRequestFocus_ = true;
+    }
     if (IsPreviewTextInputting()) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Paste blocked during preview text input");
         suppressAccessibilityEvent_ = true;
@@ -9192,6 +9196,10 @@ void RichEditorPattern::HandleOnPaste()
 
 bool RichEditorPattern::ProcessAutoFill(AceAutoFillTriggerType triggerType)
 {
+    if (auto focusHub = GetFocusHub(); focusHub && !HasFocus()) {
+        focusHub->RequestFocusImmediately();
+        isOnlyRequestFocus_ = true;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();

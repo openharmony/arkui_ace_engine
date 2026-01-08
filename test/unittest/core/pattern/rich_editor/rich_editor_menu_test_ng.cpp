@@ -1339,4 +1339,23 @@ HWTEST_F(RichEditorMenuTestNg, SetPreviewMenuParam003, TestSize.Level0)
     richEditorModel.SetPreviewMenuParam(richEditorNode, TextSpanType::MIXED, func, menuParam);
     EXPECT_TRUE(static_cast<bool>(richEditorPattern->oneStepDragController_));
 }
+
+/**
+ * @tc.name: ProcessAutoFill001
+ * @tc.desc: test ProcessAutoFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, ProcessAutoFill001, TestSize.Level0)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto flag = richEditorPattern->ProcessAutoFill(AceAutoFillTriggerType::PASTE_REQUEST);
+    EXPECT_FALSE(flag);
+}
 }
