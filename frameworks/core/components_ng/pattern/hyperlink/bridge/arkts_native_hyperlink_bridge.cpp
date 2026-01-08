@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/pattern/hyperlink/bridge/hyperlink_model_impl.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -48,7 +49,6 @@ void HyperlinkBridge::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object
     };
 
     Local<JSValueRef> functionValues[] = {
-        //  attributes
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::Create),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::Color),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HyperlinkBridge::Draggable),
@@ -136,7 +136,7 @@ ArkUINativeModuleValue HyperlinkBridge::Color(ArkUIRuntimeCallInfo* runtimeCallI
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
 
     if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resourceObject, nodeInfo)) {
-        pattern->RegisterResource<Color>("Color", resourceObject, color);
+        pattern->RegisterResource<class Color>("Color", resourceObject, color);
     } else {
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
@@ -167,7 +167,7 @@ ArkUINativeModuleValue HyperlinkBridge::Draggable(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NE_RETURN(draggableArg->IsBoolean(), true, panda::JSValueRef::Undefined(vm));
 
     bool draggable = draggableArg->ToBoolean(vm)->Value();
-    GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkDraggable(nativeNode, boolValue);
+    GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkDraggable(nativeNode, draggable);
     
     return panda::JSValueRef::Undefined(vm);
 }
@@ -229,7 +229,7 @@ ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    Color color;
+    class Color color;
     RefPtr<ResourceObject> resourceObject;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
