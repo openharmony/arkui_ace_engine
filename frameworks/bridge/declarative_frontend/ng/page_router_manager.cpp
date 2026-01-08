@@ -2375,9 +2375,6 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
             if (pagePattern) {
                 pagePattern->FireOnNewParam(info.params);
             }
-            if (!pageRouterStack_.empty()) {
-                NotifyPageTransitionEnd(pipelineContext, pageRouterStack_.back().Upgrade());
-            }
         } else {
             auto index = FindPageInRestoreStack(info.url);
             if (index != INVALID_PAGE_INDEX) {
