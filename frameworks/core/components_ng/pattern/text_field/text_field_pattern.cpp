@@ -2121,7 +2121,8 @@ void TextFieldPattern::HandleOnCameraInput()
             textConfig.windowId = systemWindowId;
         }
 #endif
-        auto ret = inputMethod->Attach(textChangeListener_, false, textConfig);
+        auto ret = inputMethod->Attach(textChangeListener_, false, textConfig,
+            MiscServices::ClientType::INNER_KIT_ARKUI);
         if (ret == MiscServices::ErrorCode::NO_ERROR) {
             auto pipeline = GetContext();
             CHECK_NULL_VOID(pipeline);
@@ -5115,7 +5116,8 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     attachOptions.isShowKeyboard = needShowSoftKeyboard;
     attachOptions.requestKeyboardReason =
         static_cast<OHOS::MiscServices::RequestKeyboardReason>(static_cast<int32_t>(sourceType));
-    auto ret = inputMethod->Attach(textChangeListener_, attachOptions, textConfig);
+    auto ret = inputMethod->Attach(textChangeListener_, attachOptions, textConfig,
+        MiscServices::ClientType::INNER_KIT_ARKUI);
     CHECK_NULL_RETURN(context, false);
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_RETURN(textFieldManager, false);

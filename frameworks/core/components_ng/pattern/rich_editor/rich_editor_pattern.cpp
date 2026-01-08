@@ -5484,7 +5484,8 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard, SourceTyp
     attachOptions.requestKeyboardReason =
         static_cast<OHOS::MiscServices::RequestKeyboardReason>(static_cast<int32_t>(sourceType));
     BeforeAttachInputMethod(textconfig);
-    auto ret = inputMethod->Attach(richEditTextChangeListener_, attachOptions, textconfig);
+    auto ret = inputMethod->Attach(richEditTextChangeListener_, attachOptions, textconfig,
+        MiscServices::ClientType::INNER_KIT_ARKUI);
     if (ret == MiscServices::ErrorCode::NO_ERROR) {
         std::unordered_map<std::string, MiscServices::PrivateDataValue> privateCommand;
         privateCommand.insert(std::make_pair("isEditorConsumeAlphaKey", true));
@@ -10984,7 +10985,8 @@ void RichEditorPattern::HandleOnCameraInput()
         }
 #endif
         BeforeAttachInputMethod(textConfig);
-        auto ret = inputMethod->Attach(richEditTextChangeListener_, false, textConfig);
+        auto ret = inputMethod->Attach(richEditTextChangeListener_, false, textConfig,
+            MiscServices::ClientType::INNER_KIT_ARKUI);
         if (ret == MiscServices::ErrorCode::NO_ERROR) {
             auto pipeline = GetContext();
             CHECK_NULL_VOID(pipeline);
