@@ -111,12 +111,12 @@ class JSHyperlink extends JSViewAbstract {
 
   static color(color) {
     let node = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().hyperlink.color(node, true, color);
+    getUINativeModule().hyperlink.setColor(node, true, color);
   }
 
   static draggable(draggable) {
     let node = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().hyperlink.draggable(node, draggable);
+    getUINativeModule().hyperlink.setDraggable(node, draggable);
   }
 
   static responseRegion(value) {

@@ -155,6 +155,7 @@
       OHOS::Ace::GridModel::*;
       OHOS::Ace::GridItemModel::*;
       OHOS::Ace::GridRowModel::*;
+      OHOS::Ace::HyperlinkModel::*;
       OHOS::Ace::IfElseModel::*;
       OHOS::Ace::ImageAnimatorModel::*;
       OHOS::Ace::ImageModel::*;
@@ -641,7 +642,6 @@
       OHOS::Ace::UiMaterialTheme::*;
       OHOS::Ace::MaterialUtils::*;
       OHOS::Ace::UiMaterial::*;
-
       OHOS::Ace::NG::Validator::*;
       OHOS::Ace::NG::CreateProxyNode*;
       OHOS::Ace::NG::Converter::ResourceConverter::*;
@@ -657,6 +657,7 @@
 
       OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
       "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";
+
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
