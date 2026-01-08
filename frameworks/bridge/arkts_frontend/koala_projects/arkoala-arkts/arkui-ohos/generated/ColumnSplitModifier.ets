@@ -116,6 +116,7 @@ export class ColumnSplitModifier extends CommonMethodModifier implements ColumnS
         {
             this._resizeable_0_flag = AttributeUpdaterFlag.UPDATE
             this._resizeable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._resizeable_0_flag = AttributeUpdaterFlag.SKIP
@@ -127,6 +128,7 @@ export class ColumnSplitModifier extends CommonMethodModifier implements ColumnS
         {
             this._divider_0_flag = AttributeUpdaterFlag.UPDATE
             this._divider_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._divider_0_flag = AttributeUpdaterFlag.SKIP

@@ -215,6 +215,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFinish_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.SKIP
@@ -226,6 +227,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         {
             this._onSkip_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSkip_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSkip_0_flag = AttributeUpdaterFlag.SKIP
@@ -237,6 +239,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -248,6 +251,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         {
             this._onNext_0_flag = AttributeUpdaterFlag.UPDATE
             this._onNext_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onNext_0_flag = AttributeUpdaterFlag.SKIP
@@ -259,6 +263,7 @@ export class StepperModifier extends CommonMethodModifier implements StepperAttr
         {
             this._onPrevious_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPrevious_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPrevious_0_flag = AttributeUpdaterFlag.SKIP

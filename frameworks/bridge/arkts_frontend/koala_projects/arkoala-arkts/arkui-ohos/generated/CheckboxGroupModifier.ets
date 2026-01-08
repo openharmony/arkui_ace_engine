@@ -251,6 +251,7 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
         {
             this._selectAll_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectAll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectAll_0_flag = AttributeUpdaterFlag.SKIP
@@ -262,6 +263,7 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
         {
             this._selectedColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -273,6 +275,7 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
         {
             this._unselectedColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._unselectedColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._unselectedColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -284,6 +287,7 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
         {
             this._mark_0_flag = AttributeUpdaterFlag.UPDATE
             this._mark_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._mark_0_flag = AttributeUpdaterFlag.SKIP
@@ -295,6 +299,7 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -306,6 +311,7 @@ export class CheckboxGroupModifier extends CommonMethodModifier implements Check
         {
             this._checkboxShape_0_flag = AttributeUpdaterFlag.UPDATE
             this._checkboxShape_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._checkboxShape_0_flag = AttributeUpdaterFlag.SKIP

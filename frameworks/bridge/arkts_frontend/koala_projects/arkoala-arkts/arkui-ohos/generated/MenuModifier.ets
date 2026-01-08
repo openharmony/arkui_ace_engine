@@ -285,6 +285,7 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
         {
             this._font_0_flag = AttributeUpdaterFlag.UPDATE
             this._font_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._font_0_flag = AttributeUpdaterFlag.SKIP
@@ -296,6 +297,7 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -307,6 +309,7 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
         {
             this._radius_0_flag = AttributeUpdaterFlag.UPDATE
             this._radius_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._radius_0_flag = AttributeUpdaterFlag.SKIP
@@ -318,6 +321,7 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
         {
             this._menuItemDivider_0_flag = AttributeUpdaterFlag.UPDATE
             this._menuItemDivider_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._menuItemDivider_0_flag = AttributeUpdaterFlag.SKIP
@@ -329,6 +333,7 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
         {
             this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.UPDATE
             this._menuItemGroupDivider_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._menuItemGroupDivider_0_flag = AttributeUpdaterFlag.SKIP
@@ -340,6 +345,7 @@ export class MenuModifier extends CommonMethodModifier implements MenuAttribute,
         {
             this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._subMenuExpandingMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._subMenuExpandingMode_0_flag = AttributeUpdaterFlag.SKIP

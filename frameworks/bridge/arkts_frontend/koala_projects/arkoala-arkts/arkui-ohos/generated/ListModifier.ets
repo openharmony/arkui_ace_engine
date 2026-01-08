@@ -1842,6 +1842,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._alignListItem_0_flag = AttributeUpdaterFlag.UPDATE
             this._alignListItem_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._alignListItem_0_flag = AttributeUpdaterFlag.SKIP
@@ -1853,6 +1854,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._listDirection_0_flag = AttributeUpdaterFlag.UPDATE
             this._listDirection_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._listDirection_0_flag = AttributeUpdaterFlag.SKIP
@@ -1864,6 +1866,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._contentStartOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentStartOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentStartOffset_0_flag = AttributeUpdaterFlag.SKIP
@@ -1875,6 +1878,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._contentEndOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentEndOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentEndOffset_0_flag = AttributeUpdaterFlag.SKIP
@@ -1886,6 +1890,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._divider_0_flag = AttributeUpdaterFlag.UPDATE
             this._divider_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._divider_0_flag = AttributeUpdaterFlag.SKIP
@@ -1897,6 +1902,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._multiSelectable_0_flag = AttributeUpdaterFlag.UPDATE
             this._multiSelectable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._multiSelectable_0_flag = AttributeUpdaterFlag.SKIP
@@ -1908,6 +1914,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._cachedCount_0_flag = AttributeUpdaterFlag.UPDATE
             this._cachedCount_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._cachedCount_0_flag = AttributeUpdaterFlag.SKIP
@@ -1919,6 +1926,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._chainAnimation_0_flag = AttributeUpdaterFlag.UPDATE
             this._chainAnimation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._chainAnimation_0_flag = AttributeUpdaterFlag.SKIP
@@ -1930,6 +1938,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._chainAnimationOptions_0_flag = AttributeUpdaterFlag.UPDATE
             this._chainAnimationOptions_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._chainAnimationOptions_0_flag = AttributeUpdaterFlag.SKIP
@@ -1941,6 +1950,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._sticky_0_flag = AttributeUpdaterFlag.UPDATE
             this._sticky_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._sticky_0_flag = AttributeUpdaterFlag.SKIP
@@ -1952,6 +1962,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._scrollSnapAlign_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollSnapAlign_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollSnapAlign_0_flag = AttributeUpdaterFlag.SKIP
@@ -1963,6 +1974,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._childrenMainSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._childrenMainSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._childrenMainSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1974,6 +1986,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._maintainVisibleContentPosition_0_flag = AttributeUpdaterFlag.UPDATE
             this._maintainVisibleContentPosition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maintainVisibleContentPosition_0_flag = AttributeUpdaterFlag.SKIP
@@ -1996,6 +2009,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._stackFromEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._stackFromEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stackFromEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -2052,6 +2066,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onScrollIndex_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollIndex_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollIndex_0_flag = AttributeUpdaterFlag.SKIP
@@ -2063,6 +2078,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onScrollVisibleContentChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollVisibleContentChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollVisibleContentChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -2074,6 +2090,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onItemMove_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemMove_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemMove_0_flag = AttributeUpdaterFlag.SKIP
@@ -2085,6 +2102,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onItemDragStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDragStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDragStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -2096,6 +2114,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onItemDragEnter_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDragEnter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDragEnter_0_flag = AttributeUpdaterFlag.SKIP
@@ -2107,6 +2126,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onItemDragMove_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDragMove_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDragMove_0_flag = AttributeUpdaterFlag.SKIP
@@ -2118,6 +2138,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onItemDragLeave_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDragLeave_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDragLeave_0_flag = AttributeUpdaterFlag.SKIP
@@ -2129,6 +2150,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onItemDrop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDrop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDrop_0_flag = AttributeUpdaterFlag.SKIP
@@ -2140,6 +2162,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollFrameBegin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.SKIP
@@ -2151,6 +2174,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onWillScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -2162,6 +2186,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onDidScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDidScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDidScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -2174,6 +2199,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
             this._lanes_0_flag = AttributeUpdaterFlag.UPDATE
             this._lanes_0_0value = value
             this._lanes_0_1value = gutter
+            this._state.fireChange()
         } else
         {
             this._lanes_0_flag = AttributeUpdaterFlag.SKIP
@@ -2186,6 +2212,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
             this._cachedCount_1_flag = AttributeUpdaterFlag.UPDATE
             this._cachedCount_1_0value = count
             this._cachedCount_1_1value = show
+            this._state.fireChange()
         } else
         {
             this._cachedCount_1_flag = AttributeUpdaterFlag.SKIP
@@ -2197,6 +2224,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._scrollBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBar_0_flag = AttributeUpdaterFlag.SKIP
@@ -2208,6 +2236,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBarColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -2219,6 +2248,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBarWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -2241,6 +2271,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._nestedScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -2252,6 +2283,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableScrollInteraction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.SKIP
@@ -2263,6 +2295,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._friction_0_flag = AttributeUpdaterFlag.UPDATE
             this._friction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._friction_0_flag = AttributeUpdaterFlag.SKIP
@@ -2329,6 +2362,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onReachStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReachStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReachStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -2340,6 +2374,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onReachEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReachEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReachEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -2351,6 +2386,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onScrollStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -2362,6 +2398,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.SKIP
@@ -2373,6 +2410,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.UPDATE
             this._flingSpeedLimit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.SKIP
@@ -2384,6 +2422,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._clipContent_0_flag = AttributeUpdaterFlag.UPDATE
             this._clipContent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._clipContent_0_flag = AttributeUpdaterFlag.SKIP
@@ -2395,6 +2434,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
             this._digitalCrownSensitivity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
@@ -2406,6 +2446,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._backToTop_0_flag = AttributeUpdaterFlag.UPDATE
             this._backToTop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backToTop_0_flag = AttributeUpdaterFlag.SKIP
@@ -2418,6 +2459,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
             this._edgeEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._edgeEffect_0_0value = edgeEffect
             this._edgeEffect_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._edgeEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -2430,6 +2472,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
             this._fadingEdge_0_flag = AttributeUpdaterFlag.UPDATE
             this._fadingEdge_0_0value = enabled
             this._fadingEdge_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._fadingEdge_0_flag = AttributeUpdaterFlag.SKIP
