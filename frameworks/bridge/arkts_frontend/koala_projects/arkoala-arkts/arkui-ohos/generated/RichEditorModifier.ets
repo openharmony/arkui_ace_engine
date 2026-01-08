@@ -1316,6 +1316,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._onReady_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReady_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReady_0_flag = AttributeUpdaterFlag.SKIP
@@ -1327,6 +1328,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._onSelect_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSelect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSelect_0_flag = AttributeUpdaterFlag.SKIP
@@ -1338,6 +1340,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._onSelectionChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSelectionChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSelectionChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -1349,6 +1352,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._aboutToIMEInput_0_flag = AttributeUpdaterFlag.UPDATE
             this._aboutToIMEInput_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._aboutToIMEInput_0_flag = AttributeUpdaterFlag.SKIP
@@ -1360,6 +1364,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._onIMEInputComplete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onIMEInputComplete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onIMEInputComplete_0_flag = AttributeUpdaterFlag.SKIP
@@ -1371,6 +1376,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._onDidIMEInput_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDidIMEInput_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDidIMEInput_0_flag = AttributeUpdaterFlag.SKIP
@@ -1382,6 +1388,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._aboutToDelete_0_flag = AttributeUpdaterFlag.UPDATE
             this._aboutToDelete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._aboutToDelete_0_flag = AttributeUpdaterFlag.SKIP
@@ -1393,6 +1400,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._onDeleteComplete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDeleteComplete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDeleteComplete_0_flag = AttributeUpdaterFlag.SKIP
@@ -1404,6 +1412,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._copyOptions_0_flag = AttributeUpdaterFlag.UPDATE
             this._copyOptions_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._copyOptions_0_flag = AttributeUpdaterFlag.SKIP
@@ -1415,6 +1424,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._onPaste_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPaste_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPaste_0_flag = AttributeUpdaterFlag.SKIP
@@ -1426,6 +1436,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._enableDataDetector_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableDataDetector_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableDataDetector_0_flag = AttributeUpdaterFlag.SKIP
@@ -1437,6 +1448,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._enablePreviewText_0_flag = AttributeUpdaterFlag.UPDATE
             this._enablePreviewText_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enablePreviewText_0_flag = AttributeUpdaterFlag.SKIP
@@ -1448,6 +1460,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.UPDATE
             this._dataDetectorConfig_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.SKIP
@@ -1459,6 +1472,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._caretColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._caretColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._caretColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1470,6 +1484,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedBackgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1481,6 +1496,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._onEditingChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onEditingChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onEditingChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -1492,6 +1508,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._enterKeyType_0_flag = AttributeUpdaterFlag.UPDATE
             this._enterKeyType_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enterKeyType_0_flag = AttributeUpdaterFlag.SKIP
@@ -1503,6 +1520,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._onSubmit_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSubmit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSubmit_0_flag = AttributeUpdaterFlag.SKIP
@@ -1514,6 +1532,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._onWillChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -1525,6 +1544,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._onDidChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDidChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDidChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -1536,6 +1556,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._onCut_0_flag = AttributeUpdaterFlag.UPDATE
             this._onCut_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onCut_0_flag = AttributeUpdaterFlag.SKIP
@@ -1547,6 +1568,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._onCopy_0_flag = AttributeUpdaterFlag.UPDATE
             this._onCopy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onCopy_0_flag = AttributeUpdaterFlag.SKIP
@@ -1558,6 +1580,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._editMenuOptions_0_flag = AttributeUpdaterFlag.UPDATE
             this._editMenuOptions_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._editMenuOptions_0_flag = AttributeUpdaterFlag.SKIP
@@ -1569,6 +1592,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._enableKeyboardOnFocus_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableKeyboardOnFocus_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableKeyboardOnFocus_0_flag = AttributeUpdaterFlag.SKIP
@@ -1580,6 +1604,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableHapticFeedback_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
@@ -1591,6 +1616,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._barState_0_flag = AttributeUpdaterFlag.UPDATE
             this._barState_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._barState_0_flag = AttributeUpdaterFlag.SKIP
@@ -1602,6 +1628,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._maxLength_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxLength_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxLength_0_flag = AttributeUpdaterFlag.SKIP
@@ -1613,6 +1640,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._maxLines_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxLines_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxLines_0_flag = AttributeUpdaterFlag.SKIP
@@ -1624,6 +1652,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._keyboardAppearance_0_flag = AttributeUpdaterFlag.UPDATE
             this._keyboardAppearance_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._keyboardAppearance_0_flag = AttributeUpdaterFlag.SKIP
@@ -1635,6 +1664,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._stopBackPress_0_flag = AttributeUpdaterFlag.UPDATE
             this._stopBackPress_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stopBackPress_0_flag = AttributeUpdaterFlag.SKIP
@@ -1646,6 +1676,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._singleLine_0_flag = AttributeUpdaterFlag.UPDATE
             this._singleLine_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._singleLine_0_flag = AttributeUpdaterFlag.SKIP
@@ -1657,6 +1688,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.UPDATE
             this._compressLeadingPunctuation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.SKIP
@@ -1668,6 +1700,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._includeFontPadding_0_flag = AttributeUpdaterFlag.UPDATE
             this._includeFontPadding_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._includeFontPadding_0_flag = AttributeUpdaterFlag.SKIP
@@ -1679,6 +1712,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.UPDATE
             this._fallbackLineSpacing_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.SKIP
@@ -1693,6 +1727,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
             this._bindSelectionMenu_0_1value = content
             this._bindSelectionMenu_0_2value = responseType
             this._bindSelectionMenu_0_3value = options
+            this._state.fireChange()
         } else
         {
             this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.SKIP
@@ -1704,6 +1739,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         {
             this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedDragPreviewStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -1716,6 +1752,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
             this._customKeyboard_0_flag = AttributeUpdaterFlag.UPDATE
             this._customKeyboard_0_0value = value
             this._customKeyboard_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._customKeyboard_0_flag = AttributeUpdaterFlag.SKIP
@@ -1728,6 +1765,7 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
             this._placeholder_0_flag = AttributeUpdaterFlag.UPDATE
             this._placeholder_0_0value = value
             this._placeholder_0_1value = style
+            this._state.fireChange()
         } else
         {
             this._placeholder_0_flag = AttributeUpdaterFlag.SKIP
