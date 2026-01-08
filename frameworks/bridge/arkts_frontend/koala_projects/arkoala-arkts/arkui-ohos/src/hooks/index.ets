@@ -46,6 +46,7 @@ import { default as EventHub } from "application.EventHub";
 import { default as UIAbilityContext } from "application.UIAbilityContext";
 import { CommonMethod, StateStyles, ArkCommonMethodComponent, ArkCommonMethodPeer, CustomProperty, GestureMask, GestureType, Gesture, GestureGroup, UIGestureEvent, DragPreviewOptions, DragInteractionOptions, UniformDataType, DragEventInternal, FunctionKey, ModifierKey } from "#generated";
 import { CommonMethodModifier } from "../CommonMethodModifier"
+import { ModifierState } from '../CommonModifier';
 import { AnimateParam } from "#generated";
 import { GestureModifier } from "#generated";
 import { CanvasRenderer, ImageData, OffscreenCanvas, RenderingContextSettings, CanvasRenderingContext2D, OffscreenCanvasRenderingContext2D, VoidCallback, } from "#generated";
@@ -216,6 +217,19 @@ export function hookDragEventGetSummary(event: DragEventInternal) : unifiedDataC
   return ArkUIAniModule._DragEvent_Get_Summary(event.peer!.ptr)
 }
 
+class StateStyleModifierState extends ModifierState {
+    fireChange(): void {
+        return;
+    }
+}
+
+class StateStyleCommonMethodModifier extends CommonMethodModifier {
+    constructor() {
+        super()
+        this._state = new StateStyleModifierState();
+    }
+}
+
 export function hookStateStyleImpl(
   receiver: ArkCommonMethodComponent,
   value: StateStyles | undefined
@@ -254,7 +268,7 @@ export function hookStateStyleImpl(
       return;
     }
 
-    let cm = new CommonMethodModifier();
+    let cm = new StateStyleCommonMethodModifier();
 
     if (currentState.value === UI_STATE_NORMAL) {
         value?.normal?.(cm)

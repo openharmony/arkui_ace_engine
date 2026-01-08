@@ -682,6 +682,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._muted_0_flag = AttributeUpdaterFlag.UPDATE
             this._muted_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._muted_0_flag = AttributeUpdaterFlag.SKIP
@@ -693,6 +694,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._autoPlay_0_flag = AttributeUpdaterFlag.UPDATE
             this._autoPlay_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._autoPlay_0_flag = AttributeUpdaterFlag.SKIP
@@ -704,6 +706,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._controls_0_flag = AttributeUpdaterFlag.UPDATE
             this._controls_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._controls_0_flag = AttributeUpdaterFlag.SKIP
@@ -715,6 +718,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._loop_0_flag = AttributeUpdaterFlag.UPDATE
             this._loop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._loop_0_flag = AttributeUpdaterFlag.SKIP
@@ -726,6 +730,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._objectFit_0_flag = AttributeUpdaterFlag.UPDATE
             this._objectFit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._objectFit_0_flag = AttributeUpdaterFlag.SKIP
@@ -737,6 +742,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -748,6 +754,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onPause_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPause_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPause_0_flag = AttributeUpdaterFlag.SKIP
@@ -759,6 +766,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFinish_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.SKIP
@@ -770,6 +778,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onFullscreenChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFullscreenChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFullscreenChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -781,6 +790,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onPrepared_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPrepared_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPrepared_0_flag = AttributeUpdaterFlag.SKIP
@@ -792,6 +802,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onSeeking_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSeeking_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSeeking_0_flag = AttributeUpdaterFlag.SKIP
@@ -803,6 +814,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onSeeked_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSeeked_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSeeked_0_flag = AttributeUpdaterFlag.SKIP
@@ -814,6 +826,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onUpdate_0_flag = AttributeUpdaterFlag.UPDATE
             this._onUpdate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onUpdate_0_flag = AttributeUpdaterFlag.SKIP
@@ -825,6 +838,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onError_0_flag = AttributeUpdaterFlag.UPDATE
             this._onError_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onError_0_flag = AttributeUpdaterFlag.SKIP
@@ -836,6 +850,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._onStop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onStop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onStop_0_flag = AttributeUpdaterFlag.SKIP
@@ -847,6 +862,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableAnalyzer_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.SKIP
@@ -858,6 +874,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._analyzerConfig_0_flag = AttributeUpdaterFlag.UPDATE
             this._analyzerConfig_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._analyzerConfig_0_flag = AttributeUpdaterFlag.SKIP
@@ -869,6 +886,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._enableShortcutKey_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableShortcutKey_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableShortcutKey_0_flag = AttributeUpdaterFlag.SKIP
@@ -880,6 +898,7 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         {
             this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._surfaceBackgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._surfaceBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
