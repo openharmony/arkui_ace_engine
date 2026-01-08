@@ -597,6 +597,7 @@ void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag
     auto pattern = GetPattern<RichEditorPattern>();
     if (IsAncestorNodeGeometryChange(flag)) {
         IF_PRESENT(pattern, CalculateHandleOffsetAndShowOverlay());
+        UpdateViewPort();
         UpdateAllHandlesOffset();
     }
     CHECK_NULL_VOID(pattern);

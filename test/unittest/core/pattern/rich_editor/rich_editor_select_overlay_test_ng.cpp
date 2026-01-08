@@ -258,9 +258,14 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnAncestorNodeChanged, TestSize.Level0)
     richEditorNode_->parent_ = frameNode;
     FrameNodeChangeInfoFlag flag = FRAME_NODE_CHANGE_GEOMETRY_CHANGE;
     richEditorNode_->changeInfoFlag_ = FRAME_NODE_CHANGE_END_SCROLL;
-    EXPECT_NE(richEditorPattern->selectOverlay_->GetPattern<RichEditorPattern>(), nullptr);
-    richEditorPattern->selectOverlay_->OnAncestorNodeChanged(flag);
+    auto selectOverlay = richEditorPattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+    EXPECT_NE(selectOverlay->GetPattern<RichEditorPattern>(), nullptr);
+    selectOverlay->OnAncestorNodeChanged(flag);
     EXPECT_NE(richEditorNode_->changeInfoFlag_, FRAME_NODE_CHANGE_INFO_NONE);
+    auto viewPort = selectOverlay->GetAncestorNodeViewPort();
+    ASSERT_TRUE(viewPort.has_value());
+    EXPECT_EQ(viewPort.value(), RectF(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 /**
