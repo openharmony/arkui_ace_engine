@@ -7357,6 +7357,7 @@ void WebDelegate::HandleAccessibilityHoverEvent(
     CHECK_NULL_VOID(nweb_);
     int32_t x = point.GetX();
     int32_t y = point.GetY();
+    bool isHoverEnter = (eventType != NG::AccessibilityHoverEventType::EXIT);
     std::shared_lock<std::shared_mutex> readLock(embedDataInfoMutex_);
     for (auto iter = embedDataInfo_.begin(); iter != embedDataInfo_.end(); iter++) {
         std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo = iter->second;
@@ -7385,10 +7386,12 @@ void WebDelegate::HandleAccessibilityHoverEvent(
             auto accessibilityManagerNG = pipeline->GetAccessibilityManagerNG();
             CHECK_NULL_VOID(accessibilityManagerNG);
             accessibilityManagerNG->HandleAccessibilityHoverEventBySurfaceId(dataInfo->GetSurfaceId(), param);
+            if (!isHoverEnter) {
+                nweb_->SendAccessibilityHoverEventV2(x, y, isHoverEnter);
+            }
             return;
         }
     }
-    bool isHoverEnter = (eventType != NG::AccessibilityHoverEventType::EXIT);
     nweb_->SendAccessibilityHoverEventV2(x, y, isHoverEnter);
 }
 
