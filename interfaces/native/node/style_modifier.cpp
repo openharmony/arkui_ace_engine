@@ -2728,15 +2728,25 @@ const ArkUI_AttributeItem* GetClipShape(ArkUI_NodeHandle node)
 
 int32_t SetTransform(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size == 0) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    // already check in entry point.
-    auto* fullImpl = GetFullImpl();
     float transforms[ALLOW_SIZE_16] = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+    if (item->size == 0) {
+        if (item->object == nullptr) {
+            return ERROR_CODE_PARAM_INVALID;
+        } else {
+            ArkUI_Matrix4* matrix = reinterpret_cast<ArkUI_Matrix4*>(item->object);
+            if (!matrix) {
+                return ERROR_CODE_PARAM_INVALID;
+            }
+            const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+            impl->getNodeModifiers()->getCommonModifier()->setTransformMatrix(node->uiNodeHandle, matrix->matrix);
+            return ERROR_CODE_NO_ERROR;
+        }
+    }
     for (int i = 0; i < item->size; ++i) {
         transforms[i] = item->value[i].f32;
     }
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->setTransform(node->uiNodeHandle, transforms, ALLOW_SIZE_16);
     return ERROR_CODE_NO_ERROR;
 }

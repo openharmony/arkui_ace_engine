@@ -1467,6 +1467,14 @@ void SetTransform(ArkUINodeHandle node, const ArkUI_Float32* matrix, ArkUI_Int32
                 matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
 }
 
+void SetTransformMatrix(ArkUINodeHandle node, ArkUIMatrix4Handle matrix)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* matrixType = reinterpret_cast<OHOS::Ace::Matrix4*>(matrix);
+    NG::ViewAbstract::SetTransformMatrix(frameNode, *matrixType);
+}
+
 void ResetTransform(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -10501,6 +10509,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .setBorderWidth = SetBorderWidth,
         .resetBorderWidth = ResetBorderWidth,
         .setTransform = SetTransform,
+        .setTransformMatrix = SetTransformMatrix,
         .resetTransform = ResetTransform,
         .setTransform3D = SetTransform3D,
         .resetTransform3D = ResetTransform3D,
