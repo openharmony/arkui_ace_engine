@@ -1053,7 +1053,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   public abstract __getPathValueFromJson__Internal(propertyName: string, jsonPath: string): string | undefined;
 
-  protected __findPathValueInJson__Internal(jsonValue: Object, jsonPath: string): string | undefined {
+  protected __findPathValueInJson__Internal(jsonValue: any, jsonPath: string): string | undefined {
     const paths = jsonPath.split('/').filter(path => path.length > 0);
     let current = jsonValue;
     for (const path of paths) {
@@ -1065,6 +1065,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       }
       current = current[path];
     }
-    return typeof current === 'string' ? current : undefined;
+    return typeof current === 'string' ? current : JSON.stringify(current);
   }
 } // class PUV2ViewBase
