@@ -481,6 +481,15 @@ void LayoutProperty::CalcToString(const CalcSize& calcSize, std::pair<std::vecto
     }
 }
 
+bool LayoutProperty::IsExpandConstraintDependencySatisfied() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    bool ancestorsAllPrepared =
+        host->GetIgnoreLayoutProcess() || host->IsRootMeasureNode() || host->GetEscapeDelayForIgnore();
+    return ancestorsAllPrepared;
+}
+
 IgnoreLayoutSafeAreaOpts LayoutProperty::GenIgnoreOpts() const
 {
     IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_NONE,
@@ -498,9 +507,7 @@ void LayoutProperty::ExpandConstraintWithSafeArea()
     if (!isExpandNode) {
         return;
     }
-    bool dependencySatisfied =
-        host->GetIgnoreLayoutProcess() || host->IsRootMeasureNode() || host->GetEscapeDelayForIgnore();
-    if (!dependencySatisfied) {
+    if (!IsExpandConstraintDependencySatisfied()) {
         return;
     }
     RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame(false);

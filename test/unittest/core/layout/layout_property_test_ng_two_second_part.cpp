@@ -646,6 +646,62 @@ HWTEST_F(LayoutPropertyTestNgTwo, TestMirrorOffset, TestSize.Level0)
 }
 
 /**
+ * @tc.name: TestIsExpandConstraintDependencySatisfied
+ * @tc.desc: Test IsExpandConstraintDependencySatisfied
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, TestIsExpandConstraintDependencySatisfied, TestSize.Level0)
+{
+    /**
+     * @tc.steps1 Create a layoutProperty and constraint.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), false);
+    layoutProperty->SetHost(frameNodeHost);
+
+    /**
+     * @tc.steps: step1. Set all conditions to false.
+     * @tc.expected: IsExpandConstraintDependencySatisfied returns false when all conditions are false.
+     */
+    frameNodeHost->SetIgnoreLayoutProcess(false);
+    frameNodeHost->SetRootMeasureNode(false);
+    frameNodeHost->SetEscapeDelayForIgnore(false);
+    EXPECT_EQ(layoutProperty->IsExpandConstraintDependencySatisfied(), false);
+
+    /**
+     * @tc.steps: step2. Set GetIgnoreLayoutProcess() to true.
+     * @tc.expected: IsExpandConstraintDependencySatisfied returns true when GetIgnoreLayoutProcess() is true.
+     */
+    frameNodeHost->SetIgnoreLayoutProcess(true);
+    EXPECT_EQ(layoutProperty->IsExpandConstraintDependencySatisfied(), true);
+
+    /**
+     * @tc.steps: step3. Set GetIgnoreLayoutProcess() to false and IsRootMeasureNode() to true.
+     * @tc.expected: IsExpandConstraintDependencySatisfied returns true when IsRootMeasureNode() is true.
+     */
+    frameNodeHost->SetIgnoreLayoutProcess(false);
+    frameNodeHost->SetRootMeasureNode(true);
+    EXPECT_EQ(layoutProperty->IsExpandConstraintDependencySatisfied(), true);
+
+    /**
+     * @tc.steps: step4. Set IsRootMeasureNode() to false and GetEscapeDelayForIgnore() to true.
+     * @tc.expected: IsExpandConstraintDependencySatisfied returns true when GetEscapeDelayForIgnore() is true.
+     */
+    frameNodeHost->SetRootMeasureNode(false);
+    frameNodeHost->SetEscapeDelayForIgnore(true);
+    EXPECT_EQ(layoutProperty->IsExpandConstraintDependencySatisfied(), true);
+
+    /**
+     * @tc.steps: step5. Set all conditions to true.
+     * @tc.expected: IsExpandConstraintDependencySatisfied returns true when all conditions are true.
+     */
+    frameNodeHost->SetIgnoreLayoutProcess(true);
+    frameNodeHost->SetRootMeasureNode(true);
+    frameNodeHost->SetEscapeDelayForIgnore(true);
+    EXPECT_EQ(layoutProperty->IsExpandConstraintDependencySatisfied(), true);
+}
+
+/**
  * @tc.name: TestGenIgnoreOpts
  * @tc.desc: Test GenIgnoreOpts.
  * @tc.type: FUNC
