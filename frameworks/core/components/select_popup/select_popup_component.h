@@ -33,13 +33,13 @@ class ACE_EXPORT SelectPopupComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(SelectPopupComponent, SoleChildComponent);
 
 public:
-    SelectPopupComponent();
+    ACE_FORCE_EXPORT SelectPopupComponent();
     ~SelectPopupComponent() override = default;
 
     RefPtr<RenderNode> CreateRenderNode() override;
     RefPtr<Element> CreateElement() override;
 
-    void InitTheme(const RefPtr<ThemeManager>& themeManager);
+    ACE_FORCE_EXPORT void InitTheme(const RefPtr<ThemeManager>& themeManager);
 
     std::size_t GetOptionSize() const
     {

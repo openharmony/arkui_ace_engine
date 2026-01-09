@@ -1264,7 +1264,7 @@ abstract class ViewPU extends PUV2ViewBase
         return undefined;
       }
     }
-    if (value === null || value === undefined || typeof value !== 'object') {
+    if (value === null || value === undefined) {
       return undefined;
     }
     return this.__findPathValueInJson__Internal(value, jsonPath);

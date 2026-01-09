@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NAVIGATION_BAR_NAVIGATION_CONTAINER_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NAVIGATION_BAR_NAVIGATION_CONTAINER_COMPONENT_H
 
-#include "core/components/tab_bar/tab_controller.h"
 #include "core/pipeline/base/component_group.h"
 
 namespace OHOS::Ace {
@@ -86,9 +85,9 @@ public:
 
     static uint32_t GetGlobalTabControllerId();
     static RefPtr<ComposedComponent> BuildToolBar(
-        const RefPtr<NavigationDeclaration>& declaration, const RefPtr<TabController>& controller);
+        const RefPtr<NavigationDeclaration>& declaration, const RefPtr<AceType>& controller);
 
-    RefPtr<TabController> GetTabController()
+    RefPtr<AceType> GetTabController()
     {
         return tabController_;
     }
@@ -112,7 +111,7 @@ private:
     bool NeedSection() const;
 
     RefPtr<NavigationDeclaration> declaration_;
-    RefPtr<TabController> tabController_;
+    RefPtr<AceType> tabController_;
     int32_t menuCount_ = 0;
 };
 

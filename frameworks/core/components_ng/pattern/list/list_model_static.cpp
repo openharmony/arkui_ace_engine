@@ -212,6 +212,11 @@ void ListModelStatic::SetItemFillPolicy(FrameNode* frameNode, PresetFillType fil
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ItemFillPolicy, fillType, frameNode);
 }
 
+void ListModelStatic::ResetItemFillPolicy(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, ItemFillPolicy, PROPERTY_UPDATE_MEASURE, frameNode);
+}
+
 void ListModelStatic::SetFocusWrapMode(FrameNode* frameNode, FocusWrapMode focusWrapMode)
 {
     CHECK_NULL_VOID(frameNode);

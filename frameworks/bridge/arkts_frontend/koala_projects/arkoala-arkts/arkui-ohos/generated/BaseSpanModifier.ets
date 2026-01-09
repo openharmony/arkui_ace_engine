@@ -117,6 +117,7 @@ export class BaseSpanModifier extends CommonMethodModifier implements BaseSpan,A
         {
             this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._textBackgroundStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -128,6 +129,7 @@ export class BaseSpanModifier extends CommonMethodModifier implements BaseSpan,A
         {
             this._baselineOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._baselineOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._baselineOffset_0_flag = AttributeUpdaterFlag.SKIP

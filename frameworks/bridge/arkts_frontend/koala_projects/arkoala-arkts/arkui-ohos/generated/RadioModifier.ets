@@ -182,6 +182,7 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
         {
             this._checked_0_flag = AttributeUpdaterFlag.UPDATE
             this._checked_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._checked_0_flag = AttributeUpdaterFlag.SKIP
@@ -193,6 +194,7 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -204,6 +206,7 @@ export class RadioModifier extends CommonMethodModifier implements RadioAttribut
         {
             this._radioStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._radioStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._radioStyle_0_flag = AttributeUpdaterFlag.SKIP

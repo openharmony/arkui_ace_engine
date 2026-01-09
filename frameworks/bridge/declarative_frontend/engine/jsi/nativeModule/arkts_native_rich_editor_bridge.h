@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 
 namespace OHOS::Ace::NG {
+struct NodeInfo;
 class RichEditorBridge {
 public:
     static ArkUINativeModuleValue SetEnableDataDetector(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -137,6 +138,9 @@ public:
 
     static ArkUINativeModuleValue SetSingleLine(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSingleLine(ArkUIRuntimeCallInfo* runtimeCallInfo);
+
+    static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
+        RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo);
 
 private:
     static void ParseAIEntityColor(

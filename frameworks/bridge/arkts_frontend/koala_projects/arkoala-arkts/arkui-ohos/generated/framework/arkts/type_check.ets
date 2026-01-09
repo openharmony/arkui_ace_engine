@@ -53,7 +53,7 @@ import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
 import { default as image } from "@ohos.multimedia.image"
 import { ComponentContent, ComponentContentBase } from "arkui.ComponentContent"
 import { StyledString, GestureStyle, GestureStyleInterface, LetterSpacingStyle, LineHeightStyle, StyleOptions, MutableStyledString, ImageAttachment, CustomSpan, SpanStyle, StyledStringKey, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback, UrlStyle, BaselineOffsetStyle, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, TextShadowStyle, DecorationStyle, DecorationStyleInterface, TextStyle, TextStyleInterface, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInterface, BackgroundColorStyle, ColorFilterType, AttachmentType, ImageAttachmentInterface, ResourceImageAttachmentOptions, StyledStringValue } from "./../../component/styledString"
-import { UIContext, DynamicSyncScene, Font, MediaQuery, UIInspector, Router, PromptAction, ComponentUtils, UIObserver, OverlayManager, OverlayManagerOptions, DragController, MeasureUtils, FocusController, PageInfo, CursorController, ContextMenuController, ComponentSnapshot, FrameCallback, ContentCoverController, TextMenuController, TargetInfo } from "@ohos.arkui.UIContext"
+import { UIContext, DynamicSyncScene, Font, MediaQuery, UIInspector, Router, PromptAction, ComponentUtils, UIObserver, OverlayManager, OverlayManagerOptions, DragController, MeasureUtils, FocusController, PageInfo, CursorController, ContextMenuController, ComponentSnapshot, FrameCallback, ContentCoverController, TextMenuController, TargetInfo, CustomKeyboardContinueFeature } from "@ohos.arkui.UIContext"
 import { BuildOptions } from "arkui.BuilderNode"
 import { default as ConfigurationConstant } from "@ohos.app.ability.ConfigurationConstant"
 import { ContentType, EnterKeyType, InputType, SubmitEvent, TextInputController, TextInputStyle, PasswordIcon, UnderlineColor, TextInputOptions } from "./../../component/textInput"
@@ -824,6 +824,9 @@ export class TypeChecker {
     }
     static isCustomDialogControllerOptionsExtender(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean, arg29: boolean, arg30: boolean, arg31: boolean, arg32: boolean, arg33: boolean, arg34: boolean, arg35: boolean, arg36: boolean, arg37: boolean): boolean {
         return value instanceof CustomDialogControllerOptionsExtender
+    }
+    static isCustomKeyboardContinueFeature(value: Object | string | number | undefined): boolean {
+        return value instanceof CustomKeyboardContinueFeature
     }
     static isCustomPopupOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean): boolean {
         return value instanceof CustomPopupOptions
@@ -4205,6 +4208,12 @@ export class TypeChecker {
     }
     static curves_Curve_FromNumeric(ordinal: int32): curves.Curve {
         return curves.Curve.fromValue(ordinal)
+    }
+    static CustomKeyboardContinueFeature_ToNumeric(value: CustomKeyboardContinueFeature): int32 {
+        return value.valueOf()
+    }
+    static CustomKeyboardContinueFeature_FromNumeric(ordinal: int32): CustomKeyboardContinueFeature {
+        return CustomKeyboardContinueFeature.fromValue(ordinal)
     }
     static DataPanelType_ToNumeric(value: DataPanelType): int32 {
         return value.valueOf()

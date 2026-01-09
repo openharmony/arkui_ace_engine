@@ -19,7 +19,6 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
-#include "core/components/tab_bar/tab_controller.h"
 #include "core/components_ng/pattern/tabs/tabs_controller.h"
 
 namespace OHOS::Ace::Framework {
@@ -32,7 +31,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSTabsController* controller);
-    static RefPtr<TabController> CreateController();
+    static RefPtr<AceType> CreateController();
 
     void ChangeIndex(int32_t index);
 
@@ -42,7 +41,7 @@ public:
 
     void SetTabBarOpacity(const JSCallbackInfo& args);
 
-    const RefPtr<TabController>& GetController() const
+    const RefPtr<AceType>& GetController() const
     {
         return controller_;
     }
@@ -82,7 +81,7 @@ public:
 
 private:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
-    RefPtr<TabController> controller_;
+    RefPtr<AceType> controller_;
     WeakPtr<NG::TabsControllerNG> tabsControllerWeak_; // used by ng structure
     OnChangeFunc onChangeImpl_;
 

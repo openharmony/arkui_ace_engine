@@ -30,10 +30,15 @@
 #include "compatible/components/picker-view/picker_view_loader.h"
 #include "compatible/components/picker/picker_loader.h"
 #include "compatible/components/label/label_loader.h"
+#include "compatible/components/navigation_menu/navigation_menu_loader.h"
 #include "compatible/components/svg/svg_loader.h"
+#include "compatible/components/tab_bar/tab_loader.h"
 #include "compatible/components/qrcode/qrcode_loader.h"
 #include "compatible/components/rating/rating_loader.h"
 #include "compatible/components/refresh/refresh_loader.h"
+#include "compatible/components/search/search_loader.h"
+#include "compatible/components/text_field/text_field_loader.h"
+#include "compatible/components/input/input_loader.h"
 #include "frameworks/base/log/log_wrapper.h"
 
 #include "compatible/components/video/video_loader.h"
@@ -56,6 +61,7 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "grid-row", []() -> ComponentLoader* { return new GridRowLoader(); } },
         { "marquee", []() -> ComponentLoader* { return new MarqueeLoader(); } },
         { "label", []() -> ComponentLoader* { return new LabelLoader(); } },
+        { "navigation-menu", []() -> ComponentLoader* { return new NavigationMenuLoader(); } },
         { "image-animator", []() -> ComponentLoader* { return new ImageAnimatorLoader(); } },
         { "svg", []() -> ComponentLoader* { return new SvgLoader(); } },
         { "animate", []() -> ComponentLoader* { return new SvgAnimateLoader(); } },
@@ -94,7 +100,13 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "timePickerDialog", []() -> ComponentLoader* { return new TimePickerDialogLoader(); } },
         { "textPicker", []() -> ComponentLoader* { return new TextPickerLoader(); } },
         { "textPickerDialog", []() -> ComponentLoader* { return new TextPickerDialogLoader(); } },
-        { "rating", []() -> ComponentLoader* { return new RatingLoader(); } }
+        { "rating", []() -> ComponentLoader* { return new RatingLoader(); } },
+        { "tabs", []() -> ComponentLoader* { return new TabsLoader(); } },
+        { "tab-bar", []() -> ComponentLoader* { return new TabBarLoader(); } },
+        { "tab-content", []() -> ComponentLoader* { return new TabContentLoader(); } },
+        { "search", []() -> ComponentLoader* { return new SearchLoader(); } },
+        { "textarea", []() -> ComponentLoader* { return new TextFieldLoader(); } },
+        { "input", []() -> ComponentLoader* { return new InputLoader(); } },
     };
     auto loaderIter = sLoaderMap.find(nameStr);
     if (loaderIter != sLoaderMap.end()) {

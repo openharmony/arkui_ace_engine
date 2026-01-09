@@ -23,8 +23,10 @@
 
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/common/properties/shadow_config.h"
-#include "core/components/text_field/rosen_render_text_field.h"
+#include "compatible/components/text_field/rosen_render_text_field.h"
 #include "core/pipeline/base/rosen_render_context.h"
+#include "core/common/dynamic_module_helper.h"
+#include "compatible/components/text_field/modifier/text_field_modifier.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -43,6 +45,19 @@ constexpr Dimension MORE_BUTTON_SIZE = 40.0_vp;
 constexpr double MAGNIFIER_GAIN = 1.25;
 constexpr double FIXED_OFFSET = 18.0;
 
+const ArkUITextFieldModifierCompatible* GetTextFieldInnerModifier()
+{
+    static const ArkUITextFieldModifierCompatible* textFieldModifier_ = nullptr;
+    if (textFieldModifier_) {
+        return textFieldModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("textarea");
+    if (loader) {
+        textFieldModifier_ = reinterpret_cast<const ArkUITextFieldModifierCompatible*>(loader->GetCustomModifier());
+        return textFieldModifier_;
+    }
+    return nullptr;
+}
 } // namespace
 
 class RenderWeb;
@@ -517,7 +532,10 @@ bool RosenRenderTextOverlay::NeedAdjustEndHandle()
         LOGE("RosenTextField is nullptr");
         return false;
     }
-    return rosenTextField->GetEditingValue().selection.GetEnd() <= startIndex_;
+    auto* modifier = GetTextFieldInnerModifier();
+    CHECK_NULL_RETURN(modifier, false);
+    int32_t value = modifier->getTextEditingEnd(rosenTextField);
+    return value <= startIndex_;
 }
 
 bool RosenRenderTextOverlay::NeedAdjustStartHandle()
@@ -528,7 +546,10 @@ bool RosenRenderTextOverlay::NeedAdjustStartHandle()
         LOGE("RosenTextField is nullptr");
         return false;
     }
-    return rosenTextField->GetEditingValue().selection.GetEnd() > endIndex_;
+    auto* modifier = GetTextFieldInnerModifier();
+    CHECK_NULL_RETURN(modifier, false);
+    int32_t value = modifier->getTextEditingEnd(rosenTextField);
+    return value > endIndex_;
 }
 
 } // namespace OHOS::Ace

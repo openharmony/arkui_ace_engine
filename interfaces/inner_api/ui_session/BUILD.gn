@@ -75,3 +75,7 @@ ohos_shared_library("ui_session") {
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = ace_engine_part
 }
+
+group("ui_session_example") {
+  deps = [ "ui_session_sample:ui_sa" ]
+}

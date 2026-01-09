@@ -322,6 +322,7 @@ typedef enum CallbackKind {
     Kind_RestrictedWorker_onexit_Callback = -2095497263,
     Kind_RestrictedWorker_onmessage_Callback = 1614214490,
     Kind_ReuseIdCallback = 1110529154,
+    Kind_Router_BusinessError_Void = -687685069,
     Kind_RouterFinishCallback = -717863645,
     Kind_SaveButtonCallback = -1634474996,
     Kind_ScrollOnDidZoomCallback = 162773161,

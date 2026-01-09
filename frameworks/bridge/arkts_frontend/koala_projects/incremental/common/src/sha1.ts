@@ -303,7 +303,7 @@ type NN = (num: int32) => int32
 
 const W = new Int32Array(workWords)
 
-let sharedBuffer: ArrayBuffer
+let sharedBuffer: ArrayBuffer = new ArrayBuffer(allocTotal)
 let sharedOffset: int32 = 0
 
 const swapLE: NN = ((c:int32):int32 => ((((c << 24) & 0xff000000) | ((c << 8) & 0xff0000) | ((c >> 8) & 0xff00) | ((c >> 24) & 0xff)).toInt()))

@@ -14796,6 +14796,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                             Ark_Scroller childScroller)
     {
     }
+    void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feature)
+    {
+    }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
     void DestroyPeerImpl(Ark_JsGeolocation peer)
@@ -17491,45 +17494,51 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // RotationRecognizerAccessor
     namespace RouterExtenderAccessor {
-    Ark_NativePointer PushImpl(Ark_NativePointer jsView,
-                               const Ark_String* url,
-                               const Opt_Boolean* recover,
-                               const Opt_RouterFinishCallback* finishCallback)
+    void Push0Impl(Ark_VMContext vmContext,
+                   Ark_AsyncWorkerPtr asyncWorker,
+                   Ark_NativePointer jsView,
+                   const Ark_PageRouterOptions* options,
+                   const Opt_RouterFinishCallback* finishCallback,
+                   const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
-        auto frameNode = reinterpret_cast<FrameNode *>(node);
-        CHECK_NULL_VOID(frameNode);
-        return {};
     }
-    Ark_NativePointer ReplaceImpl(Ark_NativePointer jsView,
-                                  const Ark_String* url,
-                                  const Opt_Boolean* recover,
-                                  const Opt_RouterFinishCallback* enterFinishCallback)
-    {
-        auto frameNode = reinterpret_cast<FrameNode *>(node);
-        CHECK_NULL_VOID(frameNode);
-        return {};
-    }
-    void MoveCommonUnderPageNodeImpl(Ark_NativePointer commonNode,
-                                     Ark_NativePointer pageNode)
+    void Push1Impl(Ark_NativePointer jsView,
+                   const Ark_PageRouterOptions* options,
+                   const Opt_RouterFinishCallback* finishCallback,
+                   const Opt_Router_BusinessError_Void* callback_)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
     }
-    void BackImpl()
+    void Replace0Impl(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
+                      Ark_NativePointer jsView,
+                      const Ark_PageRouterOptions* options,
+                      const Opt_RouterFinishCallback* enterFinishCallback,
+                      const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
     }
-    void BackWithOptionsImpl(const Ark_String* url,
-                             const Opt_Object* params)
-    {
-    }
-    Ark_NativePointer RunPageImpl(Ark_NativePointer jsView,
-                                  const Ark_String* url,
-                                  const Opt_Boolean* recover,
-                                  const Opt_RouterFinishCallback* finishCallback)
+    void Replace1Impl(Ark_NativePointer jsView,
+                      const Ark_PageRouterOptions* options,
+                      const Opt_RouterFinishCallback* finishCallback,
+                      const Opt_Router_BusinessError_Void* callback_)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
-        return {};
+    }
+    void Back0Impl(const Opt_RouterOptionsInner* options)
+    {
+    }
+    void Back1Impl(Ark_Int32 index,
+                   const Opt_String* params)
+    {
+    }
+    void RunPageImpl(Ark_NativePointer jsView,
+                     const Ark_PageRouterOptions* options,
+                     const Opt_RouterFinishCallback* finishCallback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
     }
     void ClearImpl()
     {
@@ -17539,6 +17548,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void HideAlertBeforeBackPageImpl()
     {
+    }
+    Ark_String GetLengthImpl()
+    {
+        return {};
+    }
+    Ark_RouterStateInner GetStateImpl()
+    {
+        return {};
+    }
+    Opt_RouterStateInner GetStateByIndexImpl(Ark_Int32 index)
+    {
+        return {};
+    }
+    Array_RouterStateInner GetStateByUrlImpl(const Ark_String* url)
+    {
+        return {};
+    }
+    Ark_String GetParamsImpl()
+    {
+        return {};
     }
     void PushNamedRoute0Impl(Ark_VMContext vmContext,
                              Ark_AsyncWorkerPtr asyncWorker,
@@ -17551,7 +17580,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void PushNamedRoute1Impl(Ark_NativePointer jsView,
                              const Ark_PageRouterOptions* options,
                              const Opt_RouterFinishCallback* finishCallback,
-                             const Opt_AsyncCallback_Void* callback_)
+                             const Opt_Router_BusinessError_Void* callback_)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -17560,40 +17589,53 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                 Ark_AsyncWorkerPtr asyncWorker,
                                 Ark_NativePointer jsView,
                                 const Ark_PageRouterOptions* options,
-                                const Opt_RouterFinishCallback* finishCallback,
+                                const Opt_RouterFinishCallback* enterFinishCallback,
                                 const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
     }
     void ReplaceNamedRoute1Impl(Ark_NativePointer jsView,
                                 const Ark_PageRouterOptions* options,
                                 const Opt_RouterFinishCallback* finishCallback,
-                                const Opt_AsyncCallback_Void* callback_)
+                                const Opt_Router_BusinessError_Void* callback_)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
     }
-    Ark_NativePointer CreateDynamicImpl(const Ark_String* url,
-                                        const Opt_Boolean* recover)
+    Ark_NativePointer CreateDynamicImpl(const Ark_RouterOptionsInner* options)
     {
         return {};
     }
-    Ark_NativePointer PushDynamicImpl(Ark_NativePointer pageNode,
-                                      const Ark_String* url,
-                                      const Opt_Boolean* recover,
-                                      const Opt_RouterFinishCallback* finishCallback)
+    void PushDynamic0Impl(Ark_VMContext vmContext,
+                          Ark_AsyncWorkerPtr asyncWorker,
+                          Ark_NativePointer pageNode,
+                          const Ark_PageRouterOptions* options,
+                          const Opt_RouterFinishCallback* finishCallback,
+                          const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
-        auto frameNode = reinterpret_cast<FrameNode *>(node);
-        CHECK_NULL_VOID(frameNode);
-        return {};
     }
-    Ark_NativePointer ReplaceDynamicImpl(Ark_NativePointer pageNode,
-                                         const Ark_String* url,
-                                         const Opt_Boolean* recover,
-                                         const Opt_RouterFinishCallback* finishCallback)
+    void PushDynamic1Impl(Ark_NativePointer pageNode,
+                          const Ark_PageRouterOptions* options,
+                          const Opt_RouterFinishCallback* finishCallback,
+                          const Opt_Router_BusinessError_Void* callback_)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
-        return {};
+    }
+    void ReplaceDynamic0Impl(Ark_VMContext vmContext,
+                             Ark_AsyncWorkerPtr asyncWorker,
+                             Ark_NativePointer pageNode,
+                             const Ark_PageRouterOptions* options,
+                             const Opt_RouterFinishCallback* enterFinishCallback,
+                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+    }
+    void ReplaceDynamic1Impl(Ark_NativePointer pageNode,
+                             const Ark_PageRouterOptions* options,
+                             const Opt_RouterFinishCallback* finishCallback,
+                             const Opt_Router_BusinessError_Void* callback_)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
     }
     } // RouterExtenderAccessor
     namespace ScaleSymbolEffectAccessor {
@@ -21462,6 +21504,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::UnbindTabsFromScrollableImpl,
             IUIContextAccessor::BindTabsToNestedScrollableImpl,
             IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
+            IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
         };
         return &IUIContextAccessorImpl;
     }
@@ -22587,22 +22630,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIRouterExtenderAccessor* GetRouterExtenderAccessor()
     {
         static const GENERATED_ArkUIRouterExtenderAccessor RouterExtenderAccessorImpl {
-            RouterExtenderAccessor::PushImpl,
-            RouterExtenderAccessor::ReplaceImpl,
-            RouterExtenderAccessor::MoveCommonUnderPageNodeImpl,
-            RouterExtenderAccessor::BackImpl,
-            RouterExtenderAccessor::BackWithOptionsImpl,
+            RouterExtenderAccessor::Push0Impl,
+            RouterExtenderAccessor::Push1Impl,
+            RouterExtenderAccessor::Replace0Impl,
+            RouterExtenderAccessor::Replace1Impl,
+            RouterExtenderAccessor::Back0Impl,
+            RouterExtenderAccessor::Back1Impl,
             RouterExtenderAccessor::RunPageImpl,
             RouterExtenderAccessor::ClearImpl,
             RouterExtenderAccessor::ShowAlertBeforeBackPageImpl,
             RouterExtenderAccessor::HideAlertBeforeBackPageImpl,
+            RouterExtenderAccessor::GetLengthImpl,
+            RouterExtenderAccessor::GetStateImpl,
+            RouterExtenderAccessor::GetStateByIndexImpl,
+            RouterExtenderAccessor::GetStateByUrlImpl,
+            RouterExtenderAccessor::GetParamsImpl,
             RouterExtenderAccessor::PushNamedRoute0Impl,
             RouterExtenderAccessor::PushNamedRoute1Impl,
             RouterExtenderAccessor::ReplaceNamedRoute0Impl,
             RouterExtenderAccessor::ReplaceNamedRoute1Impl,
             RouterExtenderAccessor::CreateDynamicImpl,
-            RouterExtenderAccessor::PushDynamicImpl,
-            RouterExtenderAccessor::ReplaceDynamicImpl,
+            RouterExtenderAccessor::PushDynamic0Impl,
+            RouterExtenderAccessor::PushDynamic1Impl,
+            RouterExtenderAccessor::ReplaceDynamic0Impl,
+            RouterExtenderAccessor::ReplaceDynamic1Impl,
         };
         return &RouterExtenderAccessorImpl;
     }

@@ -252,6 +252,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
         {
             this._onClick_0_flag = AttributeUpdaterFlag.UPDATE
             this._onClick_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onClick_0_flag = AttributeUpdaterFlag.SKIP
@@ -263,6 +264,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
         {
             this._setIcon_0_flag = AttributeUpdaterFlag.UPDATE
             this._setIcon_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._setIcon_0_flag = AttributeUpdaterFlag.SKIP
@@ -274,6 +276,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
         {
             this._setText_0_flag = AttributeUpdaterFlag.UPDATE
             this._setText_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._setText_0_flag = AttributeUpdaterFlag.SKIP
@@ -285,6 +288,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
         {
             this._iconSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._iconSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._iconSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -296,6 +300,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
         {
             this._iconBorderRadius_0_flag = AttributeUpdaterFlag.UPDATE
             this._iconBorderRadius_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._iconBorderRadius_0_flag = AttributeUpdaterFlag.SKIP
@@ -307,6 +312,7 @@ export class SaveButtonModifier extends SecurityComponentMethodModifier implemen
         {
             this._stateEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._stateEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stateEffect_0_flag = AttributeUpdaterFlag.SKIP

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KPointer, KInt, KLong, KBoolean, KFloat, KUInt, KSerializerBuffer  } from '@koalaui/interop';
+import { KPointer, KInt, KLong, KBoolean, KFloat, KDouble, KUInt, KSerializerBuffer  } from '@koalaui/interop';
 import { default as drawing } from '@ohos.graphics.drawing';
 import image from '@ohos.multimedia.image';
 import webview from '@ohos.web.webview';
@@ -128,6 +128,14 @@ export class ArkUIAniModule {
     native static _ResetWaterFlowFooter(ptr: KPointer): void
     native static _SetWaterFlowScroller(ptr: KPointer, scroller: KPointer): void
     native static _SetWaterFlowLayoutMode(ptr: KPointer, mode: KInt): void
+    native static _SetListItemGroupSpace(ptr: KPointer, value: KDouble | string): void
+    native static _SetListItemGroupStyle(ptr: KPointer, value: KInt): void
+    native static _SetListItemGroupHeaderContent(ptr: KPointer, footerContent: KPointer): void
+    native static _SetListItemGroupHeader(ptr: KPointer, footer: KPointer): void
+    native static _ResetListItemGroupHeader(ptr: KPointer): void
+    native static _SetListItemGroupFooterContent(ptr: KPointer, footerContent: KPointer): void
+    native static _SetListItemGroupFooter(ptr: KPointer, footer: KPointer): void
+    native static _ResetListItemGroupFooter(ptr: KPointer): void
     native static _UpdateWaterFlowSection(ptr: KPointer, changeInfo: SectionChangeInfo): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize | undefined): void
     native static _LazyForEachNode_Construct(id: KInt, isRepeat: boolean): KPointer
@@ -207,13 +215,13 @@ export class ArkUIAniModule {
 
     // for componentSnapshot
     native static _ComponentSnapshot_createFromBuilderWithCallback(ptr: KPointer, destroyCallback: () => void,
-        callback: AsyncCallback<image.PixelMap>, delay?: number, checkImageStatus?: boolean,
+        callback: AsyncCallback<image.PixelMap>, delay?: int32, checkImageStatus?: boolean,
         options?: componentSnapshot.SnapshotOptions): void
     native static _ComponentSnapshot_createFromBuilderWithPromise(ptr: KPointer, destroyCallback: () => void,
-        delay?: number, checkImageStatus?: boolean,
+        delay?: int32, checkImageStatus?: boolean,
         options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap> | null
     native static _ComponentSnapshot_createFromComponentWithPromise(ptr: KPointer, destroyCallback: () => void,
-        delay?: number, checkImageStatus?: boolean,
+        delay?: int32, checkImageStatus?: boolean,
         options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap> | null
 
     // for dragController

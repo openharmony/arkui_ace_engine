@@ -44,7 +44,6 @@
 #include "core/components_v2/inspector/loading_progress_composed_element.h"
 #include "core/components_v2/inspector/menu_composed_element.h"
 #include "core/components_v2/inspector/navigation_composed_element.h"
-#include "core/components_v2/inspector/navigation_menus_composed_element.h"
 #include "core/components_v2/inspector/navigation_title_composed_element.h"
 #include "core/components_v2/inspector/navigator_composed_element.h"
 #include "core/components_v2/inspector/panel_composed_element.h"
@@ -56,7 +55,6 @@
 #include "core/components_v2/inspector/row_split_composed_element.h"
 #include "core/components_v2/inspector/scroll_bar_composed_element.h"
 #include "core/components_v2/inspector/scroll_composed_element.h"
-#include "core/components_v2/inspector/search_composed_element.h"
 #include "core/components_v2/inspector/select_composed_element.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
 #include "core/components_v2/inspector/shape_container_composed_element.h"
@@ -69,12 +67,8 @@
 #include "core/components_v2/inspector/stepper_item_composed_element.h"
 #include "core/components_v2/inspector/swiper_composed_element.h"
 #include "core/components_v2/inspector/switch_composed_element.h"
-#include "core/components_v2/inspector/tab_content_composed_element.h"
-#include "core/components_v2/inspector/tabs_composed_element.h"
 #include "core/components_v2/inspector/text_clock_composed_element.h"
 #include "core/components_v2/inspector/text_composed_element.h"
-#include "core/components_v2/inspector/textarea_composed_element.h"
-#include "core/components_v2/inspector/textinput_composed_element.h"
 #include "core/components_v2/inspector/texttimer_composed_element.h"
 #include "core/components_v2/inspector/toggle_composed_element.h"
 #include "core/components_v2/inspector/water_flow_composed_element.h"
@@ -104,8 +98,8 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { STACK_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::StackComposedElement>(id); } },
     { SWIPER_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SwiperComposedElement>(id); } },
     { TAB_CONTENT_ITEM_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::TabContentComposedElement>(id); } },
-    { TABS_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::TabsComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TAB_CONTENT, id); } },
+    { TABS_COMPONENT_TAG, [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TABS, id); } },
     { TEXT_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::TextComposedElement>(id); } },
     { FLEX_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::FlexComposedElement>(id); } },
     { WRAP_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::WrapComposedElement>(id); } },
@@ -151,7 +145,8 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) { return AceType::MakeRefPtr<V2::CalendarComposedElement>(id); } },
     { BADGE_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_BADGE, id); } },
-    { SEARCH_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SearchComposedElement>(id); } },
+    { SEARCH_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_SEARCH, id); } },
     { FORM_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { PLUGIN_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
@@ -191,9 +186,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_GRID_ROW, id); } },
     { MENU_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::MenuComposedElement>(id); } },
     { TEXTAREA_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::TextareaComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TEXTAREA, id); } },
     { TEXTINPUT_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::TextInputComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_INPUT, id); } },
     { TEXTTIMER_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::TextTimerComposedElement>(id); } },
     { SELECT_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SelectComposedElement>(id); } },
@@ -238,7 +233,7 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { NAVIGATION_TITLE_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigationTitleComposedElement>(id); } },
     { NAVIGATION_MENUS_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigationMenusComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_NAVIGATION_MENU, id); } },
     { JS_VIEW_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { RELATIVE_CONTAINER_COMPONENT_TAG,

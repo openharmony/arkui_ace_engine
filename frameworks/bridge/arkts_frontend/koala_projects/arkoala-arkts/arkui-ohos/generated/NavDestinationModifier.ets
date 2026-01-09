@@ -32,7 +32,6 @@ import { Resource } from "global.resource"
 import { ResourceStr } from "./component/units"
 import { default as image } from "@ohos.multimedia.image"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
-import { PeerNode } from "./PeerNode"
 
 export class NavDestinationModifier extends CommonMethodModifier implements NavDestinationAttribute,AttributeModifier<NavDestinationAttribute> {
     _instanceId: number = -1;
@@ -1091,6 +1090,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._hideTitleBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._hideTitleBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._hideTitleBar_0_flag = AttributeUpdaterFlag.SKIP
@@ -1102,6 +1102,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._hideBackButton_0_flag = AttributeUpdaterFlag.UPDATE
             this._hideBackButton_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._hideBackButton_0_flag = AttributeUpdaterFlag.SKIP
@@ -1113,6 +1114,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._onShown_0_flag = AttributeUpdaterFlag.UPDATE
             this._onShown_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onShown_0_flag = AttributeUpdaterFlag.SKIP
@@ -1124,6 +1126,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._onHidden_0_flag = AttributeUpdaterFlag.UPDATE
             this._onHidden_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onHidden_0_flag = AttributeUpdaterFlag.SKIP
@@ -1135,6 +1138,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._onBackPressed_0_flag = AttributeUpdaterFlag.UPDATE
             this._onBackPressed_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onBackPressed_0_flag = AttributeUpdaterFlag.SKIP
@@ -1146,6 +1150,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._onResult_0_flag = AttributeUpdaterFlag.UPDATE
             this._onResult_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onResult_0_flag = AttributeUpdaterFlag.SKIP
@@ -1157,6 +1162,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._mode_0_flag = AttributeUpdaterFlag.UPDATE
             this._mode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._mode_0_flag = AttributeUpdaterFlag.SKIP
@@ -1168,6 +1174,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._onReady_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReady_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReady_0_flag = AttributeUpdaterFlag.SKIP
@@ -1179,6 +1186,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._onWillAppear_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillAppear_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillAppear_0_flag = AttributeUpdaterFlag.SKIP
@@ -1190,6 +1198,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._onWillDisappear_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillDisappear_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillDisappear_0_flag = AttributeUpdaterFlag.SKIP
@@ -1201,6 +1210,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._onWillShow_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillShow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillShow_0_flag = AttributeUpdaterFlag.SKIP
@@ -1212,6 +1222,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._onWillHide_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillHide_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillHide_0_flag = AttributeUpdaterFlag.SKIP
@@ -1223,6 +1234,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._systemBarStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._systemBarStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._systemBarStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -1234,6 +1246,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._recoverable_0_flag = AttributeUpdaterFlag.UPDATE
             this._recoverable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._recoverable_0_flag = AttributeUpdaterFlag.SKIP
@@ -1245,6 +1258,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._systemTransition_0_flag = AttributeUpdaterFlag.UPDATE
             this._systemTransition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._systemTransition_0_flag = AttributeUpdaterFlag.SKIP
@@ -1256,6 +1270,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._bindToScrollable_0_flag = AttributeUpdaterFlag.UPDATE
             this._bindToScrollable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._bindToScrollable_0_flag = AttributeUpdaterFlag.SKIP
@@ -1267,6 +1282,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._bindToNestedScrollable_0_flag = AttributeUpdaterFlag.UPDATE
             this._bindToNestedScrollable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._bindToNestedScrollable_0_flag = AttributeUpdaterFlag.SKIP
@@ -1278,6 +1294,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._onActive_0_flag = AttributeUpdaterFlag.UPDATE
             this._onActive_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onActive_0_flag = AttributeUpdaterFlag.SKIP
@@ -1289,6 +1306,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._onInactive_0_flag = AttributeUpdaterFlag.UPDATE
             this._onInactive_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onInactive_0_flag = AttributeUpdaterFlag.SKIP
@@ -1300,6 +1318,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._customTransition_0_flag = AttributeUpdaterFlag.UPDATE
             this._customTransition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._customTransition_0_flag = AttributeUpdaterFlag.SKIP
@@ -1311,6 +1330,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._onNewParam_0_flag = AttributeUpdaterFlag.UPDATE
             this._onNewParam_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onNewParam_0_flag = AttributeUpdaterFlag.SKIP
@@ -1322,6 +1342,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._preferredOrientation_0_flag = AttributeUpdaterFlag.UPDATE
             this._preferredOrientation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._preferredOrientation_0_flag = AttributeUpdaterFlag.SKIP
@@ -1333,6 +1354,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
         {
             this._enableNavigationIndicator_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableNavigationIndicator_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableNavigationIndicator_0_flag = AttributeUpdaterFlag.SKIP
@@ -1345,6 +1367,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
             this._title_0_flag = AttributeUpdaterFlag.UPDATE
             this._title_0_0value = value
             this._title_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._title_0_flag = AttributeUpdaterFlag.SKIP
@@ -1357,6 +1380,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
             this._hideTitleBar_1_flag = AttributeUpdaterFlag.UPDATE
             this._hideTitleBar_1_0value = hide
             this._hideTitleBar_1_1value = animated
+            this._state.fireChange()
         } else
         {
             this._hideTitleBar_1_flag = AttributeUpdaterFlag.SKIP
@@ -1369,6 +1393,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
             this._backButtonIcon_0_flag = AttributeUpdaterFlag.UPDATE
             this._backButtonIcon_0_0value = icon
             this._backButtonIcon_0_1value = accessibilityText
+            this._state.fireChange()
         } else
         {
             this._backButtonIcon_0_flag = AttributeUpdaterFlag.SKIP
@@ -1381,6 +1406,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
             this._menus_0_flag = AttributeUpdaterFlag.UPDATE
             this._menus_0_0value = items
             this._menus_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._menus_0_flag = AttributeUpdaterFlag.SKIP
@@ -1393,6 +1419,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
             this._toolbarConfiguration_0_flag = AttributeUpdaterFlag.UPDATE
             this._toolbarConfiguration_0_0value = toolbarParam
             this._toolbarConfiguration_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._toolbarConfiguration_0_flag = AttributeUpdaterFlag.SKIP
@@ -1405,6 +1432,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
             this._hideToolBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._hideToolBar_0_0value = hide
             this._hideToolBar_0_1value = animated
+            this._state.fireChange()
         } else
         {
             this._hideToolBar_0_flag = AttributeUpdaterFlag.SKIP
@@ -1417,6 +1445,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
             this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.UPDATE
             this._ignoreLayoutSafeArea_0_0value = types
             this._ignoreLayoutSafeArea_0_1value = edges
+            this._state.fireChange()
         } else
         {
             this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.SKIP
@@ -1429,6 +1458,7 @@ export class NavDestinationModifier extends CommonMethodModifier implements NavD
             this._enableStatusBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableStatusBar_0_0value = enabled
             this._enableStatusBar_0_1value = animated
+            this._state.fireChange()
         } else
         {
             this._enableStatusBar_0_flag = AttributeUpdaterFlag.SKIP

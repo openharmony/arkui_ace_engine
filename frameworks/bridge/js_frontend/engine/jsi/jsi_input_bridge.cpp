@@ -43,9 +43,9 @@ void GetInputOption(
             if (valStr.empty()) {
                 continue;
             }
-            if (strcmp(keyStr.c_str(), DOM_INPUT_OPTION_ICON) == 0) {
+            if (strcmp(keyStr.c_str(), "icon") == 0) {
                 inputOption.image = valStr;
-            } else if (strcmp(keyStr.c_str(), DOM_INPUT_OPTION_CONTENT) == 0) {
+            } else if (strcmp(keyStr.c_str(), "content") == 0) {
                 inputOption.text = valStr;
             }
         }

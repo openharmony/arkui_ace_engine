@@ -16,9 +16,9 @@
 #include "frameworks/bridge/js_frontend/js_command.h"
 
 #include "base/log/event_report.h"
+#include "compatible/components/search/dom_search.h"
+#include "compatible/components/text_field/dom_textarea.h"
 #include "core/common/dynamic_module_helper.h"
-#include "frameworks/bridge/common/dom/dom_search.h"
-#include "frameworks/bridge/common/dom/dom_textarea.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
@@ -139,19 +139,19 @@ void JsCommandDomElementOperator::UpdateForInput(const RefPtr<DOMNode>& node) co
         return;
     }
 
-    auto input = AceType::DynamicCast<DOMInput>(node);
-    if (input) {
-        input->SetInputOptions(*inputOptions_);
+    auto inputLoader = DynamicModuleHelper::GetInstance().GetLoaderByName("input");
+    if (AceType::DynamicCast<DOMInput>(node) && inputLoader) {
+        inputLoader->UpdateDomConfig(node, inputOptions_.get());
         return;
     }
-    auto textarea = AceType::DynamicCast<DOMTextarea>(node);
-    if (textarea) {
-        textarea->SetInputOptions(*inputOptions_);
+    auto areaLoader = DynamicModuleHelper::GetInstance().GetLoaderByName("textarea");
+    if (AceType::DynamicCast<DOMTextarea>(node) && areaLoader) {
+        areaLoader->UpdateDomConfig(node, inputOptions_.get());
         return;
     }
-    auto search = AceType::DynamicCast<DOMSearch>(node);
-    if (search) {
-        search->SetInputOptions(*inputOptions_);
+    auto searchloader = DynamicModuleHelper::GetInstance().GetLoaderByName("search");
+    if (AceType::DynamicCast<DOMSearch>(node) && searchloader) {
+        searchloader->UpdateDomConfig(node, inputOptions_.get());
     }
 }
 

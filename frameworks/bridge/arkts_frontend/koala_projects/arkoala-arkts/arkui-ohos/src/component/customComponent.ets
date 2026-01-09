@@ -465,6 +465,9 @@ export abstract class BaseCustomDialog<T extends BaseCustomDialog<T, T_Options>,
 
 export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent implements OptionsCallback<T_Options>, HasCommonMethod, CommonMethod {
     private __commonStyles = new Array<(instance: CommonMethod) => void>();
+    override __get__commonStyles__Internal(): Array<(instance: CommonMethod) => void> | undefined {
+        return this.__commonStyles;
+    }
     constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
         super(useSharedStorage, storage);
     }

@@ -34845,6 +34845,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feature)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setCustomKeyboardContinueFeature(");
+        WriteToString(&out, feature);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // IUIContextAccessor
     namespace JsGeolocationAccessor {
     void DestroyPeerImpl(Ark_JsGeolocation peer)
@@ -42148,109 +42159,131 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // RotationRecognizerAccessor
     namespace RouterExtenderAccessor {
-    Ark_NativePointer PushImpl(Ark_NativePointer jsView,
-                               const Ark_String* url,
-                               const Opt_Boolean* recover,
-                               const Opt_RouterFinishCallback* finishCallback)
+    void Push0Impl(Ark_VMContext vmContext,
+                   Ark_AsyncWorkerPtr asyncWorker,
+                   Ark_NativePointer jsView,
+                   const Ark_PageRouterOptions* options,
+                   const Opt_RouterFinishCallback* finishCallback,
+                   const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
         if (!needGroupedLog(1))
         {
-            return nullptr;
+            return;
         }
-        string out("push(");
+        string out("push0(");
         WriteToString(&out, jsView);
         out.append(", ");
-        WriteToString(&out, url);
-        out.append(", ");
-        WriteToString(&out, recover);
+        WriteToString(&out, options);
         out.append(", ");
         WriteToString(&out, finishCallback);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
         out.append(") \n");
-        out.append("[return nullptr] \n");
         appendGroupedLog(1, out);
-        return nullptr;
     }
-    Ark_NativePointer ReplaceImpl(Ark_NativePointer jsView,
-                                  const Ark_String* url,
-                                  const Opt_Boolean* recover,
-                                  const Opt_RouterFinishCallback* enterFinishCallback)
+    void Push1Impl(Ark_NativePointer jsView,
+                   const Ark_PageRouterOptions* options,
+                   const Opt_RouterFinishCallback* finishCallback,
+                   const Opt_Router_BusinessError_Void* callback_)
     {
         if (!needGroupedLog(1))
         {
-            return nullptr;
+            return;
         }
-        string out("replace(");
+        string out("push1(");
         WriteToString(&out, jsView);
         out.append(", ");
-        WriteToString(&out, url);
+        WriteToString(&out, options);
         out.append(", ");
-        WriteToString(&out, recover);
+        WriteToString(&out, finishCallback);
+        out.append(", ");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void Replace0Impl(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
+                      Ark_NativePointer jsView,
+                      const Ark_PageRouterOptions* options,
+                      const Opt_RouterFinishCallback* enterFinishCallback,
+                      const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("replace0(");
+        WriteToString(&out, jsView);
+        out.append(", ");
+        WriteToString(&out, options);
         out.append(", ");
         WriteToString(&out, enterFinishCallback);
-        out.append(") \n");
-        out.append("[return nullptr] \n");
-        appendGroupedLog(1, out);
-        return nullptr;
-    }
-    void MoveCommonUnderPageNodeImpl(Ark_NativePointer commonNode,
-                                     Ark_NativePointer pageNode)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("moveCommonUnderPageNode(");
-        WriteToString(&out, commonNode);
         out.append(", ");
-        WriteToString(&out, pageNode);
+        WriteToString(&out, outputArgumentForReturningPromise);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void BackImpl()
+    void Replace1Impl(Ark_NativePointer jsView,
+                      const Ark_PageRouterOptions* options,
+                      const Opt_RouterFinishCallback* finishCallback,
+                      const Opt_Router_BusinessError_Void* callback_)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("back(");
+        string out("replace1(");
+        WriteToString(&out, jsView);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(", ");
+        WriteToString(&out, finishCallback);
+        out.append(", ");
+        WriteToString(&out, callback_);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void BackWithOptionsImpl(const Ark_String* url,
-                             const Opt_Object* params)
+    void Back0Impl(const Opt_RouterOptionsInner* options)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("backWithOptions(");
-        WriteToString(&out, url);
+        string out("back0(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void Back1Impl(Ark_Int32 index,
+                   const Opt_String* params)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("back1(");
+        WriteToString(&out, index);
         out.append(", ");
         WriteToString(&out, params);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_NativePointer RunPageImpl(Ark_NativePointer jsView,
-                                  const Ark_String* url,
-                                  const Opt_Boolean* recover,
-                                  const Opt_RouterFinishCallback* finishCallback)
+    void RunPageImpl(Ark_NativePointer jsView,
+                     const Ark_PageRouterOptions* options,
+                     const Opt_RouterFinishCallback* finishCallback)
     {
         if (!needGroupedLog(1))
         {
-            return nullptr;
+            return;
         }
         string out("runPage(");
         WriteToString(&out, jsView);
         out.append(", ");
-        WriteToString(&out, url);
-        out.append(", ");
-        WriteToString(&out, recover);
+        WriteToString(&out, options);
         out.append(", ");
         WriteToString(&out, finishCallback);
         out.append(") \n");
-        out.append("[return nullptr] \n");
         appendGroupedLog(1, out);
-        return nullptr;
     }
     void ClearImpl()
     {
@@ -42283,6 +42316,68 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Ark_String GetLengthImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getLength(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_RouterStateInner GetStateImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getState(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Opt_RouterStateInner GetStateByIndexImpl(Ark_Int32 index)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getStateByIndex(");
+        WriteToString(&out, index);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Array_RouterStateInner GetStateByUrlImpl(const Ark_String* url)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getStateByUrl(");
+        WriteToString(&out, url);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_String GetParamsImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getParams(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     void PushNamedRoute0Impl(Ark_VMContext vmContext,
                              Ark_AsyncWorkerPtr asyncWorker,
                              Ark_NativePointer jsView,
@@ -42308,7 +42403,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void PushNamedRoute1Impl(Ark_NativePointer jsView,
                              const Ark_PageRouterOptions* options,
                              const Opt_RouterFinishCallback* finishCallback,
-                             const Opt_AsyncCallback_Void* callback_)
+                             const Opt_Router_BusinessError_Void* callback_)
     {
         if (!needGroupedLog(1))
         {
@@ -42329,7 +42424,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                 Ark_AsyncWorkerPtr asyncWorker,
                                 Ark_NativePointer jsView,
                                 const Ark_PageRouterOptions* options,
-                                const Opt_RouterFinishCallback* finishCallback,
+                                const Opt_RouterFinishCallback* enterFinishCallback,
                                 const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
         if (!needGroupedLog(1))
@@ -42341,7 +42436,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(", ");
         WriteToString(&out, options);
         out.append(", ");
-        WriteToString(&out, finishCallback);
+        WriteToString(&out, enterFinishCallback);
         out.append(", ");
         WriteToString(&out, outputArgumentForReturningPromise);
         out.append(") \n");
@@ -42350,7 +42445,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void ReplaceNamedRoute1Impl(Ark_NativePointer jsView,
                                 const Ark_PageRouterOptions* options,
                                 const Opt_RouterFinishCallback* finishCallback,
-                                const Opt_AsyncCallback_Void* callback_)
+                                const Opt_Router_BusinessError_Void* callback_)
     {
         if (!needGroupedLog(1))
         {
@@ -42367,65 +42462,102 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_NativePointer CreateDynamicImpl(const Ark_String* url,
-                                        const Opt_Boolean* recover)
+    Ark_NativePointer CreateDynamicImpl(const Ark_RouterOptionsInner* options)
     {
         if (!needGroupedLog(1))
         {
             return nullptr;
         }
         string out("createDynamic(");
-        WriteToString(&out, url);
-        out.append(", ");
-        WriteToString(&out, recover);
+        WriteToString(&out, options);
         out.append(") \n");
         out.append("[return nullptr] \n");
         appendGroupedLog(1, out);
         return nullptr;
     }
-    Ark_NativePointer PushDynamicImpl(Ark_NativePointer pageNode,
-                                      const Ark_String* url,
-                                      const Opt_Boolean* recover,
-                                      const Opt_RouterFinishCallback* finishCallback)
+    void PushDynamic0Impl(Ark_VMContext vmContext,
+                          Ark_AsyncWorkerPtr asyncWorker,
+                          Ark_NativePointer pageNode,
+                          const Ark_PageRouterOptions* options,
+                          const Opt_RouterFinishCallback* finishCallback,
+                          const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
     {
         if (!needGroupedLog(1))
         {
-            return nullptr;
+            return;
         }
-        string out("pushDynamic(");
+        string out("pushDynamic0(");
         WriteToString(&out, pageNode);
         out.append(", ");
-        WriteToString(&out, url);
-        out.append(", ");
-        WriteToString(&out, recover);
+        WriteToString(&out, options);
         out.append(", ");
         WriteToString(&out, finishCallback);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
         out.append(") \n");
-        out.append("[return nullptr] \n");
         appendGroupedLog(1, out);
-        return nullptr;
     }
-    Ark_NativePointer ReplaceDynamicImpl(Ark_NativePointer pageNode,
-                                         const Ark_String* url,
-                                         const Opt_Boolean* recover,
-                                         const Opt_RouterFinishCallback* finishCallback)
+    void PushDynamic1Impl(Ark_NativePointer pageNode,
+                          const Ark_PageRouterOptions* options,
+                          const Opt_RouterFinishCallback* finishCallback,
+                          const Opt_Router_BusinessError_Void* callback_)
     {
         if (!needGroupedLog(1))
         {
-            return nullptr;
+            return;
         }
-        string out("replaceDynamic(");
+        string out("pushDynamic1(");
         WriteToString(&out, pageNode);
         out.append(", ");
-        WriteToString(&out, url);
-        out.append(", ");
-        WriteToString(&out, recover);
+        WriteToString(&out, options);
         out.append(", ");
         WriteToString(&out, finishCallback);
+        out.append(", ");
+        WriteToString(&out, callback_);
         out.append(") \n");
-        out.append("[return nullptr] \n");
         appendGroupedLog(1, out);
-        return nullptr;
+    }
+    void ReplaceDynamic0Impl(Ark_VMContext vmContext,
+                             Ark_AsyncWorkerPtr asyncWorker,
+                             Ark_NativePointer pageNode,
+                             const Ark_PageRouterOptions* options,
+                             const Opt_RouterFinishCallback* enterFinishCallback,
+                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("replaceDynamic0(");
+        WriteToString(&out, pageNode);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(", ");
+        WriteToString(&out, enterFinishCallback);
+        out.append(", ");
+        WriteToString(&out, outputArgumentForReturningPromise);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ReplaceDynamic1Impl(Ark_NativePointer pageNode,
+                             const Ark_PageRouterOptions* options,
+                             const Opt_RouterFinishCallback* finishCallback,
+                             const Opt_Router_BusinessError_Void* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("replaceDynamic1(");
+        WriteToString(&out, pageNode);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(", ");
+        WriteToString(&out, finishCallback);
+        out.append(", ");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
     }
     } // RouterExtenderAccessor
     namespace ScaleSymbolEffectAccessor {
@@ -50116,6 +50248,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             IUIContextAccessor::UnbindTabsFromScrollableImpl,
             IUIContextAccessor::BindTabsToNestedScrollableImpl,
             IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
+            IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
         };
         return &IUIContextAccessorImpl;
     }
@@ -51242,22 +51375,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIRouterExtenderAccessor* GetRouterExtenderAccessor()
     {
         static const GENERATED_ArkUIRouterExtenderAccessor RouterExtenderAccessorImpl {
-            RouterExtenderAccessor::PushImpl,
-            RouterExtenderAccessor::ReplaceImpl,
-            RouterExtenderAccessor::MoveCommonUnderPageNodeImpl,
-            RouterExtenderAccessor::BackImpl,
-            RouterExtenderAccessor::BackWithOptionsImpl,
+            RouterExtenderAccessor::Push0Impl,
+            RouterExtenderAccessor::Push1Impl,
+            RouterExtenderAccessor::Replace0Impl,
+            RouterExtenderAccessor::Replace1Impl,
+            RouterExtenderAccessor::Back0Impl,
+            RouterExtenderAccessor::Back1Impl,
             RouterExtenderAccessor::RunPageImpl,
             RouterExtenderAccessor::ClearImpl,
             RouterExtenderAccessor::ShowAlertBeforeBackPageImpl,
             RouterExtenderAccessor::HideAlertBeforeBackPageImpl,
+            RouterExtenderAccessor::GetLengthImpl,
+            RouterExtenderAccessor::GetStateImpl,
+            RouterExtenderAccessor::GetStateByIndexImpl,
+            RouterExtenderAccessor::GetStateByUrlImpl,
+            RouterExtenderAccessor::GetParamsImpl,
             RouterExtenderAccessor::PushNamedRoute0Impl,
             RouterExtenderAccessor::PushNamedRoute1Impl,
             RouterExtenderAccessor::ReplaceNamedRoute0Impl,
             RouterExtenderAccessor::ReplaceNamedRoute1Impl,
             RouterExtenderAccessor::CreateDynamicImpl,
-            RouterExtenderAccessor::PushDynamicImpl,
-            RouterExtenderAccessor::ReplaceDynamicImpl,
+            RouterExtenderAccessor::PushDynamic0Impl,
+            RouterExtenderAccessor::PushDynamic1Impl,
+            RouterExtenderAccessor::ReplaceDynamic0Impl,
+            RouterExtenderAccessor::ReplaceDynamic1Impl,
         };
         return &RouterExtenderAccessorImpl;
     }

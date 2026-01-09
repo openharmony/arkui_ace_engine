@@ -17,6 +17,7 @@
 
 #include "base/log/event_report.h"
 #include "compatible/components/component_loader.h"
+#include "compatible/components/tab_bar/modifier/tab_modifier_api.h"
 #include "core/common/dynamic_module_helper.h"
 #include "frameworks/bridge/common/dom/dom_button.h"
 #include "frameworks/bridge/common/dom/dom_calendar.h"
@@ -34,25 +35,20 @@
 #ifdef WEB_SUPPORTED
 #include "frameworks/bridge/common/dom/dom_rich_text.h"
 #endif
-#include "frameworks/bridge/common/dom/dom_search.h"
 #include "frameworks/bridge/common/dom/dom_slider.h"
 #include "frameworks/bridge/common/dom/dom_stack.h"
 #include "frameworks/bridge/common/dom/dom_swiper.h"
 #include "frameworks/bridge/common/dom/dom_switch.h"
-#include "frameworks/bridge/common/dom/dom_textarea.h"
 #include "frameworks/bridge/common/dom/dom_toggle.h"
 #if defined(XCOMPONENT_SUPPORTED)
 #include "frameworks/bridge/common/dom/dom_xcomponent.h"
 #endif
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/common/dom/dom_menu.h"
-#include "frameworks/bridge/common/dom/dom_navigation_menu.h"
 #include "frameworks/bridge/common/dom/dom_option.h"
 #include "frameworks/bridge/common/dom/dom_piece.h"
 #include "frameworks/bridge/common/dom/dom_popup.h"
 #include "frameworks/bridge/common/dom/dom_select.h"
-#include "frameworks/bridge/common/dom/dom_tab_bar.h"
-#include "frameworks/bridge/common/dom/dom_tab_content.h"
 #include "frameworks/bridge/common/dom/dom_tool_bar.h"
 #if !defined(PREVIEW)
 #ifdef WEB_SUPPORTED
@@ -85,6 +81,16 @@ RefPtr<DOMNode> DOMListItemCreator(NodeId nodeId, const std::string& tag, int32_
     return AceType::MakeRefPtr<T>(nodeId, tag, itemIndex);
 }
 
+const ArkUIInnerTabBarModifier* GetTabBarInnerModifier()
+{
+    static const ArkUIInnerTabBarModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("tab-bar");
+        CHECK_NULL_RETURN(loader, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIInnerTabBarModifier*>(loader->GetCustomModifier());
+    }
+    return cachedModifier;
+}
 } // namespace
 
 DOMDocument::~DOMDocument()
@@ -104,7 +110,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_DIVIDER, &DOMNodeCreator<DOMDivider> },
         { DOM_NODE_TAG_FORM, &DOMNodeCreator<DOMForm> },
         { DOM_NODE_TAG_IMAGE, &DOMNodeCreator<DOMImage> },
-        { DOM_NODE_TAG_INPUT, &DOMNodeCreator<DOMInput> },
         { DOM_NODE_TAG_LIST, &DOMNodeCreator<DOMList> },
         { DOM_NODE_TAG_LIST_ITEM, &DOMListItemCreator<DOMListItem> },
         { DOM_NODE_TAG_LIST_ITEM_GROUP, &DOMListItemCreator<DOMListItemGroup> },
@@ -113,7 +118,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
 #endif
         { DOM_NODE_TAG_NAVIGATION_BAR, &DOMNodeCreator<DomNavigationBar> },
 #ifndef WEARABLE_PRODUCT
-        { DOM_NODE_TAG_NAVIGATION_MENU, &DOMNodeCreator<DOMNavigationMenu> },
         { DOM_NODE_TAG_OPTION, &DOMNodeCreator<DOMOption> },
         { DOM_NODE_TAG_PANEL, &DOMNodeCreator<DOMPanel> },
 #endif
@@ -124,7 +128,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
 #ifdef WEB_SUPPORTED
         { DOM_NODE_TAG_RICH_TEXT, &DOMNodeCreator<DOMRichText> },
 #endif
-        { DOM_NODE_TAG_SEARCH, &DOMNodeCreator<DOMSearch> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_SELECT, &DOMNodeCreator<DOMSelect> },
 #endif
@@ -137,13 +140,7 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
 #endif
         { DOM_NODE_TAG_SWIPER, &DOMNodeCreator<DOMSwiper> },
         { DOM_NODE_TAG_SWITCH, &DOMNodeCreator<DOMSwitch> },
-#ifndef WEARABLE_PRODUCT
-        { DOM_NODE_TAG_TAB_BAR, &DOMNodeCreator<DOMTabBar> },
-        { DOM_NODE_TAG_TAB_CONTENT, &DOMNodeCreator<DOMTabContent> },
-        { DOM_NODE_TAG_TABS, &DOMNodeCreator<DOMTabs> },
-#endif
         { DOM_NODE_TAG_TEXT, &DOMNodeCreator<DOMText> },
-        { DOM_NODE_TAG_TEXTAREA, &DOMNodeCreator<DOMTextarea> },
         { DOM_NODE_TAG_TOGGLE, &DOMNodeCreator<DOMToggle> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_TOOL_BAR, &DOMNodeCreator<DOMToolBar> },
@@ -346,10 +343,10 @@ void DOMDocument::HandleComponentPostBinding()
                     // DOMMenu bind node with ID node
                     menuNode->BindIdNode(idNode);
                 }
-            } else if (AceType::InstanceOf<DOMTabBar>(targetNode)) {
-                auto tabBarNode = AceType::DynamicCast<DOMTabBar>(targetNode);
-                // DOMTabBar in navigation bar bind tabs with ID node
-                tabBarNode->BindToTabs(idNode);
+            } else {
+                if (auto modifier = GetTabBarInnerModifier()) {
+                    modifier->bindToTabs(targetNode, idNode);
+                }
 #endif
             }
             ++iterId;

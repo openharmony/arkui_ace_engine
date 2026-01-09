@@ -862,13 +862,8 @@ void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
 {
     CHECK_NULL_VOID(HasFocus());
 #if defined(CROSS_PLATFORM)
-#if defined(IOS_PLATFORM)
     if (editingValue_ && editingValue_->selection.IsValid() &&
         editingValue_->selection.GetEnd() < selectController_->GetCaretIndex()) {
-#else
-    if (editingValue_ && editingValue_->selection.IsValid() &&
-        editingValue_->selection.GetEnd() < selectController_->GetCaretIndex() && !editingValue_->appendText.empty()) {
-#endif
         SetCaretPosition(editingValue_->selection.GetEnd());
     }
     if (editingValue_ && editingValue_->selection.IsValid()) {
@@ -1665,14 +1660,13 @@ void TextFieldPattern::OnFocusCustomKeyboardChange()
     if (!textFieldManager->NeedCloseKeyboard()) {
         return;
     }
-    if (customKeyboard_) {
-        bool matched = GetCustomKeyboardIsMatched(customKeyboard_->GetId());
-        textFieldManager->ProcessCustomKeyboard(matched, currentNode->GetId());
-        SetCustomKeyboardNodeId(customKeyboard_);
+    if ((customKeyboard_ || customKeyboardBuilder_) && textFieldManager->GetCustomKeyboardContinueFeature()) {
+        textFieldManager->ProcessCustomKeyboard(true, currentNode->GetId());
+        SetPreKeyboardNode();
         return;
     }
     textFieldManager->ProcessCustomKeyboard(false, currentNode->GetId());
-    SetCustomKeyboardNodeId(nullptr);
+    SetPreKeyboardNode();
 }
 
 bool TextFieldPattern::NeedCloseKeyboard()
@@ -5405,11 +5399,10 @@ void TextFieldPattern::RequestCustomKeyboardBuilder()
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+    SetPreKeyboardNode();
     if (customKeyboardBuilder_) {
-        SetCustomKeyboardNodeId(nullptr);
         overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
     } else {
-        SetCustomKeyboardNodeId(customKeyboard_);
         overlayManager->BindKeyboardWithNode(customKeyboard_, frameNode->GetId());
     }
 }
@@ -5670,7 +5663,13 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
         CalcCounterAfterFilterInsertValue(originLength, insertValue,
             static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>())));
     }
+#ifdef ANDROID_PLATFORM
+    if (info.textSelection.baseOffset == info.textSelection.extentOffset) {
+        selectController_->UpdateCaretIndex(info.textSelection.baseOffset);
+    }
+#else
     selectController_->UpdateCaretIndex(caretStart + caretMoveLength);
+#endif
     UpdateObscure(insertValue, hasInsertValue);
     UpdateEditingValueToRecord();
     if (isIME) {
@@ -6510,11 +6509,6 @@ bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<Tex
 #ifdef IOS_PLATFORM
     if (value->discardedMarkedText) {
         return false;
-    }
-#endif
-#ifdef ANDROID_PLATFORM
-    if (value->appendText.empty()) {
-        return true;
     }
 #endif
     InsertValue(UtfUtils::Str8DebugToStr16(value->appendText), true);
@@ -11604,6 +11598,7 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
         info.compose.end = editingValue_->compose.GetEnd();
         info.compose.isActive = editingValue_->compose.IsValid();
         info.unmarkText = editingValue_->unmarkText;
+        info.textSelection = editingValue_->selection;
     }
 #endif
     insertCommands_.emplace(info);
@@ -11978,7 +11973,7 @@ void TextFieldPattern::SetCustomKeyboard(const std::function<void()>&& keyboardB
     customKeyboardBuilder_ = keyboardBuilder;
 }
 
-void TextFieldPattern::SetCustomKeyboardNodeId(const RefPtr<UINode>& customKeyboardNode)
+void TextFieldPattern::SetPreKeyboardNode()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -11988,21 +11983,6 @@ void TextFieldPattern::SetCustomKeyboardNodeId(const RefPtr<UINode>& customKeybo
     CHECK_NULL_VOID(textFieldManager);
     WeakPtr<FrameNode> weakNode = frameNode;
     textFieldManager->SetPreNode(weakNode);
-    if (customKeyboardNode) {
-        textFieldManager->SetCustomKeyboardId(customKeyboardNode->GetId());
-    } else {
-        textFieldManager->SetCustomKeyboardId(-1);
-    }
-}
-
-bool TextFieldPattern::GetCustomKeyboardIsMatched(int32_t CustomKeyboardId)
-{
-    auto pipeline = GetContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
-    CHECK_NULL_RETURN(textFieldManager, false);
-    auto id = textFieldManager->GetCustomKeyboardId();
-    return CustomKeyboardId == id;
 }
 
 void TextFieldPattern::SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder)

@@ -161,6 +161,14 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     CHECK_NULL_VOID(!pattern->spans_.empty());
     auto contentHost = pattern->GetContentHost();
     CHECK_NULL_VOID(contentHost);
+
+    auto localOffset = handleRect.GetOffset();
+    if (IsOverlayMode()) {
+        auto parentGlobalOffset = hasTransform_ ? GetPaintOffsetWithoutTransform() : pattern->GetParentGlobalOffset();
+        localOffset = localOffset - parentGlobalOffset; // original offset
+    }
+    SetMagnifierOffset(localOffset, handleRect);
+
     // the handle position is calculated based on the middle of the handle height.
     auto handleOffset = GetHandleReferenceOffset(handleRect);
     UpdateSelectorOnHandleMove(handleOffset, isFirst);
@@ -168,12 +176,6 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->MarkInfoChange(DIRTY_SELECT_TEXT);
-    auto localOffset = handleRect.GetOffset();
-    if (IsOverlayMode()) {
-        auto parentGlobalOffset = hasTransform_ ? GetPaintOffsetWithoutTransform() : pattern->GetParentGlobalOffset();
-        localOffset = localOffset - parentGlobalOffset; // original offset
-    }
-    SetMagnifierOffset(localOffset, handleRect);
 
     bool isChangeSecondHandle = isFirst ? pattern->textSelector_.StartGreaterDest() :
         (!pattern->textSelector_.StartGreaterDest());
@@ -420,7 +422,7 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             break;
         case OptionMenuActionId::PASTE:
             pattern->HandleOnPaste();
-            CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
+            CloseOverlay(true, CloseReason::CLOSE_REASON_PASTE);
             break;
         case OptionMenuActionId::SELECT_ALL:
             pattern->HandleMenuCallbackOnSelectAll();
@@ -515,7 +517,8 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
         pattern->floatingCaretState_.Reset();
         pattern->isCursorAlwaysDisplayed_ = false;
     }
-    auto needResetSelection = pattern->GetTextDetectEnable() && !pattern->HasFocus() &&
+    auto isAIEnable = pattern->GetTextDetectEnable() && !pattern->HasFocus();
+    auto needResetSelection = isAIEnable && reason != CloseReason::CLOSE_REASON_PASTE &&
         reason != CloseReason::CLOSE_REASON_DRAG_FLOATING;
     auto isBackPressed = reason == CloseReason::CLOSE_REASON_BACK_PRESSED;
     auto isHoldByOther = reason == CloseReason::CLOSE_REASON_HOLD_BY_OTHER;

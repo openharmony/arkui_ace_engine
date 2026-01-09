@@ -285,6 +285,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
         {
             this._selected_0_flag = AttributeUpdaterFlag.UPDATE
             this._selected_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selected_0_flag = AttributeUpdaterFlag.SKIP
@@ -296,6 +297,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
         {
             this._selectIcon_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectIcon_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectIcon_0_flag = AttributeUpdaterFlag.SKIP
@@ -307,6 +309,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -318,6 +321,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
         {
             this._contentFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -329,6 +333,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
         {
             this._contentFontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentFontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentFontColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -340,6 +345,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
         {
             this._labelFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._labelFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._labelFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -351,6 +357,7 @@ export class MenuItemModifier extends CommonMethodModifier implements MenuItemAt
         {
             this._labelFontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._labelFontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._labelFontColor_0_flag = AttributeUpdaterFlag.SKIP

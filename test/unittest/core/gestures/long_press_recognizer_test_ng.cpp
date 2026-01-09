@@ -238,6 +238,15 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerTest003, TestSize.Level1)
     longPressRecognizer->isDisableMouseLeft_ = !longPressRecognizer->isDisableMouseLeft_;
     longPressRecognizer->HandleTouchDownEvent(touchEvent);
     EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 1);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case8: change passThrough to true
+     * @tc.expected: step2. result equals.
+     */
+    touchEvent.passThrough = true;
+    longPressRecognizer->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 1);
 }
 
 /**

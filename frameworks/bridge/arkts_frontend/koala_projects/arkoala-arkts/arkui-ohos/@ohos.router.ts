@@ -23,7 +23,7 @@ import { UIContextUtil } from "arkui/base/UIContextUtil"
 namespace router {
     export interface RouterOptions {
         url: string
-        params?: Object
+        params?: jsonx.JsonElement
         recoverable?: boolean
     }
     
@@ -36,7 +36,7 @@ namespace router {
         index: int;
         name: string;
         path: string;
-        params: Object;
+        params: jsonx.JsonElement;
     }
 
     export interface EnableAlertOptions {
@@ -45,7 +45,7 @@ namespace router {
 
     export interface NamedRouterOptions {
         name: string;
-        params?: Object;
+        params?: jsonx.JsonElement;
         recoverable?: boolean;
     }
 
@@ -60,7 +60,7 @@ namespace router {
         uiContext.setRouter(routerImp)
     }
 
-    export function getParams(): Object {
+    export function getParams(): jsonx.JsonElement {
         throw new Error("TBD")
     }
 

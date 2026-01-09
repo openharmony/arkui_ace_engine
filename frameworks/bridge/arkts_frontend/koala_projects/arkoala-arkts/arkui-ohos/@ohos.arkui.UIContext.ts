@@ -44,7 +44,7 @@ import { DatePickerDialogOptions } from 'arkui/framework';
 import { SheetOptions } from 'arkui/framework';
 import inspector from '@ohos/arkui/inspector';
 import router from '@ohos/router';
-import { ComponentContent } from 'arkui/ComponentContent';
+import { ComponentContent, ComponentContentBase } from 'arkui/ComponentContent';
 import overlayManager from '@ohos/overlayManager';
 import promptAction, { LevelOrder } from '@ohos/promptAction';
 import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
@@ -118,6 +118,18 @@ export class Router {
         throw Error("pushUrl not implemented in Router!");
     }
 
+    public pushUrl(options: router.RouterOptions, mode: router.RouterMode): Promise<void> {
+        throw Error("pushUrl not implemented in Router!");
+    }
+
+    public pushUrl(options: router.RouterOptions, callback: AsyncCallback<void>): void {
+        throw Error("pushUrl not implemented in Router!");
+    }
+
+    public pushUrl(options: router.RouterOptions, mode: router.RouterMode, callback: AsyncCallback<void>): void {
+        throw Error("pushUrl not implemented in Router!");
+    }
+
     public pushNamedRoute(options: router.NamedRouterOptions): Promise<void> {
         throw Error("pushNamedRoute not implemented in Router!");
     }
@@ -135,6 +147,18 @@ export class Router {
     }
 
     public replaceUrl(options: router.RouterOptions): Promise<void> {
+        throw Error("replaceUrl not implemented in Router!");
+    }
+
+    public replaceUrl(options: router.RouterOptions, mode: router.RouterMode): Promise<void> {
+        throw Error("replaceUrl not implemented in Router!");
+    }
+
+    public replaceUrl(options: router.RouterOptions, callback: AsyncCallback<void>): void {
+        throw Error("replaceUrl not implemented in Router!");
+    }
+
+    public replaceUrl(options: router.RouterOptions, mode: router.RouterMode, callback: AsyncCallback<void>): void {
         throw Error("replaceUrl not implemented in Router!");
     }
 
@@ -158,6 +182,10 @@ export class Router {
         throw Error("back not implemented in Router!");
     }
 
+    public back(index: int, params?: jsonx.JsonElement): void {
+        throw Error("back not implemented in Router!");
+    }
+
     public clear(): void {
         throw Error("clear not implemented in Router!");
     }
@@ -168,7 +196,7 @@ export class Router {
         throw Error("getStackSize not implemented in Router!")
     }
 
-    public getParams(): Object {
+    public getParams(): jsonx.JsonElement {
         throw Error("getParams not implemented in Router!");
     }
 
@@ -248,27 +276,27 @@ export class ComponentSnapshot {
     }
     //@ts-ignore
     public createFromBuilder(builder: CustomBuilder, callback: AsyncCallback<PixelMap>,
-                             delay?: number, checkImageStatus?: boolean,
+                             delay?: int32, checkImageStatus?: boolean,
                              options?: componentSnapshot.SnapshotOptions): void {
         throw Error("createFromBuilder with callback not implemented in ComponentSnapshot!")
     }
     //@ts-ignore
-    public createFromBuilder(builder: CustomBuilder, delay?: number, checkImageStatus?: boolean,
+    public createFromBuilder(builder: CustomBuilder, delay?: int32, checkImageStatus?: boolean,
                              options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error("createFromBuilder with promise not implemented in ComponentSnapshot!")
     }
     public getSync(id: string, options?: componentSnapshot.SnapshotOptions): PixelMap | null {
         throw Error("getSync not implemented in ComponentSnapshot!")
     }
-    public getWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
+    public getWithUniqueId(uniqueId: int32, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error("getWithUniqueId not implemented in ComponentSnapshot!")
     }
 
-    public getSyncWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): PixelMap {
+    public getSyncWithUniqueId(uniqueId: int32, options?: componentSnapshot.SnapshotOptions): PixelMap {
         throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
     }
 
-    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number, checkImageStatus?: boolean,
+    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: int32, checkImageStatus?: boolean,
         options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
     }
@@ -528,6 +556,9 @@ export class UIContext {
     public isFollowingSystemFontScale() : boolean {
         throw Error("isFollowingSystemFontScale not implemented in UIContext!")
     }
+    public setCustomKeyboardContinueFeature(feature: CustomKeyboardContinueFeature): void {
+        throw Error("setCustomKeyboardContinueFeature not implemented in UIContext!")
+    }
     public getMaxFontScale() : number {
         throw Error("getMaxFontScale not implemented in UIContext!")
     }
@@ -728,6 +759,14 @@ export class UIContext {
     static destroyUIContextWithoutWindow() {
         UIContextImpl.destroyUIContextWithoutWindow()
     }
+    public getPageInfoByUniqueId(id: int): PageInfo {
+        throw Error("getPageInfoByUniqueId(int) not implemented in UIContext!")
+    }
+
+    public getPageInfoByUniqueId(id: number): PageInfo {
+        throw Error("getPageInfoByUniqueId(number) not implemented in UIContext!")
+    }
+
     public getFilteredInspectorTree(filters?: Array<string>): string {
         throw Error("getFilteredInspectorTree not implemented in UIContext!")
     }
@@ -747,15 +786,15 @@ export class UIContext {
         throw Error("requireDynamicSyncScene not implemented in UIContext!");
     }
 
-    public openBindSheet(bindSheetContent: ComponentContent, sheetOptions?: SheetOptions, targetId?: int): Promise<void> {
+    public openBindSheet(bindSheetContent: ComponentContentBase, sheetOptions?: SheetOptions, targetId?: int): Promise<void> {
         throw Error("openBindSheet not implemented in UIContext!")
     }
 
-    public updateBindSheet(bindSheetContent: ComponentContent, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
+    public updateBindSheet(bindSheetContent: ComponentContentBase, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
         throw Error("updateBindSheet not implemented in UIContext!")
     }
 
-    public closeBindSheet(bindSheetContent: ComponentContent): Promise<void> {
+    public closeBindSheet(bindSheetContent: ComponentContentBase): Promise<void> {
         throw Error("closeBindSheet not implemented in UIContext!")
     }
 
@@ -779,14 +818,6 @@ export class UIContext {
     public unbindTabsFromNestedScrollable(tabsController: TabsController, parentScroller: Scroller,
         childScroller: Scroller): void {
         throw Error("unbindTabsFromNestedScrollable not implemented in UIContext!")
-    }
-
-    public getPageInfoByUniqueId(id: int): PageInfo {
-        throw Error("getPageInfoByUniqueId(int) not implemented in UIContext!")
-    }
-
-    public getPageInfoByUniqueId(id: number): PageInfo {
-        throw Error("getPageInfoByUniqueId(number) not implemented in UIContext!")
     }
 }
 export abstract class FrameCallback {
@@ -1088,4 +1119,9 @@ export class SwiperDynamicSyncScene extends DynamicSyncScene {
         super.setFrameRateRange(range);
         ArkUIAniModule._Common_SetFrameRateRange(this.nodePtr, range, this.type);
     }
+}
+
+export const enum CustomKeyboardContinueFeature {
+    ENABLED = 0,
+    DISABLED = 1,
 }

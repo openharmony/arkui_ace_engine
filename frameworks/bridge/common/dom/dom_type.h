@@ -697,7 +697,6 @@ ACE_EXPORT extern const char DOM_TRACK_COLOR_ON[];
 ACE_EXPORT extern const char DOM_TRACK_COLOR_OFF[];
 
 // tabs attribute and style constants
-ACE_EXPORT extern const char DOM_TAB_BAR_MODE[];
 ACE_EXPORT extern const char DOM_TAB_CONTENT_SCROLLABLE[];
 
 // marquee attribute and style constants
@@ -793,75 +792,17 @@ ACE_EXPORT extern const char DOM_VIDEO_POSITION_TOP[];
 ACE_EXPORT extern const char DOM_VIDEO_POSITION_BOTTOM[];
 
 // textarea attribute and style constants
-ACE_EXPORT extern const char DOM_TEXTAREA_VALUE[];
-ACE_EXPORT extern const char DOM_TEXTAREA_PLACEHOLDER[];
-ACE_EXPORT extern const char DOM_TEXTAREA_MAXLENGTH[];
-ACE_EXPORT extern const char DOM_TEXTAREA_MAXLINES[];
-ACE_EXPORT extern const char DOM_TEXTAREA_OBSCURE[];
-ACE_EXPORT extern const char DOM_TEXTAREA_OVERFLOWX[];
-ACE_EXPORT extern const char DOM_TEXTAREA_PLACEHOLDER_COLOR[];
-ACE_EXPORT extern const char DOM_TEXTAREA_CURSOR_COLOR[];
 ACE_EXPORT extern const char DOM_TEXTAREA_COLOR[];
 ACE_EXPORT extern const char DOM_TEXTAREA_FONT_SIZE[];
 ACE_EXPORT extern const char DOM_TEXTAREA_FONT_WEIGHT[];
 ACE_EXPORT extern const char DOM_TEXTAREA_FONT_FAMILY[];
-ACE_EXPORT extern const char DOM_TEXTAREA_METHOD_FOCUS[];
-ACE_EXPORT extern const char DOM_TEXTAREA_EXTEND[];
-ACE_EXPORT extern const char DOM_TEXTAREA_SHOW_COUNTER[];
 
 // input attribute and style extern constants
-ACE_EXPORT extern const char DOM_INPUT_TYPE[];
 ACE_EXPORT extern const char DOM_INPUT_TYPE_EMAIL[];
 ACE_EXPORT extern const char DOM_INPUT_TYPE_DATE[];
 ACE_EXPORT extern const char DOM_INPUT_TYPE_TIME[];
 ACE_EXPORT extern const char DOM_INPUT_TYPE_NUMBER[];
 ACE_EXPORT extern const char DOM_INPUT_TYPE_PASSWORD[];
-ACE_EXPORT extern const char DOM_INPUT_CHECKED[];
-ACE_EXPORT extern const char DOM_INPUT_NAME[];
-ACE_EXPORT extern const char DOM_INPUT_VALUE[];
-ACE_EXPORT extern const char DOM_INPUT_PLACEHOLDER[];
-ACE_EXPORT extern const char DOM_INPUT_MAXLENGTH[];
-ACE_EXPORT extern const char DOM_INPUT_ENTERKEYTYPE[];
-ACE_EXPORT extern const char DOM_INPUT_PLACEHOLDER_COLOR[];
-ACE_EXPORT extern const char DOM_INPUT_CURSOR_COLOR[];
-ACE_EXPORT extern const char DOM_INPUT_COLOR[];
-ACE_EXPORT extern const char DOM_INPUT_FONT_SIZE[];
-ACE_EXPORT extern const char DOM_INPUT_FONT_WEIGHT[];
-ACE_EXPORT extern const char DOM_INPUT_WIDTH[];
-ACE_EXPORT extern const char DOM_INPUT_HEIGHT[];
-ACE_EXPORT extern const char DOM_INPUT_FONT_FAMILY[];
-ACE_EXPORT extern const char DOM_INPUT_OBSCURE[];
-ACE_EXPORT extern const char DOM_INPUT_AUTO_FOCUS[];
-ACE_EXPORT extern const char DOM_INPUT_RECT_RADIUS[];
-ACE_EXPORT extern const char DOM_INPUT_BACKGROUND_COLOR[];
-ACE_EXPORT extern const char DOM_INPUT_CLICKED_COLOR[];
-ACE_EXPORT extern const char DOM_INPUT_DISABLE_COLOR[];
-ACE_EXPORT extern const char DOM_INPUT_FOCUS_COLOR[];
-ACE_EXPORT extern const char DOM_INPUT_METHOD_FOCUS[];
-ACE_EXPORT extern const char DOM_ICON_SRC[];
-ACE_EXPORT extern const char DOM_SHOW_ICON_SRC[];
-ACE_EXPORT extern const char DOM_HIDE_ICON_SRC[];
-ACE_EXPORT extern const char DOM_INPUT_SHOW_PASSWORD_ICON[];
-ACE_EXPORT extern const char DOM_INPUT_SHOW_COUNTER[];
-ACE_EXPORT extern const char DOM_INPUT_OPTION_ICON[];
-ACE_EXPORT extern const char DOM_INPUT_OPTION_CONTENT[];
-ACE_EXPORT extern const char DOM_INPUT_SELECTED_START[];
-ACE_EXPORT extern const char DOM_INPUT_SELECTED_END[];
-ACE_EXPORT extern const char DOM_INPUT_SOFT_KEYBOARD_ENABLED[];
-ACE_EXPORT extern const char DOM_INPUT_METHOD_SHOW_ERROR[];
-ACE_EXPORT extern const char DOM_INPUT_METHOD_DELETE[];
-ACE_EXPORT extern const char DOM_INPUT_METHOD_INSERT[];
-
-// input event extern constants
-ACE_EXPORT extern const char DOM_INPUT_EVENT_NAME[];
-ACE_EXPORT extern const char DOM_INPUT_EVENT_VALUE[];
-ACE_EXPORT extern const char DOM_INPUT_EVENT_CHECKED[];
-ACE_EXPORT extern const char DOM_INPUT_EVENT_ENTERKEYCLICK[];
-ACE_EXPORT extern const char DOM_INPUT_EVENT_OPTION_SELECT[];
-ACE_EXPORT extern const char DOM_INPUT_EVENT_TRANSLATE[];
-ACE_EXPORT extern const char DOM_INPUT_EVENT_SHARE[];
-ACE_EXPORT extern const char DOM_INPUT_EVENT_SEARCH[];
-ACE_EXPORT extern const char DOM_INPUT_EVENT_SELECT_CHANGE[];
 
 // divider style extern constants
 ACE_EXPORT extern const char DOM_DIVIDER_VERTICAL[];
@@ -959,13 +900,6 @@ ACE_EXPORT extern const char DOM_VOICE_LABEL[];
 ACE_EXPORT extern const char DOM_SUBSCRIPT_LABEL[];
 ACE_EXPORT extern const char DOM_SUBSCRIPT_FLAG[];
 ACE_EXPORT extern const char DOM_SCENE_LABEL[];
-
-// search constants
-ACE_EXPORT extern const char DOM_SEARCH_ICON[];
-ACE_EXPORT extern const char DOM_SEARCH_HINT[];
-ACE_EXPORT extern const char DOM_SUBMIT[];
-ACE_EXPORT extern const char DOM_SEARCH_VALUE[];
-ACE_EXPORT extern const char DOM_SEARCH_BUTTON[];
 
 // toggle constants
 ACE_EXPORT extern const char DOM_TOGGLE_BACKGROUND_COLOR[];

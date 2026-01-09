@@ -6581,6 +6581,26 @@ void deserializeAndCallSyncReuseIdCallback(Ark_VMContext vmContext, KSerializerB
     Callback_String_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String breakpoints)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String breakpoints)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_String_Void))))};
     callSyncMethod(vmContext, resourceId, continuationResult);
 }
+void deserializeAndCallRouter_BusinessError_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 code, const Ark_String message)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Router_BusinessError_Void))));
+    thisDeserializer.readPointer();
+    Ark_Int32 code = thisDeserializer.readInt32();
+    Ark_String message = static_cast<Ark_String>(thisDeserializer.readString());
+    _call(_resourceId, code, message);
+}
+void deserializeAndCallSyncRouter_BusinessError_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 code, const Ark_String message)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Router_BusinessError_Void))));
+    Ark_Int32 code = thisDeserializer.readInt32();
+    Ark_String message = static_cast<Ark_String>(thisDeserializer.readString());
+    callSyncMethod(vmContext, resourceId, code, message);
+}
 void deserializeAndCallRouterFinishCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -7827,6 +7847,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_RestrictedWorker_onexit_Callback: return deserializeAndCallRestrictedWorker_onexit_Callback(thisArray, thisLength);
         case Kind_RestrictedWorker_onmessage_Callback: return deserializeAndCallRestrictedWorker_onmessage_Callback(thisArray, thisLength);
         case Kind_ReuseIdCallback: return deserializeAndCallReuseIdCallback(thisArray, thisLength);
+        case Kind_Router_BusinessError_Void: return deserializeAndCallRouter_BusinessError_Void(thisArray, thisLength);
         case Kind_RouterFinishCallback: return deserializeAndCallRouterFinishCallback(thisArray, thisLength);
         case Kind_SaveButtonCallback: return deserializeAndCallSaveButtonCallback(thisArray, thisLength);
         case Kind_ScrollOnDidZoomCallback: return deserializeAndCallScrollOnDidZoomCallback(thisArray, thisLength);
@@ -8171,6 +8192,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_RestrictedWorker_onexit_Callback: return deserializeAndCallSyncRestrictedWorker_onexit_Callback(vmContext, thisArray, thisLength);
         case Kind_RestrictedWorker_onmessage_Callback: return deserializeAndCallSyncRestrictedWorker_onmessage_Callback(vmContext, thisArray, thisLength);
         case Kind_ReuseIdCallback: return deserializeAndCallSyncReuseIdCallback(vmContext, thisArray, thisLength);
+        case Kind_Router_BusinessError_Void: return deserializeAndCallSyncRouter_BusinessError_Void(vmContext, thisArray, thisLength);
         case Kind_RouterFinishCallback: return deserializeAndCallSyncRouterFinishCallback(vmContext, thisArray, thisLength);
         case Kind_SaveButtonCallback: return deserializeAndCallSyncSaveButtonCallback(vmContext, thisArray, thisLength);
         case Kind_ScrollOnDidZoomCallback: return deserializeAndCallSyncScrollOnDidZoomCallback(vmContext, thisArray, thisLength);

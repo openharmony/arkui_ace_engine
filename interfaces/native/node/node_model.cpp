@@ -58,13 +58,7 @@ public:
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot load libace: %{public}s", dlerror());
         }
     }
-    ~AceModule()
-    {
-        if (handle_) {
-            dlclose(handle_);
-            handle_ = nullptr;
-        }
-    }
+    ~AceModule() {}
 
     void* GetHandle() const
     {

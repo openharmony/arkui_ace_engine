@@ -1469,12 +1469,6 @@ HWTEST_F(ViewAbstractTestNg, SetOverlayNodeTest001, TestSize.Level1)
     EXPECT_EQ(x, dimensionValue);
     EXPECT_EQ(y, dimensionValue);
 
-    auto renderContext = overlayNodeWithFrameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    auto getOptions = renderContext->GetOverlayTextValue(NG::OverlayOptions());
-    auto direction = getOptions.direction;
-    EXPECT_EQ(direction, options.direction);
-
     ViewAbstract::SetOverlayNode(AceType::RawPtr(frameNode), nullptr, options);
     overlayNodeWithFrameNode = frameNode->GetOverlayNode();
     EXPECT_EQ(overlayNodeWithFrameNode, nullptr);

@@ -37,7 +37,7 @@ ohos_source_set("ace_compatible_source") {
       "USE_ARK_ENGINE",
     ]
   configs = [ "$ace_root:ace_config" ]
-
+  defines += [ "ENABLE_ROSEN_BACKEND" ]
   sources = [
     "components/badge/badge_component.cpp",
     "components/badge/badge_composed_element.cpp",
@@ -85,6 +85,9 @@ ohos_source_set("ace_compatible_source") {
     "components/marquee/render_marquee.cpp",
     "components/marquee/render_marquee_creator.cpp",
     "components/marquee/rosen_render_marquee.cpp",
+    "components/navigation_menu/dom_navigation_menu.cpp",
+    "components/navigation_menu/navigation_menus_composed_element.cpp",
+    "components/navigation_menu/navigation_menu_loader.cpp",
     "components/picker/date_picker_composed_element.cpp",
     "components/picker/date_picker_dialog_composed_element.cpp",
     "components/picker/picker_loader.cpp",
@@ -295,6 +298,37 @@ ohos_source_set("ace_compatible_source") {
     "components/svg/svg_text_path_declaration.cpp",
     "components/svg/svg_tspan_component.cpp",
     "components/svg/svg_use_component.cpp",
+    "components/tab_bar/dom/dom_tab_bar.cpp",
+    "components/tab_bar/dom/dom_tab_content.cpp",
+    "components/tab_bar/dom/dom_tabs.cpp",
+    "components/tab_bar/models/tab_content_model_impl.cpp",
+    "components/tab_bar/models/tabs_model_impl.cpp",
+    "components/tab_bar/modifier/tab_modifier.cpp",
+    "components/tab_bar/render_tab_bar.cpp",
+    "components/tab_bar/render_tab_bar_creator.cpp",
+    "components/tab_bar/render_tab_bar_item.cpp",
+    "components/tab_bar/render_tab_bar_item_creator.cpp",
+    "components/tab_bar/render_tab_content.cpp",
+    "components/tab_bar/render_tab_content_creator.cpp",
+    "components/tab_bar/rosen_render_tab_bar.cpp",
+    "components/tab_bar/rosen_render_tab_bar_item.cpp",
+    "components/tab_bar/rosen_render_tab_content.cpp",
+    "components/tab_bar/tab_bar_component.cpp",
+    "components/tab_bar/tab_bar_element.cpp",
+    "components/tab_bar/tab_bar_indicator_component.cpp",
+    "components/tab_bar/tab_bar_item_component.cpp",
+    "components/tab_bar/tab_bar_size_animation.cpp",
+    "components/tab_bar/tab_content_component.cpp",
+    "components/tab_bar/tab_content_element.cpp",
+    "components/tab_bar/tab_controller.cpp",
+    "components/tab_bar/tab_loader.cpp",
+    "components/tab_bar/v2/tab_content_composed_element.cpp",
+    "components/tab_bar/v2/tab_content_item_component.cpp",
+    "components/tab_bar/v2/tab_content_item_element.cpp",
+    "components/tab_bar/v2/tab_content_proxy_element.cpp",
+    "components/tab_bar/v2/tabs_component.cpp",
+    "components/tab_bar/v2/tabs_composed_element.cpp",
+    "components/tab_bar/v2/tabs_element.cpp",
     "components/video/dom_video.cpp",
     "components/video/render_texture_creator.cpp",
     "components/video/render_texture.cpp",
@@ -314,6 +348,41 @@ ohos_source_set("ace_compatible_source") {
     "components/clock/render_clock_creator.cpp",
     "components/clock/rosen_render_clock.cpp",
     "components/clock/clock_loader.cpp",
+    
+    "components/search/dom_search.cpp",
+    "components/search/render_search_creator.cpp",
+    "components/search/render_search.cpp",
+    "components/search/rosen_render_search.cpp",
+    "components/search/search_component.cpp",
+    "components/search/search_composed_element.cpp",
+    "components/search/search_declaration.cpp",
+    "components/search/search_element.cpp",
+    "components/search/search_loader.cpp",
+    "components/search/search_model_impl.cpp",
+
+    "components/text_field/dom_textarea.cpp",
+    "components/text_field/render_text_field_creator.cpp",
+    "components/text_field/render_text_field.cpp",
+    "components/text_field/rosen_render_text_field.cpp",
+    "components/text_field/text_field_component.cpp",
+    "components/text_field/text_field_controller.cpp",
+    "components/text_field/text_field_element.cpp",
+    "components/text_field/text_field_loader.cpp",
+    "components/text_field/text_field_model_impl.cpp",
+    "components/text_field/textarea_composed_element.cpp",
+    "components/text_field/textarea_declaration.cpp",
+    "components/text_field/textfield_declaration.cpp",
+    "components/text_field/text_field_type.cpp",
+    "components/text_field/modifier/text_field_modifier.cpp",
+
+    "components/input/input/dom_button_util.cpp",
+    "components/input/input/dom_checkbox_util.cpp",
+    "components/input/input/dom_radio_util.cpp",
+    "components/input/input/dom_textfield_util.cpp",
+    "components/input/dom_input.cpp",
+    "components/input/input_loader.cpp",
+    "components/input/input_declaration.cpp",
+    "components/input/textinput_composed_element.cpp",
   ]
 
   if (qrcodegen_support) {
@@ -333,10 +402,15 @@ ohos_source_set("ace_compatible_source") {
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
+    "graphic_2d:rosen_text",
     "icu:shared_icui18n",
     "icu:shared_icuuc",
     "napi:ace_napi",
   ]
+  if (defined(global_parts_info.inputmethod_imf) && !use_mingw_win && !use_mac && !use_linux) {
+    sources += [ "components/text_field/on_text_changed_listener_impl.cpp" ]
+    external_deps += [ "imf:inputmethod_client" ]
+  }
   deps = [
     "$ace_root/frameworks/core:ace_container_scope",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
@@ -345,6 +419,12 @@ ohos_source_set("ace_compatible_source") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 
+  if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
+    external_deps += [
+      "hilog:libhilog",
+      "input:libmmi-client",
+    ]
+  }
   if (ohos_indep_compiler_enable) {
     include_dirs = indep_compile_includes
   }

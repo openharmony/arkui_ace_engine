@@ -85,6 +85,7 @@ export class HyperlinkModifier extends CommonMethodModifier implements Hyperlink
         {
             this._color_0_flag = AttributeUpdaterFlag.UPDATE
             this._color_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._color_0_flag = AttributeUpdaterFlag.SKIP

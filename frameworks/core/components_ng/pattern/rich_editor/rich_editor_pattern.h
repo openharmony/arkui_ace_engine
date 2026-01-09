@@ -931,9 +931,8 @@ public:
     bool IsSingleHandle();
     bool IsHandlesShow() override;
     bool IsHandleMoving();
-    void SetCustomKeyboardNode(const RefPtr<UINode>& customKeyboardNode);
+    void SetPreKeyboardNode();
     void ProcessCloseKeyboard(const RefPtr<FrameNode>& currentNode);
-    bool GetCustomKeyboardIsMatched(int32_t customKeyboard);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
     void InitAiSelection(const Offset& globalOffset, bool isBetweenSelection = false);

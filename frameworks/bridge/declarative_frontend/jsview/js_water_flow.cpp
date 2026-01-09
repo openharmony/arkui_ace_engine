@@ -92,26 +92,6 @@ void ParseScroller(const JSRef<JSObject>& obj)
         WaterFlowModel::GetInstance()->SetScroller(positionController, proxy);
     }
 }
-
-bool isSectionChanged(
-    const std::vector<NG::WaterFlowSections::Section>& cur,
-    const std::vector<NG::WaterFlowSections::Section>& all)
-{
-    if (cur.size() != all.size()) {
-        return true;
-    }
-
-    for (size_t i = 0; i < all.size(); ++i) {
-        if (cur[i].itemsCount != all[i].itemsCount) {
-            return true;
-        }
-
-        if (cur[i].crossCount != all[i].crossCount) {
-            return true;
-        }
-    }
-    return false;
-}
 } // namespace
 
 void UpdateSections(
@@ -153,7 +133,7 @@ void UpdateSections(
             auto nodeSection = weak.Upgrade();
             CHECK_NULL_VOID(nodeSection);
             nodeSection->ChangeData(start, deleteCount, change);
-            if (isSectionChanged(nodeSection->GetSectionInfo(), all)) {
+            if (nodeSection->GetSectionInfo().size() != all.size()) {
                 nodeSection->ChangeData(0, nodeSection->GetSectionInfo().size(), all);
             }
         });

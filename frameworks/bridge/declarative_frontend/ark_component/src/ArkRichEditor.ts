@@ -668,7 +668,7 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
     return this;
   }
   bindSelectionMenu(spanType: RichEditorSpanType, content: CustomBuilder, responseType: ResponseType, options?: SelectionMenuOptions): RichEditorAttribute {
-    throw new BusinessError(100028, 'Method not implemented.');
+    throw new Error('Method not implemented.');
   }
   selectedDragPreviewStyle(value: SelectedDragPreviewStyle): this {
     let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();

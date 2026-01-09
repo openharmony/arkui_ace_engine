@@ -117,6 +117,7 @@ export class ScrollBarModifier extends CommonMethodModifier implements ScrollBar
         {
             this._enableNestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableNestedScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableNestedScroll_0_flag = AttributeUpdaterFlag.SKIP

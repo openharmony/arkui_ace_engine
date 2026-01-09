@@ -42,6 +42,7 @@ void GridModelStatic::SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& 
 
 void GridModelStatic::SetColumnsTemplate(FrameNode* frameNode, const std::optional<std::string>& columnsTemplate)
 {
+    ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ItemFillPolicy, frameNode);
     if (!columnsTemplate) {
         CHECK_NULL_VOID(frameNode);
         auto layout = frameNode->GetLayoutPropertyPtr<GridLayoutProperty>();

@@ -1107,10 +1107,10 @@ typedef struct Array_RichEditorSpan Array_RichEditorSpan;
 typedef struct Opt_Array_RichEditorSpan Opt_Array_RichEditorSpan;
 typedef struct Array_RichEditorTextSpanResult Array_RichEditorTextSpanResult;
 typedef struct Opt_Array_RichEditorTextSpanResult Opt_Array_RichEditorTextSpanResult;
-typedef struct Array_router_RouterState Array_router_RouterState;
-typedef struct Opt_Array_router_RouterState Opt_Array_router_RouterState;
 typedef struct Array_RouterItem Array_RouterItem;
 typedef struct Opt_Array_RouterItem Opt_Array_RouterItem;
+typedef struct Array_RouterStateInner Array_RouterStateInner;
+typedef struct Opt_Array_RouterStateInner Opt_Array_RouterStateInner;
 typedef struct Array_SafeAreaEdge Array_SafeAreaEdge;
 typedef struct Opt_Array_SafeAreaEdge Opt_Array_SafeAreaEdge;
 typedef struct Array_SafeAreaType Array_SafeAreaType;
@@ -1216,6 +1216,8 @@ typedef struct Opt_Callback_Boolean_Void Opt_Callback_Boolean_Void;
 typedef struct Callback_Buffer_Void Callback_Buffer_Void;
 typedef struct Opt_Callback_Buffer_Void Opt_Callback_Buffer_Void;
 typedef struct Callback_ClickEvent_Void Callback_ClickEvent_Void;
+typedef struct Callback_BusinessError_Void Callback_BusinessError_Void;
+typedef struct Opt_Callback_BusinessError_Void Opt_Callback_BusinessError_Void;
 typedef struct Opt_Callback_ClickEvent_Void Opt_Callback_ClickEvent_Void;
 typedef struct Callback_ComputedBarAttribute_Void Callback_ComputedBarAttribute_Void;
 typedef struct Opt_Callback_ComputedBarAttribute_Void Opt_Callback_ComputedBarAttribute_Void;
@@ -1801,6 +1803,8 @@ typedef struct RestrictedWorker_onmessage_Callback RestrictedWorker_onmessage_Ca
 typedef struct Opt_RestrictedWorker_onmessage_Callback Opt_RestrictedWorker_onmessage_Callback;
 typedef struct ReuseIdCallback ReuseIdCallback;
 typedef struct Opt_ReuseIdCallback Opt_ReuseIdCallback;
+typedef struct Router_BusinessError_Void Router_BusinessError_Void;
+typedef struct Opt_Router_BusinessError_Void Opt_Router_BusinessError_Void;
 typedef struct RouterFinishCallback RouterFinishCallback;
 typedef struct Opt_RouterFinishCallback Opt_RouterFinishCallback;
 typedef struct SaveButtonCallback SaveButtonCallback;
@@ -2442,15 +2446,15 @@ typedef struct Ark_RoundRect Ark_RoundRect;
 typedef struct Opt_RoundRect Opt_RoundRect;
 typedef struct Ark_RouteMapConfig Ark_RouteMapConfig;
 typedef struct Opt_RouteMapConfig Opt_RouteMapConfig;
-typedef struct Ark_router_RouterOptions Ark_router_RouterOptions;
-typedef struct Opt_router_RouterOptions Opt_router_RouterOptions;
-typedef struct Ark_router_RouterState Ark_router_RouterState;
-typedef struct Opt_router_RouterState Opt_router_RouterState;
 typedef struct Ark_RouterCallbackInfo Ark_RouterCallbackInfo;
 typedef struct Opt_RouterCallbackInfo Opt_RouterCallbackInfo;
 typedef struct RouterItemPeer RouterItemPeer;
 typedef struct RouterItemPeer* Ark_RouterItem;
 typedef struct Opt_RouterItem Opt_RouterItem;
+typedef struct Ark_RouterOptionsInner Ark_RouterOptionsInner;
+typedef struct Opt_RouterOptionsInner Opt_RouterOptionsInner;
+typedef struct Ark_RouterStateInner Ark_RouterStateInner;
+typedef struct Opt_RouterStateInner Opt_RouterStateInner;
 typedef struct Ark_RowOptions Ark_RowOptions;
 typedef struct Opt_RowOptions Opt_RowOptions;
 typedef struct Ark_ScaleOptions Ark_ScaleOptions;
@@ -4569,6 +4573,14 @@ typedef struct Opt_curves_Curve {
     Ark_Tag tag;
     Ark_curves_Curve value;
 } Opt_curves_Curve;
+typedef enum Ark_CustomKeyboardContinueFeature {
+    ARK_CUSTOM_KEYBOARD_CONTINUE_FEATURE_ENABLED = 0,
+    ARK_CUSTOM_KEYBOARD_CONTINUE_FEATURE_DISABLED = 1,
+} Ark_CustomKeyboardContinueFeature;
+typedef struct Opt_CustomKeyboardContinueFeature {
+    Ark_Tag tag;
+    Ark_CustomKeyboardContinueFeature value;
+} Opt_CustomKeyboardContinueFeature;
 typedef enum Ark_DataPanelType {
     ARK_DATA_PANEL_TYPE_LINE = 0,
     ARK_DATA_PANEL_TYPE_CIRCLE = 1,
@@ -10224,15 +10236,6 @@ typedef struct Opt_Array_RichEditorTextSpanResult {
     Ark_Tag tag;
     Array_RichEditorTextSpanResult value;
 } Opt_Array_RichEditorTextSpanResult;
-typedef struct Array_router_RouterState {
-    /* kind: ContainerType */
-    Ark_router_RouterState* array;
-    Ark_Int32 length;
-} Array_router_RouterState;
-typedef struct Opt_Array_router_RouterState {
-    Ark_Tag tag;
-    Array_router_RouterState value;
-} Opt_Array_router_RouterState;
 typedef struct Array_RouterItem {
     /* kind: ContainerType */
     Ark_RouterItem* array;
@@ -10242,6 +10245,15 @@ typedef struct Opt_Array_RouterItem {
     Ark_Tag tag;
     Array_RouterItem value;
 } Opt_Array_RouterItem;
+typedef struct Array_RouterStateInner {
+    /* kind: ContainerType */
+    Ark_RouterStateInner* array;
+    Ark_Int32 length;
+} Array_RouterStateInner;
+typedef struct Opt_Array_RouterStateInner {
+    Ark_Tag tag;
+    Array_RouterStateInner value;
+} Opt_Array_RouterStateInner;
 typedef struct Array_SafeAreaEdge {
     /* kind: ContainerType */
     Ark_SafeAreaEdge* array;
@@ -10725,6 +10737,16 @@ typedef struct Opt_Callback_Buffer_Void {
     Ark_Tag tag;
     Callback_Buffer_Void value;
 } Opt_Callback_Buffer_Void;
+typedef struct Callback_BusinessError_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 code, const Ark_String message);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 code, const Ark_String message);
+} Callback_BusinessError_Void;
+typedef struct Opt_Callback_BusinessError_Void {
+    Ark_Tag tag;
+    Callback_BusinessError_Void value;
+} Opt_Callback_BusinessError_Void;
 typedef struct Callback_ClickEvent_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13665,6 +13687,16 @@ typedef struct Opt_ReuseIdCallback {
     Ark_Tag tag;
     ReuseIdCallback value;
 } Opt_ReuseIdCallback;
+typedef struct Router_BusinessError_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 code, const Ark_String message);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 code, const Ark_String message);
+} Router_BusinessError_Void;
+typedef struct Opt_Router_BusinessError_Void {
+    Ark_Tag tag;
+    Router_BusinessError_Void value;
+} Opt_Router_BusinessError_Void;
 typedef struct RouterFinishCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -16528,31 +16560,31 @@ typedef struct Opt_RouterCallbackInfo {
     Ark_Tag tag;
     Ark_RouterCallbackInfo value;
 } Opt_RouterCallbackInfo;
-typedef struct Ark_router_RouterOptions {
-    /* kind: Interface */
-    Ark_String url;
-    Opt_Object params;
-    Opt_Boolean recoverable;
-} Ark_router_RouterOptions;
-typedef struct Opt_router_RouterOptions {
-    Ark_Tag tag;
-    Ark_router_RouterOptions value;
-} Opt_router_RouterOptions;
-typedef struct Ark_router_RouterState {
-    /* kind: Interface */
-    Ark_Number index;
-    Ark_String name;
-    Ark_String path;
-    Ark_Object params;
-} Ark_router_RouterState;
-typedef struct Opt_router_RouterState {
-    Ark_Tag tag;
-    Ark_router_RouterState value;
-} Opt_router_RouterState;
 typedef struct Opt_RouterItem {
     Ark_Tag tag;
     Ark_RouterItem value;
 } Opt_RouterItem;
+typedef struct Ark_RouterOptionsInner {
+    /* kind: Interface */
+    Ark_String url;
+    Opt_String params;
+    Opt_Boolean recoverable;
+} Ark_RouterOptionsInner;
+typedef struct Opt_RouterOptionsInner {
+    Ark_Tag tag;
+    Ark_RouterOptionsInner value;
+} Opt_RouterOptionsInner;
+typedef struct Ark_RouterStateInner {
+    /* kind: Interface */
+    Ark_Int32 index;
+    Ark_String name;
+    Ark_String path;
+    Ark_String params;
+} Ark_RouterStateInner;
+typedef struct Opt_RouterStateInner {
+    Ark_Tag tag;
+    Ark_RouterStateInner value;
+} Opt_RouterStateInner;
 typedef struct Ark_RowOptions {
     /* kind: Interface */
     Opt_Union_String_Number space;
@@ -19045,7 +19077,7 @@ typedef struct Opt_OverlayOptions {
 } Opt_OverlayOptions;
 typedef struct Ark_PageRouterOptions {
     /* kind: Interface */
-    Ark_router_RouterOptions options;
+    Ark_RouterOptionsInner options;
     Opt_router_RouterMode mode;
 } Ark_PageRouterOptions;
 typedef struct Opt_PageRouterOptions {
@@ -28496,6 +28528,7 @@ typedef struct GENERATED_ArkUIIUIContextAccessor {
     void (*unbindTabsFromNestedScrollable)(Ark_TabsController tabsController,
                                            Ark_Scroller parentScroller,
                                            Ark_Scroller childScroller);
+    void (*setCustomKeyboardContinueFeature)(Ark_CustomKeyboardContinueFeature feature);
 } GENERATED_ArkUIIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIJsGeolocationAccessor {
@@ -29640,26 +29673,40 @@ typedef struct GENERATED_ArkUIRotationRecognizerAccessor {
 } GENERATED_ArkUIRotationRecognizerAccessor;
 
 typedef struct GENERATED_ArkUIRouterExtenderAccessor {
-    Ark_NativePointer (*push)(Ark_NativePointer jsView,
-                              const Ark_String* url,
-                              const Opt_Boolean* recover,
-                              const Opt_RouterFinishCallback* finishCallback);
-    Ark_NativePointer (*replace)(Ark_NativePointer jsView,
-                                 const Ark_String* url,
-                                 const Opt_Boolean* recover,
-                                 const Opt_RouterFinishCallback* enterFinishCallback);
-    void (*moveCommonUnderPageNode)(Ark_NativePointer commonNode,
-                                    Ark_NativePointer pageNode);
-    void (*back)();
-    void (*backWithOptions)(const Ark_String* url,
-                            const Opt_Object* params);
-    Ark_NativePointer (*runPage)(Ark_NativePointer jsView,
-                                 const Ark_String* url,
-                                 const Opt_Boolean* recover,
-                                 const Opt_RouterFinishCallback* finishCallback);
+    void (*push0)(Ark_VMContext vmContext,
+                  Ark_AsyncWorkerPtr asyncWorker,
+                  Ark_NativePointer jsView,
+                  const Ark_PageRouterOptions* options,
+                  const Opt_RouterFinishCallback* finishCallback,
+                  const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*push1)(Ark_NativePointer jsView,
+                  const Ark_PageRouterOptions* options,
+                  const Opt_RouterFinishCallback* finishCallback,
+                  const Opt_Router_BusinessError_Void* callback_);
+    void (*replace0)(Ark_VMContext vmContext,
+                     Ark_AsyncWorkerPtr asyncWorker,
+                     Ark_NativePointer jsView,
+                     const Ark_PageRouterOptions* options,
+                     const Opt_RouterFinishCallback* enterFinishCallback,
+                     const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*replace1)(Ark_NativePointer jsView,
+                     const Ark_PageRouterOptions* options,
+                     const Opt_RouterFinishCallback* finishCallback,
+                     const Opt_Router_BusinessError_Void* callback_);
+    void (*back0)(const Opt_RouterOptionsInner* options);
+    void (*back1)(Ark_Int32 index,
+                  const Opt_String* params);
+    void (*runPage)(Ark_NativePointer jsView,
+                    const Ark_PageRouterOptions* options,
+                    const Opt_RouterFinishCallback* finishCallback);
     void (*clear)();
     void (*showAlertBeforeBackPage)(const Ark_String* message);
     void (*hideAlertBeforeBackPage)();
+    Ark_String (*getLength)();
+    Ark_RouterStateInner (*getState)();
+    Opt_RouterStateInner (*getStateByIndex)(Ark_Int32 index);
+    Array_RouterStateInner (*getStateByUrl)(const Ark_String* url);
+    Ark_String (*getParams)();
     void (*pushNamedRoute0)(Ark_VMContext vmContext,
                             Ark_AsyncWorkerPtr asyncWorker,
                             Ark_NativePointer jsView,
@@ -29669,27 +29716,38 @@ typedef struct GENERATED_ArkUIRouterExtenderAccessor {
     void (*pushNamedRoute1)(Ark_NativePointer jsView,
                             const Ark_PageRouterOptions* options,
                             const Opt_RouterFinishCallback* finishCallback,
-                            const Opt_AsyncCallback_Void* callback_);
+                            const Opt_Router_BusinessError_Void* callback_);
     void (*replaceNamedRoute0)(Ark_VMContext vmContext,
                                Ark_AsyncWorkerPtr asyncWorker,
                                Ark_NativePointer jsView,
                                const Ark_PageRouterOptions* options,
-                               const Opt_RouterFinishCallback* finishCallback,
+                               const Opt_RouterFinishCallback* enterFinishCallback,
                                const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
     void (*replaceNamedRoute1)(Ark_NativePointer jsView,
                                const Ark_PageRouterOptions* options,
                                const Opt_RouterFinishCallback* finishCallback,
-                               const Opt_AsyncCallback_Void* callback_);
-    Ark_NativePointer (*createDynamic)(const Ark_String* url,
-                                       const Opt_Boolean* recover);
-    Ark_NativePointer (*pushDynamic)(Ark_NativePointer pageNode,
-                                     const Ark_String* url,
-                                     const Opt_Boolean* recover,
-                                     const Opt_RouterFinishCallback* finishCallback);
-    Ark_NativePointer (*replaceDynamic)(Ark_NativePointer pageNode,
-                                        const Ark_String* url,
-                                        const Opt_Boolean* recover,
-                                        const Opt_RouterFinishCallback* finishCallback);
+                               const Opt_Router_BusinessError_Void* callback_);
+    Ark_NativePointer (*createDynamic)(const Ark_RouterOptionsInner* options);
+    void (*pushDynamic0)(Ark_VMContext vmContext,
+                         Ark_AsyncWorkerPtr asyncWorker,
+                         Ark_NativePointer pageNode,
+                         const Ark_PageRouterOptions* options,
+                         const Opt_RouterFinishCallback* finishCallback,
+                         const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*pushDynamic1)(Ark_NativePointer pageNode,
+                         const Ark_PageRouterOptions* options,
+                         const Opt_RouterFinishCallback* finishCallback,
+                         const Opt_Router_BusinessError_Void* callback_);
+    void (*replaceDynamic0)(Ark_VMContext vmContext,
+                            Ark_AsyncWorkerPtr asyncWorker,
+                            Ark_NativePointer pageNode,
+                            const Ark_PageRouterOptions* options,
+                            const Opt_RouterFinishCallback* enterFinishCallback,
+                            const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
+    void (*replaceDynamic1)(Ark_NativePointer pageNode,
+                            const Ark_PageRouterOptions* options,
+                            const Opt_RouterFinishCallback* finishCallback,
+                            const Opt_Router_BusinessError_Void* callback_);
 } GENERATED_ArkUIRouterExtenderAccessor;
 
 typedef struct GENERATED_ArkUIScaleSymbolEffectAccessor {

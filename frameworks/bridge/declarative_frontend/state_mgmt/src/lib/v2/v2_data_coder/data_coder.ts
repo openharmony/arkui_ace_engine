@@ -95,17 +95,29 @@ class DataCoder {
   }
 
   // Recursively touch all properties of an object to record dependencies
-  private static touchAll<T extends object>(target: T): T {
-    if ([Array, Map, Set, SendableArray, SendableMap, SendableSet].some(clazz => target instanceof clazz)) {
-      (target as any)?.forEach?.(() => {});
+  private static touchAll<T>(target: T, visited: Set<object> = new Set()): T {
+    if (typeof target !== 'object' || target === null || visited.has(target)) {
+      return target;
     }
 
-    if (typeof target === 'object' && target != null) {
-      Object.entries(target).forEach(() => {});
+    visited.add(target);
+
+    if ([Array, Map, Set, SendableArray, SendableMap, SendableSet].some(clazz => target instanceof clazz)) {
+      (target as unknown as { forEach: Function }).forEach?.((value: unknown) => {
+        DataCoder.touchAll(value, visited);
+      });
+      return target;
     }
 
     if (target instanceof Date) {
       target.getTime();
+      return target;
+    }
+
+    for (const key in target) {
+      if (Object.prototype.hasOwnProperty.call(target, key)) {
+        DataCoder.touchAll((target as Record<string, unknown>)[key], visited);
+      }
     }
 
     return target;
