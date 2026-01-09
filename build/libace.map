@@ -472,6 +472,7 @@
       "OHOS::Ace::AlignComponent::AlignComponent(std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::Component>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::Component>>> const&, OHOS::Ace::Alignment const&)";
       "OHOS::Ace::ButtonComponent::ButtonComponent(std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::Component>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::Component>>> const&)";
       "OHOS::Ace::MultiModalScene::SubscribeVoiceEvent(OHOS::Ace::VoiceEvent const&, std::__h::function<void (OHOS::Ace::AceMultimodalEvent const&)> const&)";
+      "OHOS::Ace::FileUriHelper::GetRealPath(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>)";
       OHOS::Ace::RenderFocusAnimation::*;
       OHOS::Ace::AccessibilityNode::*;
       OHOS::Ace::DragRecognizer::*;
