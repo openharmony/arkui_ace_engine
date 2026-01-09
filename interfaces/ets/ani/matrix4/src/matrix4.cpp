@@ -39,11 +39,10 @@ namespace {
 ani_class g_matrix4Class[2] = { nullptr };
 enum class MatrixClassName : int32_t {
     TRANSIT_INNER = 0, // "@ohos.matrix4.matrix4.Matrix4TransitInner"
-    ESCOMPAT = 1,      // "std.core.Array"
+    ESCOMPAT = 1, // "std.core.Array"
 };
 const char* g_matrixClassName[2] = { "@ohos.matrix4.matrix4.Matrix4TransitInner", "std.core.Array" };
 ani_class GetOrCreateMatrix4Class(ani_env* env, MatrixClassName matrixClassName)
-
 {
     int32_t index = static_cast<int32_t>(matrixClassName);
     if (g_matrix4Class[index]) {
@@ -66,7 +65,6 @@ ani_class GetOrCreateMatrix4Class(ani_env* env, MatrixClassName matrixClassName)
 
 ani_method g_matrix4ToDoubleMethod;
 ani_method GetOrCreateToDoubleMethod(ani_env* env)
-
 {
     if (g_matrix4ToDoubleMethod) {
         return g_matrix4ToDoubleMethod;
@@ -88,7 +86,6 @@ ani_method GetOrCreateToDoubleMethod(ani_env* env)
 
 ani_method g_matrix4ToIntMethod;
 ani_method GetOrCreateToIntMethod(ani_env* env)
-
 {
     if (g_matrix4ToIntMethod) {
         return g_matrix4ToIntMethod;
@@ -429,8 +426,10 @@ void ParseArray([[maybe_unused]] ani_env* env, const char* property, ani_object 
     if (ANI_OK != env->Object_InstanceOf(static_cast<ani_object>(params_ref), arrayClass, &isArray)) {
         return;
     }
-    ani_double length;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(params_ref), "length", &length)) {
+    ani_int arrLength;
+    ani_status status = env->Object_GetPropertyByName_Int(static_cast<ani_object>(params_ref), "length", &arrLength);
+    if (ANI_OK != status) {
+        LOGI("matrix4, get array length fail. status=%{public}d", status);
         return;
     }
     for (int i = 0; i < static_cast<int32_t>(length); i++) {
@@ -648,7 +647,7 @@ ani_status BindMatrixTransit(ani_env* env)
     };
 
     std::array staticMethod = {
-        ani_native_function  { "nativeTransferStatic", nullptr, reinterpret_cast<void*>(MatrixTransferStatic) }
+        ani_native_function { "nativeTransferStatic", nullptr, reinterpret_cast<void*>(MatrixTransferStatic) }
     };
     if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethod.data(), staticMethod.size())) {
         return ANI_ERROR;
