@@ -337,7 +337,6 @@ ohos_source_set("ace_compatible_source") {
     "components/video/video_element.cpp",
     "components/video/video_loader.cpp",
     "components/video/video_model_impl.cpp",
-
     "components/clock/clock_component.cpp",
     "components/clock/clock_declaration.cpp",
     "components/clock/dom_clock.cpp",
@@ -380,6 +379,23 @@ ohos_source_set("ace_compatible_source") {
     "components/input/input_loader.cpp",
     "components/input/input_declaration.cpp",
     "components/input/textinput_composed_element.cpp",
+    "components/switch/dom_switch.cpp",
+    "components/switch/switch_loader.cpp",
+    "components/switch/switch_component.cpp",
+    "components/switch/render_switch_creator.cpp",
+    "components/switch/render_switch.cpp",
+    "components/switch/rosen_render_switch.cpp",
+    "components/switch/modifier/switch_modifier.cpp",
+    "components/switch/switch_composed_element.cpp",
+    "components/toggle/dom_toggle.cpp",
+    "components/toggle/toggle_loader.cpp",
+    "components/toggle/render_toggle_creator.cpp",
+    "components/toggle/render_toggle.cpp",
+    "components/toggle/rosen_render_toggle.cpp",
+    "components/toggle/toggle_component.cpp",
+    "components/toggle/toggle_element.cpp",
+    "components/toggle/toggle_composed_element.cpp",
+    "components/toggle/toggle_model_impl.cpp",
   ]
 
   if (qrcodegen_support) {
@@ -412,7 +428,7 @@ ohos_source_set("ace_compatible_source") {
     "$ace_root/frameworks/core:ace_container_scope",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
   ]
-
+ 
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 

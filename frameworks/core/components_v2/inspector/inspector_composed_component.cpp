@@ -67,11 +67,9 @@
 #include "core/components_v2/inspector/stepper_composed_element.h"
 #include "core/components_v2/inspector/stepper_item_composed_element.h"
 #include "core/components_v2/inspector/swiper_composed_element.h"
-#include "core/components_v2/inspector/switch_composed_element.h"
 #include "core/components_v2/inspector/text_clock_composed_element.h"
 #include "core/components_v2/inspector/text_composed_element.h"
 #include "core/components_v2/inspector/texttimer_composed_element.h"
-#include "core/components_v2/inspector/toggle_composed_element.h"
 #include "core/components_v2/inspector/water_flow_composed_element.h"
 #include "core/components_v2/inspector/water_flow_item_composed_element.h"
 #include "core/components_v2/inspector/wrap_composed_element.h"
@@ -139,8 +137,10 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) { return AceType::MakeRefPtr<V2::CheckboxComposedElement>(id); } },
     { CHECK_BOX_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::CheckboxComposedElement>(id); } },
-    { SWITCH_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SwitchComposedElement>(id); } },
-    { TOGGLE_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ToggleComposedElement>(id); } },
+    { SWITCH_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_SWITCH, id); } },
+    { TOGGLE_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TOGGLE, id); } },
     { SCROLL_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ScrollComposedElement>(id); } },
     { CALENDAR_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::CalendarComposedElement>(id); } },

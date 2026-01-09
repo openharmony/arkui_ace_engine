@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components/checkable/render_switch.h"
+#include "compatible/components/switch/render_switch.h"
 
 #include "base/log/event_report.h"
 #include "core/common/font_manager.h"

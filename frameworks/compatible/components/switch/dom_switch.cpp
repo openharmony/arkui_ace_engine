@@ -13,12 +13,24 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/common/dom/dom_switch.h"
+#include "compatible/components/switch/dom_switch.h"
 
 #include "base/i18n/localization.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
+
+// switch attribute and style constants
+const char DOM_CHECKED[] = "checked";
+const char DOM_SHOW_TEXT[] = "showtext";
+const char DOM_TEXT_ON[] = "texton";
+const char DOM_TEXT_OFF[] = "textoff";
+const char DOM_TEXT_PADDING[] = "textPadding";
+const char DOM_TEXT_ON_COLOR[] = "textonColor";
+const char DOM_TEXT_OFF_COLOR[] = "textoffColor";
+const char DOM_TRACK_COLOR_ON[] = "trackColorOn";
+const char DOM_TRACK_COLOR_OFF[] = "trackColorOff";
+
 namespace {
 
 constexpr Dimension BOX_HOVER_RADIUS = 8.0_vp;

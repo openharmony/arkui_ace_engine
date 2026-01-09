@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components/toggle/render_toggle.h"
+#include "compatible/components/toggle/render_toggle.h"
 
 #include "core/event/ace_event_helper.h"
 namespace OHOS::Ace {
@@ -195,8 +195,8 @@ void RenderToggle::OnMouseClickUpAnimation()
     clickControllerUp_->SetFillMode(FillMode::FORWARDS);
 }
 
-void RenderToggle::CreateFloatAnimation(RefPtr<KeyframeAnimation<float>>& floatAnimation, float beginValue,
-    float endValue)
+void RenderToggle::CreateFloatAnimation(
+    RefPtr<KeyframeAnimation<float>>& floatAnimation, float beginValue, float endValue)
 {
     if (!floatAnimation) {
         return;

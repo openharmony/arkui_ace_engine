@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/models/toggle_model_impl.h"
+#include "compatible/components/toggle/toggle_model_impl.h"
+
+#include "compatible/components/switch/switch_component.h"
+#include "compatible/components/toggle/toggle_component.h"
 
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "core/components/toggle/toggle_component.h"
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components/toggle/toggle_theme.h"
 
 namespace OHOS::Ace::Framework {

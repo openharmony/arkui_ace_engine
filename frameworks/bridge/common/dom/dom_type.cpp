@@ -896,14 +896,6 @@ const char DOM_SUBSCRIPT_LABEL[] = "subscriptlabel";
 const char DOM_SUBSCRIPT_FLAG[] = "subscriptflag";
 const char DOM_SCENE_LABEL[] = "scenelabel";
 
-// toggle constants
-const char DOM_TOGGLE_BACKGROUND_COLOR[] = "backgroundColor";
-const char DOM_TOGGLE_CHECKED_COLOR[] = "checkedColor";
-const char DOM_TOGGLE_CHECKED_STATE[] = "checked";
-const char DOM_TOGGLE_TEXT_COLOR[] = "textColor";
-const char DOM_TOGGLE_HEIGHT[] = "height";
-const char DOM_TOGGLE_WIDTH[] = "width";
-
 // clock attr
 const char DOM_DIGIT_COLOR[] = "digitColor";
 const char DOM_DIGIT_COLOR_NIGHT[] = "digitColorNight";

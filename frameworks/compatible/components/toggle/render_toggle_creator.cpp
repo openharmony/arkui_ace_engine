@@ -13,20 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components/toggle/toggle_component.h"
-
-#include "core/components/toggle/toggle_element.h"
+#include "rosen_render_toggle.h"
 
 namespace OHOS::Ace {
-
-RefPtr<RenderNode> ToggleComponent::CreateRenderNode()
+RefPtr<RenderNode> RenderToggle::Create()
 {
-    return RenderToggle::Create();
+    return AceType::MakeRefPtr<RosenRenderToggle>();
 }
-
-RefPtr<Element> ToggleComponent::CreateElement()
-{
-    return AceType::MakeRefPtr<ToggleElement>();
-}
-
 } // namespace OHOS::Ace

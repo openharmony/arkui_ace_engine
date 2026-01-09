@@ -553,7 +553,6 @@ template("declarative_js_engine") {
       "jsview/models/text_clock_model_impl.cpp",
       "jsview/models/text_model_impl.cpp",
       "jsview/models/text_timer_model_impl.cpp",
-      "jsview/models/toggle_model_impl.cpp",
       "jsview/models/view_abstract_model_impl.cpp",
       "jsview/models/view_context_model_impl.cpp",
       "jsview/models/view_full_update_model_impl.cpp",

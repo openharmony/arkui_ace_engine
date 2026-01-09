@@ -13,17 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_TOGGLE_H
-#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_TOGGLE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_TOGGLE_DOM_TOGGLE_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_TOGGLE_DOM_TOGGLE_H
+
+#include "compatible/components/toggle/toggle_component.h"
 
 #include "core/components/padding/padding_component.h"
 #include "core/components/text/text_component.h"
-#include "core/components/toggle/toggle_component.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 
 namespace OHOS::Ace::Framework {
+    
+extern const char DOM_TOGGLE_BACKGROUND_COLOR[];
+extern const char DOM_TOGGLE_CHECKED_COLOR[];
+extern const char DOM_TOGGLE_CHECKED_STATE[];
+extern const char DOM_TOGGLE_TEXT_COLOR[];
+extern const char DOM_TOGGLE_HEIGHT[];
+extern const char DOM_TOGGLE_WIDTH[];
 
 class DOMToggle final : public DOMNode {
     DECLARE_ACE_TYPE(DOMToggle, DOMNode);
@@ -65,4 +73,4 @@ private:
 
 } // namespace OHOS::Ace::Framework
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_TOGGLE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_TOGGLE_DOM_TOGGLE_H

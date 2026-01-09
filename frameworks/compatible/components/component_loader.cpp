@@ -39,7 +39,8 @@
 #include "compatible/components/text_field/text_field_loader.h"
 #include "compatible/components/input/input_loader.h"
 #include "frameworks/base/log/log_wrapper.h"
-
+#include "compatible/components/switch/switch_loader.h"
+#include "compatible/components/toggle/toggle_loader.h"
 #include "compatible/components/video/video_loader.h"
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_Compatible_GetLoader(const char* name)
@@ -105,6 +106,8 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "search", []() -> ComponentLoader* { return new SearchLoader(); } },
         { "textarea", []() -> ComponentLoader* { return new TextFieldLoader(); } },
         { "input", []() -> ComponentLoader* { return new InputLoader(); } },
+        { "switch", []() -> ComponentLoader* { return new SwitchLoader(); } },
+        { "toggle", []() -> ComponentLoader* { return new ToggleLoader(); } }
     };
     auto loaderIter = sLoaderMap.find(nameStr);
     if (loaderIter != sLoaderMap.end()) {

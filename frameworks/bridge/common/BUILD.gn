@@ -48,9 +48,7 @@ template("bridge_common") {
       "dom/dom_span.cpp",
       "dom/dom_stack.cpp",
       "dom/dom_swiper.cpp",
-      "dom/dom_switch.cpp",
       "dom/dom_text.cpp",
-      "dom/dom_toggle.cpp",
       "dom/dom_type.cpp",
 
       # manifest

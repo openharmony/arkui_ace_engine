@@ -38,8 +38,6 @@
 #include "frameworks/bridge/common/dom/dom_slider.h"
 #include "frameworks/bridge/common/dom/dom_stack.h"
 #include "frameworks/bridge/common/dom/dom_swiper.h"
-#include "frameworks/bridge/common/dom/dom_switch.h"
-#include "frameworks/bridge/common/dom/dom_toggle.h"
 #if defined(XCOMPONENT_SUPPORTED)
 #include "frameworks/bridge/common/dom/dom_xcomponent.h"
 #endif
@@ -141,9 +139,7 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_STEPPER_ITEM, &DOMListItemCreator<DOMStepperItem> },
 #endif
         { DOM_NODE_TAG_SWIPER, &DOMNodeCreator<DOMSwiper> },
-        { DOM_NODE_TAG_SWITCH, &DOMNodeCreator<DOMSwitch> },
         { DOM_NODE_TAG_TEXT, &DOMNodeCreator<DOMText> },
-        { DOM_NODE_TAG_TOGGLE, &DOMNodeCreator<DOMToggle> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_TOOL_BAR, &DOMNodeCreator<DOMToolBar> },
         { DOM_NODE_TAG_TOOL_BAR_ITEM, &DOMNodeCreator<DOMToolBarItem> },

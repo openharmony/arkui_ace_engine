@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_v2/inspector/switch_composed_element.h"
+#include "compatible/components/switch/switch_composed_element.h"
 
 #include "base/log/dump_log.h"
 #include "core/components_v2/inspector/utils.h"

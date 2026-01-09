@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components/checkable/rosen_render_switch.h"
+#include "compatible/components/switch/rosen_render_switch.h"
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkRRect.h"

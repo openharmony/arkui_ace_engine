@@ -17,13 +17,14 @@
 
 #include <cstddef>
 #include <string>
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/log/ace_scoring_log.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_button.h"
-#include "bridge/declarative_frontend/jsview/models/toggle_model_impl.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/common/container.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -47,7 +48,9 @@ ToggleModel* ToggleModel::GetInstance()
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::ToggleModelNG());
             } else {
-                instance_.reset(new Framework::ToggleModelImpl());
+                static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("toggle");
+                static ToggleModel* instance = loader ? reinterpret_cast<ToggleModel*>(loader->CreateModel()) : nullptr;
+                instance_.reset(instance);
             }
 #endif
         }

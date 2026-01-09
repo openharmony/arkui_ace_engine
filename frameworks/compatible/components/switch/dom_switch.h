@@ -13,13 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_SWITCH_H
-#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_SWITCH_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_SWITCH_DOM_SWITCH_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_SWITCH_DOM_SWITCH_H
+
+#include "compatible/components/switch/switch_component.h"
 
 #include "core/components/checkable/checkable_component.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
 
 namespace OHOS::Ace::Framework {
+
+// switch attribute and style constants
+extern const char DOM_CHECKED[];
+extern const char DOM_SHOW_TEXT[];
+extern const char DOM_TEXT_ON[];
+extern const char DOM_TEXT_OFF[];
+extern const char DOM_TEXT_PADDING[];
+extern const char DOM_TEXT_ON_COLOR[];
+extern const char DOM_TEXT_OFF_COLOR[];
+extern const char DOM_TRACK_COLOR_ON[];
+extern const char DOM_TRACK_COLOR_OFF[];
 
 class DOMSwitch final : public DOMNode {
     DECLARE_ACE_TYPE(DOMSwitch, DOMNode);
@@ -55,4 +68,4 @@ private:
 
 } // namespace OHOS::Ace::Framework
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_SWITCH_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_SWITCH_DOM_SWITCH_H
