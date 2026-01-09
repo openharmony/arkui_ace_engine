@@ -280,6 +280,31 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         }
     };
 
+    static ani_method getJsViewNameMethod = nullptr;
+    if (!getJsViewNameMethod) {
+        env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "__getJsViewName_Internal",
+            ":C{std.core.String}", &getJsViewNameMethod);
+    }
+    auto getJsViewName = [vm, weakRef]() {
+        ani_env *env = nullptr;
+        vm->GetEnv(ANI_VERSION_1, &env);
+        std::string empty { };
+        if (!env) {
+            return empty;
+        }
+        ani_boolean released = true;
+        ani_ref localRef;
+        ani_ref result;
+        env->WeakReference_GetReference(*weakRef, &released, &localRef);
+        if (released) {
+            return empty;
+        }
+        env->Object_CallMethod_Ref(static_cast<ani_object>(localRef), getJsViewNameMethod, &result);
+        env->Reference_Delete(localRef);
+        ani_string aniStr = static_cast<ani_string>(result);
+        return AniUtils::ANIStringToStdString(env, aniStr);
+    };
+
     struct ArkUICustomNodeInfo customNodeInfo {
         .onPageShowFunc = std::move(onPageShow),
         .onPageHideFunc = std::move(onPageHide),
@@ -288,6 +313,7 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         .onCleanupFunc = std::move(onCleanupFunc),
         .onDumpInspectorFunc = std::move(onDumpInspector),
         .setActiveFunc = std::move(setActive),
+        .onGetJsViewNameFunc = std::move(getJsViewName),
     };
     
     ani_long customNode = modifier->getCustomNodeAniModifier()->constructCustomNode(id, std::move(customNodeInfo));

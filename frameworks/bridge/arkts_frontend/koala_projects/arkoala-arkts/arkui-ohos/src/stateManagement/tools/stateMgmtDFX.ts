@@ -39,10 +39,24 @@ class ViewInfo {
     isV2?: boolean;
 }
 
+class MapItem {
+    key?: string;
+    value?: string[];
+}
+
+class PropertyDependenciesInfo {
+    mode?: string;
+    propertyDependencies?: string[];
+    trackPropertiesDependencies?: MapItem[];
+}
+
 class DecoratorInfo {
     decorator?: string;
     propertyName?: string;
     value?: Any;
+    syncPeers?: DecoratorInfo[];
+    id?: int;
+    dependentElementIds?: PropertyDependenciesInfo;
 }
 
 export class DumpInfo {
@@ -88,9 +102,16 @@ export class StateMgmtDFX {
                                 decorator: value.decorator,
                                 propertyName: value.varName,
                                 value: value.get(),
+                                syncPeers: [],
+                                id: -1,
+                                dependentElementIds: {
+                                    mode: 'Compatible Mode',
+                                    propertyDependencies: [],
+                                    trackPropertiesDependencies: []
+                                }
                             });
                         }
-		    }
+                    }
                 });
         }
     }
@@ -120,18 +141,39 @@ export class StateMgmtDFX {
                                 decorator: value.decorator,
                                 propertyName: value.varName,
                                 value: value.get(),
+                                syncPeers: [],
+                                id: -1,
+                                dependentElementIds: {
+                                    mode: 'Compatible Mode',
+                                    propertyDependencies: [],
+                                    trackPropertiesDependencies: []
+                                }
                             });
                         } else if (value && value instanceof ComputedDecoratedVariable) {
                             dumpInfo.observedPropertiesInfo.push({
                                 decorator: value.decorator,
                                 propertyName: value.varName,
                                 value: value.get(),
+                                syncPeers: [],
+                                id: -1,
+                                dependentElementIds: {
+                                    mode: 'Compatible Mode',
+                                    propertyDependencies: [],
+                                    trackPropertiesDependencies: []
+                                }
                             });
                         } else if (value && value instanceof MonitorFunctionDecorator) {
                             const propertyName = varName.replace('__monitor_', '');
                             dumpInfo.observedPropertiesInfo.push({
                                 decorator: value.decorator,
                                 propertyName: propertyName,
+                                syncPeers: [],
+                                id: -1,
+                                dependentElementIds: {
+                                    mode: 'Compatible Mode',
+                                    propertyDependencies: [],
+                                    trackPropertiesDependencies: []
+                                }
                             });
                         }
                     }
