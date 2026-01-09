@@ -202,8 +202,10 @@ void RenderContext::ToJsonValuePart1(std::unique_ptr<JsonValue>& json, const Ins
 {
     if (uiMaterial_) {
         auto optJsonValue = JsonUtil::Create(true);
-        optJsonValue->Put("type", uiMaterial_->GetType());
-        json->PutExtAttr("MaterialOptions", optJsonValue, filter);
+        optJsonValue->Put("type", MaterialTypeToString(uiMaterial_->GetType()));
+        auto materialJsonValue = JsonUtil::Create(true);
+        materialJsonValue->Put("material", optJsonValue);
+        json->PutExtAttr("systemMaterial", materialJsonValue, filter);
     }
 }
 
