@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components/toggle/rosen_render_toggle.h"
+#include "compatible/components/toggle/rosen_render_toggle.h"
 
 #ifdef OHOS_PLATFORM
 #include "core/components/common/painter/rosen_svg_painter.h"

@@ -13,37 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/components/toggle/toggle_element.h"
+#include "core/components/checkable/checkable_component.h"
+#include "compatible/components/switch/switch_component.h"
 
 namespace OHOS::Ace {
-
-void ToggleElement::Update()
+SwitchComponent::SwitchComponent(const RefPtr<SwitchTheme>& theme)
+    : CheckableComponent(CheckableType::SWITCH, theme), CheckableValue<bool>(DEFAULT_SWITCH_VALUE)
 {
-    RenderElement::Update();
-    toggle_ = AceType::DynamicCast<RenderToggle>(renderNode_);
-}
-
-void ToggleElement::OnFocus()
-{
-    if (!toggle_) {
-        return;
+    if (theme) {
+        backgroundSolid_ = theme->IsBackgroundSolid();
     }
-    toggle_->UpdateFocusAnimation();
-    toggle_->ChangeStatus(RenderStatus::FOCUS);
 }
-
-void ToggleElement::OnBlur()
-{
-    if (!toggle_) {
-        return;
-    }
-    toggle_->ChangeStatus(RenderStatus::BLUR);
-    auto context = context_.Upgrade();
-    if (!context) {
-        return;
-    }
-    context->CancelFocusAnimation();
-    context->CancelShadow();
-}
-
 } // namespace OHOS::Ace

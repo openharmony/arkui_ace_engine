@@ -13,19 +13,11 @@
  * limitations under the License.
  */
 
-#include "rosen_render_switch.h"
+#include "compatible/components/switch/rosen_render_switch.h"
 
 namespace OHOS::Ace {
 RefPtr<RenderNode> RenderSwitch::Create()
 {
-    if (SystemProperties::GetRosenBackendEnabled()) {
-#ifdef ENABLE_ROSEN_BACKEND
-        return AceType::MakeRefPtr<RosenRenderSwitch>();
-#else
-        return nullptr;
-#endif
-    } else {
-        return nullptr;
-    }
+    return AceType::MakeRefPtr<RosenRenderSwitch>();
 }
 } // namespace OHOS::Ace

@@ -428,6 +428,8 @@
       OHOS::Ace::NG::SecurityUIExtensionProxy::*;
       OHOS::Ace::NG::DynamicModelStatic::*;
       OHOS::Ace::NG::DynamicParam::*;
+      OHOS::Ace::CheckableComponent::*;
+      OHOS::Ace::RenderCheckable::*;
       OHOS::Ace::NG::MinusPaddingToSize*;
       OHOS::Ace::NG::AddPaddingToSize*;
       OHOS::Ace::ToRSPoint*;
@@ -496,6 +498,16 @@
       OHOS::Ace::RatingComponent::*;
       "OHOS::Ace::Component::Component()";
       "OHOS::Ace::NG::CreateProxyNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
+
+      "OHOS::Ace::NG::ViewStackProcessor::Pop()";
+      "OHOS::Ace::MultiModalScene::UnSubscribeVoiceEvent(OHOS::Ace::VoiceEvent const&)";
+      "OHOS::Ace::RosenCheckablePainter::SetStrokeWidth(double, OHOS::Rosen::Drawing::Pen&) const";
+      "OHOS::Ace::RosenUniversalPainter::DrawRRectBackground(OHOS::Rosen::Drawing::Canvas*, OHOS::Ace::RRect const&, unsigned int, double)";
+      "OHOS::Ace::RosenUniversalPainter::DrawHoverBackground(OHOS::Rosen::Drawing::Canvas*, OHOS::Ace::Rect const&, unsigned int, double)";
+      "OHOS::Ace::TextStyle::SetAdaptTextSize(OHOS::Ace::Dimension const&, OHOS::Ace::Dimension const&, OHOS::Ace::Dimension const&)";
+      "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, uint32_t, bool)>>::GetInstance()";
+      "OHOS::Ace::AnimatableColor::AnimatableColor(unsigned int, OHOS::Ace::AnimationOption const&)";
+      
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
@@ -605,6 +617,10 @@
       VTT?for?OHOS::Ace::FocusNode*;
       VTT?for?OHOS::Ace::CheckableComponent;
       VTT?for?OHOS::Ace::RatingComponent;
+      VTT?for?OHOS::Ace::PaddingComponent;
+      VTT?for?OHOS::Ace::RawRecognizer;
+      VTT?for?OHOS::Ace::RenderCheckable;
+      
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
@@ -798,6 +814,8 @@
       vtable?for?OHOS::Ace::PixelMapDrawableDescriptor;
       vtable?for?OHOS::Ace::AnimatedDrawableDescriptor;
       vtable?for?OHOS::Ace::ImageComponent;
+      vtable?for?OHOS::Ace::PaddingComponent;
+      vtable?for?OHOS::Ace::RawRecognizer;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
@@ -1056,6 +1074,21 @@
       vtable?for?OHOS::Ace::PaddingComponent;
       vtable?for?OHOS::Ace::LengthLimitingFormatter;
 
+      OHOS::Ace::DOM_DISABLED;
+      OHOS::Ace::DOM_TEXT_VALUE;
+      OHOS::Ace::DOM_TEXT_ALLOW_SCALE;
+      OHOS::Ace::DOM_TEXT_FONT_SIZE;
+      OHOS::Ace::DOM_TEXT_FONT_WEIGHT;
+      OHOS::Ace::DOM_TEXT_FONT_FAMILY;
+      OHOS::Ace::DOM_TEXT_FONT_STYLE;
+      OHOS::Ace::DOM_TEXT_LETTER_SPACING;
+      OHOS::Ace::DOM_TEXT_DECORATION;
+      OHOS::Ace::DOM_TEXT_DECORATION_LINETHROUGH;
+      OHOS::Ace::DOM_TEXT_DECORATION_NONE;
+      OHOS::Ace::DOM_TEXT_DECORATION_OVERLINE;
+      OHOS::Ace::DOM_TEXT_DECORATION_UNDERLINE;
+      OHOS::Ace::DOM_TEXT_FONT_STYLE_ITALIC;
+      OHOS::Ace::DOM_TEXT_DECORATION_INHERIT;
       virtual?thunk?to?OHOS::Ace::Framework::DOMNode::*;
       virtual?thunk?to?OHOS::Ace::RenderElement::*;
       virtual?thunk?to?OHOS::Ace::Element::*;

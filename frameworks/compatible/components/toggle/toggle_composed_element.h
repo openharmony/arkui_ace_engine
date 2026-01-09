@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_TOGGLE_COMPOSED_ELEMENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_TOGGLE_COMPOSED_ELEMENT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_TOGGLE_TOGGLE_COMPOSED_ELEMENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_TOGGLE_TOGGLE_COMPOSED_ELEMENT_H
 
-#include "core/components/toggle/render_toggle.h"
-#include "core/components/toggle/toggle_element.h"
+#include "compatible/components/toggle/render_toggle.h"
+#include "compatible/components/toggle/toggle_element.h"
+
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
 
@@ -46,10 +47,11 @@ public:
     {
         return GetContentElement<ToggleElement>(ToggleElement::TypeId());
     }
+
 private:
     RefPtr<RenderToggle> GetRenderToggle() const;
 };
 
 } // namespace OHOS::Ace::V2
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_STACK_COMPOSED_ELEMENT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_TOGGLE_TOGGLE_COMPOSED_ELEMENT_H

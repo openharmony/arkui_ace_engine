@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_SWITCH_COMPOSED_ELEMENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_SWITCH_COMPOSED_ELEMENT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_SWITCH_SWITCH_COMPOSED_ELEMENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_SWITCH_SWITCH_COMPOSED_ELEMENT_H
 
 #include "core/components/checkable/checkable_element.h"
-#include "core/components/checkable/render_switch.h"
+#include "compatible/components/switch/render_switch.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
+#include "compatible/components/switch/switch_component.h"
 
 namespace OHOS::Ace::V2 {
 
@@ -51,4 +52,4 @@ private:
 
 } // namespace OHOS::Ace::V2
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_STACK_COMPOSED_ELEMENT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_SWITCH_SWITCH_COMPOSED_ELEMENT_H

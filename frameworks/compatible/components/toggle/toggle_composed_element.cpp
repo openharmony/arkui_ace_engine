@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_v2/inspector/toggle_composed_element.h"
+#include "compatible/components/toggle/toggle_composed_element.h"
 
 #include "base/log/dump_log.h"
 #include "core/components_v2/inspector/utils.h"

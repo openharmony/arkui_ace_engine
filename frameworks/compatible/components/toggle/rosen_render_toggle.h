@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOGGLE_ROSEN_RENDER_TOGGLE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOGGLE_ROSEN_RENDER_TOGGLE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_TOGGLE_ROSEN_RENDER_TOGGLE_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_TOGGLE_ROSEN_RENDER_TOGGLE_H
 
-#include "core/components/toggle/render_toggle.h"
+#include "compatible/components/toggle/render_toggle.h"
+
 #include "core/components/transform/rosen_render_transform.h"
 
 namespace OHOS::Ace {
@@ -42,4 +43,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOGGLE_ROSEN_RENDER_TOGGLE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_TOGGLE_ROSEN_RENDER_TOGGLE_H

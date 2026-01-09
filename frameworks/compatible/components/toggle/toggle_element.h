@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOGGLE_TOGGLE_ELEMENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOGGLE_TOGGLE_ELEMENT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_TOGGLE_TOGGLE_ELEMENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_TOGGLE_TOGGLE_ELEMENT_H
 
-#include "core/components/toggle/render_toggle.h"
-#include "core/components/toggle/toggle_component.h"
+#include "compatible/components/toggle/render_toggle.h"
+#include "compatible/components/toggle/toggle_component.h"
+
 #include "core/focus/focus_node.h"
 #include "core/pipeline/base/render_element.h"
 
@@ -38,4 +39,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOGGLE_TOGGLE_ELEMENT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_TOGGLE_TOGGLE_ELEMENT_H

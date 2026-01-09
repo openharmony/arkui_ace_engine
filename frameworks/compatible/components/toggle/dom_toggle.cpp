@@ -13,11 +13,17 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/common/dom/dom_toggle.h"
-
+#include "compatible/components/toggle/dom_toggle.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
+
+const char DOM_TOGGLE_BACKGROUND_COLOR[] = "backgroundColor";
+const char DOM_TOGGLE_CHECKED_COLOR[] = "checkedColor";
+const char DOM_TOGGLE_CHECKED_STATE[] = "checked";
+const char DOM_TOGGLE_TEXT_COLOR[] = "textColor";
+const char DOM_TOGGLE_HEIGHT[] = "height";
+const char DOM_TOGGLE_WIDTH[] = "width";
 
 DOMToggle::DOMToggle(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
@@ -57,8 +63,8 @@ bool DOMToggle::SetSpecializedAttr(const std::pair<std::string, std::string>& at
             [](DOMToggle& toggle, const std::string& value) {
                 toggle.toggleChild_->SetCheckedState(StringToBool(value));
             } },
-        { DOM_DISABLED, [](DOMToggle& toggle, const std::string& value) {
-            toggle.toggleChild_->SetDisabled(StringToBool(value)); } },
+        { DOM_DISABLED, [](DOMToggle& toggle,
+                            const std::string& value) { toggle.toggleChild_->SetDisabled(StringToBool(value)); } },
         { DOM_TEXT_VALUE, [](DOMToggle& toggle, const std::string& value) { toggle.textChild_->SetData(value); } },
     };
     auto operatorIter = BinarySearchFindIndex(toggleAttrOperators, ArraySize(toggleAttrOperators), attr.first.c_str());

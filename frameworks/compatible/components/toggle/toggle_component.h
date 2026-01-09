@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOGGLE_TOGGLE_COMPONENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOGGLE_TOGGLE_COMPONENT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_TOGGLE_TOGGLE_COMPONENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_TOGGLE_TOGGLE_COMPONENT_H
 
 #include "base/geometry/dimension.h"
-#include "core/pipeline/base/sole_child_component.h"
 #include "core/components_v2/common/common_def.h"
+#include "core/pipeline/base/sole_child_component.h"
 
 namespace OHOS::Ace {
 
@@ -149,4 +149,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOGGLE_TOGGLE_COMPONENT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_TOGGLE_TOGGLE_COMPONENT_H

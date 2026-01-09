@@ -41,7 +41,7 @@ enum class UIStatus {
     ON_TO_PART,
 };
 
-class RenderCheckable : public RenderNode {
+class ACE_FORCE_EXPORT RenderCheckable : public RenderNode {
     DECLARE_ACE_TYPE(RenderCheckable, RenderNode);
 
 public:

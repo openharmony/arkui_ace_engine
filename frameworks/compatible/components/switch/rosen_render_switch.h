@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHECKABLE_ROSEN_RENDER_SWITCH_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHECKABLE_ROSEN_RENDER_SWITCH_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_SWITCH_ROSEN_RENDER_SWITCH_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_SWITCH_ROSEN_RENDER_SWITCH_H
 
 #include "core/components/checkable/render_checkable.h"
-#include "core/components/checkable/render_switch.h"
+#include "compatible/components/switch/render_switch.h"
 #include "core/components/common/painter/rosen_checkable_painter.h"
 #include "core/components/text/render_text.h"
 
@@ -74,4 +74,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHECKABLE_ROSEN_RENDER_SWITCH_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_SWITCH_ROSEN_RENDER_SWITCH_H

@@ -33,9 +33,9 @@ public:
     ~RosenCheckablePainter() = default;
 
 #ifndef USE_ROSEN_DRAWING
-    void SetStrokeWidth(double strokeWidth, SkPaint& paint) const;
+    ACE_FORCE_EXPORT void SetStrokeWidth(double strokeWidth, SkPaint& paint) const;
 #else
-    void SetStrokeWidth(double strokeWidth, RSPen& pen) const;
+    ACE_FORCE_EXPORT void SetStrokeWidth(double strokeWidth, RSPen& pen) const;
 #endif
     float ConfigureOpacity(bool disabled);
 
