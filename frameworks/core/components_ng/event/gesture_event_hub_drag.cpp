@@ -1681,7 +1681,7 @@ OffsetF GestureEventHub::GetDragPreviewInitPositionToScreen(
         data.pixelMap->GetHeight() / 2.0f) : OffsetF();
     previewOffset = DragDropFuncWrapper::GetPaintRectCenterToScreen(frameNode) - pixelMapHalfSize;
     auto frameTag = frameNode->GetTag();
-    if (IsPixelMapNeedScale() && GetTextDraggable() && IsTextCategoryComponent(frameTag)) {
+    if (GetTextDraggable() && IsTextCategoryComponent(frameTag)) {
         auto textDragPattern = frameNode->GetPattern<TextDragBase>();
         CHECK_NULL_RETURN(textDragPattern, previewOffset);
         auto dragNode = textDragPattern->MoveDragNode();

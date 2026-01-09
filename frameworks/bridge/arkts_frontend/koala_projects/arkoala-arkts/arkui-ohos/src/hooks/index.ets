@@ -171,13 +171,14 @@ export function hookGestureModifier(commonMethod: ArkCommonMethodComponent, valu
     value_casted.applyGesture(gestureEvent as UIGestureEvent);
 }
 
-export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPeer, value: Array<UniformDataType> | null | Array<string> | undefined) : void {
+export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPeer | ArkBaseNode,
+  value: Array<UniformDataType> | null | Array<string> | undefined) : void {
   if (!node) {
       return
   }
   if (value === null) {
-    if (node instanceof ArkCommonMethodComponent) {
-      let nodeComponent = node as ArkCommonMethodComponent
+    if (node instanceof ArkCommonMethodComponent || node instanceof ArkBaseNode) {
+      let nodeComponent = node as (ArkCommonMethodComponent | ArkBaseNode)
       ArkUIAniModule._Drag_Set_AllowDrop_Null(nodeComponent.getPeer().getPeerPtr())
     } else if (node instanceof ArkCommonMethodPeer) {
       let nodePeer = node as ArkCommonMethodPeer
@@ -186,8 +187,8 @@ export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPe
     return
   }
   let array = value as (Array<UniformDataType> | Array<string> | undefined)
-  if (node instanceof ArkCommonMethodComponent) {
-    let nodeComponent = node as ArkCommonMethodComponent
+  if (node instanceof ArkCommonMethodComponent || node instanceof ArkBaseNode) {
+    let nodeComponent = node as (ArkCommonMethodComponent | ArkBaseNode)
     ArkUIAniModule._Drag_Set_AllowDrop(nodeComponent.getPeer().getPeerPtr(), array)
   } else if (node instanceof ArkCommonMethodPeer) {
     let nodePeer = node as ArkCommonMethodPeer
