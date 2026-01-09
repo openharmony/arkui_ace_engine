@@ -3503,6 +3503,7 @@ typedef struct Opt_TextPickerTextStyle Opt_TextPickerTextStyle;
 typedef struct TouchEventPeer TouchEventPeer;
 typedef struct TouchEventPeer* Ark_TouchEvent;
 typedef struct Opt_TouchEvent Opt_TouchEvent;
+typedef struct Opt_InputEventType Opt_InputEventType;
 typedef struct uiObserver_RouterPageInfoPeer uiObserver_RouterPageInfoPeer;
 typedef struct uiObserver_RouterPageInfoPeer* Ark_uiObserver_RouterPageInfo;
 typedef struct Opt_uiObserver_RouterPageInfo Opt_uiObserver_RouterPageInfo;
@@ -22414,6 +22415,18 @@ typedef struct Opt_TouchEvent {
     Ark_Tag tag;
     Ark_TouchEvent value;
 } Opt_TouchEvent;
+typedef struct Ark_InputEventType {
+    Ark_Int32 selector;
+    union {
+        Ark_TouchEvent value0;
+        Ark_MouseEvent value1;
+        Ark_AxisEvent value2;
+    };
+    } Ark_InputEventType;
+    typedef struct Opt_InputEventType {
+        Ark_Tag tag;
+        Ark_InputEventType value;
+} Opt_InputEventType;
 typedef struct Opt_uiObserver_RouterPageInfo {
     Ark_Tag tag;
     Ark_uiObserver_RouterPageInfo value;
@@ -27272,6 +27285,8 @@ typedef struct GENERATED_ArkUIBuilderNodeOpsAccessor {
                        const Ark_BuilderNodeOptions* options);
     Ark_Boolean (*postTouchEvent)(Ark_BuilderNodeOps peer,
                                   Ark_TouchEvent event);
+    Ark_Boolean (*postInputEvent)(Ark_BuilderNodeOps peer,
+                                  const Opt_InputEventType* event);
     Ark_NativePointer (*setRootFrameNodeInBuilderNode)(Ark_BuilderNodeOps peer,
                                                        Ark_NativePointer node);
 } GENERATED_ArkUIBuilderNodeOpsAccessor;

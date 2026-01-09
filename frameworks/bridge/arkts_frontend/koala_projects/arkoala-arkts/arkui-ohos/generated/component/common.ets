@@ -9504,6 +9504,7 @@ export interface Bindable<T = void> {
 }
 export type BindableResourceStr = ResourceStr | Bindable<ResourceStr> | Bindable<Resource> | Bindable<string>;
 export type BindableResourceStrArray = Array<ResourceStr> | Bindable<Array<ResourceStr>> | Bindable<Array<Resource>> | Bindable<Array<string>>;
+export type InputEventType = TouchEvent | MouseEvent | AxisEvent;
 export class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
     getPeer(): ArkCommonMethodPeer {
         if (!this.peer) {

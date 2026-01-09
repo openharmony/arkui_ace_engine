@@ -3441,6 +3441,22 @@ void AssignUnionTo(std::optional<T>& dst,
     }
 }
 
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_InputEventType& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        case SELECTOR_ID_2: AssignTo(dst, src.value2); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
 template<typename T, typename P>
 void AssignLiteralTo(std::optional<T>& dst, const P& src);
 
@@ -5280,6 +5296,7 @@ ASSIGN_OPT(Opt_text_RunMetrics)
 ASSIGN_OPT(Opt_TextBackgroundStyle)
 ASSIGN_OPT(Opt_TextPickerTextStyle)
 ASSIGN_OPT(Opt_TouchEvent)
+ASSIGN_OPT(Opt_InputEventType)
 ASSIGN_OPT(Opt_uiObserver_RouterPageInfo)
 ASSIGN_OPT(Opt_Union_AlertDialogParamWithConfirm_AlertDialogParamWithButtons_AlertDialogParamWithOptions)
 ASSIGN_OPT(Opt_Union_BadgeParamWithNumber_BadgeParamWithString)
