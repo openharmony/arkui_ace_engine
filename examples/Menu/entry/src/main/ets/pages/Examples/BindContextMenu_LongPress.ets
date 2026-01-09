@@ -26,72 +26,56 @@ struct BindContextMenu02Test {
     // 以垂直列表形式显示的菜单。
     Menu() {
       // 展示菜单Menu中具体的item菜单项。
-      MenuItem({
-        content: '撤销',
-      })
+      MenuItem({content: '撤销'})
         .width(100)
         .height(50)
         .onClick(() => {
           this.result?.undo();
           this.showMenu = false;
         })
-      MenuItem({
-        content: '重做',
-      })
+      MenuItem({content: '重做'})
         .width(100)
         .height(50)
         .onClick(() => {
           this.result?.redo();
           this.showMenu = false;
         })
-      MenuItem({
-        content: '粘贴为纯文本',
-      })
+      MenuItem({content: '粘贴为纯文本'})
         .width(100)
         .height(50)
         .onClick(() => {
           this.result?.pasteAndMatchStyle();
           this.showMenu = false;
         })
-      MenuItem({
-        content: '复制图片',
-      })
+      MenuItem({content: '复制图片'})
         .width(100)
         .height(50)
         .onClick(() => {
           this.result?.copyImage();
           this.showMenu = false;
         })
-      MenuItem({
-        content: '剪切',
-      })
+      MenuItem({content: '剪切'})
         .width(100)
         .height(50)
         .onClick(() => {
           this.result?.cut();
           this.showMenu = false;
         })
-      MenuItem({
-        content: '复制',
-      })
+      MenuItem({content: '复制'})
         .width(100)
         .height(50)
         .onClick(() => {
           this.result?.copy();
           this.showMenu = false;
         })
-      MenuItem({
-        content: '粘贴',
-      })
+      MenuItem({content: '粘贴'})
         .width(100)
         .height(50)
         .onClick(() => {
           this.result?.paste();
           this.showMenu = false;
         })
-      MenuItem({
-        content: '复制链接',
-      })
+      MenuItem({content: '复制链接'})
         .width(100)
         .height(50)
         .onClick(() => {
@@ -103,9 +87,7 @@ struct BindContextMenu02Test {
           })
           this.showMenu = false;
         })
-      MenuItem({
-        content: '全选',
-      })
+      MenuItem({content: '全选'})
         .width(100)
         .height(50)
         .onClick(() => {
@@ -118,7 +100,6 @@ struct BindContextMenu02Test {
   }
 
   private iconStr: Resource = $r('app.media.app_icon')
-
   @State isShow: boolean = false
   @State isShow2: boolean = false
 
@@ -126,50 +107,31 @@ struct BindContextMenu02Test {
     { 
         value: '菜单一', 
         icon: $r('app.media.app_icon'), 
-        action: () => {
-            console.log('www data click on menu 1')
-        }},
+        action: () => {console.log('www data click on menu 1')}},
     { 
         value: '菜单二', 
         icon: $r('app.media.app_icon'), 
-        action: () => {
-            console.log('www data click on menu 2')
-        }},
+        action: () => {console.log('www data click on menu 2')}},
     { 
         value: '菜单三', 
         icon: $r('app.media.app_icon'), 
-        action: () => {
-            console.log('www data click on menu 3')
-        }},
+        action: () => {console.log('www data click on menu 3')}},
     { 
         value: '菜单四', 
         icon: $r('app.media.app_icon'), 
-        action: () => {
-            console.log('www data click on menu 4')
-        }},
+        action: () => {console.log('www data click on menu 4')}},
     { 
         value: '菜单五',
         icon: $r('app.media.app_icon'), 
-        action: () => {
-            console.log('www data click on menu 5')
-        }},
+        action: () => {console.log('www data click on menu 5')}},
   ]
 
   @Builder
   MyMenu() {
     Menu() {
-      MenuItem({ 
-        startIcon: this.iconStr, 
-        content: '菜单选项' 
-      })
-      MenuItem({ 
-        startIcon: this.iconStr, 
-        content: '菜单选项' 
-      })
-      MenuItem({ 
-        startIcon: this.iconStr,
-        content: '菜单选项' 
-      })
+      MenuItem({ startIcon: this.iconStr, content: '菜单选项' })
+      MenuItem({ startIcon: this.iconStr, content: '菜单选项' })
+      MenuItem({ startIcon: this.iconStr, content: '菜单选项' })
     }
   }
 
@@ -204,7 +166,6 @@ struct BindContextMenu02Test {
               aboutToAppear: () => {
                 console.log('aboutToAppear----------')
               },
-
               onDisappear: () => {
                 // this.result!.closeContextMenu();
               },
