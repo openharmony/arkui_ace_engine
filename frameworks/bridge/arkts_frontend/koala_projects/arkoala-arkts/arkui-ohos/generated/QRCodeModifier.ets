@@ -152,6 +152,7 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
         {
             this._color_0_flag = AttributeUpdaterFlag.UPDATE
             this._color_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._color_0_flag = AttributeUpdaterFlag.SKIP
@@ -163,6 +164,7 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
         {
             this._backgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._backgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backgroundColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -174,6 +176,7 @@ export class QRCodeModifier extends CommonMethodModifier implements QRCodeAttrib
         {
             this._contentOpacity_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentOpacity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentOpacity_0_flag = AttributeUpdaterFlag.SKIP

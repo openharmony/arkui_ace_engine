@@ -1173,6 +1173,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._iconSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._iconSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._iconSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1184,6 +1185,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._layoutDirection_0_flag = AttributeUpdaterFlag.UPDATE
             this._layoutDirection_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._layoutDirection_0_flag = AttributeUpdaterFlag.SKIP
@@ -1195,6 +1197,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._position_0_flag = AttributeUpdaterFlag.UPDATE
             this._position_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._position_0_flag = AttributeUpdaterFlag.SKIP
@@ -1206,6 +1209,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._markAnchor_0_flag = AttributeUpdaterFlag.UPDATE
             this._markAnchor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._markAnchor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1217,6 +1221,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._offset_0_flag = AttributeUpdaterFlag.UPDATE
             this._offset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._offset_0_flag = AttributeUpdaterFlag.SKIP
@@ -1228,6 +1233,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1239,6 +1245,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._fontStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -1250,6 +1257,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontWeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -1261,6 +1269,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontFamily_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.SKIP
@@ -1272,6 +1281,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1283,6 +1293,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._iconColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._iconColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._iconColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1294,6 +1305,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._backgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._backgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backgroundColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1305,6 +1317,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._borderStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._borderStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._borderStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -1316,6 +1329,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._borderWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._borderWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._borderWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -1327,6 +1341,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._borderColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._borderColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._borderColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1338,6 +1353,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._borderRadius_0_flag = AttributeUpdaterFlag.UPDATE
             this._borderRadius_0_0value = radius
+            this._state.fireChange()
         } else
         {
             this._borderRadius_0_flag = AttributeUpdaterFlag.SKIP
@@ -1349,6 +1365,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._padding_0_flag = AttributeUpdaterFlag.UPDATE
             this._padding_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._padding_0_flag = AttributeUpdaterFlag.SKIP
@@ -1360,6 +1377,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._textIconSpace_0_flag = AttributeUpdaterFlag.UPDATE
             this._textIconSpace_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textIconSpace_0_flag = AttributeUpdaterFlag.SKIP
@@ -1371,6 +1389,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._key_0_flag = AttributeUpdaterFlag.UPDATE
             this._key_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._key_0_flag = AttributeUpdaterFlag.SKIP
@@ -1382,6 +1401,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._width_0_flag = AttributeUpdaterFlag.UPDATE
             this._width_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._width_0_flag = AttributeUpdaterFlag.SKIP
@@ -1393,6 +1413,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._height_0_flag = AttributeUpdaterFlag.UPDATE
             this._height_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._height_0_flag = AttributeUpdaterFlag.SKIP
@@ -1404,6 +1425,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._size_0_flag = AttributeUpdaterFlag.UPDATE
             this._size_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._size_0_flag = AttributeUpdaterFlag.SKIP
@@ -1415,6 +1437,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._constraintSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._constraintSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._constraintSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1426,6 +1449,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._align_0_flag = AttributeUpdaterFlag.UPDATE
             this._align_0_0value = alignType
+            this._state.fireChange()
         } else
         {
             this._align_0_flag = AttributeUpdaterFlag.SKIP
@@ -1437,6 +1461,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._alignRules_0_flag = AttributeUpdaterFlag.UPDATE
             this._alignRules_0_0value = alignRule
+            this._state.fireChange()
         } else
         {
             this._alignRules_0_flag = AttributeUpdaterFlag.SKIP
@@ -1448,6 +1473,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._id_0_flag = AttributeUpdaterFlag.UPDATE
             this._id_0_0value = description
+            this._state.fireChange()
         } else
         {
             this._id_0_flag = AttributeUpdaterFlag.SKIP
@@ -1460,6 +1486,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
             this._chainMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._chainMode_0_0value = direction
             this._chainMode_0_1value = style
+            this._state.fireChange()
         } else
         {
             this._chainMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -1471,6 +1498,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.UPDATE
             this._minFontScale_0_0value = scale
+            this._state.fireChange()
         } else
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.SKIP
@@ -1482,6 +1510,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxFontScale_0_0value = scale
+            this._state.fireChange()
         } else
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.SKIP
@@ -1493,6 +1522,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._maxLines_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxLines_0_0value = line
+            this._state.fireChange()
         } else
         {
             this._maxLines_0_flag = AttributeUpdaterFlag.SKIP
@@ -1504,6 +1534,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._minFontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._minFontSize_0_0value = minSize
+            this._state.fireChange()
         } else
         {
             this._minFontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1515,6 +1546,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._maxFontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxFontSize_0_0value = maxSize
+            this._state.fireChange()
         } else
         {
             this._maxFontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1526,6 +1558,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._heightAdaptivePolicy_0_flag = AttributeUpdaterFlag.UPDATE
             this._heightAdaptivePolicy_0_0value = policy
+            this._state.fireChange()
         } else
         {
             this._heightAdaptivePolicy_0_flag = AttributeUpdaterFlag.SKIP
@@ -1537,6 +1570,7 @@ export class SecurityComponentMethodModifier implements SecurityComponentMethod,
         {
             this._enabled_0_flag = AttributeUpdaterFlag.UPDATE
             this._enabled_0_0value = respond
+            this._state.fireChange()
         } else
         {
             this._enabled_0_flag = AttributeUpdaterFlag.SKIP

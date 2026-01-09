@@ -350,6 +350,7 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         {
             this._format_0_flag = AttributeUpdaterFlag.UPDATE
             this._format_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._format_0_flag = AttributeUpdaterFlag.SKIP
@@ -361,6 +362,7 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -372,6 +374,7 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -383,6 +386,7 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         {
             this._fontStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -394,6 +398,7 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontWeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -405,6 +410,7 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontFamily_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.SKIP
@@ -416,6 +422,7 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         {
             this._onTimer_0_flag = AttributeUpdaterFlag.UPDATE
             this._onTimer_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onTimer_0_flag = AttributeUpdaterFlag.SKIP
@@ -427,6 +434,7 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         {
             this._textShadow_0_flag = AttributeUpdaterFlag.UPDATE
             this._textShadow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textShadow_0_flag = AttributeUpdaterFlag.SKIP
@@ -434,10 +442,11 @@ export class TextTimerModifier extends CommonMethodModifier implements TextTimer
         return this
     }
     contentModifier(value: ContentModifier<TextTimerConfiguration> | undefined): this {
-        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentModifier_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP

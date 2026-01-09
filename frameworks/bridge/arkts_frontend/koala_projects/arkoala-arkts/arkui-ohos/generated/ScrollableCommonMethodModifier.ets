@@ -847,6 +847,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             this._scrollBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBar_0_flag = AttributeUpdaterFlag.SKIP
@@ -858,6 +859,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBarColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -869,6 +871,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBarWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -891,6 +894,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._nestedScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -902,6 +906,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableScrollInteraction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.SKIP
@@ -913,6 +918,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             this._friction_0_flag = AttributeUpdaterFlag.UPDATE
             this._friction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._friction_0_flag = AttributeUpdaterFlag.SKIP
@@ -1001,6 +1007,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             this._onReachStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReachStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReachStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1012,6 +1019,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             this._onReachEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReachEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReachEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -1023,6 +1031,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             this._onScrollStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1034,6 +1043,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.SKIP
@@ -1045,6 +1055,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.UPDATE
             this._flingSpeedLimit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.SKIP
@@ -1056,6 +1067,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             this._clipContent_0_flag = AttributeUpdaterFlag.UPDATE
             this._clipContent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._clipContent_0_flag = AttributeUpdaterFlag.SKIP
@@ -1067,6 +1079,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
             this._digitalCrownSensitivity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
@@ -1078,6 +1091,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
         {
             this._backToTop_0_flag = AttributeUpdaterFlag.UPDATE
             this._backToTop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backToTop_0_flag = AttributeUpdaterFlag.SKIP
@@ -1090,6 +1104,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
             this._edgeEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._edgeEffect_0_0value = edgeEffect
             this._edgeEffect_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._edgeEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -1102,6 +1117,7 @@ export class ScrollableCommonMethodModifier extends CommonMethodModifier impleme
             this._fadingEdge_0_flag = AttributeUpdaterFlag.UPDATE
             this._fadingEdge_0_0value = enabled
             this._fadingEdge_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._fadingEdge_0_flag = AttributeUpdaterFlag.SKIP

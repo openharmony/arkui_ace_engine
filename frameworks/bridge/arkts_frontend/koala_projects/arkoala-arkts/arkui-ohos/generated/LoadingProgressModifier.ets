@@ -152,6 +152,7 @@ export class LoadingProgressModifier extends CommonMethodModifier implements Loa
         {
             this._color_0_flag = AttributeUpdaterFlag.UPDATE
             this._color_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._color_0_flag = AttributeUpdaterFlag.SKIP
@@ -163,6 +164,7 @@ export class LoadingProgressModifier extends CommonMethodModifier implements Loa
         {
             this._enableLoading_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableLoading_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableLoading_0_flag = AttributeUpdaterFlag.SKIP
@@ -170,10 +172,11 @@ export class LoadingProgressModifier extends CommonMethodModifier implements Loa
         return this
     }
     contentModifier(value: ContentModifier<LoadingProgressConfiguration> | undefined): this {
-        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentModifier_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP

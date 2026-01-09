@@ -346,6 +346,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         {
             this._onStateChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onStateChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onStateChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -357,6 +358,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         {
             this._onRefreshing_0_flag = AttributeUpdaterFlag.UPDATE
             this._onRefreshing_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onRefreshing_0_flag = AttributeUpdaterFlag.SKIP
@@ -368,6 +370,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         {
             this._refreshOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._refreshOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._refreshOffset_0_flag = AttributeUpdaterFlag.SKIP
@@ -379,6 +382,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         {
             this._pullToRefresh_0_flag = AttributeUpdaterFlag.UPDATE
             this._pullToRefresh_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._pullToRefresh_0_flag = AttributeUpdaterFlag.SKIP
@@ -401,6 +405,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         {
             this._onOffsetChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onOffsetChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onOffsetChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -412,6 +417,7 @@ export class RefreshModifier extends CommonMethodModifier implements RefreshAttr
         {
             this._pullDownRatio_0_flag = AttributeUpdaterFlag.UPDATE
             this._pullDownRatio_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._pullDownRatio_0_flag = AttributeUpdaterFlag.SKIP

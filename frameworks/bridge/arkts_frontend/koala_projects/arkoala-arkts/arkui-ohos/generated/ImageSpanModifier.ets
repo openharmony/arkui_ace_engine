@@ -322,6 +322,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._verticalAlign_0_flag = AttributeUpdaterFlag.UPDATE
             this._verticalAlign_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._verticalAlign_0_flag = AttributeUpdaterFlag.SKIP
@@ -333,6 +334,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._colorFilter_0_flag = AttributeUpdaterFlag.UPDATE
             this._colorFilter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._colorFilter_0_flag = AttributeUpdaterFlag.SKIP
@@ -344,6 +346,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._objectFit_0_flag = AttributeUpdaterFlag.UPDATE
             this._objectFit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._objectFit_0_flag = AttributeUpdaterFlag.SKIP
@@ -355,6 +358,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onComplete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.SKIP
@@ -366,6 +370,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._onError_0_flag = AttributeUpdaterFlag.UPDATE
             this._onError_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onError_0_flag = AttributeUpdaterFlag.SKIP
@@ -377,6 +382,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._alt_0_flag = AttributeUpdaterFlag.UPDATE
             this._alt_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._alt_0_flag = AttributeUpdaterFlag.SKIP
@@ -388,6 +394,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._textBackgroundStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -399,6 +406,7 @@ export class ImageSpanModifier extends CommonMethodModifier implements ImageSpan
         {
             this._baselineOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._baselineOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._baselineOffset_0_flag = AttributeUpdaterFlag.SKIP

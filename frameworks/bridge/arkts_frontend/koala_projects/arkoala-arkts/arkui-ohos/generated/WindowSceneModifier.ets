@@ -86,6 +86,7 @@ export class WindowSceneModifier extends CommonMethodModifier implements WindowS
             this._attractionEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._attractionEffect_0_0value = destination
             this._attractionEffect_0_1value = fraction
+            this._state.fireChange()
         } else
         {
             this._attractionEffect_0_flag = AttributeUpdaterFlag.SKIP

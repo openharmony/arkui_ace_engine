@@ -287,7 +287,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
                 }
                 default: {
                     this._divider_0_flag = AttributeUpdaterFlag.INITIAL;
-                     hookTextPickerDivider(peer, (undefined as DividerOptions | null | undefined));
+                    hookTextPickerDivider(peer, (undefined as DividerOptions | null | undefined));
                 }
             }
         }
@@ -581,6 +581,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             this._defaultPickerItemHeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._defaultPickerItemHeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._defaultPickerItemHeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -592,6 +593,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             this._canLoop_0_flag = AttributeUpdaterFlag.UPDATE
             this._canLoop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._canLoop_0_flag = AttributeUpdaterFlag.SKIP
@@ -603,6 +605,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             this._disappearTextStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._disappearTextStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._disappearTextStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -614,6 +617,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             this._textStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._textStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -625,6 +629,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             this._selectedTextStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedTextStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedTextStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -636,6 +641,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             this._disableTextStyleAnimation_0_flag = AttributeUpdaterFlag.UPDATE
             this._disableTextStyleAnimation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._disableTextStyleAnimation_0_flag = AttributeUpdaterFlag.SKIP
@@ -647,6 +653,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             this._defaultTextStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._defaultTextStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._defaultTextStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -658,6 +665,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -669,6 +677,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.SKIP
@@ -680,6 +689,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             this._onEnterSelectedArea_0_flag = AttributeUpdaterFlag.UPDATE
             this._onEnterSelectedArea_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onEnterSelectedArea_0_flag = AttributeUpdaterFlag.SKIP
@@ -691,6 +701,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             this._selectedIndex_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedIndex_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedIndex_0_flag = AttributeUpdaterFlag.SKIP
@@ -702,6 +713,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             this._divider_0_flag = AttributeUpdaterFlag.UPDATE
             this._divider_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._divider_0_flag = AttributeUpdaterFlag.SKIP
@@ -713,6 +725,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             this._gradientHeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._gradientHeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._gradientHeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -724,6 +737,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableHapticFeedback_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
@@ -735,6 +749,7 @@ export class TextPickerModifier extends CommonMethodModifier implements TextPick
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
             this._digitalCrownSensitivity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP

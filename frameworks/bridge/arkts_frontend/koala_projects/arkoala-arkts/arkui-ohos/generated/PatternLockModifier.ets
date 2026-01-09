@@ -482,6 +482,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         {
             this._sideLength_0_flag = AttributeUpdaterFlag.UPDATE
             this._sideLength_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._sideLength_0_flag = AttributeUpdaterFlag.SKIP
@@ -493,6 +494,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         {
             this._circleRadius_0_flag = AttributeUpdaterFlag.UPDATE
             this._circleRadius_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._circleRadius_0_flag = AttributeUpdaterFlag.SKIP
@@ -504,6 +506,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         {
             this._backgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._backgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backgroundColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -515,6 +518,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         {
             this._regularColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._regularColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._regularColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -526,6 +530,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         {
             this._selectedColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -537,6 +542,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         {
             this._activeColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._activeColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._activeColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -548,6 +554,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         {
             this._pathColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._pathColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._pathColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -559,6 +566,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         {
             this._pathStrokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._pathStrokeWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._pathStrokeWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -570,6 +578,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         {
             this._onPatternComplete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPatternComplete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPatternComplete_0_flag = AttributeUpdaterFlag.SKIP
@@ -581,6 +590,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         {
             this._autoReset_0_flag = AttributeUpdaterFlag.UPDATE
             this._autoReset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._autoReset_0_flag = AttributeUpdaterFlag.SKIP
@@ -592,6 +602,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         {
             this._onDotConnect_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDotConnect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDotConnect_0_flag = AttributeUpdaterFlag.SKIP
@@ -603,6 +614,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         {
             this._activateCircleStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._activateCircleStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._activateCircleStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -614,6 +626,7 @@ export class PatternLockModifier extends CommonMethodModifier implements Pattern
         {
             this._skipUnselectedPoint_0_flag = AttributeUpdaterFlag.UPDATE
             this._skipUnselectedPoint_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._skipUnselectedPoint_0_flag = AttributeUpdaterFlag.SKIP

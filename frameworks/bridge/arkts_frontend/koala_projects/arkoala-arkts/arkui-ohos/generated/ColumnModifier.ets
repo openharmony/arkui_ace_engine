@@ -150,6 +150,7 @@ export class ColumnModifier extends CommonMethodModifier implements ColumnAttrib
         {
             this._alignItems_0_flag = AttributeUpdaterFlag.UPDATE
             this._alignItems_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._alignItems_0_flag = AttributeUpdaterFlag.SKIP
@@ -161,6 +162,7 @@ export class ColumnModifier extends CommonMethodModifier implements ColumnAttrib
         {
             this._justifyContent_0_flag = AttributeUpdaterFlag.UPDATE
             this._justifyContent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._justifyContent_0_flag = AttributeUpdaterFlag.SKIP
@@ -172,6 +174,7 @@ export class ColumnModifier extends CommonMethodModifier implements ColumnAttrib
         {
             this._reverse_0_flag = AttributeUpdaterFlag.UPDATE
             this._reverse_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._reverse_0_flag = AttributeUpdaterFlag.SKIP

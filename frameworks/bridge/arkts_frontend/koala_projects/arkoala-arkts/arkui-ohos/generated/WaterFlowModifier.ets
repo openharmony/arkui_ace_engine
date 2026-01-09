@@ -1281,6 +1281,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._columnsTemplate_0_flag = AttributeUpdaterFlag.UPDATE
             this._columnsTemplate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._columnsTemplate_0_flag = AttributeUpdaterFlag.SKIP
@@ -1292,6 +1293,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._itemConstraintSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._itemConstraintSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._itemConstraintSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1303,6 +1305,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._rowsTemplate_0_flag = AttributeUpdaterFlag.UPDATE
             this._rowsTemplate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._rowsTemplate_0_flag = AttributeUpdaterFlag.SKIP
@@ -1314,6 +1317,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._columnsGap_0_flag = AttributeUpdaterFlag.UPDATE
             this._columnsGap_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._columnsGap_0_flag = AttributeUpdaterFlag.SKIP
@@ -1325,6 +1329,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._rowsGap_0_flag = AttributeUpdaterFlag.UPDATE
             this._rowsGap_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._rowsGap_0_flag = AttributeUpdaterFlag.SKIP
@@ -1336,6 +1341,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._layoutDirection_0_flag = AttributeUpdaterFlag.UPDATE
             this._layoutDirection_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._layoutDirection_0_flag = AttributeUpdaterFlag.SKIP
@@ -1347,6 +1353,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._cachedCount_0_flag = AttributeUpdaterFlag.UPDATE
             this._cachedCount_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._cachedCount_0_flag = AttributeUpdaterFlag.SKIP
@@ -1369,6 +1376,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollFrameBegin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.SKIP
@@ -1380,6 +1388,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._onScrollIndex_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollIndex_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollIndex_0_flag = AttributeUpdaterFlag.SKIP
@@ -1391,6 +1400,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._onWillScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1402,6 +1412,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._onDidScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDidScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDidScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1414,6 +1425,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
             this._cachedCount_1_flag = AttributeUpdaterFlag.UPDATE
             this._cachedCount_1_0value = count
             this._cachedCount_1_1value = show
+            this._state.fireChange()
         } else
         {
             this._cachedCount_1_flag = AttributeUpdaterFlag.SKIP
@@ -1425,6 +1437,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._scrollBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBar_0_flag = AttributeUpdaterFlag.SKIP
@@ -1436,6 +1449,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBarColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1447,6 +1461,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBarWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -1469,6 +1484,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._nestedScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1480,6 +1496,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableScrollInteraction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.SKIP
@@ -1491,6 +1508,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._friction_0_flag = AttributeUpdaterFlag.UPDATE
             this._friction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._friction_0_flag = AttributeUpdaterFlag.SKIP
@@ -1579,6 +1597,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._onReachStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReachStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReachStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1590,6 +1609,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._onReachEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReachEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReachEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -1601,6 +1621,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._onScrollStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1612,6 +1633,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.SKIP
@@ -1623,6 +1645,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.UPDATE
             this._flingSpeedLimit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.SKIP
@@ -1634,6 +1657,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._clipContent_0_flag = AttributeUpdaterFlag.UPDATE
             this._clipContent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._clipContent_0_flag = AttributeUpdaterFlag.SKIP
@@ -1645,6 +1669,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
             this._digitalCrownSensitivity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
@@ -1656,6 +1681,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
         {
             this._backToTop_0_flag = AttributeUpdaterFlag.UPDATE
             this._backToTop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backToTop_0_flag = AttributeUpdaterFlag.SKIP
@@ -1668,6 +1694,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
             this._edgeEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._edgeEffect_0_0value = edgeEffect
             this._edgeEffect_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._edgeEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -1680,6 +1707,7 @@ export class WaterFlowModifier extends CommonMethodModifier implements WaterFlow
             this._fadingEdge_0_flag = AttributeUpdaterFlag.UPDATE
             this._fadingEdge_0_0value = enabled
             this._fadingEdge_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._fadingEdge_0_flag = AttributeUpdaterFlag.SKIP
