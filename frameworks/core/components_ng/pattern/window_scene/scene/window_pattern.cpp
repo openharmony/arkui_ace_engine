@@ -607,8 +607,9 @@ void WindowPattern::HideStartingWindow()
         CHECK_NULL_VOID(self->startingWindow_);
         auto session = self->session_;
         CHECK_NULL_VOID(session);
-        CHECK_NULL_VOID(session->GetSessionInfoAbilityInfo());
-        bool debugMode = session->GetSessionInfoAbilityInfo()->applicationInfo.debug;
+        auto abilityInfo = session->GetSessionInfoAbilityInfo();
+        CHECK_NULL_VOID(abilityInfo);
+        bool debugMode = abilityInfo->applicationInfo.debug;
         TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "hide StartingWindow time out, debug mode: %{public}d", debugMode);
         CHECK_EQUAL_VOID(debugMode, true);
         auto ret = session->Clear();
