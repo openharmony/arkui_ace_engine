@@ -406,6 +406,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     InitializeParam(menuPattern);
     auto needModify = !menuPattern->IsSelectMenu() && !menuPattern->IsSelectOverlayDefaultModeRightClickMenu();
     if (needModify && canExpandCurrentWindow_) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "original position is : %{public}s", position_.ToString().c_str());
         ModifyOffset(position_, menuPattern);
     }
     dumpInfo_.originPlacement =
@@ -811,7 +812,6 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
 // Called to perform layout render node and child.
 void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    // initialize screen size and menu position
     CHECK_NULL_VOID(layoutWrapper);
     MenuDumpInfo dumpInfo;
     auto menuNode = layoutWrapper->GetHostNode();
@@ -822,6 +822,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuLayoutProperty);
     auto isContextMenu = menuPattern->IsContextMenu();
     InitCanExpandCurrentWindow(isContextMenu, menuLayoutProperty);
+    dumpInfo_.canExpandCurrentWindow = canExpandCurrentWindow_;
     Initialize(layoutWrapper);
     if (!targetTag_.empty()) {
         InitTargetSizeAndPosition(layoutWrapper, isContextMenu, menuPattern);
@@ -2986,6 +2987,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
     CHECK_NULL_VOID(pipelineContext);
     if (canExpandCurrentWindow_ && !menuPattern->IsSelectMenu()) {
         if (!holdTargetOffset) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "original targetOffset is : %{public}s", targetOffset_.ToString().c_str());
             ModifyOffset(targetOffset_, menuPattern);
             menuPattern->SetTargetOffset(targetOffset_);
         }
@@ -3548,12 +3550,15 @@ void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(
     bool isContextMenu, const RefPtr<MenuLayoutProperty>& menuLayoutProperty)
 {
     CHECK_NULL_VOID(menuLayoutProperty);
+    showInSubWindow_ = menuLayoutProperty->GetShowInSubWindowValue(false) || isContextMenu;
+    dumpInfo_.showInSubWindow = showInSubWindow_;
+    if (!showInSubWindow_) {
+        canExpandCurrentWindow_ = false;
+        return;
+    }
     // subwindow on phone has the same size as the main window
     // so menu showed in subwindow can not expand the current window on phone
-    auto showInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(false);
-    dumpInfo_.showInSubWindow = showInSubWindow;
-    canExpandCurrentWindow_ = IsExpandDisplay() && (showInSubWindow || isContextMenu);
-    dumpInfo_.canExpandCurrentWindow = canExpandCurrentWindow_;
+    canExpandCurrentWindow_ = IsExpandDisplay();
     auto containerId = Container::CurrentId();
     auto container = AceEngine::Get().GetContainer(containerId);
     if (containerId >= MIN_SUBCONTAINER_ID) {
@@ -3628,7 +3633,6 @@ Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuP
 
 void MenuLayoutAlgorithm::ModifyOffset(OffsetF& offset, const RefPtr<MenuPattern>& menuPattern)
 {
-    TAG_LOGI(AceLogTag::ACE_MENU, "original targetOffset is : %{public}s", offset.ToString().c_str());
     if (isExpandDisplay_) {
         auto host = menuPattern->GetHost();
         CHECK_NULL_VOID(host);
