@@ -164,7 +164,7 @@ void ListItemLayoutAlgorithm::SetSwipeActionNode(
     LayoutWrapper* layoutWrapper, const SizeF& size, const OffsetF& paddingOffset)
 {
     // Update child position.
-    if (Positive(curOffset_) && startNodeIndex_ >= 0) {
+    if ((Positive(curOffset_) && startNodeIndex_ >= 0) || CheckMeasureSwipeAction(true)) {
         auto child = layoutWrapper->GetOrCreateChildByIndex(startNodeIndex_);
         CHECK_NULL_VOID(child);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
@@ -174,7 +174,8 @@ void ListItemLayoutAlgorithm::SetSwipeActionNode(
         OffsetF offset = axis_ == Axis::VERTICAL ? OffsetF(crossOffset, mainOffset) : OffsetF(mainOffset, crossOffset);
         child->GetGeometryNode()->SetMarginFrameOffset(paddingOffset + offset);
         child->Layout();
-    } else if (Negative(curOffset_) && endNodeIndex_ >= 0) {
+    }
+    if ((Negative(curOffset_) && endNodeIndex_ >= 0) || CheckMeasureSwipeAction(false)) {
         auto child = layoutWrapper->GetOrCreateChildByIndex(endNodeIndex_);
         CHECK_NULL_VOID(child);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
