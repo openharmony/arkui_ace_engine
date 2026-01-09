@@ -610,10 +610,10 @@ void WindowPattern::HideStartingWindow()
         auto abilityInfo = session->GetSessionInfoAbilityInfo();
         CHECK_NULL_VOID(abilityInfo);
         bool debugMode = abilityInfo->applicationInfo.debug;
-        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "hide StartingWindow time out, debug mode: %{public}d", debugMode);
+        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "HideStartingWindow time out, debug mode: %{public}d", debugMode);
         CHECK_EQUAL_VOID(debugMode, true);
         auto ret = session->Clear();
-        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "Terminate StartingWindow, ret: %{public}d", ret);
+        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "HideStartingWindow terminate session, ret: %{public}d", ret);
     });
     taskExecutor->PostDelayedTask(
         interruptStartingTask_, TaskExecutor::TaskType::UI, STARTING_WINDOW_TIMEOUT_MS, "ArkUICleanStartingWindow");
