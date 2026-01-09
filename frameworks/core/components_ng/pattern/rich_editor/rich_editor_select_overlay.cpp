@@ -161,6 +161,14 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     CHECK_NULL_VOID(!pattern->spans_.empty());
     auto contentHost = pattern->GetContentHost();
     CHECK_NULL_VOID(contentHost);
+
+    auto localOffset = handleRect.GetOffset();
+    if (IsOverlayMode()) {
+        auto parentGlobalOffset = hasTransform_ ? GetPaintOffsetWithoutTransform() : pattern->GetParentGlobalOffset();
+        localOffset = localOffset - parentGlobalOffset; // original offset
+    }
+    SetMagnifierOffset(localOffset, handleRect);
+
     // the handle position is calculated based on the middle of the handle height.
     auto handleOffset = GetHandleReferenceOffset(handleRect);
     UpdateSelectorOnHandleMove(handleOffset, isFirst);
@@ -168,12 +176,6 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->MarkInfoChange(DIRTY_SELECT_TEXT);
-    auto localOffset = handleRect.GetOffset();
-    if (IsOverlayMode()) {
-        auto parentGlobalOffset = hasTransform_ ? GetPaintOffsetWithoutTransform() : pattern->GetParentGlobalOffset();
-        localOffset = localOffset - parentGlobalOffset; // original offset
-    }
-    SetMagnifierOffset(localOffset, handleRect);
 
     bool isChangeSecondHandle = isFirst ? pattern->textSelector_.StartGreaterDest() :
         (!pattern->textSelector_.StartGreaterDest());

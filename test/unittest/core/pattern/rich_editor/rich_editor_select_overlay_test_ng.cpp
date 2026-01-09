@@ -321,6 +321,29 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: OnHandleMove003
+ * @tc.desc: test OnHandleMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto focusHub = richEditorPattern->GetHost()->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    AddImageSpan();
+    richEditorPattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
+    richEditorPattern->selectOverlay_->hasTransform_ = true;
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    richEditorPattern->selectOverlay_->SetHandleLevelMode(HandleLevelMode::EMBED);
+    richEditorPattern->selectOverlay_->OnHandleMove(RectF(1.0f, 0.0f, 10.0f, 10.0f), false);
+    EXPECT_NE(richEditorPattern->magnifierController_->localOffset_.GetX(), 0.0f);
+}
+
+/**
  * @tc.name: OnHandleMoveDone001
  * @tc.desc: test OnHandleMoveDone
  * @tc.type: FUNC
@@ -1458,11 +1481,11 @@ HWTEST_F(RichEditorSelectOverlayTestNg, DumpInfo002, TestSize.Level0)
 }
 
 /**
- * @tc.name: OnHandleMove001
+ * @tc.name: OnHandleMove004
  * @tc.desc: test OnHandleMove
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove003, TestSize.Level0)
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
