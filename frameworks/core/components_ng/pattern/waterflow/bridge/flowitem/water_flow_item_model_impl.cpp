@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WATER_FLOW_ITEM_MODEL_IMPL_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WATER_FLOW_ITEM_MODEL_IMPL_H
+#include "core/components_ng/pattern/waterflow/bridge/flowitem/water_flow_item_model_impl.h"
 
-#include "core/components_ng/pattern/waterflow/water_flow_item_model.h"
+#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/core/components_v2/water_flow/water_flow_item_component.h"
 
 namespace OHOS::Ace::Framework {
-class WaterFlowItemModelImpl : public OHOS::Ace::WaterFlowItemModel {
-public:
-    void Create() override;
-};
+void WaterFlowItemModelImpl::Create()
+{
+    auto itemComponent = AceType::MakeRefPtr<V2::WaterFlowItemComponent>();
+    ViewStackProcessor::GetInstance()->ClaimElementId(itemComponent);
+    ViewStackProcessor::GetInstance()->Push(itemComponent);
+}
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_WATER_FLOW_ITEM_MODEL_IMPL_H

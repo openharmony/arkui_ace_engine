@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,8 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_scroll_ffi.h"
 #include "core/common/container.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -30,14 +32,29 @@ NativeWaterFlowSections::NativeWaterFlowSections() : FFIData()
     RefPtr<NG::WaterFlowSections> sections = AceType::MakeRefPtr<NG::WaterFlowSections>();
     SetWaterFlowSections(sections);
 }
+
+NG::WaterFlowModelNG* GetWaterFlowModel()
+{
+    static NG::WaterFlowModelNG* cachedModel = nullptr;
+    if (!cachedModel) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("WaterFlow");
+        if (module == nullptr) {
+            LOGF("Can't find WaterFlow dynamic module");
+            abort();
+        }
+        cachedModel = reinterpret_cast<NG::WaterFlowModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
+
 } // namespace OHOS::Ace::Framework
 
 extern "C" {
 void FfiOHOSAceFrameworkWaterFlowCreate(void (*footer)(), int32_t scrollerID, bool scrollerHasValue, int32_t sectionID,
     bool sectionsIDHasValue, int32_t direction)
 {
-    WaterFlowModel::GetInstance()->Create();
-    WaterFlowModel::GetInstance()->SetLayoutMode(static_cast<NG::WaterFlowLayoutMode>(direction));
+    GetWaterFlowModel()->Create();
+    GetWaterFlowModel()->SetLayoutMode(static_cast<NG::WaterFlowLayoutMode>(direction));
 
     if (scrollerHasValue) {
         auto scroller = FFIData::GetData<NativeNGScroller>(scrollerID);
@@ -45,7 +62,7 @@ void FfiOHOSAceFrameworkWaterFlowCreate(void (*footer)(), int32_t scrollerID, bo
             LOGE("invalid scrollerID");
             return;
         }
-        auto positionController = WaterFlowModel::GetInstance()->CreateScrollController();
+        auto positionController = GetWaterFlowModel()->CreateScrollController();
         scroller->SetController(positionController);
 
         auto proxy = AceType::DynamicCast<NG::ScrollBarProxy>(scroller->GetScrollBarProxy());
@@ -53,7 +70,7 @@ void FfiOHOSAceFrameworkWaterFlowCreate(void (*footer)(), int32_t scrollerID, bo
             proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
             scroller->SetScrollBarProxy(proxy);
         }
-        WaterFlowModel::GetInstance()->SetScroller(positionController, proxy);
+        GetWaterFlowModel()->SetScroller(positionController, proxy);
     }
 
     if (sectionsIDHasValue) {
@@ -62,76 +79,76 @@ void FfiOHOSAceFrameworkWaterFlowCreate(void (*footer)(), int32_t scrollerID, bo
             LOGE("invalid sectionID");
             return;
         }
-        auto waterFlowSections = WaterFlowModel::GetInstance()->GetOrCreateWaterFlowSections();
+        auto waterFlowSections = GetWaterFlowModel()->GetOrCreateWaterFlowSections();
         auto localSections = self->GetWaterFlowSections()->GetSectionInfo();
         waterFlowSections->ReplaceFrom(0, localSections);
     } else {
-        WaterFlowModel::GetInstance()->ResetSections();
+        GetWaterFlowModel()->ResetSections();
         auto lambda = CJLambda::Create(footer);
         auto builderFunc = [lambda]() { lambda(); };
-        WaterFlowModel::GetInstance()->SetFooter(std::move(builderFunc));
+        GetWaterFlowModel()->SetFooter(std::move(builderFunc));
     }
 }
 
 void FfiOHOSAceFrameworkWaterFlowSetColumnsTemplate(const char* content)
 {
     auto string = static_cast<std::string>(content);
-    WaterFlowModel::GetInstance()->SetColumnsTemplate(string);
+    GetWaterFlowModel()->SetColumnsTemplate(string);
 }
 
 void FfiOHOSAceFrameworkWaterFlowSetRowsTemplate(const char* content)
 {
     auto string = static_cast<std::string>(content);
-    WaterFlowModel::GetInstance()->SetRowsTemplate(string);
+    GetWaterFlowModel()->SetRowsTemplate(string);
 }
 
 void FfiOHOSAceFrameworkWaterFlowSetItemConstraintSize(double minWidth, int32_t minWidthUnit, double maxWidth,
     int32_t maxWidthUnit, double minHeight, int32_t minHeightUnit, double maxHeight, int32_t maxHeightUnit)
 {
     CalcDimension minWidthLocal = CalcDimension(minWidth, static_cast<DimensionUnit>(minWidthUnit));
-    WaterFlowModel::GetInstance()->SetItemMinWidth(minWidthLocal);
+    GetWaterFlowModel()->SetItemMinWidth(minWidthLocal);
     CalcDimension maxWidthLocal = CalcDimension(maxWidth, static_cast<DimensionUnit>(maxWidthUnit));
-    WaterFlowModel::GetInstance()->SetItemMaxWidth(maxWidthLocal);
+    GetWaterFlowModel()->SetItemMaxWidth(maxWidthLocal);
     CalcDimension minHeightLocal = CalcDimension(minHeight, static_cast<DimensionUnit>(minHeightUnit));
-    WaterFlowModel::GetInstance()->SetItemMinHeight(minHeightLocal);
+    GetWaterFlowModel()->SetItemMinHeight(minHeightLocal);
     CalcDimension maxHeightLocal = CalcDimension(maxHeight, static_cast<DimensionUnit>(maxHeightUnit));
-    WaterFlowModel::GetInstance()->SetItemMaxHeight(maxHeightLocal);
+    GetWaterFlowModel()->SetItemMaxHeight(maxHeightLocal);
 }
 void FfiOHOSAceFrameworkWaterFlowSetColumnsGap(double size, int32_t unit)
 {
     CalcDimension value = CalcDimension(size, static_cast<DimensionUnit>(unit));
-    WaterFlowModel::GetInstance()->SetColumnsGap(value);
+    GetWaterFlowModel()->SetColumnsGap(value);
 }
 
 void FfiOHOSAceFrameworkWaterFlowSetRowsGap(double size, int32_t unit)
 {
     CalcDimension value = CalcDimension(size, static_cast<DimensionUnit>(unit));
-    WaterFlowModel::GetInstance()->SetRowsGap(value);
+    GetWaterFlowModel()->SetRowsGap(value);
 }
 
 void FfiOHOSAceFrameworkWaterFlowSetFriction(double value)
 {
-    WaterFlowModel::GetInstance()->SetFriction(value);
+    GetWaterFlowModel()->SetFriction(value);
 }
 
 void FfiOHOSAceFrameworkWaterFlowSetLayoutDirection(int32_t value)
 {
     if (value < static_cast<int32_t>(FlexDirection::ROW) ||
         value > static_cast<int32_t>(FlexDirection::COLUMN_REVERSE)) {
-        WaterFlowModel::GetInstance()->SetLayoutDirection(FlexDirection::COLUMN);
+        GetWaterFlowModel()->SetLayoutDirection(FlexDirection::COLUMN);
     } else {
-        WaterFlowModel::GetInstance()->SetLayoutDirection(static_cast<FlexDirection>(value));
+        GetWaterFlowModel()->SetLayoutDirection(static_cast<FlexDirection>(value));
     }
 }
 
 void FfiOHOSAceFrameworkWaterFlowSetCachedCount(int32_t value, bool show)
 {
-    WaterFlowModel::GetInstance()->SetCachedCount(value, show);
+    GetWaterFlowModel()->SetCachedCount(value, show);
 }
 
 void FfiOHOSAceFrameworkWaterFlowSetScrollEnabled(bool value)
 {
-    WaterFlowModel::GetInstance()->SetScrollEnabled(value);
+    GetWaterFlowModel()->SetScrollEnabled(value);
 }
 
 void FfiOHOSAceFrameworkWaterFlowSetNestedScroll(int32_t forward, int32_t backward)
@@ -148,32 +165,32 @@ void FfiOHOSAceFrameworkWaterFlowSetNestedScroll(int32_t forward, int32_t backwa
     }
     NestedScrollOptions nestedOpt = { .forward = static_cast<NestedScrollMode>(forwardLocal),
         .backward = static_cast<NestedScrollMode>(backwardLocal) };
-    WaterFlowModel::GetInstance()->SetNestedScroll(nestedOpt);
+    GetWaterFlowModel()->SetNestedScroll(nestedOpt);
 }
 
 void FfiOHOSAceFrameworkWaterFlowSetOnReachStartCallback(void (*callback)())
 {
     auto lambda = CJLambda::Create(callback);
     auto onReachStart = [lambda]() { lambda(); };
-    WaterFlowModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
+    GetWaterFlowModel()->SetOnReachStart(std::move(onReachStart));
 }
 
 void FfiOHOSAceFrameworkWaterFlowSetOnReachEndCallback(void (*callback)())
 {
     auto lambda = CJLambda::Create(callback);
     auto onReachEnd = [lambda]() { lambda(); };
-    WaterFlowModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
+    GetWaterFlowModel()->SetOnReachEnd(std::move(onReachEnd));
 }
 
 void FfiOHOSAceFrameworkWaterFlowScrollBar(int32_t value)
 {
     auto displayMode = static_cast<DisplayMode>(value);
-    WaterFlowModel::GetInstance()->SetScrollBarMode(displayMode);
+    GetWaterFlowModel()->SetScrollBarMode(displayMode);
 }
 
 void FfiOHOSAceFrameworkWaterFlowScrollBarColor(uint32_t color)
 {
-    WaterFlowModel::GetInstance()->SetScrollBarColor(Color(color).ColorToString());
+    GetWaterFlowModel()->SetScrollBarColor(Color(color).ColorToString());
 }
 
 void FfiOHOSAceFrameworkWaterFlowScrollBarWidth(double value, int32_t valueUnit)
@@ -183,7 +200,7 @@ void FfiOHOSAceFrameworkWaterFlowScrollBarWidth(double value, int32_t valueUnit)
     if (scrollBarWidth.Unit() == DimensionUnit::PERCENT) {
         return;
     }
-    WaterFlowModel::GetInstance()->SetScrollBarWidth(scrollBarWidth.ToString());
+    GetWaterFlowModel()->SetScrollBarWidth(scrollBarWidth.ToString());
 }
 
 void FfiOHOSAceFrameworkWaterFlowEdgeEffect(int32_t value, bool isEnabled)
@@ -192,7 +209,7 @@ void FfiOHOSAceFrameworkWaterFlowEdgeEffect(int32_t value, bool isEnabled)
     if (edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
         edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
     }
-    WaterFlowModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), isEnabled);
+    GetWaterFlowModel()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), isEnabled);
 }
 
 void FfiOHOSAceFrameworkWaterFlowOnScrollStart(void (*callback)())
@@ -201,7 +218,7 @@ void FfiOHOSAceFrameworkWaterFlowOnScrollStart(void (*callback)())
     auto onScrollStart = [lambda]() {
         lambda();
     };
-    WaterFlowModel::GetInstance()->SetOnScrollStart(std::move(onScrollStart));
+    GetWaterFlowModel()->SetOnScrollStart(std::move(onScrollStart));
 }
 
 void FfiOHOSAceFrameworkWaterFlowOnScrollStop(void (*callback)())
@@ -210,7 +227,7 @@ void FfiOHOSAceFrameworkWaterFlowOnScrollStop(void (*callback)())
     auto onScrollStop = [lambda]() {
         lambda();
     };
-    WaterFlowModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
+    GetWaterFlowModel()->SetOnScrollStop(std::move(onScrollStop));
 }
 
 void FfiOHOSAceFrameworkWaterFlowSetOnScrollFrameBegin(double (*callback)(double offset, int32_t state))
@@ -221,7 +238,7 @@ void FfiOHOSAceFrameworkWaterFlowSetOnScrollFrameBegin(double (*callback)(double
         ScrollFrameResult scrollRes { .offset = Dimension(result, DimensionUnit::VP) };
         return scrollRes;
     };
-    WaterFlowModel::GetInstance()->SetOnScrollFrameBegin(std::move(onScrollBegin));
+    GetWaterFlowModel()->SetOnScrollFrameBegin(std::move(onScrollBegin));
 }
 
 void FfiOHOSAceFrameworkWaterFlowSetScrollIndexCallback(void (*callback)(int32_t first, int32_t last))
@@ -231,7 +248,7 @@ void FfiOHOSAceFrameworkWaterFlowSetScrollIndexCallback(void (*callback)(int32_t
         lambda(first, last);
         return;
     };
-    WaterFlowModel::GetInstance()->SetOnScrollIndex(std::move(onScrollIndex));
+    GetWaterFlowModel()->SetOnScrollIndex(std::move(onScrollIndex));
 }
 
 int64_t FfiOHOSAceFrameworkWaterFlowSectionsCreate()
@@ -358,6 +375,19 @@ void FfiOHOSAceFrameworkWaterFlowSectionsValue(int64_t selfID, CArrNativeSection
 
 void FfiOHOSAceFrameworkFlowItemCreate()
 {
-    WaterFlowItemModel::GetInstance()->Create();
+    static NG::WaterFlowItemModelNG* cachedModel = nullptr;
+    if (!cachedModel) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("FlowItem");
+        if (module == nullptr) {
+            LOGF("Can't find FlowItem dynamic module");
+            abort();
+        }
+        cachedModel = reinterpret_cast<NG::WaterFlowItemModelNG*>(module->GetModel());
+        if (cachedModel == nullptr) {
+            LOGF("Can't find FlowItem model");
+            abort();
+        }
+    }
+    cachedModel->Create();
 }
 }

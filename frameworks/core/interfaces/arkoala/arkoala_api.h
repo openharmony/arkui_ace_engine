@@ -6120,6 +6120,27 @@ struct ArkUIWaterFlowModifier {
     void (*setOnWaterFlowScrollIndexCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnWaterFlowScrollIndex)(ArkUINodeHandle node);
     void (*createWaterFlowScrollBarColorWithResourceObj)(ArkUINodeHandle node, void* resObj);
+    ArkUINodeHandle (*createWaterFlow)(ArkUI_Int32 nodeId);
+    void (*create)();
+    void (*setScrollEnabled)(ArkUINodeHandle node, ArkUI_Bool enabled);
+    void (*setOnScroll)(ArkUINodeHandle node, void* onScrollCallback);
+    void (*setOnScrollStart)(ArkUINodeHandle node, void* onScrollStartCallback);
+    void (*setOnScrollStop)(ArkUINodeHandle node, void* onScrollStopCallback);
+    void (*setOnScrollIndex)(ArkUINodeHandle node, void* onScrollIndexCallback);
+    void (*setOnReachStart)(ArkUINodeHandle node, void* onReachStartCallback);
+    void (*setOnReachEnd)(ArkUINodeHandle node, void* onReachEndCallback);
+    void (*setOnScrollFrameBegin)(ArkUINodeHandle node, void* onScrollFrameBeginCallback);
+    void (*setScrollBarColorNull)(ArkUINodeHandle node);
+    void (*setWaterflowFooterWithFrameNode)(ArkUINodeHandle node, void* uiNodePtr);
+    void (*setFooterCallback)(ArkUINodeHandle node, void* func);
+    void* (*createScrollBarProxy)();
+    void* (*getEventSetHandler)(uint32_t kind);
+    void* (*getEventResetHandler)(uint32_t kind);
+};
+
+struct ArkUIWaterFlowItemModifier {
+    void (*create)();
+    ArkUINodeHandle (*createFlowItem)(ArkUI_Int32 nodeId);
 };
 
 struct ArkUIMenuItemModifier {
@@ -8140,6 +8161,7 @@ struct ArkUINodeModifiers {
     const ArkUIMenuModifier* (*getMenuModifier)();
     const ArkUIDatePickerModifier* (*getDatePickerModifier)();
     const ArkUIWaterFlowModifier* (*getWaterFlowModifier)();
+    const ArkUIWaterFlowItemModifier* (*getWaterFlowItemModifier)();
     const ArkUIAlphabetIndexerModifier* (*getAlphabetIndexerModifier)();
     const ArkUIDataPanelModifier* (*getDataPanelModifier)();
     const ArkUIGaugeModifier* (*getGaugeModifier)();

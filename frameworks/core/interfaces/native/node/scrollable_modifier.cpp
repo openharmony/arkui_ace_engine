@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,11 @@ namespace {
 constexpr bool DEFAULT_BACKTOTOP = false;
 constexpr bool DEFAULT_OFFSET = 0.0f;
 constexpr int32_t ERROR_INT_CODE = -1;
+
+FrameNode* GetFrameNode(ArkUINodeHandle node)
+{
+    return node ? reinterpret_cast<FrameNode*>(node) : ViewStackProcessor::GetInstance()->GetMainFrameNode();
+}
 
 ArkUI_Int32 GetContentClip(ArkUINodeHandle node)
 {
@@ -190,7 +195,7 @@ ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[3])
 
 void SetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 edge)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ScrollableModelNG::SetEdgeEffect(
         frameNode, static_cast<EdgeEffect>(edgeEffect), alwaysEnabled, static_cast<EffectEdge>(edge));

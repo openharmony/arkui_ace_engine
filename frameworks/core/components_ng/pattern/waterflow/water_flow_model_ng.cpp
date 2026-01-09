@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_constants.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
@@ -34,16 +35,26 @@ void WaterFlowModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::WATERFLOW_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", WATERFLOW_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::WATERFLOW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WaterFlowPattern>(); });
+        WATERFLOW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WaterFlowPattern>(); });
     stack->Push(frameNode);
 }
 
 RefPtr<FrameNode> WaterFlowModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::WATERFLOW_ETS_TAG, nodeId, AceType::MakeRefPtr<WaterFlowPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(WATERFLOW_ETS_TAG, nodeId, AceType::MakeRefPtr<WaterFlowPattern>());
     return frameNode;
+}
+
+void WaterFlowModelNG::CreateFrameNode()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", WATERFLOW_ETS_TAG, nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        WATERFLOW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WaterFlowPattern>(); });
+    stack->Push(frameNode);
 }
 
 RefPtr<ScrollControllerBase> WaterFlowModelNG::GetOrCreateController(FrameNode* frameNode)
@@ -58,6 +69,16 @@ RefPtr<ScrollControllerBase> WaterFlowModelNG::GetOrCreateController(FrameNode* 
         pattern->TriggerModifyDone();
     }
     return pattern->GetPositionController();
+}
+
+RefPtr<ScrollProxy> WaterFlowModelNG::CreateScrollBarProxyStatic()
+{
+    return AceType::MakeRefPtr<NG::ScrollBarProxy>();
+}
+
+RefPtr<ScrollProxy> WaterFlowModelNG::CreateScrollBarProxy()
+{
+    return AceType::MakeRefPtr<NG::ScrollBarProxy>();
 }
 
 void WaterFlowModelNG::SetFooter(std::function<void()>&& footer)
@@ -88,11 +109,6 @@ void WaterFlowModelNG::SetFooterWithFrameNode(const RefPtr<NG::UINode>& footer)
 RefPtr<ScrollControllerBase> WaterFlowModelNG::CreateScrollController()
 {
     return AceType::MakeRefPtr<ScrollableController>();
-}
-
-RefPtr<ScrollProxy> WaterFlowModelNG::CreateScrollBarProxy()
-{
-    return AceType::MakeRefPtr<NG::ScrollBarProxy>();
 }
 
 void WaterFlowModelNG::SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy)

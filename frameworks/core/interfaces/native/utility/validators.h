@@ -48,7 +48,7 @@ template<class T> void ValidateNonEmpty(std::optional<T>& opt)
         opt.reset();
     }
 }
-void ValidateNonNegative(std::optional<int>& value);
+ACE_FORCE_EXPORT void ValidateNonNegative(std::optional<int>& value);
 void ValidateGreatOrEqual(std::optional<int32_t>& opt, const int32_t& right);
 void ValidatePositive(std::optional<int>& value);
 void ValidateNonNegative(std::optional<V2::GridContainerSize>& value);

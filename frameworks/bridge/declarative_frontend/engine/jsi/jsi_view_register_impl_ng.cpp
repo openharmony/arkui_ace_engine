@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,6 +115,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scope_util.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_scroller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_select.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
@@ -142,9 +143,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_union_effect_container.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_water_flow.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_sections.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_sections_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_app_bar_view.h"
@@ -444,7 +443,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSGridItem::JSBind(globalObj);
     JSSwiper::JSBind(globalObj);
     JSImageSpan::JSBind(globalObj);
-    JSScroller::JSBind(globalObj);
+    JSScrollerBinding::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSScrollBar::JSBind(globalObj);
     JSButton::JSBind(globalObj);
@@ -522,9 +521,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSTextInputController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
     JSRefresh::JSBind(globalObj);
-    JSWaterFlow::JSBind(globalObj);
-    JSWaterFlowItem::JSBind(globalObj);
-    JSWaterFlowSections::JSBind(globalObj);
+    JSWaterFlowSectionsBinding::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
     JSRecycleView::JSBind(globalObj);
     JSLinearGradientBinding::JSBind(globalObj);

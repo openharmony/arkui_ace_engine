@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,29 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/models/water_flow_model_impl.h"
+#include "core/components_ng/pattern/waterflow/bridge/waterflow/water_flow_model_impl.h"
 
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components_v2/water_flow/water_flow_component.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+template<class C, class V, class T>
+void JSViewSetProperty(void (C::*setMethod)(V), T&& param)
+{
+#ifndef NG_BUILD
+    auto component = AceType::DynamicCast<C>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!component) {
+        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<C>());
+        return;
+    }
+    ((*component).*setMethod)(std::forward<T>(param));
+#else
+    LOGE("do not support JSViewSetProperty in new pipeline");
+#endif
+}
+}
+
 void WaterFlowModelImpl::Create()
 {
     std::list<RefPtr<Component>> componentChildren;

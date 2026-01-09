@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,22 @@ namespace OHOS::Ace::NG {
 constexpr int32_t CALL_ARG_0 = 0;
 constexpr int32_t CALL_ARG_1 = 1;
 constexpr int32_t CALL_ARG_2 = 2;
+namespace {
+bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& nodeArg, const EcmaVM* vm)
+{
+    CHECK_NULL_RETURN(vm, false);
+    if (nodeArg->IsNativePointer(vm)) {
+        nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+        return true;
+    }
+    if (nodeArg->IsBoolean() && nodeArg->ToBoolean(vm)->Value()) {
+        nativeNode = nullptr;
+        return true;
+    }
+
+    return false;
+}
+} // namespace
 ArkUINativeModuleValue ScrollableBridge::SetContentClip(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -66,8 +82,8 @@ ArkUINativeModuleValue ScrollableBridge::SetEdgeEffect(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> alwaysEnabledArg = runtimeCallInfo->GetCallArgRef(2); // 2: index of alwaysEnabled value
     Local<JSValueRef> effectEdgeArg = runtimeCallInfo->GetCallArgRef(3); // 3: index of effectEdge value
 
-    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_EQUAL_RETURN(GetNativeNode(nativeNode, node, vm), false, panda::JSValueRef::Undefined(vm));
     EdgeEffect effect = EdgeEffect::NONE;
     bool alwaysEnabled = false;
     int32_t effectEdge = static_cast<int32_t>(EffectEdge::ALL);

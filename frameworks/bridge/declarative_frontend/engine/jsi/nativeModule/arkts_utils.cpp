@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3436,4 +3436,153 @@ int32_t ArkTSUtils::GetStringFormatStartIndex(const EcmaVM* vm, const Local<pand
     }
     return 0;
 }
+
+void ArkTSUtils::ParseMarginOrPaddingCorner(const EcmaVM* vm, const Local<JSValueRef>& value,
+    std::optional<CalcDimension>& top, std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left,
+    std::optional<CalcDimension>& right)
+{
+    CalcDimension leftDimen;
+    if (ParseJsDimensionVp(vm, GetProperty(vm, value, static_cast<int32_t>(Framework::ArkUIIndex::LEFT)), leftDimen)) {
+        left = leftDimen;
+    }
+    CalcDimension rightDimen;
+    if (ParseJsDimensionVp(
+            vm, GetProperty(vm, value, static_cast<int32_t>(Framework::ArkUIIndex::RIGHT)), rightDimen)) {
+        right = rightDimen;
+    }
+    CalcDimension topDimen;
+    if (ParseJsDimensionVp(vm, GetProperty(vm, value, static_cast<int32_t>(Framework::ArkUIIndex::TOP)), topDimen)) {
+        top = topDimen;
+    }
+    CalcDimension bottomDimen;
+    if (ParseJsDimensionVp(
+            vm, GetProperty(vm, value, static_cast<int32_t>(Framework::ArkUIIndex::BOTTOM)), bottomDimen)) {
+        bottom = bottomDimen;
+    }
+}
+
+bool ArkTSUtils::HasProperty(const EcmaVM* vm, const Local<panda::ObjectRef>& obj, const std::string& propertyName)
+{
+    CHECK_NULL_RETURN(vm, false);
+    auto stringRef = panda::StringRef::NewFromUtf8(vm, propertyName.c_str());
+    return obj->Has(vm, stringRef);
+}
+
+Local<JSValueRef> ArkTSUtils::GetProperty(
+    const EcmaVM* vm, const Local<panda::ObjectRef>& obj, const std::string& propertyName)
+{
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto stringRef = panda::StringRef::NewFromUtf8(vm, propertyName.c_str());
+    return obj->Get(vm, stringRef);
+}
+
+Local<JSValueRef> ArkTSUtils::GetProperty(const EcmaVM* vm, const Local<panda::ObjectRef>& obj, int32_t propertyIndex)
+{
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    return obj->Get(vm, panda::ExternalStringCache::GetCachedString(vm, propertyIndex));
+}
+
+bool ArkTSUtils::CheckJavaScriptScope(const EcmaVM* vm)
+{
+    return !(Framework::JsiDeclarativeEngineInstance::GetCurrentRuntime() == nullptr || vm == nullptr);
+}
+
+template<typename T>
+Local<JSValueRef> ArkTSUtils::ToJsValueWithVM(const EcmaVM* vm, T val)
+{
+    if constexpr (std::is_same_v<T, bool>) {
+        return panda::BooleanRef::New(vm, val);
+    } else if constexpr (std::is_same_v<T, int64_t>) {
+        return panda::NumberRef::New(vm, val);
+    } else if constexpr (std::is_integral<T>::value && std::is_signed<T>::value) {
+        return panda::IntegerRef::New(vm, val);
+    } else if constexpr (std::is_unsigned_v<T>) {
+        return panda::IntegerRef::NewFromUnsigned(vm, val);
+    } else if constexpr (std::is_floating_point_v<T>) {
+        return panda::NumberRef::New(vm, val);
+    } else if constexpr (std::is_same_v<T, std::string>) {
+        return panda::StringRef::NewFromUtf8(vm, val.c_str());
+    } else if constexpr (std::is_same_v<T, const char*>) {
+        return panda::StringRef::NewFromUtf8(vm, val);
+    } else if constexpr (std::is_same_v<T, std::u16string>) {
+        return panda::StringRef::NewFromUtf16(vm, val.c_str());
+    }
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+template<class T>
+Local<JSValueRef> ArkTSUtils::ConvertToJSValue(const EcmaVM* vm, T&& value)
+{
+    using ValueType = std::remove_cv_t<std::remove_reference_t<T>>;
+    if constexpr (std::is_arithmetic_v<ValueType> || std::is_same_v<ValueType, std::string> ||
+                  std::is_same_v<ValueType, std::u16string>) {
+        return ToJsValueWithVM(vm, std::forward<T>(value));
+    } else if constexpr (std::is_enum_v<ValueType>) {
+        return ToJsValueWithVM(vm, static_cast<std::make_signed_t<ValueType>>(value));
+    } else if constexpr (std::is_same_v<ValueType, Dimension> || std::is_same_v<ValueType, CalcDimension>) {
+        if (value.Unit() == DimensionUnit::VP) {
+            return ToJsValueWithVM(vm, value.Value());
+        } else {
+            LOGE("Failed to convert to JS value with dimension which it not using 'VP' unit");
+            return Local<JSValueRef>();
+        }
+    } else {
+        LOGE("Failed to convert to JS value");
+        return Local<JSValueRef>();
+    }
+}
+
+template<class T>
+void ArkTSUtils::ConvertToJSValuesImpl(
+    const EcmaVM* vm, std::vector<Local<JSValueRef>>& result, T&& value)
+{
+    result.emplace_back(ConvertToJSValue(vm, std::forward<T>(value)));
+}
+
+template<class T, class V, class... Args>
+void ArkTSUtils::ConvertToJSValuesImpl(
+    const EcmaVM* vm, std::vector<Local<JSValueRef>>& result, T&& value, V&& nextValue, Args&&... args)
+{
+    result.emplace_back(ConvertToJSValue(vm, std::forward<T>(value)));
+    ConvertToJSValuesImpl(vm, result, std::forward<V>(nextValue), std::forward<Args>(args)...);
+}
+
+template<class... Args>
+std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJSValues(const EcmaVM* vm, Args... args)
+{
+    std::vector<Local<JSValueRef>> result;
+    ConvertToJSValuesImpl(vm, result, args...);
+    return result;
+}
+
+template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<double>(const EcmaVM* vm, double);
+template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<int32_t>(const EcmaVM* vm, int32_t);
+
+template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ConvertToJSValue<CalcDimension>(
+    const EcmaVM* vm, CalcDimension&& value);
+template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ConvertToJSValue<Dimension>(
+    const EcmaVM* vm, Dimension&& value);
+template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ConvertToJSValue<ScrollState>(
+    const EcmaVM* vm, ScrollState&& value);
+template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ConvertToJSValue<int32_t>(const EcmaVM* vm, int32_t&& value);
+
+template ACE_FORCE_EXPORT void ArkTSUtils::ConvertToJSValuesImpl<ScrollState>(
+    const EcmaVM*, std::vector<Local<JSValueRef>>&, ScrollState&&);
+template ACE_FORCE_EXPORT void ArkTSUtils::ConvertToJSValuesImpl<int32_t>(
+    const EcmaVM*, std::vector<Local<JSValueRef>>&, int32_t&&);
+
+template ACE_FORCE_EXPORT void ArkTSUtils::ConvertToJSValuesImpl<CalcDimension, ScrollState>(
+    const EcmaVM*, std::vector<Local<JSValueRef>>&, CalcDimension&&, ScrollState&&);
+template ACE_FORCE_EXPORT void ArkTSUtils::ConvertToJSValuesImpl<Dimension, ScrollState>(
+    const EcmaVM*, std::vector<Local<JSValueRef>>&, Dimension&&, ScrollState&&);
+template ACE_FORCE_EXPORT void ArkTSUtils::ConvertToJSValuesImpl<int32_t, int32_t>(
+    const EcmaVM*, std::vector<Local<JSValueRef>>&, int32_t&&, int32_t&&);
+
+template ACE_FORCE_EXPORT std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJSValues<CalcDimension, ScrollState>(
+    const EcmaVM*, CalcDimension, ScrollState);
+template ACE_FORCE_EXPORT std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJSValues<Dimension, ScrollState>(
+    const EcmaVM*, Dimension, ScrollState);
+template ACE_FORCE_EXPORT std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJSValues<int32_t, int32_t>(
+    const EcmaVM*, int32_t, int32_t);
 } // namespace OHOS::Ace::NG

@@ -547,6 +547,8 @@ frameworks/bridge/declarative_frontend/ark_component/types/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/.gitignore @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/package-lock.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/package.json @arkuieco3
+frameworks/bridge/declarative_frontend/ark_component/components/arkflowitem.js @arkuiscroll
+frameworks/bridge/declarative_frontend/ark_component/components/arkwaterflow.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/tsconfig.release.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkgauge.js @arkui001
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckboxgroup.js @arkuipopupwindow_all
@@ -1055,8 +1057,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_util
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h @arkui_framework_resource
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.cpp @arkuieco3
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h @arkuieco3
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_water_flow_bridge.cpp @arkuiscroll
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_water_flow_bridge.h @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_web_bridge.cpp @arkweb-committer-group
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_web_bridge.h @arkweb-committer-group
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.cpp @ArkUI_ability_group
@@ -1341,6 +1341,7 @@ frameworks/bridge/declarative_frontend/jsview/js_scrollable.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_scroll.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_scroller.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_scroller.h @arkuiscroll
+frameworks/bridge/declarative_frontend/jsview/js_scroller_binding.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_scroll.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_search.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_search.h @huawei_g_five
@@ -1434,12 +1435,9 @@ frameworks/bridge/declarative_frontend/jsview/js_view_measure_layout.h @arkuilay
 frameworks/bridge/declarative_frontend/jsview/js_view_register.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.cpp @arkui_statemgmt
 frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h @arkui_statemgmt
-frameworks/bridge/declarative_frontend/jsview/js_water_flow.cpp @arkuiscroll
-frameworks/bridge/declarative_frontend/jsview/js_water_flow.h @arkuiscroll
-frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.cpp @arkuiscroll
-frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_water_flow_sections.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_water_flow_sections.h @arkuiscroll
+frameworks/bridge/declarative_frontend/jsview/js_water_flow_sections_binding.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_web_controller.cpp @arkweb-committer-group
 frameworks/bridge/declarative_frontend/jsview/js_web_controller.h @arkweb-committer-group
 frameworks/bridge/declarative_frontend/jsview/js_web.cpp @arkweb-committer-group
@@ -1631,10 +1629,6 @@ frameworks/bridge/declarative_frontend/jsview/models/view_full_update_model_impl
 frameworks/bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.cpp @arkui_statemgmt
 frameworks/bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h @arkui_statemgmt
 frameworks/bridge/declarative_frontend/jsview/models/view_stack_model_impl.h @arkui_statemgmt
-frameworks/bridge/declarative_frontend/jsview/models/water_flow_item_model_impl.cpp @arkuiscroll
-frameworks/bridge/declarative_frontend/jsview/models/water_flow_item_model_impl.h @arkuiscroll
-frameworks/bridge/declarative_frontend/jsview/models/water_flow_model_impl.cpp @arkuiscroll
-frameworks/bridge/declarative_frontend/jsview/models/water_flow_model_impl.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/models/web_model_impl.cpp @arkweb-committer-group
 frameworks/bridge/declarative_frontend/jsview/models/web_model_impl.h @arkweb-committer-group
 frameworks/bridge/declarative_frontend/jsview/models/xcomponent_model_impl.cpp @ArkUI_ability_group

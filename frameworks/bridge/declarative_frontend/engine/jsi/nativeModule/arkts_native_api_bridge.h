@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 using ArkUINativeModuleValue = panda::Local<panda::JSValueRef>;
 using ArkUIRuntimeCallInfo = panda::JsiRuntimeCallInfo;
 using panda::JSValueRef;
+using panda::ObjectRef;
 using panda::Local;
 using panda::ecmascript::EcmaVM;
 class ArkUINativeModule {
@@ -89,7 +90,6 @@ private:
     static void RegisterTimepickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterWaterFlowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDataPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterScrollAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGridItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

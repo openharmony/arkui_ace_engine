@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -25,6 +26,9 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "arkoala_api_generated.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/water_flow_modifier.h"
 
 #include "rect_shape_peer.h"
 
@@ -144,7 +148,9 @@ void SetEnableScrollInteractionImpl(Ark_NativePointer node,
     } else if (ScrollLayoutProperty::TypeId() == id) {
         ScrollModelStatic::SetScrollEnabled(frameNode, convValue.value_or(true));
     } else if (WaterFlowLayoutProperty::TypeId() == id) {
-        WaterFlowModelNG::SetScrollEnabled(frameNode, convValue.value_or(true));
+        auto* modifier = NG::NodeModifier::GetWaterFlowModifier();
+        CHECK_NULL_VOID(modifier);
+        modifier->setScrollEnabled(reinterpret_cast<ArkUINodeHandle>(frameNode), convValue.value_or(true));
     }
 }
 void SetFrictionImpl(Ark_NativePointer node,

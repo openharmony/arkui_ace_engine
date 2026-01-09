@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,7 @@ constexpr int32_t DEFAULT_HOURS_WEST = -8;
 */
 ACE_FORCE_EXPORT int64_t GetMicroTickCount();
 
-int64_t GetSysTimestamp();
+ACE_FORCE_EXPORT int64_t GetSysTimestamp();
 
 /**
 * return milliseconds to 1970-1-1 0:0:0

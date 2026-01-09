@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_list_bridge.h"
 
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/common/dom/dom_list.h"
 
 namespace OHOS::Ace::Framework {

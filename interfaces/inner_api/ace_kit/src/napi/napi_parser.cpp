@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@
 #undef ALTERNATE
 #endif
 #endif
+#include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "interfaces/inner_api/ace_kit/src/view/scroller_impl.h"
 

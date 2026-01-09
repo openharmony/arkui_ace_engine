@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -136,6 +136,7 @@
 #include "bridge/declarative_frontend/jsview/js_save_button.h"
 #include "bridge/declarative_frontend/jsview/js_scope_util.h"
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
+#include "bridge/declarative_frontend/jsview/js_scroller_binding.h"
 #include "bridge/declarative_frontend/jsview/js_search.h"
 #include "bridge/declarative_frontend/jsview/js_select.h"
 #include "bridge/declarative_frontend/jsview/js_shape.h"
@@ -164,9 +165,7 @@
 #include "bridge/declarative_frontend/jsview/js_union_effect_container.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
-#include "bridge/declarative_frontend/jsview/js_water_flow.h"
-#include "bridge/declarative_frontend/jsview/js_water_flow_item.h"
-#include "bridge/declarative_frontend/jsview/js_water_flow_sections.h"
+#include "bridge/declarative_frontend/jsview/js_water_flow_sections_binding.h"
 #include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
@@ -716,7 +715,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "PanGestureOption", JSPanGestureOption::JSBind },
     { "PanGestureOptions", JSPanGestureOption::JSBind },
     { "NativeCustomDialogController", JSCustomDialogController::JSBind },
-    { "Scroller", JSScroller::JSBind },
+    { "Scroller", JSScrollerBinding::JSBind },
     { "ListScroller", JSListScroller::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
     { "IndicatorController", JSIndicatorController::JSBind },
@@ -752,9 +751,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextInputController", JSTextInputController::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
     { "Refresh", JSRefresh::JSBind },
-    { "WaterFlow", JSWaterFlow::JSBind },
-    { "FlowItem", JSWaterFlowItem::JSBind },
-    { "NativeWaterFlowSection", JSWaterFlowSections::JSBind },
+    { "NativeWaterFlowSection", JSWaterFlowSectionsBinding::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "__Recycle__", JSRecycleView::JSBind },
@@ -863,7 +860,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine, bool isCusto
     JSSwiperController::JSBind(globalObj);
     JSIndicatorController::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
-    JSScroller::JSBind(globalObj);
+    JSScrollerBinding::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSRenderingContext::JSBind(globalObj);
@@ -915,7 +912,7 @@ void RegisterAllFormModule(BindingTarget globalObj, void* nativeEngine)
     JSCommonView::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
     JSIndicatorController::JSBind(globalObj);
-    JSScroller::JSBind(globalObj);
+    JSScrollerBinding::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSRenderingContext::JSBind(globalObj);
@@ -1061,7 +1058,7 @@ void JsBindFormViews(
         JSViewStackProcessor::JSBind(globalObj);
         JSTouchHandler::JSBind(globalObj);
         JSPersistent::JSBind(globalObj);
-        JSScroller::JSBind(globalObj);
+        JSScrollerBinding::JSBind(globalObj);
         JSListScroller::JSBind(globalObj);
 
         JSProfiler::JSBind(globalObj);
@@ -1128,7 +1125,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSCustomDialogController::JSBind(globalObj);
     JSShareData::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
-    JSScroller::JSBind(globalObj);
+    JSScrollerBinding::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSMagnifierController::JSBind(globalObj);
 
