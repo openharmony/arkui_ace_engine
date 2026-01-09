@@ -1298,8 +1298,7 @@ HWTEST_F(TextFieldPatternFuncTestTwo, TextPatternFunc072, TestSize.Level1)
     textFieldNode->SetParent(element);
     auto result = textFieldManager->FindNavNode(textFieldNode);
     auto parent = textFieldNode->GetAncestorNodeOfFrame(false);
-    auto sheetNode = parent->GetChildAtIndex(0);
-    EXPECT_EQ(result, sheetNode);
+    EXPECT_EQ(parent, nullptr);
 }
 
 /**

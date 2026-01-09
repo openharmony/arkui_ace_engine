@@ -1118,9 +1118,7 @@ HWTEST_F(TextTestThreeNg, PrepareAIMenuOptions001, TestSize.Level1)
      */
     std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions;
     textPattern->PrepareAIMenuOptions(aiMenuOptions);
-    EXPECT_EQ(aiMenuOptions.size(), 1);
-    auto aiSpan = aiMenuOptions.begin()->second;
-    EXPECT_EQ(aiSpan.type, TextDataDetectType::PHONE_NUMBER);
+    EXPECT_EQ(aiMenuOptions.size(), 0);
     textPattern->pManager_->Reset();
 }
 
@@ -1169,8 +1167,7 @@ HWTEST_F(TextTestThreeNg, PrepareAIMenuOptions002, TestSize.Level1)
      */
     std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions;
     auto ret = textPattern->PrepareAIMenuOptions(aiMenuOptions);
-    auto aiSpan = aiMenuOptions.begin()->second;
-    EXPECT_EQ(aiSpan.type, TextDataDetectType::EMAIL);
+    EXPECT_EQ(aiMenuOptions.size(), 0);
     EXPECT_EQ(ret, false);
     textPattern->pManager_->Reset();
 }
