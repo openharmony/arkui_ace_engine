@@ -49,6 +49,22 @@ namespace {
             colors.emplace_back(gradient);
         }
     }
+
+    // Set dimension for gradient color with version check and offset validation
+    void SetGradientColorDimension(NG::GradientColor& gradientColor, double offset, double defaultOffset)
+    {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+            // Validate offset value: clamp to [0.0, 1.0] range, same as JS implementation
+            if (offset < 0.0) {
+                offset = 0.0;
+            } else if (offset > 1.0) {
+                offset = 1.0;
+            }
+            gradientColor.SetDimension(Dimension(offset));
+        } else {
+            gradientColor.SetDimension(Dimension(defaultOffset));
+        }
+    }
 }
 
 extern "C" {
@@ -121,12 +137,12 @@ void FfiOHOSAceFrameworkDataPanelSetValueColors(VectorStringPtr vecContent)
         OHOS::Ace::NG::GradientColor gradientColorStart;
 
         gradientColorStart.SetLinearColor(LinearColor(nativeLinearGradientVec[i].firstColor));
-        gradientColorStart.SetDimension(Dimension(0.0));
+        SetGradientColorDimension(gradientColorStart, nativeLinearGradientVec[i].firstOffset, 0.0);
         gradient.AddColor(gradientColorStart);
         OHOS::Ace::NG::GradientColor gradientColorEnd;
 
         gradientColorEnd.SetLinearColor(LinearColor(nativeLinearGradientVec[i].secondColor));
-        gradientColorEnd.SetDimension(Dimension(1.0));
+        SetGradientColorDimension(gradientColorEnd, nativeLinearGradientVec[i].secondOffset, 1.0);
         gradient.AddColor(gradientColorEnd);
         valueColors.emplace_back(gradient);
     }
@@ -166,12 +182,12 @@ void FfiOHOSAceFrameworkDataPanelSetTrackShadow(NativeDataPanelShadow nativeData
         OHOS::Ace::NG::GradientColor gradientColorStart;
 
         gradientColorStart.SetLinearColor(LinearColor(nativeLinearGradientVec[i].firstColor));
-        gradientColorStart.SetDimension(Dimension(0.0));
+        SetGradientColorDimension(gradientColorStart, nativeLinearGradientVec[i].firstOffset, 0.0);
         gradient.AddColor(gradientColorStart);
         OHOS::Ace::NG::GradientColor gradientColorEnd;
 
         gradientColorEnd.SetLinearColor(LinearColor(nativeLinearGradientVec[i].secondColor));
-        gradientColorEnd.SetDimension(Dimension(1.0));
+        SetGradientColorDimension(gradientColorEnd, nativeLinearGradientVec[i].secondOffset, 1.0);
         gradient.AddColor(gradientColorEnd);
         valueColors.emplace_back(gradient);
     }
