@@ -62,6 +62,12 @@ HWTEST_F(ScrollEffectTestNg, SpringEffect001, TestSize.Level1)
     springEffect->ProcessScrollOver(0.0);
     EXPECT_NE(springEffect->scrollable_->GetSpringProperty(), nullptr);
 
+    EXPECT_NE(springEffect->initTrailingCallback_, nullptr);
+    EXPECT_NE(springEffect->initLeadingCallback_, nullptr);
+    EXPECT_NE(springEffect->trailingCallback_, nullptr);
+    EXPECT_NE(springEffect->initTrailingCallback_, nullptr);
+    EXPECT_NE(springEffect->currentPositionCallback_, nullptr);
+
     springEffect->scrollable_->springOffsetProperty_ = nullptr;
     scrollable->MarkAvailable(false);
     springEffect->ProcessScrollOver(0.0);
