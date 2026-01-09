@@ -114,58 +114,42 @@ struct BindMenuTest {
   }
 
   private iconStr: Resource = $r('app.media.app_icon')
-
   @State isShow: boolean = false
   @State isShow2: boolean = false
-
   private menuElementList: Array<MenuElement> = [
     { 
         value: '菜单一',
         icon: $r('app.media.app_icon'),
-        action: () => {
-            console.log('www data click on menu 1')
-        }},
+        action: () => {console.log('www data click on menu 1')}
+    },
     { 
         value: '菜单二',
         icon: $r('app.media.app_icon'),
-        action: () => {
-            console.log('www data click on menu 2')
-        }},
+        action: () => {console.log('www data click on menu 2')}
+    },
     { 
         value: '菜单三',
         icon: $r('app.media.app_icon'),
-        action: () => {
-            console.log('www data click on menu 3')
-        }},
+        action: () => {console.log('www data click on menu 3')}
+    },
     { 
         value: '菜单四',
         icon: $r('app.media.app_icon'),
-        action: () => {
-            console.log('www data click on menu 4')
-        }},
+        action: () => {console.log('www data click on menu 4')}
+    },
     { 
         value: '菜单五',
         icon: $r('app.media.app_icon'),
-        action: () => {
-            console.log('www data click on menu 5')
-        }},
+        action: () => {console.log('www data click on menu 5')}
+    },
   ]
 
   @Builder
   MyMenu() {
     Menu() {
-      MenuItem({ 
-        startIcon: this.iconStr,
-        content: '菜单选项'
-      })
-      MenuItem({
-        startIcon: this.iconStr,
-        content: '菜单选项'
-      })
-      MenuItem({
-        startIcon: this.iconStr,
-        content: '菜单选项'
-      })
+      MenuItem({ startIcon: this.iconStr,content: '菜单选项'})
+      MenuItem({startIcon: this.iconStr,content: '菜单选项'})
+      MenuItem({startIcon: this.iconStr,content: '菜单选项'})
     }
   }
 
@@ -193,10 +177,7 @@ struct BindMenuTest {
             .bindMenu(this.showMenu, this.MenuBuilder(), {
               enableArrow: false,
               placement: Placement.LeftTop,
-              offset: {
-                x: this.offsetX,
-                y: this.offsetY
-              },
+              offset: {x: this.offsetX,y: this.offsetY},
               mask: false,
               onDisappear: () => {
                 this.showMenu = false;
