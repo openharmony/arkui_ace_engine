@@ -654,7 +654,7 @@ HWTEST_F(WindowSceneTest, HideStartingWindowInvisible, TestSize.Level1)
     /**
      * @tc.steps: step3. Test and check
      */
-    ASSERT_EQ(windowScene->session_->GetHidingStartingWindow(), true);
+    EXPECT_EQ(windowScene->session_->GetHidingStartingWindow(), true);
 }
 
 /**
@@ -686,7 +686,7 @@ HWTEST_F(WindowSceneTest, HideStartingWindowDefault01, TestSize.Level1)
     /**
      * @tc.steps: step3. Test and check
      */
-    ASSERT_EQ(windowScene->session_->GetHidingStartingWindow(), false);
+    EXPECT_EQ(windowScene->session_->GetHidingStartingWindow(), false);
 }
 
 /**
