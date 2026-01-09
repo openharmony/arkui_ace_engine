@@ -425,6 +425,7 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
+    // ACE_CONTAINER_TRACE
     auto wantObj = JSRef<JSObject>::Cast(info[0]);
     RefPtr<OHOS::Ace::WantWrap> want = CreateWantWrapFromNapiValue(wantObj);
 

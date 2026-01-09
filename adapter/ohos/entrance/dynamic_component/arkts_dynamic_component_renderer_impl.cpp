@@ -259,6 +259,7 @@ void ArktsDynamicComponentRendererImpl::BuildDynamicInitialConfig(
 
 void ArktsDynamicComponentRendererImpl::InitUiContent(OHOS::AbilityRuntime::Context *abilityContext)
 {
+    ACE_UINODE_TRACE(host_);
     ACE_SCOPED_TRACE("[AceDynamicComponent]InitUiContent");
     rendererDumpInfo_.ReSet();
     // create UI Content

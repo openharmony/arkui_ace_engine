@@ -19,6 +19,7 @@
 
 #include "base/utils/utils.h"
 
+extern "C" void setResTraceId(uint32_t traceType, uint64_t traceId, uint32_t* pOldTraceType, uint64_t* pOldTraceId);
 namespace OHOS::Ace {
 namespace {
 static constexpr uint64_t ACE_TRACE_COMMERCIAL = HITRACE_TAG_ACE | HITRACE_TAG_COMMERCIAL;
@@ -96,5 +97,10 @@ void AceCountTrace(const char *key, int32_t count)
     CHECK_NULL_VOID(key);
     std::string keyStr(key);
     CountTrace(HITRACE_TAG_ACE, keyStr, count);
+}
+
+void AceSetResTraceId(uint32_t traceType, uint64_t traceId, uint32_t* pOldTraceType, uint64_t* pOldTraceId)
+{
+    setResTraceId(traceType, traceId, pOldTraceType, pOldTraceId);
 }
 } // namespace OHOS::Ace

@@ -245,6 +245,7 @@ void XComponentElement::CreatePlatformResource()
 #ifdef OHOS_STANDARD_SYSTEM
 void XComponentElement::CreateSurface()
 {
+    ACE_UINODE_TRACE(GetElementId());
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto context = context_.Upgrade();
         uint32_t windowId = 0;

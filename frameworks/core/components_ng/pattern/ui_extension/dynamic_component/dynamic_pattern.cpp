@@ -195,6 +195,7 @@ void DynamicPattern::InitializeRender(void* runtime)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     dynamicDumpInfo_.createLimitedWorkerTime = GetCurrentTimestamp();
 #if !defined(PREVIEW)
     auto code = CheckConstraint();
