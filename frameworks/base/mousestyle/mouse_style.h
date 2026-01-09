@@ -85,7 +85,7 @@ class ACE_EXPORT MouseStyle : public AceType {
     DECLARE_ACE_TYPE(MouseStyle, AceType);
 
 public:
-    static RefPtr<MouseStyle> CreateMouseStyle();
+    ACE_FORCE_EXPORT static RefPtr<MouseStyle> CreateMouseStyle();
 
     virtual bool SetPointerStyle(int32_t windowId, MouseFormat pointerStyle) const = 0;
     virtual int32_t GetPointerStyle(int32_t windowId, int32_t& pointerStyle) const = 0;

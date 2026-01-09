@@ -24,15 +24,12 @@
 #include "core/components/declaration/common/method.h"
 #include "core/components/declaration/common/style.h"
 #include "core/components/declaration/div/div_declaration.h"
-#include "core/components/declaration/input/input_declaration.h"
 #include "core/components/declaration/piece/piece_declaration.h"
 #include "core/components/declaration/richtext/rich_text_declaration.h"
-#include "core/components/declaration/search/search_declaration.h"
 #include "core/components/declaration/side_bar/side_bar_declaration.h"
 #include "core/components/declaration/span/span_declaration.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components/declaration/text/text_declaration.h"
-#include "core/components/declaration/textfield/textfield_declaration.h"
 #include "core/components/declaration/texttimer/texttimer_declaration.h"
 #include "core/components/declaration/web/web_declaration.h"
 #include "core/components/declaration/xcomponent/xcomponent_declaration.h"
@@ -103,19 +100,10 @@ public:
     static const std::shared_ptr<DivAttribute> DEFAULT_DIV_ATTR;
     static const std::shared_ptr<DivStyle> DEFAULT_DIV_STYLE;
 
-    // default value of input
-    static const std::shared_ptr<InputAttribute> DEFAULT_INPUT_ATTR;
-
     // default value of piece
     static const std::shared_ptr<PieceAttribute> DEFAULT_PIECE_ATTR;
     static const std::shared_ptr<PieceStyle> DEFAULT_PIECE_STYLE;
     static const std::shared_ptr<PieceEvent> DEFAULT_PIECE_EVENT;
-
-    // default value of search
-    static const std::shared_ptr<SearchAttribute> DEFAULT_SEARCH_ATTR;
-    static const std::shared_ptr<SearchStyle> DEFAULT_SEARCH_STYLE;
-    static const std::shared_ptr<SearchEvent> DEFAULT_SEARCH_EVENT;
-    static const std::shared_ptr<SearchMethod> DEFAULT_SEARCH_METHOD;
 
     // default value of side bar
     static const std::shared_ptr<SideBarContainerAttribute> DEFAULT_SIDE_BAR_ATTR;
@@ -134,12 +122,6 @@ public:
     // default value of text
     static const std::shared_ptr<TextSpecializedAttribute> DEFAULT_TEXT_ATTR;
     static const std::shared_ptr<TextSpecializedStyle> DEFAULT_TEXT_STYLE;
-
-    // default value of textfield
-    static const std::shared_ptr<TextFieldAttribute> DEFAULT_TEXTFIELD_ATTR;
-    static const std::shared_ptr<TextFieldStyle> DEFAULT_TEXTFIELD_STYLE;
-    static const std::shared_ptr<TextFieldEvent> DEFAULT_TEXTFIELD_EVENT;
-    static const std::shared_ptr<TextFieldMethod> DEFAULT_TEXTFIELD_METHOD;
 
     // default value of texttimer
     static const std::shared_ptr<TextTimerAttribute> DEFAULT_TEXTTIMER_ATTR;

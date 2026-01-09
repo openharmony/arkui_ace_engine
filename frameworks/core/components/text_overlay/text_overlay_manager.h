@@ -243,8 +243,8 @@ public:
     }
 
     const RefPtr<RenderNode> GetTargetNode() const;
-    void PopTextOverlay();
-    void PushTextOverlayToStack(
+    ACE_FORCE_EXPORT void PopTextOverlay();
+    ACE_FORCE_EXPORT void PushTextOverlayToStack(
         const RefPtr<TextOverlayComponent>& textOverlay, const WeakPtr<PipelineContext>& context);
 
     void HandleCtrlC() const;

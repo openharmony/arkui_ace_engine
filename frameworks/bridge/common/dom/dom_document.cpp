@@ -35,12 +35,10 @@
 #ifdef WEB_SUPPORTED
 #include "frameworks/bridge/common/dom/dom_rich_text.h"
 #endif
-#include "frameworks/bridge/common/dom/dom_search.h"
 #include "frameworks/bridge/common/dom/dom_slider.h"
 #include "frameworks/bridge/common/dom/dom_stack.h"
 #include "frameworks/bridge/common/dom/dom_swiper.h"
 #include "frameworks/bridge/common/dom/dom_switch.h"
-#include "frameworks/bridge/common/dom/dom_textarea.h"
 #include "frameworks/bridge/common/dom/dom_toggle.h"
 #if defined(XCOMPONENT_SUPPORTED)
 #include "frameworks/bridge/common/dom/dom_xcomponent.h"
@@ -113,7 +111,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_DIVIDER, &DOMNodeCreator<DOMDivider> },
         { DOM_NODE_TAG_FORM, &DOMNodeCreator<DOMForm> },
         { DOM_NODE_TAG_IMAGE, &DOMNodeCreator<DOMImage> },
-        { DOM_NODE_TAG_INPUT, &DOMNodeCreator<DOMInput> },
         { DOM_NODE_TAG_LIST, &DOMNodeCreator<DOMList> },
         { DOM_NODE_TAG_LIST_ITEM, &DOMListItemCreator<DOMListItem> },
         { DOM_NODE_TAG_LIST_ITEM_GROUP, &DOMListItemCreator<DOMListItemGroup> },
@@ -133,7 +130,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
 #ifdef WEB_SUPPORTED
         { DOM_NODE_TAG_RICH_TEXT, &DOMNodeCreator<DOMRichText> },
 #endif
-        { DOM_NODE_TAG_SEARCH, &DOMNodeCreator<DOMSearch> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_SELECT, &DOMNodeCreator<DOMSelect> },
 #endif
@@ -147,7 +143,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_SWIPER, &DOMNodeCreator<DOMSwiper> },
         { DOM_NODE_TAG_SWITCH, &DOMNodeCreator<DOMSwitch> },
         { DOM_NODE_TAG_TEXT, &DOMNodeCreator<DOMText> },
-        { DOM_NODE_TAG_TEXTAREA, &DOMNodeCreator<DOMTextarea> },
         { DOM_NODE_TAG_TOGGLE, &DOMNodeCreator<DOMToggle> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_TOOL_BAR, &DOMNodeCreator<DOMToolBar> },

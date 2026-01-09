@@ -39,7 +39,8 @@ public:
     {
         SetBorderRadius(radius);
     }
-    Border(const BorderEdge& left, const BorderEdge& top, const BorderEdge& right, const BorderEdge& bottom);
+    ACE_FORCE_EXPORT Border(const BorderEdge& left, const BorderEdge& top,
+        const BorderEdge& right, const BorderEdge& bottom);
 
     Border(const BorderImageEdge& leftImage, const BorderImageEdge& topImage,
         const BorderImageEdge& rightImage, const BorderImageEdge& bottomImage);
@@ -52,7 +53,7 @@ public:
     Offset GetOffset(double dipScale) const;
     double HorizontalWidth(double dipScale) const;
     double VerticalWidth(double dipScale) const;
-    Size GetLayoutSize(double dipScale) const;
+    ACE_FORCE_EXPORT Size GetLayoutSize(double dipScale) const;
     BorderEdge GetValidEdge() const;
 
     bool IsValid() const

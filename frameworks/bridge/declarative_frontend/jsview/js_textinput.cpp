@@ -30,7 +30,7 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 #include "frameworks/core/common/ime/text_input_action.h"
 #include "frameworks/core/common/ime/text_input_type.h"
-#include "frameworks/core/components/text_field/text_field_component.h"
+#include "frameworks/compatible/components/text_field/text_field_component.h"
 #include "frameworks/core/components/text_field/textfield_theme.h"
 #include "frameworks/core/components_ng/pattern/text_field/text_content_type.h"
 

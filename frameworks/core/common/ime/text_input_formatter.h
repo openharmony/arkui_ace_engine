@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_IME_TEXT_INPUT_FORMATTER_H
 
 #include <regex>
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace {
 
@@ -53,35 +54,35 @@ public:
 
 class NumberFormatter : public BlackListCharsFormatter {
 public:
-    NumberFormatter();
+    ACE_FORCE_EXPORT NumberFormatter();
     ~NumberFormatter() override = default;
 };
 
 class PhoneNumberFormatter : public BlackListCharsFormatter {
 public:
-    PhoneNumberFormatter();
+    ACE_FORCE_EXPORT PhoneNumberFormatter();
     ~PhoneNumberFormatter() override = default;
 };
 
 class UriFormatter : public BlackListCharsFormatter {
 public:
-    UriFormatter();
+    ACE_FORCE_EXPORT UriFormatter();
     ~UriFormatter() override = default;
 };
 
 class EmailFormatter : public BlackListCharsFormatter {
 public:
-    EmailFormatter();
+    ACE_FORCE_EXPORT EmailFormatter();
     ~EmailFormatter() override = default;
 };
 
 class SingleLineFormatter : public BlackListCharsFormatter {
 public:
-    SingleLineFormatter();
+    ACE_FORCE_EXPORT SingleLineFormatter();
     ~SingleLineFormatter() override = default;
 };
 
-class LengthLimitingFormatter : public TextInputFormatter {
+class ACE_FORCE_EXPORT LengthLimitingFormatter : public TextInputFormatter {
 public:
     explicit LengthLimitingFormatter(uint32_t limit) : limit_(limit) {}
     ~LengthLimitingFormatter() override = default;

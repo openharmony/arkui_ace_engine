@@ -25,7 +25,11 @@
 
 namespace OHOS::Ace {
 
+#ifdef NG_BUILD
+class RosenRenderContext : public RenderContext {
+#else
 class ACE_FORCE_EXPORT RosenRenderContext : public RenderContext {
+#endif
     DECLARE_ACE_TYPE(RosenRenderContext, RenderContext);
 
 public:

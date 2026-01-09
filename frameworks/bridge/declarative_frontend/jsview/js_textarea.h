@@ -19,8 +19,8 @@
 #include "base/memory/referenced.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/core/components/text_field/text_field_component.h"
-#include "frameworks/core/components/text_field/text_field_controller.h"
+#include "frameworks/compatible/components/text_field/text_field_component.h"
+#include "frameworks/compatible/components/text_field/text_field_controller.h"
 #include "frameworks/core/components/text_field/textfield_theme.h"
 
 namespace OHOS::Ace::Framework {

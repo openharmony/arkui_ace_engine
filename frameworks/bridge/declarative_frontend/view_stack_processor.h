@@ -77,7 +77,7 @@ public:
     RefPtr<GestureListenerComponent> GetClickGestureListenerComponent();
     bool HasClickGestureListenerComponent() const;
     RefPtr<GestureListenerComponent> GetPanGestureListenerComponent();
-    RefPtr<FocusableComponent> GetFocusableComponent(bool createIfNotExist = true);
+    ACE_FORCE_EXPORT RefPtr<FocusableComponent> GetFocusableComponent(bool createIfNotExist = true);
     RefPtr<SharedTransitionComponent> GetSharedTransitionComponent();
     RefPtr<GestureComponent> GetGestureComponent();
     RefPtr<PositionedComponent> GetPositionedComponent();

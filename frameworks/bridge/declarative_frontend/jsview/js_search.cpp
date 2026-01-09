@@ -30,7 +30,7 @@
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/jsview/models/search_model_impl.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/search/search_theme.h"
@@ -53,8 +53,9 @@ SearchModel* SearchModel::GetInstance()
         static NG::SearchModelNG instance;
         return &instance;
     } else {
-        static Framework::SearchModelImpl instance;
-        return &instance;
+        static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("search");
+        static SearchModel* instance = loader ? reinterpret_cast<SearchModel*>(loader->CreateModel()) : nullptr;
+        return instance;
     }
 #endif
 }

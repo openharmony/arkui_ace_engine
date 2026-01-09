@@ -19,7 +19,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
-#include "core/components/text_field/text_field_controller.h"
+#include "compatible/components/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
