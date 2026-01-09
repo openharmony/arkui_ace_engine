@@ -227,7 +227,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     }
   }
   public clearChildBuilderNodeWeakMap(): void {
-    this.builderNodeWeakrefMap_.forEach((weakRefChild) => {
+    this.builderNodeWeakrefMap_?.forEach((weakRefChild) => {
       const child = weakRefChild?.deref();
       if (child instanceof JSBuilderNode) {
         child.__parentViewOfBuildNode = undefined;
