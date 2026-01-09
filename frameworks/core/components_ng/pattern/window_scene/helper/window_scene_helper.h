@@ -61,7 +61,7 @@ public:
 
     static bool IsWindowScene(const RefPtr<FrameNode>& focusedFrameNode);
 
-    static int32_t GetFocusSystemWindowId(const RefPtr<FrameNode>& focusedFrameNode);
+    ACE_FORCE_EXPORT static int32_t GetFocusSystemWindowId(const RefPtr<FrameNode>& focusedFrameNode);
 
     static int32_t GetWindowIdForWindowScene(const RefPtr<FrameNode>& windowSceneNode);
 

@@ -24,7 +24,7 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-class DividerPattern : public Pattern {
+class ACE_FORCE_EXPORT DividerPattern : public Pattern {
     DECLARE_ACE_TYPE(DividerPattern, Pattern);
 
 public:

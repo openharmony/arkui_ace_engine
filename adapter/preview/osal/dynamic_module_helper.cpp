@@ -83,6 +83,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Checkbox", "checkbox"},
         {"CheckboxGroup", "checkbox"},
         {"Gauge", "gauge"},
+        {"Sidebar", "sidebar"},
         {"Rating", "rating"},
         { "FlowItem", "waterflow" },
         { "WaterFlow", "waterflow" },

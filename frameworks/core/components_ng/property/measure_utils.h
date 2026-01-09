@@ -157,8 +157,9 @@ ACE_FORCE_EXPORT OptionalSizeF CreateIdealSize(
  * @param needToConstrain constraint the result idealSize or not by min and max size in layoutConstraint.
  * @return SizeF the node size info.
  */
-OptionalSizeF CreateIdealSizeByPercentRef(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType,
-    bool needToConstrain = false, const std::unique_ptr<MeasureProperty>& rawConstraint = nullptr);
+ACE_FORCE_EXPORT OptionalSizeF CreateIdealSizeByPercentRef(const LayoutConstraintF& layoutConstraint, Axis axis,
+    MeasureType measureType, bool needToConstrain = false,
+    const std::unique_ptr<MeasureProperty>& rawConstraint = nullptr);
 
 /**
  * @brief Constrain node IdealSize by LayoutPolicy.

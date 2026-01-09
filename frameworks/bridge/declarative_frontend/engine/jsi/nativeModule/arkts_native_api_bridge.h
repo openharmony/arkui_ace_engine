@@ -72,7 +72,6 @@ private:
     static void RegisterPathAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterPolygonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterPolylineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterSideBarContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCalendarPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTabAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterStepperItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

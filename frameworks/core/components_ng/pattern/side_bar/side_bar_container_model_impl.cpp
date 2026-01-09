@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/models/side_bar_container_model_impl.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_model_impl.h"
 
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/components_ng/base/view_abstract_model.h"
 
 namespace OHOS::Ace::Framework {
 void SideBarContainerModelImpl::SetSideBarContainerType(SideBarContainerType type)
@@ -28,8 +29,8 @@ void SideBarContainerModelImpl::SetSideBarContainerType(SideBarContainerType typ
 
     auto stack = ViewStackProcessor::GetInstance();
     stack->Push(sideBarContainer);
-    JSInteractableView::SetFocusable(false);
-    JSInteractableView::SetFocusNode(true);
+    ViewAbstractModel::GetInstance()->SetFocusable(false);
+    ViewAbstractModel::GetInstance()->SetFocusNode(true);
 }
 
 void SideBarContainerModelImpl::SetShowSideBar(bool isShow)
@@ -163,7 +164,17 @@ void SideBarContainerModelImpl::ResetControlButtonIconInfo() {}
 
 void SideBarContainerModelImpl::SetOnChange(std::function<void(const bool)>&& onChange)
 {
-    JSViewSetProperty(&SideBarContainerComponent::SetOnChange, std::move(onChange));
+#ifndef NG_BUILD
+    auto component =
+        AceType::DynamicCast<SideBarContainerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!component) {
+        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<CheckboxComponent>());
+        return;
+    }
+    component->SetOnChange(std::move(onChange));
+#else
+    LOGE("do not support JSViewSetProperty in new pipeline");
+#endif
 }
 
 void SideBarContainerModelImpl::SetDividerStrokeWidth(const Dimension& strokeWidth) {}

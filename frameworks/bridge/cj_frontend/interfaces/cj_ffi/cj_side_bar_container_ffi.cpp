@@ -16,9 +16,13 @@
 #include "cj_side_bar_container_ffi.h"
 
 #include "cj_lambda.h"
+
+#include "base/log/log_wrapper.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_model.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -48,31 +52,45 @@ const std::vector<SideBarContainerType> SIDE_BAR_TYPE = { SideBarContainerType::
     SideBarContainerType::AUTO };
 const std::vector<SideBarPosition> SIDE_BAR_POSITION = { SideBarPosition::START, SideBarPosition::END };
 
+// Should use CJUIModifier API later
+NG::SideBarContainerModelNG* GetSideBarContainerModel()
+{
+    static NG::SideBarContainerModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Sidebar");
+        if (module == nullptr) {
+            LOGF("Can't find sidebar module");
+            abort();
+        }
+        model = reinterpret_cast<NG::SideBarContainerModelNG*>(module->GetModel());
+    }
+    return model;
+}
+
 void ParseAndSetWidth(Dimension dimension, CJWidthType widthType)
 {
     switch (widthType) {
         case CJWidthType::SIDEBAR_WIDTH:
-            SideBarContainerModel::GetInstance()->SetSideBarWidth(
-                dimension.IsNonNegative() ? dimension : DEFAULT_SIDE_BAR_WIDTH);
+            GetSideBarContainerModel()->SetSideBarWidth(dimension.IsNonNegative() ? dimension : DEFAULT_SIDE_BAR_WIDTH);
             break;
         case CJWidthType::MIN_SIDEBAR_WIDTH:
-            SideBarContainerModel::GetInstance()->SetMinSideBarWidth(
+            GetSideBarContainerModel()->SetMinSideBarWidth(
                 dimension.IsNonNegative() ? dimension : DEFAULT_MIN_SIDE_BAR_WIDTH);
             break;
         case CJWidthType::MAX_SIDEBAR_WIDTH:
-            SideBarContainerModel::GetInstance()->SetMaxSideBarWidth(
+            GetSideBarContainerModel()->SetMaxSideBarWidth(
                 dimension.IsNonNegative() ? dimension : DEFAULT_MAX_SIDE_BAR_WIDTH);
             break;
         case CJWidthType::STROKE_WIDTH:
-            SideBarContainerModel::GetInstance()->SetDividerStrokeWidth(
+            GetSideBarContainerModel()->SetDividerStrokeWidth(
                 dimension.IsNonNegative() ? dimension : DEFAULT_DIVIDER_STROKE_WIDTH);
             break;
         case CJWidthType::START_MARGIN:
-            SideBarContainerModel::GetInstance()->SetDividerStartMargin(
+            GetSideBarContainerModel()->SetDividerStartMargin(
                 dimension.IsNonNegative() ? dimension : DEFAULT_DIVIDER_START_MARGIN);
             break;
         case CJWidthType::END_MARGIN:
-            SideBarContainerModel::GetInstance()->SetDividerEndMargin(
+            GetSideBarContainerModel()->SetDividerEndMargin(
                 dimension.IsNonNegative() ? dimension : DEFAULT_DIVIDER_END_MARGIN);
             break;
         default:
@@ -88,13 +106,13 @@ void FfiOHOSAceFrameworkSideBarCreate(int32_t type)
         LOGE("invalid value for sidebar type");
         return;
     }
-    SideBarContainerModel::GetInstance()->Create();
+    GetSideBarContainerModel()->Create();
     SideBarContainerType style = static_cast<SideBarContainerType>(type);
-    SideBarContainerModel::GetInstance()->SetSideBarContainerType(style);
+    GetSideBarContainerModel()->SetSideBarContainerType(style);
 }
 void FfiOHOSAceFrameworkSideBarShowSideBar(bool isShow)
 {
-    SideBarContainerModel::GetInstance()->SetShowSideBar(isShow);
+    GetSideBarContainerModel()->SetShowSideBar(isShow);
 }
 void FfiOHOSAceFrameworkSideBarControlButton(CJSideBarButtonStyle style)
 {
@@ -102,50 +120,50 @@ void FfiOHOSAceFrameworkSideBarControlButton(CJSideBarButtonStyle style)
     if (LessNotEqual(controlButtonWidth.Value(), 0.0)) {
         controlButtonWidth = DEFAULT_CONTROL_BUTTON_WIDTH;
     }
-    SideBarContainerModel::GetInstance()->SetControlButtonWidth(controlButtonWidth);
+    GetSideBarContainerModel()->SetControlButtonWidth(controlButtonWidth);
 
     auto controlButtonHeight = Dimension(style.height, DimensionUnit::VP);
     if (LessNotEqual(controlButtonHeight.Value(), 0.0)) {
         controlButtonHeight = DEFAULT_CONTROL_BUTTON_HEIGHT;
     }
-    SideBarContainerModel::GetInstance()->SetControlButtonHeight(controlButtonHeight);
-    SideBarContainerModel::GetInstance()->SetControlButtonLeft(Dimension(style.left, DimensionUnit::VP));
-    SideBarContainerModel::GetInstance()->SetControlButtonTop(Dimension(style.top, DimensionUnit::VP));
+    GetSideBarContainerModel()->SetControlButtonHeight(controlButtonHeight);
+    GetSideBarContainerModel()->SetControlButtonLeft(Dimension(style.left, DimensionUnit::VP));
+    GetSideBarContainerModel()->SetControlButtonTop(Dimension(style.top, DimensionUnit::VP));
 
     auto iconsInfo = style.icons;
     if (iconsInfo.shown) {
-        SideBarContainerModel::GetInstance()->SetControlButtonShowIconInfo(iconsInfo.shown, false, nullptr);
+        GetSideBarContainerModel()->SetControlButtonShowIconInfo(iconsInfo.shown, false, nullptr);
     }
     if (iconsInfo.hidden) {
-        SideBarContainerModel::GetInstance()->SetControlButtonHiddenIconInfo(iconsInfo.hidden, false, nullptr);
+        GetSideBarContainerModel()->SetControlButtonHiddenIconInfo(iconsInfo.hidden, false, nullptr);
     }
     if (iconsInfo.switching) {
-        SideBarContainerModel::GetInstance()->SetControlButtonSwitchingIconInfo(iconsInfo.switching, false, nullptr);
+        GetSideBarContainerModel()->SetControlButtonSwitchingIconInfo(iconsInfo.switching, false, nullptr);
     }
 }
 void FfiOHOSAceFrameworkSideBarShowControlButton(bool isShow)
 {
-    SideBarContainerModel::GetInstance()->SetShowControlButton(isShow);
+    GetSideBarContainerModel()->SetShowControlButton(isShow);
 }
 
 void FfiOHOSAceFrameworkSideBarResetControlButton()
 {
-    SideBarContainerModel::GetInstance()->SetControlButtonWidth(DEFAULT_CONTROL_BUTTON_WIDTH);
-    SideBarContainerModel::GetInstance()->SetControlButtonHeight(DEFAULT_CONTROL_BUTTON_HEIGHT);
-    SideBarContainerModel::GetInstance()->ResetControlButtonLeft();
-    SideBarContainerModel::GetInstance()->SetControlButtonTop(DEFAULT_CONTROL_BUTTON_TOP);
-    SideBarContainerModel::GetInstance()->ResetControlButtonIconInfo();
+    GetSideBarContainerModel()->SetControlButtonWidth(DEFAULT_CONTROL_BUTTON_WIDTH);
+    GetSideBarContainerModel()->SetControlButtonHeight(DEFAULT_CONTROL_BUTTON_HEIGHT);
+    GetSideBarContainerModel()->ResetControlButtonLeft();
+    GetSideBarContainerModel()->SetControlButtonTop(DEFAULT_CONTROL_BUTTON_TOP);
+    GetSideBarContainerModel()->ResetControlButtonIconInfo();
 }
 
 void FfiOHOSAceFrameworkSideBarResetControlButtonIcons()
 {
-    SideBarContainerModel::GetInstance()->ResetControlButtonIconInfo();
+    GetSideBarContainerModel()->ResetControlButtonIconInfo();
 }
 
 void FfiOHOSAceFrameworkSideBarOnChange(void (*callback)(bool isShow))
 {
     auto onChange = [ffiCallback = CJLambda::Create(callback)](bool isShow) { ffiCallback(isShow); };
-    SideBarContainerModel::GetInstance()->SetOnChange(std::move(onChange));
+    GetSideBarContainerModel()->SetOnChange(std::move(onChange));
 }
 
 void FfiOHOSAceFrameworkSideBarSideBarWidth(double width, int32_t unit)
@@ -163,7 +181,7 @@ void FfiOHOSAceFrameworkSideBarMaxSideBarWidth(double width, int32_t unit)
 }
 void FfiOHOSAceFrameworkSideBarAutoHide(bool autoHide)
 {
-    SideBarContainerModel::GetInstance()->SetAutoHide(autoHide);
+    GetSideBarContainerModel()->SetAutoHide(autoHide);
 }
 void FfiOHOSAceFrameworkSideBarSideBarPosition(int32_t position)
 {
@@ -172,7 +190,7 @@ void FfiOHOSAceFrameworkSideBarSideBarPosition(int32_t position)
         return;
     }
     SideBarPosition sideBarPosition = static_cast<SideBarPosition>(position);
-    SideBarContainerModel::GetInstance()->SetSideBarPosition(sideBarPosition);
+    GetSideBarContainerModel()->SetSideBarPosition(sideBarPosition);
 }
 void FfiOHOSAceFrameworkSideBarPop()
 {
@@ -183,28 +201,28 @@ void FfiOHOSAceFrameworkSideBarDividerNull()
 {
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         // sideBar divider set default width when input illegal value
-        SideBarContainerModel::GetInstance()->SetDividerStrokeWidth(DEFAULT_DIVIDER_STROKE_WIDTH);
+        GetSideBarContainerModel()->SetDividerStrokeWidth(DEFAULT_DIVIDER_STROKE_WIDTH);
     } else {
-        SideBarContainerModel::GetInstance()->SetDividerStrokeWidth(0.0_vp);
+        GetSideBarContainerModel()->SetDividerStrokeWidth(0.0_vp);
     }
 }
 
 void FfiOHOSAceFrameworkSideBarDivider(CJDividerStyle info)
 {
-    ParseAndSetWidth(Dimension(info.strokeWidth, static_cast<DimensionUnit>(info.strokeWidthUnit)),
-        CJWidthType::STROKE_WIDTH);
+    ParseAndSetWidth(
+        Dimension(info.strokeWidth, static_cast<DimensionUnit>(info.strokeWidthUnit)), CJWidthType::STROKE_WIDTH);
 
     Color color = info.hasColor ? Color(info.color) : DEFAULT_DIVIDER_COLOR;
-    SideBarContainerModel::GetInstance()->SetDividerColor(color);
-    ParseAndSetWidth(Dimension(info.startMargin, static_cast<DimensionUnit>(info.startMarginUnit)),
-        CJWidthType::START_MARGIN);
-    ParseAndSetWidth(Dimension(info.endMargin, static_cast<DimensionUnit>(info.endMarginUnit)),
-        CJWidthType::END_MARGIN);
+    GetSideBarContainerModel()->SetDividerColor(color);
+    ParseAndSetWidth(
+        Dimension(info.startMargin, static_cast<DimensionUnit>(info.startMarginUnit)), CJWidthType::START_MARGIN);
+    ParseAndSetWidth(
+        Dimension(info.endMargin, static_cast<DimensionUnit>(info.endMarginUnit)), CJWidthType::END_MARGIN);
 }
 
 void FfiOHOSAceFrameworkSideBarMinContentWidth(double width, int32_t unit)
 {
     CalcDimension minContentWidth(width, static_cast<DimensionUnit>(unit));
-    SideBarContainerModel::GetInstance()->SetMinContentWidth(minContentWidth);
+    GetSideBarContainerModel()->SetMinContentWidth(minContentWidth);
 }
 }

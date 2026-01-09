@@ -205,7 +205,6 @@
       OHOS::Ace::Shadow::*;
       OHOS::Ace::ShadowStyle::*;
       OHOS::Ace::ShapeModel::*;
-      OHOS::Ace::SideBarContainerModel::*;
       OHOS::Ace::SymbolModel::*;
       OHOS::Ace::SliderModel::*;
       OHOS::Ace::SpanModel::*;
@@ -1496,6 +1495,37 @@
       "OHOS::Ace::ACE_PI";
       "OHOS::Ace::ACE_E";
       OHOS::Ace::PipelineBase::GetImageCache*;
+
+      #sidebar
+      OHOS::Ace::NG::CreateIdealSizeByPercentRef*;
+      OHOS::Ace::NG::CreateIdealSize*;
+      OHOS::Ace::NG::MeasureProperty::UpdateMaxSizeWithCheck*;
+      OHOS::Ace::NG::MeasureProperty::UpdateMinSizeWithCheck*;
+      OHOS::Ace::NG::ToolbarManager::OnToolBarManagerModifyDone*;
+      OHOS::Ace::NG::ToolbarManager::OnChangeSideBarColor*;
+      OHOS::Ace::NG::ToolbarManager::SetSideBarInfo*;
+      OHOS::Ace::NG::ToolbarManager::SetSideBarDividerInfo*;
+      OHOS::Ace::ShadowConfig::DefaultShadowXS*;
+      OHOS::Ace::NG::WindowSceneHelper::GetFocusSystemWindowId*;
+      OHOS::Ace::NG::AgingAdapationDialogUtil::ShowLongPressDialog*;
+      OHOS::Ace::NG::AgingAdapationDialogUtil::GetDialogBigFontSizeScale*;
+      vtable?for?OHOS::Ace::NG::DividerPattern;
+      VTT?for?OHOS::Ace::NG::DividerPattern;
+      vtable?for?OHOS::Ace::NG::ButtonPattern;
+      VTT?for?OHOS::Ace::NG::ButtonPattern;
+      vtable?for?OHOS::Ace::Framework::SideBarContainerModelImpl;
+      OHOS::Ace::SideBarContainerComponent::SideBarContainerComponent*;
+      OHOS::Ace::SideBarContainerComponent::SetButtonWidth*;
+      OHOS::Ace::SideBarContainerComponent::SetButtonHeight*;
+      OHOS::Ace::SideBarContainerComponent::SetButtonLeft*;
+      OHOS::Ace::SideBarContainerComponent::SetButtonTop*;
+      OHOS::Ace::SideBarContainerComponent::SetShowIcon*;
+      OHOS::Ace::SideBarContainerComponent::SetHiddenIcon*;
+      OHOS::Ace::SideBarContainerComponent::SetSwitchIcon*;
+      OHOS::Ace::Declaration::GetAttribute*;
+      "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>::operator==(OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension> const&) const";
+      *OHOS::Ace::NG::ArkTSUtils::ConvertFromJSValueNG*;
+      *OHOS::Ace::NG::ArkTSUtils::ConvertFromJSValue*;
 
       "OHOS::Ace::RenderImage::Create()";
       "OHOS::Ace::GetTimeOfNow(int)";

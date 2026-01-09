@@ -172,7 +172,7 @@ void SideBarContainerPattern::OnUpdateShowControlButton(
     }
 
     auto controlButtonNode = children.back();
-    if (controlButtonNode->GetTag() != V2::BUTTON_ETS_TAG || !AceType::InstanceOf<FrameNode>(controlButtonNode)) {
+    if (controlButtonNode->GetTag() != BUTTON_ETS_TAG || !AceType::InstanceOf<FrameNode>(controlButtonNode)) {
         return;
     }
 
@@ -180,7 +180,7 @@ void SideBarContainerPattern::OnUpdateShowControlButton(
     controlImageHeight_ = layoutProperty->GetControlButtonHeight().value_or(DEFAULT_CONTROL_BUTTON_HEIGHT);
     auto imageNode = controlButtonNode->GetFirstChild();
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
-    if (!imageFrameNode || imageFrameNode ->GetTag() != V2::IMAGE_ETS_TAG) {
+    if (!imageFrameNode || imageFrameNode->GetTag() != IMAGE_ETS_TAG) {
         return;
     }
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -213,7 +213,7 @@ void SideBarContainerPattern::OnUpdateShowDivider(
     auto begin = children.rbegin();
     auto dividerNode = *(++begin);
     CHECK_NULL_VOID(dividerNode);
-    if (dividerNode->GetTag() != V2::DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) {
+    if (dividerNode->GetTag() != DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) {
         return;
     }
 
@@ -339,7 +339,7 @@ RefPtr<FrameNode> SideBarContainerPattern::GetControlButtonNode() const
         return nullptr;
     }
     auto controlButtonNode = children.back();
-    if (controlButtonNode->GetTag() != V2::BUTTON_ETS_TAG || !AceType::InstanceOf<FrameNode>(controlButtonNode)) {
+    if (controlButtonNode->GetTag() != BUTTON_ETS_TAG || !AceType::InstanceOf<FrameNode>(controlButtonNode)) {
         return nullptr;
     }
     return AceType::DynamicCast<FrameNode>(controlButtonNode);
@@ -356,7 +356,7 @@ RefPtr<FrameNode> SideBarContainerPattern::GetControlImageNode() const
     }
 
     auto controlButtonNode = children.back();
-    if (controlButtonNode->GetTag() != V2::BUTTON_ETS_TAG || !AceType::InstanceOf<FrameNode>(controlButtonNode)) {
+    if (controlButtonNode->GetTag() != BUTTON_ETS_TAG || !AceType::InstanceOf<FrameNode>(controlButtonNode)) {
         return nullptr;
     }
 
@@ -366,7 +366,7 @@ RefPtr<FrameNode> SideBarContainerPattern::GetControlImageNode() const
     }
 
     auto imageNode = buttonChildren.front();
-    if (imageNode->GetTag() != V2::IMAGE_ETS_TAG || !AceType::InstanceOf<FrameNode>(imageNode)) {
+    if (imageNode->GetTag() != IMAGE_ETS_TAG || !AceType::InstanceOf<FrameNode>(imageNode)) {
         return nullptr;
     }
     return AceType::DynamicCast<FrameNode>(imageNode);
@@ -384,7 +384,7 @@ RefPtr<FrameNode> SideBarContainerPattern::GetDividerNode() const
     auto begin = children.rbegin();
     auto dividerNode = *(++begin);
     CHECK_NULL_RETURN(dividerNode, nullptr);
-    if (dividerNode->GetTag() != V2::DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) {
+    if (dividerNode->GetTag() != DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) {
         return nullptr;
     }
 
@@ -594,7 +594,7 @@ void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>&
 
     int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+        DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
 
     auto dividerHub = dividerNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(dividerHub);
@@ -660,7 +660,7 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<Side
     CHECK_NULL_RETURN(sideBarTheme, nullptr);
     int32_t buttonId = ElementRegister::GetInstance()->MakeUniqueId();
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_RETURN(buttonNode, nullptr);
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
@@ -683,8 +683,8 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlImage(
 {
     CHECK_NULL_RETURN(sideBarTheme, nullptr);
     int32_t imgNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto imgNode = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto imgNode =
+        FrameNode::GetOrCreateFrameNode(IMAGE_ETS_TAG, imgNodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     CHECK_NULL_RETURN(imgNode, nullptr);
 
     auto layoutProperty = parentNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
@@ -1548,6 +1548,17 @@ void SideBarContainerPattern::SetSideBarWidthToolBarManager(bool isShow, float s
         dividerInfo.width = dividerWidth;
         toolbarManager_->SetSideBarDividerInfo(dividerInfo);
         toolbarManager_->SetSiderBarDividerNode(GetDividerNode());
+    }
+}
+
+void SideBarContainerPattern::InitToolBarManager()
+{
+    if (!toolbarManager_) {
+        auto pipeline = GetHost()->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        toolbarManager_ = pipeline->GetToolbarManager();
+        UpdateSideBarStatus();
+        UpdateSideBarColorToToolbarManager();
     }
 }
 
