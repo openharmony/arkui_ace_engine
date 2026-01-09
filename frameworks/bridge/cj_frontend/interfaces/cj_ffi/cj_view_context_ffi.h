@@ -23,6 +23,7 @@ extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkViewContextAnimation(NativeOptionAnimateParam animateOptParam);
 CJ_EXPORT void FfiOHOSAceFrameworkViewContextAnimationTo(NativeAnimateParam animateParam, void (*callback)(),
                                                          bool isImmediately);
+CJ_EXPORT int64_t FfiOHOSAceFrameworkViewContextGetHostContext();
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_VIEW_CONTEXT_H
