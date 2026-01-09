@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/common/dom/dom_navigation_menu.h"
+#include "frameworks/compatible/components/navigation_menu/dom_navigation_menu.h"
 
 #include "frameworks/bridge/common/dom/dom_navigation_bar.h"
 
 namespace OHOS::Ace::Framework {
+const char DOM_SELECTED[] = "selected";
 
 DOMNavigationMenu::DOMNavigationMenu(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {

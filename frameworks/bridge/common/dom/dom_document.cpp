@@ -45,7 +45,6 @@
 #endif
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/common/dom/dom_menu.h"
-#include "frameworks/bridge/common/dom/dom_navigation_menu.h"
 #include "frameworks/bridge/common/dom/dom_option.h"
 #include "frameworks/bridge/common/dom/dom_piece.h"
 #include "frameworks/bridge/common/dom/dom_popup.h"
@@ -119,7 +118,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
 #endif
         { DOM_NODE_TAG_NAVIGATION_BAR, &DOMNodeCreator<DomNavigationBar> },
 #ifndef WEARABLE_PRODUCT
-        { DOM_NODE_TAG_NAVIGATION_MENU, &DOMNodeCreator<DOMNavigationMenu> },
         { DOM_NODE_TAG_OPTION, &DOMNodeCreator<DOMOption> },
         { DOM_NODE_TAG_PANEL, &DOMNodeCreator<DOMPanel> },
 #endif

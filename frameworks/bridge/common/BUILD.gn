@@ -80,7 +80,6 @@ template("bridge_common") {
         config.rich_components_support) {
       sources += [
         "dom/dom_menu.cpp",
-        "dom/dom_navigation_menu.cpp",
         "dom/dom_option.cpp",
         "dom/dom_piece.cpp",
         "dom/dom_popup.cpp",
