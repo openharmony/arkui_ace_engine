@@ -136,6 +136,27 @@ HWTEST_F(WebAgentEventReporterTest, GetAgentEventReporter, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UpdateTextSelectionHolderId
+ * @tc.desc: Test UpdateTextSelectionHolderId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAgentEventReporterTest, UpdateTextSelectionHolderId, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    g_webPattern->webSelectOverlay_ = nullptr;
+    g_webPattern->isFocus_ = false;
+    g_webPattern->UpdateTextSelectionHolderId();
+    EXPECT_EQ(g_webPattern->webSelectOverlay_, nullptr);
+    g_webPattern->isFocus_ = true;
+    g_webPattern->UpdateTextSelectionHolderId();
+    EXPECT_NE(g_webPattern->webSelectOverlay_, nullptr);
+    // reset
+    g_webPattern->isFocus_ = false;
+    g_webPattern->webSelectOverlay_ = nullptr;
+#endif
+}
+
+/**
  * @tc.name: AddEvent
  * @tc.desc: Test AddEvent.
  * @tc.type: FUNC
