@@ -7617,6 +7617,9 @@ export interface ResponseRegion {
 export type CustomProperty = undefined | null | Object | Record<string, CustomProperty> | Array<CustomProperty>;
 // instructive change end
 export interface CommonMethod {
+    __get__commonStyles__Internal(): Array<(instance: CommonMethod) => void> | undefined {
+        return undefined;
+    }
     width(value: Length | LayoutPolicy | undefined): this {
         throw new Error("Unimplemented method width")
     }
@@ -8279,7 +8282,9 @@ export interface CommonMethod {
     // instructive change begin
     applyAttributesFinish(): void {}
     // instructive change end
-}
+// do not delete the comment on the next line
+} // end CommonMethod
+
 export class ArkCommonMethodStyle implements CommonMethod {
     width_value?: Length | LayoutPolicy | undefined
     height_value?: Length | LayoutPolicy | undefined
