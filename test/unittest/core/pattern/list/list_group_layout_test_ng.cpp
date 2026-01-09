@@ -1830,6 +1830,38 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, CheckRecycle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckRecycle002
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm CheckRecycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, CheckRecycle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List and ListItemGroup, set TextDirection to RTL and set ListDirection to HORIZONTAL.
+     */
+    ListModelNG model = CreateList();
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    auto listItemGroup = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto listItemGroupFrameNode = AceType::DynamicCast<FrameNode>(listItemGroup);
+    auto layoutAlgorithmWrapper = listItemGroupFrameNode->GetLayoutAlgorithm();
+    auto layoutAlgorithm = layoutAlgorithmWrapper->GetLayoutAlgorithm();
+    auto listItemGroupLayoutAlgorithm = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithm);
+    CreateListItems(20, V2::ListItemStyle::NONE);
+    CreateDone();
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    auto horizontal = 1;
+    ListModelNG::SetListDirection(AceType::RawPtr(frameNode_), horizontal);
+    
+    /**
+     * @tc.steps: step2. FlushUITasks
+     * @tc.expected: The size of cachedItemPosition is 0.
+     */
+    FlushUITasks();
+    auto cachedItemPosition = listItemGroupLayoutAlgorithm->GetCachedItemPosition();
+    EXPECT_TRUE(cachedItemPosition.empty());
+}
+
+/**
  * @tc.name: TestWhetherCacheItemLayouted
  * @tc.desc: Test whether the cached item is layouted.
  * @tc.type: FUNC
