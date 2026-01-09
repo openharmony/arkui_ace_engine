@@ -1227,7 +1227,7 @@ int32_t ListPattern::GetEndIndexExcludeEndOffset()
     while (iter != itemPosition_.rend() && GreatOrEqual(iter->second.startPos, endPos)) {
         iter++;
     }
-    return iter->first;
+    return iter == itemPosition_.rend() ? endIndex_ : iter->first;
 }
 
 int32_t ListPattern::GetStartIndexExcludeStartOffset()
@@ -1236,7 +1236,7 @@ int32_t ListPattern::GetStartIndexExcludeStartOffset()
     while (iter != itemPosition_.end() && LessOrEqual(iter->second.endPos, contentStartOffset_)) {
         iter++;
     }
-    return iter->first;
+    return iter == itemPosition_.end() ? startIndex_ : iter->first;
 }
 
 void ListPattern::StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)
