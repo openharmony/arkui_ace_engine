@@ -81,7 +81,10 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
         }
         const receiver = remember(() => {
             const instance = factory();
+            const savedRenderingComponent = OBSERVE.renderingComponent;
+            OBSERVE.renderingComponent = ObserveSingleton.RenderingPause;
             instance.__initializeStruct(content, initializers?.());
+            OBSERVE.renderingComponent = savedRenderingComponent;
             instance.setInitializers(initializers);
             return instance;
         });
