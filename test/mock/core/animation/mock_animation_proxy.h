@@ -40,7 +40,7 @@ public:
         if (!Manager::GetInstance().IsAnimationOpen()) {
             impl = { targetValue, targetValue };
 
-            if (Manager::Version() > Manager::Version::V0) {
+            if (Manager::GetVersion() > Manager::Version::V0) {
                 const auto prop = ptr.Upgrade();
                 CHECK_NULL_VOID(prop);
                 if (auto cb = prop->GetUpdateCallback()) {
