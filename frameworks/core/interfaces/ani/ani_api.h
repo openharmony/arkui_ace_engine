@@ -434,6 +434,12 @@ struct ArkUIWaterFlowSection {
     ArkUIWaterFlowSectionPadding margin;
     std::function<float(int32_t)> onGetItemMainSizeByIndex;
 };
+
+struct ArkUIListItemGroupSpace {
+    int32_t unit = 1;
+    float value = 0.0f;
+};
+
 struct ArkUIAniWebModifier {
     void (*setJavaScriptProxyController)(void* node, std::function<void()>&& callback);
     bool (*transferScreenCaptureHandlerToStatic)(void* peer, void* nativePtr);
@@ -643,6 +649,16 @@ struct ArkUIAniListModifier {
     void (*syncChildrenSizeOver)(ArkUINodeHandle node);
     void (*resetListChildrenMainSize)(ArkUINodeHandle node);
 };
+struct ArkUIAniListItemGroupModifier {
+    void (*setListItemGroupHeader)(ArkUINodeHandle node, ArkUINodeHandle headerPtr);
+    void (*setListItemGroupHeaderContent)(ArkUINodeHandle node, ArkUINodeHandle headerPtr);
+    void (*resetListItemGroupHeader)(ArkUINodeHandle node);
+    void (*setListItemGroupFooter)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
+    void (*setListItemGroupFooterContent)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
+    void (*resetListItemGroupFooter)(ArkUINodeHandle node);
+    void (*setListItemGroupStyle)(ArkUINodeHandle node, int32_t style);
+    void (*setListItemGroupSpace)(ArkUINodeHandle node, ArkUIListItemGroupSpace space);
+};
 struct ArkUIAniComponentSnapshotModifier {
     void (*createFromBuilder)(
         ArkUINodeHandle node, const ArkUIComponentSnapshotAsync& asyncCtx, const ArkUISnapshotParam& param);
@@ -836,6 +852,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
     const ArkUIAniListModifier* (*getArkUIAniListModifier)();
+    const ArkUIAniListItemGroupModifier* (*getArkUIAniListItemGroupModifier)();
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
     const ArkUIAniVisualEffectModifier* (*getVisualEffectAniModifier)();

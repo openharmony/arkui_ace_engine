@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "list_children_main_size_module.h"
+#include "list/list_module.h"
 
 #include <memory>
 

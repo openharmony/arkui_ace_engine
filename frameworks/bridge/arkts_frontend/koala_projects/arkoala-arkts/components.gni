@@ -406,6 +406,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/hooks/WebHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/NavigationOpsHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/ListHandWritten.ets",
+  "arkui-preprocessed/arkui/hooks/ListItemGroupHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/WaterFlowHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/TabsOpsHandWritten.ets",
   "arkui-preprocessed/arkui/hooks/XComponentOpsHandWritten.ets",
