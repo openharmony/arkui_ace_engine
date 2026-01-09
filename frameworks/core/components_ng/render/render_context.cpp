@@ -201,9 +201,9 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
 void RenderContext::ToJsonValuePart1(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     if (uiMaterial_) {
-        auto innerJsonValue = JsonUtil::Create(true);
-        innerJsonValue->Put("left", pixStretchEffectOption.left.ToString().c_str());  //  修改， type 
-        json->PutExtAttr("pixelStretchEffect", pixelJsonValue, filter);
+        auto optJsonValue = JsonUtil::Create(true);
+        optJsonValue->Put("type", uiMaterial_->GetType());
+        json->PutExtAttr("MaterialOptions", optJsonValue, filter);
     }
 }
 
