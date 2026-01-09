@@ -18,7 +18,7 @@ import { PeerNode } from 'arkui/PeerNode';
 declare namespace router {
     interface RouterOptions {
         url: string;
-        params?: jsonx.JsonElement;
+        params?: Object;
     }
     enum RouterMode {
         Standard = 0,
@@ -27,7 +27,7 @@ declare namespace router {
     function registerPage(page: string, className: string): void;
     function error(prefix: string, e: Object | null | undefined): string;
     function setRouter(routerImp: Router): void;
-    function getParams(): jsonx.JsonElement | undefined;
+    function getParams(): Object | undefined;
     function clear(): void;
     function pushUrl(options: RouterOptions): void;
     function push(options: RouterOptions): void;

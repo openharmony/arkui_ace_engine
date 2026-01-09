@@ -683,7 +683,7 @@ export class RouterImpl extends Router {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
-    public back(index: int, params?: jsonx.JsonElement): void {
+    public back(index: int, params?: Object): void {
         if (this.router_ === undefined) {
             throw Error("router set in uiContext is empty");
         }
@@ -721,7 +721,7 @@ export class RouterImpl extends Router {
         return result;
     }
 
-    public getParams(): jsonx.JsonElement {
+    public getParams(): Object {
         if (this.router_ === undefined) {
             throw Error("router set in uiContext is empty");
         }
