@@ -324,11 +324,12 @@ public:
         return isScrollableAxis_;
     }
 
+    void OffsetNodeToSafeArea();
+
 protected:
     void CreateRootConstraint();
     void ApplyConstraint(LayoutConstraintF constraint);
 
-    void OffsetNodeToSafeArea();
     // keyboard avoidance is done by offsetting, to expand into keyboard area, reverse the offset.
     OffsetF ExpandIntoKeyboard();
     bool CheckValidSafeArea();

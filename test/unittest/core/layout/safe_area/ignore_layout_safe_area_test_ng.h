@@ -22,11 +22,17 @@
 
 #include "gtest/gtest.h"
 
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/layout/safe_area/expand_safe_area_test_ng.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
-class IgnoreLayoutSafeAreaOptsTestNg : public TestNG {};
+class IgnoreLayoutSafeAreaOptsTestNg : public TestNG {
+protected:
+    static void InitSafeArea();
+    static void InitSafeAreaManager();
+};
 } // namespace OHOS::Ace::NG
 #endif // OUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_LAYOUT_IGNORE_LAYOUT_SAFE_AREA_TEST_NG_H
