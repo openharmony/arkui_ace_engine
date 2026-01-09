@@ -2970,6 +2970,12 @@ HWTEST_F(TextFieldPatternTest, TextFieldShiftMultipleSelection001, TestSize.Leve
     ASSERT_NE(pattern, nullptr);
     pattern->frameRect_ = RectF(0, 0, 10, 50);
 
+    /**
+      *
+      * @tc.step:
+      * create a key event
+      *
+      */
     KeyEvent keyEvent;
     keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
     keyEvent.action = KeyAction::DOWN;
@@ -2985,12 +2991,6 @@ HWTEST_F(TextFieldPatternTest, TextFieldShiftMultipleSelection001, TestSize.Leve
     pattern->HandleMouseEvent(info);
     pattern->UpdateCaretByClick(offset);
 
-    /**
-     * 
-     * @tc.step:
-     * check if pattern->IsSelected is false
-     *
-     */
     EXPECT_EQ(pattern->IsSelected(), false);
 }
 

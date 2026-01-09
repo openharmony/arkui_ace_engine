@@ -211,7 +211,6 @@ struct InsertCommandInfo {
 #if defined(CROSS_PLATFORM)
     InsertCommandComposeInfo compose;
     bool unmarkText;
-    TextSelection textSelection;
 #endif
 };
 
