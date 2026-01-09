@@ -15,9 +15,8 @@
 
 #include "core/components_ng/render/render_context.h"
 
-#include "ui/properties/ui_material.h"
-
 #include "base/utils/multi_thread.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -36,6 +35,15 @@ std::string UseEffectTypeToString(EffectType effectType)
 {
     static const std::string UseEffectTypeStyles[] = { "EffectType.DEFAULT", "EffectType.WINDOW_EFFECT" };
     return UseEffectTypeStyles[static_cast<int>(effectType)];
+}
+
+std::string MaterialTypeToString(int32_t type)
+{
+    static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT" };
+    if (type >= static_cast<int32_t>(MaterialType::NONE) && type <= static_cast<int32_t>(MaterialType::MAX)) {
+        return MaterialTypeStyles[type];
+    }
+    return MaterialTypeStyles[0];
 }
 
 } // namespace
@@ -186,6 +194,16 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         StringUtils::ToString(GetRenderStrategyValue(RenderStrategy::FAST)).c_str(), filter);
     if (GetExcludeFromRenderGroup().has_value()) {
         json->PutExtAttr("excludeFromRenderGroup", GetExcludeFromRenderGroupValue() ? "true" : "false", filter);
+    }
+    ToJsonValuePart1(json, filter);
+}
+
+void RenderContext::ToJsonValuePart1(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    if (uiMaterial_) {
+        auto innerJsonValue = JsonUtil::Create(true);
+        innerJsonValue->Put("left", pixStretchEffectOption.left.ToString().c_str());  //  修改， type 
+        json->PutExtAttr("pixelStretchEffect", pixelJsonValue, filter);
     }
 }
 
