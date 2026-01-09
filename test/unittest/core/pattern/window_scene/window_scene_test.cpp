@@ -49,6 +49,7 @@ const std::string ABILITY_NAME = "MainAbility";
 const std::string BUNDLE_NAME = "com.example.helloworld";
 const std::string MODULE_NAME = "entry";
 const uint32_t WAIT_SYNC_IN_NS = 200000;
+constexpr uint32_t STARTING_WINDOW_TIMEOUT_NS = 10000000000;
 } // namespace
 
 class WindowSceneTest : public testing::Test {
@@ -719,6 +720,8 @@ HWTEST_F(WindowSceneTest, HideStartingWindowDefault02, TestSize.Level1)
      * @tc.steps: step3. Test and check
      */
     ASSERT_EQ(windowScene->session_->GetHidingStartingWindow(), true);
+    windowScene->startingWindow_ = nullptr;
+    usleep(STARTING_WINDOW_TIMEOUT_NS);
 }
 
 /**
