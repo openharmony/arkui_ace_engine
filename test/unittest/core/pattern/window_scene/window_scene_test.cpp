@@ -690,6 +690,38 @@ HWTEST_F(WindowSceneTest, HideStartingWindowDefault01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HideStartingWindow02
+ * @tc.desc: HideStartingWindow02
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, HideStartingWindowDefault02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create windowScene.
+     */
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+        .startWindowType_ = Rosen::StartWindowType::DEFAULT,
+    };
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    ASSERT_NE(windowScene, nullptr);
+
+    /**
+     * @tc.steps: step2. Set default.
+     */
+    windowScene->HideStartingWindow();
+
+    /**
+     * @tc.steps: step3. Test and check
+     */
+    EXPECT_EQ(windowScene->session_->GetHidingStartingWindow(), true);
+}
+
+/**
  * @tc.name: SetSubSessionVisible
  * @tc.desc: set sub session visible
  * @tc.type: FUNC
