@@ -10,6 +10,10 @@
     "pages/components/dialog/page/CustomDialogTestLevel0_5",
     "pages/components/dialog/page/CustomDialogTestLevel0_6",
     "pages/components/dialog/page/CustomDialogTestLevel0_7",
-    "pages/components/dialog/page/CustomDialogTestLevel0_8"
+    "pages/components/dialog/page/CustomDialogTestLevel0_8",
+    "pages/components/dialog/page/CustomDialogTestLevel0_9",
+    "pages/components/dialog/page/CustomDialogTestLevel1_0",
+    "pages/components/dialog/page/CustomDialogTestLevel1_1",
+    "pages/components/dialog/page/CustomDialogTestLevel1_2"
   ]
 }
