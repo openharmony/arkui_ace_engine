@@ -27,6 +27,8 @@
 namespace OHOS::Ace::Framework {
 namespace {
 constexpr int32_t DEFAULT_IGD_MASK_COLOR = 0X33182431;
+constexpr int32_t MINIMIZE_SHEET_DIALOG_SHADOW_COLOR = 0X26000000;
+constexpr float MINIMIZE_SHEET_DIALOG_SHADOW_RADIUS = 20.0f;
 constexpr char SHEET_PAGE_TAG[] = "SheetPage";
 
 const Dimension DIMENSION_ONE_HUNDRED_PERCENT = Dimension(1, DimensionUnit::PERCENT);
@@ -157,6 +159,11 @@ void ImageGeneratorDialogView::MinimizeDialog(int32_t instanceId, int32_t unique
     style.width = DIMENSION_MINIMIZE_SHEET_SIZE;
     style.interactive = true;
     style.instanceId = instanceId;
+    style.showCloseIcon = false;
+    Shadow shadow;
+    shadow.SetColor(Color(MINIMIZE_SHEET_DIALOG_SHADOW_COLOR));
+    shadow.SetBlurRadius(MINIMIZE_SHEET_DIALOG_SHADOW_RADIUS);
+    style.shadow = shadow;
     auto shouldDismiss = [weakOverlayMgr = WeakPtr(overlayManager)](int32_t reason) {
         if (reason == static_cast<int32_t>(NG::BindSheetDismissReason::BACK_PRESSED) ||
             reason == static_cast<int32_t>(NG::BindSheetDismissReason::SLIDE_DOWN)) {
