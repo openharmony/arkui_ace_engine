@@ -838,7 +838,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         return;
     }
     SetVsyncTime(nanoTimestamp);
-    if (contentChangeMgr_) {
+    // First vsync may come before rootNode_ is created.
+    if (contentChangeMgr_ && rootNode_) {
         contentChangeMgr_->OnVsyncStart();
     }
     ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64 "][instanceID:%d]",
@@ -1018,7 +1019,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         RequestFrame();
     }
     FireFrameMetricsCallBack(frameMetrics);
-    if (contentChangeMgr_) {
+    // First vsync may come before rootNode_ is created.
+    if (contentChangeMgr_ && rootNode_) {
         contentChangeMgr_->OnVsyncEnd(rootNode_->GetRectWithRender());
     }
 }
