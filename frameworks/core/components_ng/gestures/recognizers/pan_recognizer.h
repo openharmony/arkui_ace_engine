@@ -106,6 +106,18 @@ public:
         return panGestureOption_;
     }
 
+    void SetAngle(double angle)
+    {
+        angle_ = angle;
+    }
+
+    double GetAngle() const
+    {
+        return angle_;
+    }
+
+protected:
+    std::string GetGestureInfoString() const override;
 private:
     class PanVelocity {
     public:
@@ -213,6 +225,7 @@ private:
     // this callback will be triggered when pan end, but the enable state is false
     std::unique_ptr<GestureEventFunc> panEndOnDisableState_;
     int32_t lastAction_ = 0;
+    double angle_ = 45.0;
 };
 
 } // namespace OHOS::Ace::NG

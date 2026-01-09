@@ -587,7 +587,8 @@ export class SegmentButtonOptions {
       localizedTextPadding: options.localizedTextPadding,
       localizedButtonPadding: options.localizedButtonPadding,
       backgroundBlurStyle: options.backgroundBlurStyle,
-      direction: options.direction
+      direction: options.direction,
+      backgroundSystemMaterial: options.backgroundSystemMaterial
     } as CapsuleSegmentButtonOptions)
   }
 }

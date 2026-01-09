@@ -95,15 +95,33 @@ void RegisterPageCallback(const RefPtr<FrameNode>& frameNode, void* jsViewNode)
 #endif
     curPageNode->MarkDirtyNode();
 }
+
+void ExitToDesktop()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [] {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            AccessibilityEvent event;
+            event.type = AccessibilityEventType::PAGE_CHANGE;
+            pipeline->SendEventToAccessibility(event);
+            pipeline->Finish(false);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIPageRouterExitToDesktop");
+}
 } // namespace
 
-RefPtr<FrameNode> PageRouterManager::PushExtender(
+void PageRouterManager::PushExtender(
     const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
         auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(context, nullptr);
+        CHECK_NULL_VOID(context);
         context->PostAsyncEvent(
             [weak = WeakClaim(this), pageCallback = std::move(finishCallback), jsNode, target]() {
                 auto router = weak.Upgrade();
@@ -112,23 +130,23 @@ RefPtr<FrameNode> PageRouterManager::PushExtender(
                 router->PushExtender(target, std::move(nonConstCallback), jsNode);
             },
             "ArkUIPageRouterPush", TaskExecutor::TaskType::JS);
-        return nullptr;
+        return;
     }
     RouterOptScope scope(this);
     if (target.url.empty()) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "push url is empty");
-        return nullptr;
+        return;
     }
     auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(context, nullptr);
+    CHECK_NULL_VOID(context);
     auto forceSplitMgr = context->GetForceSplitManager();
-    CHECK_NULL_RETURN(forceSplitMgr, nullptr);
+    CHECK_NULL_VOID(forceSplitMgr);
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !forceSplitMgr->IsForceSplitEnable(true)) {
         TAG_LOGW(AceLogTag::ACE_ROUTER, "StartPush exceeds maxStackSize.");
         if (target.errorCallback != nullptr) {
             target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
         }
-        return nullptr;
+        return;
     }
     RouterPageInfo info = target;
     info.path = info.url + ".js";
@@ -137,7 +155,7 @@ RefPtr<FrameNode> PageRouterManager::PushExtender(
         if (info.errorCallback != nullptr) {
             info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR);
         }
-        return nullptr;
+        return;
     }
 
     CleanPageOverlay();
@@ -152,25 +170,24 @@ RefPtr<FrameNode> PageRouterManager::PushExtender(
                 pagePattern->FireOnNewParam(info.params);
             }
             MovePageToFront(pageInfo.first, pageInfo.second, info, true);
-            return pagePattern->GetHost();
+            return;
         }
         auto index = FindPageInRestoreStack(info.url);
         if (index != INVALID_PAGE_INDEX) {
             // find page in restore page, create page, move position and update params.
             RestorePageWithTarget(index, false, info, RestorePageDestination::TOP);
-            return pageInfo.second;
+            return;
         }
     }
     auto loadPageSuccess = LoadPageExtender(GenerateNextPageId(), info, jsNode, true, true);
     if (!loadPageSuccess) {
-        return nullptr;
+        return;
     }
     auto pageNode = pageRouterStack_.back().Upgrade();
-    CHECK_NULL_RETURN(pageNode, nullptr);
+    CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
-    CHECK_NULL_RETURN(pagePattern, nullptr);
+    CHECK_NULL_VOID(pagePattern);
     pagePattern->SetOnNodeDisposeCallback(std::move(finishCallback));
-    return pageNode;
 }
 
 void PageRouterManager::PushNamedRouteExtender(
@@ -230,13 +247,13 @@ void PageRouterManager::PushNamedRouteExtender(
     pagePattern->SetOnNodeDisposeCallback(std::move(finishCallback));
 }
 
-RefPtr<FrameNode> PageRouterManager::PushDynamicExtender(
+void PageRouterManager::PushDynamicExtender(
     const RouterPageInfo& target, std::function<void()>&& finishCallback, const RefPtr<FrameNode>& pageNode)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
         auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(context, nullptr);
+        CHECK_NULL_VOID(context);
         context->PostAsyncEvent([weak = WeakClaim(this), target, pageNode,
             tempFinishCallback = std::move(finishCallback)]() mutable {
                 auto router = weak.Upgrade();
@@ -244,12 +261,12 @@ RefPtr<FrameNode> PageRouterManager::PushDynamicExtender(
                 router->PushDynamicExtender(target, std::move(tempFinishCallback), pageNode);
             },
             "ArkUIPageRouterManagerPushDynamicExtender", TaskExecutor::TaskType::JS);
-        return nullptr;
+        return;
     }
     RouterOptScope scope(this);
     if (target.url.empty()) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "push url is empty");
-        return nullptr;
+        return;
     }
 
     RouterPageInfo info = target;
@@ -259,7 +276,7 @@ RefPtr<FrameNode> PageRouterManager::PushDynamicExtender(
         if (info.errorCallback != nullptr) {
             info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR);
         }
-        return nullptr;
+        return;
     }
 
     CleanPageOverlay();
@@ -274,32 +291,29 @@ RefPtr<FrameNode> PageRouterManager::PushDynamicExtender(
                 pagePattern->FireOnNewParam(info.params);
             }
             MovePageToFront(pageInfo.first, pageInfo.second, info, true);
-            return pagePattern->GetHost();
         }
         auto index = FindPageInRestoreStack(info.url);
         if (index != INVALID_PAGE_INDEX) {
             // find page in restore page, create page, move position and update params.
             RestorePageWithTarget(index, false, info, RestorePageDestination::TOP);
-            return pageInfo.second;
         }
     }
     auto loadPageSuccess = LoadDynamicPageExtender(pageNode, true, true);
     if (!loadPageSuccess) {
-        return nullptr;
+        return;
     }
     auto pagePattern = pageNode->GetPattern<PagePattern>();
-    CHECK_NULL_RETURN(pagePattern, nullptr);
+    CHECK_NULL_VOID(pagePattern);
     pagePattern->SetOnNodeDisposeCallback(std::move(finishCallback));
-    return pageNode;
 }
 
-RefPtr<FrameNode> PageRouterManager::ReplaceDynamicExtender(
+void PageRouterManager::ReplaceDynamicExtender(
     const RouterPageInfo& target, std::function<void()>&& finishCallback, const RefPtr<FrameNode>& createdPageNode)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
         auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(context, nullptr);
+        CHECK_NULL_VOID(context);
         context->PostAsyncEvent(
             [weak = WeakClaim(this), pageCallback = std::move(finishCallback), createdPageNode, target]() mutable {
                 auto router = weak.Upgrade();
@@ -307,12 +321,12 @@ RefPtr<FrameNode> PageRouterManager::ReplaceDynamicExtender(
                 router->ReplaceDynamicExtender(target, std::move(pageCallback), createdPageNode);
             },
             "ArkUIPageRouterReplaceDynamicExtender", TaskExecutor::TaskType::JS);
-        return nullptr;
+        return;
     }
     RouterOptScope scope(this);
     CleanPageOverlay();
     if (target.url.empty()) {
-        return nullptr;
+        return;
     }
 
     RouterPageInfo info = target;
@@ -322,15 +336,15 @@ RefPtr<FrameNode> PageRouterManager::ReplaceDynamicExtender(
         if (info.errorCallback != nullptr) {
             info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR_LITE);
         }
-        return nullptr;
+        return;
     }
     UpdateSrcPage();
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    CHECK_NULL_VOID(pipelineContext);
 #if defined(ENABLE_SPLIT_MODE)
     auto stageManager = pipelineContext->GetStageManager();
-    CHECK_NULL_RETURN(stageManager, nullptr);
+    CHECK_NULL_VOID(stageManager);
 #endif
     TAG_LOGI(AceLogTag::ACE_ROUTER,
         "router replace in new lifecycle(API version > 11), replace mode: %{public}d, url: %{public}s",
@@ -348,12 +362,12 @@ RefPtr<FrameNode> PageRouterManager::ReplaceDynamicExtender(
         auto replacePageNode = pageInfo.second;
         if (pageInfo.first == popIndex) {
             // replace top self in SINGLE mode, do nothing.
-            CHECK_NULL_RETURN(replacePageNode, nullptr);
+            CHECK_NULL_VOID(replacePageNode);
             auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
             if (pagePattern) {
                 pagePattern->FireOnNewParam(info.params);
             }
-            return replacePageNode;
+            return;
         }
         if (replacePageNode) {
             // find page in stack, move position and update params.
@@ -375,7 +389,7 @@ RefPtr<FrameNode> PageRouterManager::ReplaceDynamicExtender(
             if (index != INVALID_PAGE_INDEX) {
                 // find page in restore page, create page, move position and update params.
                 RestorePageWithTarget(index, false, info, RestorePageDestination::BELLOW_TOP, false);
-                return replacePageNode;
+                return;
             }
         }
     }
@@ -389,7 +403,7 @@ RefPtr<FrameNode> PageRouterManager::ReplaceDynamicExtender(
         if (loadPageSuccess) {
             pageNode = pageRouterStack_.back().Upgrade();
             auto pagePattern = pageNode->GetPattern<PagePattern>();
-            CHECK_NULL_RETURN(pagePattern, nullptr);
+            CHECK_NULL_VOID(pagePattern);
             pagePattern->SetOnNodeDisposeCallback(std::move(finishCallback));
         }
 #if defined(ENABLE_SPLIT_MODE)
@@ -398,9 +412,9 @@ RefPtr<FrameNode> PageRouterManager::ReplaceDynamicExtender(
         isNewPageReplacing_ = false;
     }
     if (popIndex < 0 || popNode == GetCurrentPageNode()) {
-        return pageNode;
+        return;
     }
-    CHECK_NULL_RETURN(popNode, nullptr);
+    CHECK_NULL_VOID(popNode);
     auto iter = pageRouterStack_.begin();
     std::advance(iter, popIndex);
     auto lastIter = pageRouterStack_.erase(iter);
@@ -425,16 +439,15 @@ RefPtr<FrameNode> PageRouterManager::ReplaceDynamicExtender(
 #if defined(ENABLE_SPLIT_MODE)
     stageManager->SetIsNewPageReplacing(false);
 #endif
-    return pageNode;
 }
 
-RefPtr<FrameNode> PageRouterManager::ReplaceExtender(const RouterPageInfo& target,
+void PageRouterManager::ReplaceExtender(const RouterPageInfo& target,
     std::function<void()>&& enterFinishCallback, void* jsNode)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
         auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(context, nullptr);
+        CHECK_NULL_VOID(context);
         context->PostAsyncEvent(
             [weak = WeakClaim(this), pageCallback = std::move(enterFinishCallback), jsNode, target]() {
                 auto router = weak.Upgrade();
@@ -443,12 +456,12 @@ RefPtr<FrameNode> PageRouterManager::ReplaceExtender(const RouterPageInfo& targe
                 router->ReplaceExtender(target, std::move(nonConstCallback), jsNode);
             },
             "ArkUIPageRouterReplace", TaskExecutor::TaskType::JS);
-        return nullptr;
+        return;
     }
     RouterOptScope scope(this);
     CleanPageOverlay();
     if (target.url.empty()) {
-        return nullptr;
+        return;
     }
 
     RouterPageInfo info = target;
@@ -458,15 +471,15 @@ RefPtr<FrameNode> PageRouterManager::ReplaceExtender(const RouterPageInfo& targe
         if (info.errorCallback != nullptr) {
             info.errorCallback("The uri of router is not exist.", ERROR_CODE_URI_ERROR_LITE);
         }
-        return nullptr;
+        return;
     }
     UpdateSrcPage();
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    CHECK_NULL_VOID(pipelineContext);
 #if defined(ENABLE_SPLIT_MODE)
     auto stageManager = pipelineContext->GetStageManager();
-    CHECK_NULL_RETURN(stageManager, nullptr);
+    CHECK_NULL_VOID(stageManager);
 #endif
     TAG_LOGI(AceLogTag::ACE_ROUTER,
         "router replace in new lifecycle(API version > 11), replace mode: %{public}d, url: %{public}s",
@@ -484,12 +497,12 @@ RefPtr<FrameNode> PageRouterManager::ReplaceExtender(const RouterPageInfo& targe
         auto replacePageNode = pageInfo.second;
         if (pageInfo.first == popIndex) {
             // replace top self in SINGLE mode, do nothing.
-            CHECK_NULL_RETURN(replacePageNode, nullptr);
+            CHECK_NULL_VOID(replacePageNode);
             auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
             if (pagePattern) {
                 pagePattern->FireOnNewParam(info.params);
             }
-            return replacePageNode;
+            return;
         }
         if (replacePageNode) {
             // find page in stack, move position and update params.
@@ -511,11 +524,10 @@ RefPtr<FrameNode> PageRouterManager::ReplaceExtender(const RouterPageInfo& targe
             if (index != INVALID_PAGE_INDEX) {
                 // find page in restore page, create page, move position and update params.
                 RestorePageWithTarget(index, false, info, RestorePageDestination::BELLOW_TOP, false);
-                return replacePageNode;
+                return;
             }
         }
     }
-    RefPtr<FrameNode> pageNode = nullptr;
     if (!findPage) {
         isNewPageReplacing_ = true;
 #if defined(ENABLE_SPLIT_MODE)
@@ -523,10 +535,10 @@ RefPtr<FrameNode> PageRouterManager::ReplaceExtender(const RouterPageInfo& targe
 #endif
         bool loadPageSuccess = LoadPageExtender(GenerateNextPageId(), info, jsNode, false, false);
         if (loadPageSuccess) {
-            pageNode = pageRouterStack_.back().Upgrade();
-            CHECK_NULL_RETURN(pageNode, nullptr);
+            auto pageNode = pageRouterStack_.back().Upgrade();
+            CHECK_NULL_VOID(pageNode);
             auto pagePattern = pageNode->GetPattern<PagePattern>();
-            CHECK_NULL_RETURN(pagePattern, nullptr);
+            CHECK_NULL_VOID(pagePattern);
             pagePattern->SetOnNodeDisposeCallback(std::move(enterFinishCallback));
         }
 #if defined(ENABLE_SPLIT_MODE)
@@ -535,9 +547,9 @@ RefPtr<FrameNode> PageRouterManager::ReplaceExtender(const RouterPageInfo& targe
         isNewPageReplacing_ = false;
     }
     if (popIndex < 0 || popNode == GetCurrentPageNode()) {
-        return pageNode;
+        return;
     }
-    CHECK_NULL_RETURN(popNode, nullptr);
+    CHECK_NULL_VOID(popNode);
     auto iter = pageRouterStack_.begin();
     std::advance(iter, popIndex);
     auto lastIter = pageRouterStack_.erase(iter);
@@ -562,7 +574,6 @@ RefPtr<FrameNode> PageRouterManager::ReplaceExtender(const RouterPageInfo& targe
 #if defined(ENABLE_SPLIT_MODE)
     stageManager->SetIsNewPageReplacing(false);
 #endif
-    return pageNode;
 }
 
 void PageRouterManager::ReplaceNamedRouteExtender(
@@ -686,7 +697,7 @@ void PageRouterManager::ReplaceNamedRouteExtender(
 #endif
 }
 
-RefPtr<FrameNode> PageRouterManager::RunPageExtender(
+void PageRouterManager::RunPageExtender(
     const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode)
 {
     PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
@@ -696,14 +707,13 @@ RefPtr<FrameNode> PageRouterManager::RunPageExtender(
     info.path = info.url + ".js";
     auto loadPageSuccess = LoadPageExtender(GenerateNextPageId(), info, jsNode);
     if (!loadPageSuccess) {
-        return nullptr;
+        return;
     }
     auto pageNode = pageRouterStack_.back().Upgrade();
-    CHECK_NULL_RETURN(pageNode, nullptr);
+    CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
-    CHECK_NULL_RETURN(pagePattern, nullptr);
+    CHECK_NULL_VOID(pagePattern);
     pagePattern->SetOnNodeDisposeCallback(std::move(finishCallback));
-    return pageNode;
 }
 
 bool PageRouterManager::LoadPageExtender(
@@ -831,5 +841,139 @@ RefPtr<FrameNode> PageRouterManager::CreatePageExtender(int32_t pageId, const Ro
 
     pageRouterStack_.pop_back();
     return pageNode;
+}
+
+void PageRouterManager::StartBackExtender(const RouterPageInfo& target)
+{
+    CleanPageOverlay();
+    UpdateSrcPage();
+    if (target.url.empty()) {
+        size_t pageRouteSize = pageRouterStack_.size();
+        if (pageRouteSize <= 1) {
+            if (!restorePageStack_.empty()) {
+                auto newInfo = RouterPageInfo();
+                newInfo.params = target.params;
+                StartRestore(newInfo);
+                return;
+            }
+            TAG_LOGI(AceLogTag::ACE_ROUTER, "Router back start ExitToDesktop");
+            ExitToDesktop();
+            return;
+        }
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "Router back start PopPage");
+        PopPage(target.params, true, true);
+        return;
+    }
+
+    auto pageInfo = FindPageInStack(target.url, true);
+    if (pageInfo.second) {
+        // find page in stack, pop to specified index.
+        RouterPageInfo info = target;
+#if !defined(PREVIEW)
+        if (info.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
+            info.path = info.url + ".js";
+            PopPageToIndex(pageInfo.first, info.params, true, true);
+            return;
+        }
+#endif
+        PopPageToIndex(pageInfo.first, info.params, true, true);
+        return;
+    }
+
+    auto index = FindPageInRestoreStack(target.url);
+    if (index == INVALID_PAGE_INDEX) {
+        return;
+    }
+
+    RestorePageWithTarget(index, true, target, RestorePageDestination::BOTTOM);
+}
+
+void PageRouterManager::BackWithTargetExtender(const RouterPageInfo& target)
+{
+    CHECK_RUN_ON(JS);
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "Router back path:%{public}s", target.url.c_str());
+    if (inRouterOpt_) {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->PostAsyncEvent(
+            [weak = WeakClaim(this), target]() {
+                auto router = weak.Upgrade();
+                CHECK_NULL_VOID(router);
+                router->BackWithTarget(target);
+            },
+            "ArkUIPageRouterBackWithTarget", TaskExecutor::TaskType::JS);
+        return;
+    }
+    RouterOptScope scope(this);
+    if (pageRouterStack_.empty()) {
+        TAG_LOGW(AceLogTag::ACE_ROUTER, "Page router stack size is zero, can not back");
+        return;
+    }
+    auto currentPage = GetCurrentPageNode();
+    CHECK_NULL_VOID(currentPage);
+    auto pagePattern = currentPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    CHECK_NULL_VOID(pageInfo);
+    if (pageInfo->GetAlertCallback()) {
+        ngBackTarget_ = target;
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto overlayManager = pipelineContext ? pipelineContext->GetOverlayManager() : nullptr;
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->ShowDialog(
+            pageInfo->GetDialogProperties(), nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+        return;
+    }
+    StartBackExtender(target);
+}
+
+void PageRouterManager::BackToIndexWithTargetExtender(int32_t index, const std::string& params)
+{
+    CHECK_RUN_ON(JS);
+    if (!CheckIndexValid(index)) {
+        return;
+    }
+    if (inRouterOpt_) {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->PostAsyncEvent(
+            [weak = WeakClaim(this), index, params]() {
+                auto router = weak.Upgrade();
+                CHECK_NULL_VOID(router);
+                router->BackToIndexWithTarget(index, params);
+            },
+            "ArkUIPageRouterBackToIndex", TaskExecutor::TaskType::JS);
+        return;
+    }
+    RouterOptScope scope(this);
+    if (pageRouterStack_.empty()) {
+        return;
+    }
+    RouterPageInfo target = GetPageInfoByIndex(index, params);
+    auto currentPage = GetCurrentPageNode();
+    CHECK_NULL_VOID(currentPage);
+    auto pagePattern = currentPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    CHECK_NULL_VOID(pageInfo);
+    if (pageInfo->GetAlertCallback()) {
+        ngBackTarget_ = target;
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto overlayManager = pipelineContext ? pipelineContext->GetOverlayManager() : nullptr;
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->ShowDialog(
+            pageInfo->GetDialogProperties(), nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+        return;
+    }
+    UpdateSrcPage();
+    CleanPageOverlay();
+    if (index > static_cast<int32_t>(restorePageStack_.size())) {
+        PopPageToIndex(index - static_cast<int32_t>(restorePageStack_.size()) - 1, params, true, true);
+        return;
+    }
+
+    RouterPageInfo info;
+    info.params = params;
+    RestorePageWithTarget(index - 1, true, info, RestorePageDestination::BOTTOM);
 }
 } // namespace OHOS::Ace::NG

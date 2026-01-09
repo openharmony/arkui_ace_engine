@@ -19,7 +19,7 @@
 #include <optional>
 
 #include "core/components/theme/app_theme.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"

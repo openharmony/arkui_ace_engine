@@ -153,6 +153,7 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
         {
             this._tabBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._tabBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._tabBar_0_flag = AttributeUpdaterFlag.SKIP
@@ -164,6 +165,7 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
         {
             this._onWillShow_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillShow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillShow_0_flag = AttributeUpdaterFlag.SKIP
@@ -175,6 +177,7 @@ export class TabContentModifier extends CommonMethodModifier implements TabConte
         {
             this._onWillHide_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillHide_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillHide_0_flag = AttributeUpdaterFlag.SKIP

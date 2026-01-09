@@ -133,6 +133,13 @@ export struct SliderBootcamp {
   @State blockColor: string = '';
   @State enableTrackColor: boolean = false;
   @State trackColor: string = '';
+  @State enableTrackColorMetrics: boolean = false;
+  @State trackColorMetricsBeginColor: ColorMetrics =
+    ColorMetrics.colorWithSpace(ColorSpace.DISPLAY_P3, 0.0, 1.0, 0.0, 1);
+  @State trackColorMetricsEndColor: ColorMetrics =
+    ColorMetrics.colorWithSpace(ColorSpace.DISPLAY_P3, 1.0, 1.0, 0.0, 1);
+  @State trackColorMetricsBeginOffset: number = 0;
+  @State trackColorMetricsEndOffset: number = 1;
   @State enableSelectedColor: boolean = false;
   @State selectedColor: string = '';
   @State enableShowSteps: boolean = false;
@@ -750,6 +757,12 @@ export struct SliderBootcamp {
       })
         .blockColor(useEnabled(this.enableBlockColor, this.blockColor))
         .trackColor(useEnabled(this.enableTrackColor, this.trackColor))
+        .trackColorMetrics(useEnabled(this.enableTrackColorMetrics,new ColorMetricsLinearGradient([
+              { color: this.trackColorMetricsBeginColor, offset: this.trackColorMetricsBeginOffset },
+              { color: this.trackColorMetricsEndColor, offset: this.trackColorMetricsEndOffset }
+            ])
+          )
+        )
         .selectedColor(useEnabled(this.enableSelectedColor, this.selectedColor))
         .showSteps(useEnabled(this.enableShowSteps, this.showSteps))
         .showTips(useEnabled(this.enableShowTipsValue, this.showTipsValue))
@@ -1458,6 +1471,16 @@ export struct SliderBootcamp {
           title: 'trackColor',
           isEnabled: $enableTrackColor,
           color: $trackColor
+        })
+
+        RadioBlock({
+          title: 'trackColorMetrics',
+          isEnabled: $enableTrackColorMetrics,
+          value: $enableTrackColorMetrics,
+          dataSource: [
+            { label: 'false', value: false },
+            { label: 'true', value: true }
+          ]
         })
 
         ColorBlock({

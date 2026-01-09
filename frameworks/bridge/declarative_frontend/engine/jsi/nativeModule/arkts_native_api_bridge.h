@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_API_BRIDGE_H
 
 #include "ecmascript/napi/include/jsnapi.h"
-
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
@@ -29,6 +28,7 @@ namespace OHOS::Ace::NG {
 using ArkUINativeModuleValue = panda::Local<panda::JSValueRef>;
 using ArkUIRuntimeCallInfo = panda::JsiRuntimeCallInfo;
 using panda::JSValueRef;
+using panda::ObjectRef;
 using panda::Local;
 using panda::ecmascript::EcmaVM;
 class ArkUINativeModule {
@@ -87,12 +87,9 @@ private:
     static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRadioAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSliderAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterRatingAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTimepickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterWaterFlowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterCheckboxAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDataPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterScrollAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGridItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -134,7 +131,6 @@ private:
     static void RegisterStackAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCounterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterCheckboxGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterBlankAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSpanAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

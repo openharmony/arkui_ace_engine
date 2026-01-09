@@ -55,6 +55,7 @@ public:
     virtual RefPtr<UnifiedData> TransformUnifiedDataForNative(void* rawData) = 0;
     virtual RefPtr<DataLoadParams> TransformDataLoadParamsForNative(void* rawData) = 0;
     virtual void* TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedData) = 0;
+    virtual std::shared_ptr<void> TransformUnifiedDataSharedPtr(RefPtr<UnifiedData>& unifiedDataImpl) = 0;
     virtual napi_value TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) = 0;
     virtual napi_value TransformSummary(std::map<std::string, int64_t>& summary) = 0;
     virtual RefPtr<UnifiedData> CreateUnifiedData() = 0;

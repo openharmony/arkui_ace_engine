@@ -318,6 +318,7 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
             this._setSymbolSpanOptions0_value !== value || !Type.of(value).isPrimitive()) {
             this._setSymbolSpanOptions0_value = value
             this._setSymbolSpanOptions_flag = AttributeUpdaterFlag.UPDATE
+            this._state.fireChange()
         } else {
             this._setSymbolSpanOptions_flag = AttributeUpdaterFlag.SKIP
         }
@@ -328,6 +329,7 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -339,6 +341,7 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -350,6 +353,7 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontWeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -361,6 +365,7 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
         {
             this._effectStrategy_0_flag = AttributeUpdaterFlag.UPDATE
             this._effectStrategy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._effectStrategy_0_flag = AttributeUpdaterFlag.SKIP
@@ -372,6 +377,7 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
         {
             this._renderingStrategy_0_flag = AttributeUpdaterFlag.UPDATE
             this._renderingStrategy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._renderingStrategy_0_flag = AttributeUpdaterFlag.SKIP
@@ -383,6 +389,7 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
         {
             this._key_0_flag = AttributeUpdaterFlag.UPDATE
             this._key_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._key_0_flag = AttributeUpdaterFlag.SKIP
@@ -394,6 +401,7 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
         {
             this._id_0_flag = AttributeUpdaterFlag.UPDATE
             this._id_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._id_0_flag = AttributeUpdaterFlag.SKIP

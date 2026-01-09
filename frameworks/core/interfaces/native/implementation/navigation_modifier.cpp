@@ -665,7 +665,7 @@ void SetDividerImpl(Ark_NativePointer node, const Opt_NavigationDividerStyle* st
     auto color = Converter::OptConvert<Color>(style->value.color);
     if (color.has_value()) {
         NavigationModelStatic::UpdateDefineColor(frameNode, true);
-        NavigationModelNG::UpdateDividerColor(frameNode, color.value_or(Color()), nullptr);
+        NavigationModelStatic::UpdateDividerColor(frameNode, color.value_or(Color()));
     } else {
         NavigationModelStatic::UpdateDefineColor(frameNode, false);
     }

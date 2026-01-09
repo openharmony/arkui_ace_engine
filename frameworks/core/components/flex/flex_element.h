@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT FlexElement : public ComponentGroupElement, public FocusGroup {
+class ACE_FORCE_EXPORT FlexElement : public ComponentGroupElement, public FocusGroup {
     DECLARE_ACE_TYPE(FlexElement, ComponentGroupElement, FocusGroup);
 
 public:

@@ -2206,6 +2206,10 @@ void NavigationPattern::StartDefaultAnimation(const RefPtr<NavDestinationGroupNo
             navigationNode->TransitionWithPop(preTopNavDestination, navBarOrHomeDestNode, true);
         }
     }
+    // navBar or HomeDestination push navDestination in split mode
+    if (newTopNavDestination && !preTopNavDestination && (navigationMode_ == NavigationMode::SPLIT)) {
+        ContentChangeReport(newTopNavDestination);
+    }
 }
 
 void NavigationPattern::OnVisibleChange(bool isVisible)
@@ -2820,20 +2824,22 @@ void NavigationPattern::AddDividerHotZoneRect()
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    auto navBarOrHomeDestNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarOrHomeDestinationNode());
-    CHECK_NULL_VOID(navBarOrHomeDestNode);
-    auto geometryNode = navBarOrHomeDestNode->GetGeometryNode();
+    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(GetDividerNode());
+    CHECK_NULL_VOID(dividerFrameNode);
+    auto geometryNode = dividerFrameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-
     OffsetF hotZoneOffset;
     hotZoneOffset.SetX(-DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
-    hotZoneOffset.SetY(DEFAULT_DIVIDER_START_MARGIN.ConvertToPx());
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto dividerStart = layoutProperty->GetDividerStartMargin().value_or(DEFAULT_DIVIDER_START_MARGIN).ConvertToPx();
+    hotZoneOffset.SetY(dividerStart);
     SizeF hotZoneSize;
     hotZoneSize.SetWidth(realDividerWidth_ + DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM *
                                                  DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
     hotZoneSize.SetHeight(geometryNode->GetFrameSize().Height());
     DimensionRect hotZoneRegion;
-    auto paintHeight = GetPaintRectHeight(navBarOrHomeDestNode);
+    auto paintHeight = GetPaintRectHeight(dividerFrameNode);
     if (navigationMode_ == NavigationMode::STACK || enableDragBar_) {
         hotZoneRegion.SetSize(DimensionSize(Dimension(0.0f), Dimension(0.0f)));
     } else {
@@ -2841,18 +2847,14 @@ void NavigationPattern::AddDividerHotZoneRect()
             Dimension(hotZoneSize.Width()), Dimension(NearZero(paintHeight) ? hotZoneSize.Height() : paintHeight)));
     }
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
-
     std::vector<DimensionRect> mouseRegion;
     mouseRegion.emplace_back(hotZoneRegion);
-
-    auto dividerFrameNode = GetDividerNode();
-    CHECK_NULL_VOID(dividerFrameNode);
     auto dividerGestureHub = dividerFrameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(dividerGestureHub);
     dividerGestureHub->SetMouseResponseRegion(mouseRegion);
-
     auto dragRectOffset = geometryNode->GetMarginFrameOffset();
     dragRectOffset.SetX(-DEFAULT_DRAG_REGION.ConvertToPx());
+    dragRectOffset.SetY(0.0f);
     dragRect_.SetOffset(dragRectOffset);
     if (navigationMode_ == NavigationMode::STACK || enableDragBar_) {
         dragRect_.SetSize(SizeF(0.0f, 0.0f));
@@ -2860,7 +2862,6 @@ void NavigationPattern::AddDividerHotZoneRect()
         dragRect_.SetSize(SizeF(DEFAULT_DRAG_REGION.ConvertToPx() * DEFAULT_HALF + realDividerWidth_,
             NearZero(paintHeight) ? geometryNode->GetFrameSize().Height() : paintHeight));
     }
-
     std::vector<DimensionRect> responseRegion;
     DimensionOffset responseOffset(dragRectOffset);
     DimensionRect responseRect(Dimension(dragRect_.Width(), DimensionUnit::PX),
@@ -2983,7 +2984,8 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
             ACE_SCOPED_TRACE_COMMERCIAL("navigation page custom transition end");
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH_INTERACTIVE, true);
             pattern->LoadCompleteManagerStopCollect();
-            if (proxy->GetIsSuccess()) {
+            bool isSuccess = proxy->GetIsSuccess();
+            if (isSuccess) {
                 pattern->ClearRecoveryList();
                 pattern->OnCustomAnimationFinish(preDestination, topDestination, isPopPage);
             } else {
@@ -2994,7 +2996,9 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
             }
             proxy->FireEndCallback();
             pattern->RemoveProxyById(proxyId);
-            pattern->ContentChangeReport(topDestination);
+            if (isSuccess) {
+                pattern->ContentChangeReport(topDestination);
+            }
         };
         auto finishCallback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
             auto pattern = weakNavigation.Upgrade();
@@ -3340,7 +3344,7 @@ void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNav
 
 void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& navigationStack, bool needUpdateCallback)
 {
-    if (navigationStack_) {
+    if (navigationStack_ && needUpdateCallback) {
         navigationStack_->SetOnStateChangedCallback(nullptr);
     }
     navigationStack_ = navigationStack;

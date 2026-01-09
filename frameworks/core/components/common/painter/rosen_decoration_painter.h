@@ -58,7 +58,7 @@ class RosenDecorationPainter : public virtual NG::DrawingDecorationPainter {
 #endif
 
 public:
-    RosenDecorationPainter(
+    ACE_FORCE_EXPORT RosenDecorationPainter(
         const RefPtr<Decoration>& decoration, const Rect& paintRect, const Size& paintSize, double dipScale);
     ~RosenDecorationPainter() override = default;
 
@@ -87,7 +87,7 @@ public:
 
     void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context, const sk_sp<SkImage>& image);
 
-    void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context);
+    ACE_FORCE_EXPORT void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context);
 
     static void PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize, const Offset& position,
         SkCanvas* canvas, const sk_sp<SkImage>& image, double dipScale);
@@ -112,7 +112,7 @@ public:
         const float& hueRotate, const Color& color);
     void PaintDecoration(const Offset& offset, RSCanvas* canvas, RenderContext& context,
         const std::shared_ptr<RSImage>& image);
-    void PaintDecoration(const Offset& offset, RSCanvas* canvas, RenderContext& context);
+    ACE_FORCE_EXPORT void PaintDecoration(const Offset& offset, RSCanvas* canvas, RenderContext& context);
     static void PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize, const Offset& position,
         RSCanvas* canvas, const std::shared_ptr<RSImage>& image, double dipScale);
 #endif
@@ -165,9 +165,9 @@ public:
     }
 
 #ifndef USE_ROSEN_DRAWING
-    SkRRect GetBoxRRect(const Offset& offset, const Border& border, double shrinkFactor, bool isRound);
+    ACE_FORCE_EXPORT SkRRect GetBoxRRect(const Offset& offset, const Border& border, double shrinkFactor, bool isRound);
 #else
-    RSRoundRect GetBoxRRect(const Offset& offset, const Border& border,
+    ACE_FORCE_EXPORT RSRoundRect GetBoxRRect(const Offset& offset, const Border& border,
         double shrinkFactor, bool isRound);
 #endif
 

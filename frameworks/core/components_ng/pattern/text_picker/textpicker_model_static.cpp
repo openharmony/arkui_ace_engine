@@ -938,16 +938,6 @@ const Dimension TextPickerModelStatic::ConvertFontScaleValue(const Dimension& fo
     return fontSizeValue;
 }
 
-const std::string TextPickerModelStatic::GetSelectedObjectStr(FrameNode* frameNode,
-    const std::string value, const uint32_t index)
-{
-    // CHECK_NULL_RETURN(frameNode, "framenode null");
-    // auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-    // CHECK_NULL_RETURN(textPickerPattern, "pattern null");
-    // return textPickerPattern->GetSelectedObjectStr(value, index);
-    return "framenode null";
-}
-
 void TextPickerModelStatic::SetOnValueChangeEvent(FrameNode* frameNode,
     TextCascadeValueChangeEvent&& onValueChangeEvent)
 {

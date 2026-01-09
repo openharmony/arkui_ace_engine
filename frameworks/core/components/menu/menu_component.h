@@ -33,7 +33,7 @@ enum MenuStatus {
     INIT
 };
 
-class ACE_EXPORT MenuComponent : public ComposedComponent {
+class ACE_FORCE_EXPORT MenuComponent : public ComposedComponent {
     DECLARE_ACE_TYPE(MenuComponent, ComposedComponent);
 
 public:

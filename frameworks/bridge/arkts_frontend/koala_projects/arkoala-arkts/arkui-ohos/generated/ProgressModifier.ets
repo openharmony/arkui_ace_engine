@@ -219,6 +219,7 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
         {
             this._value_0_flag = AttributeUpdaterFlag.UPDATE
             this._value_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._value_0_flag = AttributeUpdaterFlag.SKIP
@@ -230,6 +231,7 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
         {
             this._color_0_flag = AttributeUpdaterFlag.UPDATE
             this._color_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._color_0_flag = AttributeUpdaterFlag.SKIP
@@ -241,6 +243,7 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
         {
             this._style_0_flag = AttributeUpdaterFlag.UPDATE
             this._style_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._style_0_flag = AttributeUpdaterFlag.SKIP
@@ -252,6 +255,7 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
         {
             this._privacySensitive_0_flag = AttributeUpdaterFlag.UPDATE
             this._privacySensitive_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._privacySensitive_0_flag = AttributeUpdaterFlag.SKIP
@@ -259,10 +263,11 @@ export class ProgressModifier extends CommonMethodModifier implements ProgressAt
         return this
     }
     contentModifier(value: ContentModifier<ProgressConfiguration> | undefined): this {
-        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentModifier_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP

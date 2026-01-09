@@ -19,48 +19,17 @@
 #include <memory>
 
 #include "core/components/declaration/button/button_declaration.h"
-#include "core/components/declaration/clock/clock_declaration.h"
 #include "core/components/declaration/common/attribute.h"
 #include "core/components/declaration/common/event.h"
 #include "core/components/declaration/common/method.h"
 #include "core/components/declaration/common/style.h"
 #include "core/components/declaration/div/div_declaration.h"
-#include "core/components/declaration/image/image_animator_declaration.h"
-#include "core/components/declaration/input/input_declaration.h"
 #include "core/components/declaration/piece/piece_declaration.h"
 #include "core/components/declaration/richtext/rich_text_declaration.h"
-#include "core/components/declaration/search/search_declaration.h"
 #include "core/components/declaration/side_bar/side_bar_declaration.h"
 #include "core/components/declaration/span/span_declaration.h"
-#include "core/components/declaration/svg/svg_animate_declaration.h"
-#include "core/components/declaration/svg/svg_base_declaration.h"
-#include "core/components/declaration/svg/svg_circle_declaration.h"
-#include "core/components/declaration/svg/svg_declaration.h"
-#include "core/components/declaration/svg/svg_ellipse_declaration.h"
-#include "core/components/declaration/svg/svg_fe_blend_declaration.h"
-#include "core/components/declaration/svg/svg_fe_colormatrix_declaration.h"
-#include "core/components/declaration/svg/svg_fe_composite_declaration.h"
-#include "core/components/declaration/svg/svg_fe_flood_declaration.h"
-#include "core/components/declaration/svg/svg_fe_func_declaration.h"
-#include "core/components/declaration/svg/svg_fe_gaussianblur_declaration.h"
-#include "core/components/declaration/svg/svg_fe_merge_declaration.h"
-#include "core/components/declaration/svg/svg_fe_merge_node_declaration.h"
-#include "core/components/declaration/svg/svg_fe_offset_declaration.h"
-#include "core/components/declaration/svg/svg_filter_declaration.h"
-#include "core/components/declaration/svg/svg_gradient_declaration.h"
-#include "core/components/declaration/svg/svg_image_declaration.h"
-#include "core/components/declaration/svg/svg_line_declaration.h"
-#include "core/components/declaration/svg/svg_mask_declaration.h"
-#include "core/components/declaration/svg/svg_path_declaration.h"
-#include "core/components/declaration/svg/svg_pattern_declaration.h"
-#include "core/components/declaration/svg/svg_polygon_declaration.h"
-#include "core/components/declaration/svg/svg_rect_declaration.h"
-#include "core/components/declaration/svg/svg_stop_declaration.h"
-#include "core/components/declaration/svg/svg_text_declaration.h"
-#include "core/components/declaration/svg/svg_text_path_declaration.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components/declaration/text/text_declaration.h"
-#include "core/components/declaration/textfield/textfield_declaration.h"
 #include "core/components/declaration/texttimer/texttimer_declaration.h"
 #include "core/components/declaration/web/web_declaration.h"
 #include "core/components/declaration/xcomponent/xcomponent_declaration.h"
@@ -131,19 +100,10 @@ public:
     static const std::shared_ptr<DivAttribute> DEFAULT_DIV_ATTR;
     static const std::shared_ptr<DivStyle> DEFAULT_DIV_STYLE;
 
-    // default value of input
-    static const std::shared_ptr<InputAttribute> DEFAULT_INPUT_ATTR;
-
     // default value of piece
     static const std::shared_ptr<PieceAttribute> DEFAULT_PIECE_ATTR;
     static const std::shared_ptr<PieceStyle> DEFAULT_PIECE_STYLE;
     static const std::shared_ptr<PieceEvent> DEFAULT_PIECE_EVENT;
-
-    // default value of search
-    static const std::shared_ptr<SearchAttribute> DEFAULT_SEARCH_ATTR;
-    static const std::shared_ptr<SearchStyle> DEFAULT_SEARCH_STYLE;
-    static const std::shared_ptr<SearchEvent> DEFAULT_SEARCH_EVENT;
-    static const std::shared_ptr<SearchMethod> DEFAULT_SEARCH_METHOD;
 
     // default value of side bar
     static const std::shared_ptr<SideBarContainerAttribute> DEFAULT_SIDE_BAR_ATTR;
@@ -163,49 +123,11 @@ public:
     static const std::shared_ptr<TextSpecializedAttribute> DEFAULT_TEXT_ATTR;
     static const std::shared_ptr<TextSpecializedStyle> DEFAULT_TEXT_STYLE;
 
-    // default value of textfield
-    static const std::shared_ptr<TextFieldAttribute> DEFAULT_TEXTFIELD_ATTR;
-    static const std::shared_ptr<TextFieldStyle> DEFAULT_TEXTFIELD_STYLE;
-    static const std::shared_ptr<TextFieldEvent> DEFAULT_TEXTFIELD_EVENT;
-    static const std::shared_ptr<TextFieldMethod> DEFAULT_TEXTFIELD_METHOD;
-
     // default value of texttimer
     static const std::shared_ptr<TextTimerAttribute> DEFAULT_TEXTTIMER_ATTR;
     static const std::shared_ptr<TextTimerStyle> DEFAULT_TEXTTIMER_STYLE;
     static const std::shared_ptr<TextTimerEvent> DEFAULT_TEXTTIMER_EVENT;
     static const std::shared_ptr<TextTimerMethod> DEFAULT_TEXTTIMER_METHOD;
-
-    // default value of svg
-    static const std::shared_ptr<SvgAnimateAttribute> DEFAULT_SVG_ANIMATE_ATTR;
-    static const std::shared_ptr<SvgAttribute> DEFAULT_SVG_ATTR;
-    static const std::shared_ptr<SvgBaseAttribute> DEFAULT_SVG_BASE_ATTR;
-    static const std::shared_ptr<SvgCircleAttribute> DEFAULT_SVG_CIRCLE_ATTR;
-    static const std::shared_ptr<SvgEllipseAttribute> DEFAULT_SVG_ELLIPSE_ATTR;
-    static const std::shared_ptr<SvgImageAttribute> DEFAULT_SVG_IMAGE_ATTR;
-    static const std::shared_ptr<SvgLineAttribute> DEFAULT_SVG_LINE_ATTR;
-    static const std::shared_ptr<SvgMaskAttribute> DEFAULT_SVG_MASK_ATTR;
-    static const std::shared_ptr<SvgPathAttribute> DEFAULT_SVG_PATH_ATTR;
-    static const std::shared_ptr<SvgPatternAttribute> DEFAULT_SVG_PATTERN_ATTR;
-    static const std::shared_ptr<SvgPolygonAttribute> DEFAULT_SVG_POLYGON_ATTR;
-    static const std::shared_ptr<SvgRectAttribute> DEFAULT_SVG_RECT_ATTR;
-    static const std::shared_ptr<SvgTextAttribute> DEFAULT_SVG_TEXT_ATTR;
-    static const std::shared_ptr<SvgTextPathAttribute> DEFAULT_SVG_TEXT_PATH_ATTR;
-    static const std::shared_ptr<SvgStopAttribute> DEFAULT_SVG_STOP_ATTR;
-    static const std::shared_ptr<SvgGradientAttribute> DEFAULT_SVG_GRADIENT_ATTR;
-    static const std::shared_ptr<SvgFilterAttribute> DEFAULT_SVG_FILTER_ATTR;
-    static const std::shared_ptr<SvgFeColorMatrixAttribute> DEFAULT_SVG_FE_COLORMATRIX_ATTR;
-    static const std::shared_ptr<SvgFeAttribute> DEFAULT_SVG_FE_COMPONENT_TRANSFER_ATTR;
-    static const std::shared_ptr<SvgFeCompositeAttribute> DEFAULT_SVG_FE_COMPOSITE_ATTR;
-    static const std::shared_ptr<SvgFeOffsetAttribute> DEFAULT_SVG_FE_OFFSET_ATTR;
-    static const std::shared_ptr<SvgFeFuncAttribute> DEFAULT_SVG_FE_FUNC_ATTR;
-    static const std::shared_ptr<SvgFeFloodAttribute> DEFAULT_SVG_FE_FLOOD_ATTR;
-    static const std::shared_ptr<SvgFeGaussianBlurAttribute> DEFAULT_SVG_FE_GAUSSIAN_BLUR_ATTR;
-    static const std::shared_ptr<SvgFeMergeAttribute> DEFAULT_SVG_FE_MERGE_ATTR;
-    static const std::shared_ptr<SvgFeMergeNodeAttribute> DEFAULT_SVG_FE_MERGE_NODE_ATTR;
-    static const std::shared_ptr<SvgFeBlendAttribute> DEFAULT_SVG_FE_BLEND_ATTR;
-
-    // default value of image_animator
-    static const std::shared_ptr<ImageAnimatorAttribute> DEFAULT_IMAGE_ANIMATOR_ATTR;
 
     // default value of web
     static const std::shared_ptr<WebAttribute> DEFAULT_WEB_ATTR;
@@ -215,11 +137,6 @@ public:
     // default value of richtext
     static const std::shared_ptr<RichTextAttribute> DEFAULT_RICH_TEXT_ATTR;
     static const std::shared_ptr<RichTextEvent> DEFAULT_RICH_TEXT_EVENT;
-
-    // default value of clock
-    static const std::shared_ptr<ClockAttribute> DEFAULT_CLOCK_ATTR;
-    static const std::shared_ptr<ClockStyle> DEFAULT_CLOCK_STYLE;
-    static const std::shared_ptr<ClockEvent> DEFAULT_CLOCK_EVENT;
 
     // default value of xcomponent
     static const std::shared_ptr<XComponentAttribute> DEFAULT_XCOMPONENT_ATTR;

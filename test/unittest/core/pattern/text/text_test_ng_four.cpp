@@ -176,7 +176,7 @@ HWTEST_F(TextTestNgFour, HandleMouseEvent003, TestSize.Level1)
     pattern->blockPress_ = true;
     pattern->HandleMouseEvent(info);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
 
     pattern->textSelector_.Update(0, 3);
     pattern->blockPress_ = false;
@@ -865,6 +865,35 @@ HWTEST_F(TextTestNgFour, TextContentModifier005, TestSize.Level1)
     ASSERT_NE(textPaintMethod->textContentModifier_, nullptr);
     EXPECT_EQ(textPaintMethod->textContentModifier_->imageNodeList_.size(), 1);
     textPattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: TextContentModifier006
+ * @tc.desc: test text_content_modifier.cpp RemoveWhitespaceCharacters function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgFour, TextContentModifier006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textPaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(textPaintMethod, nullptr);
+    auto textContentModifier = textPattern->GetContentModifier();
+    ASSERT_NE(textContentModifier, nullptr);
+    /**
+     * @tc.steps: step2. call RemoveWhitespaceCharacters function and check the result.
+     */
+    std::u16string testContent1 = u"  \n   \t   \r";
+    std::u16string testContent2 = u"  \n hello!  \n\tworld";
+    textContentModifier->RemoveWhitespaceCharacters(testContent1);
+    textContentModifier->RemoveWhitespaceCharacters(testContent2);
+    EXPECT_EQ(testContent1, u"");
+    EXPECT_EQ(testContent2, u"hello!world");
 }
 
 /**

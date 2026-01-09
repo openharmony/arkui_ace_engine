@@ -47,6 +47,7 @@ public:
     static void JSSetKeyboardAppearanceConfig(const JSCallbackInfo& info);
     static void JSSetImageCacheCount(const JSCallbackInfo& info);
     static void JSSetImageRawDataCacheSize(const JSCallbackInfo& info);
+    static void JSSetCustomKeyboardContinueFeature(const JSCallbackInfo& info);
 
 private:
     static void AnimateToInner(const JSCallbackInfo& info, bool immediately);

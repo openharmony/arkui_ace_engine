@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_FULL_SCREEN_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_FULL_SCREEN_PATTERN_H
 
-#include "core/components/video/video_controller_v2.h"
 #include "core/components_ng/manager/focus/focus_view.h"
+#include "core/components_ng/pattern/video/video_controller_v2.h"
 #include "core/components_ng/pattern/video/video_node.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 

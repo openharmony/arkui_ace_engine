@@ -53,6 +53,7 @@ public:
     bool IsTextAABBCollecting() const;
 
 private:
+    void ReportSwiperEvent();
     void StartTextAABBCollecting();
     void StopTextAABBCollecting(const RectF& rootRect);
 

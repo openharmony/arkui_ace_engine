@@ -214,7 +214,7 @@ export class Application {
     private withLog = false
     private useNativeLog = true
     private rootPointer: KPointer = nullptr
-    private static firstRegisterArkuiApiHandler: boolean = true
+    public static firstRegisterArkuiApiHandler: boolean = true
 
     constructor(useNativeLog: boolean, moduleName: string, startUrl: string, startParam: string, name: string,
         userView: UserView | undefined, entryPoint: EntryPoint | undefined) {
@@ -414,12 +414,12 @@ export class Application {
         // Ensure all current state updates took effect.
         manager.syncChanges()
         manager.updateSnapshot()
+        flushBuilderRootNode()
         let detachedRoots = getDetachedRootsByInstanceId(this.instanceId);
         for (const detachedRoot of detachedRoots.values()) {
             detachedRoot.compute()
         }
         updateLazyItems()
-        flushBuilderRootNode()
         this.uiContext!.updateParallelizeItemNode()
         if (partialUpdates.length > 0) {
             // If there are pending partial updates - we apply them one by one and provide update context.

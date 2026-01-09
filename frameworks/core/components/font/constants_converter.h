@@ -61,15 +61,15 @@ enum class SymbolType;
 
 namespace Constants {
 
-OHOS::Rosen::FontWeight ConvertTxtFontWeight(FontWeight fontWeight);
+ACE_FORCE_EXPORT OHOS::Rosen::FontWeight ConvertTxtFontWeight(FontWeight fontWeight);
 
 OHOS::Rosen::SymbolType ConvertTxtSymbolType(SymbolType symbolType);
 
-OHOS::Rosen::FontStyle ConvertTxtFontStyle(FontStyle fontStyle);
+ACE_FORCE_EXPORT OHOS::Rosen::FontStyle ConvertTxtFontStyle(FontStyle fontStyle);
 
-OHOS::Rosen::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline);
+ACE_FORCE_EXPORT OHOS::Rosen::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline);
 
-OHOS::Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign);
+ACE_FORCE_EXPORT OHOS::Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign);
 
 Rosen::TextVerticalAlign ConvertTxtTextVerticalAlign(TextVerticalAlign textVerticalAlign);
 
@@ -77,7 +77,7 @@ OHOS::Rosen::TextRectHeightStyle ConvertTxtRectHeightStyle(RectHeightStyle heigh
 
 OHOS::Rosen::TextRectWidthStyle ConvertTxtRectWidthStyle(RectWidthStyle widthStyle);
 
-OHOS::Rosen::TextDirection ConvertTxtTextDirection(TextDirection textDirection);
+ACE_FORCE_EXPORT OHOS::Rosen::TextDirection ConvertTxtTextDirection(TextDirection textDirection);
 
 OHOS::Rosen::TextDecoration ConvertTxtTextDecoration(std::vector<TextDecoration>& textDecoration);
 
@@ -89,13 +89,13 @@ void ConvertTxtStyle(const TextStyle& textStyle, OHOS::Rosen::TextStyle& txtStyl
 
 void ConvertSymbolTxtStyle(const TextStyle& textStyle, OHOS::Rosen::TextStyle& txtStyle);
 
-Rect ConvertSkRect(const Rosen::Drawing::RectF &skRect);
+ACE_FORCE_EXPORT Rect ConvertSkRect(const Rosen::Drawing::RectF &skRect);
 
 OHOS::Rosen::PlaceholderVerticalAlignment ConvertPlaceholderAlignment(PlaceholderAlignment textDecoration);
 
 void ConvertPlaceholderRun(const PlaceholderRun& span, OHOS::Rosen::PlaceholderSpan& txtSpan);
 
-SkColor ConvertSkColor(Color color);
+ACE_FORCE_EXPORT SkColor ConvertSkColor(Color color);
 void ConvertForegroundPaint(const TextStyle& textStyle, double width, double height, Rosen::TextStyle& txtStyle);
 float GetVariableFontWeight(FontWeight fontWeight);
 std::vector<Rosen::Drawing::Color> ConvertColors(const std::vector<Color>& colors);

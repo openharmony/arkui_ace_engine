@@ -2101,7 +2101,8 @@ bool DialogPattern::NeedUpdateHostWindowRect()
 void DialogPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     auto forceUpdate = NeedUpdateHostWindowRect();
-    auto isWindowChanged = type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE;
+    auto isWindowChanged = type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE ||
+                           type == WindowSizeChangeReason::SCENE_WITH_ANIMATION;
 
     TAG_LOGI(AceLogTag::ACE_DIALOG,
         "WindowSize is changed, type: %{public}d isFoldStatusChanged_: %{public}d forceUpdate: %{public}d", type,

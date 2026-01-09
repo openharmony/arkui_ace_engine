@@ -172,6 +172,14 @@ Ark_image_PixelMap GetValueImpl(Ark_ImageAttachment peer)
     return nullptr;
 #endif
 }
+Opt_String GetResourceValueImpl(Ark_ImageAttachment peer)
+{
+    auto invalid = Converter::ArkValue<Opt_String>();
+    CHECK_NULL_RETURN(peer && peer->span, invalid);
+    auto image = peer->span->GetImageSpanOptions().image;
+    CHECK_NULL_RETURN(image, invalid);
+    return Converter::ArkValue<Opt_String>(image.value());
+}
 Opt_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
 {
     auto invalid = Converter::ArkValue<Opt_SizeOptions>();
@@ -233,6 +241,7 @@ const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor()
         ImageAttachmentAccessor::ConstructImpl,
         ImageAttachmentAccessor::GetFinalizerImpl,
         ImageAttachmentAccessor::GetValueImpl,
+        ImageAttachmentAccessor::GetResourceValueImpl,
         ImageAttachmentAccessor::GetSizeImpl,
         ImageAttachmentAccessor::GetVerticalAlignImpl,
         ImageAttachmentAccessor::GetObjectFitImpl,

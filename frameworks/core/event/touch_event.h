@@ -174,7 +174,7 @@ public:
     {
         return direction_;
     }
-    void SetTouchRestrict(const TouchRestrict& touchRestrict);
+    ACE_FORCE_EXPORT void SetTouchRestrict(const TouchRestrict& touchRestrict);
     void SetGetEventTargetImpl(const GetEventTargetImpl& getEventTargetImpl);
     std::optional<EventTarget> GetEventTarget() const;
     // Coordinate offset is used to calculate the local location of the touch point in the render node.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -315,7 +315,7 @@ class JSBuilderNode extends BaseNode {
         }
     }
     clearChildBuilderNodeWeakMap() {
-        this.builderNodeWeakrefMap_.forEach((weakRefChild) => {
+        this.builderNodeWeakrefMap_?.forEach((weakRefChild) => {
             const child = weakRefChild?.deref();
             if (child instanceof JSBuilderNode) {
                 child.__parentViewOfBuildNode = undefined;
@@ -1470,6 +1470,9 @@ class FrameNode extends Disposable {
         return getUINativeModule().frameNode.isAttached(this.getNodePtr());
     }
     isOnMainTree() {
+        if (this.isDisposed()) {
+            throw { message: 'The current node has been disposed.', code: 100026 };
+          }
         return getUINativeModule().frameNode.isOnMainTree(this.getNodePtr());
     }
     getInspectorInfo() {
@@ -2030,7 +2033,9 @@ const __creatorMap__ = new Map([
         }],
     ['WaterFlow', (context) => {
             return new TypedFrameNode(context, 'WaterFlow', (node, type) => {
-                return new ArkWaterFlowComponent(node, type);
+                getUINativeModule().loadNativeModule('WaterFlow');
+                let module = globalThis.requireNapi('arkui.components.arkwaterflow');
+                return module.createComponent(node, type);
             });
         }],
     ['SymbolGlyph', (context) => {
@@ -2040,7 +2045,9 @@ const __creatorMap__ = new Map([
         }],
     ['FlowItem', (context) => {
             return new TypedFrameNode(context, 'FlowItem', (node, type) => {
-                return new ArkFlowItemComponent(node, type);
+                getUINativeModule().loadNativeModule('FlowItem');
+                let module = globalThis.requireNapi('arkui.components.arkflowitem');
+                return module.createComponent(node, type);
             });
         }],
     ['QRCode', (context) => {
@@ -2085,12 +2092,16 @@ const __creatorMap__ = new Map([
         }],
     ['Checkbox', (context) => {
             return new TypedFrameNode(context, 'Checkbox', (node, type) => {
-                return new ArkCheckboxComponent(node, type);
+                getUINativeModule().loadNativeModule('Checkbox');
+                let module = globalThis.requireNapi('arkui.components.arkcheckbox');
+                return module.createComponent(node, type);
             });
         }],
     ['CheckboxGroup', (context) => {
             return new TypedFrameNode(context, 'CheckboxGroup', (node, type) => {
-                return new ArkCheckboxGroupComponent(node, type);
+                getUINativeModule().loadNativeModule('CheckboxGroup');
+                let module = globalThis.requireNapi('arkui.components.arkcheckboxgroup');
+                return module.createComponent(node, type);
             });
         }],
     ['Radio', (context) => {
@@ -2100,7 +2111,9 @@ const __creatorMap__ = new Map([
         }],
     ['Rating', (context) => {
             return new TypedFrameNode(context, 'Rating', (node, type) => {
-                return new ArkRatingComponent(node, type);
+                getUINativeModule().loadNativeModule('Rating');
+                let module = globalThis.requireNapi('arkui.components.arkrating');
+                return module.createComponent(node, type);
             });
         }],
     ['Slider', (context) => {
@@ -2177,7 +2190,9 @@ const __attributeMap__ = new Map([
         if (!node.getNodePtr()) {
             return undefined;
         }
-        node._componentAttribute = new ArkWaterFlowComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        getUINativeModule().loadNativeModule('WaterFlow');
+        let module = globalThis.requireNapi('arkui.components.arkwaterflow');
+        node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
     }],
     ['FlowItem', (node) => {
@@ -2187,7 +2202,9 @@ const __attributeMap__ = new Map([
         if (!node.getNodePtr()) {
             return undefined;
         }
-        node._componentAttribute = new ArkFlowItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        getUINativeModule().loadNativeModule('FlowItem');
+        let module = globalThis.requireNapi('arkui.components.arkflowitem');
+        node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
     }],
     ['Grid', (node) => {
@@ -2257,7 +2274,9 @@ const __attributeMap__ = new Map([
         if (!node.getNodePtr()) {
             return undefined;
         }
-        node._componentAttribute = new ArkCheckboxComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        getUINativeModule().loadNativeModule('Checkbox');
+        let module = globalThis.requireNapi('arkui.components.arkcheckbox');
+        node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
     }],
     ['Radio', (node) => {

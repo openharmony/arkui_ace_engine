@@ -15,6 +15,9 @@
 
 #include "base/log/ace_trace.h"
 
+#include "core/common/container.h"
+#include "core/components_ng/base/ui_node.h"
+
 #ifndef WINDOWS_PLATFORM
 #include "securec.h"
 #endif
@@ -148,4 +151,28 @@ AceAsyncScopedTrace::~AceAsyncScopedTrace()
         AceAsyncTraceEnd(taskId_, name_.c_str());
     }
 }
+
+ResTracer::ResTracer(uint32_t traceType, uint64_t traceId)
+{
+    AceSetResTraceId(traceType, traceId, &traceType_, &traceId_);
+}
+
+ResTracer::~ResTracer()
+{
+    uint32_t traceType;
+    uint64_t traceId;
+    AceSetResTraceId(traceType_, traceId_, &traceType, &traceId);
+}
+
+ContainerTracer::ContainerTracer(const Container* container)
+    : ContainerTracer(container ? container->GetInstanceId() : INSTANCE_ID_UNDEFINED)
+{}
+
+ContainerTracer::ContainerTracer()
+    : ContainerTracer(Container::CurrentId())
+{}
+
+UINodeTracer::UINodeTracer(const NG::UINode* uiNode)
+    : UINodeTracer(uiNode ? uiNode->GetId() : ElementRegister::UndefinedElementId)
+{}
 } // namespace OHOS::Ace

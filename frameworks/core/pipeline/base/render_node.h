@@ -61,8 +61,12 @@ constexpr uint32_t FIND_MAX_COUNT = 64;
 using HoverAndPressCallback = std::function<void(const Color&)>;
 using Rosen::RSNode;
 
+#ifdef NG_BUILD
 // RenderNode is the base class for different render backend, represent a render unit for render pipeline.
+class ACE_EXPORT RenderNode : public PropertyAnimatable, public AnimatableProperties, public virtual AceType {
+#else
 class ACE_FORCE_EXPORT RenderNode : public PropertyAnimatable, public AnimatableProperties, public virtual AceType {
+#endif
     DECLARE_ACE_TYPE(RenderNode, PropertyAnimatable, AceType);
 
 public:

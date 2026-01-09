@@ -20,14 +20,14 @@ import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Scroller_serializer, OnScrollFrameBeginCallback, Scroller } from "./scroll"
 import { Resource_serializer } from "./../framework/resource"
-import { NestedScrollOptions_serializer, EditModeOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, NestedScrollOptions, EditModeOptions, OnWillScrollCallback, OnScrollCallback, CommonMethod, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { NestedScrollOptions_serializer, EditModeOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, NestedScrollOptions, EditModeOptions, OnWillScrollCallback, OnScrollCallback, CommonMethod, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from "./common"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { Length } from "./units"
+import { ItemFillPolicy_serializer, ItemFillPolicy, Length } from "./units"
 import { Resource } from "global.resource"
-import { Color, BarState, ScrollSource, EdgeEffect } from "./enums"
+import { Color, BarState, FocusWrapMode, ScrollSource, EdgeEffect } from "./enums"
 import { ScrollState } from "./list"
 import { AttributeModifier, hookGridAttributeModifier, AttributeUpdater } from "#handwritten"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
@@ -69,12 +69,20 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridInterface_setGridOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setColumnsTemplateAttribute(value: string | undefined): void {
+    setColumnsTemplateAttribute(value: string | ItemFillPolicy | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeString(valueTmpValue)
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof ItemFillPolicy) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as ItemFillPolicy
+                ItemFillPolicy_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -161,7 +169,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setScrollBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setScrollBarColorAttribute(value: Color | int32 | string | undefined): void {
+    setScrollBarColorAttribute(value: Color | int32 | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -178,6 +186,10 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((3).toByte())
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -445,6 +457,30 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._GridAttribute_setAlignItems(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setFocusWrapModeAttribute(value: FocusWrapMode | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as FocusWrapMode)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_setFocusWrapMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setSyncLoadAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GridAttribute_setSyncLoad(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setEditModeOptionsAttribute(value: EditModeOptions | undefined): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -533,6 +569,7 @@ export class ArkGridPeer extends ArkScrollableCommonMethodPeer {
         thisSerializer.release()
     }
 }
+export type OnGridScrollIndexCallback = (first: int32, last: int32) => void;
 export interface GridLayoutOptions {
     regularSize: [ int32, int32 ];
     irregularIndexes?: Array<int32>;
@@ -561,7 +598,7 @@ export interface GridAttribute extends ScrollableCommonMethod {
     setGridOptions(scroller?: Scroller, layoutOptions?: GridLayoutOptions): this {
         throw new Error("Unimplemented method setGridOptions")
     }
-    columnsTemplate(value: string | undefined): this {
+    columnsTemplate(value: string | ItemFillPolicy | undefined): this {
         throw new Error("Unimplemented method columnsTemplate")
     }
     rowsTemplate(value: string | undefined): this {
@@ -574,7 +611,7 @@ export interface GridAttribute extends ScrollableCommonMethod {
         throw new Error("Unimplemented method rowsGap")
     }
     scrollBarWidth(value: double | string | undefined): this
-    scrollBarColor(value: Color | int32 | string | undefined): this
+    scrollBarColor(value: Color | int32 | string | Resource | undefined): this
     scrollBar(value: BarState | undefined): this
     onScrollBarUpdate(value: ((index: int32,offset: double) => ComputedBarAttribute) | undefined): this {
         throw new Error("Unimplemented method onScrollBarUpdate")
@@ -630,6 +667,12 @@ export interface GridAttribute extends ScrollableCommonMethod {
     alignItems(value: GridItemAlignment | undefined): this {
         throw new Error("Unimplemented method alignItems")
     }
+    focusWrapMode(value: FocusWrapMode | undefined): this {
+        throw new Error("Unimplemented method focusWrapMode")
+    }
+    syncLoad(value: boolean | undefined): this {
+        throw new Error("Unimplemented method syncLoad")
+    }
     editModeOptions(value: EditModeOptions | undefined): this {
         throw new Error("Unimplemented method editModeOptions")
     }
@@ -653,12 +696,12 @@ export interface GridAttribute extends ScrollableCommonMethod {
     }
 }
 export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements GridAttribute {
-    columnsTemplate_value?: string | undefined
+    columnsTemplate_value?: string | ItemFillPolicy | undefined
     rowsTemplate_value?: string | undefined
     columnsGap_value?: Length | undefined
     rowsGap_value?: Length | undefined
     scrollBarWidth_value?: double | string | undefined
-    scrollBarColor_value?: Color | int32 | string | undefined
+    scrollBarColor_value?: Color | int32 | string | Resource | undefined
     scrollBar_value?: BarState | undefined
     onScrollBarUpdate_value?: ((index: int32,offset: double) => ComputedBarAttribute) | undefined
     onScrollIndex_value?: ((first: int32,last: int32) => void) | undefined
@@ -680,6 +723,8 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     enableScrollInteraction_value?: boolean | undefined
     friction_value?: double | Resource | undefined
     alignItems_value?: GridItemAlignment | undefined
+    focusWrapMode_value?: FocusWrapMode | undefined
+    syncLoad_value?: boolean | undefined
     editModeOptions_value?: EditModeOptions | undefined
     onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
     onWillScroll_value?: OnWillScrollCallback | undefined
@@ -688,7 +733,7 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     setGridOptions(scroller?: Scroller, layoutOptions?: GridLayoutOptions): this {
         return this
     }
-    columnsTemplate(value: string | undefined): this {
+    columnsTemplate(value: string | ItemFillPolicy | undefined): this {
         return this
     }
     rowsTemplate(value: string | undefined): this {
@@ -703,7 +748,7 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     scrollBarWidth(value: double | string | undefined): this {
         return this
     }
-    scrollBarColor(value: Color | int32 | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
         return this
     }
     scrollBar(value: BarState | undefined): this {
@@ -769,6 +814,12 @@ export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements Grid
     alignItems(value: GridItemAlignment | undefined): this {
         return this
     }
+    focusWrapMode(value: FocusWrapMode | undefined): this {
+        return this
+    }
+    syncLoad(value: boolean | undefined): this {
+        return this
+    }
     editModeOptions(value: EditModeOptions | undefined): this {
         return this
     }
@@ -809,9 +860,9 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    public columnsTemplate(value: string | undefined): this {
+    public columnsTemplate(value: string | ItemFillPolicy | undefined): this {
         if (this.checkPriority("columnsTemplate")) {
-            const value_casted = value as (string | undefined)
+            const value_casted = value as (string | ItemFillPolicy | undefined)
             this.getPeer()?.setColumnsTemplateAttribute(value_casted)
             return this
         }
@@ -849,9 +900,9 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    public scrollBarColor(value: Color | int32 | string | undefined): this {
+    public scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
         if (this.checkPriority("scrollBarColor")) {
-            const value_casted = value as (Color | int32 | string | undefined)
+            const value_casted = value as (Color | int32 | string | Resource | undefined)
             this.getPeer()?.setScrollBarColorAttribute(value_casted)
             return this
         }
@@ -1033,6 +1084,22 @@ export class ArkGridComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
+    public focusWrapMode(value: FocusWrapMode | undefined): this {
+        if (this.checkPriority("focusWrapMode")) {
+            const value_casted = value as (FocusWrapMode | undefined)
+            this.getPeer()?.setFocusWrapModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public syncLoad(value: boolean | undefined): this {
+        if (this.checkPriority("syncLoad")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setSyncLoadAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         if (this.checkPriority("onScrollFrameBegin")) {
             const value_casted = value as (OnScrollFrameBeginCallback | undefined)
@@ -1108,6 +1175,17 @@ export function GridImpl(
     })
 }
 
+export class UIGridEvent_serializer {
+    public static write(buffer: SerializerBase, value: UIGridEvent): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): UIGridEvent {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return UIGridEventInternal.fromPtr(ptr)
+    }
+}
 export class ComputedBarAttribute_serializer {
     public static write(buffer: SerializerBase, value: ComputedBarAttribute): void {
         let valueSerializer : SerializerBase = buffer
@@ -1227,3 +1305,75 @@ export class GridLayoutOptions_serializer {
         return value
     }
 }
+export interface UIGridEvent extends UIScrollableCommonEvent {
+    setOnWillScroll(callback_: OnWillScrollCallback | undefined): void
+    setOnDidScroll(callback_: OnScrollCallback | undefined): void
+    setOnScrollIndex(callback_: OnGridScrollIndexCallback | undefined): void
+}
+export class UIGridEventInternal extends UIScrollableCommonEventInternal implements MaterializedBase,UIGridEvent {
+    constructor(peerPtr: KPointer) {
+        super(peerPtr)
+    }
+    static construct(ptr: KPointer): UIGridEventInternal {
+        const retval  = ArkUIGeneratedNativeModule._UIGridEvent_construct(ptr)
+        return new UIGridEventInternal(retval)
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._UIGridEvent_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): UIGridEventInternal {
+        return new UIGridEventInternal(ptr)
+    }
+    public setOnWillScroll(callback_: OnWillScrollCallback | undefined): void {
+        const callback__casted = callback_ as (OnWillScrollCallback | undefined)
+        this.setOnWillScroll_serialize(callback__casted)
+        return
+    }
+    public setOnDidScroll(callback_: OnScrollCallback | undefined): void {
+        const callback__casted = callback_ as (OnScrollCallback | undefined)
+        this.setOnDidScroll_serialize(callback__casted)
+        return
+    }
+    public setOnScrollIndex(callback_: OnGridScrollIndexCallback | undefined): void {
+        const callback__casted = callback_ as (OnGridScrollIndexCallback | undefined)
+        this.setOnScrollIndex_serialize(callback__casted)
+        return
+    }
+    setOnWillScroll_serialize(callback_: OnWillScrollCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIGridEvent_setOnWillScroll(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnDidScroll_serialize(callback_: OnScrollCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIGridEvent_setOnDidScroll(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnScrollIndex_serialize(callback_: OnGridScrollIndexCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIGridEvent_setOnScrollIndex(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+

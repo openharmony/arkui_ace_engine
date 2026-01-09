@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_COMPONENT_LOADER
-#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_COMPONENT_LOADER
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_COMPONENT_LOADER_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_COMPONENT_LOADER_H
 
 #include <cstdint>
 #include "base/memory/referenced.h"
@@ -53,10 +53,14 @@ public:
         return nullptr;
     }
     virtual void UpdateDomConfig(const RefPtr<Framework::DOMNode>& node, void* config) {}
+    virtual const void* GetCustomModifier(const std::string& tag = "")
+    {
+        return nullptr;
+    }
 
     static ComponentLoader* GetLoaderByName(const char* name);
 };
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_COMPONENT_LOADER
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_COMPONENT_LOADER_H

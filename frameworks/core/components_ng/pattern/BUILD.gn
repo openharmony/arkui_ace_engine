@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -75,22 +75,6 @@ build_component_ng("pattern_ng") {
     "canvas/offscreen_canvas_paint_method.cpp",
     "canvas/offscreen_canvas_pattern.cpp",
     "canvas/offscreen_canvas_rendering_context_2d_model_ng.cpp",
-    "checkbox/checkbox_accessibility_property.cpp",
-    "checkbox/checkbox_layout_algorithm.cpp",
-    "checkbox/checkbox_model_ng.cpp",
-    "checkbox/checkbox_model_static.cpp",
-    "checkbox/checkbox_paint_method.cpp",
-    "checkbox/checkbox_paint_property.cpp",
-    "checkbox/checkbox_pattern.cpp",
-    "checkbox/checkbox_pattern_multi_thread.cpp",
-    "checkboxgroup/checkboxgroup_accessibility_property.cpp",
-    "checkboxgroup/checkboxgroup_layout_algorithm.cpp",
-    "checkboxgroup/checkboxgroup_model_ng.cpp",
-    "checkboxgroup/checkboxgroup_model_static.cpp",
-    "checkboxgroup/checkboxgroup_modifier.cpp",
-    "checkboxgroup/checkboxgroup_paint_property.cpp",
-    "checkboxgroup/checkboxgroup_pattern.cpp",
-    "checkboxgroup/checkboxgroup_pattern_multi_thread.cpp",
     "common_view/common_view_model_ng.cpp",
     "container_modal/container_modal_accessibility_property.cpp",
     "container_modal/container_modal_pattern.cpp",
@@ -411,6 +395,8 @@ build_component_ng("pattern_ng") {
     "picker/datepicker_paint_method.cpp",
     "picker/datepicker_pattern.cpp",
     "picker/datepicker_pattern_multi_thread.cpp",
+    "picker/picker_data.cpp",
+    "picker/picker_theme.cpp",
     "picker_utils/picker_column_pattern.cpp",
     "picker_utils/picker_column_pattern_multi_thread.cpp",
     "picker_utils/toss_animation_controller.cpp",
@@ -431,12 +417,6 @@ build_component_ng("pattern_ng") {
     "radio/radio_paint_property.cpp",
     "radio/radio_pattern.cpp",
     "radio/radio_pattern_multi_thread.cpp",
-    "rating/rating_accessibility_property.cpp",
-    "rating/rating_layout_algorithm.cpp",
-    "rating/rating_model_ng.cpp",
-    "rating/rating_model_static.cpp",
-    "rating/rating_modifier.cpp",
-    "rating/rating_pattern.cpp",
     "recycle_view/recycle_dummy_node.cpp",
     "recycle_view/recycle_manager.cpp",
     "recycle_view/recycle_view_model_ng.cpp",
@@ -733,8 +713,8 @@ build_component_ng("pattern_ng") {
     "toggle/toggle_model_static.cpp",
     "toolbaritem/toolbar_row_pattern.cpp",
     "toolbaritem/toolbaritem_model_ng.cpp",
-    "union_container/union_container_model_ng.cpp",
-    "union_container/union_container_pattern.cpp",
+    "union_effect_container/union_effect_container_model_ng.cpp",
+    "union_effect_container/union_effect_container_pattern.cpp",
     "video/video_accessibility_property.cpp",
     "video/video_full_screen_node.cpp",
     "video/video_full_screen_pattern.cpp",
@@ -745,25 +725,6 @@ build_component_ng("pattern_ng") {
     "video/video_pattern.cpp",
     "view_context/view_context_model_ng.cpp",
     "view_context/view_context_model_static.cpp",
-    "waterflow/layout/sliding_window/water_flow_layout_info_sw.cpp",
-    "waterflow/layout/sliding_window/water_flow_layout_sw.cpp",
-    "waterflow/layout/top_down/water_flow_layout_algorithm.cpp",
-    "waterflow/layout/top_down/water_flow_layout_info.cpp",
-    "waterflow/layout/top_down/water_flow_segmented_layout.cpp",
-    "waterflow/layout/water_flow_layout_algorithm_base.cpp",
-    "waterflow/layout/water_flow_layout_info_base.cpp",
-    "waterflow/layout/water_flow_layout_utils.cpp",
-    "waterflow/water_flow_accessibility_property.cpp",
-    "waterflow/water_flow_content_modifier.cpp",
-    "waterflow/water_flow_item_model_ng.cpp",
-    "waterflow/water_flow_item_node.cpp",
-    "waterflow/water_flow_layout_property.cpp",
-    "waterflow/water_flow_model_ng.cpp",
-    "waterflow/water_flow_model_ng_multi_thread.cpp",
-    "waterflow/water_flow_model_static.cpp",
-    "waterflow/water_flow_paint_method.cpp",
-    "waterflow/water_flow_pattern.cpp",
-    "waterflow/water_flow_sections.cpp",
   ]
 
   # Add Cangjie application window registration
@@ -800,6 +761,20 @@ build_component_ng("pattern_ng") {
     "app_bar/interfaces:custom_app_bar",
     "container_modal/interfaces:customtitle",
   ]
+
+ if (enable_player_framework) {
+   sources += [
+     "video/resource/ext_surface.cpp",
+     "video/resource/ext_texture.cpp",
+     "video/resource/player.cpp",
+     "video/resource/resource.cpp",
+     "video/resource/texture.cpp",
+   ]
+
+   if (!build_ohos_sdk) {
+     external_deps += [ "player_framework:media_client" ]
+   }
+ }
 
   if (!build_ohos_sdk && !is_arkui_x) {
     # arkts 1.2

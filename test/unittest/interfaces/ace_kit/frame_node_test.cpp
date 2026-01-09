@@ -62,7 +62,6 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest001, TestSize.Level1)
     auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
     auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
     EXPECT_NE(frameNode, nullptr);
-
     EXPECT_EQ(frameNode->GetId(), id);
     auto nodeTag = frameNode->GetTag();
     EXPECT_EQ(tag, nodeTag);
@@ -79,14 +78,19 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest002, TestSize.Level1)
     auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
     auto frameNode = AbstractViewFactory::CreateFrameNode(tag, 2, mockPattern);
     EXPECT_NE(frameNode, nullptr);
+
     auto property = frameNode->GetProperty();
     EXPECT_TRUE(property);
+
     auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(frameNode);
     ASSERT_TRUE(frameNodeImpl);
+
     auto* aceNodePtr = frameNodeImpl->GetAceNodePtr();
     EXPECT_TRUE(aceNodePtr);
+
     auto aceNode = frameNodeImpl->GetAceNode();
     EXPECT_TRUE(aceNode);
+
     auto pattern = frameNodeImpl->GetPattern();
     EXPECT_TRUE(pattern);
     frameNode->Reset();
@@ -107,13 +111,12 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest003, TestSize.Level1)
     auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
     auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
     EXPECT_NE(frameNode, nullptr);
+
     auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(frameNode);
     ASSERT_TRUE(frameNodeImpl);
-
     auto aceNode =
         NG::FrameNode::GetOrCreateFrameNode("TEST_ACE_NODE", 3, []() { return AceType::MakeRefPtr<NG::Pattern>(); });
     ASSERT_TRUE(aceNode);
-
     auto popAceNode = frameNodeImpl->MoveOwnershipAndGetAceNode();
     EXPECT_EQ(popAceNode->GetTag(), tag);
     EXPECT_EQ(popAceNode->GetId(), id);
@@ -134,10 +137,8 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest004, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(frameNode);
     ASSERT_TRUE(frameNodeImpl);
-
     frameNode->AddChild(nullptr);
     EXPECT_EQ(frameNode->GetChildren().size(), 0);
-
     const std::string childTag = "TEST4_CHILD";
     const int32_t childId = 4;
     auto mockPatternChild = AceType::MakeRefPtr<MockAceKitPattern>();

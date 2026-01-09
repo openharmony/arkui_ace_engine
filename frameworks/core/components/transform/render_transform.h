@@ -35,7 +35,7 @@ enum class TransformType {
     PERSPECTIVE,
 };
 
-class RenderTransform : public RenderNode {
+class ACE_FORCE_EXPORT RenderTransform : public RenderNode {
     DECLARE_ACE_TYPE(RenderTransform, RenderNode);
 
 public:

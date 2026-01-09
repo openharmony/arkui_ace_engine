@@ -16,6 +16,7 @@
 #include "core/components_v2/inspector/inspector_composed_component.h"
 
 #include "compatible/components/component_loader.h"
+
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_v2/inspector/actionsheetdialog_composed_element.h"
 #include "core/components_v2/inspector/alertdialog_composed_element.h"
@@ -29,15 +30,12 @@
 #include "core/components_v2/inspector/counter_composed_element.h"
 #include "core/components_v2/inspector/customdialog_composed_element.h"
 #include "core/components_v2/inspector/data_panel_composed_element.h"
-#include "core/components_v2/inspector/date_picker_composed_element.h"
-#include "core/components_v2/inspector/date_picker_dialog_composed_element.h"
 #include "core/components_v2/inspector/divider_composed_element.h"
 #include "core/components_v2/inspector/flex_composed_element.h"
 #include "core/components_v2/inspector/gauge_composed_element.h"
 #include "core/components_v2/inspector/grid_composed_element.h"
 #include "core/components_v2/inspector/grid_item_composed_element.h"
 #include "core/components_v2/inspector/hyperlink_composed_element.h"
-#include "core/components_v2/inspector/image_animator_composed_element.h"
 #include "core/components_v2/inspector/image_composed_element.h"
 #include "core/components_v2/inspector/indexer_composed_element.h"
 #include "core/components_v2/inspector/list_composed_element.h"
@@ -46,22 +44,17 @@
 #include "core/components_v2/inspector/loading_progress_composed_element.h"
 #include "core/components_v2/inspector/menu_composed_element.h"
 #include "core/components_v2/inspector/navigation_composed_element.h"
-#include "core/components_v2/inspector/navigation_menus_composed_element.h"
 #include "core/components_v2/inspector/navigation_title_composed_element.h"
 #include "core/components_v2/inspector/navigator_composed_element.h"
 #include "core/components_v2/inspector/panel_composed_element.h"
 #include "core/components_v2/inspector/pattern_lock_composed_element.h"
-#include "core/components_v2/inspector/picker_text_dialog_composed_element.h"
 #include "core/components_v2/inspector/progress_composed_element.h"
 #include "core/components_v2/inspector/radio_composed_element.h"
-#include "core/components_v2/inspector/rating_composed_element.h"
-#include "core/components_v2/inspector/refresh_composed_element.h"
 #include "core/components_v2/inspector/relative_container_composed_element.h"
 #include "core/components_v2/inspector/row_composed_element.h"
 #include "core/components_v2/inspector/row_split_composed_element.h"
 #include "core/components_v2/inspector/scroll_bar_composed_element.h"
 #include "core/components_v2/inspector/scroll_composed_element.h"
-#include "core/components_v2/inspector/search_composed_element.h"
 #include "core/components_v2/inspector/select_composed_element.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
 #include "core/components_v2/inspector/shape_container_composed_element.h"
@@ -73,18 +66,9 @@
 #include "core/components_v2/inspector/stepper_composed_element.h"
 #include "core/components_v2/inspector/stepper_item_composed_element.h"
 #include "core/components_v2/inspector/swiper_composed_element.h"
-#include "core/components_v2/inspector/switch_composed_element.h"
-#include "core/components_v2/inspector/tab_content_composed_element.h"
-#include "core/components_v2/inspector/tabs_composed_element.h"
 #include "core/components_v2/inspector/text_clock_composed_element.h"
 #include "core/components_v2/inspector/text_composed_element.h"
-#include "core/components_v2/inspector/text_picker_composed_element.h"
-#include "core/components_v2/inspector/textarea_composed_element.h"
-#include "core/components_v2/inspector/textinput_composed_element.h"
 #include "core/components_v2/inspector/texttimer_composed_element.h"
-#include "core/components_v2/inspector/time_picker_composed_element.h"
-#include "core/components_v2/inspector/time_picker_dialog_composed_element.h"
-#include "core/components_v2/inspector/toggle_composed_element.h"
 #include "core/components_v2/inspector/water_flow_composed_element.h"
 #include "core/components_v2/inspector/water_flow_item_composed_element.h"
 #include "core/components_v2/inspector/wrap_composed_element.h"
@@ -112,8 +96,8 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { STACK_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::StackComposedElement>(id); } },
     { SWIPER_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SwiperComposedElement>(id); } },
     { TAB_CONTENT_ITEM_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::TabContentComposedElement>(id); } },
-    { TABS_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::TabsComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TAB_CONTENT, id); } },
+    { TABS_COMPONENT_TAG, [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TABS, id); } },
     { TEXT_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::TextComposedElement>(id); } },
     { FLEX_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::FlexComposedElement>(id); } },
     { WRAP_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::WrapComposedElement>(id); } },
@@ -139,7 +123,7 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { SHAPE_CONTAINER_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ShapeContainerComposedElement>(id); } },
     { IMAGE_ANIMATOR_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::ImageAnimatorComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_IMAGE_ANIMATOR, id); } },
     { IMAGE_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ImageComposedElement>(id); } },
     { QRCODE_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_QRCODE, id); } },
@@ -152,23 +136,27 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) { return AceType::MakeRefPtr<V2::CheckboxComposedElement>(id); } },
     { CHECK_BOX_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::CheckboxComposedElement>(id); } },
-    { SWITCH_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SwitchComposedElement>(id); } },
-    { TOGGLE_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ToggleComposedElement>(id); } },
+    { SWITCH_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_SWITCH, id); } },
+    { TOGGLE_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TOGGLE, id); } },
     { SCROLL_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ScrollComposedElement>(id); } },
     { CALENDAR_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::CalendarComposedElement>(id); } },
     { BADGE_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_BADGE, id); } },
-    { SEARCH_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SearchComposedElement>(id); } },
+    { SEARCH_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_SEARCH, id); } },
     { FORM_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { PLUGIN_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { VIDEO_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_VIDEO, id); } },
     { INDEXER_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::IndexerComposedElement>(id); } },
     { SLIDER_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SliderComposedElement>(id); } },
-    { RATING_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::RatingComposedElement>(id); } },
+    { RATING_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_RATING, id); } },
     { PROGRESS_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ProgressComposedElement>(id); } },
     { DATA_PANEL_COMPONENT_TAG,
@@ -183,11 +171,11 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { SCROLL_BAR_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ScrollBarComposedElement>(id); } },
     { REFRESH_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::RefreshComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_REFRESH, id); } },
     { DATE_PICKER_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::DatePickerComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DATE_PICKER_COMPONENT_LOADER_TAG, id); } },
     { TIME_PICKER_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::TimePickerComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(TIME_PICKER_COMPONENT_LOADER_TAG, id); } },
     { RADIO_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::RadioComposedElement>(id); } },
     { GAUGE_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::GaugeComposedElement>(id); } },
     { GRIDCONTAINER_COMPONENT_TAG,
@@ -198,9 +186,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_GRID_ROW, id); } },
     { MENU_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::MenuComposedElement>(id); } },
     { TEXTAREA_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::TextareaComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TEXTAREA, id); } },
     { TEXTINPUT_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::TextInputComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_INPUT, id); } },
     { TEXTTIMER_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::TextTimerComposedElement>(id); } },
     { SELECT_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SelectComposedElement>(id); } },
@@ -209,9 +197,11 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { TEXTCLOCK_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::TextClockComposedElement>(id); } },
     { TEXT_PICKER_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::TextPickerComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(TEXT_PICKER_COMPONENT_LOADER_TAG, id); } },
     { PICKER_TEXT_DIALOG_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::PickerTextDialogComposedElement>(id); } },
+        [](const std::string& id) {
+            return DynamicCreateInspectorElement(PICKER_TEXT_DIALOG_COMPONENT_LOADER_TAG, id);
+        } },
     { CANVAS_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { DIALOG_COMPONENT_TAG,
@@ -223,7 +213,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { CUSTOM_DIALOG_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::CustomDialogComposedElement>(id); } },
     { DATE_PICKER_DIALOG_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::DatePickerDialogComposedElement>(id); } },
+        [](const std::string& id) {
+            return DynamicCreateInspectorElement(DATE_PICKER_DIALOG_COMPONENT_LOADER_TAG, id);
+        } },
     { SIDE_BAR_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::SideBarComposedElement>(id); } },
     { LOADING_PROGRESS_COMPONENT_TAG,
@@ -231,7 +223,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { CHECKBOXGROUP_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::CheckboxGroupComposedElement>(id); } },
     { TIME_PICKER_DIALOG_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::TimePickerDialogComposedElement>(id); } },
+        [](const std::string& id) {
+            return DynamicCreateInspectorElement(TIME_PICKER_DIALOG_COMPONENT_LOADER_TAG, id);
+        } },
     { WEB_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { RICH_TEXT_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
@@ -239,7 +233,7 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { NAVIGATION_TITLE_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigationTitleComposedElement>(id); } },
     { NAVIGATION_MENUS_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigationMenusComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_NAVIGATION_MENU, id); } },
     { JS_VIEW_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { RELATIVE_CONTAINER_COMPONENT_TAG,
@@ -352,7 +346,7 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { ARC_LIST_COMPONENT_TAG, ARC_LIST_ETS_TAG },
     { ARC_LIST_ITEM_COMPONENT_TAG, ARC_LIST_ITEM_ETS_TAG },
     { ARC_SCROLL_BAR_COMPONENT_TAG, ARC_SCROLL_BAR_ETS_TAG },
-	{ ARC_INDEXER_COMPONENT_TAG, ARC_INDEXER_ETS_TAG },
+    { ARC_INDEXER_COMPONENT_TAG, ARC_INDEXER_ETS_TAG },
 };
 
 thread_local int32_t InspectorComposedComponent::composedElementId_ = 1;

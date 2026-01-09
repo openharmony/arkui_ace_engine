@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "bridge/declarative_frontend/jsview/js_search.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 #ifdef USE_ARK_ENGINE
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
@@ -1460,6 +1461,25 @@ void JSViewContext::JSSetImageRawDataCacheSize(const JSCallbackInfo& info)
         OHOS::Ace::TaskExecutor::TaskType::UI, "ArkUISetImageDataCacheSize");
 }
 
+void JSViewContext::JSSetCustomKeyboardContinueFeature(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    auto index = static_cast<NG::CustomKeyboardContinueFeature>(info[0]->ToNumber<uint32_t>());
+    bool value = (index == NG::CustomKeyboardContinueFeature::ENABLED);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto textFieldManager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipelineContext->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    textFieldManager->SetCustomKeyboardContinueFeature(value);
+}
+
 void JSViewContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewContext>::Declare("Context");
@@ -1488,6 +1508,8 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod("setKeyboardAppearanceConfig", JSViewContext::JSSetKeyboardAppearanceConfig);
     JSClass<JSViewContext>::StaticMethod("setImageCacheCount",  JSViewContext::JSSetImageCacheCount);
     JSClass<JSViewContext>::StaticMethod("setImageRawDataCacheSize",  JSViewContext::JSSetImageRawDataCacheSize);
+    JSClass<JSViewContext>::StaticMethod(
+        "setCustomKeyboardContinueFeature",  JSViewContext::JSSetCustomKeyboardContinueFeature);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

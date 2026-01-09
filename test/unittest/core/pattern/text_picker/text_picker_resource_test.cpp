@@ -23,7 +23,7 @@
 #include "test/mock/base/mock_system_properties.h"
 
 #include "core/components/theme/icon_theme.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"

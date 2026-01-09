@@ -48,23 +48,20 @@ export interface BuildOptions {
 
 const __uiNode_name_map__: Array<string> = ["ContentSlot", "CustomComponent", "ForEach", "LazyForEach", "Repeat", "IfElse", "Span", "ContainerSpan", "SymbolSpan"]
 
-class BuilderRootNode extends IncrementalNode {
+class BuilderRootNode extends PeerNode {
     public __parent?: ArkBuilderProxyNodePeer;
 
-    constructor() {
-        super(BuilderRootNodeType)
+    protected constructor(peerPtr: pointer, id: int32, name: string = '', flags: int32 = 0) {
+        super(peerPtr, id, name, flags, BuilderRootNodeType)
     }
-    getPeerPtr(): pointer {
-        let peer = findPeerNode(this)
-        return peer ? peer!.getPeerPtr() : nullptr
-    }
-    isFirstUINode(): boolean {
-        const peer = this.firstChild
-        if (peer?.isKind(PeerNodeType)) {
-            return __uiNode_name_map__.includes((peer as PeerNode)!.name!)
-        } else {
-            return false;
+
+    public static create(): BuilderRootNode {
+        const peerId = PeerNode.nextId()
+        const peerPtr = ArkUIAniModule._DetachedFreeRoot_Construct(peerId);
+        if (!peerPtr) {
+            throw new Error('create BuilderRootNode fail')
         }
+        return new BuilderRootNode(peerPtr, peerId, 'BuilderRootNode')
     }
 }
 // mark the tree create by BuilderNode
@@ -267,7 +264,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         }
         this.__rootStage = createUiDetachedBuilderRoot(() => {
             if (this.__root == null) {
-                this.__root = new BuilderRootNode();
+                this.__root = BuilderRootNode.create();
             }
             return this.__root!;
         }, () => {
@@ -312,7 +309,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             this.reset();
             return;
         }
-        if (this.__root?.isFirstUINode() || this.__buildOptions?.useParallel) {
+        if (this.__root !== null || this.__buildOptions?.useParallel) {
             this.__builderProxyNode = ArkBuilderProxyNodePeer.create(undefined);
             this.__root!.__parent = this.__builderProxyNode;
             this.__builderProxyNode!.hasChild = true;

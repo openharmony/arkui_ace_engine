@@ -467,7 +467,8 @@ private:
     void DispatchTouchEventInOldPipeline(const TouchEvent& point, bool dispatchSuccess);
     void DispatchTouchEventToTouchTestResult(const TouchEvent& touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
-    void SetResponseLinkRecognizers(const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers);
+    void SetResponseLinkRecognizers(
+        const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers, bool isPostEvent = false);
     void FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, bool sendOnTouch = true);
     void FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent, bool sendOnTouch = true);
     void FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoint);

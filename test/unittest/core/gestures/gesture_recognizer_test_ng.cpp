@@ -47,6 +47,7 @@ public:
         std::map<int32_t, TouchEvent> emptyTouchPoints;
         return emptyTouchPoints;
     }
+    void CheckCurrentFingers() const {};
 };
 class GestureRecognizerTestNg : public GesturesCommonTestNg {
 public:
@@ -1152,5 +1153,68 @@ HWTEST_F(GestureRecognizerTestNg, HandleGestureAcceptTest008, TestSize.Level1)
     };
     UIObserverHandler::GetInstance().SetHandleGestureHandleFunc(startCallback);
     clickRecognizerPtr->SendCallbackMsg(clickRecognizerPtr->onActionStart_, GestureCallbackType::START);
+}
+
+/**
+ * @tc.name: GetGestureInfoString001
+ * @tc.desc: Test GestureRecognizerTestNg function: GetGestureInfoString
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    ASSERT_NE(clickRecognizer, nullptr);
+    clickRecognizer->AttachFrameNode(frameNode);
+    clickRecognizer->refereeState_ = RefereeState::DETECTING;
+    clickRecognizer->lastRefereeState_ = RefereeState::READY;
+    clickRecognizer->disposal_ = GestureDisposal::REJECT;
+    clickRecognizer->priority_ = GesturePriority::High;
+    clickRecognizer->currentCallbackState_ = CurrentCallbackState::START;
+    clickRecognizer->fromCardOrUIExtension_ = true;
+    clickRecognizer->currentFingers_ = 1;
+    clickRecognizer->isTouchEventFinished_ = true;
+    clickRecognizer->bridgeMode_ = true;
+    clickRecognizer->enabled_ = false;
+    clickRecognizer->isNeedResetVoluntarily_ = true;
+    clickRecognizer->isNeedResetRecognizerState_ = true;
+    clickRecognizer->preventBegin_ = true;
+
+    std::string result = clickRecognizer->GetGestureInfoString();
+    EXPECT_THAT(result, StartsWith("myButton"));
+    EXPECT_THAT(result, HasSubstr("LST:READY"));
+    EXPECT_THAT(result, HasSubstr("ST:DETECTING"));
+    EXPECT_THAT(result, HasSubstr("DSP:1"));
+    EXPECT_THAT(result, HasSubstr("PRI:1"));
+    EXPECT_THAT(result, HasSubstr("CCST:1"));
+    EXPECT_THAT(result, HasSubstr("FCOU:1"));
+    EXPECT_THAT(result, HasSubstr("CF:1"));
+    EXPECT_THAT(result, HasSubstr("FID:[]"));
+    EXPECT_THAT(result, HasSubstr("ITEF:1"));
+    EXPECT_THAT(result, HasSubstr("BM:1"));
+    EXPECT_THAT(result, HasSubstr("ENB:0"));
+    EXPECT_THAT(result, HasSubstr("NRV:1"));
+    EXPECT_THAT(result, HasSubstr("NRRS:1"));
+    EXPECT_THAT(result, HasSubstr("PB:1"));
+}
+
+/**
+ * @tc.name: GetGestureInfoString002
+ * @tc.desc: Test GestureRecognizerTestNg function: GetGestureInfoString
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, GetGestureInfoString002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    ASSERT_NE(clickRecognizer, nullptr);
+    clickRecognizer->AttachFrameNode(frameNode);
+    clickRecognizer->fingersId_.insert(1);
+
+    std::string result = clickRecognizer->GetGestureInfoString();
+    EXPECT_THAT(result, StartsWith("myButton"));
+    EXPECT_THAT(result, HasSubstr("FID:[,1]"));
 }
 } // namespace OHOS::Ace::NG

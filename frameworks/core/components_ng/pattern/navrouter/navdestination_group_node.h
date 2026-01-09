@@ -280,6 +280,8 @@ public:
     {
         return isTitleConsumedElapsedTime_;
     }
+    void ContentChangeReport();
+
 private:
     int32_t DoCustomTransition(NavigationOperation operation, bool isEnter);
     int32_t DoSystemTransition(NavigationOperation operation, bool isEnter);

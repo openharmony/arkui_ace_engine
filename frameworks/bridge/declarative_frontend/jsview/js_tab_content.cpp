@@ -22,7 +22,6 @@
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/jsview/models/tab_content_model_impl.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/tab_bar/tab_theme.h"
@@ -32,6 +31,7 @@
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/common/dynamic_module_helper.h"
 
 namespace {
 constexpr char DRAWABLE_DESCRIPTOR_NAME[] = "DrawableDescriptor";
@@ -62,7 +62,10 @@ TabContentModel* TabContentModel::GetInstance()
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::TabContentModelNG());
             } else {
-                instance_.reset(new Framework::TabContentModelImpl());
+                static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("tab-content");
+                static TabContentModel* instance =
+                    loader ? reinterpret_cast<TabContentModel*>(loader->CreateModel()) : nullptr;
+                return instance;
             }
 #endif
         }

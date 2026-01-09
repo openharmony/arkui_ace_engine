@@ -22,6 +22,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "base/log/dump_log.h"
+#include "core/accessibility/node_utils/accessibility_frame_node_utils.h"
 #include "frameworks/core/accessibility/utils/accessibility_property_utils.h"
 
 using namespace OHOS::Accessibility;
@@ -33,6 +34,41 @@ namespace OHOS::Ace {
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float TEST_FRAME_NODE_WIDTH = 10.0f;
+constexpr float TEST_FRAME_NODE_HEIGHT = 10.0f;
+
+class MockRenderContextTest : public RenderContext {
+public:
+    RectF GetPaintRectWithoutTransform() override
+    {
+        return *retf;
+    }
+    RectF GetPaintRectWithTransform() override
+    {
+        return *retf;
+    }
+
+    std::shared_ptr<RectF> retf;
+};
+
+bool InitTwoFrameNode(RefPtr<FrameNode>& frameNode1, RefPtr<FrameNode>& frameNode2)
+{
+    frameNode1 = FrameNode::CreateFrameNode("test1",
+    ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    CHECK_NULL_RETURN(frameNode1, false);
+    frameNode2 = FrameNode::CreateFrameNode("test2",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    CHECK_NULL_RETURN(frameNode2, false);
+    auto renderContext = AceType::MakeRefPtr<MockRenderContextTest>();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto rect = std::make_shared<RectF>(0.0, 0.0, TEST_FRAME_NODE_WIDTH, TEST_FRAME_NODE_HEIGHT);
+    renderContext->retf = rect;
+    frameNode1->renderContext_ = renderContext;
+    frameNode2->renderContext_ = renderContext;
+    frameNode1->AddChild(frameNode2);
+    return true;
+}
+
 } // namespace
 
 
@@ -346,6 +382,48 @@ HWTEST_F(AccessibilityPropertyUtilsTest, CheckAndGetStateController003, TestSize
     EXPECT_EQ(result, StateControllerType::CONTROLLER_NONE);
 }
 
+/**
+ * @tc.name: CheckAndGetStateController004
+ * @tc.desc: test CheckAndGetStateController when frameNode2 is not visibile
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyUtilsTest, CheckAndGetStateController004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct frameNode
+     */
+    RefPtr<FrameNode> frameNode1;
+    RefPtr<FrameNode> frameNode2;
+    auto initRet = InitTwoFrameNode(frameNode1, frameNode2);
+    ASSERT_EQ(initRet, true);
+
+    auto accessibilityProperty1 = frameNode1->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty1, nullptr);
+    accessibilityProperty1->SetAccessibilityGroup(true);
+    EXPECT_TRUE(accessibilityProperty1->IsAccessibilityGroup());
+
+    frameNode2->tag_ = V2::BUTTON_ETS_TAG;
+
+    ASSERT_EQ(frameNode1->IsVisible(), true);
+    ASSERT_EQ(frameNode2->IsVisible(), true);
+    NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(frameNode2);
+    ASSERT_EQ(frameNode2->GetAccessibilityVisible(), false);
+     
+    /**
+     * @tc.steps: step2. construct AccessibilityGroupOptions
+     */
+    AccessibilityGroupOptions accessibilityGroupOptions;
+    EXPECT_TRUE(accessibilityGroupOptions.stateControllerByInspector.empty());
+    accessibilityGroupOptions.stateControllerByType = AccessibilityRoleType::BUTTON;
+    accessibilityProperty1->SetAccessibilityGroupOptions(accessibilityGroupOptions);
+
+    /**
+     * @tc.steps: step3. test CheckAndGetStateController
+     */
+    RefPtr<NG::FrameNode> controllerNode = nullptr;
+    auto result = AccessibilityPropertyUtils::CheckAndGetStateController(frameNode1, controllerNode);
+    EXPECT_EQ(result, StateControllerType::CONTROLLER_NONE);
+}
 /**
  * @tc.name: CheckAndGetActionController001
  * @tc.desc: test CheckAndGetActionController when node is nullptr

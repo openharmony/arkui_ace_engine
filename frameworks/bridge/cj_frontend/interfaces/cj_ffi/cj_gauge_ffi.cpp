@@ -40,7 +40,7 @@ ViewAbstractModel* ViewAbstractModel::GetInstance()
 // Should use CJUIModifier API later
 NG::GaugeModelNG* GetGaugeModel()
 {
-    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("gauge");
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Gauge");
     if (module == nullptr) {
         LOGF("Can't find gauge dynamic module");
         abort();

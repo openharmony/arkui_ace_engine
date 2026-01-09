@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,9 @@
  */
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_image_animator_bridge.h"
+
+#include "core/common/dynamic_module_helper.h"
+#include "compatible/components/image-animator/image_animator_compatible_modifier.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -39,11 +42,19 @@ shared_ptr<JsValue> JsiImageAnimatorBridge::JsGetState(const shared_ptr<JsRuntim
         if (!domDoc) {
             return;
         }
-        auto domImageAnimator = AceType::DynamicCast<DOMImageAnimator>(domDoc->GetDOMNodeById(nodeId));
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("image-animator");
+        if (!loader) {
+            return;
+        }
+        auto domImageAnimator = loader->CreateDomNode(nodeId, "image-animator");
         if (!domImageAnimator) {
             return;
         }
-        state = domImageAnimator->GetState();
+        auto* modifier = reinterpret_cast<const ArkUIImageAnimatorCompatibleModifier*>(loader->GetCustomModifier());
+        if (!modifier) {
+            return;
+        }
+        state = modifier->getState(reinterpret_cast<DOMImageAnimator*>(AceType::RawPtr(domImageAnimator)));
     };
     auto delegate = engine->GetFrontendDelegate();
     if (!delegate) {

@@ -201,8 +201,8 @@ namespace OHOS::Ace::NG::Converter {
 
     class ConvContext {
     public:
-        Ark_String Store(const std::string_view& src);
-        void *Allocate(std::size_t size);
+        Ark_String ACE_FORCE_EXPORT Store(const std::string_view& src);
+        ACE_FORCE_EXPORT void *Allocate(std::size_t size);
         void Clear();
         template<typename T>
         T AllocateArray(std::size_t size)
@@ -288,7 +288,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_CrownAction& dst, const CrownAction& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     void AssignArkValue(Ark_Date& dst, const std::string& src);
-    void AssignArkValue(Ark_Dimension& dst, const Dimension& src, ConvContext *ctx);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_Dimension& dst, const Dimension& src, ConvContext *ctx);
     void AssignArkValue(Ark_Dimension& dst, const char* src);
     void AssignArkValue(Ark_Dimension& dst, const float& src);
     void AssignArkValue(Ark_Dimension& dst, const int64_t& id);
@@ -305,7 +305,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_EventLocationInfo& dst, const EventLocationInfo& src);
     void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src, ConvContext *ctx);
     void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src);
-    void AssignArkValue(Ark_Float64& dst, const Dimension& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_Float64& dst, const Dimension& src);
     void AssignArkValue(Ark_Float64& dst, const LeadingMargin& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Float64& dst, const double& src);
     void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
@@ -371,7 +371,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Number& dst, const uint32_t& src);
     void AssignArkValue(Ark_Number& dst, const uint64_t& src);
     void AssignArkValue(Ark_OffsetResult& dst, const Offset& src, ConvContext *ctx);
-    void AssignArkValue(Ark_Padding& dst, const PaddingProperty& src, ConvContext *ctx);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_Padding& dst, const PaddingProperty& src, ConvContext *ctx);
     void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_Position& dst, const OffsetF& src, ConvContext *ctx);
@@ -391,14 +391,15 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_ScrollAlign& dst, const ScrollAlign& src);
     void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src);
-    void AssignArkValue(Ark_ScrollSource& dst, const ScrollSource& src);
-    void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src);
-    void AssignArkValue(Ark_SelectStatus& dst, const int32_t& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_ScrollSource& dst, const ScrollSource& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src);
+    void ACE_FORCE_EXPORT AssignArkValue(Ark_SelectStatus& dst, const int32_t& src);
     void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, ConvContext* ctx);
     void AssignArkValue(Ark_ShadowType& dst, const ShadowType& src);
     void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src);
     void AssignArkValue(Ark_SheetType& dst, const SheetType& src);
     void AssignArkValue(Ark_Size& dst, const SizeF& src);
+    void AssignArkValue(Ark_SizeResult& dst, const SizeF& src);
     void AssignArkValue(Ark_SliderChangeMode& dst, const SliderModel::SliderChangeMode& src);
     void AssignArkValue(Ark_SourceTool& dst, const SourceTool& src);
     void AssignArkValue(Ark_SourceType& dst, const SourceType& src);

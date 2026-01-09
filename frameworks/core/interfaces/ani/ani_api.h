@@ -222,7 +222,6 @@ struct ArkUIDragPreviewOption {
     bool isNumber = false;
     bool isDefaultShadowEnabled = false;
     bool isDefaultRadiusEnabled = false;
-    bool isDragPreviewEnabled = true;
     bool isDefaultDragItemGrayEffectEnabled = false;
     bool enableEdgeAutoScroll = true;
     bool enableHapticFeedback = false;
@@ -435,6 +434,12 @@ struct ArkUIWaterFlowSection {
     ArkUIWaterFlowSectionPadding margin;
     std::function<float(int32_t)> onGetItemMainSizeByIndex;
 };
+
+struct ArkUIListItemGroupSpace {
+    int32_t unit = 1;
+    float value = 0.0f;
+};
+
 struct ArkUIAniWebModifier {
     void (*setJavaScriptProxyController)(void* node, std::function<void()>&& callback);
     bool (*transferScreenCaptureHandlerToStatic)(void* peer, void* nativePtr);
@@ -487,7 +492,7 @@ struct ArkUIAniDragModifier {
     void (*setDragPreviewOptions)(ArkUINodeHandle node, ArkUIDragPreviewOption options);
     const char* (*getUdKey)(ani_ref event);
     ani_long (*createUnifiedDataPeer)(void* data);
-    ani_long (*getUnifiedData)(ani_long peer);
+    SharedPointerWrapper (*getUnifiedData)(ani_long peer);
     void (*getPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
 };
 struct ArkUIAniXBarModifier {
@@ -644,6 +649,16 @@ struct ArkUIAniListModifier {
     void (*syncChildrenSizeOver)(ArkUINodeHandle node);
     void (*resetListChildrenMainSize)(ArkUINodeHandle node);
 };
+struct ArkUIAniListItemGroupModifier {
+    void (*setListItemGroupHeader)(ArkUINodeHandle node, ArkUINodeHandle headerPtr);
+    void (*setListItemGroupHeaderContent)(ArkUINodeHandle node, ArkUINodeHandle headerPtr);
+    void (*resetListItemGroupHeader)(ArkUINodeHandle node);
+    void (*setListItemGroupFooter)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
+    void (*setListItemGroupFooterContent)(ArkUINodeHandle node, ArkUINodeHandle footerPtr);
+    void (*resetListItemGroupFooter)(ArkUINodeHandle node);
+    void (*setListItemGroupStyle)(ArkUINodeHandle node, int32_t style);
+    void (*setListItemGroupSpace)(ArkUINodeHandle node, ArkUIListItemGroupSpace space);
+};
 struct ArkUIAniComponentSnapshotModifier {
     void (*createFromBuilder)(
         ArkUINodeHandle node, const ArkUIComponentSnapshotAsync& asyncCtx, const ArkUISnapshotParam& param);
@@ -678,7 +693,7 @@ struct ArkUIAniDragControllerModifier {
     bool (*aniHandleDragAction)(ArkUIDragControllerAsync& asyncCtx, std::string &errMsg);
     bool (*aniHandleDragActionStartDrag)(ArkUIDragControllerAsync& asyncCtx);
     void* (*createDragEventPeer)(const ArkUIDragNotifyMessage& dragNotifyMsg);
-    void (*aniDragPreviewSetForegroundColor)(Ark_ResourceColor value, ArkUIDragPreviewAsync& asyncCtx);
+    void (*aniDragPreviewSetForegroundColor)(ani_long value, ArkUIDragPreviewAsync& asyncCtx);
     void (*aniDragPreviewAnimate)(ArkUIDragPreviewAsync& asyncCtx);
     void (*aniDragActionSetDragEventStrictReportingEnabled)(bool enable);
     void (*aniDragActionCancelDataLoading)(const char* key);
@@ -820,6 +835,10 @@ struct ArkUIAniVisualEffectModifier {
     void (*destroyMaterial)(OHOS::Ace::UiMaterial* ptr);
 };
 
+struct ArkUIAniDetachedFreeRootModifier {
+    ani_long (*constructDetachedFreeRoot)(ani_int);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -833,6 +852,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
     const ArkUIAniListModifier* (*getArkUIAniListModifier)();
+    const ArkUIAniListItemGroupModifier* (*getArkUIAniListItemGroupModifier)();
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
     const ArkUIAniVisualEffectModifier* (*getVisualEffectAniModifier)();
@@ -860,6 +880,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniParallelizeUIModifier* (*getParallelizeUIModifier)();
     const ArkUIAniSaveButtonModifier* (*getSaveButtonAniModifier)();
     const ArkUIAniPasteButtonModifier* (*getPasteButtonAniModifier)();
+    const ArkUIAniDetachedFreeRootModifier* (*getArkUIAniDetachedFreeRootModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

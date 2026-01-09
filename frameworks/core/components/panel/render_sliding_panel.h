@@ -99,9 +99,9 @@ public:
 
     void Dump() override;
 
-    void LiftPanelForVirtualKeyboard(double offsetY);
+    ACE_FORCE_EXPORT void LiftPanelForVirtualKeyboard(double offsetY);
 
-    void UpdatePanelHeightByCurrentMode();
+    ACE_FORCE_EXPORT void UpdatePanelHeightByCurrentMode();
 
     const std::function<void(int32_t)>& GetOnHeightChange() const
     {

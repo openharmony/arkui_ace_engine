@@ -47,6 +47,10 @@ class AccessibilityElementInfo;
 class AccessibilityEventInfo;
 }
 
+namespace OHOS::Ace {
+struct UiMaterialParam;
+}
+
 namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
 class InspectorFilter;
@@ -872,13 +876,14 @@ public:
     virtual void OnContentChangeRegister(const ContentChangeConfig& config) {}
     virtual void OnContentChangeUnregister() {}
     virtual void ContentChangeByDetaching(PipelineContext*) {}
-    virtual RefPtr<FrameNode> GetKeyFrameNodeWhenContentChanged()
+    virtual std::list<RefPtr<FrameNode>> GetKeyFrameNodeWhenContentChanged()
     {
-        return nullptr;
+        return std::list<RefPtr<FrameNode>>();
     }
     virtual void OnDetachFromMainRenderTree() {}
     virtual void OnAttachToMainRenderTree() {}
     virtual void OnOffscreenProcessResource() {}
+    virtual void OnUiMaterialParamUpdate(const UiMaterialParam& params) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

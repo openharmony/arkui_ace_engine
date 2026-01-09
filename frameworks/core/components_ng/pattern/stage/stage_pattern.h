@@ -35,6 +35,11 @@ public:
         return true;
     }
 
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<StageLayoutAlgorithm>();
+    }
+
     bool IsAtomicNode() const override
     {
         return false;

@@ -28,7 +28,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/geometry/dimension.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"

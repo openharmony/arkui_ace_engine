@@ -31,7 +31,7 @@
 #include "scroll_result_peer.h"
 
 namespace OHOS::Ace::NG {
-using ListLanesType = std::variant<int, std::pair<Dimension, Dimension>>;
+using ListLanesType = std::variant<int, std::pair<Dimension, Dimension>, PresetFillType>;
 }
 
 namespace OHOS::Ace::NG::Converter {
@@ -119,6 +119,12 @@ namespace OHOS::Ace::NG::Converter {
     ListLanesType Convert(const Ark_LengthConstrain& src)
     {
         return Converter::Convert<std::pair<Dimension, Dimension>>(src);
+    }
+
+    template<>
+    ListLanesType Convert(const Ark_ItemFillPolicy& src)
+    {
+        return Converter::Convert<PresetFillType>(src);
     }
 
     template<>
@@ -210,7 +216,7 @@ void SetListDirectionImpl(Ark_NativePointer node,
     ListModelStatic::SetListDirection(frameNode, EnumToInt(direction));
 }
 void SetContentStartOffsetImpl(Ark_NativePointer node,
-                               const Opt_Float64* value)
+                               const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -222,7 +228,7 @@ void SetContentStartOffsetImpl(Ark_NativePointer node,
     ListModelStatic::SetContentStartOffset(frameNode, *convValue);
 }
 void SetContentEndOffsetImpl(Ark_NativePointer node,
-                             const Opt_Float64* value)
+                             const Opt_Union_F64_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -372,8 +378,52 @@ void SetEditModeOptionsImpl(Ark_NativePointer node,
         auto enableGatherSelectedItemsAnimation =
             Converter::OptConvert<bool>(convValue->enableGatherSelectedItemsAnimation);
         options.enableGatherSelectedItemsAnimation = enableGatherSelectedItemsAnimation.value_or(false);
+
+        auto onGetPreviewBadge = Converter::OptConvert<::Callback_Union_Boolean_I32>(convValue->onGetPreviewBadge);
+        if (onGetPreviewBadge) {
+            auto modelCallback = [callback = CallbackHelper(*onGetPreviewBadge)]() -> PreviewBadge {
+                auto resultOpt = callback.InvokeWithOptConvertResult<PreviewBadge, Ark_Union_Boolean_I32,
+                    Callback_Union_Boolean_I32_Void>();
+                return resultOpt.value_or(PreviewBadge());
+            };
+            options.getPreviewBadge = modelCallback;
+        }
     }
     ListModelStatic::SetEditModeOptions(frameNode, options);
+}
+void SetFocusWrapModeImpl(Ark_NativePointer node,
+                          const Opt_FocusWrapMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<FocusWrapMode>(value);
+    auto focusWrapMode = static_cast<int32_t>(convValue.value_or(FocusWrapMode::DEFAULT));
+    if (focusWrapMode < static_cast<int32_t>(FocusWrapMode::DEFAULT) ||
+        focusWrapMode > static_cast<int32_t>(FocusWrapMode::WRAP_WITH_ARROW)) {
+        focusWrapMode = static_cast<int32_t>(FocusWrapMode::DEFAULT);
+    }
+    ListModelStatic::SetFocusWrapMode(frameNode, static_cast<FocusWrapMode>(focusWrapMode));
+}
+void SetSyncLoadImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ListModelStatic::SetSyncLoad(frameNode, convValue.value_or(true));
+}
+void SetScrollSnapAnimationSpeedImpl(Ark_NativePointer node,
+                                     const Opt_ScrollSnapAnimationSpeed* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<ScrollSnapAnimationSpeed>(value);
+    auto speed = static_cast<int32_t>(convValue.value_or(ScrollSnapAnimationSpeed::NORMAL));
+    if (speed < static_cast<int32_t>(ScrollSnapAnimationSpeed::NORMAL) ||
+        speed > static_cast<int32_t>(ScrollSnapAnimationSpeed::SLOW)) {
+        speed = static_cast<int32_t>(ScrollSnapAnimationSpeed::NORMAL);
+    }
+    ListModelStatic::SetScrollSnapAnimationSpeed(frameNode, static_cast<ScrollSnapAnimationSpeed>(speed));
 }
 void SetOnScrollIndexImpl(Ark_NativePointer node,
                           const Opt_Callback_I32_I32_I32_Void* value)
@@ -593,7 +643,7 @@ void SetOnDidScrollImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetOnDidScroll(frameNode, std::move(onDidScroll));
 }
 void SetLanesImpl(Ark_NativePointer node,
-                  const Opt_Union_I32_LengthConstrain* value,
+                  const Opt_Union_I32_LengthConstrain_ItemFillPolicy* value,
                   const Opt_Dimension* gutter)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -604,11 +654,21 @@ void SetLanesImpl(Ark_NativePointer node,
         if (lanes.value().index() == 0) {
             int lane = std::get<0>(lanes.value());
             ListModelStatic::SetLanes(frameNode, lane);
+            ListModelStatic::ResetItemFillPolicy(frameNode);
             ListModelStatic::SetLaneConstrain(frameNode, Dimension(), Dimension());
-        } else {
+        } else if (lanes.value().index() == 1) {
             auto dimensions = std::get<1>(lanes.value());
             ListModelStatic::SetLanes(frameNode, 1);
+            ListModelStatic::ResetItemFillPolicy(frameNode);
             ListModelStatic::SetLaneConstrain(frameNode, std::get<0>(dimensions), std::get<1>(dimensions));
+        } else {
+            auto itemFillPolicy = std::get<2>(lanes.value());
+            if (static_cast<int32_t>(itemFillPolicy) < static_cast<int32_t>(PresetFillType::BREAKPOINT_DEFAULT) ||
+                static_cast<int32_t>(itemFillPolicy) > static_cast<int32_t>(PresetFillType::BREAKPOINT_SM2MD3LG5)) {
+                itemFillPolicy = PresetFillType::BREAKPOINT_DEFAULT;
+            }
+            ListModelStatic::SetLanes(frameNode, 1);
+            ListModelStatic::SetItemFillPolicy(frameNode, itemFillPolicy);
         }
     } else {
         ListModelStatic::ResetLanes(frameNode);
@@ -622,14 +682,29 @@ void SetLanesImpl(Ark_NativePointer node,
     }
 }
 void SetCachedCount1Impl(Ark_NativePointer node,
-                         const Opt_Int32* count,
+                         const Opt_Union_I32_CacheCountInfo* count,
                          const Opt_Boolean* show)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto countValue = Converter::OptConvertPtr<int>(count);
     auto showValue = Converter::OptConvertPtr<bool>(show);
-    ListModelStatic::SetCachedCount(frameNode, countValue, showValue);
+    Converter::VisitUnionPtr(
+        count,
+        [frameNode, showValue](const Ark_Int32& value0) {
+            auto countValue = Converter::OptConvert<int>(value0);
+            ListModelStatic::SetCachedCount(frameNode, countValue, showValue);
+        },
+        [frameNode, showValue](const Ark_CacheCountInfo& value1) {
+            NG::CacheRange cacheRange = { 1, 1 };
+            int32_t minCacheCount = Converter::OptConvert<int32_t>(value1.minCount).value_or(1);
+            int32_t maxCacheCount = Converter::OptConvert<int32_t>(value1.maxCount).value_or(minCacheCount);
+            minCacheCount = minCacheCount < 0 ? 1 : minCacheCount;
+            maxCacheCount = maxCacheCount < 0 ? minCacheCount : maxCacheCount;
+            cacheRange.min = minCacheCount;
+            cacheRange.max = maxCacheCount;
+            ListModelStatic::SetCacheRange(frameNode, cacheRange, showValue.value_or(false));
+        },
+        [frameNode, showValue]() { ListModelStatic::SetCachedCount(frameNode, 1, showValue); });
 }
 } // ListAttributeModifier
 const GENERATED_ArkUIListModifier* GetListModifier()
@@ -653,6 +728,9 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::SetSupportEmptyBranchInLazyLoadingImpl,
         ListAttributeModifier::SetStackFromEndImpl,
         ListAttributeModifier::SetEditModeOptionsImpl,
+        ListAttributeModifier::SetFocusWrapModeImpl,
+        ListAttributeModifier::SetSyncLoadImpl,
+        ListAttributeModifier::SetScrollSnapAnimationSpeedImpl,
         ListAttributeModifier::SetOnScrollIndexImpl,
         ListAttributeModifier::SetOnScrollVisibleContentChangeImpl,
         ListAttributeModifier::SetOnItemMoveImpl,

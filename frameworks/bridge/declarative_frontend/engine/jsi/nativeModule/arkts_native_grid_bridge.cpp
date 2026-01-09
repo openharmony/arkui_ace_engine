@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_bridge.h"
+
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
@@ -23,6 +24,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
@@ -118,6 +120,24 @@ void ParseGetGridItemRect(const EcmaVM* vm, const Local<JSValueRef>& getRectByIn
                 return gridItemRect;
             };
         option.getRectByIndex = std::move(onGetRectByIndex);
+    }
+}
+
+void ParsePreviewBadge(const Framework::JSRef<Framework::JSVal>& result, PreviewBadge& badge)
+{
+    if (result->IsEmpty()) {
+        return;
+    }
+    if (result->IsNumber()) {
+        int64_t number = result->ToNumber<int64_t>();
+        if (number < 0 || number > INT_MAX) {
+            badge.mode = PreviewBadgeMode::AUTO;
+        } else {
+            badge.mode = PreviewBadgeMode::USER_SET;
+            badge.count = result->ToNumber<int32_t>();
+        }
+    } else if (result->IsBoolean()) {
+        badge.mode = result->ToBoolean() ? PreviewBadgeMode::AUTO : PreviewBadgeMode::NO_BADGE;
     }
 }
 } // namespace
@@ -813,19 +833,36 @@ ArkUINativeModuleValue GridBridge::SetEditModeOptions(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    Local<JSValueRef> argOptions = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    EditModeOptions options;
+    Local<JSValueRef> argOptions = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     if (argOptions->IsObject(vm)) {
-        ArkUI_EditModeOptions options;
-        JSRef<JSVal> gather = JSRef<JSObject>::Make(argOptions)->GetProperty("enableGatherSelectedItemsAnimation");
+        auto optionsObj = argOptions->ToObject(vm);
+        auto gather = optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "enableGatherSelectedItemsAnimation"));
         if (gather->IsBoolean()) {
-            options.enableGatherSelectedItemsAnimation = gather->ToBoolean();
+            options.enableGatherSelectedItemsAnimation = gather->ToBoolean(vm)->Value();
         }
-        GetArkUINodeModifiers()->getGridModifier()->setEditModeOptions(nativeNode, &options);
-    } else {
-        GetArkUINodeModifiers()->getGridModifier()->resetEditModeOptions(nativeNode);
+        auto getPreviewBadge = optionsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "onGetPreviewBadge"));
+        if (getPreviewBadge->IsFunction(vm)) {
+            Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+            Local<panda::FunctionRef> functionRef = getPreviewBadge->ToObject(vm);
+            auto onGetPreviewBadge =
+                [func = AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
+                     Framework::JSRef<Framework::JSFunc>(Framework::JSFunc(functionRef))),
+                    execCtx = info.GetExecutionContext(), node = AceType::WeakClaim(frameNode)]() {
+                    JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                    PipelineContext::SetCallBackNode(node);
+                    NG::PreviewBadge badge;
+                    auto result = func->ExecuteJS();
+                    ParsePreviewBadge(result, badge);
+                    return badge;
+                };
+            options.getPreviewBadge = std::move(onGetPreviewBadge);
+        }
     }
+    GridModelNG::SetEditModeOptions(frameNode, options);
     return panda::JSValueRef::Undefined(vm);
 }
 

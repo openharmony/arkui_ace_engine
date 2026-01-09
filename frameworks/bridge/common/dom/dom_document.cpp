@@ -17,6 +17,7 @@
 
 #include "base/log/event_report.h"
 #include "compatible/components/component_loader.h"
+#include "compatible/components/tab_bar/modifier/tab_modifier_api.h"
 #include "core/common/dynamic_module_helper.h"
 #include "frameworks/bridge/common/dom/dom_button.h"
 #include "frameworks/bridge/common/dom/dom_calendar.h"
@@ -25,63 +26,28 @@
 #include "frameworks/bridge/common/dom/dom_divider.h"
 #include "frameworks/bridge/common/dom/dom_form.h"
 #include "frameworks/bridge/common/dom/dom_image.h"
-#include "frameworks/bridge/common/dom/dom_label.h"
+#include "frameworks/compatible/components/label/modifier/label_modifier.h"
 #include "frameworks/bridge/common/dom/dom_list.h"
 #include "frameworks/bridge/common/dom/dom_list_item_group.h"
 #include "frameworks/bridge/common/dom/dom_navigation_bar.h"
 #include "frameworks/bridge/common/dom/dom_panel.h"
-#include "frameworks/bridge/common/dom/dom_picker_view.h"
 #include "frameworks/bridge/common/dom/dom_progress.h"
-#include "frameworks/bridge/common/dom/dom_refresh.h"
 #ifdef WEB_SUPPORTED
 #include "frameworks/bridge/common/dom/dom_rich_text.h"
 #endif
-#include "frameworks/bridge/common/dom/dom_search.h"
 #include "frameworks/bridge/common/dom/dom_slider.h"
 #include "frameworks/bridge/common/dom/dom_stack.h"
-#include "frameworks/bridge/common/dom/dom_svg.h"
-#include "frameworks/bridge/common/dom/dom_svg_animate_motion.h"
-#include "frameworks/bridge/common/dom/dom_svg_animate_transform.h"
-#include "frameworks/bridge/common/dom/dom_svg_circle.h"
-#include "frameworks/bridge/common/dom/dom_svg_defs.h"
-#include "frameworks/bridge/common/dom/dom_svg_ellipse.h"
-#include "frameworks/bridge/common/dom/dom_svg_fe_colormatrix.h"
-#include "frameworks/bridge/common/dom/dom_svg_fe_composite.h"
-#include "frameworks/bridge/common/dom/dom_svg_fe_gaussianblur.h"
-#include "frameworks/bridge/common/dom/dom_svg_fe_offset.h"
-#include "frameworks/bridge/common/dom/dom_svg_filter.h"
-#include "frameworks/bridge/common/dom/dom_svg_g.h"
-#include "frameworks/bridge/common/dom/dom_svg_line.h"
-#include "frameworks/bridge/common/dom/dom_svg_mask.h"
-#include "frameworks/bridge/common/dom/dom_svg_path.h"
-#include "frameworks/bridge/common/dom/dom_svg_polygon.h"
-#include "frameworks/bridge/common/dom/dom_svg_polyline.h"
-#include "frameworks/bridge/common/dom/dom_svg_rect.h"
-#include "frameworks/bridge/common/dom/dom_svg_text_path.h"
-#include "frameworks/bridge/common/dom/dom_svg_tspan.h"
-#include "frameworks/bridge/common/dom/dom_svg_use.h"
 #include "frameworks/bridge/common/dom/dom_swiper.h"
-#include "frameworks/bridge/common/dom/dom_switch.h"
-#include "frameworks/bridge/common/dom/dom_textarea.h"
-#include "frameworks/bridge/common/dom/dom_toggle.h"
 #if defined(XCOMPONENT_SUPPORTED)
 #include "frameworks/bridge/common/dom/dom_xcomponent.h"
 #endif
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/common/dom/dom_menu.h"
-#include "frameworks/bridge/common/dom/dom_navigation_menu.h"
 #include "frameworks/bridge/common/dom/dom_option.h"
-#include "frameworks/bridge/common/dom/dom_picker_dialog.h"
 #include "frameworks/bridge/common/dom/dom_piece.h"
 #include "frameworks/bridge/common/dom/dom_popup.h"
-#include "frameworks/bridge/common/dom/dom_rating.h"
 #include "frameworks/bridge/common/dom/dom_select.h"
-#include "frameworks/bridge/common/dom/dom_tab_bar.h"
-#include "frameworks/bridge/common/dom/dom_tab_content.h"
 #include "frameworks/bridge/common/dom/dom_tool_bar.h"
-#if defined(PLAYER_FRAMEWORK_EXISTS)
-#include "frameworks/bridge/common/dom/dom_video.h"
-#endif
 #if !defined(PREVIEW)
 #ifdef WEB_SUPPORTED
 #include "frameworks/bridge/common/dom/dom_web.h"
@@ -113,6 +79,16 @@ RefPtr<DOMNode> DOMListItemCreator(NodeId nodeId, const std::string& tag, int32_
     return AceType::MakeRefPtr<T>(nodeId, tag, itemIndex);
 }
 
+const ArkUIInnerTabBarModifier* GetTabBarInnerModifier()
+{
+    static const ArkUIInnerTabBarModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("tab-bar");
+        CHECK_NULL_RETURN(loader, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIInnerTabBarModifier*>(loader->GetCustomModifier());
+    }
+    return cachedModifier;
+}
 } // namespace
 
 DOMDocument::~DOMDocument()
@@ -123,65 +99,33 @@ DOMDocument::~DOMDocument()
 RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nodeId, int32_t itemIndex)
 {
     static const LinearMapNode<RefPtr<DOMNode> (*)(NodeId, const std::string&, int32_t)> domNodeCreators[] = {
-        { DOM_NODE_TAG_ANIMATE, &DOMNodeCreator<DOMSvgAnimate> },
-        { DOM_NODE_TAG_ANIMATE_MOTION, &DOMNodeCreator<DOMSvgAnimateMotion> },
-        { DOM_NODE_TAG_ANIMATE_TRANSFORM, &DOMNodeCreator<DOMSvgAnimateTransform> },
         { DOM_NODE_TAG_BUTTON, &DOMNodeCreator<DOMButton> },
         { DOM_NODE_TAG_CALENDAR, &DOMNodeCreator<DomCalendar> },
         { DOM_NODE_TAG_CANVAS, &DOMNodeCreator<DOMCanvas> },
         { DOM_NODE_TAG_CHART, &DOMNodeCreator<DOMChart> },
-        { DOM_NODE_TAG_CIRCLE, &DOMNodeCreator<DOMSvgCircle> },
-        { DOM_NODE_TAG_CLOCK, &DOMNodeCreator<DOMClock> },
-        { DOM_NODE_TAG_DEFS, &DOMNodeCreator<DOMSvgDefs> },
         { DOM_NODE_TAG_DIALOG, &DOMNodeCreator<DOMDialog> },
         { DOM_NODE_TAG_DIV, &DOMNodeCreator<DOMDiv> },
         { DOM_NODE_TAG_DIVIDER, &DOMNodeCreator<DOMDivider> },
-        { DOM_NODE_TAG_ELLIPSE, &DOMNodeCreator<DOMSvgEllipse> },
-        { DOM_NODE_TAG_FE_COLORMATRIX, &DOMNodeCreator<DOMSvgFeColorMatrix> },
-        { DOM_NODE_TAG_FE_COMPOSITE, &DOMNodeCreator<DOMSvgFeComposite> },
-        { DOM_NODE_TAG_FE_GAUSSIANBLUR, &DOMNodeCreator<DOMSvgFeGaussianBlur> },
-        { DOM_NODE_TAG_FE_OFFSET, &DOMNodeCreator<DOMSvgFeOffset> },
-        { DOM_NODE_TAG_FILTER, &DOMNodeCreator<DOMSvgFilter> },
         { DOM_NODE_TAG_FORM, &DOMNodeCreator<DOMForm> },
-        { DOM_NODE_TAG_G, &DOMNodeCreator<DOMSvgG> },
         { DOM_NODE_TAG_IMAGE, &DOMNodeCreator<DOMImage> },
-        { DOM_NODE_TAG_IMAGE_ANIMATOR, &DOMNodeCreator<DOMImageAnimator> },
-        { DOM_NODE_TAG_INPUT, &DOMNodeCreator<DOMInput> },
-        { DOM_NODE_TAG_LABEL, &DOMNodeCreator<DOMLabel> },
-        { DOM_NODE_TAG_LINE, &DOMNodeCreator<DOMSvgLine> },
         { DOM_NODE_TAG_LIST, &DOMNodeCreator<DOMList> },
         { DOM_NODE_TAG_LIST_ITEM, &DOMListItemCreator<DOMListItem> },
         { DOM_NODE_TAG_LIST_ITEM_GROUP, &DOMListItemCreator<DOMListItemGroup> },
-        { DOM_NODE_TAG_MASK, &DOMNodeCreator<DOMSvgMask> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_MENU, &DOMNodeCreator<DOMMenu> },
 #endif
         { DOM_NODE_TAG_NAVIGATION_BAR, &DOMNodeCreator<DomNavigationBar> },
 #ifndef WEARABLE_PRODUCT
-        { DOM_NODE_TAG_NAVIGATION_MENU, &DOMNodeCreator<DOMNavigationMenu> },
         { DOM_NODE_TAG_OPTION, &DOMNodeCreator<DOMOption> },
         { DOM_NODE_TAG_PANEL, &DOMNodeCreator<DOMPanel> },
 #endif
-        { DOM_NODE_TAG_PATH, &DOMNodeCreator<DOMSvgPath> },
-#ifndef WEARABLE_PRODUCT
-        { DOM_NODE_TAG_PICKER_DIALOG, &DOMNodeCreator<DOMPickerDialog> },
-#endif
-        { DOM_NODE_TAG_PICKER_VIEW, &DOMNodeCreator<DOMPickerView> },
-        { DOM_NODE_TAG_POLYGON, &DOMNodeCreator<DOMSvgPolygon> },
-        { DOM_NODE_TAG_POLYLINE, &DOMNodeCreator<DOMSvgPolyline> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_POPUP, &DOMNodeCreator<DOMPopup> },
 #endif
         { DOM_NODE_TAG_PROGRESS, &DOMNodeCreator<DOMProgress> },
-#ifndef WEARABLE_PRODUCT
-        { DOM_NODE_TAG_RATING, &DOMNodeCreator<DOMRating> },
-#endif
-        { DOM_NODE_TAG_RECT, &DOMNodeCreator<DOMSvgRect> },
-        { DOM_NODE_TAG_REFRESH, &DOMNodeCreator<DOMRefresh> },
 #ifdef WEB_SUPPORTED
         { DOM_NODE_TAG_RICH_TEXT, &DOMNodeCreator<DOMRichText> },
 #endif
-        { DOM_NODE_TAG_SEARCH, &DOMNodeCreator<DOMSearch> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_SELECT, &DOMNodeCreator<DOMSelect> },
 #endif
@@ -192,29 +136,13 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_STEPPER, &DOMNodeCreator<DOMStepper> },
         { DOM_NODE_TAG_STEPPER_ITEM, &DOMListItemCreator<DOMStepperItem> },
 #endif
-        { DOM_NODE_TAG_SVG, &DOMNodeCreator<DOMSvg> },
-        { DOM_NODE_TAG_SVG_TEXT, &DOMNodeCreator<DOMSvgText> },
         { DOM_NODE_TAG_SWIPER, &DOMNodeCreator<DOMSwiper> },
-        { DOM_NODE_TAG_SWITCH, &DOMNodeCreator<DOMSwitch> },
-#ifndef WEARABLE_PRODUCT
-        { DOM_NODE_TAG_TAB_BAR, &DOMNodeCreator<DOMTabBar> },
-        { DOM_NODE_TAG_TAB_CONTENT, &DOMNodeCreator<DOMTabContent> },
-        { DOM_NODE_TAG_TABS, &DOMNodeCreator<DOMTabs> },
-#endif
         { DOM_NODE_TAG_TEXT, &DOMNodeCreator<DOMText> },
-        { DOM_NODE_TAG_TEXTAREA, &DOMNodeCreator<DOMTextarea> },
-        { DOM_NODE_TAG_TEXT_PATH, &DOMNodeCreator<DOMSvgTextPath> },
-        { DOM_NODE_TAG_TOGGLE, &DOMNodeCreator<DOMToggle> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_TOOL_BAR, &DOMNodeCreator<DOMToolBar> },
         { DOM_NODE_TAG_TOOL_BAR_ITEM, &DOMNodeCreator<DOMToolBarItem> },
 #endif
-        { DOM_NODE_TAG_TSPAN, &DOMNodeCreator<DOMSvgTspan> },
-        { DOM_NODE_TAG_USE, &DOMNodeCreator<DOMSvgUse> },
 #ifndef WEARABLE_PRODUCT
-#if defined(PLAYER_FRAMEWORK_EXISTS)
-        { DOM_NODE_TAG_VIDEO, &DOMNodeCreator<DOMVideo> },
-#endif
 #ifdef WEB_SUPPORTED
         { DOM_NODE_TAG_WEB, &DOMNodeCreator<DOMWeb> },
 #endif
@@ -393,10 +321,11 @@ void DOMDocument::HandleComponentPostBinding()
 
             auto component = targetNode->GetSpecializedComponent();
             if (AceType::InstanceOf<TouchListenerComponent>(component)) {
-                auto labelNode = AceType::DynamicCast<DOMLabel>(targetNode);
-                if (labelNode) {
-                    labelNode->SetTargetNode(idNode);
-                }
+                auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("label");
+                CHECK_NULL_VOID(loader);
+                auto* modifier = reinterpret_cast<const ArkUILabelModifierCompatible*>(loader->GetCustomModifier());
+                CHECK_NULL_VOID(modifier);
+                modifier->setTargetNode(targetNode, idNode);
 #ifndef WEARABLE_PRODUCT
             } else if (AceType::InstanceOf<PopupComponent>(component)) {
                 auto popupNode = AceType::DynamicCast<DOMPopup>(targetNode);
@@ -410,10 +339,10 @@ void DOMDocument::HandleComponentPostBinding()
                     // DOMMenu bind node with ID node
                     menuNode->BindIdNode(idNode);
                 }
-            } else if (AceType::InstanceOf<DOMTabBar>(targetNode)) {
-                auto tabBarNode = AceType::DynamicCast<DOMTabBar>(targetNode);
-                // DOMTabBar in navigation bar bind tabs with ID node
-                tabBarNode->BindToTabs(idNode);
+            } else {
+                if (auto modifier = GetTabBarInnerModifier()) {
+                    modifier->bindToTabs(targetNode, idNode);
+                }
 #endif
             }
             ++iterId;

@@ -3061,7 +3061,7 @@ void WebDelegate::InitWebViewWithWindow()
                 std::make_shared<OHOS::NWeb::NWebEngineInitArgsImpl>();
             std::string app_path = GetDataPath();
             if (!app_path.empty()) {
-                initArgs->AddArg(std::string("--user-data-dir=").append(app_path));
+                initArgs->AddArg(std::string("--arkweb-app-data-dir=").append(app_path));
             }
 
             delegate->window_ = delegate->CreateWindow();
@@ -3540,7 +3540,7 @@ void WebDelegate::InitWebViewWithSurface()
             CHECK_NULL_VOID(delegate);
             std::shared_ptr<OHOS::NWeb::NWebEngineInitArgsImpl> initArgs =
                 std::make_shared<OHOS::NWeb::NWebEngineInitArgsImpl>();
-            initArgs->AddArg(std::string("--user-data-dir=").append(delegate->bundleDataPath_));
+            initArgs->AddArg(std::string("--arkweb-app-data-dir=").append(delegate->bundleDataPath_));
             initArgs->AddArg(std::string("--bundle-installation-dir=").append(delegate->bundlePath_));
             initArgs->AddArg(std::string("--lang=").append(AceApplicationInfo::GetInstance().GetLanguage() +
                     "-" + AceApplicationInfo::GetInstance().GetCountryOrRegion()));
@@ -9572,12 +9572,16 @@ void WebDelegate::OnTextSelectionChange(const std::string& selectionText, bool i
     CHECK_NULL_VOID(taskExecutor_);
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
-    if (lastSelectionText_ == selectionText && !isFromOverlay) {
+    bool selectionChanged = (lastSelectionText_ != selectionText);
+    if (!selectionChanged && !isFromOverlay) {
         return;
     }
     lastSelectionText_ = selectionText;
     if (webPattern->IsTextSelectionEnable()) {
         return;
+    }
+    if (!selectionText.empty() && selectionChanged) {
+        webPattern->UpdateTextSelectionHolderId();
     }
     taskExecutor_->PostTask(
         [weak = WeakClaim(this), selectionText]() {

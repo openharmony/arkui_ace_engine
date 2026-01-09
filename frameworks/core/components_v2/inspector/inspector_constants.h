@@ -433,8 +433,10 @@ ACE_EXPORT extern const char REFRESH_ETS_TAG[];
 // datePicker
 ACE_EXPORT extern const char DATE_PICKER_COMPONENT_TAG[];
 ACE_EXPORT extern const char DATE_PICKER_ETS_TAG[];
+ACE_EXPORT extern const char DATE_PICKER_COMPONENT_LOADER_TAG[];
 ACE_EXPORT extern const char TIME_PICKER_COMPONENT_TAG[];
 ACE_EXPORT extern const char TIME_PICKER_ETS_TAG[];
+ACE_EXPORT extern const char TIME_PICKER_COMPONENT_LOADER_TAG[];
 
 // Radio
 ACE_EXPORT extern const char RADIO_COMPONENT_TAG[];
@@ -506,10 +508,12 @@ ACE_EXPORT extern const char TEXTCLOCK_ETS_TAG[];
 // textpicker
 ACE_EXPORT extern const char TEXT_PICKER_COMPONENT_TAG[];
 ACE_EXPORT extern const char TEXT_PICKER_ETS_TAG[];
+ACE_EXPORT extern const char TEXT_PICKER_COMPONENT_LOADER_TAG[];
 
 // pickertextdialog
 ACE_EXPORT extern const char PICKER_TEXT_DIALOG_COMPONENT_TAG[];
 ACE_EXPORT extern const char PICKER_TEXT_DIALOG_ETS_TAG[];
+ACE_EXPORT extern const char PICKER_TEXT_DIALOG_COMPONENT_LOADER_TAG[];
 
 // canvas
 ACE_EXPORT extern const char CANVAS_COMPONENT_TAG[];
@@ -530,6 +534,7 @@ ACE_EXPORT extern const char CUSTOM_DIALOG_ETS_TAG[];
 // datePickerdialog
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_COMPONENT_TAG[];
 ACE_EXPORT extern const char DATE_PICKER_DIALOG_ETS_TAG[];
+ACE_EXPORT extern const char DATE_PICKER_DIALOG_COMPONENT_LOADER_TAG[];
 
 // Normal dialog
 ACE_EXPORT extern const char DIALOG_COMPONENT_TAG[];
@@ -550,6 +555,7 @@ ACE_EXPORT extern const char CHECKBOXGROUP_ETS_TAG[];
 // timePickerdialog
 ACE_EXPORT extern const char TIME_PICKER_DIALOG_COMPONENT_TAG[];
 ACE_EXPORT extern const char TIME_PICKER_DIALOG_ETS_TAG[];
+ACE_EXPORT extern const char TIME_PICKER_DIALOG_COMPONENT_LOADER_TAG[];
 
 // web
 ACE_EXPORT extern const char WEB_COMPONENT_TAG[];
@@ -681,7 +687,7 @@ ACE_EXPORT extern const char CONTAINER_PICKER_ETS_TAG[];
 // UndefinedNode
 ACE_EXPORT extern const char UNDEFINED_NODE_ETS_TAG[];
 
-// UnionContainer
-ACE_EXPORT extern const char UNION_CONTAINER_ETS_TAG[];
+// UnionEffectContainer
+ACE_EXPORT extern const char UNION_EFFECT_CONTAINER_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

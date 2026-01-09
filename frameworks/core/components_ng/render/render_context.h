@@ -207,9 +207,10 @@ public:
         bool isSkipCheckInMultiInstance = false;
     };
 
-    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
+    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, FrameNode* host = nullptr) {}
 
-    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) {}
+    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode,
+        FrameNode* host = nullptr) {}
 
     virtual void SetSurfaceChangedCallBack(
         const std::function<void(float, float, float, float)>& callback) {}
@@ -736,8 +737,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffectType, EffectType);
 
-    // useUnion
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseUnion, bool);
+    // useUnionEffect
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseUnionEffect, bool);
 
     // useShadowBatching
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseShadowBatching, bool);
@@ -866,6 +867,11 @@ public:
 
     virtual void UpdateOverlayText() {}
 
+    void SetIsFree(bool isFree)
+    {
+        isFree_ = isFree;
+    }
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -875,6 +881,7 @@ protected:
     bool isNeedRebuildRSTree_ = true;
     bool handleChildBounds_ = false;
     bool isNeedAnimate_ = true;
+    bool isFree_ = false;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
@@ -962,7 +969,7 @@ protected:
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
     virtual void OnUseEffectUpdate(bool useEffect) {}
     virtual void OnUseEffectTypeUpdate(EffectType effectType) {}
-    virtual void OnUseUnionUpdate(bool useUnion) {}
+    virtual void OnUseUnionEffectUpdate(bool useUnion) {}
     virtual bool GetStatusByEffectTypeAndWindow() { return false; }
     virtual void OnUseShadowBatchingUpdate(bool useShadowBatching) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}

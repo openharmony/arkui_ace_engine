@@ -260,6 +260,12 @@ void ReplaceHolder(std::string& originStr, const std::vector<ResourceObjectParam
 void ResourceParseUtils::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
     Color& color, const std::string& nodeTag)
 {
+    CompleteResObjFromColorWithAllowForceDark(resObj, color, nodeTag, true);
+}
+
+void ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(
+    RefPtr<ResourceObject>& resObj, Color& color, const std::string& nodeTag, bool allowForceDark)
+{
     if (!SystemProperties::ConfigChangePerform()) {
         return;
     }
@@ -269,7 +275,7 @@ void ResourceParseUtils::CompleteResourceObjectFromColor(RefPtr<ResourceObject>&
 
     auto colorMode = Container::CurrentColorMode();
     Color curColor = color;
-    if (colorMode == ColorMode::DARK) {
+    if (colorMode == ColorMode::DARK && allowForceDark) {
         color = Color(invertFunc(color.GetValue()));
     }
     resObj = AceType::MakeRefPtr<ResourceObject>();

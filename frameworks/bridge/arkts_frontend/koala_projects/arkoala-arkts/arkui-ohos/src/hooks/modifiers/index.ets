@@ -167,7 +167,7 @@ import { ArkScreenComponent, ScreenAttribute } from "./../../component/screen"
 import { ScreenModifier } from "./../../ScreenModifier"
 import { ArkScrollComponent, ScrollAttribute } from "./../../component/scroll"
 import { ScrollModifier } from "./../../ScrollModifier"
-import { ArkScrollBarComponent, ScrollBarAttribute } from "./../../component/scrollBar"
+import { ArkScrollBarComponent, ScrollBarAttribute, ScrollBarOptions } from "./../../component/scrollBar"
 import { ScrollBarModifier } from "./../../ScrollBarModifier"
 import { ArkSearchComponent, SearchAttribute } from "./../../component/search"
 import { SearchModifier } from "./../../SearchModifier"
@@ -789,7 +789,42 @@ export function hookRemoteWindowAttributeModifier(componenet: ArkRemoteWindowCom
 export function hookRichTextAttributeModifier(componenet: ArkRichTextComponent, value: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookRootSceneAttributeModifier(componenet: ArkRootSceneComponent, value: AttributeModifier<RootSceneAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
 export function hookScreenAttributeModifier(componenet: ArkScreenComponent, value: AttributeModifier<ScreenAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
-export function hookScrollBarAttributeModifier(componenet: ArkScrollBarComponent, value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
+export function hookScrollBarAttributeModifier(component: ArkScrollBarComponent, modifier: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined):void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): ScrollBarModifier => {
+        let isScrollBarModifier: boolean = modifier instanceof ScrollBarModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ScrollBarModifier();
+        if (isScrollBarModifier) {
+            let scrollBarModifier = modifier as object as ScrollBarModifier;
+            initModifier.mergeModifier(scrollBarModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length !== 1) {
+            throw new Error('must only 1 parameter')
+        }
+        let content_casted: ScrollBarOptions = params[0] as ScrollBarOptions
+        (component as ArkScrollBarComponent).setScrollBarOptions(content_casted)
+    };
+    let updaterReceiver = (): ArkScrollBarComponent => {
+        let componentNew: ArkScrollBarComponent = new ArkScrollBarComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<ScrollBarAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
 export function hookShapeAttributeModifier(component: ArkShapeComponent, modifier: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined):void {
      if (modifier === undefined) {
         return;

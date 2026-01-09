@@ -23,6 +23,7 @@
 #include "component3d/component3d_module_methods.h"
 #include "componentSnapshot/componentSnapshot_module.h"
 #include "content_slot/content_slot_module.h"
+#include "detached_free_root_node/detached_free_root_node.h"
 #include "keyboard_avoid_mode/keyboard_avoid_mode_module.h"
 #include "custom_node/custom_node_module.h"
 #include "syntax/lazy_for_each_module.h"
@@ -34,7 +35,8 @@
 #include "styled_string/styled_string_module.h"
 #include "image_span/image_span_module.h"
 #include "image/image_module.h"
-#include "list/list_children_main_size_module.h"
+#include "list/list_module.h"
+#include "list/list_item_group_module.h"
 #include "load.h"
 #include "log/log.h"
 #include "utils/convert_utils.h"
@@ -534,6 +536,46 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_SetWaterFlowLayoutMode",
             "li:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowLayoutMode)
+        },
+        ani_native_function {
+            "_SetListItemGroupSpace",
+            "lX{C{std.core.Double}C{std.core.String}}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetListItemGroupSpace)
+        },
+        ani_native_function {
+            "_SetListItemGroupStyle",
+            "li:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetListItemGroupStyle)
+        },
+        ani_native_function {
+            "_SetListItemGroupHeaderContent",
+            "ll:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetListItemGroupHeaderContent)
+        },
+        ani_native_function {
+            "_SetListItemGroupHeader",
+            "ll:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetListItemGroupHeader)
+        },
+        ani_native_function {
+            "_ResetListItemGroupHeader",
+            "l:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ResetListItemGroupHeader)
+        },
+        ani_native_function {
+            "_SetListItemGroupFooterContent",
+            "ll:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetListItemGroupFooterContent)
+        },
+        ani_native_function {
+            "_SetListItemGroupFooter",
+            "ll:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetListItemGroupFooter)
+        },
+        ani_native_function {
+            "_ResetListItemGroupFooter",
+            "l:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ResetListItemGroupFooter)
         },
         ani_native_function {
             "_SetListChildrenMainSize",
@@ -1458,6 +1500,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToUiEffectFilterPtr)
         },
         ani_native_function {
+            "_Extractors_ToUiEffectBrightnessBlenderPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToUiEffectBrightnessBlenderPtr)
+        },
+        ani_native_function {
             "_Extractors_ToUiEffectVisualEffectPtr",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToUiEffectVisualEffectPtr)
@@ -1561,6 +1608,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_ResolveUIContext",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ResolveUIContext)
+       },
+       ani_native_function {
+            "_DetachedFreeRoot_Construct",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructDetachedFreeRoot)
        }
     };
 

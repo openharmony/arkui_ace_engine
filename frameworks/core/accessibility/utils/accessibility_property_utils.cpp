@@ -65,7 +65,9 @@ bool CheckAndGetController(const RefPtr<FrameNode>& node,
     if (!controllerByInspector.empty()) {
         FindCondition condition = [controllerByInspector](const RefPtr<NG::FrameNode>& node) {
             CHECK_NULL_RETURN(node, false);
-            return node->GetInspectorId() == controllerByInspector;
+            CHECK_NE_RETURN(node->GetInspectorId(), controllerByInspector, false);
+            NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(node);
+            return node->GetAccessibilityVisible();
         };
         controllerNode = NG::AccessibilityFrameNodeUtils::GetFramenodeByCondition(node, condition);
         CHECK_NE_RETURN(controllerNode, nullptr, true);
@@ -75,7 +77,9 @@ bool CheckAndGetController(const RefPtr<FrameNode>& node,
         CHECK_NULL_RETURN(node, false);
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_RETURN(accessibilityProperty, false);
-        return IsNodeOfSupportControllerType(node, controllerByType);
+        CHECK_NE_RETURN(IsNodeOfSupportControllerType(node, controllerByType), true, false);
+        NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(node);
+        return node->GetAccessibilityVisible();
     };
     controllerNode = AccessibilityFrameNodeUtils::GetFramenodeByCondition(node, condition);
     CHECK_NE_RETURN(controllerNode, nullptr, true);

@@ -12,6 +12,7 @@ struct RotationIndex {
 
   private items : ListCategories[] = [
     { title: 'RightClick',url: 'pages/MenuPlacement/RightClick/Index' },
+    { title: 'LongPress',url: 'pages/MenuPlacement/LongPress/Index' },
   ]
 
   build() {

@@ -38,6 +38,7 @@ public:
     void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap);
     void GetMultiImagesById(uint32_t windowId, const std::vector<int32_t>& arkUIIds,
         const std::map<int32_t, std::vector<int32_t>>& arkWebs);
+    void GetWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request);
     void SetArkUIQueryErrorCode(MultiImageQueryErrorCode errorCode);
     void SetArkWebQueryErrorCode(MultiImageQueryErrorCode errorCode);
     MultiImageQueryErrorCode GetArkWebQueryErrorCode() const;
@@ -45,9 +46,8 @@ public:
     bool GetHasSendArkWebQueryResult() const;
     void SendArkUIImagesById();
     void SendArkWebImagesById();
-    void DoSendArkWebImagesById();
+    void DoSendArkWebImagesById(bool triggerFromArkWebCallback = false);
     void MarkCurrentWebImageQueryDone(int32_t currentWebId);
-    void AddArkUIComponentPixelMap(int32_t componentId, std::shared_ptr<Media::PixelMap>& componentPixelMap);
     void AddArkWebImageMap(int32_t webId, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>& webImageMap);
     void PostToUI(const std::function<void()>& task) override;
 

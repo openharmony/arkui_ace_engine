@@ -121,6 +121,12 @@ Ark_Int32 GetItemIndexImpl(Ark_VMContext vmContext,
     auto res = peer->TriggerGetItemIndex(vmContext, x, y);
     return Converter::ArkValue<Ark_Int32>(res);
 }
+Ark_SizeResult ContentSizeImpl(Ark_VMContext vmContext, 
+                               Ark_Scroller peer)
+{
+    CHECK_NULL_RETURN(peer, {}); // need to fix default value
+    return peer->TriggerContentSize(vmContext);
+}
 } // ScrollerAccessor
 const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
 {
@@ -139,6 +145,7 @@ const GENERATED_ArkUIScrollerAccessor* GetScrollerAccessor()
         ScrollerAccessor::IsAtEndImpl,
         ScrollerAccessor::GetItemRectImpl,
         ScrollerAccessor::GetItemIndexImpl,
+        ScrollerAccessor::ContentSizeImpl,
     };
     return &ScrollerAccessorImpl;
 }

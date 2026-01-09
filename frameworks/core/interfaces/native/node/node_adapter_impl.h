@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -233,7 +233,7 @@ private:
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NodeAdapter {
-const ArkUINodeAdapterAPI* GetNodeAdapterAPI();
+ACE_FORCE_EXPORT const ArkUINodeAdapterAPI* GetNodeAdapterAPI();
 const CJUINodeAdapterAPI* GetCJUINodeAdapterAPI();
 } // namespace OHOS::Ace::NodeAdapter
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_ADAPTER_IMPL_H

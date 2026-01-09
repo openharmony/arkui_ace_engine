@@ -18,27 +18,24 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-void StageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
-{
-    // apply safe area to page nodes
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    auto layoutConstraint = layoutProperty->CreateChildConstraint();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    childInsets_ = pipeline->GetSafeArea();
-    LayoutWrapper::ApplySafeArea(childInsets_, layoutConstraint);
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(layoutConstraint);
-    }
-    PerformMeasureSelf(layoutWrapper);
-}
 
 void StageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     PerformLayout(layoutWrapper);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->GetGeometryNode()->SetFrameOffset(OffsetF(childInsets_.left_.Length(), childInsets_.top_.Length()));
+        MovePageToSafeArea(child);
         child->Layout();
     }
+}
+
+void StageLayoutAlgorithm::MovePageToSafeArea(const RefPtr<LayoutWrapper>& childLayoutWrapper)
+{
+    CHECK_NULL_VOID(childLayoutWrapper);
+    auto childNode = childLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(childNode);
+    if (childNode->GetHostTag() != V2::PAGE_ETS_TAG) {
+        return;
+    }
+    childLayoutWrapper->OffsetNodeToSafeArea();
 }
 } // namespace OHOS::Ace::NG

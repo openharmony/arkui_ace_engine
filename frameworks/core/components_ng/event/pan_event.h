@@ -130,6 +130,12 @@ public:
 
     void DumpVelocityInfo(int32_t fingerId);
 
+    void SetPanAngle(double angle)
+    {
+        CHECK_NULL_VOID(panRecognizer_);
+        panRecognizer_->SetAngle(angle);
+    }
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     std::list<RefPtr<PanEvent>> panEvents_;

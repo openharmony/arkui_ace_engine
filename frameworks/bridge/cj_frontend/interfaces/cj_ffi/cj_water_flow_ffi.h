@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,6 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
-#include "frameworks/bridge/declarative_frontend/jsview/models/water_flow_item_model_impl.h"
 #include "frameworks/core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 
 namespace OHOS::Ace::Framework {

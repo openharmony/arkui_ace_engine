@@ -1029,4 +1029,25 @@ HWTEST_F(ClickRecognizerTestNg, Dump001, TestSize.Level1)
     EXPECT_NE(snapshot, nullptr);
     EXPECT_EQ(snapshot->customInfo, "count: 2, fingers: 5, distanceThreshold: 20, userDT: inf, allowedTypes: [all]");
 }
+
+/**
+ * @tc.name: GetGestureInfoString001
+ * @tc.desc: Test ClickRecognizer function: GetGestureInfoString
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    clickRecognizer->tappedCount_ = 1;
+    clickRecognizer->equalsToFingers_ = true;
+    clickRecognizer->useCatchMode_ = false;
+    clickRecognizer->currentTouchPointsNum_ = 1;
+
+    std::string result = clickRecognizer->GetGestureInfoString();
+    EXPECT_THAT(result, HasSubstr("TPC:1"));
+    EXPECT_THAT(result, HasSubstr("ETF:1"));
+    EXPECT_THAT(result, HasSubstr("UCM:0"));
+    EXPECT_THAT(result, HasSubstr("CTPN:1"));
+}
 } // namespace OHOS::Ace::NG

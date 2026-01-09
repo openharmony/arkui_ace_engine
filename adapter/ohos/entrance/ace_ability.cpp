@@ -273,6 +273,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         LOGI("deviceWidth: %{public}d, deviceHeight: %{public}d, default density: %{public}f", deviceWidth,
             deviceHeight, density_);
     }
+    SystemProperties::ReadSystemParametersCallOnce();
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density_, false);
     ColorMode colorMode = ColorMode::LIGHT;
 

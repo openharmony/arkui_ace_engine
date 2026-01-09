@@ -88,6 +88,7 @@ constexpr Dimension EXTENSION_MENU_DEFAULT_WIDTH = 224.0_vp;
 constexpr Dimension EXTENSION_MENU_ITEM_DEFAULT_WIDTH = 216.0_vp;
 constexpr Dimension MIN_HOTSPOT_WIDTH = 40.0_vp;
 constexpr float AGING_MIN_SCALE = 1.75f;
+constexpr Dimension MENU_BUTTON_SPACING = 4.0_vp;
 
 std::unordered_map<TextDataDetectType, std::pair<std::string, std::function<bool()>>> AI_TYPE_ID_MAP = {
     { TextDataDetectType::PHONE_NUMBER, std::make_pair(OH_DEFAULT_AI_MENU_PHONE, &TextSystemMenu::IsShowAIPhone) },
@@ -278,6 +279,7 @@ void PreparePasteButtonLayoutProperty(RefPtr<OHOS::Ace::NG::SecurityComponentLay
     CHECK_NULL_VOID(buttonLayoutProperty);
     CHECK_NULL_VOID(textOverlayTheme);
     auto descriptionId = static_cast<int32_t>(PasteButtonPasteDescription::PASTE);
+    buttonLayoutProperty->UpdateBackgroundBorderRadius(BorderRadiusProperty(textOverlayTheme->GetMenuButtonRadius()));
 
     buttonLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
     buttonLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
@@ -290,6 +292,8 @@ void PreparePasteButtonLayoutProperty(RefPtr<OHOS::Ace::NG::SecurityComponentLay
     buttonWidth = MeasureUtil::MeasureTextWidth(textStyle, buttonContent);
     buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
     if (GreatOrEqual(fontScale, AGING_MIN_SCALE)) {
+        buttonLayoutProperty->UpdateBackgroundTopPadding(MENU_BUTTON_SPACING);
+        buttonLayoutProperty->UpdateBackgroundBottomPadding(MENU_BUTTON_SPACING);
         buttonLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(buttonWidth), std::nullopt });
     } else {
         buttonLayoutProperty->UpdateUserDefinedIdealSize(
@@ -302,7 +306,7 @@ RefPtr<FrameNode> BuildPasteButton(const std::shared_ptr<SelectOverlayInfo>& inf
 {
     auto descriptionId = static_cast<int32_t>(PasteButtonPasteDescription::PASTE);
     auto pasteButton = PasteButtonModelNG::GetInstance()->CreateNode(descriptionId,
-        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::CAPSULE),
+        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL),
         true, static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL));
     CHECK_NULL_RETURN(pasteButton, nullptr);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -573,18 +577,19 @@ RefPtr<FrameNode> BuildButton(const MenuOptionsParam& menuOption, int32_t overla
     text->MarkModifyDone();
     // Calculate the width of entension option include button padding.
     contentWidth = static_cast<float>(MeasureUtil::MeasureTextWidth(textStyle, data));
+    bool isAging = GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE);
     const auto& padding = textOverlayTheme->GetMenuButtonPadding();
     auto left = CalcLength(padding.Left().ConvertToPx());
     auto right = CalcLength(padding.Right().ConvertToPx());
-    auto top = CalcLength(padding.Top().ConvertToPx());
-    auto bottom = CalcLength(padding.Bottom().ConvertToPx());
+    auto top = CalcLength(isAging ? MENU_BUTTON_SPACING.ConvertToPx() : padding.Top().ConvertToPx());
+    auto bottom = CalcLength(isAging ? MENU_BUTTON_SPACING.ConvertToPx() : padding.Bottom().ConvertToPx());
     contentWidth = contentWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
 
     // Update button property.
     auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, button);
     buttonLayoutProperty->UpdatePadding({ left, right, top, bottom, std::nullopt, std::nullopt });
-    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+    if (isAging) {
         buttonLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(contentWidth), std::nullopt });
     } else {
         buttonLayoutProperty->UpdateUserDefinedIdealSize(
@@ -594,9 +599,10 @@ RefPtr<FrameNode> BuildButton(const MenuOptionsParam& menuOption, int32_t overla
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     BindButtonClickEvent(button, menuOption, overlayId);
     SetResponseRegion(button);
-    if (button->GetPatternPtr<ButtonPattern>()) {
-        button->GetPatternPtr<ButtonPattern>()->SetClickedColor(textOverlayTheme->GetButtonClickedColor());
-        button->GetPatternPtr<ButtonPattern>()->SetBlendColor(textOverlayTheme->GetButtonClickedColor(),
+    if (auto buttonPattern = button->GetPatternPtr<ButtonPattern>(); buttonPattern) {
+        buttonPattern->SetHasCustomPadding(isAging);
+        buttonPattern->SetClickedColor(textOverlayTheme->GetButtonClickedColor());
+        buttonPattern->SetBlendColor(textOverlayTheme->GetButtonClickedColor(),
             textOverlayTheme->GetButtonHoverColor());
     }
     button->MarkModifyDone();
@@ -1538,7 +1544,8 @@ void SetPasteMenuItemEvent(const RefPtr<FrameNode>& menuItem, const RefPtr<Frame
     menuItemPattern->SetPasteButton(pasteNode);
 }
 
-RefPtr<FrameNode> CreateRelativeContainer(const RefPtr<FrameNode>& menuItem, const RefPtr<FrameNode>& pasteNode)
+RefPtr<FrameNode> CreateRelativeContainer(const RefPtr<FrameNode>& menuItem, const RefPtr<FrameNode>& pasteNode,
+    bool isUsingMouse)
 {
     auto relativeContainer =
         FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -1546,8 +1553,8 @@ RefPtr<FrameNode> CreateRelativeContainer(const RefPtr<FrameNode>& menuItem, con
     CHECK_NULL_RETURN(relativeContainer, nullptr);
     auto relativeContainerLayoutProperty = relativeContainer->GetLayoutProperty();
     CHECK_NULL_RETURN(relativeContainerLayoutProperty, nullptr);
-    relativeContainerLayoutProperty->UpdateUserDefinedIdealSize(
-        { CalcLength(0.0, DimensionUnit::AUTO), CalcLength(0.0, DimensionUnit::AUTO) });
+    relativeContainerLayoutProperty->UpdateUserDefinedIdealSize({ isUsingMouse ? CalcLength(0.0, DimensionUnit::AUTO) :
+        CalcLength(EXTENSION_MENU_ITEM_DEFAULT_WIDTH), CalcLength(0.0, DimensionUnit::AUTO) });
     auto menuItemRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(menuItemRow, nullptr);
@@ -1658,7 +1665,7 @@ RefPtr<FrameNode> CreateMenuItemPaste(const std::string& content, const std::str
     SetupMenuItemChildrenAndFocus(menuItem, rowText, theme, param, cfg);
 
     SetPasteMenuItemEvent(menuItem, pasteNode, param, theme);
-    auto relativeContainer = CreateRelativeContainer(menuItem, pasteNode);
+    auto relativeContainer = CreateRelativeContainer(menuItem, pasteNode, isUsingMouse);
     CHECK_NULL_RETURN(relativeContainer, nullptr);
     CreateMenuItemPasteDivider(innerMenuNode, menuItem, isUsingMouse, index);
     menuItem->MarkModifyDone();

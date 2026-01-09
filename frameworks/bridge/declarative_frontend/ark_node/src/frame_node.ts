@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -586,6 +586,9 @@ class FrameNode extends Disposable {
   }
 
   isOnMainTree(): boolean {
+    if (this.isDisposed()) {
+      throw { message: 'The current node has been disposed.', code: 100026 };
+    }
     return getUINativeModule().frameNode.isOnMainTree(this.getNodePtr());
   }
 
@@ -1184,7 +1187,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['WaterFlow', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'WaterFlow', (node: NodePtr, type: ModifierType): ArkWaterFlowComponent => {
-        return new ArkWaterFlowComponent(node, type);
+        getUINativeModule().loadNativeModule('WaterFlow');
+        let module = globalThis.requireNapi('arkui.components.arkwaterflow');
+        return module.createComponent(node, type);
       })
     }],
     ['SymbolGlyph', (context: UIContext): FrameNode => {
@@ -1194,7 +1199,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['FlowItem', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'FlowItem', (node: NodePtr, type: ModifierType): ArkFlowItemComponent => {
-        return new ArkFlowItemComponent(node, type);
+        getUINativeModule().loadNativeModule('FlowItem');
+        let module = globalThis.requireNapi('arkui.components.arkflowitem');
+        return module.createComponent(node, type);
       })
     }],
     ['QRCode', (context: UIContext): FrameNode => {
@@ -1239,12 +1246,16 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Checkbox', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Checkbox', (node: NodePtr, type: ModifierType): ArkCheckboxComponent => {
-        return new ArkCheckboxComponent(node, type);
+        getUINativeModule().loadNativeModule('Checkbox');
+        let module = globalThis.requireNapi('arkui.components.arkcheckbox');
+        return module.createComponent(node, type);
       });
     }],
     ['CheckboxGroup', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'CheckboxGroup', (node: NodePtr, type: ModifierType): ArkCheckboxGroupComponent => {
-        return new ArkCheckboxGroupComponent(node, type);
+        getUINativeModule().loadNativeModule('CheckboxGroup');
+        let module = globalThis.requireNapi('arkui.components.arkcheckboxgroup');
+        return module.createComponent(node, type);
       });
     }],
     ['Radio', (context: UIContext): FrameNode => {
@@ -1254,7 +1265,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Rating', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Rating', (node: NodePtr, type: ModifierType): ArkRatingComponent => {
-        return new ArkRatingComponent(node, type);
+        getUINativeModule().loadNativeModule('Rating');
+        let module = globalThis.requireNapi('arkui.components.arkrating');
+        return module.createComponent(node, type);
       });
     }],
     ['Slider', (context: UIContext): FrameNode => {
@@ -1334,7 +1347,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkWaterFlowComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('WaterFlow');
+      let module = globalThis.requireNapi('arkui.components.arkwaterflow');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['FlowItem', (node: FrameNode): ArkFlowItemComponent => {
@@ -1344,7 +1359,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkFlowItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('FlowItem');
+      let module = globalThis.requireNapi('arkui.components.arkflowitem');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['Grid', (node: FrameNode): ArkGridComponent => {
@@ -1414,7 +1431,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkCheckboxComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('Checkbox');
+      let module = globalThis.requireNapi('arkui.components.arkcheckbox');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['Radio', (node: FrameNode): ArkRadioComponent => {

@@ -199,6 +199,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto predictSnapEndPos = listLayoutAlgorithm->GetPredictSnapEndPosition();
     bool isJump = listLayoutAlgorithm->NeedEstimateOffset();
     auto lanesLayoutAlgorithm = DynamicCast<ListLanesLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    bool prevStackEnd = isStackFromEnd_;
     isStackFromEnd_ = listLayoutAlgorithm->GetStackFromEnd();
     if (lanesLayoutAlgorithm) {
         lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
@@ -208,6 +209,9 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             if (item) {
                 item->ResetSwipeStatus();
             }
+        }
+        if (prevStackEnd != isStackFromEnd_) {
+            lanesItemRange_.clear();
         }
         lanes_ = lanesLayoutAlgorithm->GetLanes();
         laneGutter_ = lanesLayoutAlgorithm->GetLaneGutter();
@@ -1223,7 +1227,7 @@ int32_t ListPattern::GetEndIndexExcludeEndOffset()
     while (iter != itemPosition_.rend() && GreatOrEqual(iter->second.startPos, endPos)) {
         iter++;
     }
-    return iter->first;
+    return iter == itemPosition_.rend() ? endIndex_ : iter->first;
 }
 
 int32_t ListPattern::GetStartIndexExcludeStartOffset()
@@ -1232,7 +1236,7 @@ int32_t ListPattern::GetStartIndexExcludeStartOffset()
     while (iter != itemPosition_.end() && LessOrEqual(iter->second.endPos, contentStartOffset_)) {
         iter++;
     }
-    return iter->first;
+    return iter == itemPosition_.end() ? startIndex_ : iter->first;
 }
 
 void ListPattern::StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)

@@ -1020,6 +1020,13 @@ HWTEST_F(BadgeTestNg, BadgeDumpInfoTest003, TestSize.Level1)
 HWTEST_F(BadgeTestNg, BadgeDumpInfoTest004, TestSize.Level1)
 {
     BadgeModelNG badge;
+    badge.CreateBadgeFrameNode();
+    GetInstance();
+    ASSERT_NE(pattern_, nullptr);
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    pattern_->DumpInfo(json);
+    EXPECT_FALSE(layoutProperty_->HasBadgeCount());
+
     BadgeParameters badgeParameters;
     badgeParameters.badgeMaxCount = 99;
     badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
@@ -1046,7 +1053,6 @@ HWTEST_F(BadgeTestNg, BadgeDumpInfoTest004, TestSize.Level1)
     pattern_->OnModifyDone();
 
     // update badge layoutProperty and go to different branch
-    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
     layoutProperty_->UpdateBadgeCount(1);
     pattern_->DumpInfo(json);
     EXPECT_EQ(layoutProperty_->GetBadgeCountValue(), 1);

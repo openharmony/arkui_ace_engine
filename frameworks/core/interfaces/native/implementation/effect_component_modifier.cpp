@@ -20,6 +20,26 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+namespace OHOS::Ace::NG {
+namespace {
+struct EffectComponentOpt {
+    std::optional<EffectLayer> layer;
+};
+} // namespace
+namespace Converter {
+template<>
+EffectComponentOpt Convert(const Ark_EffectComponentOptions& src)
+{
+    EffectComponentOpt options;
+    options.layer = Converter::OptConvert<EffectLayer>(src.effectLayer);
+    if (!options.layer.has_value()) {
+        options.layer = EffectLayer::NONE;
+    }
+    return options;
+};
+} // namespace Converter
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EffectComponentModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -40,10 +60,12 @@ void SetEffectComponentOptionsImpl(Ark_NativePointer node,
     auto effectComponentPattern = frameNode->GetPattern<EffectComponentPattern>();
     CHECK_NULL_VOID(effectComponentPattern);
     auto layer = EffectLayer::NONE;
-    if (options->tag != InteropTag::INTEROP_TAG_UNDEFINED &&
-        options->value.effectLayer.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        layer = static_cast<EffectLayer>(options->value.effectLayer.value);
+    auto optionsValue = Converter::OptConvert<EffectComponentOpt>(options->value);
+    if (!optionsValue) {
+        effectComponentPattern->SetEffectLayer(layer);
+        return;
     }
+    layer = optionsValue->layer.value();
     effectComponentPattern->SetEffectLayer(layer);
 }
 } // EffectComponentInterfaceModifier

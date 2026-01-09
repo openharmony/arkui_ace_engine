@@ -23,6 +23,7 @@
 #include "condition_scope_ani_modifier.h"
 #include "content_slot_ani_modifier.h"
 #include "custom_node_ani_modifier.h"
+#include "detached_free_root_ani_modifier.h"
 #include "keyboard_avoid_mode_ani_modifier.h"
 #include "drag_ani_modifier.h"
 #include "drag_controller_ani_modifier.h"
@@ -31,6 +32,7 @@
 #include "interop_ani_modifier.h"
 #include "lazy_for_each_node_ani_modifier.h"
 #include "list_ani_modifier.h"
+#include "list_item_group_ani_modifier.h"
 #include "node_adapter_ani_modifier.h"
 #include "parallelize_ui_ani_modifier.h"
 #include "rich_editor_ani_modifier.h"
@@ -66,6 +68,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniDrawModifier = OHOS::Ace::NG::GetArkUIAniDrawModifier,
         .getArkUIAniWaterFlowModifier = OHOS::Ace::NG::GetArkUIAniWaterFlowModifier,
         .getArkUIAniListModifier = OHOS::Ace::NG::GetArkUIAniListModifier,
+        .getArkUIAniListItemGroupModifier = OHOS::Ace::NG::GetArkUIAniListItemGroupModifier,
         .getComponentSnapshotAniModifier = OHOS::Ace::NG::GetComponentSnapshotAniModifier,
         .getAnimationAniModifier = OHOS::Ace::NG::GetAnimationAniModifier,
         .getVisualEffectAniModifier = OHOS::Ace::NG::GetVisualEffectAniModifier,
@@ -93,6 +96,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getParallelizeUIModifier = OHOS::Ace::NG::GetParallelizeUIAniModifier,
         .getSaveButtonAniModifier = OHOS::Ace::NG::GetSaveButtonAniModifier,
         .getPasteButtonAniModifier = OHOS::Ace::NG::GetPasteButtonAniModifier,
+        .getArkUIAniDetachedFreeRootModifier = OHOS::Ace::NG::GetDetachedFreeRootModifier,
     };
     return &impl;
 }

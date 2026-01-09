@@ -1,0 +1,10 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/button_Test",
+    "pages/toggle_Test",
+    "pages/checkbox_Test",
+    "pages/radio_Test",
+    "pages/Dongtai"
+  ]
+}

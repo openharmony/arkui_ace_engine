@@ -17,6 +17,8 @@
 
 #include "cj_lambda.h"
 
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
@@ -28,23 +30,38 @@ namespace {
 constexpr int32_t INVALID_UNIT = -1;
 constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
 } // namespace
-
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::CheckBoxModelNG* GetCheckBoxModel()
+{
+    static NG::CheckBoxModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Checkbox");
+        if (module == nullptr) {
+            LOGF("Can't find checkbox dynamic module");
+            abort();
+        }
+        model = reinterpret_cast<NG::CheckBoxModelNG*>(module->GetModel());
+    }
+    return model;
+}
+}
 extern "C" {
 void FfiOHOSAceFrameworkCheckBoxCreate(const char* name, const char* group)
 {
     auto checkboxName = std::optional<std::string>(name);
     auto checkboxGroup = std::optional<std::string>(group);
-    CheckBoxModel::GetInstance()->Create(checkboxName, checkboxGroup, "Checkbox");
+    GetCheckBoxModel()->Create(checkboxName, checkboxGroup, "Checkbox");
 }
 
 void FfiOHOSAceFrameworkCheckBoxSelect(bool value)
 {
-    CheckBoxModel::GetInstance()->SetSelect(value);
+    GetCheckBoxModel()->SetSelect(value);
 }
 
 void FfiOHOSAceFrameworkCheckBoxSetSelectedColor(uint32_t color)
 {
-    CheckBoxModel::GetInstance()->SetSelectedColor(Color(color));
+    GetCheckBoxModel()->SetSelectedColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkCheckBoxSetWidth(double width, uint32_t unit)
@@ -92,27 +109,27 @@ void FfiOHOSAceFrameworkCheckBoxSetPaddings(CJEdge params)
 
 void FfiOHOSAceFrameworkCheckBoxSetOnChange(void (*callback)(bool isOn))
 {
-    CheckBoxModel::GetInstance()->SetOnChange(CJLambda::Create(callback));
+    GetCheckBoxModel()->SetOnChange(CJLambda::Create(callback));
 }
 
 void FfiOHOSAceFrameworkCheckBoxSetCheckboxStyle(int32_t checkBoxStyle)
 {
     CheckBoxStyle curCheckBoxStyle = static_cast<CheckBoxStyle>(checkBoxStyle);
-    CheckBoxModel::GetInstance()->SetCheckboxStyle(curCheckBoxStyle);
+    GetCheckBoxModel()->SetCheckboxStyle(curCheckBoxStyle);
 }
 
 void FfiCheckBoxSetResponseRegion(CJResponseRegion value)
 {
     std::vector<DimensionRect> result;
     ParseCJResponseRegion(value, result);
-    CheckBoxModel::GetInstance()->SetResponseRegion(result);
+    GetCheckBoxModel()->SetResponseRegion(result);
 }
 
 void FfiCheckBoxSetResponseRegionArray(VectorStringPtr vecContent)
 {
     std::vector<DimensionRect> result;
     ParseVectorStringPtr(vecContent, result);
-    CheckBoxModel::GetInstance()->SetResponseRegion(result);
+    GetCheckBoxModel()->SetResponseRegion(result);
 }
 
 void FfiCheckBoxCreateWithIndicator(const char* name, const char* group, void (*indicatorBuilder)())
@@ -123,13 +140,13 @@ void FfiCheckBoxCreateWithIndicator(const char* name, const char* group, void (*
         PipelineContext::SetCallBackNode(node);
         func();
     };
-    CheckBoxModel::GetInstance()->Create(name, group, "Checkbox");
-    CheckBoxModel::GetInstance()->SetBuilder(customBuilderFunc);
+    GetCheckBoxModel()->Create(name, group, "Checkbox");
+    GetCheckBoxModel()->SetBuilder(customBuilderFunc);
 }
 
 void FfiCheckBoxUnselectedColor(uint32_t color)
 {
-    CheckBoxModel::GetInstance()->SetUnSelectedColor(Color(color));
+    GetCheckBoxModel()->SetUnSelectedColor(Color(color));
 }
 
 void FfiCheckBoxMarkStyle(
@@ -137,18 +154,18 @@ void FfiCheckBoxMarkStyle(
 {
     auto theme = GetTheme<CheckboxTheme>();
     Color strokeColorValue = Color(strokeColor);
-    CheckBoxModel::GetInstance()->SetCheckMarkColor(strokeColorValue);
+    GetCheckBoxModel()->SetCheckMarkColor(strokeColorValue);
     if (sizeUnit != INVALID_UNIT && static_cast<DimensionUnit>(sizeUnit) != DimensionUnit::PERCENT && size >= 0.0) {
-        CheckBoxModel::GetInstance()->SetCheckMarkSize(CalcDimension(size, static_cast<DimensionUnit>(sizeUnit)));
+        GetCheckBoxModel()->SetCheckMarkSize(CalcDimension(size, static_cast<DimensionUnit>(sizeUnit)));
     } else {
-        CheckBoxModel::GetInstance()->SetCheckMarkSize(Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE));
+        GetCheckBoxModel()->SetCheckMarkSize(Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE));
     }
     if (strokeWidthUnit != INVALID_UNIT && static_cast<DimensionUnit>(strokeWidthUnit) != DimensionUnit::PERCENT &&
         strokeWidth >= 0.0) {
-        CheckBoxModel::GetInstance()->SetCheckMarkWidth(
+        GetCheckBoxModel()->SetCheckMarkWidth(
             CalcDimension(strokeWidth, static_cast<DimensionUnit>(strokeWidthUnit)));
     } else {
-        CheckBoxModel::GetInstance()->SetCheckMarkWidth(theme->GetCheckStroke());
+        GetCheckBoxModel()->SetCheckMarkWidth(theme->GetCheckStroke());
     }
 }
 }

@@ -16,7 +16,9 @@
 #include "core/components/common/painter/rosen_svg_painter.h"
 
 #include "include/utils/SkParsePath.h"
-#include "frameworks/core/components/svg/rosen_render_svg_pattern.h"
+
+#include "core/common/dynamic_module_helper.h"
+#include "frameworks/compatible/components/svg/rosen_render_svg_pattern.h"
 
 namespace OHOS::Ace {
 
@@ -25,7 +27,20 @@ namespace {
 constexpr float FLAT_ANGLE = 180.0f;
 const char ROTATE_TYPE_AUTO[] = "auto";
 const char ROTATE_TYPE_REVERSE[] = "auto-reverse";
+const ArkUISvgCompatibleModifier* GetSvgCompatibleModifier()
+{
+    static const ArkUISvgCompatibleModifier* svgCompatibleModifier_ = nullptr;
 
+    if (svgCompatibleModifier_) {
+        return svgCompatibleModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("svg");
+    if (loader) {
+        svgCompatibleModifier_ = reinterpret_cast<const ArkUISvgCompatibleModifier*>(loader->GetCustomModifier());
+        return svgCompatibleModifier_;
+    }
+    return nullptr;
+}
 } // namespace
 
 #if !defined(PREVIEW) && !defined(CROSS_PLATFORM)
@@ -122,11 +137,14 @@ void RosenSvgPainter::SetFillStyle(RSCanvas* canvas,
 
     RSBrush brush;
     brush.Reset();
-    auto pattern = AceType::DynamicCast<RosenRenderSvgPattern>(renderInfo.node->GetPatternFromRoot(fillHref));
+    const auto* modifier = GetSvgCompatibleModifier();
+    CHECK_NULL_VOID(modifier);
+    auto pattern = modifier->getPatternFromRoot(renderInfo.node, fillHref.c_str());
     if (!pattern) {
         return;
     }
-    if (!pattern->OnAsPaint(renderInfo.offset, renderInfo.node->GetPaintBounds(renderInfo.offset), nullptr, &brush)) {
+    auto paintBounds = renderInfo.node->GetPaintBounds(renderInfo.offset);
+    if (!modifier->onAsPaint(pattern, &renderInfo.offset, &paintBounds, nullptr, &brush)) {
         return;
     }
     brush.SetAlphaF(fillState.GetOpacity().GetValue() * renderInfo.opacity * (1.0f / UINT8_MAX));
@@ -187,11 +205,14 @@ void RosenSvgPainter::SetStrokeStyle(RSCanvas* canvas,
     if (GreatNotEqual(strokeState.GetLineWidth().Value(), 0.0)) {
         RSPen pen;
         SetStrokeStyle(pen, strokeState, renderInfo.opacity, renderInfo.antiAlias);
-        auto pattern = AceType::DynamicCast<RosenRenderSvgPattern>(renderInfo.node->GetPatternFromRoot(strokeHref));
+        const auto* modifier = GetSvgCompatibleModifier();
+        CHECK_NULL_VOID(modifier);
+        auto pattern = modifier->getPatternFromRoot(renderInfo.node, strokeHref.c_str());
         if (!pattern) {
             return;
         }
-        if (!pattern->OnAsPaint(renderInfo.offset, renderInfo.node->GetPaintBounds(renderInfo.offset), &pen, nullptr)) {
+        auto paintBounds = renderInfo.node->GetPaintBounds(renderInfo.offset);
+        if (!modifier->onAsPaint(pattern, &renderInfo.offset, &paintBounds, &pen, nullptr)) {
             return;
         }
         canvas->AttachPen(pen);

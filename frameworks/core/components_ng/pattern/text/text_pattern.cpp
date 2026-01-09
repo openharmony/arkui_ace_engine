@@ -863,7 +863,7 @@ bool TextPattern::IsSelectAll()
            textSelector_.GetTextEnd() == static_cast<int32_t>(textForDisplay_.length()) + placeholderCount_;
 }
 
-std::u16string TextPattern::TextHighlightSelectedContent(int32_t start, int32_t end)
+std::u16string TextPattern::TextHighlightSelectedContent(int32_t start, int32_t end) const
 {
     if (start == end) {
         return u"";
@@ -880,6 +880,9 @@ std::u16string TextPattern::TextHighlightSelectedContent(int32_t start, int32_t 
     std::u16string value;
     int32_t tag = 0;
     for (const auto& span : spans_) {
+        if (!span) {
+            continue;
+        }
         if (span->position - 1 >= start && span->placeholderIndex == -1 && span->position != -1) {
             auto wideString = span->GetSpanContent();
             auto max = std::min(span->position, end);
@@ -887,15 +890,9 @@ std::u16string TextPattern::TextHighlightSelectedContent(int32_t start, int32_t 
             value +=
                 TextEmojiProcessor::SubU16string(std::clamp((min - tag), 0, static_cast<int32_t>(wideString.length())),
                     std::clamp((max - min), 0, static_cast<int32_t>(wideString.length())), wideString, false, false);
-        } else if (span->position - 1 >= start && span->position != -1 &&
-            span->spanItemType == SpanItemType::CustomSpan) {
+        } else if (span->position - 1 >= start && span->position != -1) {
             // image span or custom span (span->placeholderIndex != -1)
             value += u" ";
-        } else if (span->position - 1 >= start && span->position != -1 &&
-            span->spanItemType == SpanItemType::SYMBOL) {
-            for (int32_t i = 0; i < span->length; ++i) {
-                value += u" ";
-            }
         }
         tag = span->position == -1 ? tag + 1 : span->position;
         if (span->position >= end) {
@@ -2806,6 +2803,9 @@ void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset&
         leftMousePressed_ = false;
         return;
     }
+    if (blockPress_ && !shiftFlag_) {
+        return;
+    }
     if (isMousePressed_) {
         mouseStatus_ = MouseStatus::MOVE;
         CHECK_NULL_VOID(pManager_);
@@ -3553,6 +3553,7 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
     return [wk = WeakClaim(this)](const Offset& point) {
         auto pattern = wk.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->blockPress_ = false;
         pattern->InitAiSelection(point);
         if (pattern->BetweenSelectedPosition(point) || pattern->IsAiSelected()) {
             const auto& children = pattern->GetChildNodes();
@@ -5047,8 +5048,8 @@ void TextPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
         json->Put("content", "");
         return;
     }
-    auto textValue = UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u""));
-    if (!textValue.empty()) {
+    if (spans_.empty()) {
+        auto textValue = UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u""));
         json->Put("content", textValue.c_str());
         json->Put(
             "fontColor", textLayoutProp->GetTextColorValue(theme->GetTextStyle().GetTextColor()).ToString().c_str());
@@ -5057,20 +5058,7 @@ void TextPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
         json->Put("fontSize", GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str());
         json->Put("fontWeight", GetFontWeightInJson(textLayoutProp->GetFontWeight()).c_str());
     } else {
-        CHECK_NULL_VOID(pManager_);
-        auto paragraphs = pManager_->GetParagraphs();
-        if (paragraphs.empty()) {
-            return;
-        }
-
-        std::string text;
-        for (auto&& info : paragraphs) {
-            auto paragraph = info.paragraph;
-            if (paragraph) {
-                text += StringUtils::Str16ToStr8(paragraph->GetParagraphText());
-            }
-        }
-        json->Put("content", text.c_str());
+        json->Put("content", StringUtils::Str16ToStr8(GetContentWithPlaceholderSpaceFillter()).c_str());
         for (const auto& item : spans_) {
             if (item && item->spanItemType == SpanItemType::NORMAL) {
                 auto& fontStyle = item->fontStyle;
@@ -5095,6 +5083,22 @@ void TextPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
     }
     json->Put("ForegroundColor",
         renderContext->GetForegroundColor() ? renderContext->GetForegroundColorValue().ToString().c_str() : "Na");
+}
+
+std::u16string TextPattern::GetContentWithPlaceholderSpaceFillter() const
+{
+    if (isSpanStringMode_) {
+        return textForDisplay_;
+    }
+    CHECK_NULL_RETURN(!spans_.empty(), u"");
+    std::u16string value;
+    for (const auto& span : spans_) {
+        if (!span) {
+            continue; // skip null
+        }
+        value += span->content;
+    }
+    return value;
 }
 
 void TextPattern::DumpAdvanceInfo()
@@ -6674,16 +6678,20 @@ std::vector<std::pair<float, float>> TextPattern::GetSpecifiedContentOffsets(con
         return offsets;
     }
     auto indexes = GetSpecifiedContentIndex(content);
+    if (indexes.empty()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT,
+            "GetSpecifiedContentOffsets, the content was not found, id:[%{public}d] content:%{public}s", host->GetId(),
+            content.c_str());
+        return offsets;
+    }
     RectF textContentRect = contentRect_;
     textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
 
     for (auto index : indexes) {
         CaretMetricsF metrics;
         std::pair<float, float> offset;
-        // set text offset
         // calc caret metrics
-        auto realIndex = HighlightStrIndexToPaintRectIndex(index, true);
-        if (pManager_->CalcCaretMetricsByPosition(realIndex, metrics, TextAffinity::DOWNSTREAM)) {
+        if (pManager_->CalcCaretMetricsByPosition(index, metrics, TextAffinity::DOWNSTREAM)) {
             // calc global offset
             offset.first = metrics.offset.GetX() + textContentRect.GetX();
             offset.second = metrics.offset.GetY() + textContentRect.GetY();
@@ -6693,54 +6701,25 @@ std::vector<std::pair<float, float>> TextPattern::GetSpecifiedContentOffsets(con
     return offsets;
 }
 
-int32_t TextPattern::HighlightStrIndexToPaintRectIndex(int32_t matchIndex, bool isStart)
-{
-    int32_t oldStrIndex = matchIndex;
-    const auto& children = GetAllChildren();
-    int32_t index = 0;
-    for (const auto& uinode : children) {
-        if (oldStrIndex <= 0) {
-            if (oldStrIndex == 0 && isStart && uinode->GetTag() == V2::IMAGE_ETS_TAG) {
-                if (DynamicCast<FrameNode>(uinode) && GetSpanItemByIndex(index)) {
-                    matchIndex += GetSpanItemByIndex(index)->length;
-                }
-            }
-            break;
-        }
-        if (uinode->GetTag() == V2::IMAGE_ETS_TAG) {
-            if (DynamicCast<FrameNode>(uinode) && GetSpanItemByIndex(index)) {
-                matchIndex += GetSpanItemByIndex(index)->length;
-            }
-        } else if (uinode->GetTag() == V2::SPAN_ETS_TAG) {
-            if (DynamicCast<SpanNode>(uinode)) {
-                auto spanItem = DynamicCast<SpanNode>(uinode)->GetSpanItem();
-                oldStrIndex-=spanItem->length;
-            }
-        } else if (uinode->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
-            if (DynamicCast<SpanNode>(uinode)) {
-                auto spanItem = DynamicCast<SpanNode>(uinode)->GetSpanItem();
-                oldStrIndex-=spanItem->length;
-            }
-        } else if (uinode->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG ||
-                   uinode->GetTag() == V2::CUSTOM_SPAN_NODE_ETS_TAG) {
-            if (DynamicCast<FrameNode>(uinode) && GetSpanItemByIndex(index)) {
-                oldStrIndex-=GetSpanItemByIndex(index)->length;
-            }
-        }
-        index++;
-    }
-    return matchIndex;
-}
-
 std::vector<int32_t> TextPattern::GetSpecifiedContentIndex(const std::string& content, bool isFirst) const
 {
     std::vector<int32_t> indexes;
+    if (content.empty()) {
+        return indexes;
+    }
     int32_t pos = 0;
     int32_t size = 0;
-    while ((pos = static_cast<int32_t>(textForDisplay_.find(UtfUtils::Str8DebugToStr16(content), pos))) !=
+    auto uContent = UtfUtils::Str8DebugToStr16(content);
+    std::u16string wString;
+    if (spans_.empty()) {
+        wString = textForDisplay_;
+    } else {
+        wString = GetContentWithPlaceholderSpaceFillter();
+    }
+    while ((pos = static_cast<int32_t>(wString.find(uContent, pos))) !=
             std::string::npos) {
         indexes.push_back(pos);
-        pos += static_cast<int32_t>(content.length());
+        pos += static_cast<int32_t>(uContent.length());
         if (isFirst && size == 0) {
             break;
         }
@@ -6753,7 +6732,7 @@ void TextPattern::ResetHighLightValue()
 {
     textSelector_.ResetHighLightValue();
     CHECK_NULL_VOID(overlayMod_);
-    overlayMod_->SetHightlightOpacity(0.0f);
+    overlayMod_->SetHighlightOpacity(0.0f);
 }
 
 const RefPtr<ScrollablePattern> TextPattern::FindScrollableParentWithRelativeOffset(OffsetF& offset)
@@ -6777,7 +6756,7 @@ const RefPtr<ScrollablePattern> TextPattern::FindScrollableParentWithRelativeOff
     return nullptr;
 }
 
-bool TextPattern::HighlightTriggerScrollableParentToScroll(const RectF& hightlightRect)
+bool TextPattern::HighlightTriggerScrollableParentToScroll(const RectF& highlightRect)
 {
     CHECK_NULL_RETURN(textSelector_.highlightStart.value() != textSelector_.highlightEnd.value(), true);
     auto host = GetHost();
@@ -6802,7 +6781,7 @@ bool TextPattern::HighlightTriggerScrollableParentToScroll(const RectF& hightlig
     auto frameRect = geometryNode->GetFrameRect();
 
     // Convert highlight region from text local coordinate system to scroll coordinate system
-    RectF highlightInScroll = hightlightRect;
+    RectF highlightInScroll = highlightRect;
     highlightInScroll.SetOffset(highlightInScroll.GetOffset() + textOffset);
     
     float targetOffset = 0.0f;
@@ -6889,8 +6868,6 @@ void TextPattern::HighlightSpecifiedContent(
     ResetSelection();
     textSelector_.highlightStart = indexes[0];
     textSelector_.highlightEnd = indexes[0] + UtfUtils::Str8DebugToStr16(content).length();
-    textSelector_.highlightStart = HighlightStrIndexToPaintRectIndex(textSelector_.highlightStart.value(), true);
-    textSelector_.highlightEnd = HighlightStrIndexToPaintRectIndex(textSelector_.highlightEnd.value(), false);
 
     CHECK_NULL_VOID(pManager_);
     auto paragraphsRects =
@@ -6912,7 +6889,7 @@ void TextPattern::HighlightAppearAnimation()
         AnimationUtils::StopAnimation(highlightDisappearAnimation_);
     }
     if (overlayMod_) {
-        overlayMod_->SetHightlightOpacity(0.0f);
+        overlayMod_->SetHighlightOpacity(0.0f);
     }
     ++highlightAppearAnimationId_;
     AnimationOption option;
@@ -6924,7 +6901,7 @@ void TextPattern::HighlightAppearAnimation()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             CHECK_NULL_VOID(pattern->overlayMod_);
-            pattern->overlayMod_->SetHightlightOpacity(1.0f);
+            pattern->overlayMod_->SetHighlightOpacity(1.0f);
         },
         [weak = WeakClaim(this), animationId = highlightAppearAnimationId_]() {
             auto pattern = weak.Upgrade();
@@ -6948,7 +6925,7 @@ void TextPattern::HighlightDisappearAnimation()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             CHECK_NULL_VOID(pattern->overlayMod_);
-            pattern->overlayMod_->SetHightlightOpacity(0.0f);
+            pattern->overlayMod_->SetHighlightOpacity(0.0f);
         },
         [weak = WeakClaim(this), animationId = highlightDisappearAnimationId_,
             startId = highlightAppearAnimationId_]() {
@@ -7635,5 +7612,16 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
     if (frameNode->GetRerenderable()) {
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+}
+
+std::optional<void*> TextPattern::GetDrawParagraph()
+{
+    auto paragraphs = GetParagraphs();
+    if (!paragraphs.empty()) {
+        auto drawParagraph = paragraphs.front().paragraph;
+        CHECK_NULL_RETURN(drawParagraph, std::nullopt);
+        return drawParagraph->GetRawParagraph();
+    }
+    return std::nullopt;
 }
 } // namespace OHOS::Ace::NG

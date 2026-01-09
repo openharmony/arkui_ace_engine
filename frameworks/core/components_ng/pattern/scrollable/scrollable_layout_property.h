@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-class ACE_EXPORT ScrollableLayoutProperty : public LayoutProperty {
+class ACE_FORCE_EXPORT ScrollableLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ScrollableLayoutProperty, LayoutProperty);
 
 public:
@@ -51,7 +51,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(ContentEndOffset, float, PROPERTY_UPDATE_MEASURE);
     virtual void OnContentEndOffsetUpdate(float /* contentEndOffset */) const {}
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SupportLazyLoadingEmptyBranch, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(SupportLazyLoadingEmptyBranch, bool);
+public:
+    void UpdateSupportLazyLoadingEmptyBranch(const bool& value);
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override

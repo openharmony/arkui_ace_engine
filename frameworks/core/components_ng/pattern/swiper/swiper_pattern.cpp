@@ -232,12 +232,18 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     return algo;
 }
 
-RefPtr<FrameNode> SwiperPattern::GetKeyFrameNodeWhenContentChanged()
+std::list<RefPtr<FrameNode>> SwiperPattern::GetKeyFrameNodeWhenContentChanged()
 {
+    std::list<RefPtr<FrameNode>> keyChildren;
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    auto currIndex = GetLoopIndex(currentIndex_);
-    return DynamicCast<FrameNode>(host->GetChildByIndex(currIndex));
+    CHECK_NULL_RETURN(host, keyChildren);
+
+    for (auto item : itemPosition_) {
+        auto swiperItemNode = item.second.node;
+        CHECK_NULL_CONTINUE(swiperItemNode);
+        keyChildren.push_back(swiperItemNode);
+    }
+    return keyChildren;
 }
 
 void SwiperPattern::OnIndexChange(bool isInLayout)
@@ -8103,7 +8109,7 @@ void SwiperPattern::LoadCompleteManagerStopCollect()
     pipeline->GetLoadCompleteManager()->StopCollect();
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
-    if (!IsAutoPlay()) {
+    if (!IsAutoPlay() && (!targetIndex_.has_value() || targetIndex_.value() != currentIndex_)) {
         mgr->OnSwiperChangeEnd(GetHost(), hasTabsAncestor_);
     }
 }

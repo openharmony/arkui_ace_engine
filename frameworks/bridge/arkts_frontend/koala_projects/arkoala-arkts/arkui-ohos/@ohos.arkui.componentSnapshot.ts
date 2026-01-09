@@ -50,6 +50,6 @@ export declare namespace componentSnapshot {
     export function get(callbackId: string, callback: AsyncCallback<PixelMap>, options?: SnapshotOptions): void;
     export function get(promiseId: string, options?: SnapshotOptions): Promise<PixelMap> | null;
     export function getSync(value: string, options?: SnapshotOptions): PixelMap | null;
-    export function getWithUniqueId(uniqueIdValue: number, options?: SnapshotOptions): Promise<PixelMap> | null;
-    export function getSyncWithUniqueId(uniqueIdValue: number, options?: SnapshotOptions): PixelMap;
+    export function getWithUniqueId(uniqueIdValue: int, options?: SnapshotOptions): Promise<PixelMap> | null;
+    export function getSyncWithUniqueId(uniqueIdValue: int, options?: SnapshotOptions): PixelMap;
 }

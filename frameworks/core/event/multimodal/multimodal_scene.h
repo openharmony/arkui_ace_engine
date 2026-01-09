@@ -38,8 +38,8 @@ public:
     std::string GetCurrentMaxSubscriptId();
     void RemoveSubscriptId(const std::string& subscriptId);
 
-    bool SubscribeVoiceEvent(const VoiceEvent& voiceEvent, const MultimodalEventCallback& callback);
-    void UnSubscribeVoiceEvent(const VoiceEvent& voiceEvent);
+    ACE_FORCE_EXPORT bool SubscribeVoiceEvent(const VoiceEvent& voiceEvent, const MultimodalEventCallback& callback);
+    ACE_FORCE_EXPORT void UnSubscribeVoiceEvent(const VoiceEvent& voiceEvent);
     void SubscribeSubscriptSwitchEvent(const EventCallback<void(bool)>& callback);
     void UnSubscribeSubscriptSwitchEvent(const EventCallback<void(bool)>& callback);
     void OnNotifyMultimodalEvent(const AceMultimodalEvent& event);

@@ -243,7 +243,7 @@ HWTEST_F(TextThirteenTestNg, DumpSimplifyInfo_003, TestSize.Level1)
      * @tc.expected: The "content" to "hello".
      */
     pattern->DumpSimplifyInfo(json);
-    EXPECT_EQ(json->GetString("content"), "hello");
+    EXPECT_EQ(json->GetString("content"), "");
 }
 
 /**

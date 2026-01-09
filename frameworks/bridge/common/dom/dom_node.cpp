@@ -15,8 +15,8 @@
 
 #include "frameworks/bridge/common/dom/dom_node.h"
 
-#include "core/components/text_field/text_field_component.h"
-#include "core/components/video/texture_component.h"
+#include "compatible/components/text_field/text_field_component.h"
+#include "compatible/components/video/texture_component.h"
 #include "core/components/web/web_component.h"
 #include "core/components/xcomponent/xcomponent_component.h"
 #include "frameworks/bridge/common/dom/dom_document.h"

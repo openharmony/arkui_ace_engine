@@ -1412,6 +1412,22 @@ void WebSelectOverlay::UpdateAISelectMenu(TextDataDetectType type, const std::st
     manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM);
 }
 
+void WebSelectOverlay::UpdateTextSelectionHolderId()
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto selectOverlayManager = context->GetSelectOverlayManager();
+    CHECK_NULL_VOID(selectOverlayManager);
+    auto manager = selectOverlayManager->GetSelectContentOverlayManager();
+    CHECK_NULL_VOID(manager);
+    TAG_LOGD(AceLogTag::ACE_WEB, "UpdateTextSelectionHolderId id %{public}d", host->GetId());
+    manager->SetTextSelectionHolderId(host->GetId());
+}
+
 void WebSelectOverlay::UpdateIsSelectAll()
 {
     if (isSelectAll_) {

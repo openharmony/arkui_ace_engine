@@ -21,7 +21,7 @@
 
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/i18n/localization.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_column_accessibility_property.h"

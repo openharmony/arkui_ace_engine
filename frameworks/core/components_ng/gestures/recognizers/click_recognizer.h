@@ -97,6 +97,8 @@ public:
     void CleanRecognizerState() override;
     GestureEvent GetGestureEventInfo();
     ClickInfo GetClickInfo();
+protected:
+    std::string GetGestureInfoString() const override;
 
 private:
     // Recognize whether MOVE/UP event is in response region.

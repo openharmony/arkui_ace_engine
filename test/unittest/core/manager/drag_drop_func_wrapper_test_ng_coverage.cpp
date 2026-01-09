@@ -1747,4 +1747,26 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage045
     DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
     EXPECT_EQ(option.options.material, nullptr);
 }
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage046
+ * @tc.desc: Test UpdateDragPreviewOptionsFromModifier with uimaterial
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage046, TestSize.Level1)
+{
+    auto applyOnNodeSync = [](WeakPtr<FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto renderContext = node->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto material = AceType::MakeRefPtr<UiMaterial>();
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(node), AceType::RawPtr(material));
+    };
+
+    DragPreviewOption option;
+    option.options.material = AceType::MakeRefPtr<UiMaterial>();
+    DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
+    EXPECT_EQ(option.options.material, nullptr);
+}
 } // namespace OHOS::Ace::NG

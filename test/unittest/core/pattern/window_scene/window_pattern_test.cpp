@@ -347,6 +347,12 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow, TestSize.Level0)
     ASSERT_NE(windowScene_->startingWindow_, nullptr);
     auto layoutProperty = windowScene_->startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
+
+    ssm_->preLoadStartingWindowMap_.clear();
+    sceneSession_->SetPreloadingStartingWindow(false);
+    windowScene_->WindowPattern::CreateStartingWindow();
+    EXPECT_EQ(sceneSession_->GetPreloadingStartingWindow(), false);
+    ASSERT_NE(windowScene_->startingWindow_, nullptr);
 }
 
 /**

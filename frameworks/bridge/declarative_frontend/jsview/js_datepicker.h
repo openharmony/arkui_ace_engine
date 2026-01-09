@@ -18,7 +18,6 @@
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "frameworks/base/i18n/time_format.h"
@@ -90,9 +89,6 @@ private:
     static void UpdatePickerDialogPositionInfo(const JSRef<JSObject>& paramObject, PickerDialogInfo& pickerDialog);
     static void UpdatePickerDialogInfo(const JSRef<JSObject>& paramObject, PickerDialogInfo& pickerDialog);
 
-    static void CreateDatePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
-    // keep compatible, need remove after
-    static void CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
     // keep compatible, need remove after
     static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
@@ -134,7 +130,6 @@ public:
         const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
 
 private:
-    static void CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
     static PickerTime ParseTime(
         const JSRef<JSVal>& timeVal, PickerTime defaultTime = PickerTime(), bool useDefaultTime = false);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);

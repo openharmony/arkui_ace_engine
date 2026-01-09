@@ -19,8 +19,11 @@
 #include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
+
 
 namespace OHOS::Ace::NG {
+const char CHECK_BOX_ETS_TAG[] = "Checkbox";
 class CheckBoxConfiguration : public CommonConfiguration {
     public:
         CheckBoxConfiguration(const std::string& name, bool selected, bool enabled)
@@ -31,7 +34,7 @@ class CheckBoxConfiguration : public CommonConfiguration {
 };
 using CheckBoxMakeCallback =
     std::function<RefPtr<FrameNode>(const CheckBoxConfiguration& checkBoxConfiguration)>;
-class ACE_EXPORT CheckBoxModelNG : public OHOS::Ace::CheckBoxModel {
+class ACE_FORCE_EXPORT CheckBoxModelNG : public OHOS::Ace::CheckBoxModel {
 public:
     void Create(const std::optional<std::string>& name, const std::optional<std::string>& groupName,
         const std::string& tagName) override;
@@ -93,6 +96,15 @@ public:
     static void UpdateComponentColor(FrameNode* frameNode, const CheckBoxColorType type, const Color& color);
     static void CreateWithResourceObj(
         FrameNode* frameNode, const CheckBoxColorType type, const RefPtr<ResourceObject>& resObj);
+    static void SetBuilder(FrameNode* frameNode, std::optional<std::function<void(void)>>& buildFunc);
+    static RefPtr<FrameNode> CreateToggleCheckboxFrameNode(int32_t nodeId);
+    static void SetToggleBuilderFunc(FrameNode* frameNode, SwitchMakeCallback&& makeFunc);
+    static bool IsToggleCheckboxPattern(FrameNode* frameNode);
+    static void SetChangeEvent(FrameNode* frameNode, ChangeEvent&& changeEvent);
+    static bool IsCheckboxContentModifierNodeId(FrameNode* frameNode, int32_t nodeId);
+    static void UpdatePaintPropertyBySettingData(FrameNode* frameNode, const CheckboxSettingData& data, bool isLunar);
+    static void CreateCheckbox(const std::optional<std::string>& name, const std::optional<std::string>& groupName,
+        const std::string& tagName);
 
 private:
     static std::string ColorTypeToString(const CheckBoxColorType checkBoxColorType);

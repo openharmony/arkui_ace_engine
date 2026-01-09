@@ -70,7 +70,7 @@ private:
     bool hasValue_ = false;
 };
 
-class ACE_EXPORT CheckableComponent : public RenderComponent {
+class ACE_FORCE_EXPORT CheckableComponent : public RenderComponent {
     DECLARE_ACE_TYPE(CheckableComponent, RenderComponent);
 
 public:
@@ -362,11 +362,11 @@ private:
     int32_t status_ = 0;
 };
 
-class ACE_EXPORT CheckboxComponent : public CheckableComponent, public CheckableValue<bool>, public LabelTarget {
+class ACE_FORCE_EXPORT CheckboxComponent : public CheckableComponent, public CheckableValue<bool>, public LabelTarget {
     DECLARE_ACE_TYPE(CheckboxComponent, CheckableComponent, LabelTarget);
 
 public:
-    explicit CheckboxComponent(const RefPtr<CheckboxTheme>& theme);
+    ACE_FORCE_EXPORT explicit CheckboxComponent(const RefPtr<CheckboxTheme>& theme);
     ~CheckboxComponent() override = default;
     void SetGroupName(const std::string& groupName)
     {
@@ -469,7 +469,7 @@ public:
 
         if (count == checkboxList_.size()) {
             UpdateRenderChecked(CheckableStatus::ALL);
-        } else if (count ==0) {
+        } else if (count == 0) {
             UpdateRenderChecked(CheckableStatus::NONE);
         } else {
             UpdateRenderChecked(CheckableStatus::PART);
@@ -522,108 +522,6 @@ private:
     EventMarker OnGroupChange_;
     static std::unordered_map<std::string, std::list<WeakPtr<CheckboxComponent>>> ungroupedCheckboxs_;
     static std::unordered_map<std::string, RefPtr<CheckboxComponent>> checkboxGroups_;
-};
-
-class ACE_EXPORT SwitchComponent : public CheckableComponent, public CheckableValue<bool> {
-    DECLARE_ACE_TYPE(SwitchComponent, CheckableComponent);
-
-public:
-    explicit SwitchComponent(const RefPtr<SwitchTheme>& theme);
-    ~SwitchComponent() override = default;
-
-    void SetTextStyle(const TextStyle& textStyle)
-    {
-        textStyle_ = textStyle;
-    }
-
-    const TextStyle& GetTextStyle() const
-    {
-        return textStyle_;
-    }
-
-    const std::string& GetTextOn() const
-    {
-        return textOn_;
-    }
-
-    void SetTextOn(const std::string& textOn)
-    {
-        textOn_ = textOn;
-    }
-
-    const std::string& GetTextOff() const
-    {
-        return textOff_;
-    }
-
-    void SetTextOff(const std::string& textOff)
-    {
-        textOff_ = textOff;
-    }
-
-    bool GetShowText() const
-    {
-        return showText_;
-    }
-
-    void SetShowText(bool showText)
-    {
-        showText_ = showText;
-    }
-
-    const Color& GetTextColorOn() const
-    {
-        return textColorOn_;
-    }
-
-    void SetTextColorOn(const Color& textColorOn)
-    {
-        textColorOn_ = textColorOn;
-    }
-
-    const Color& GetTextColorOff() const
-    {
-        return textColorOff_;
-    }
-
-    void SetTextColorOff(const Color& textColorOff)
-    {
-        textColorOff_ = textColorOff;
-    }
-
-    const Dimension& GetTextPadding() const
-    {
-        return textPadding_;
-    }
-
-    void SetTextPadding(const Dimension& textPadding)
-    {
-        textPadding_ = textPadding;
-    }
-
-#ifndef WEARABLE_PRODUCT
-    const CommonMultimodalAttribute& GetMultimodalProperties() const
-    {
-        return multimodalProperties_;
-    }
-
-    void SetMultimodalProperties(const CommonMultimodalAttribute& multimodalProperties)
-    {
-        multimodalProperties_ = multimodalProperties;
-    }
-#endif
-
-private:
-    std::string textOn_ = "On";
-    std::string textOff_ = "Off";
-    Color textColorOn_ = Color::BLACK;
-    Color textColorOff_ = Color::BLACK;
-    bool showText_ = false;
-    TextStyle textStyle_;
-#ifndef WEARABLE_PRODUCT
-    CommonMultimodalAttribute multimodalProperties_;
-#endif
-    Dimension textPadding_ { 0, DimensionUnit::PX };
 };
 
 template<class VALUE_TYPE>

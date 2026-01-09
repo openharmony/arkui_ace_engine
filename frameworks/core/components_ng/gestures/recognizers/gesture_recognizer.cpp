@@ -132,12 +132,15 @@ bool NGGestureRecognizer::ProcessTouchEvent(const TouchEvent& point)
             break;
         case TouchType::DOWN:
             HandleTouchDown(point);
+            CheckCurrentFingers();
             break;
         case TouchType::UP:
             HandleTouchUp(point);
+            CheckCurrentFingers();
             break;
         case TouchType::CANCEL:
             HandleTouchCancel(point);
+            CheckCurrentFingers();
             break;
         default:
             break;
@@ -752,5 +755,37 @@ GestureActionPhase NGGestureRecognizer::GetActionPhase(
         default:
             return GestureActionPhase::UNKNOWN;
     }
+}
+
+std::string NGGestureRecognizer::GetGestureInfoString() const
+{
+    constexpr int32_t MAX_GESTURE_INFO_STR_LENGTH = 320;
+    auto node = GetAttachedNode().Upgrade();
+    std::string gestureInfoStr = node ? node->GetTag() : "";
+    gestureInfoStr.reserve(gestureInfoStr.size() + MAX_GESTURE_INFO_STR_LENGTH);
+    gestureInfoStr.append(",LST:");
+    gestureInfoStr.append(TransRefereeState(lastRefereeState_));
+    gestureInfoStr.append(",ST:");
+    gestureInfoStr.append(TransRefereeState(refereeState_));
+    gestureInfoStr.append(",DSP:").append(std::to_string(static_cast<int32_t>(disposal_)));
+    gestureInfoStr.append(",PRI:").append(std::to_string(static_cast<int32_t>(priority_)));
+    gestureInfoStr.append(",CCST:").append(std::to_string(static_cast<int32_t>(currentCallbackState_)));
+    gestureInfoStr.append(",FCOU:").append(std::to_string(fromCardOrUIExtension_));
+    gestureInfoStr.append(",CF:").append(std::to_string(currentFingers_));
+    gestureInfoStr.append(",FID:[");
+    if (!fingersId_.empty()) {
+        for (const auto& item : fingersId_) {
+            gestureInfoStr.push_back(',');
+            gestureInfoStr.append(std::to_string(item));
+        }
+    }
+    gestureInfoStr.push_back(']');
+    gestureInfoStr.append(",ITEF:").append(std::to_string(isTouchEventFinished_));
+    gestureInfoStr.append(",BM:").append(std::to_string(bridgeMode_));
+    gestureInfoStr.append(",ENB:").append(std::to_string(enabled_));
+    gestureInfoStr.append(",NRV:").append(std::to_string(isNeedResetVoluntarily_));
+    gestureInfoStr.append(",NRRS:").append(std::to_string(isNeedResetRecognizerState_));
+    gestureInfoStr.append(",PB:").append(std::to_string(preventBegin_));
+    return gestureInfoStr;
 }
 } // namespace OHOS::Ace::NG

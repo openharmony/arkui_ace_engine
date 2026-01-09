@@ -878,10 +878,9 @@ ani_object ANIGetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani
 }
 
 void ANIDragPreviewSetForegroundColor([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
-    ani_long thisArray, ani_double thisLength, ani_long dragPreviewPtr)
+    ani_long colorValue, ani_double thisLength, ani_long dragPreviewPtr)
 {
-    Ark_ResourceColor resourceColor = GetResourceColor(thisArray, thisLength);
-    DragPreview::SetForegroundColor(env, aniClass, resourceColor, dragPreviewPtr);
+    DragPreview::SetForegroundColor(env, aniClass, colorValue, dragPreviewPtr);
 }
 
 void ANIDragPreviewAnimate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object options,

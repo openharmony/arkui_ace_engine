@@ -555,6 +555,63 @@ HWTEST_F(ListItemPatternTestNg, ExpandSwipeAction003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ExpandSwipeAction004
+ * @tc.desc: Test ListItemPattern ExpandSwipeAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemPatternTestNg, ExpandSwipeAction004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List an ListItem.
+     */
+    MockPipelineContext::SetUp();
+    RefPtr<ListItemPattern> listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE);
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto listItem = FrameNode::CreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), listItemPattern);
+    ASSERT_NE(listItem, nullptr);
+    auto list =
+        FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), listPattern);
+    ASSERT_NE(list, nullptr);
+    listItem->MountToParent(list);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    listItem->SetActive(true);
+    listItemPattern->axis_ = Axis::VERTICAL;
+    listItemPattern->springMotion_ = AceType::MakeRefPtr<SpringMotion>(.0f, .0f, .0f, nullptr);
+    listItemPattern->springController_ = CREATE_ANIMATOR(MockPipelineContext::GetCurrentContext());
+    listItemPattern->SetStartNode(CreateSwipeNode());
+    listItemPattern->SetEndNode(CreateSwipeNode());
+    auto layoutProperty = listItem->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0f), CalcLength(1.0f)));
+    listItem->onMainTree_ = true;
+
+    /**
+     * @tc.steps: step2. Expand swipe action with start direction.
+     * @tc.expected: The start node will be layout.
+     */
+    ListItemModelNG::ExpandSwipeAction(AceType::RawPtr(listItem), ListItemSwipeActionDirection::END);
+    pipelineContext->FlushUITaskWithSingleDirtyNode(listItem);
+    EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::SWIPER_END);
+    auto endNode = AceType::DynamicCast<FrameNode>(listItem->GetChildAtIndex(listItemPattern->endNodeIndex_));
+    ASSERT_NE(endNode, nullptr);
+    EXPECT_TRUE(endNode->IsLayoutComplete());
+
+    /**
+     * @tc.steps: step3. Expand swipe action with end direction.
+     * @tc.expected: The end node will be layout.
+     */
+    ListItemModelNG::ExpandSwipeAction(AceType::RawPtr(listItem), ListItemSwipeActionDirection::START);
+    pipelineContext->FlushUITaskWithSingleDirtyNode(listItem);
+    EXPECT_EQ(listItemPattern->swiperIndex_, ListItemSwipeIndex::SWIPER_START);
+    auto startNode = AceType::DynamicCast<FrameNode>(listItem->GetChildAtIndex(listItemPattern->startNodeIndex_));
+    ASSERT_NE(startNode, nullptr);
+    EXPECT_TRUE(startNode->IsLayoutComplete());
+    MockPipelineContext::TearDown();
+}
+
+/**
  * @tc.name: CollapseSwipeAction001
  * @tc.desc: Test ListItemPattern CollapseSwipeAction
  * @tc.type: FUNC

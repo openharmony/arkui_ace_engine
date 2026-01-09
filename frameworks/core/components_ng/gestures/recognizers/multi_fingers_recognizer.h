@@ -112,6 +112,7 @@ public:
         backupTouchPointsForSucceedBlock_.reset();
     }
 
+    void CheckCurrentFingers() const override;
 protected:
     void OnBeginGestureReferee(int32_t touchId, int32_t originalId, bool needUpdateChild = false) override
     {
@@ -156,6 +157,7 @@ protected:
     bool CheckFingerListInDownFingers(int32_t pointId) const;
 
     std::string DumpGestureInfo() const;
+    std::string GetGestureInfoString() const override;
 
     std::map<int32_t, TouchEvent> touchPoints_;
     std::list<FingerInfo> fingerList_;

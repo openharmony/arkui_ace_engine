@@ -111,6 +111,10 @@ export class ArkCustomComponentRootPeer extends PeerNode {
             ArkUIAniCustomNodeModule._CustomNode_AddChild(this.peer.ptr, childPeerPtr);
         }
     }
+
+    getChildPeerPtr(): KPointer {
+        return this.childPeerPtr;
+    }
 }
 export interface Root {
 }

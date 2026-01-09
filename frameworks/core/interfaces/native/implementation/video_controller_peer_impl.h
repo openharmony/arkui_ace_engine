@@ -18,7 +18,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/container_consts.h"
-#include "core/components/video/video_controller_v2.h"
+#include "core/components_ng/pattern/video/video_controller_v2.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 class VideoControllerPeerImpl : public Referenced {

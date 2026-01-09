@@ -34,6 +34,7 @@ constexpr int32_t DEFAULT_PAN_FINGERS = 1;
 constexpr int32_t AXIS_PAN_FINGERS = 1;
 constexpr float MIN_SPEED_THRESHOLD = 500.0f;
 constexpr float TOUCHPAD_STILL_THRESHOLD = 0.1;
+constexpr float DEFAULT_RECYCLE_ANGLE = 180.0f;
 
 } // namespace
 
@@ -171,8 +172,10 @@ void PanRecognizer::OnAccepted()
     if (!touchPoints_.empty()) {
         touchPoint = touchPoints_.begin()->second;
     }
-    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
-        isPostEventResult_, touchPoint.postEventNodeId);
+    auto postEventNodeId =
+        inputEventType_ == InputEventType::AXIS ? lastAxisEvent_.postEventNodeId : touchPoint.postEventNodeId;
+    localMatrix_ =
+        NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false, isPostEventResult_, postEventNodeId);
     SendCallbackMsg(onActionStart_, GestureCallbackType::START);
     isNeedResetVoluntarily_ = false;
     // only report the pan gesture starting for touch event
@@ -305,7 +308,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             lastRefereeState_ = refereeState_;
             refereeState_ = RefereeState::DETECTING;
         } else {
-            TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan gesture refereeState is %{public}d not READY", refereeState_);
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan not READY, info:%{public}s", GetGestureInfoString().c_str());
         }
     }
     HandlePanExtAccept();
@@ -612,6 +615,8 @@ bool PanRecognizer::HandlePanAccept()
     }
     if (TriggerGestureJudgeCallback() == GestureJudgeResult::REJECT) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        auto node = GetAttachedNode().Upgrade();
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan judge reject, %{public}s", node ? node->GetTag().c_str() : "");
         if (gestureInfo_ && gestureInfo_->GetType() == GestureTypeName::DRAG) {
             auto dragEventActuator = GetDragEventActuator();
             CHECK_NULL_RETURN(dragEventActuator, true);
@@ -764,7 +769,8 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
         return IsPanGestureAcceptInAllDirection(judgeDistance);
     }
-    if (fabs(averageDistance_.GetX()) > fabs(averageDistance_.GetY())) {
+    if (!NearZero(averageDistance_.GetX()) &&
+        fabs(averageDistance_.GetY() / averageDistance_.GetX()) < std::tan(angle_ * ACE_PI / DEFAULT_RECYCLE_ANGLE)) {
         return IsPanGestureAcceptInHorizontalDirection(judgeDistance);
     }
     return IsPanGestureAcceptInVerticalDirection(judgeDistance);
@@ -835,9 +841,10 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
         touchPoint = touchPoints_.begin()->second;
     }
     PointF localPoint(globalPoint_.GetX(), globalPoint_.GetY());
-    TransformForRecognizer(
-        localPoint, GetAttachedNode(), false, isPostEventResult_, touchPoint.postEventNodeId);
-    info.SetRawGlobalLocation(GetRawGlobalLocation(touchPoint.postEventNodeId));
+    auto postEventNodeId =
+        inputEventType_ == InputEventType::AXIS ? lastAxisEvent_.postEventNodeId : touchPoint.postEventNodeId;
+    TransformForRecognizer(localPoint, GetAttachedNode(), false, isPostEventResult_, postEventNodeId);
+    info.SetRawGlobalLocation(GetRawGlobalLocation(postEventNodeId));
     info.SetPointerId(inputEventType_ == InputEventType::AXIS ? lastAxisEvent_.id : lastTouchEvent_.id);
     info.SetTargetDisplayId(touchPoint.targetDisplayId);
     info.SetIsInterpolated(touchPoint.isInterpolated);
@@ -861,6 +868,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
         info.SetPointerEventId(lastAxisEvent_.touchEventId);
         info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
         info.SetPassThrough(lastAxisEvent_.passThrough);
+        info.SetPostEventNodeId(lastAxisEvent_.postEventNodeId);
     } else {
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
         info.SetGlobalDisplayLocation(lastTouchEvent_.GetGlobalDisplayOffset());
@@ -869,6 +877,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
         info.SetPointerEventId(lastTouchEvent_.touchEventId);
         info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
         info.SetPassThrough(lastTouchEvent_.passThrough);
+        info.SetPostEventNodeId(lastTouchEvent_.postEventNodeId);
     }
     info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
@@ -879,7 +888,6 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetRollAngle(lastTouchEvent_.rollAngle.value_or(0.0));
     info.SetPointerEvent(lastPointEvent_);
     info.SetIsPostEventResult(isPostEventResult_);
-    info.SetPostEventNodeId(lastTouchEvent_.postEventNodeId);
     info.SetLastAction(lastAction_);
     return info;
 }
@@ -1333,5 +1341,23 @@ void PanRecognizer::HandlePanGestureAccept(
         UIObserverHandler::GetInstance().NotifyPanGestureStateChange(
             info, Claim(this), node, { panGestureState, currentCallbackState_ });
     }
+}
+
+std::string PanRecognizer::GetGestureInfoString() const
+{
+    std::string gestureInfoStr = MultiFingersRecognizer::GetGestureInfoString();
+    gestureInfoStr.append(",FTE:");
+    gestureInfoStr.append(std::to_string(isFlushTouchEventsEnd_));
+    gestureInfoStr.append(",FD:");
+    gestureInfoStr.append(std::to_string(isForDrag_));
+    gestureInfoStr.append(",AM:");
+    gestureInfoStr.append(std::to_string(isAllowMouse_));
+    gestureInfoStr.append(",ST:");
+    gestureInfoStr.append(std::to_string(isStartTriggered_));
+    gestureInfoStr.append(",LA:");
+    gestureInfoStr.append(std::to_string(lastAction_));
+    gestureInfoStr.append(",AG:");
+    gestureInfoStr.append(std::to_string(static_cast<int32_t>(angle_)));
+    return gestureInfoStr;
 }
 } // namespace OHOS::Ace::NG

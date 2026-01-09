@@ -27,6 +27,10 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+const std::string TEXT_VALUE = "TextValue";
+} // namespace
+
 class TextTestNineNg : public TextBases {
 public:
     static void SetUpTestSuite();
@@ -99,7 +103,7 @@ HWTEST_F(TextTestNineNg, HandleOnTranslate001, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     stack->StartGetAccessRecordingFor(0);
     TextModelNG textModelNG;
-    textModelNG.Create("TextValue");
+    textModelNG.Create(TEXT_VALUE);
     stack->StopGetAccessRecording();
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -127,7 +131,7 @@ HWTEST_F(TextTestNineNg, OnHandleMoveStart001, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     stack->StartGetAccessRecordingFor(0);
     TextModelNG textModelNG;
-    textModelNG.Create("TextValue");
+    textModelNG.Create(TEXT_VALUE);
     stack->StopGetAccessRecording();
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -158,7 +162,7 @@ HWTEST_F(TextTestNineNg, OnMenuItemAction001, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     stack->StartGetAccessRecordingFor(0);
     TextModelNG textModelNG;
-    textModelNG.Create("TextValue");
+    textModelNG.Create(TEXT_VALUE);
     stack->StopGetAccessRecording();
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -220,7 +224,7 @@ HWTEST_F(TextTestNineNg, OnMenuItemAction002, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     stack->StartGetAccessRecordingFor(0);
     TextModelNG textModelNG;
-    textModelNG.Create("TextValue");
+    textModelNG.Create(TEXT_VALUE);
     stack->StopGetAccessRecording();
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
     ASSERT_NE(frameNode, nullptr);
@@ -276,7 +280,7 @@ HWTEST_F(TextTestNineNg, CheckHandleVisible001, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     stack->StartGetAccessRecordingFor(0);
     TextModelNG textModelNG;
-    textModelNG.Create("TextValue");
+    textModelNG.Create(TEXT_VALUE);
     stack->StopGetAccessRecording();
     auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
     ASSERT_NE(frameNode, nullptr);

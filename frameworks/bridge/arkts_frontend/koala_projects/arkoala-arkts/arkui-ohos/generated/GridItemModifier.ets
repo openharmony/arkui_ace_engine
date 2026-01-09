@@ -281,6 +281,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
         {
             this._rowStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._rowStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._rowStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -292,6 +293,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
         {
             this._rowEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._rowEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._rowEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -303,6 +305,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
         {
             this._columnStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._columnStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._columnStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -314,6 +317,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
         {
             this._columnEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._columnEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._columnEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -325,6 +329,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
         {
             this._selectable_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectable_0_flag = AttributeUpdaterFlag.SKIP
@@ -336,6 +341,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
         {
             this._selected_0_flag = AttributeUpdaterFlag.UPDATE
             this._selected_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selected_0_flag = AttributeUpdaterFlag.SKIP
@@ -347,6 +353,7 @@ export class GridItemModifier extends CommonMethodModifier implements GridItemAt
         {
             this._onSelect_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSelect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSelect_0_flag = AttributeUpdaterFlag.SKIP

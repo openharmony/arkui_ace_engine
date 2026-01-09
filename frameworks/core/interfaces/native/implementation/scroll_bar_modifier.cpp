@@ -54,6 +54,14 @@ void SetEnableNestedScrollImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     ScrollBarModelStatic::SetEnableNestedScroll(frameNode, convValue);
 }
+void SetScrollBarColorImpl(Ark_NativePointer node,
+                           const Opt_ColorMetrics* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
+    ScrollBarModelStatic::SetScrollBarColor(frameNode, convValue);
+}
 } // ScrollBarAttributeModifier
 const GENERATED_ArkUIScrollBarModifier* GetScrollBarModifier()
 {
@@ -61,6 +69,7 @@ const GENERATED_ArkUIScrollBarModifier* GetScrollBarModifier()
         ScrollBarModifier::ConstructImpl,
         ScrollBarInterfaceModifier::SetScrollBarOptionsImpl,
         ScrollBarAttributeModifier::SetEnableNestedScrollImpl,
+        ScrollBarAttributeModifier::SetScrollBarColorImpl,
     };
     return &ArkUIScrollBarModifierImpl;
 }

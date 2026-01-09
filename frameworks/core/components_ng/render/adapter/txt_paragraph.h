@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace::NG {
 
+using ReLayoutParagraphStyleBitmap = std::bitset<static_cast<size_t>(ParagraphStyleAttribute::MAX_TEXT_STYLE)>;
 // Paragraph is interface for drawing text and text paragraph.
 class TxtParagraph : public Paragraph {
     DECLARE_ACE_TYPE(NG::TxtParagraph, NG::Paragraph);
@@ -73,6 +74,8 @@ public:
     void Layout(float width) override;
     // interfaces for reLayout
     void ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles) override;
+    void ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles,
+        const std::optional<TextStyle>& firstValidTextStyle) override;
     void ReLayoutForeground(const TextStyle& textStyle) override;
     float GetHeight() override;
     float GetTextWidth() override;
@@ -129,6 +132,7 @@ public:
 
     bool DidExceedMaxLinesInner() override;
     std::string GetDumpInfo() override;
+    std::optional<void*> GetRawParagraph() override;
 
 protected:
     ParagraphStyle paraStyle_;

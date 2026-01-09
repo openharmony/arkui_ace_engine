@@ -20,7 +20,7 @@
 
 #include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"

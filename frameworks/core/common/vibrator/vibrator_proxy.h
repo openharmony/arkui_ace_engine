@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-class VibratorProxy : public Singleton<VibratorProxy>, public VibratorInterface {
+class ACE_FORCE_EXPORT VibratorProxy : public Singleton<VibratorProxy>, public VibratorInterface {
     DECLARE_SINGLETON(VibratorProxy);
 
 public:

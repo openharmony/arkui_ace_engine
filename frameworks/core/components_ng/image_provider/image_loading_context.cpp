@@ -247,14 +247,26 @@ void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage
     stateManager_->HandleCommand(ImageLoadingCommand::MAKE_CANVAS_IMAGE_SUCCESS);
 }
 
+void ImageLoadingContext::RemoveDownloadedImageCache(const ImageSourceInfo& src)
+{
+    if (src.GetSrcType() != SrcType::NETWORK) {
+        return;
+    }
+    DownloadManager::GetInstance()->RemoveUrlCache(src.GetSrc());
+    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineCtx);
+    auto cache = pipelineCtx->GetImageCache();
+    if (cache) {
+        cache->ClearCacheImgObj(src.GetKey());
+    }
+}
+
 void ImageLoadingContext::FailCallback(const std::string& errorMsg, const ImageErrorInfo& errorInfo)
 {
     errorInfo_ = errorInfo;
     errorMsg_ = errorMsg;
     needErrorCallBack_ = true;
-    if (src_.GetSrcType() == SrcType::NETWORK) {
-        DownloadManager::GetInstance()->RemoveUrlCache(src_.GetSrc());
-    }
+    RemoveDownloadedImageCache(src_);
     TAG_LOGD(AceLogTag::ACE_IMAGE, "fail-%{private}s-%{public}s-%{public}s", src_.ToString().c_str(),
         errorMsg.c_str(), imageDfxConfig_.ToStringWithoutSrc().c_str());
     CHECK_NULL_VOID(measureFinish_);

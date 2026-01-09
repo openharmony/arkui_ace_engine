@@ -1810,7 +1810,7 @@ static void OffTabContentUpdateWithOptions([[maybe_unused]] ani_env* env, [[mayb
 }
 
 static void OnNavDestinationUpdateWithId([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    ani_string type, ani_object options, ani_fn_object fnObj)
+    ani_object options, ani_fn_object fnObj)
 {
     if (!fnObj) {
         return;
@@ -1828,7 +1828,7 @@ static void OnNavDestinationUpdateWithId([[maybe_unused]] ani_env* env, [[maybe_
 }
 
 static void OffNavDestinationUpdateWithId([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    ani_string type, ani_object options, ani_fn_object fnObj)
+    ani_object options, ani_fn_object fnObj)
 {
     if (!fnObj) {
         return;
@@ -1846,7 +1846,7 @@ static void OffNavDestinationUpdateWithId([[maybe_unused]] ani_env* env, [[maybe
 }
 
 static void OnNavDestinationUpdateWithIdContext([[maybe_unused]] ani_env* env,
-    ani_string type, ani_object options, ani_fn_object fnObj)
+    ani_object options, ani_fn_object fnObj)
 {
     if (!fnObj) {
         return;
@@ -1869,7 +1869,7 @@ static void OnNavDestinationUpdateWithIdContext([[maybe_unused]] ani_env* env,
 }
 
 static void OffNavDestinationUpdateWithIdContext([[maybe_unused]] ani_env* env,
-    ani_string type, ani_object options, ani_fn_object fnObj)
+    ani_object options, ani_fn_object fnObj)
 {
     if (!fnObj) {
         return;

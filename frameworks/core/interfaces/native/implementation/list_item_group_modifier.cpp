@@ -64,7 +64,7 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
             auto builder = [uiNode]() -> RefPtr<UINode> {
                 return uiNode;
             };
-            ListItemGroupModelStatic::SetHeader(AceType::RawPtr(headerNode), std::move(builder));
+            // ListItemGroupModelStatic::SetHeader(AceType::RawPtr(headerNode), std::move(builder));
             }, node);
     }
     auto footer = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().footer);
@@ -75,7 +75,7 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
             auto builder = [uiNode]() -> RefPtr<UINode> {
                 return uiNode;
             };
-            ListItemGroupModelStatic::SetFooter(AceType::RawPtr(footerNode), std::move(builder));
+            // ListItemGroupModelStatic::SetFooter(AceType::RawPtr(footerNode), std::move(builder));
             }, node);
     }
 }

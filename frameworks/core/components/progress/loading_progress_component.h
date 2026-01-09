@@ -31,7 +31,7 @@ const Dimension ORBIT_RADIUS = 17.0_vp;
 const Color PROGRESS_COLOR = Color(0xff666666);
 const Color PROGRESS_COLOR_DARK = Color(0x99ffffff);
 
-class ACE_EXPORT LoadingProgressComponent : public RenderComponent {
+class ACE_FORCE_EXPORT LoadingProgressComponent : public RenderComponent {
     DECLARE_ACE_TYPE(LoadingProgressComponent, RenderComponent);
 
 public:

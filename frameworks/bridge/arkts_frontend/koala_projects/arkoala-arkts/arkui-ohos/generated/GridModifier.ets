@@ -16,8 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethod, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, EditModeOptions, OnWillScrollCallback, OnScrollCallback } from "./component/common"
-import { BarState, Color, CrownSensitivity, EdgeEffect, ScrollSource } from "./component/enums"
+import { CommonMethod, NestedScrollOptions, OnWillStopDraggingCallback, OnDidStopDraggingCallback, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod, OnItemDragStartCallback, ItemDragInfo, EditModeOptions, OnWillScrollCallback, OnScrollCallback } from "./component/common"
+import { BarState, Color, CrownSensitivity, EdgeEffect, FocusWrapMode, ScrollSource } from "./component/enums"
 import { Resource } from "global.resource"
 import { extractors, AttributeModifier } from "#handwritten"
 import { RectShape } from "@ohos.arkui.shape"
@@ -28,7 +28,7 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkGridPeer, ComputedBarAttribute, GridDirection, GridItemAlignment, GridAttribute } from "./component/grid"
 import { int32 } from "@koalaui/common"
-import { Length } from "./component/units"
+import { VoidCallback, ItemFillPolicy, Length, ScrollBarMargin } from "./component/units"
 import { OnScrollFrameBeginCallback } from "./component/scroll"
 import { ScrollState } from "./component/list"
 export class GridModifier extends CommonMethodModifier implements GridAttribute,AttributeModifier<GridAttribute> {
@@ -44,7 +44,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
     applyDisabledAttribute(instance: GridAttribute): void { }
     applySelectedAttribute(instance: GridAttribute): void { }
     _columnsTemplate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _columnsTemplate_0_0value?: string | undefined
+    _columnsTemplate_0_0value?: string | ItemFillPolicy | undefined
     _rowsTemplate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _rowsTemplate_0_0value?: string | undefined
     _columnsGap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -54,7 +54,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
     _scrollBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollBarWidth_0_0value?: double | string | undefined
     _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarColor_0_0value?: Color | int32 | string | undefined
+    _scrollBarColor_0_0value?: Color | int32 | string | Resource | undefined
     _scrollBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollBar_0_0value?: BarState | undefined
     _onScrollBarUpdate_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -97,6 +97,10 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
     _friction_0_0value?: double | Resource | undefined
     _alignItems_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _alignItems_0_0value?: GridItemAlignment | undefined
+    _focusWrapMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _focusWrapMode_0_0value?: FocusWrapMode | undefined
+    _syncLoad_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _syncLoad_0_0value?: boolean | undefined
     _editModeOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _editModeOptions_0_0value?: EditModeOptions | undefined
     _onScrollFrameBegin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -111,6 +115,22 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
     _edgeEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _edgeEffect_0_0value?: EdgeEffect | undefined
     _edgeEffect_0_1value?: EdgeEffectOptions | undefined
+    _scrollBarMargin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _scrollBarMargin_0_0value?: ScrollBarMargin | undefined
+    _contentStartOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentStartOffset_0_0value?: double | Resource | undefined
+    _contentEndOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentEndOffset_0_0value?: double | Resource | undefined
+    _onWillStartDragging_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillStartDragging_0_0value?: VoidCallback | undefined
+    _onWillStopDragging_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillStopDragging_0_0value?: OnWillStopDraggingCallback | undefined
+    _onDidStopDragging_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onDidStopDragging_0_0value?: OnDidStopDraggingCallback | undefined
+    _onWillStartFling_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillStartFling_0_0value?: VoidCallback | undefined
+    _onDidStopFling_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onDidStopFling_0_0value?: VoidCallback | undefined
     _onReachStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onReachStart_0_0value?: (() => void) | undefined
     _onReachEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -120,7 +140,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
     _onScrollStop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onScrollStop_0_0value?: (() => void) | undefined
     _flingSpeedLimit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _flingSpeedLimit_0_0value?: number | undefined
+    _flingSpeedLimit_0_0value?: double | undefined
     _clipContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _clipContent_0_0value?: ContentClipMode | RectShape | undefined
     _digitalCrownSensitivity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -138,7 +158,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._columnsTemplate_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setColumnsTemplateAttribute((this._columnsTemplate_0_0value as string | undefined));
+                    peer.setColumnsTemplateAttribute((this._columnsTemplate_0_0value as string | ItemFillPolicy | undefined));
                     this._columnsTemplate_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -148,7 +168,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._columnsTemplate_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setColumnsTemplateAttribute((undefined as string | undefined));
+                    peer.setColumnsTemplateAttribute((undefined as string | ItemFillPolicy | undefined));
                 }
             }
         }
@@ -228,7 +248,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._scrollBarColor_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | int32 | string | undefined));
+                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | int32 | string | Resource | undefined));
                     this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -238,7 +258,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._scrollBarColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setScrollBarColorAttribute((undefined as Color | int32 | string | undefined));
+                    peer.setScrollBarColorAttribute((undefined as Color | int32 | string | Resource | undefined));
                 }
             }
         }
@@ -638,6 +658,42 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
             }
         }
+        if (this._focusWrapMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._focusWrapMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFocusWrapModeAttribute((this._focusWrapMode_0_0value as FocusWrapMode | undefined));
+                    this._focusWrapMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._focusWrapMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._focusWrapMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFocusWrapModeAttribute((undefined as FocusWrapMode | undefined));
+                }
+            }
+        }
+        if (this._syncLoad_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._syncLoad_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSyncLoadAttribute((this._syncLoad_0_0value as boolean | undefined));
+                    this._syncLoad_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._syncLoad_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._syncLoad_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSyncLoadAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._onScrollFrameBegin_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onScrollFrameBegin_0_flag) {
@@ -728,6 +784,150 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
             }
         }
+        if (this._scrollBarMargin_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._scrollBarMargin_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setScrollBarMarginAttribute((this._scrollBarMargin_0_0value as ScrollBarMargin | undefined));
+                    this._scrollBarMargin_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._scrollBarMargin_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._scrollBarMargin_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setScrollBarMarginAttribute((undefined as ScrollBarMargin | undefined));
+                }
+            }
+        }
+        if (this._contentStartOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentStartOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setContentStartOffsetAttribute((this._contentStartOffset_0_0value as double | Resource | undefined));
+                    this._contentStartOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentStartOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentStartOffset_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setContentStartOffsetAttribute((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (this._contentEndOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentEndOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setContentEndOffsetAttribute((this._contentEndOffset_0_0value as double | Resource | undefined));
+                    this._contentEndOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentEndOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentEndOffset_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setContentEndOffsetAttribute((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (this._onWillStartDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillStartDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillStartDraggingAttribute((this._onWillStartDragging_0_0value as VoidCallback | undefined));
+                    this._onWillStartDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillStartDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillStartDragging_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillStartDraggingAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._onWillStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillStopDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillStopDraggingAttribute((this._onWillStopDragging_0_0value as OnWillStopDraggingCallback | undefined));
+                    this._onWillStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillStopDragging_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillStopDraggingAttribute((undefined as OnWillStopDraggingCallback | undefined));
+                }
+            }
+        }
+        if (this._onDidStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onDidStopDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnDidStopDraggingAttribute((this._onDidStopDragging_0_0value as OnDidStopDraggingCallback | undefined));
+                    this._onDidStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onDidStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onDidStopDragging_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnDidStopDraggingAttribute((undefined as OnDidStopDraggingCallback | undefined));
+                }
+            }
+        }
+        if (this._onWillStartFling_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillStartFling_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillStartFlingAttribute((this._onWillStartFling_0_0value as VoidCallback | undefined));
+                    this._onWillStartFling_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillStartFling_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillStartFling_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillStartFlingAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._onDidStopFling_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onDidStopFling_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnDidStopFlingAttribute((this._onDidStopFling_0_0value as VoidCallback | undefined));
+                    this._onDidStopFling_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onDidStopFling_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onDidStopFling_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnDidStopFlingAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
         if (this._onReachStart_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onReachStart_0_flag) {
@@ -804,7 +1004,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             switch (this._flingSpeedLimit_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as number | undefined));
+                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as double | undefined));
                     this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -814,7 +1014,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
                 default: {
                     this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFlingSpeedLimitAttribute((undefined as number | undefined));
+                    peer.setFlingSpeedLimitAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -903,7 +1103,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.columnsTemplate((undefined as string | undefined));
+                    this.columnsTemplate((undefined as string | ItemFillPolicy | undefined));
                 }
             }
         }
@@ -968,7 +1168,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.scrollBarColor((undefined as Color | int32 | string | undefined));
+                    this.scrollBarColor((undefined as Color | int32 | string | Resource | undefined));
                 }
             }
         }
@@ -1258,6 +1458,32 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
             }
         }
+        if (modifier._focusWrapMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._focusWrapMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.focusWrapMode(modifier._focusWrapMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.focusWrapMode((undefined as FocusWrapMode | undefined));
+                }
+            }
+        }
+        if (modifier._syncLoad_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._syncLoad_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.syncLoad(modifier._syncLoad_0_0value);
+                    break;
+                }
+                default: {
+                    this.syncLoad((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._onScrollFrameBegin_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onScrollFrameBegin_0_flag) {
@@ -1323,6 +1549,110 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                 }
             }
         }
+        if (modifier._scrollBarMargin_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._scrollBarMargin_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.scrollBarMargin(modifier._scrollBarMargin_0_0value);
+                    break;
+                }
+                default: {
+                    this.scrollBarMargin((undefined as ScrollBarMargin | undefined));
+                }
+            }
+        }
+        if (modifier._contentStartOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentStartOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentStartOffset(modifier._contentStartOffset_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentStartOffset((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._contentEndOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentEndOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentEndOffset(modifier._contentEndOffset_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentEndOffset((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._onWillStartDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillStartDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillStartDragging(modifier._onWillStartDragging_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillStartDragging((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onWillStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillStopDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillStopDragging(modifier._onWillStopDragging_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillStopDragging((undefined as OnWillStopDraggingCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onDidStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onDidStopDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onDidStopDragging(modifier._onDidStopDragging_0_0value);
+                    break;
+                }
+                default: {
+                    this.onDidStopDragging((undefined as OnDidStopDraggingCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onWillStartFling_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillStartFling_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillStartFling(modifier._onWillStartFling_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillStartFling((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onDidStopFling_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onDidStopFling_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onDidStopFling(modifier._onDidStopFling_0_0value);
+                    break;
+                }
+                default: {
+                    this.onDidStopFling((undefined as VoidCallback | undefined));
+                }
+            }
+        }
         if (modifier._onReachStart_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onReachStart_0_flag) {
@@ -1384,7 +1714,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
                     break;
                 }
                 default: {
-                    this.flingSpeedLimit((undefined as number | undefined));
+                    this.flingSpeedLimit((undefined as double | undefined));
                 }
             }
         }
@@ -1441,11 +1771,12 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
             }
         }
     }
-    columnsTemplate(value: string | undefined): this {
+    columnsTemplate(value: string | ItemFillPolicy | undefined): this {
         if (((this._columnsTemplate_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._columnsTemplate_0_0value) !== (value)))
         {
             this._columnsTemplate_0_flag = AttributeUpdaterFlag.UPDATE
             this._columnsTemplate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._columnsTemplate_0_flag = AttributeUpdaterFlag.SKIP
@@ -1457,6 +1788,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._rowsTemplate_0_flag = AttributeUpdaterFlag.UPDATE
             this._rowsTemplate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._rowsTemplate_0_flag = AttributeUpdaterFlag.SKIP
@@ -1468,6 +1800,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._columnsGap_0_flag = AttributeUpdaterFlag.UPDATE
             this._columnsGap_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._columnsGap_0_flag = AttributeUpdaterFlag.SKIP
@@ -1479,6 +1812,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._rowsGap_0_flag = AttributeUpdaterFlag.UPDATE
             this._rowsGap_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._rowsGap_0_flag = AttributeUpdaterFlag.SKIP
@@ -1490,17 +1824,19 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBarWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    scrollBarColor(value: Color | int32 | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
         if (((this._scrollBarColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBarColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1512,6 +1848,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._scrollBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBar_0_flag = AttributeUpdaterFlag.SKIP
@@ -1523,6 +1860,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onScrollBarUpdate_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollBarUpdate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollBarUpdate_0_flag = AttributeUpdaterFlag.SKIP
@@ -1534,6 +1872,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onScrollIndex_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollIndex_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollIndex_0_flag = AttributeUpdaterFlag.SKIP
@@ -1545,6 +1884,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._cachedCount_0_flag = AttributeUpdaterFlag.UPDATE
             this._cachedCount_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._cachedCount_0_flag = AttributeUpdaterFlag.SKIP
@@ -1556,6 +1896,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._editMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._editMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._editMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -1567,6 +1908,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._multiSelectable_0_flag = AttributeUpdaterFlag.UPDATE
             this._multiSelectable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._multiSelectable_0_flag = AttributeUpdaterFlag.SKIP
@@ -1578,6 +1920,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._maxCount_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxCount_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxCount_0_flag = AttributeUpdaterFlag.SKIP
@@ -1589,6 +1932,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._minCount_0_flag = AttributeUpdaterFlag.UPDATE
             this._minCount_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minCount_0_flag = AttributeUpdaterFlag.SKIP
@@ -1600,6 +1944,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._cellLength_0_flag = AttributeUpdaterFlag.UPDATE
             this._cellLength_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._cellLength_0_flag = AttributeUpdaterFlag.SKIP
@@ -1611,6 +1956,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._layoutDirection_0_flag = AttributeUpdaterFlag.UPDATE
             this._layoutDirection_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._layoutDirection_0_flag = AttributeUpdaterFlag.SKIP
@@ -1622,6 +1968,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._supportAnimation_0_flag = AttributeUpdaterFlag.UPDATE
             this._supportAnimation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._supportAnimation_0_flag = AttributeUpdaterFlag.SKIP
@@ -1644,6 +1991,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onItemDragStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDragStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDragStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1655,6 +2003,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onItemDragEnter_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDragEnter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDragEnter_0_flag = AttributeUpdaterFlag.SKIP
@@ -1666,6 +2015,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onItemDragMove_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDragMove_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDragMove_0_flag = AttributeUpdaterFlag.SKIP
@@ -1677,6 +2027,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onItemDragLeave_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDragLeave_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDragLeave_0_flag = AttributeUpdaterFlag.SKIP
@@ -1688,6 +2039,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onItemDrop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDrop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDrop_0_flag = AttributeUpdaterFlag.SKIP
@@ -1699,6 +2051,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._nestedScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1710,6 +2063,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableScrollInteraction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.SKIP
@@ -1721,6 +2075,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._friction_0_flag = AttributeUpdaterFlag.UPDATE
             this._friction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._friction_0_flag = AttributeUpdaterFlag.SKIP
@@ -1732,6 +2087,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._alignItems_0_flag = AttributeUpdaterFlag.UPDATE
             this._alignItems_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._alignItems_0_flag = AttributeUpdaterFlag.SKIP
@@ -1750,11 +2106,34 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         }
         return this
     }
+    focusWrapMode(value: FocusWrapMode | undefined): this {
+        if (((this._focusWrapMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._focusWrapMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._focusWrapMode_0_0value = value
+        } else
+        {
+            this._focusWrapMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    syncLoad(value: boolean | undefined): this {
+        if (((this._syncLoad_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._syncLoad_0_0value) !== (value)))
+        {
+            this._syncLoad_0_flag = AttributeUpdaterFlag.UPDATE
+            this._syncLoad_0_0value = value
+        } else
+        {
+            this._syncLoad_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         if (((this._onScrollFrameBegin_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollFrameBegin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.SKIP
@@ -1766,6 +2145,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onWillScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1777,6 +2157,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onDidScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDidScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDidScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1789,6 +2170,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
             this._cachedCount_1_flag = AttributeUpdaterFlag.UPDATE
             this._cachedCount_1_0value = count
             this._cachedCount_1_1value = show
+            this._state.fireChange()
         } else
         {
             this._cachedCount_1_flag = AttributeUpdaterFlag.SKIP
@@ -1801,9 +2183,98 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
             this._edgeEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._edgeEffect_0_0value = value
             this._edgeEffect_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._edgeEffect_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    scrollBarMargin(value: ScrollBarMargin | undefined): this {
+        if (((this._scrollBarMargin_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._scrollBarMargin_0_0value) !== (value)))
+        {
+            this._scrollBarMargin_0_flag = AttributeUpdaterFlag.UPDATE
+            this._scrollBarMargin_0_0value = value
+        } else
+        {
+            this._scrollBarMargin_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentStartOffset(value: double | Resource | undefined): this {
+        if (((this._contentStartOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._contentStartOffset_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentStartOffset_0_0value = value
+        } else
+        {
+            this._contentStartOffset_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentEndOffset(value: double | Resource | undefined): this {
+        if (((this._contentEndOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._contentEndOffset_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentEndOffset_0_0value = value
+        } else
+        {
+            this._contentEndOffset_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onWillStartDragging(value: VoidCallback | undefined): this {
+        if (((this._onWillStartDragging_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillStartDragging_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillStartDragging_0_0value = value
+        } else
+        {
+            this._onWillStartDragging_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
+        if (((this._onWillStopDragging_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillStopDragging_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillStopDragging_0_0value = value
+        } else
+        {
+            this._onWillStopDragging_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
+        if (((this._onDidStopDragging_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onDidStopDragging_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onDidStopDragging_0_0value = value
+        } else
+        {
+            this._onDidStopDragging_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onWillStartFling(value: VoidCallback | undefined): this {
+        if (((this._onWillStartFling_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillStartFling_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillStartFling_0_0value = value
+        } else
+        {
+            this._onWillStartFling_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onDidStopFling(value: VoidCallback | undefined): this {
+        if (((this._onDidStopFling_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onDidStopFling_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onDidStopFling_0_0value = value
+        } else
+        {
+            this._onDidStopFling_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -1812,6 +2283,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onReachStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReachStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReachStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1823,6 +2295,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onReachEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReachEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReachEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -1834,6 +2307,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onScrollStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1845,17 +2319,19 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    flingSpeedLimit(value: number | undefined): this {
+    flingSpeedLimit(value: double | undefined): this {
         if (((this._flingSpeedLimit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._flingSpeedLimit_0_0value) !== (value)))
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.UPDATE
             this._flingSpeedLimit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.SKIP
@@ -1867,6 +2343,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._clipContent_0_flag = AttributeUpdaterFlag.UPDATE
             this._clipContent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._clipContent_0_flag = AttributeUpdaterFlag.SKIP
@@ -1878,6 +2355,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
             this._digitalCrownSensitivity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
@@ -1889,6 +2367,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
         {
             this._backToTop_0_flag = AttributeUpdaterFlag.UPDATE
             this._backToTop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backToTop_0_flag = AttributeUpdaterFlag.SKIP
@@ -1901,6 +2380,7 @@ export class GridModifier extends CommonMethodModifier implements GridAttribute,
             this._fadingEdge_0_flag = AttributeUpdaterFlag.UPDATE
             this._fadingEdge_0_0value = enabled
             this._fadingEdge_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._fadingEdge_0_flag = AttributeUpdaterFlag.SKIP

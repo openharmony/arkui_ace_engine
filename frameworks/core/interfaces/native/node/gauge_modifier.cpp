@@ -24,7 +24,7 @@ const ArkUIGaugeModifier* GetGaugeModifier()
 {
     static const ArkUIGaugeModifier* cachedModifier = nullptr;
     if (cachedModifier == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("gauge");
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Gauge");
         CHECK_NULL_RETURN(module, nullptr);
         cachedModifier = reinterpret_cast<const ArkUIGaugeModifier*>(module->GetDynamicModifier());
     }
@@ -35,7 +35,7 @@ const CJUIGaugeModifier* GetCJUIGaugeModifier()
 {
     static const CJUIGaugeModifier* cachedModifier = nullptr;
     if (cachedModifier == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("gauge");
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Gauge");
         CHECK_NULL_RETURN(module, nullptr);
         cachedModifier = reinterpret_cast<const CJUIGaugeModifier*>(module->GetCjModifier());
     }

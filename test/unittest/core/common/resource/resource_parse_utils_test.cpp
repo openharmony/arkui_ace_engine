@@ -2421,4 +2421,127 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest068, TestSize.Level1)
     result = GetReplaceContentStr(0, "f", params, 0);
     EXPECT_NE(result, "45.670000"); // Double to string conversion may have precision
 }
+
+/**
+ * @tc.name: ResourceParseUtilsTest069
+ * @tc.desc: Test CompleteResObjFromColorWithAllowForceDark.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest069, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CompleteResObjFromColorWithAllowForceDark with cofigChangePerform false.
+     * @tc.expect: resObj is null.
+     */
+    RefPtr<ResourceObject> resObj;
+    Color color = Color::WHITE;
+    ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj, color, "", true);
+    EXPECT_EQ(resObj, nullptr);
+    ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj, color, "", false);
+    EXPECT_EQ(resObj, nullptr);
+
+    /**
+     * @tc.steps: step2. CompleteResObjFromColorWithAllowForceDark with cofigChangePerform true.
+     * @tc.expect: resObj is not null.
+     */
+    g_isConfigChangePerform = true;
+    auto invertFunc = [](uint32_t color) {
+        return ColorInverter::DefaultInverter(color);
+    };
+    ColorInverter::GetInstance().EnableColorInvert(Container::CurrentIdSafely(), "", std::move(invertFunc));
+    ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj, color, "", true);
+    EXPECT_NE(resObj, nullptr);
+    ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj, color, "", false);
+    EXPECT_NE(resObj, nullptr);
+
+    /**
+     * @tc.steps: step3. CompleteResObjFromColorWithAllowForceDark with current colormode is dark.
+     * @tc.expect: resObj is not null.
+     */
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj, color, "", true);
+    EXPECT_NE(resObj, nullptr);
+    ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj, color, "", false);
+    EXPECT_NE(resObj, nullptr);
+    MockContainer::SetMockColorMode(ColorMode::LIGHT);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest070
+ * @tc.desc: Test CompleteResObjFromColorWithAllowForceDark with different conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest070, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test CompleteResObjFromColorWithAllowForceDark with g_isConfigChangePerform false.
+     * @tc.expect: resObj remains nullptr.
+     */
+    RefPtr<ResourceObject> resObj;
+    Color color = Color::WHITE;
+    g_isConfigChangePerform = false;
+    ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj, color, "", true);
+    EXPECT_EQ(resObj, nullptr);
+    ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj, color, "", false);
+    EXPECT_EQ(resObj, nullptr);
+
+    /**
+     * @tc.steps: step2. Test CompleteResObjFromColorWithAllowForceDark with g_isConfigChangePerform true but no
+     * invertFunc.
+     * @tc.expect: resObj remains nullptr.
+     */
+    g_isConfigChangePerform = true;
+    ColorInverter::GetInstance().DisableColorInvert(Container::CurrentIdSafely(), "");
+    ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj, color, "", true);
+    EXPECT_EQ(resObj, nullptr);
+    ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj, color, "", false);
+    EXPECT_EQ(resObj, nullptr);
+
+    /**
+     * @tc.steps: step3. Test CompleteResObjFromColorWithAllowForceDark with g_isConfigChangePerform true and has
+     * invertFunc.
+     * @tc.expect: resObj is created and properties are set correctly.
+     */
+    auto invertFunc = [](uint32_t color) {
+        return ColorInverter::DefaultInverter(color);
+    };
+    ColorInverter::GetInstance().EnableColorInvert(Container::CurrentIdSafely(), "", std::move(invertFunc));
+    ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj, color, "testNode", true);
+    EXPECT_NE(resObj, nullptr);
+    EXPECT_FALSE(resObj->IsResource());
+    EXPECT_EQ(resObj->GetInstanceId(), Container::CurrentIdSafely());
+    EXPECT_EQ(resObj->GetNodeTag(), "testNode");
+    EXPECT_EQ(resObj->GetColorMode(), Container::CurrentColorMode());
+    EXPECT_FALSE(resObj->HasDarkResource());
+    ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj, color, "testNode", false);
+    EXPECT_NE(resObj, nullptr);
+    EXPECT_FALSE(resObj->IsResource());
+    EXPECT_EQ(resObj->GetInstanceId(), Container::CurrentIdSafely());
+    EXPECT_EQ(resObj->GetNodeTag(), "testNode");
+    EXPECT_EQ(resObj->GetColorMode(), Container::CurrentColorMode());
+    EXPECT_FALSE(resObj->HasDarkResource());
+
+    /**
+     * @tc.steps: step4. Test CompleteResObjFromColorWithAllowForceDark with dark mode.
+     * @tc.expect: color is inverted and stored correctly.
+     */
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    RefPtr<ResourceObject> resObj2;
+    Color color2 = Color::WHITE;
+    Color originalColor = color2;
+    ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj2, color2, "darkNode", true);
+    EXPECT_NE(resObj2, nullptr);
+    EXPECT_EQ(resObj2->GetColor(), originalColor);
+    EXPECT_NE(color2, originalColor);
+    Color color3 = Color::WHITE;
+    Color originalColor3 = color3;
+    ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj2, color3, "darkNode", false);
+    EXPECT_NE(resObj2, nullptr);
+    EXPECT_EQ(resObj2->GetColor(), originalColor3);
+    EXPECT_EQ(color3, originalColor3);
+
+    MockContainer::SetMockColorMode(ColorMode::LIGHT);
+    g_isConfigChangePerform = false;
+}
 } // namespace OHOS::Ace

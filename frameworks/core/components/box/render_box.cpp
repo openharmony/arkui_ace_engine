@@ -18,7 +18,7 @@
 #include "base/log/event_report.h"
 #include "core/components/box/box_component_helper.h"
 #include "core/components/container_modal/container_modal_constants.h"
-#include "core/components/text_field/render_text_field.h"
+#include "compatible/components/text_field/render_text_field.h"
 #include "core/components_v2/list/render_list.h"
 #include "core/gestures/parallel_recognizer.h"
 

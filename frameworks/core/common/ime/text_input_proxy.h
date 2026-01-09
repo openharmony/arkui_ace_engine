@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class TextInputProxy : public Singleton<TextInputProxy>, public TextInput {
+class ACE_FORCE_EXPORT TextInputProxy : public Singleton<TextInputProxy>, public TextInput {
     DECLARE_SINGLETON(TextInputProxy);
 
 public:

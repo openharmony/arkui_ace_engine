@@ -966,4 +966,25 @@ HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest018, TestSize.Level1)
     result = sequencedRecognizer->CheckGroupState();
     EXPECT_TRUE(result);
 }
+
+/**
+ * @tc.name: GetGestureInfoString001
+ * @tc.desc: Test SequencedRecognizer function: GetGestureInfoString
+ * @tc.type: FUNC
+ */
+HWTEST_F(SequencedRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create SequencedRecognizer.
+     */
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
+    RefPtr<SequencedRecognizer> sequencedRecognizer = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+
+    sequencedRecognizer->isEventHandoverNeeded_ = true;
+    sequencedRecognizer->currentIndex_ = 1;
+
+    std::string result = sequencedRecognizer->GetGestureInfoString();
+    EXPECT_THAT(result, HasSubstr("EHN:1"));
+    EXPECT_THAT(result, HasSubstr("CI:1"));
+}
 } // namespace OHOS::Ace::NG

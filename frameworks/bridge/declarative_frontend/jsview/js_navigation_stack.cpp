@@ -589,6 +589,9 @@ bool JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINod
         auto isEntry = GetIsEntryByIndex(index);
         TAG_LOGD(AceLogTag::ACE_NAVIGATION, "create destination node, isEntry %{public}d", isEntry);
         auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
+        if (pattern->GetIsStatic()) {
+            pattern->UpdateSerializedParam(ConvertParamToString(param, true));
+        }
         pattern->SetNavPathInfo(pathInfo);
         pattern->SetNavigationStack(WeakClaim(this));
     }

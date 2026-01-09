@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -331,8 +331,6 @@ template("declarative_js_engine") {
       "jsview/js_calendar.cpp",
       "jsview/js_calendar_controller.cpp",
       "jsview/js_calendar_picker.cpp",
-      "jsview/js_checkbox.cpp",
-      "jsview/js_checkboxgroup.cpp",
       "jsview/js_circle.cpp",
       "jsview/js_circle_shape.cpp",
       "jsview/js_clipboard.cpp",
@@ -465,7 +463,7 @@ template("declarative_js_engine") {
       "jsview/js_toggle.cpp",
       "jsview/js_toolbaritem.cpp",
       "jsview/js_touch_handler.cpp",
-      "jsview/js_union_container.cpp",
+      "jsview/js_union_effect_container.cpp",
       "jsview/js_utils.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
@@ -474,8 +472,6 @@ template("declarative_js_engine") {
       "jsview/js_view_functions.cpp",
       "jsview/js_view_measure_layout.cpp",
       "jsview/js_view_stack_processor.cpp",
-      "jsview/js_water_flow.cpp",
-      "jsview/js_water_flow_item.cpp",
       "jsview/js_water_flow_sections.cpp",
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
@@ -501,8 +497,6 @@ template("declarative_js_engine") {
       "jsview/models/canvas/canvas_model_impl.cpp",
       "jsview/models/canvas/canvas_rendering_context_2d_model_impl.cpp",
       "jsview/models/canvas/offscreen_canvas_rendering_context_2d_model_impl.cpp",
-      "jsview/models/checkbox_model_impl.cpp",
-      "jsview/models/checkboxgroup_model_impl.cpp",
       "jsview/models/circle_model_impl.cpp",
       "jsview/models/column_model_impl.cpp",
       "jsview/models/common_view_model_impl.cpp",
@@ -518,7 +512,6 @@ template("declarative_js_engine") {
       "jsview/models/grid_model_impl.cpp",
       "jsview/models/hyperlink_model_impl.cpp",
       "jsview/models/if_else_model_impl.cpp",
-      "jsview/models/image_animator_model_impl.cpp",
       "jsview/models/image_model_impl.cpp",
       "jsview/models/indexer_model_impl.cpp",
       "jsview/models/lazy_for_each_model_impl.cpp",
@@ -535,18 +528,15 @@ template("declarative_js_engine") {
       "jsview/models/page_transition_model_impl.cpp",
       "jsview/models/path_model_impl.cpp",
       "jsview/models/patternlock_model_impl.cpp",
-      "jsview/models/picker_model_impl.cpp",
       "jsview/models/polygon_model_impl.cpp",
       "jsview/models/progress_model_impl.cpp",
       "jsview/models/radio_model_impl.cpp",
       "jsview/models/rect_model_impl.cpp",
-      "jsview/models/refresh_model_impl.cpp",
       "jsview/models/relative_container_model_impl.cpp",
       "jsview/models/richeditor_model_impl.cpp",
       "jsview/models/row_model_impl.cpp",
       "jsview/models/scroll_bar_model_impl.cpp",
       "jsview/models/scroll_model_impl.cpp",
-      "jsview/models/search_model_impl.cpp",
       "jsview/models/select_model_impl.cpp",
       "jsview/models/shape_abstract_model_impl.cpp",
       "jsview/models/shape_model_impl.cpp",
@@ -558,21 +548,13 @@ template("declarative_js_engine") {
       "jsview/models/stepper_item_model_impl.cpp",
       "jsview/models/stepper_model_impl.cpp",
       "jsview/models/swiper_model_impl.cpp",
-      "jsview/models/tab_content_model_impl.cpp",
-      "jsview/models/tabs_model_impl.cpp",
       "jsview/models/text_clock_model_impl.cpp",
-      "jsview/models/text_field_model_impl.cpp",
       "jsview/models/text_model_impl.cpp",
       "jsview/models/text_timer_model_impl.cpp",
-      "jsview/models/textpicker_model_impl.cpp",
-      "jsview/models/timepicker_model_impl.cpp",
-      "jsview/models/toggle_model_impl.cpp",
       "jsview/models/view_abstract_model_impl.cpp",
       "jsview/models/view_context_model_impl.cpp",
       "jsview/models/view_full_update_model_impl.cpp",
       "jsview/models/view_partial_update_model_impl.cpp",
-      "jsview/models/water_flow_item_model_impl.cpp",
-      "jsview/models/water_flow_model_impl.cpp",
     ]
 
     if (!ace_engine_feature_wearable) {
@@ -612,15 +594,12 @@ template("declarative_js_engine") {
         config.rich_components_support) {
       sources += [
         "jsview/js_piece.cpp",
-        "jsview/js_rating.cpp",
-        "jsview/models/rating_model_impl.cpp",
       ]
       if (defined(config.video_components_support) &&
           config.video_components_support) {
         sources += [
           "jsview/js_video.cpp",
           "jsview/js_video_controller.cpp",
-          "jsview/models/video_model_impl.cpp",
         ]
       }
       if (defined(config.video_support_jsstack) &&
@@ -925,8 +904,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_calendar.cpp",
       "jsview/js_calendar_controller.cpp",
       "jsview/js_calendar_picker.cpp",
-      "jsview/js_checkbox.cpp",
-      "jsview/js_checkboxgroup.cpp",
       "jsview/js_circle.cpp",
       "jsview/js_circle_shape.cpp",
       "jsview/js_clipboard.cpp",
@@ -1004,7 +981,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_popups.cpp",
       "jsview/js_progress.cpp",
       "jsview/js_radio.cpp",
-      "jsview/js_rating.cpp",
       "jsview/js_rect.cpp",
       "jsview/js_rect_shape.cpp",
       "jsview/js_recycle_view.cpp",
@@ -1051,13 +1027,11 @@ template("declarative_js_engine_ng") {
       "jsview/js_toggle.cpp",
       "jsview/js_toolbaritem.cpp",
       "jsview/js_utils.cpp",
-      "jsview/js_union_container.cpp",
+      "jsview/js_union_effect_container.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
       "jsview/js_view_abstract_bridge.cpp",
       "jsview/js_view_context.cpp",
-      "jsview/js_water_flow.cpp",
-      "jsview/js_water_flow_item.cpp",
       "jsview/js_water_flow_sections.cpp",
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",

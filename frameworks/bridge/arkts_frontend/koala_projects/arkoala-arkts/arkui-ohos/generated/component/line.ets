@@ -229,8 +229,6 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements L
 export function LineImpl(
     @memo
     style: ((attributes: LineAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkLineComponent>((): ArkLineComponent => {
         return new ArkLineComponent()
@@ -239,7 +237,6 @@ export function LineImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

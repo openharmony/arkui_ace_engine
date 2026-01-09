@@ -85,6 +85,7 @@ export class PasteButtonModifier extends SecurityComponentMethodModifier impleme
         {
             this._onClick_0_flag = AttributeUpdaterFlag.UPDATE
             this._onClick_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onClick_0_flag = AttributeUpdaterFlag.SKIP

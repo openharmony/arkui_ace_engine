@@ -40,6 +40,8 @@ constexpr char WEB_ATTR_SCROLL_HEIGHT[] = "scrollHeight";
 constexpr char WEB_ATTR_XPATH[] = "xpath";
 constexpr char WEB_ATTR_SRC[] = "src";
 
+constexpr char WEB_NODE_TEXT[] = "$TEXT_NODE$";
+
 constexpr char WEB_ERROR_STRING[] = "";
 constexpr int32_t WEB_ERROR_INT = -1;
 constexpr double WEB_ERROR_DOUBLE = 0.0;
@@ -64,8 +66,10 @@ std::unique_ptr<JsonValue> ActiveNode::ToJson(const WebDomDocument& document) co
     nodeJson->Put(WEB_JSON_TYPE, tagName.c_str());
     nodeJson->Put(WEB_JSON_TYPE_OUTER, type.c_str());
 
-    auto absoluteRect = rect + document.GetOffset();
-    nodeJson->Put(WEB_JSON_RECT, absoluteRect.ToBounds().c_str());
+    if (tagName != WEB_NODE_TEXT) {
+        auto absoluteRect = rect + document.GetOffset();
+        nodeJson->Put(WEB_JSON_RECT, absoluteRect.ToBounds().c_str());
+    }
 
     if (attributes && attributes->IsValid()) {
         nodeJson->Put(WEB_JSON_ATTRS, attributes);

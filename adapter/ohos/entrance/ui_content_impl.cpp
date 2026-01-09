@@ -1461,7 +1461,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
             "%{public}d, deviceHeight: %{public}d",
             bundleName_.c_str(), moduleName_.c_str(), instanceId_, density, deviceWidth, deviceHeight);
     }
-
+    SystemProperties::ReadSystemParametersCallOnce();
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
     ColorMode colorMode = Container::CurrentColorMode();
@@ -1915,10 +1915,6 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     if (!fontWeightScale.empty()) {
         SystemProperties::SetFontWeightScale(string2float(fontWeightScale));
     }
-    auto deviceType = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::DEVICE_TYPE);
-    if (!deviceType.empty()) {
-        SystemProperties::SetConfigDeviceType(deviceType);
-    }
     auto smartGesture = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_SMART_GESTURE_SWITCH);
     if (!smartGesture.empty()) {
         auto canActivate = (smartGesture == OHOS::AppExecFwk::ConfigurationInner::SMART_GESTURE_AUTO);
@@ -2027,6 +2023,7 @@ void UIContentImpl::SetDeviceProperties()
         devicePhysicalWidth = displayInfo->GetPhysicalWidth();
         devicePhysicalHeight = displayInfo->GetPhysicalHeight();
     }
+    SystemProperties::ReadSystemParametersCallOnce();
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     SystemProperties::SetDevicePhysicalWidth(devicePhysicalWidth);
     SystemProperties::SetDevicePhysicalHeight(devicePhysicalHeight);
@@ -3107,7 +3104,9 @@ bool UIContentImpl::ProcessBackPressed()
     CHECK_NULL_RETURN(taskExecutor, false);
     taskExecutor->PostTask(
         []() {
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "backpressed");
+            auto value = JsonUtil::CreateSharedPtrJson();
+            value->Put("GestureType", "backpressed");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString());
         },
         TaskExecutor::TaskType::UI, "ArkUIReportBackPressedEvent");
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
@@ -3921,14 +3920,14 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
                     KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
                 }
-            }, TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid", PriorityType::VIP);
+            }, TaskExecutor::TaskType::UI, "ArkUIUpdateOriginAvoidAreaAndExecuteKeyboardAvoid");
         return;
     }
 
     auto taskId = viewportConfigMgr_->MakeTaskId();
     auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_,
                     instanceId = instanceId_, info, isDynamicRender = isDynamicRender_, animationOpt, avoidAreas,
-                    taskId, viewportConfigMgr = viewportConfigMgr_]() {
+                    taskId, weak = WeakPtr(viewportConfigMgr_)]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         auto avoidAreaMap = UpdateSafeArea(pipelineContext, avoidAreas);
@@ -3989,7 +3988,10 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         SubwindowManager::GetInstance()->OnWindowSizeChanged(container->GetInstanceId(),
             Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),
             static_cast<WindowSizeChangeReason>(reason));
-        viewportConfigMgr->UpdateViewConfigTaskDone(taskId);
+        auto viewportConfigMgr = weak.Upgrade();
+        if (viewportConfigMgr) {
+            viewportConfigMgr->UpdateViewConfigTaskDone(taskId);
+        }
         if (pipelineContext && reason == OHOS::Rosen::WindowSizeChangeReason::OCCUPIED_AREA_CHANGE) {
             TAG_LOGD(ACE_KEYBOARD, "KeyboardAvoid in the UpdateViewportConfig task");
             KeyboardAvoid(reason, instanceId, pipelineContext, info, container);
@@ -4093,9 +4095,15 @@ void UIContentImpl::NotifyWindowMode(OHOS::Rosen::WindowMode mode)
     CHECK_NULL_VOID(taskExecutor);
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(pipeline);
-    if (window_) {
-        pipeline->SetIsLayoutFullScreen(window_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
-    }
+    taskExecutor->PostSyncTask(
+        [weak = WeakPtr<NG::PipelineContext>(pipeline), window = window_]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            if (window) {
+                pipeline->SetIsLayoutFullScreen(window->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUINotifyLayoutFullScreen");
     taskExecutor->PostTask(
         [weak = WeakPtr<NG::PipelineContext>(pipeline), mode]() {
             auto pipeline = weak.Upgrade();
@@ -4376,6 +4384,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         deviceWidth = defaultDisplay->GetWidth();
         deviceHeight = defaultDisplay->GetHeight();
     }
+    SystemProperties::ReadSystemParametersCallOnce();
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo;
     auto context = context_.lock();
@@ -5849,11 +5858,12 @@ void sendCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
 
 void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)
 {
+    const int32_t GET_INSPECTOR_TREE_TIMEOUT_TIME = 1500;
     // set get inspector tree function for ui session manager
     auto callback = [weakTaskExecutor = taskExecutor](bool onlyNeedVisible, ParamConfig config) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
+        taskExecutor->PostSyncTaskTimeout(
             [onlyNeedVisible, config]() {
                 auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
@@ -5863,8 +5873,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
                     pipeline->GetInspectorTree(false, config);
                 }
             },
-            TaskExecutor::TaskType::UI, "UiSessionGetInspectorTree",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            TaskExecutor::TaskType::UI, GET_INSPECTOR_TREE_TIMEOUT_TIME, "UiSessionGetInspectorTree");
     };
     UiSessionManager::GetInstance()->SaveInspectorTreeFunction(callback);
     auto webCallback = [weakTaskExecutor = taskExecutor](bool isRegister) {
@@ -5893,6 +5902,25 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     RegisterHighlightSpecifiedContentCallback(taskExecutor);
     RegisterSelectTextCallback(taskExecutor);
     SaveGetStateMgmtInfoFunction(taskExecutor);
+    SaveGetWebInfoByRequestFunction(taskExecutor);
+}
+
+void UIContentImpl::SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto&& getWebInfoCallback = [weakTaskExecutor = taskExecutor](int32_t webId, const std::string& request) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [webId, request]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                auto uiTranslateManager = pipeline->GetUiTranslateManagerImpl();
+                uint32_t windowId = pipeline->GetWindowId();
+                uiTranslateManager->GetWebInfoByRequest(windowId, webId, request);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionWebInfoByRequest");
+    };
+    UiSessionManager::GetInstance()->SaveGetWebInfoByRequestFunction(getWebInfoCallback);
 }
 
 void UIContentImpl::RegisterGetSpecifiedContentOffsetsCallback(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6419,6 +6447,23 @@ void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& 
             },
             TaskExecutor::TaskType::UI, "UiSessionContentChangeDetectStop");
     });
+}
+
+void UIContentImpl::SetXComponentDisplayConstraintEnabled(bool isEnable)
+{
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT,
+        "[%{public}s][%{public}s][%{public}d]: SetXComponentDisplayConstraintEnabled:"
+        "isEnable %{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, isEnable);
+    ContainerScope scope(instanceId_);
+    auto task = [id = instanceId_, isEnable]() {
+        auto container = AceEngine::Get().GetContainer(id);
+        CHECK_NULL_VOID(container);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->SetXComponentDisplayConstraintEnabled(isEnable);
+    };
+    ExecuteUITask(std::move(task), "ArkUISetXComponentDisplayConstraintEnabled");
 }
 
 void UIContentImpl::SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor)

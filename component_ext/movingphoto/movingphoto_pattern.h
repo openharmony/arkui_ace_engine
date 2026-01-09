@@ -32,7 +32,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/media_player.h"
 #include "core/components_ng/render/render_surface.h"
-#include "core/components/video/video_utils.h"
+#include "core/components_ng/pattern/video/video_utils.h"
 #include "core/components/image/image_event.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
@@ -208,6 +208,7 @@ private:
         RefPtr<ImageSource> imageSrc, SizeF& imageSize, float imageW, float imageL, RefPtr<FrameNode>& host);
     void SetRenderContextBounds(const SizeF& movingPhotoNodeSize, const SizeF& VideoFrameSize);
     void SetRenderContextBoundsInXmage(const SizeF& movingPhotoNodeSize, const SizeF& videoFrameSize);
+    SizeF SetVideoFrameSize(const SizeF& layoutSize, const RefPtr<MovingPhotoLayoutProperty>& layoutProperty);
     SizeF CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize);
     SizeF CalculateFitFill(const SizeF& layoutSize);
     SizeF CalculateFitCover(const SizeF& rawSize, const SizeF& layoutSize);

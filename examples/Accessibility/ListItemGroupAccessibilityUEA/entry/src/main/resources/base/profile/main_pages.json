@@ -1,0 +1,10 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/EmptyUEA",
+    "pages/OnfocusUEA",
+    "pages/UECNestingFullScreen",
+    "pages/UECNestingFullScreen2",
+    "pages/PhotoPickerUEA"
+  ]
+}

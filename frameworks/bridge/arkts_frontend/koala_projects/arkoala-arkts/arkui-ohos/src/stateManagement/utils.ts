@@ -80,10 +80,10 @@ export class UIUtils {
     }
 
     private static generatePathLambda(callbacks: (() => Any)[], paths?: string[]): IMonitorPathInfo[] {
-        return callbacks.map((callback: () => Any, index: number): IMonitorPathInfo => {
+        return callbacks.map((callback: () => Any, index: int): IMonitorPathInfo => {
             const currentPath: string = !paths || index >= paths.length
                 ? `${UIUtils.DEFAULT_PATH}${UIUtils.currentIndex_++}`
-                : paths[Double.toInt(index)];
+                : paths[index];
 
             return UIUtils.createPathInfo(callback, currentPath);
         });

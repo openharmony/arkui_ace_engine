@@ -51,7 +51,7 @@
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/core/components/text_overlay/text_overlay_theme.h"
 #include "frameworks/core/components_ng/pattern/web/web_model_ng.h"
-#include "frameworks/core/components_v2/inspector/textinput_composed_element.h"
+#include "frameworks/compatible/components/input/textinput_composed_element.h"
 
 using namespace testing;
 using namespace testing::ext;

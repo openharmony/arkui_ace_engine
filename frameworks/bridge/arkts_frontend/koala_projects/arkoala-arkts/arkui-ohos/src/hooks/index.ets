@@ -46,6 +46,7 @@ import { default as EventHub } from "application.EventHub";
 import { default as UIAbilityContext } from "application.UIAbilityContext";
 import { CommonMethod, StateStyles, ArkCommonMethodComponent, ArkCommonMethodPeer, CustomProperty, GestureMask, GestureType, Gesture, GestureGroup, UIGestureEvent, DragPreviewOptions, DragInteractionOptions, UniformDataType, DragEventInternal, FunctionKey, ModifierKey } from "#generated";
 import { CommonMethodModifier } from "../CommonMethodModifier"
+import { ModifierState } from '../CommonModifier';
 import { AnimateParam } from "#generated";
 import { GestureModifier } from "#generated";
 import { CanvasRenderer, ImageData, OffscreenCanvas, RenderingContextSettings, CanvasRenderingContext2D, OffscreenCanvasRenderingContext2D, VoidCallback, } from "#generated";
@@ -59,6 +60,8 @@ import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
 import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkImagePeer, ImageErrorCallback, ArkTabsComponent } from "#generated";
 import { ArkWaterFlowComponent, WaterFlowOptions } from '#generated';
+import { ArkListItemGroupComponent, ListItemGroupOptions } from '#generated';
+import { ListItemGroupHandWritten } from './ListItemGroupHandWritten';
 import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
 import { TabsOpsHandWritten } from "./TabsOpsHandWritten";
 import { WaterFlowHandWritten } from './WaterFlowHandWritten';
@@ -84,6 +87,8 @@ import { WebHandWritten } from "./WebHandWritten";
 import { ArkSaveButtonComponent, ArkSaveButtonPeer, SaveButtonCallback, ArkPasteButtonComponent, ArkPasteButtonPeer, PasteButtonCallback } from '#generated';
 import { SaveButtonOpsHandWritten } from './SaveButtonOpsHandWritten';
 import { PasteButtonOpsHandWritten } from './PasteButtonOpsHandWritten';
+import { ArkGaugeComponent, ArkGaugePeer, GaugeIndicatorOptions } from "#generated";
+import { GaugeExtender } from "#generated"
 
 export function hookId(component: object, value?: string) {}
 
@@ -215,6 +220,19 @@ export function hookDragEventGetSummary(event: DragEventInternal) : unifiedDataC
   return ArkUIAniModule._DragEvent_Get_Summary(event.peer!.ptr)
 }
 
+class StateStyleModifierState extends ModifierState {
+    fireChange(): void {
+        return;
+    }
+}
+
+class StateStyleCommonMethodModifier extends CommonMethodModifier {
+    constructor() {
+        super()
+        this._state = new StateStyleModifierState();
+    }
+}
+
 export function hookStateStyleImpl(
   receiver: ArkCommonMethodComponent,
   value: StateStyles | undefined
@@ -253,7 +271,7 @@ export function hookStateStyleImpl(
       return;
     }
 
-    let cm = new CommonMethodModifier();
+    let cm = new StateStyleCommonMethodModifier();
 
     if (currentState.value === UI_STATE_NORMAL) {
         value?.normal?.(cm)
@@ -748,6 +766,10 @@ export function hookWaterFlowOptionsImpl(node: ArkWaterFlowComponent, options: W
   WaterFlowHandWritten.hookWaterFlowOptionsImpl(node, options)
 }
 
+export function hookListItemGroupOptionsImpl(node: ArkListItemGroupComponent, options: ListItemGroupOptions | undefined): void {
+  ListItemGroupHandWritten.hookListItemGroupOptionsImpl(node, options)
+}
+
 export function hookTextPickerDivider(receiver: ArkTextPickerComponent | ArkTextPickerPeer,
   value: DividerOptions | null | undefined): void {
   const peer: ArkTextPickerPeer =
@@ -797,4 +819,28 @@ export function hookSaveButtonOnClick(
 export function hookPasteButtonOnClick(
   receiver: ArkPasteButtonComponent | ArkPasteButtonPeer, value: PasteButtonCallback | undefined): void {
     PasteButtonOpsHandWritten.hookPasteButtonOnClickImpl(receiver, value);
+}
+
+export function hookGaugeIndicator(receiver: ArkGaugeComponent | ArkGaugePeer,
+  value: GaugeIndicatorOptions | null | undefined): void {
+
+  const gaugePeer: ArkGaugePeer =
+    receiver instanceof ArkGaugeComponent ? (receiver as ArkGaugeComponent).getPeer() :
+      (receiver as ArkGaugePeer);
+  if (!gaugePeer) {
+    return;
+  }
+
+  let value_casted: GaugeIndicatorOptions | undefined;
+  if (value === undefined) {
+    value_casted = {
+      icon: undefined,
+      space: undefined
+    }
+  } else if (value === null) {
+    value_casted = undefined;
+  } else {
+    value_casted = value as (GaugeIndicatorOptions | undefined)
+  }
+  GaugeExtender.setIndicator(gaugePeer.peer.ptr, value_casted)
 }

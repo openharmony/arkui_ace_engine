@@ -15,7 +15,9 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_COMMON_CONFIGURATION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_COMMON_CONFIGURATION_H
+#include <functional>
 
+#include "core/components_ng/base/frame_node.h"
 namespace OHOS::Ace::NG {
 class CommonConfiguration {
 
@@ -24,6 +26,14 @@ public:
     ~CommonConfiguration() = default;
     bool enabled_ = false;
 };
+
+class ToggleConfiguration : public CommonConfiguration {
+public:
+    ToggleConfiguration(bool enabled, bool isOn) : CommonConfiguration(enabled), isOn_(isOn) {}
+    bool isOn_;
+};
+
+using SwitchMakeCallback = std::function<RefPtr<FrameNode>(const ToggleConfiguration& toggleConfiguration)>;
 
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_COMMON_CONFIGURATION_H

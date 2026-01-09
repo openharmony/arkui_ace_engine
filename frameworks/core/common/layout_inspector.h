@@ -38,7 +38,7 @@ using PixelMapPair = std::pair<uint64_t, std::shared_ptr<Media::PixelMap>>;
 
 class LayoutInspector {
 public:
-    static void SupportInspector();
+    ACE_FORCE_EXPORT static void SupportInspector();
     static void SetlayoutInspectorStatus(int32_t containerId);
     static void GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId);
     static void CreateLayoutInfo(int32_t containerId);
