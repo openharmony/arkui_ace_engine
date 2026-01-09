@@ -1015,4 +1015,30 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerThumbnailTimerTest001, Te
     longPressRecognizer->ThumbnailTimer(0);
     EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::READY);
 }
+
+/**
+ * @tc.name: GetGestureInfoString001
+ * @tc.desc: Test LongPressRecognizer function: GetGestureInfoString
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
+        FINGER_NUMBER, false);
+
+    longPressRecognizer->useCatchMode_ = false;
+    longPressRecognizer->isForDrag_ = true;
+    longPressRecognizer->isDisableMouseLeft_ = true;
+    longPressRecognizer->longPressFingerCountForSequence_ = 1;
+    longPressRecognizer->isOnActionTriggered_ = true;
+    longPressRecognizer->lastAction_ = 1;
+
+    std::string result = longPressRecognizer->GetGestureInfoString();
+    EXPECT_THAT(result, HasSubstr("UCM:0"));
+    EXPECT_THAT(result, HasSubstr("FD:1"));
+    EXPECT_THAT(result, HasSubstr("DML:1"));
+    EXPECT_THAT(result, HasSubstr("LFCFS:1"));
+    EXPECT_THAT(result, HasSubstr("OAT:1"));
+    EXPECT_THAT(result, HasSubstr("LA:1"));
+}
 } // namespace OHOS::Ace::NG

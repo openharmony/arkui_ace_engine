@@ -308,7 +308,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             lastRefereeState_ = refereeState_;
             refereeState_ = RefereeState::DETECTING;
         } else {
-            TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan gesture refereeState is %{public}d not READY", refereeState_);
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan not READY, info:%{public}s", GetGestureInfoString().c_str());
         }
     }
     HandlePanExtAccept();
@@ -615,6 +615,8 @@ bool PanRecognizer::HandlePanAccept()
     }
     if (TriggerGestureJudgeCallback() == GestureJudgeResult::REJECT) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        auto node = GetAttachedNode().Upgrade();
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan judge reject, %{public}s", node ? node->GetTag().c_str() : "");
         if (gestureInfo_ && gestureInfo_->GetType() == GestureTypeName::DRAG) {
             auto dragEventActuator = GetDragEventActuator();
             CHECK_NULL_RETURN(dragEventActuator, true);
@@ -1339,5 +1341,23 @@ void PanRecognizer::HandlePanGestureAccept(
         UIObserverHandler::GetInstance().NotifyPanGestureStateChange(
             info, Claim(this), node, { panGestureState, currentCallbackState_ });
     }
+}
+
+std::string PanRecognizer::GetGestureInfoString() const
+{
+    std::string gestureInfoStr = MultiFingersRecognizer::GetGestureInfoString();
+    gestureInfoStr.append(",FTE:");
+    gestureInfoStr.append(std::to_string(isFlushTouchEventsEnd_));
+    gestureInfoStr.append(",FD:");
+    gestureInfoStr.append(std::to_string(isForDrag_));
+    gestureInfoStr.append(",AM:");
+    gestureInfoStr.append(std::to_string(isAllowMouse_));
+    gestureInfoStr.append(",ST:");
+    gestureInfoStr.append(std::to_string(isStartTriggered_));
+    gestureInfoStr.append(",LA:");
+    gestureInfoStr.append(std::to_string(lastAction_));
+    gestureInfoStr.append(",AG:");
+    gestureInfoStr.append(std::to_string(static_cast<int32_t>(angle_)));
+    return gestureInfoStr;
 }
 } // namespace OHOS::Ace::NG

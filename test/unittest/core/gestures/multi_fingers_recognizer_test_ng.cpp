@@ -259,6 +259,7 @@ public:
         std::map<int32_t, TouchEvent> emptyTouchPoints;
         return emptyTouchPoints;
     }
+    void CheckCurrentFingers() const {};
 };
 
 /**
@@ -386,5 +387,87 @@ HWTEST_F(MultiFingersRecognizerTestNg, Test009, TestSize.Level1)
     }
     clickRecognizer->UpdateFingerListInfo();
     EXPECT_EQ(clickRecognizer->lastPointEvent_, nullptr);
+}
+
+/**
+ * @tc.name: GetGestureInfoString001
+ * @tc.desc: Test MultiFingersRecognizerTestNg function: GetGestureInfoString with touchPoints_
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+
+    /**
+     * @tc.steps: call clickRecognizer with empty touchPoints_;
+     * @tc.expected: result equal.
+     */
+    std::string result = clickRecognizer->GetGestureInfoString();
+    EXPECT_THAT(result, HasSubstr("TP:[]"));
+
+    /**
+     * @tc.steps: call clickRecognizer with not empty touchPoints_;
+     * @tc.expected: result equal.
+     */
+    TouchEvent event;
+    event.id = 1;
+    event.originalId = 2;
+    clickRecognizer->touchPoints_[0] = event;
+    result = clickRecognizer->GetGestureInfoString();
+    EXPECT_THAT(result, HasSubstr("TP:[,0->(1,2)]"));
+}
+
+/**
+ * @tc.name: GetGestureInfoString002
+ * @tc.desc: Test MultiFingersRecognizerTestNg function: GetGestureInfoString with activeFingers_
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, GetGestureInfoString002, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+
+    /**
+     * @tc.steps: call clickRecognizer with empty activeFingers_;
+     * @tc.expected: result equal.
+     */
+    std::string result = clickRecognizer->GetGestureInfoString();
+    EXPECT_THAT(result, HasSubstr("TP:[]"));
+
+    /**
+     * @tc.steps: call clickRecognizer with not empty activeFingers_;
+     * @tc.expected: result equal.
+     */
+    clickRecognizer->activeFingers_.emplace_back(1);
+    result = clickRecognizer->GetGestureInfoString();
+    EXPECT_THAT(result, HasSubstr("AF:[,1]"));
+}
+
+/**
+ * @tc.name: GetGestureInfoString003
+ * @tc.desc: Test MultiFingersRecognizerTestNg function: GetGestureInfoString with backupTouchPointsForSucceedBlock_
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiFingersRecognizerTestNg, GetGestureInfoString003, TestSize.Level1)
+{
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+
+    /**
+     * @tc.steps: call clickRecognizer with empty backupTouchPointsForSucceedBlock_;
+     * @tc.expected: result equal.
+     */
+    std::string result = clickRecognizer->GetGestureInfoString();
+    EXPECT_THAT(result, HasSubstr("TP:[]"));
+
+    /**
+     * @tc.steps: call clickRecognizer with not empty backupTouchPointsForSucceedBlock_;
+     * @tc.expected: result equal.
+     */
+    TouchEvent event;
+    event.id = 1;
+    event.originalId = 2;
+    clickRecognizer->touchPoints_[0] = event;
+    clickRecognizer->SetTouchPointsForSucceedBlock();
+    result = clickRecognizer->GetGestureInfoString();
+    EXPECT_THAT(result, HasSubstr("BTP:[,0->(1,2)]"));
 }
 }; // namespace OHOS::Ace::NG

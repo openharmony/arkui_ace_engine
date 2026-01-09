@@ -503,4 +503,13 @@ void SequencedRecognizer::CleanRecognizerStateVoluntarily()
     }
 }
 
+std::string SequencedRecognizer::GetGestureInfoString() const
+{
+    std::string gestureInfoStr = MultiFingersRecognizer::GetGestureInfoString();
+    gestureInfoStr.append(",EHN:");
+    gestureInfoStr.append(std::to_string(isEventHandoverNeeded_));
+    gestureInfoStr.append(",CI:");
+    gestureInfoStr.append(std::to_string(currentIndex_));
+    return gestureInfoStr;
+}
 } // namespace OHOS::Ace::NG
