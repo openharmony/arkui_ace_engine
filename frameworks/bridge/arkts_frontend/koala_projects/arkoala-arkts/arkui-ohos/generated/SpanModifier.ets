@@ -30,7 +30,7 @@ import { LengthMetrics } from "arkui.Graphics"
 import { ModifierState } from './CommonModifier'
 export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }

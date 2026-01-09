@@ -17,17 +17,17 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { ModifierState } from './CommonModifier'
 import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkBaseSpanPeer, TextBackgroundStyle, BaseSpan } from "./component/span"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { CommonMethod } from "./component/common"
 import { LengthMetrics } from "arkui.Graphics"
 export class BaseSpanModifier extends CommonMethodModifier implements BaseSpan,AttributeModifier<BaseSpan> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
