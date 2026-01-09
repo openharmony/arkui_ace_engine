@@ -155,6 +155,7 @@ bool ImageSourcePreview::IsHeifWithoutAlpha()
 
 ImageRotateOrientation ImageSourcePreview::GetImageOrientation()
 {
+    CHECK_NULL_RETURN(codec_, {});
     auto origin = codec_->getOrigin();
     return GetImageRotateOrientation(origin);
 }
