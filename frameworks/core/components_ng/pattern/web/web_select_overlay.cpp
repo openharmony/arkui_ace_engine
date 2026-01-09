@@ -97,9 +97,6 @@ bool WebSelectOverlay::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuPar
     auto host = pattern->GetHost();
     CHECK_NULL_RETURN(host, false);
     StartListenSelectOverlayParentScroll(host);
-    auto delegate = pattern->delegate_;
-    CHECK_NULL_RETURN(delegate, false);
-    delegate->OnTextSelectionChange(delegate->GetLastSelectionText(), true);
     ProcessOverlay({ .animation = true });
     SetTouchHandleExistState(true);
     return true;
@@ -1051,6 +1048,7 @@ void WebSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst
     CHECK_NULL_VOID(pattern);
     auto delegate = pattern->delegate_;
     CHECK_NULL_VOID(delegate);
+    pattern->SetTextSelectionEnable(true);
     RectF handleRect = ChangeHandleHeight(event, isFirst);
     TouchInfo touchPoint;
     touchPoint.id = 0;
@@ -1076,6 +1074,8 @@ void WebSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     CHECK_NULL_VOID(pattern);
     auto delegate = pattern->delegate_;
     CHECK_NULL_VOID(delegate);
+    pattern->SetTextSelectionEnable(false);
+    delegate->OnTextSelectionChange(delegate->GetLastSelectionText());
     DetectSelectedText(GetSelectedText());
     TouchInfo touchPoint;
     touchPoint.id = 0;
@@ -1089,7 +1089,6 @@ void WebSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         pattern->SetOverlayCreating(false);
         delegate->HandleTouchCancel();
     }
-    delegate->OnTextSelectionChange(delegate->GetLastSelectionText(), true);
     UpdateTouchHandleForOverlay(true);
     if (!IsShowMenu()) {
         ChangeVisibilityOfQuickMenu();
