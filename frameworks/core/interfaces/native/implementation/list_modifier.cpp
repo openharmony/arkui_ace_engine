@@ -654,10 +654,12 @@ void SetLanesImpl(Ark_NativePointer node,
         if (lanes.value().index() == 0) {
             int lane = std::get<0>(lanes.value());
             ListModelStatic::SetLanes(frameNode, lane);
+            ListModelStatic::ResetItemFillPolicy(frameNode);
             ListModelStatic::SetLaneConstrain(frameNode, Dimension(), Dimension());
         } else if (lanes.value().index() == 1) {
             auto dimensions = std::get<1>(lanes.value());
             ListModelStatic::SetLanes(frameNode, 1);
+            ListModelStatic::ResetItemFillPolicy(frameNode);
             ListModelStatic::SetLaneConstrain(frameNode, std::get<0>(dimensions), std::get<1>(dimensions));
         } else {
             auto itemFillPolicy = std::get<2>(lanes.value());
@@ -694,13 +696,15 @@ void SetCachedCount1Impl(Ark_NativePointer node,
         },
         [frameNode, showValue](const Ark_CacheCountInfo& value1) {
             NG::CacheRange cacheRange = { 1, 1 };
-            auto minValue = Converter::Convert<int32_t>(value1.minCount);
-            auto maxValue = Converter::Convert<int32_t>(value1.maxCount);
-            cacheRange.min = minValue < 0 ? 1 : minValue;
-            cacheRange.max = maxValue < 0 ? 1 : maxValue;
+            int32_t minCacheCount = Converter::OptConvert<int32_t>(value1.minCount).value_or(1);
+            int32_t maxCacheCount = Converter::OptConvert<int32_t>(value1.maxCount).value_or(minCacheCount);
+            minCacheCount = minCacheCount < 0 ? 1 : minCacheCount;
+            maxCacheCount = maxCacheCount < 0 ? minCacheCount : maxCacheCount;
+            cacheRange.min = minCacheCount;
+            cacheRange.max = maxCacheCount;
             ListModelStatic::SetCacheRange(frameNode, cacheRange, showValue.value_or(false));
         },
-        [frameNode, showValue]() { ListModelStatic::SetCachedCount(frameNode, std::nullopt, showValue); });
+        [frameNode, showValue]() { ListModelStatic::SetCachedCount(frameNode, 1, showValue); });
 }
 } // ListAttributeModifier
 const GENERATED_ArkUIListModifier* GetListModifier()
