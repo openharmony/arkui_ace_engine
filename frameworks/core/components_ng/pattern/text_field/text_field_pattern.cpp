@@ -9260,7 +9260,30 @@ void TextFieldPattern::TriggerAvoidOnCaretChange()
     if (selectOverlay_) {
         selectOverlay_->AddAvoidKeyboardCallback(isCustomKeyboardAttached_);
     }
+#if defined(CROSS_PLATFORM)
+    if (pipeline->IsLayouting()) {
+        pipeline->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this)] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (!pattern->HasFocus()) {
+                    return;
+                }
+                auto host = pattern->GetHost();
+                CHECK_NULL_VOID(host);
+                auto pipeline = host->GetContext();
+                CHECK_NULL_VOID(pipeline);
+                auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+                CHECK_NULL_VOID(textFieldManager);
+                textFieldManager->TriggerAvoidOnCaretChange();
+            },
+            TaskExecutor::TaskType::UI, "ArkUITextFieldScrollToSafeArea", PriorityType::IMMEDIATE);
+    } else {
+        textFieldManager->TriggerAvoidOnCaretChange();
+    }
+#else
     textFieldManager->TriggerAvoidOnCaretChange();
+#endif
     auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
     SetLastCaretPos(caretPos);
 }
