@@ -854,6 +854,7 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
     });
     scrollEffect->SetInitLeadingCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
         auto scroll = weakScroll.Upgrade();
+        CHECK_NULL_RETURN(scroll, 0.0);
         if (scroll && !scroll->IsRowReverse() && !scroll->IsColReverse()) {
             return 0.0;
         }
