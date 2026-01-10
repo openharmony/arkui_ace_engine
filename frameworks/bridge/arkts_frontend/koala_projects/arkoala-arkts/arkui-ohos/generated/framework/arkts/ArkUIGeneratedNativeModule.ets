@@ -1633,6 +1633,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RichEditorAttribute_setDataDetectorConfig(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _RichEditorAttribute_setEnableSelectedDataDetector(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _RichEditorAttribute_setCaretColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RichEditorAttribute_setSelectedBackgroundColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -1663,9 +1665,15 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RichEditorAttribute_setMaxLines(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _RichEditorAttribute_setEnableAutoSpacing(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _RichEditorAttribute_setKeyboardAppearance(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RichEditorAttribute_setStopBackPress(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RichEditorAttribute_setScrollBarColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RichEditorAttribute_setUndoStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RichEditorAttribute_setSingleLine(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -2426,6 +2434,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TextAttribute_setLineSpacing(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TextAttribute_setTextAlign(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAttribute_setTextVerticalAlign(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TextAttribute_setLineHeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -4948,6 +4958,18 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LazyForEachOps_SyncOnMoveOps(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _LeadingMarginSpan_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _LeadingMarginSpan_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _LeadingMarginSpan_getOnDraw_callback(ptr: KPointer): KPointer
+    @ani.unsafe.Direct
+    native static _LeadingMarginSpan_setOnDraw_callback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _LeadingMarginSpan_getGetLeadingMargin_callback(ptr: KPointer): KPointer
+    @ani.unsafe.Direct
+    native static _LeadingMarginSpan_setGetLeadingMargin_callback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _LetterSpacingStyle_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _LetterSpacingStyle_getFinalizer(): KPointer
@@ -5470,6 +5492,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _ParagraphStyle_getTextAlign(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
+    native static _ParagraphStyle_getTextVerticalAlign(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
     native static _ParagraphStyle_getTextIndent(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _ParagraphStyle_getMaxLines(ptr: KPointer): KInteropReturnBuffer
@@ -5481,6 +5505,8 @@ export class ArkUIGeneratedNativeModule {
     native static _ParagraphStyle_getLeadingMargin(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _ParagraphStyle_getParagraphSpacing(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _ParagraphStyle_getLeadingMarginSpan(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _ParagraphStyle_getTextDirection(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
@@ -5740,6 +5766,8 @@ export class ArkUIGeneratedNativeModule {
     native static _RichEditorBaseController_getTypingStyle(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _RichEditorBaseController_setTypingStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _RichEditorBaseController_setTypingParagraphStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _RichEditorBaseController_setSelection(ptr: KPointer, selectionStart: KInt, selectionEnd: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick

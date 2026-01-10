@@ -1251,6 +1251,8 @@ typedef struct Callback_DragEvent_Opt_String_Void Callback_DragEvent_Opt_String_
 typedef struct Opt_Callback_DragEvent_Opt_String_Void Opt_Callback_DragEvent_Opt_String_Void;
 typedef struct Callback_DrawContext_CustomSpanDrawInfo_Void Callback_DrawContext_CustomSpanDrawInfo_Void;
 typedef struct Opt_Callback_DrawContext_CustomSpanDrawInfo_Void Opt_Callback_DrawContext_CustomSpanDrawInfo_Void;
+typedef struct Callback_DrawContext_LeadingMarginSpanDrawInfo_Void Callback_DrawContext_LeadingMarginSpanDrawInfo_Void;
+typedef struct Opt_Callback_DrawContext_LeadingMarginSpanDrawInfo_Void Opt_Callback_DrawContext_LeadingMarginSpanDrawInfo_Void;
 typedef struct Callback_DrawContext_Void Callback_DrawContext_Void;
 typedef struct Opt_Callback_DrawContext_Void Opt_Callback_DrawContext_Void;
 typedef struct Callback_EditableTextChangeValue_Boolean Callback_EditableTextChangeValue_Boolean;
@@ -1313,6 +1315,10 @@ typedef struct Callback_KeyEvent_Boolean Callback_KeyEvent_Boolean;
 typedef struct Opt_Callback_KeyEvent_Boolean Opt_Callback_KeyEvent_Boolean;
 typedef struct Callback_KeyEvent_Void Callback_KeyEvent_Void;
 typedef struct Opt_Callback_KeyEvent_Void Opt_Callback_KeyEvent_Void;
+typedef struct Callback_LengthMetrics Callback_LengthMetrics;
+typedef struct Opt_Callback_LengthMetrics Opt_Callback_LengthMetrics;
+typedef struct Callback_LengthMetrics_Void Callback_LengthMetrics_Void;
+typedef struct Opt_Callback_LengthMetrics_Void Opt_Callback_LengthMetrics_Void;
 typedef struct Callback_Long_Void Callback_Long_Void;
 typedef struct Opt_Callback_Long_Void Opt_Callback_Long_Void;
 typedef struct Callback_Map_String_RecordData_Void Callback_Map_String_RecordData_Void;
@@ -1719,6 +1725,8 @@ typedef struct OnOverrideUrlLoadingCallback OnOverrideUrlLoadingCallback;
 typedef struct Opt_OnOverrideUrlLoadingCallback Opt_OnOverrideUrlLoadingCallback;
 typedef struct OnPasteCallback OnPasteCallback;
 typedef struct Opt_OnPasteCallback Opt_OnPasteCallback;
+typedef struct OnPrepareMenuCallback OnPrepareMenuCallback;
+typedef struct Opt_OnPrepareMenuCallback Opt_OnPrepareMenuCallback;
 typedef struct OnPickerCallback OnPickerCallback;
 typedef struct Opt_OnPickerCallback Opt_OnPickerCallback;
 typedef struct OnRadioChangeCallback OnRadioChangeCallback;
@@ -2214,6 +2222,11 @@ typedef struct Ark_LargestContentfulPaint Ark_LargestContentfulPaint;
 typedef struct Opt_LargestContentfulPaint Opt_LargestContentfulPaint;
 typedef struct Ark_LayoutConstraint Ark_LayoutConstraint;
 typedef struct Opt_LayoutConstraint Opt_LayoutConstraint;
+typedef struct LeadingMarginSpanPeer LeadingMarginSpanPeer;
+typedef struct LeadingMarginSpanPeer* Ark_LeadingMarginSpan;
+typedef struct Opt_LeadingMarginSpan Opt_LeadingMarginSpan;
+typedef struct Ark_LeadingMarginSpanDrawInfo Ark_LeadingMarginSpanDrawInfo;
+typedef struct Opt_LeadingMarginSpanDrawInfo Opt_LeadingMarginSpanDrawInfo;
 typedef struct Ark_LengthMetrics Ark_LengthMetrics;
 typedef struct Opt_LengthMetrics Opt_LengthMetrics;
 typedef struct Ark_LengthMetricsCustom Ark_LengthMetricsCustom;
@@ -5313,6 +5326,7 @@ typedef enum Ark_ImageSpanAlignment {
     ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM = 3,
     ARK_IMAGE_SPAN_ALIGNMENT_CENTER = 2,
     ARK_IMAGE_SPAN_ALIGNMENT_TOP = 1,
+    ARK_IMAGE_SPAN_ALIGNMENT_FOLLOW_PARAGRAPH = 5,
 } Ark_ImageSpanAlignment;
 typedef struct Opt_ImageSpanAlignment {
     Ark_Tag tag;
@@ -6994,6 +7008,25 @@ typedef struct Opt_TextCase {
     Ark_Tag tag;
     Ark_TextCase value;
 } Opt_TextCase;
+typedef enum Ark_TextChangeReason {
+    ARK_TEXT_CHANGE_REASON_UNKNOWN = 0,
+    ARK_TEXT_CHANGE_REASON_INPUT = 1,
+    ARK_TEXT_CHANGE_REASON_PASTE = 2,
+    ARK_TEXT_CHANGE_REASON_CUT = 3,
+    ARK_TEXT_CHANGE_REASON_DRAG = 4,
+    ARK_TEXT_CHANGE_REASON_AUTO_FILL = 5,
+    ARK_TEXT_CHANGE_REASON_AI_WRITE = 6,
+    ARK_TEXT_CHANGE_REASON_REDO = 7,
+    ARK_TEXT_CHANGE_REASON_UNDO = 8,
+    ARK_TEXT_CHANGE_REASON_CONTROLLER = 9,
+    ARK_TEXT_CHANGE_REASON_ACCESSIBILITY = 10,
+    ARK_TEXT_CHANGE_REASON_COLLABORATION = 11,
+    ARK_TEXT_CHANGE_REASON_STYLUS = 12,
+} Ark_TextChangeReason;
+typedef struct Opt_TextChangeReason {
+    Ark_Tag tag;
+    Ark_TextChangeReason value;
+} Opt_TextChangeReason;
 typedef enum Ark_TextContentStyle {
     ARK_TEXT_CONTENT_STYLE_DEFAULT = 0,
     ARK_TEXT_CONTENT_STYLE_INLINE = 1,
@@ -7116,6 +7149,16 @@ typedef struct Opt_TextSpanType {
     Ark_Tag tag;
     Ark_TextSpanType value;
 } Opt_TextSpanType;
+typedef enum Ark_TextVerticalAlign {
+    ARK_TEXT_VERTICAL_ALIGN_BASELINE = 0,
+    ARK_TEXT_VERTICAL_ALIGN_BOTTOM = 1,
+    ARK_TEXT_VERTICAL_ALIGN_CENTER = 2,
+    ARK_TEXT_VERTICAL_ALIGN_TOP = 3,
+} Ark_TextVerticalAlign;
+typedef struct Opt_TextVerticalAlign {
+    Ark_Tag tag;
+    Ark_TextVerticalAlign value;
+} Opt_TextVerticalAlign;
 typedef enum Ark_ThemeColorMode {
     ARK_THEME_COLOR_MODE_SYSTEM = 0,
     ARK_THEME_COLOR_MODE_LIGHT = 1,
@@ -7259,6 +7302,14 @@ typedef struct Opt_uiObserver_RouterPageState {
     Ark_Tag tag;
     Ark_uiObserver_RouterPageState value;
 } Opt_uiObserver_RouterPageState;
+typedef enum Ark_UndoStyle {
+    ARK_UNDO_STYLE_CLEAR_STYLE = 0,
+    ARK_UNDO_STYLE_KEEP_STYLE = 1,
+} Ark_UndoStyle;
+typedef struct Opt_UndoStyle {
+    Ark_Tag tag;
+    Ark_UndoStyle value;
+} Opt_UndoStyle;
 typedef enum Ark_uniformTypeDescriptor_UniformDataType {
     ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_ENTITY,
     ARK_UNIFORM_TYPE_DESCRIPTOR_UNIFORM_DATA_TYPE_OBJECT,
@@ -10918,6 +10969,16 @@ typedef struct Opt_Callback_DrawContext_CustomSpanDrawInfo_Void {
     Ark_Tag tag;
     Callback_DrawContext_CustomSpanDrawInfo_Void value;
 } Opt_Callback_DrawContext_CustomSpanDrawInfo_Void;
+typedef struct Callback_DrawContext_LeadingMarginSpanDrawInfo_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_DrawContext context, const Ark_LeadingMarginSpanDrawInfo drawInfo);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DrawContext context, const Ark_LeadingMarginSpanDrawInfo drawInfo);
+} Callback_DrawContext_LeadingMarginSpanDrawInfo_Void;
+typedef struct Opt_Callback_DrawContext_LeadingMarginSpanDrawInfo_Void {
+    Ark_Tag tag;
+    Callback_DrawContext_LeadingMarginSpanDrawInfo_Void value;
+} Opt_Callback_DrawContext_LeadingMarginSpanDrawInfo_Void;
 typedef struct Callback_DrawContext_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -11248,6 +11309,26 @@ typedef struct Opt_Callback_KeyEvent_Void {
     Ark_Tag tag;
     Callback_KeyEvent_Void value;
 } Opt_Callback_KeyEvent_Void;
+typedef struct Callback_LengthMetrics {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Callback_LengthMetrics_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Callback_LengthMetrics_Void continuation);
+} Callback_LengthMetrics;
+typedef struct Opt_Callback_LengthMetrics {
+    Ark_Tag tag;
+    Callback_LengthMetrics value;
+} Opt_Callback_LengthMetrics;
+typedef struct Callback_LengthMetrics_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_LengthMetrics value);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_LengthMetrics value);
+} Callback_LengthMetrics_Void;
+typedef struct Opt_Callback_LengthMetrics_Void {
+    Ark_Tag tag;
+    Callback_LengthMetrics_Void value;
+} Opt_Callback_LengthMetrics_Void;
 typedef struct Callback_Long_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13268,6 +13349,16 @@ typedef struct Opt_OnPasteCallback {
     Ark_Tag tag;
     OnPasteCallback value;
 } Opt_OnPasteCallback;
+typedef struct OnPrepareMenuCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Array_TextMenuItem menuItems, const Callback_Array_TextMenuItem_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Array_TextMenuItem menuItems, const Callback_Array_TextMenuItem_Void continuation);
+} OnPrepareMenuCallback;
+typedef struct Opt_OnPrepareMenuCallback {
+    Ark_Tag tag;
+    OnPrepareMenuCallback value;
+} Opt_OnPrepareMenuCallback;
 typedef struct OnPickerCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -14918,6 +15009,7 @@ typedef struct Ark_EditMenuOptions {
     /* kind: Interface */
     Opt_OnCreateMenuCallback onCreateMenu;
     Opt_OnMenuItemClickCallback onMenuItemClick;
+    Opt_OnPrepareMenuCallback onPrepareMenu;
 } Ark_EditMenuOptions;
 typedef struct Opt_EditMenuOptions {
     Ark_Tag tag;
@@ -15225,6 +15317,7 @@ typedef struct Ark_GestureStyleInterface {
     /* kind: Interface */
     Opt_Callback_ClickEvent_Void onClick;
     Opt_Callback_GestureEvent_Void onLongPress;
+    Opt_Callback_TouchEvent_Void onTouch;
 } Ark_GestureStyleInterface;
 typedef struct Opt_GestureStyleInterface {
     Ark_Tag tag;
@@ -15492,6 +15585,25 @@ typedef struct Opt_LayoutConstraint {
     Ark_Tag tag;
     Ark_LayoutConstraint value;
 } Opt_LayoutConstraint;
+typedef struct Opt_LeadingMarginSpan {
+    Ark_Tag tag;
+    Ark_LeadingMarginSpan value;
+} Opt_LeadingMarginSpan;
+typedef struct Ark_LeadingMarginSpanDrawInfo {
+    /* kind: Interface */
+    Ark_Float64 x;
+    Ark_Float64 top;
+    Ark_Float64 bottom;
+    Ark_Float64 baseline;
+    Ark_TextDirection direction;
+    Ark_Float64 start;
+    Ark_Float64 end;
+    Ark_Boolean first;
+} Ark_LeadingMarginSpanDrawInfo;
+typedef struct Opt_LeadingMarginSpanDrawInfo {
+    Ark_Tag tag;
+    Ark_LeadingMarginSpanDrawInfo value;
+} Opt_LeadingMarginSpanDrawInfo;
 typedef struct Ark_LengthMetrics {
     /* kind: Interface */
     Ark_LengthUnit unit;
@@ -19251,6 +19363,7 @@ typedef struct Ark_RichEditorChangeValue {
     Array_RichEditorTextSpanResult replacedSpans;
     Array_RichEditorImageSpanResult replacedImageSpans;
     Array_RichEditorTextSpanResult replacedSymbolSpans;
+    Opt_TextChangeReason changeReason;
 } Ark_RichEditorChangeValue;
 typedef struct Opt_RichEditorChangeValue {
     Ark_Tag tag;
@@ -20854,6 +20967,7 @@ typedef struct Ark_TextDataDetectorConfig {
     Opt_Callback_String_Void onDetectResultUpdate;
     Opt_ResourceColor color;
     Opt_DecorationStyleInterface decoration;
+    Opt_Boolean enablePreviewMenu;
 } Ark_TextDataDetectorConfig;
 typedef struct Opt_TextDataDetectorConfig {
     Ark_Tag tag;
@@ -22123,12 +22237,14 @@ typedef struct Opt_ParagraphStyle {
 typedef struct Ark_ParagraphStyleInterface {
     /* kind: Interface */
     Opt_TextAlign textAlign;
+    Opt_TextVerticalAlign textVerticalAlign;
     Opt_LengthMetrics textIndent;
     Opt_Int32 maxLines;
     Opt_TextOverflow overflow;
     Opt_WordBreak wordBreak;
     Opt_Union_LengthMetrics_LeadingMarginPlaceholder leadingMargin;
     Opt_LengthMetrics paragraphSpacing;
+    Opt_LeadingMarginSpan leadingMarginSpan;
     Opt_TextDirection textDirection;
 } Ark_ParagraphStyleInterface;
 typedef struct Opt_ParagraphStyleInterface {
@@ -22262,6 +22378,7 @@ typedef struct Opt_RichEditorLayoutStyle {
 typedef struct Ark_RichEditorParagraphStyle {
     /* kind: Interface */
     Opt_TextAlign textAlign;
+    Opt_TextVerticalAlign textVerticalAlign;
     Opt_Union_Dimension_LeadingMarginPlaceholder leadingMargin;
     Opt_WordBreak wordBreak;
     Opt_LineBreakStrategy lineBreakStrategy;
@@ -25092,6 +25209,8 @@ typedef struct GENERATED_ArkUIRichEditorModifier {
                                  const Opt_Boolean* value);
     void (*setDataDetectorConfig)(Ark_NativePointer node,
                                   const Opt_TextDataDetectorConfig* value);
+    void (*setEnableSelectedDataDetector)(Ark_NativePointer node,
+                                          const Opt_Boolean* value);
     void (*setCaretColor)(Ark_NativePointer node,
                           const Opt_ResourceColor* value);
     void (*setSelectedBackgroundColor)(Ark_NativePointer node,
@@ -25122,10 +25241,16 @@ typedef struct GENERATED_ArkUIRichEditorModifier {
                          const Opt_Int32* value);
     void (*setMaxLines)(Ark_NativePointer node,
                         const Opt_Int32* value);
+    void (*setEnableAutoSpacing)(Ark_NativePointer node,
+                                 const Opt_Boolean* value);
     void (*setKeyboardAppearance)(Ark_NativePointer node,
                                   const Opt_KeyboardAppearance* value);
     void (*setStopBackPress)(Ark_NativePointer node,
                              const Opt_Boolean* value);
+    void (*setScrollBarColor)(Ark_NativePointer node,
+                              const Opt_ColorMetrics* value);
+    void (*setUndoStyle)(Ark_NativePointer node,
+                         const Opt_UndoStyle* value);
     void (*setSingleLine)(Ark_NativePointer node,
                           const Opt_Boolean* value);
     void (*setCompressLeadingPunctuation)(Ark_NativePointer node,
@@ -26038,6 +26163,8 @@ typedef struct GENERATED_ArkUITextModifier {
                            const Opt_LengthMetrics* value);
     void (*setTextAlign)(Ark_NativePointer node,
                          const Opt_TextAlign* value);
+    void (*setTextVerticalAlign)(Ark_NativePointer node,
+                                 const Opt_TextVerticalAlign* value);
     void (*setLineHeight)(Ark_NativePointer node,
                           const Opt_Union_F64_String_Resource* value);
     void (*setTextOverflow)(Ark_NativePointer node,
@@ -28670,6 +28797,18 @@ typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
                           const Opt_ItemDragEventHandler* onMoveDragEventOps);
 } GENERATED_ArkUILazyForEachOpsAccessor;
 
+typedef struct GENERATED_ArkUILeadingMarginSpanAccessor {
+    void (*destroyPeer)(Ark_LeadingMarginSpan peer);
+    Ark_LeadingMarginSpan (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    Callback_DrawContext_LeadingMarginSpanDrawInfo_Void (*getOnDraw_callback)(Ark_LeadingMarginSpan peer);
+    void (*setOnDraw_callback)(Ark_LeadingMarginSpan peer,
+                               const Callback_DrawContext_LeadingMarginSpanDrawInfo_Void* onDraw_callback);
+    Callback_LengthMetrics (*getGetLeadingMargin_callback)(Ark_LeadingMarginSpan peer);
+    void (*setGetLeadingMargin_callback)(Ark_LeadingMarginSpan peer,
+                                         const Callback_LengthMetrics* getLeadingMargin_callback);
+} GENERATED_ArkUILeadingMarginSpanAccessor;
+
 typedef struct GENERATED_ArkUILetterSpacingStyleAccessor {
     void (*destroyPeer)(Ark_LetterSpacingStyle peer);
     Ark_LetterSpacingStyle (*construct)(const Ark_LengthMetrics* value);
@@ -29254,12 +29393,14 @@ typedef struct GENERATED_ArkUIParagraphStyleAccessor {
     Ark_ParagraphStyle (*construct)(const Opt_ParagraphStyleInterface* value);
     Ark_NativePointer (*getFinalizer)();
     Opt_TextAlign (*getTextAlign)(Ark_ParagraphStyle peer);
+    Opt_TextVerticalAlign (*getTextVerticalAlign)(Ark_ParagraphStyle peer);
     Opt_Float64 (*getTextIndent)(Ark_ParagraphStyle peer);
     Opt_Int32 (*getMaxLines)(Ark_ParagraphStyle peer);
     Opt_TextOverflow (*getOverflow)(Ark_ParagraphStyle peer);
     Opt_WordBreak (*getWordBreak)(Ark_ParagraphStyle peer);
     Opt_Union_F64_LeadingMarginPlaceholder (*getLeadingMargin)(Ark_ParagraphStyle peer);
     Opt_Float64 (*getParagraphSpacing)(Ark_ParagraphStyle peer);
+    Opt_LeadingMarginSpan (*getLeadingMarginSpan)(Ark_ParagraphStyle peer);
     Opt_TextDirection (*getTextDirection)(Ark_ParagraphStyle peer);
 } GENERATED_ArkUIParagraphStyleAccessor;
 
@@ -29614,6 +29755,8 @@ typedef struct GENERATED_ArkUIRichEditorBaseControllerAccessor {
     Opt_RichEditorTextStyle (*getTypingStyle)(Ark_RichEditorBaseController peer);
     void (*setTypingStyle)(Ark_RichEditorBaseController peer,
                            const Ark_RichEditorTextStyle* value);
+    void (*setTypingParagraphStyle)(Ark_RichEditorBaseController peer,
+                                    const Opt_RichEditorParagraphStyle* style);
     void (*setSelection)(Ark_RichEditorBaseController peer,
                          const Ark_Int32* selectionStart,
                          const Ark_Int32* selectionEnd,
@@ -30906,6 +31049,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUILayoutPolicyAccessor* (*getLayoutPolicyAccessor)();
     const GENERATED_ArkUILazyBuildAccessor* (*getLazyBuildAccessor)();
     const GENERATED_ArkUILazyForEachOpsAccessor* (*getLazyForEachOpsAccessor)();
+    const GENERATED_ArkUILeadingMarginSpanAccessor* (*getLeadingMarginSpanAccessor)();
     const GENERATED_ArkUILetterSpacingStyleAccessor* (*getLetterSpacingStyleAccessor)();
     const GENERATED_ArkUILevelOrderExtenderAccessor* (*getLevelOrderExtenderAccessor)();
     const GENERATED_ArkUILifeCycleAccessor* (*getLifeCycleAccessor)();

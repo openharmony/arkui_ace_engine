@@ -415,6 +415,7 @@ export interface TextDataDetectorConfig {
     onDetectResultUpdate?: ((value0: string) => void);
     color?: ResourceColor;
     decoration?: DecorationStyleInterface;
+    enablePreviewMenu?: boolean;
 }
 export interface TextRange {
     start?: int32;
@@ -431,6 +432,27 @@ export enum TextDeleteDirection {
 export enum MenuType {
     SELECTION_MENU = 0,
     PREVIEW_MENU = 1
+}
+export enum TextVerticalAlign {
+    BASELINE = 0,
+    BOTTOM = 1,
+    CENTER = 2,
+    TOP = 3
+}
+export enum TextChangeReason {
+    UNKNOWN = 0,
+    INPUT = 1,
+    PASTE = 2,
+    CUT = 3,
+    DRAG = 4,
+    AUTO_FILL = 5,
+    AI_WRITE = 6,
+    REDO = 7,
+    UNDO = 8,
+    CONTROLLER = 9,
+    ACCESSIBILITY = 10,
+    COLLABORATION = 11,
+    STYLUS = 12
 }
 export enum AutoCapitalizationMode {
     NONE = 0,
@@ -479,9 +501,11 @@ export interface TextMenuItem {
 }
 export type OnCreateMenuCallback = (menuItems: Array<TextMenuItem>) => Array<TextMenuItem>;
 export type OnMenuItemClickCallback = (menuItem: TextMenuItem, range: TextRange) => boolean;
+export type OnPrepareMenuCallback = (menuItems: Array<TextMenuItem>) => Array<TextMenuItem>;
 export interface EditMenuOptions {
     onCreateMenu: OnCreateMenuCallback | undefined;
     onMenuItemClick: OnMenuItemClickCallback | undefined;
+    onPrepareMenu?: OnPrepareMenuCallback;
 }
 export interface DecorationStyleResult {
     type: TextDecorationType;
@@ -622,6 +646,14 @@ export class EditMenuOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForOnPrepareMenu  = value.onPrepareMenu
+        if (valueHolderForOnPrepareMenu !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnPrepareMenuTmpValue  = valueHolderForOnPrepareMenu!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnPrepareMenuTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): EditMenuOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -676,7 +708,34 @@ export class EditMenuOptions_serializer {
             }
         }
         const onMenuItemClickTmpResult : OnMenuItemClickCallback | undefined = onMenuItemClickTmpBuf
-        let value : EditMenuOptions = ({onCreateMenu: onCreateMenuTmpResult, onMenuItemClick: onMenuItemClickTmpResult} as EditMenuOptions)
+        const onPrepareMenuTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onPrepareMenuTmpBuf : OnPrepareMenuCallback | undefined = undefined
+        if ((onPrepareMenuTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onPrepareMenuTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onPrepareMenuTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onPrepareMenuTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onPrepareMenuTmpBuf = (menuItems: Array<TextMenuItem>):Array<TextMenuItem> => {
+                const onPrepareMenuTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onPrepareMenuTmpBuf_BufArgsSerializer.writeInt32(onPrepareMenuTmpBuf_BufResource.resourceId);
+                onPrepareMenuTmpBuf_BufArgsSerializer.writePointer(onPrepareMenuTmpBuf_BufCall);
+                onPrepareMenuTmpBuf_BufArgsSerializer.writePointer(onPrepareMenuTmpBuf_BufCallSync);
+                onPrepareMenuTmpBuf_BufArgsSerializer.writeInt32((menuItems.length).toInt());
+                for (let menuItemsCounterI = 0; menuItemsCounterI < menuItems.length; menuItemsCounterI++) {
+                    const menuItemsTmpElement : TextMenuItem = menuItems[menuItemsCounterI];
+                    TextMenuItem_serializer.write(onPrepareMenuTmpBuf_BufArgsSerializer, menuItemsTmpElement);
+                }
+                let onPrepareMenuTmpBuf_BufContinuationValue : Array<TextMenuItem> | undefined;
+                const onPrepareMenuTmpBuf_BufContinuationCallback : ((value: Array<TextMenuItem>) => void) = (value: Array<TextMenuItem>):void => {
+                onPrepareMenuTmpBuf_BufContinuationValue = value;
+            }
+                onPrepareMenuTmpBuf_BufArgsSerializer.holdAndWriteCallback(onPrepareMenuTmpBuf_BufContinuationCallback);
+                InteropNativeModule._CallCallbackSync(10, -1238906520, onPrepareMenuTmpBuf_BufArgsSerializer.asBuffer(), onPrepareMenuTmpBuf_BufArgsSerializer.length());
+                onPrepareMenuTmpBuf_BufArgsSerializer.release();
+                return (onPrepareMenuTmpBuf_BufContinuationValue as Array<TextMenuItem>);
+            }
+        }
+        const onPrepareMenuTmpResult : OnPrepareMenuCallback | undefined = onPrepareMenuTmpBuf
+        let value : EditMenuOptions = ({onCreateMenu: onCreateMenuTmpResult, onMenuItemClick: onMenuItemClickTmpResult, onPrepareMenu: onPrepareMenuTmpResult} as EditMenuOptions)
         return value
     }
 }
@@ -1413,6 +1472,14 @@ export class TextDataDetectorConfig_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForEnablePreviewMenu  = value.enablePreviewMenu
+        if (valueHolderForEnablePreviewMenu !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnablePreviewMenuTmpValue  = valueHolderForEnablePreviewMenu!
+            valueSerializer.writeBoolean(valueHolderForEnablePreviewMenuTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): TextDataDetectorConfig {
         let valueDeserializer : DeserializerBase = buffer
@@ -1470,7 +1537,13 @@ export class TextDataDetectorConfig_serializer {
             decorationTmpBuf = DecorationStyleInterface_serializer.read(valueDeserializer)
         }
         const decorationTmpResult : DecorationStyleInterface | undefined = decorationTmpBuf
-        let value : TextDataDetectorConfig = ({types: typesTmpResult, onDetectResultUpdate: onDetectResultUpdateTmpResult, color: colorTmpResult, decoration: decorationTmpResult} as TextDataDetectorConfig)
+        const enablePreviewMenuTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enablePreviewMenuTmpBuf : boolean | undefined = undefined
+        if ((enablePreviewMenuTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enablePreviewMenuTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enablePreviewMenuTmpResult : boolean | undefined = enablePreviewMenuTmpBuf
+        let value : TextDataDetectorConfig = ({types: typesTmpResult, onDetectResultUpdate: onDetectResultUpdateTmpResult, color: colorTmpResult, decoration: decorationTmpResult, enablePreviewMenu: enablePreviewMenuTmpResult} as TextDataDetectorConfig)
         return value
     }
 }

@@ -577,7 +577,8 @@ export enum ImageSpanAlignment {
     BASELINE = 4,
     BOTTOM = 3,
     CENTER = 2,
-    TOP = 1
+    TOP = 1,
+    FOLLOW_PARAGRAPH = 5
 }
 export enum ObscuredReasons {
     PLACEHOLDER = 0

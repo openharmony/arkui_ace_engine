@@ -819,6 +819,34 @@ void AssignArkValue(Ark_TextAlign& dst, const TextAlign& src)
             LOGE("Unexpected enum value in TextAlign: %{public}d", src);
     }
 }
+void AssignArkValue(Ark_TextVerticalAlign& dst, const TextVerticalAlign& src)
+{
+    switch (src) {
+        case TextVerticalAlign::BASELINE: dst = ARK_TEXT_VERTICAL_ALIGN_BASELINE; break;
+        case TextVerticalAlign::BOTTOM: dst = ARK_TEXT_VERTICAL_ALIGN_BOTTOM; break;
+        case TextVerticalAlign::CENTER: dst = ARK_TEXT_VERTICAL_ALIGN_CENTER; break;
+        case TextVerticalAlign::TOP: dst = ARK_TEXT_VERTICAL_ALIGN_TOP; break;
+        default:
+            dst = static_cast<Ark_TextVerticalAlign>(-1);
+            LOGE("Unexpected enum value in TextAlign: %{public}d", src);
+    }
+}
+void AssignArkValue(Ark_TextVerticalAlign& dst, const int32_t& src)
+{
+    const int32_t BASELINE = 0;
+    const int32_t BOTTOM = 1;
+    const int32_t CENTER = 2;
+    const int32_t TOP = 3;
+    switch (src) {
+        case BASELINE: dst = ARK_TEXT_VERTICAL_ALIGN_BASELINE; break;
+        case BOTTOM: dst = ARK_TEXT_VERTICAL_ALIGN_BOTTOM; break;
+        case CENTER: dst = ARK_TEXT_VERTICAL_ALIGN_CENTER; break;
+        case TOP: dst = ARK_TEXT_VERTICAL_ALIGN_TOP; break;
+        default:
+            dst = static_cast<Ark_TextVerticalAlign>(-1);
+            LOGE("Unexpected enum value in TextAlign: %{public}d", src);
+    }
+}
 void AssignArkValue(Ark_TextOverflow& dst, const TextOverflow& src)
 {
     switch (src) {
@@ -839,12 +867,34 @@ void AssignArkValue(Ark_ImageSpanAlignment& dst, const VerticalAlign& src)
         case VerticalAlign::CENTER: dst = ARK_IMAGE_SPAN_ALIGNMENT_CENTER; break;
         case VerticalAlign::BOTTOM: dst = ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM; break;
         case VerticalAlign::BASELINE: dst = ARK_IMAGE_SPAN_ALIGNMENT_BASELINE; break;
+        case VerticalAlign::FOLLOW_PARAGRAPH: dst = ARK_IMAGE_SPAN_ALIGNMENT_FOLLOW_PARAGRAPH; break;
         default:
             dst = INVALID_ENUM_VAL<Ark_ImageSpanAlignment>;
             LOGE("Unexpected enum value in Ark_ImageSpanAlignment: %{public}d", static_cast<int>(src));
     }
 }
 
+void AssignArkValue(Ark_TextChangeReason& dst, const TextChangeReason& src)
+{
+    switch (src) {
+        case TextChangeReason::UNKNOWN: dst = ARK_TEXT_CHANGE_REASON_UNKNOWN; break;
+        case TextChangeReason::INPUT: dst = ARK_TEXT_CHANGE_REASON_INPUT; break;
+        case TextChangeReason::PASTE: dst = ARK_TEXT_CHANGE_REASON_PASTE; break;
+        case TextChangeReason::CUT: dst = ARK_TEXT_CHANGE_REASON_CUT; break;
+        case TextChangeReason::DRAG: dst = ARK_TEXT_CHANGE_REASON_DRAG; break;
+        case TextChangeReason::AUTO_FILL: dst = ARK_TEXT_CHANGE_REASON_AUTO_FILL; break;
+        case TextChangeReason::AI_WRITE: dst = ARK_TEXT_CHANGE_REASON_AI_WRITE; break;
+        case TextChangeReason::REDO: dst = ARK_TEXT_CHANGE_REASON_REDO; break;
+        case TextChangeReason::UNDO: dst = ARK_TEXT_CHANGE_REASON_UNDO; break;
+        case TextChangeReason::CONTROLLER: dst = ARK_TEXT_CHANGE_REASON_CONTROLLER; break;
+        case TextChangeReason::ACCESSIBILITY: dst = ARK_TEXT_CHANGE_REASON_ACCESSIBILITY; break;
+        case TextChangeReason::COLLABORATION: dst = ARK_TEXT_CHANGE_REASON_COLLABORATION; break;
+        case TextChangeReason::STYLUS: dst = ARK_TEXT_CHANGE_REASON_STYLUS; break;
+        default:
+            dst = static_cast<Ark_TextChangeReason>(-1);
+            LOGE("Unexpected enum value in TextChangeReason: %{public}d", src);
+    }
+}
 void AssignArkValue(Ark_ImageFit& dst, const ImageFit& src)
 {
     switch (src) {

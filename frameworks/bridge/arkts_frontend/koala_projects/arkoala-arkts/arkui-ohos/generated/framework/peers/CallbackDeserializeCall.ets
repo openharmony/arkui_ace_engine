@@ -20,12 +20,12 @@ import { AccessibilityHoverEvent_serializer, TouchTestInfo_serializer, TouchResu
 import { image_PixelMap_serializer } from "./../ohos.multimedia.image"
 import { ButtonConfiguration_serializer, ButtonConfiguration, ButtonTriggerClickCallback } from "./../../component/button"
 import { Area_serializer, ConstraintSizeOptions_serializer, SizeOptions_serializer, Area, ConstraintSizeOptions, Length, ResourceStr, SizeOptions, VoidCallback } from "./../../component/units"
-import { TextMenuItem_serializer, DeleteValue_serializer, EditableTextChangeValue_serializer, InsertValue_serializer, StyledStringChangeValue_serializer, TextRange_serializer, PreviewText_serializer, TextChangeOptions_serializer, TextMenuItem, DeleteValue, EditableTextChangeValue, InsertValue, StyledStringChangeValue, TextRange, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, OnCreateMenuCallback, OnDidChangeCallback, OnMenuItemClickCallback } from "./../../component/textCommon"
+import { TextMenuItem_serializer, DeleteValue_serializer, EditableTextChangeValue_serializer, InsertValue_serializer, StyledStringChangeValue_serializer, TextRange_serializer, PreviewText_serializer, TextChangeOptions_serializer, TextMenuItem, DeleteValue, EditableTextChangeValue, InsertValue, StyledStringChangeValue, TextRange, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, OnCreateMenuCallback, OnDidChangeCallback, OnMenuItemClickCallback, OnPrepareMenuCallback } from "./../../component/textCommon"
 import { ComputedBarAttribute_serializer, ComputedBarAttribute, OnGridScrollIndexCallback } from "./../../component/grid"
 import { CopyEvent_serializer, CutEvent_serializer, RichEditorChangeValue_serializer, RichEditorDeleteValue_serializer, RichEditorInsertValue_serializer, RichEditorRange_serializer, RichEditorSelection_serializer, RichEditorTextSpanResult_serializer, PasteEvent_serializer, CopyEvent, CutEvent, RichEditorChangeValue, RichEditorDeleteValue, RichEditorInsertValue, RichEditorRange, RichEditorSelection, RichEditorTextSpanResult, PasteEvent, MenuCallback, MenuOnAppearCallback, OnHoverCallback, PasteEventCallback, SubmitCallback } from "./../../component/richEditor"
-import { CustomSpanMeasureInfo_serializer, CustomSpanMetrics_serializer, CustomSpanDrawInfo_serializer, StyledString_serializer, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, StyledString, UserDataSpan, StyledStringMarshallCallback, StyledStringUnmarshallCallback } from "./../../component/styledString"
+import { CustomSpanMeasureInfo_serializer, CustomSpanMetrics_serializer, CustomSpanDrawInfo_serializer, LeadingMarginSpanDrawInfo_serializer, StyledString_serializer, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, LeadingMarginSpanDrawInfo, StyledString, UserDataSpan, StyledStringMarshallCallback, StyledStringUnmarshallCallback } from "./../../component/styledString"
 import { DismissDialogAction_serializer, DismissDialogAction } from "./../../component/actionSheet"
-import { DrawContext_serializer, Size_serializer } from "./../../Graphics"
+import { DrawContext_serializer, LengthMetrics_serializer, Size_serializer } from "./../../Graphics"
 import { ErrorInformation_serializer, FormCallbackInfo_serializer, RouterCallbackInfo_serializer, ErrorInformation, FormCallbackInfo, RouterCallbackInfo } from "./../../component/formComponent"
 import { FullscreenInfo_serializer, PlaybackInfo_serializer, PreparedInfo_serializer, FullscreenInfo, PlaybackInfo, PreparedInfo } from "./../../component/video"
 import { GestureEvent_serializer, GestureInfo_serializer, BaseGestureEvent_serializer, GestureRecognizer_serializer, GestureEvent, GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer } from "./../../component/gesture"
@@ -67,7 +67,7 @@ import { int32, float32, int64 } from "@koalaui/common"
 import { CallbackTransformer } from "./../../CallbackTransformer"
 import { extractors } from "#handwritten"
 import { default as image } from "@ohos.multimedia.image"
-import { DrawContext, Size } from "arkui.Graphics"
+import { DrawContext, LengthMetrics, Size } from "arkui.Graphics"
 import { HitTestMode, ResponseType, Edge, ScrollSource } from "./../../component/enums"
 import { MarqueeState } from "./../../component/text"
 import { CustomBuilder, CustomBuilderT, PageMapBuilder } from "./../../component/builder"
@@ -455,6 +455,13 @@ export function deserializeAndCallCallback_DrawContext_CustomSpanDrawInfo_Void(t
     let drawInfo : CustomSpanDrawInfo = CustomSpanDrawInfo_serializer.read(thisDeserializer)
     _call(context, drawInfo)
 }
+export function deserializeAndCallCallback_DrawContext_LeadingMarginSpanDrawInfo_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((context: DrawContext,drawInfo: LeadingMarginSpanDrawInfo) => void))
+    let context : DrawContext = (DrawContext_serializer.read(thisDeserializer) as DrawContext)
+    let drawInfo : LeadingMarginSpanDrawInfo = LeadingMarginSpanDrawInfo_serializer.read(thisDeserializer)
+    _call(context, drawInfo)
+}
 export function deserializeAndCallCallback_DrawContext_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((drawContext: DrawContext) => void))
@@ -787,6 +794,31 @@ export function deserializeAndCallCallback_KeyEvent_Void(thisDeserializer: Deser
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: KeyEvent) => void))
     let event : KeyEvent = (KeyEvent_serializer.read(thisDeserializer) as KeyEvent)
     _call(event)
+}
+export function deserializeAndCallCallback_LengthMetrics(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as (() => LengthMetrics))
+    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
+    let continuationResult : ((value: LengthMetrics) => void) = (value: LengthMetrics):void => {
+        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        LengthMetrics_serializer.write(continuationBufferBufArgsSerializer, value);
+        InteropNativeModule._CallCallbackSync(10, 539826980, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    const _callResult  = _call()
+    continuationResult(_callResult)
+}
+export function deserializeAndCallCallback_LengthMetrics_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: LengthMetrics) => void))
+    let value : LengthMetrics = LengthMetrics_serializer.read(thisDeserializer)
+    _call(value)
 }
 export function deserializeAndCallCallback_Long_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2791,6 +2823,35 @@ export function deserializeAndCallOnPasteCallback(thisDeserializer: Deserializer
     let event : PasteEvent = PasteEvent_serializer.read(thisDeserializer)
     _call(content, event)
 }
+export function deserializeAndCallOnPrepareMenuCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnPrepareMenuCallback)
+    const menuItemsTmpBufLength : int32 = thisDeserializer.readInt32()
+    let menuItemsTmpBuf : Array<TextMenuItem> = new Array<TextMenuItem>(menuItemsTmpBufLength)
+    for (let menuItemsTmpBufBufCounterI = 0; menuItemsTmpBufBufCounterI < menuItemsTmpBufLength; menuItemsTmpBufBufCounterI++) {
+        menuItemsTmpBuf[menuItemsTmpBufBufCounterI] = TextMenuItem_serializer.read(thisDeserializer)
+    }
+    let menuItems : Array<TextMenuItem> = menuItemsTmpBuf
+    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
+    let continuationResult : ((value: Array<TextMenuItem>) => void) = (value: Array<TextMenuItem>):void => {
+        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        continuationBufferBufArgsSerializer.writeInt32((value.length).toInt());
+        for (let valueCounterI = 0; valueCounterI < value.length; valueCounterI++) {
+            const valueTmpElement : TextMenuItem = value[valueCounterI];
+            TextMenuItem_serializer.write(continuationBufferBufArgsSerializer, valueTmpElement);
+        }
+        InteropNativeModule._CallCallbackSync(10, 528588498, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    const _callResult  = _call(menuItems)
+    continuationResult(_callResult)
+}
 export function deserializeAndCallOnPickerCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnPickerCallback)
@@ -3791,6 +3852,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_DismissSheetAction_Void: return deserializeAndCallCallback_DismissSheetAction_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_DragEvent_Opt_String_Void: return deserializeAndCallCallback_DragEvent_Opt_String_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_DrawContext_CustomSpanDrawInfo_Void: return deserializeAndCallCallback_DrawContext_CustomSpanDrawInfo_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_DrawContext_LeadingMarginSpanDrawInfo_Void: return deserializeAndCallCallback_DrawContext_LeadingMarginSpanDrawInfo_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_DrawContext_Void: return deserializeAndCallCallback_DrawContext_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_EditableTextChangeValue_Boolean: return deserializeAndCallCallback_EditableTextChangeValue_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_ErrorInformation_Void: return deserializeAndCallCallback_ErrorInformation_Void(thisDeserializer);
@@ -3824,6 +3886,8 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_ItemDragInfo_Void: return deserializeAndCallCallback_ItemDragInfo_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_KeyEvent_Boolean: return deserializeAndCallCallback_KeyEvent_Boolean(thisDeserializer);
         case CallbackKind.Kind_Callback_KeyEvent_Void: return deserializeAndCallCallback_KeyEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_LengthMetrics: return deserializeAndCallCallback_LengthMetrics(thisDeserializer);
+        case CallbackKind.Kind_Callback_LengthMetrics_Void: return deserializeAndCallCallback_LengthMetrics_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Long_Void: return deserializeAndCallCallback_Long_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Map_String_RecordData_Void: return deserializeAndCallCallback_Map_String_RecordData_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_MarqueeState_Void: return deserializeAndCallCallback_MarqueeState_Void(thisDeserializer);
@@ -4017,6 +4081,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_OnOverrideErrorPageCallback: return deserializeAndCallOnOverrideErrorPageCallback(thisDeserializer);
         case CallbackKind.Kind_OnOverrideUrlLoadingCallback: return deserializeAndCallOnOverrideUrlLoadingCallback(thisDeserializer);
         case CallbackKind.Kind_OnPasteCallback: return deserializeAndCallOnPasteCallback(thisDeserializer);
+        case CallbackKind.Kind_OnPrepareMenuCallback: return deserializeAndCallOnPrepareMenuCallback(thisDeserializer);
         case CallbackKind.Kind_OnPickerCallback: return deserializeAndCallOnPickerCallback(thisDeserializer);
         case CallbackKind.Kind_OnRadioChangeCallback: return deserializeAndCallOnRadioChangeCallback(thisDeserializer);
         case CallbackKind.Kind_OnRatingChangeCallback: return deserializeAndCallOnRatingChangeCallback(thisDeserializer);

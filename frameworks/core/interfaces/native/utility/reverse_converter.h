@@ -140,8 +140,10 @@ enum class NavigationOperation;
 enum class NavigationTitleMode;
 enum class RefereeState;
 enum class RichEditorDeleteDirection;
+struct DrawableLeadingMargin;
 struct KeyboardOptions;
 struct LeadingMargin;
+struct LeadingMarginSpanOptions;
 struct MenuItemParam;
 
 namespace Converter {
@@ -239,6 +241,11 @@ namespace OHOS::Ace::NG::Converter {
         dst = static_cast<Ark_Float64>(src);
     }
 
+    inline void AssignArkValue(Ark_Float64& dst, const size_t& src)
+    {
+        dst = static_cast<Ark_Float64>(src);
+    }
+
     inline void AssignArkValue(Ark_Int64& dst, const int32_t& src)
     {
         dst = static_cast<Ark_Int64>(src);
@@ -330,6 +337,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvContext *ctx);
     void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src);
     void AssignArkValue(Ark_LeadingMarginPlaceholder& dst, const LeadingMargin& src, ConvContext *ctx);
+    void AssignArkValue(Ark_LeadingMarginSpan& dst, const DrawableLeadingMargin& src);
+    void AssignArkValue(Ark_LeadingMarginSpanDrawInfo& dst, const LeadingMarginSpanOptions& src);
     void AssignArkValue(Ark_Length& dst, const CalcDimension& src, ConvContext *ctx);
     void AssignArkValue(Ark_Length& dst, const CalcLength& src, ConvContext *ctx);
     void AssignArkValue(Ark_Length& dst, const Dimension& src, ConvContext *ctx);
@@ -418,6 +427,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextAlign& dst, const TextAlign& src);
     void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx);
     void AssignArkValue(Ark_TextChangeOptions& dst, const ChangeValueInfo& value, ConvContext *ctx);
+    void AssignArkValue(Ark_TextChangeReason& dst, const TextChangeReason& src);
     void AssignArkValue(Ark_TextDecorationStyle& dst, const TextDecorationStyle& src);
     void AssignArkValue(Ark_TextDecorationType& dst, const TextDecoration& src);
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
@@ -426,6 +436,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextOverflow& dst, const TextOverflow& src);
     void AssignArkValue(Ark_TextRange& dst, const SelectionInfo& src);
     void AssignArkValue(Ark_TextRange& dst, const TextRange& src);
+    void AssignArkValue(Ark_TextVerticalAlign& dst, const TextVerticalAlign& src);
+    void AssignArkValue(Ark_TextVerticalAlign& dst, const int32_t& src);
     void AssignArkValue(Ark_ThreatType& dst, const ThreatType& src);
     void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src);
     void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src);

@@ -21,7 +21,7 @@ import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkRichEditorPeer, RichEditorSelection, RichEditorRange, RichEditorInsertValue, RichEditorTextSpanResult, RichEditorDeleteValue, PasteEventCallback, PasteEvent, SubmitCallback, RichEditorChangeValue, CutEvent, CopyEvent, RichEditorAttribute, RichEditorSpanType, RichEditorResponseType, SelectionMenuOptions, KeyboardOptions, PlaceholderStyle } from "./component/richEditor"
+import { ArkRichEditorPeer, RichEditorSelection, RichEditorRange, RichEditorInsertValue, RichEditorTextSpanResult, RichEditorDeleteValue, PasteEventCallback, PasteEvent, SubmitCallback, RichEditorChangeValue, CutEvent, CopyEvent, RichEditorAttribute, UndoStyle, RichEditorSpanType, RichEditorResponseType, SelectionMenuOptions, KeyboardOptions, PlaceholderStyle } from "./component/richEditor"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
 import { VoidCallback, ResourceColor, ResourceStr } from "./component/units"
@@ -29,6 +29,7 @@ import { TextRange, TextDataDetectorConfig, OnDidChangeCallback, EditMenuOptions
 import { CopyOptions, Color, BarState, ResponseType } from "./component/enums"
 import { Resource } from "global.resource"
 import { EnterKeyType, SubmitEvent } from "./component/textInput"
+import { ColorMetrics } from "arkui.Graphics"
 import { CustomBuilder } from "./component/builder"
 import { ComponentContent } from "arkui.ComponentContent"
 export class RichEditorModifier extends CommonMethodModifier implements RichEditorAttribute,AttributeModifier<RichEditorAttribute> {
@@ -69,6 +70,8 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
     _enablePreviewText_0_0value?: boolean | undefined
     _dataDetectorConfig_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _dataDetectorConfig_0_0value?: TextDataDetectorConfig | undefined
+    _enableSelectedDataDetector_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableSelectedDataDetector_0_0value?: boolean | undefined
     _caretColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _caretColor_0_0value?: ResourceColor | undefined
     _selectedBackgroundColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -99,10 +102,16 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
     _maxLength_0_0value?: int32 | undefined
     _maxLines_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _maxLines_0_0value?: int32 | undefined
+    _enableAutoSpacing_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableAutoSpacing_0_0value?: boolean | undefined
     _keyboardAppearance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _keyboardAppearance_0_0value?: KeyboardAppearance | undefined
     _stopBackPress_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _stopBackPress_0_0value?: boolean | undefined
+    _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _scrollBarColor_0_0value?: ColorMetrics | undefined
+    _undoStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _undoStyle_0_0value?: UndoStyle | undefined
     _singleLine_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _singleLine_0_0value?: boolean | undefined
     _compressLeadingPunctuation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -359,6 +368,24 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 default: {
                     this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setDataDetectorConfigAttribute((undefined as TextDataDetectorConfig | undefined));
+                }
+            }
+        }
+        if (this._enableSelectedDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableSelectedDataDetector_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableSelectedDataDetectorAttribute((this._enableSelectedDataDetector_0_0value as boolean | undefined));
+                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableSelectedDataDetectorAttribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -632,6 +659,24 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
+        if (this._enableAutoSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableAutoSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableAutoSpacingAttribute((this._enableAutoSpacing_0_0value as boolean | undefined));
+                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableAutoSpacingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
         if (this._keyboardAppearance_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._keyboardAppearance_0_flag) {
@@ -737,6 +782,42 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 default: {
                     this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setFallbackLineSpacingAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._scrollBarColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._scrollBarColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as ColorMetrics | undefined));
+                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setScrollBarColorAttribute((undefined as ColorMetrics | undefined));
+                }
+            }
+        }
+        if (this._undoStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._undoStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setUndoStyleAttribute((this._undoStyle_0_0value as UndoStyle | undefined));
+                    this._undoStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._undoStyle_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._undoStyle_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setUndoStyleAttribute((undefined as UndoStyle | undefined));
                 }
             }
         }
@@ -985,6 +1066,19 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
+        if (modifier._enableSelectedDataDetector_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableSelectedDataDetector_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableSelectedDataDetector(modifier._enableSelectedDataDetector_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableSelectedDataDetector((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._caretColor_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._caretColor_0_flag) {
@@ -1180,6 +1274,19 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
             }
         }
+        if (modifier._enableAutoSpacing_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableAutoSpacing_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableAutoSpacing(modifier._enableAutoSpacing_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableAutoSpacing((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._keyboardAppearance_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._keyboardAppearance_0_flag) {
@@ -1255,6 +1362,32 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
                 }
                 default: {
                     this.fallbackLineSpacing((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._scrollBarColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._scrollBarColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.scrollBarColor(modifier._scrollBarColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.scrollBarColor((undefined as ColorMetrics | undefined));
+                }
+            }
+        }
+        if (modifier._undoStyle_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._undoStyle_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.undoStyle(modifier._undoStyle_0_0value);
+                    break;
+                }
+                default: {
+                    this.undoStyle((undefined as UndoStyle | undefined));
                 }
             }
         }
@@ -1467,6 +1600,17 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         }
         return this
     }
+    enableSelectedDataDetector(value: boolean | undefined): this {
+        if (((this._enableSelectedDataDetector_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableSelectedDataDetector_0_0value) !== (value)))
+        {
+            this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableSelectedDataDetector_0_0value = value
+        } else
+        {
+            this._enableSelectedDataDetector_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     caretColor(value: ResourceColor | undefined): this {
         if (((this._caretColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
@@ -1647,6 +1791,17 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         }
         return this
     }
+    enableAutoSpacing(value: boolean | undefined): this {
+        if (((this._enableAutoSpacing_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableAutoSpacing_0_0value) !== (value)))
+        {
+            this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableAutoSpacing_0_0value = value
+        } else
+        {
+            this._enableAutoSpacing_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     keyboardAppearance(value: KeyboardAppearance | undefined): this {
         if (((this._keyboardAppearance_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
@@ -1716,6 +1871,28 @@ export class RichEditorModifier extends CommonMethodModifier implements RichEdit
         } else
         {
             this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    scrollBarColor(value: ColorMetrics | undefined): this {
+        if (((this._scrollBarColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._scrollBarColor_0_0value = value
+        } else
+        {
+            this._scrollBarColor_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    undoStyle(value: UndoStyle | undefined): this {
+        if (((this._undoStyle_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._undoStyle_0_flag = AttributeUpdaterFlag.UPDATE
+            this._undoStyle_0_0value = value
+        } else
+        {
+            this._undoStyle_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

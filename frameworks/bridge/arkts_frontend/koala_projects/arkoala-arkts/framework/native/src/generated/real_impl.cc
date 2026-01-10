@@ -4768,6 +4768,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                    const Opt_TextDataDetectorConfig* value)
     {
     }
+    void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
+                                           const Opt_Boolean* value)
+    {
+    }
     void SetCaretColorImpl(Ark_NativePointer node,
                            const Opt_ResourceColor* value)
     {
@@ -4828,12 +4832,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                          const Opt_Number* value)
     {
     }
+    void SetEnableAutoSpacingImpl(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+    {
+    }
     void SetKeyboardAppearanceImpl(Ark_NativePointer node,
                                    const Opt_KeyboardAppearance* value)
     {
     }
     void SetStopBackPressImpl(Ark_NativePointer node,
                               const Opt_Boolean* value)
+    {
+    }
+    void SetScrollBarColorImpl(Ark_NativePointer node,
+                               const Opt_ColorMetrics* value)
+    {
+    }
+    void SetUndoStyleImpl(Ark_NativePointer node,
+                          const Opt_UndoStyle* value)
     {
     }
     void SetSingleLineImpl(Ark_NativePointer node,
@@ -5354,6 +5370,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetTextAlignImpl(Ark_NativePointer node,
                           const Opt_TextAlign* value)
+    {
+    }
+    void SetTextVerticalAlignImpl(Ark_NativePointer node,
+                                  const Opt_TextVerticalAlign* value)
     {
     }
     void SetEnableKeyboardOnFocusImpl(Ark_NativePointer node,
@@ -9862,6 +9882,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorAttributeModifier::SetEnableDataDetectorImpl,
             RichEditorAttributeModifier::SetEnablePreviewTextImpl,
             RichEditorAttributeModifier::SetDataDetectorConfigImpl,
+            RichEditorAttributeModifier::SetEnableSelectedDataDetectorImpl,
             RichEditorAttributeModifier::SetCaretColorImpl,
             RichEditorAttributeModifier::SetSelectedBackgroundColorImpl,
             RichEditorAttributeModifier::SetOnEditingChangeImpl,
@@ -9877,8 +9898,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorAttributeModifier::SetBarStateImpl,
             RichEditorAttributeModifier::SetMaxLengthImpl,
             RichEditorAttributeModifier::SetMaxLinesImpl,
+            RichEditorAttributeModifier::SetEnableAutoSpacingImpl,
             RichEditorAttributeModifier::SetKeyboardAppearanceImpl,
             RichEditorAttributeModifier::SetStopBackPressImpl,
+            RichEditorAttributeModifier::SetScrollBarColorImpl,
+            RichEditorAttributeModifier::SetUndoStyleImpl,
             RichEditorAttributeModifier::SetSingleLineImpl,
             RichEditorAttributeModifier::SetCompressLeadingPunctuationImpl,
             RichEditorAttributeModifier::SetIncludeFontPaddingImpl,
@@ -10465,6 +10489,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextAttributeModifier::SetFontStyleImpl,
             TextAttributeModifier::SetLineSpacingImpl,
             TextAttributeModifier::SetTextAlignImpl,
+            TextAttributeModifier::SetTextVerticalAlignImpl,
             TextAttributeModifier::SetLineHeightImpl,
             TextAttributeModifier::SetTextOverflowImpl,
             TextAttributeModifier::SetFontFamilyImpl,
@@ -15120,6 +15145,39 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         CHECK_NULL_VOID(frameNode);
     }
     } // LazyForEachOpsAccessor
+    namespace LeadingMarginSpanAccessor {
+    void DestroyPeerImpl(Ark_LeadingMarginSpan peer)
+    {
+        auto peerImpl = reinterpret_cast<LeadingMarginSpanPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_LeadingMarginSpan ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Callback_DrawContext_LeadingMarginSpanDrawInfo_Void GetOnDraw_callbackImpl(Ark_LeadingMarginSpan peer)
+    {
+        return {};
+    }
+    void SetOnDraw_callbackImpl(Ark_LeadingMarginSpan peer,
+                                const Callback_DrawContext_LeadingMarginSpanDrawInfo_Void* onDraw_callback)
+    {
+    }
+    Callback_LengthMetrics GetGetLeadingMargin_callbackImpl(Ark_LeadingMarginSpan peer)
+    {
+        return {};
+    }
+    void SetGetLeadingMargin_callbackImpl(Ark_LeadingMarginSpan peer,
+                                          const Callback_LengthMetrics* getLeadingMargin_callback)
+    {
+    }
+    } // LeadingMarginSpanAccessor
     namespace LetterSpacingStyleAccessor {
     void DestroyPeerImpl(Ark_LetterSpacingStyle peer)
     {
@@ -16537,6 +16595,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Opt_TextVerticalAlign GetTextVerticalAlignImpl(Ark_ParagraphStyle peer)
+    {
+        return {};
+    }
     Opt_Float64 GetTextIndentImpl(Ark_ParagraphStyle peer)
     {
         return {};
@@ -16558,6 +16620,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     Opt_Float64 GetParagraphSpacingImpl(Ark_ParagraphStyle peer)
+    {
+        return {};
+    }
+    Opt_LeadingMarginSpan GetLeadingMarginSpanImpl(Ark_ParagraphStyle peer)
     {
         return {};
     }
@@ -17273,6 +17339,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetTypingStyleImpl(Ark_RichEditorBaseController peer,
                             const Ark_RichEditorTextStyle* value)
+    {
+    }
+    void SetTypingParagraphStyleImpl(Ark_RichEditorBaseController peer,
+                                     const Opt_RichEditorParagraphStyle* style)
     {
     }
     void SetSelectionImpl(Ark_RichEditorBaseController peer,
@@ -21653,6 +21723,24 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &LazyForEachOpsAccessorImpl;
     }
+    co
+    nst GENERATED_ArkUILeadingMarginSpanAccessor* GetLeadingMarginSpanAccessor()
+    {
+        static const GENERATED_ArkUILeadingMarginSpanAccessor LeadingMarginSpanAccessorImpl {
+            LeadingMarginSpanAccessor::DestroyPeerImpl,
+            LeadingMarginSpanAccessor::ConstructImpl,
+            LeadingMarginSpanAccessor::GetFinalizerImpl,
+            LeadingMarginSpanAccessor::GetOnDraw_callbackImpl,
+            LeadingMarginSpanAccessor::SetOnDraw_callbackImpl,
+            LeadingMarginSpanAccessor::GetGetLeadingMargin_callbackImpl,
+            LeadingMarginSpanAccessor::SetGetLeadingMargin_callbackImpl,
+        };
+        return &LeadingMarginSpanAccessorImpl;
+    }
+
+    struct LeadingMarginSpanPeer {
+        virtual ~LeadingMarginSpanPeer() = default;
+    };
 
     const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor()
     {
@@ -22209,12 +22297,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ParagraphStyleAccessor::ConstructImpl,
             ParagraphStyleAccessor::GetFinalizerImpl,
             ParagraphStyleAccessor::GetTextAlignImpl,
+            ParagraphStyleAccessor::GetTextVerticalAlignImpl,
             ParagraphStyleAccessor::GetTextIndentImpl,
             ParagraphStyleAccessor::GetMaxLinesImpl,
             ParagraphStyleAccessor::GetOverflowImpl,
             ParagraphStyleAccessor::GetWordBreakImpl,
             ParagraphStyleAccessor::GetLeadingMarginImpl,
             ParagraphStyleAccessor::GetParagraphSpacingImpl,
+            ParagraphStyleAccessor::GetLeadingMarginSpanImpl,
             ParagraphStyleAccessor::GetTextDirectionImpl,
         };
         return &ParagraphStyleAccessorImpl;
@@ -22531,6 +22621,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             RichEditorBaseControllerAccessor::CloseSelectionMenuImpl,
             RichEditorBaseControllerAccessor::GetTypingStyleImpl,
             RichEditorBaseControllerAccessor::SetTypingStyleImpl,
+            RichEditorBaseControllerAccessor::SetTypingParagraphStyleImpl,
             RichEditorBaseControllerAccessor::SetSelectionImpl,
             RichEditorBaseControllerAccessor::IsEditingImpl,
             RichEditorBaseControllerAccessor::StopEditingImpl,
@@ -23888,6 +23979,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLayoutPolicyAccessor,
             GetLazyBuildAccessor,
             GetLazyForEachOpsAccessor,
+            GetLeadingMarginSpanAccessor,
             GetLetterSpacingStyleAccessor,
             GetLevelOrderExtenderAccessor,
             GetLifeCycleAccessor,
