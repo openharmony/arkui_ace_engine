@@ -592,7 +592,7 @@ void WindowPattern::HideStartingWindow()
 {
     session_->SetHidingStartingWindow(true);
     session_->SetLeashWindowAlpha(true);
-    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "hide startWindow: %{public}d", session_->GetPersistentId());
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "HideStartingWindow: %{public}d", session_->GetPersistentId());
 
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
@@ -608,9 +608,11 @@ void WindowPattern::HideStartingWindow()
         auto session = self->session_;
         CHECK_NULL_VOID(session);
         auto abilityInfo = session->GetSessionInfoAbilityInfo();
-        CHECK_NULL_VOID(abilityInfo);
-        bool debugMode = abilityInfo->applicationInfo.debug;
-        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "HideStartingWindow time out, debug mode: %{public}d", debugMode);
+        bool debugMode = false;
+        if (abilityInfo) {
+            debugMode = abilityInfo->applicationInfo.debug;
+            TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "HideStartingWindow time out, debug mode: %{public}d", debugMode);
+        }
         CHECK_EQUAL_VOID(debugMode, true);
         auto ret = session->Clear();
         TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "HideStartingWindow terminate session, ret: %{public}d", ret);
