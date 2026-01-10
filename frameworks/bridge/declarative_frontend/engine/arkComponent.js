@@ -40630,8 +40630,8 @@ class ContainerPickerSelectionIndicatorModifier extends ModifierWithKey {
 }
 ContainerPickerSelectionIndicatorModifier.identity = Symbol('containerPickerSelectionIndicator');
 // @ts-ignore
-if (globalThis.Picker !== undefined) {
-  globalThis.Picker.attributeModifier = function (modifier) {
+if (globalThis.UIPickerComponent !== undefined) {
+  globalThis.UIPickerComponent.attributeModifier = function (modifier) {
     attributeModifierFunc.call(this, modifier, (nativePtr) => {
       return new ArkContainerPickerComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {

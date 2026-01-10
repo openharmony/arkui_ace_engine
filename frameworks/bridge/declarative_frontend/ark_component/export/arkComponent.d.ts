@@ -1057,7 +1057,7 @@ declare class ArkTextPickerComponent extends ArkComponent implements TextPickerA
     onScrollStop(callback: (value: string | string[], index: number | number[]) => void): this;
 }
 
-declare class ArkContainerPicker extends ArkComponent implements PickerAttribute {
+declare class ArkContainerPicker extends ArkComponent implements UIPickerComponentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     onChange(callback: Optional<OnPickerCallback>): this;
     onScrollStop(callback: Optional<OnPickerCallback>): this;

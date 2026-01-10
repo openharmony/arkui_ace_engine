@@ -672,8 +672,8 @@ const char ACCESSIBILITY_FOCUS_PAINT_NODE_TAG[] = "Accessibility_focus_paint_nod
 // LazyVGridLayout
 const char LAZY_V_GRID_LAYOUT_ETS_TAG[] = "LazyVGridLayout";
 
-//Picker
-const char CONTAINER_PICKER_ETS_TAG[] = "Picker";
+// UIPickerComponent
+const char CONTAINER_PICKER_ETS_TAG[] = "UIPickerComponent";
 
 // UndefinedNode
 const char UNDEFINED_NODE_ETS_TAG[] = "";
