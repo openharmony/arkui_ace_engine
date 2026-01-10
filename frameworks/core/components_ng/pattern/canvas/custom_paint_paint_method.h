@@ -120,7 +120,7 @@ public:
         state_.fillState.SetPattern(pattern);
     }
 
-    void SetFillPatternNG(const std::weak_ptr<Ace::Pattern>& pattern)
+    void SetFillPatternNG(const std::shared_ptr<Ace::Pattern>& pattern)
     {
         state_.fillState.SetPatternNG(pattern);
     }
@@ -151,7 +151,7 @@ public:
         state_.strokeState.SetColor(color);
     }
 
-    void SetStrokePatternNG(const std::weak_ptr<Ace::Pattern>& pattern)
+    void SetStrokePatternNG(const std::shared_ptr<Ace::Pattern>& pattern)
     {
         state_.strokeState.SetPatternNG(pattern);
     }

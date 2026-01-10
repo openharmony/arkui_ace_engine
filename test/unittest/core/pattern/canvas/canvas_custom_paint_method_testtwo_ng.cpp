@@ -313,6 +313,9 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo011, Te
     Rect rect;
     Offset offset(0.0f, 0.0f);
 
+    /**
+     * @tc.steps1: initialize parameters.
+     */
     paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
     paintMethod->state_.globalState.SetAlpha(1.0f);
     EXPECT_TRUE(paintMethod->state_.globalState.HasGlobalAlpha());
@@ -326,11 +329,14 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo011, Te
     auto sharedPattern = std::make_shared<OHOS::Ace::Pattern>();
     sharedPattern->SetPixelMap(pixelMap);
     sharedPattern->SetImgSrc(src);
-    std::weak_ptr<Ace::Pattern> patternWeak = sharedPattern;
-    paintMethod->state_.fillState.SetPatternNG(patternWeak);
+    paintMethod->state_.fillState.SetPatternNG(sharedPattern);
     paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_OVER);
     paintMethod->state_.shadow.SetOffset(offset);
     paintMethod->state_.shadow.SetLightRadius(0.5f);
+    /**
+     * @tc.steps2: Call the function fill and Path2DFill.
+     * @tc.expected: AttachBrush, DrawRect, DetachBrush, SetColor, SetAlphaF and AddRect are called.
+     */
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
@@ -354,6 +360,9 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo012, Te
     Testing::MockCanvas canvas;
     Offset offset(0.0, 0.0);
 
+    /**
+     * @tc.steps1: initialize parameters.
+     */
     OHOS::Ace::Pattern pattern;
     void* voidPtr = static_cast<void*>(new char[10]);
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
@@ -364,11 +373,14 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo012, Te
     auto sharedPattern = std::make_shared<OHOS::Ace::Pattern>();
     sharedPattern->SetPixelMap(pixelMap);
     sharedPattern->SetImgSrc(src);
-    std::weak_ptr<Ace::Pattern> patternWeak = sharedPattern;
-    paintMethod->state_.strokeState.SetPatternNG(patternWeak);
+    paintMethod->state_.strokeState.SetPatternNG(sharedPattern);
     paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
     paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_OVER);
     paintMethod->state_.shadow.SetOffset(offset);
+    /**
+     * @tc.steps2: Call the function StrokeRect, Stroke and Path2DStroke.
+     * @tc.expected: AttachPen, DrawRect, AddRect and DetachPen are called.
+     */
     EXPECT_CALL(path, AddRect(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
@@ -488,6 +500,9 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo015, Te
     Testing::MockPath path;
     Offset offset(0.0f, 0.0f);
 
+    /**
+     * @tc.steps1: initialize parameters.
+     */
     paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
     paintMethod->state_.globalState.SetAlpha(1.0f);
     EXPECT_TRUE(paintMethod->state_.globalState.HasGlobalAlpha());
@@ -501,11 +516,14 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo015, Te
     auto sharedPattern = std::make_shared<OHOS::Ace::Pattern>();
     sharedPattern->SetPixelMap(pixelMap);
     sharedPattern->SetImgSrc(src);
-    std::weak_ptr<Ace::Pattern> patternWeak = sharedPattern;
-    paintMethod->state_.fillState.SetPatternNG(patternWeak);
+    paintMethod->state_.fillState.SetPatternNG(sharedPattern);
     paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_OVER);
     paintMethod->state_.shadow.SetOffset(offset);
     paintMethod->state_.shadow.SetLightRadius(0.5f);
+    /**
+     * @tc.steps2: Call the function fill and Path2DFill.
+     * @tc.expected: AttachBrush, DrawRect, DetachBrush, SetColor, SetAlphaF and AddRect are called.
+     */
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));

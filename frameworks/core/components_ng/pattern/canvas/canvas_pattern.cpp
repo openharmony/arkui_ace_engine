@@ -501,7 +501,7 @@ void CanvasPattern::UpdateTextBaseline(TextBaseline baseline)
     paintMethod_->PushTask(task);
 }
 
-void CanvasPattern::UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern)
+void CanvasPattern::UpdateStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern)
 {
     auto task = [pattern](CanvasPaintMethod& paintMethod) { paintMethod.SetStrokePatternNG(pattern); };
     paintMethod_->PushTask(task);
@@ -564,7 +564,7 @@ void CanvasPattern::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradie
     paintMethod_->PushTask(task);
 }
 
-void CanvasPattern::UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern)
+void CanvasPattern::UpdateFillPattern(const std::shared_ptr<Ace::Pattern>& pattern)
 {
     auto task = [pattern](CanvasPaintMethod& paintMethod) { paintMethod.SetFillPatternNG(pattern); };
     paintMethod_->PushTask(task);
