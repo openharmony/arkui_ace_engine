@@ -158,9 +158,7 @@ struct BindContextMenuTest {
     NavDestination() {
       Scroll() {
         Column({space: 10}) {
-          Web({ src: 'https://auth.huaweicloud.com/authui/login.html?locale=zh-cn&service=https%3A%2F%2Fwww.huaweicloud.com%2Fintl%2Fzh-cn%2F#/login'
-            //$rawfile('index.html')
-          , controller: this.controller })
+          Web({ src: '', controller: this.controller })
           // 触发自定义弹窗
             .onContextMenuShow((event) => {
               if (event) {

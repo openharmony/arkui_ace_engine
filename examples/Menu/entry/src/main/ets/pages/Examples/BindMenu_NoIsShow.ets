@@ -167,7 +167,7 @@ struct BindMenuNonIsShowTest {
             Scroll() {
                 Column({ space: 10}) {
                     Web({
-                        src: 'https://auth.huaweicloud.com/authui/login.html?locale=zh-cn&service=https%3A%2F%2fwww.huaweicloud.com%2Fintl%2Fzh-cn%2F#/login',
+                        src: '',
                         controller: this.controller
                     })
                     // 触发自定义弹窗

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { SymbolGlyphModifier } from '@kit.ArkUI';
-import { MyComponent } from "../common/MyComponent"
+import { MyComponent } from '../common/MyComponent'
 
 class MenuItemPrivateAttrOptions {
   selected?: boolean | undefined
@@ -25,14 +25,14 @@ class MenuItemPrivateAttrOptions {
 @Extend(Text)
 function paramTextStyle() {
   .fontSize(9)
-  .width("100%")
+  .width('100%')
 }
 
 @Extend(Column)
 function columnStyle() {
   .borderWidth(1.0)
   .padding(10)
-  .width("100%")
+  .width('100%')
   .backgroundColor(Color.Pink)
 }
 
@@ -64,74 +64,74 @@ struct MenuTestLevel0_10 {
     },
     //3
     {
-      startIcon: $r("app.media.app_icon"),
-      content: "",
-      endIcon: $r("app.media.app_icon"),
-      labelInfo: "",
+      startIcon: $r('app.media.app_icon'),
+      content: '',
+      endIcon: $r('app.media.app_icon'),
+      labelInfo: '',
     },
     //4
     {
-      startIcon: $r("app.string.EntryAbility_label"), //res异常值，预期切换前的src图片
-      content: "content",
-      endIcon: $r("app.string.EntryAbility_label"),
-      labelInfo: "label",
+      startIcon: $r('app.string.EntryAbility_label'), //res异常值，预期切换前的src图片
+      content: 'content',
+      endIcon: $r('app.string.EntryAbility_label'),
+      labelInfo: 'label',
     },
     //5
     {
-      startIcon: "/resource/media/svg_money.svg",
-      content: "content \n",
-      endIcon: "/resource/media/png_arrow.png",
-      labelInfo: "label \n",
+      startIcon: '/resource/media/svg_money.svg',
+      content: 'content \n',
+      endIcon: '/resource/media/png_arrow.png',
+      labelInfo: 'label \n',
     },
     //6
     {
-      startIcon: "svg_number", //str异常值，预期切换前的src图片
-      content: "content .".repeat(3),
-      endIcon: "png_arrow.png",
-      labelInfo: "label .".repeat(3),
+      startIcon: 'svg_number', //str异常值，预期切换前的src图片
+      content: 'content .'.repeat(3),
+      endIcon: 'png_arrow.png',
+      labelInfo: 'label .'.repeat(3),
     },
     //7
     {
-      startIcon: $r("app.media.app_icon"),
-      content: "content .".repeat(10),
-      endIcon: $r("app.media.app_icon"),
-      labelInfo: "label .".repeat(10),
+      startIcon: $r('app.media.app_icon'),
+      content: 'content .'.repeat(10),
+      endIcon: $r('app.media.app_icon'),
+      labelInfo: 'label .'.repeat(10),
 
     },
     //8
     {
-      startIcon: $r("app.media.app_icon"),
-      content: $r("app.string.EntryAbility_label"),
-      endIcon: $r("app.media.app_icon"),
-      labelInfo: $r("app.string.EntryAbility_desc"),
+      startIcon: $r('app.media.app_icon'),
+      content: $r('app.string.EntryAbility_label'),
+      endIcon: $r('app.media.app_icon'),
+      labelInfo: $r('app.string.EntryAbility_desc'),
     },
     //9
     {
-      startIcon: $r("app.media.app_icon"),
-      content: $r("app.media.app_icon"), //res异常值，预期走占位空白
-      endIcon: $r("app.media.app_icon"),
-      labelInfo: $r("app.media.app_icon"),
+      startIcon: $r('app.media.app_icon'),
+      content: $r('app.media.app_icon'), //res异常值，预期走占位空白
+      endIcon: $r('app.media.app_icon'),
+      labelInfo: $r('app.media.app_icon'),
     },
     //10
     {
-      startIcon: $r("app.media.app_icon"),
-      endIcon: $r("app.media.app_icon"),
+      startIcon: $r('app.media.app_icon'),
+      endIcon: $r('app.media.app_icon'),
     },
     //11
     {
-      startIcon: $r("app.media.app_icon"),
-      endIcon: $r("app.media.app_icon"),
+      startIcon: $r('app.media.app_icon'),
+      endIcon: $r('app.media.app_icon'),
     },
     //12
     {
-      startIcon: $r("app.media.app_icon"), //video类型，预期占位不显示
-      endIcon: $r("app.media.app_icon"),
+      startIcon: $r('app.media.app_icon'), //video类型，预期占位不显示
+      endIcon: $r('app.media.app_icon'),
     },
     //13
     {
-      startIcon: $r("app.media.app_icon"),
-      content: "二级菜单",
-      endIcon: $r("app.media.app_icon"),
+      startIcon: $r('app.media.app_icon'),
+      content: '二级菜单',
+      endIcon: $r('app.media.app_icon'),
       builder: (): void => this.SubMenuBuilder()
     },
 
@@ -152,8 +152,8 @@ struct MenuTestLevel0_10 {
         .effectStrategy(SymbolEffectStrategy.HIERARCHICAL)
         .renderingStrategy(SymbolRenderingStrategy.MULTIPLE_OPACITY)
         .symbolEffect(SymbolEffect.prototype, 2),
-      content: "Content",
-      labelInfo: "Ctrl",
+      content: 'Content',
+      labelInfo: 'Ctrl',
       builder: (): void => this.SubMenuBuilder()
     },
   ]
@@ -174,7 +174,7 @@ struct MenuTestLevel0_10 {
       contentFont: {
         size: -16,
         weight: 0, //预计字重走默认值
-        family: "HarmonyOS Sans",
+        family: 'HarmonyOS Sans',
         style: FontStyle.Normal
       },
       contentFontColor: Color.Blue,
@@ -184,20 +184,20 @@ struct MenuTestLevel0_10 {
       selected: true,
       selectIcon: false,
       contentFont: {
-        size: "0", //预计字体大小为0:
+        size: '0', //预计字体大小为0:
         weight: 300,
-        family: "注册自定义字体",
+        family: '注册自定义字体',
         style: FontStyle.Italic
       },
-      contentFontColor: "#ff0000ff",
+      contentFontColor: '#ff0000ff',
 
     },
     //5
     {
       selected: true,
-      selectIcon: $r("app.media.app_icon"),
+      selectIcon: $r('app.media.app_icon'),
       contentFont: {
-        size: $r("app.float.float_40"),
+        size: $r('app.float.float_40'),
         weight: 800,
         style: 3  //字体样式枚举异常值，预期走默认值
       },
@@ -206,58 +206,58 @@ struct MenuTestLevel0_10 {
     //6
     {
       selected: true,
-      selectIcon: "svg_album.svg",
+      selectIcon: 'svg_album.svg',
       contentFont: {
         size: 20,
         weight: 1200, //超出范围的异常值，预计走默认值400
       },
-      contentFontColor: $r("app.string.EntryAbility_label"),
+      contentFontColor: $r('app.string.EntryAbility_label'),
     },
     //7
     {
       selected: true,
-      selectIcon: "/resource/media/svg_money.svg",
+      selectIcon: '/resource/media/svg_money.svg',
       contentFont: {
         size: 24,
-        weight: "850", //预计走默认值400
+        weight: '850', //预计走默认值400
         style: FontStyle.Italic
       },
-      contentFontColor: $r("app.color.Color_red"),
+      contentFontColor: $r('app.color.Color_red'),
     },
     //8
     {
       selected: true,
-      selectIcon: $r("app.string.EntryAbility_label"),
+      selectIcon: $r('app.string.EntryAbility_label'),
       contentFont: {
-        size: "100%", //预计字体大小为默认值
+        size: '100%', //预计字体大小为默认值
         weight: FontWeight.Lighter,
         style: undefined
       },
-      contentFontColor: "rgba(123.7,12.37,1.237, 1237)",
+      contentFontColor: 'rgba(123.7,12.37,1.237, 1237)',
     },
     //9
     {
       selected: true,
-      selectIcon: $r("app.media.app_icon"),
+      selectIcon: $r('app.media.app_icon'),
       contentFont: {
         size: 10,
         weight: FontWeight.Normal,
       },
-      contentFontColor: "color-blue",
+      contentFontColor: 'color-blue',
     },
     //10
     {
       selected: true,
       selectIcon: undefined,
       contentFont: {
-        size: $r("app.string.EntryAbility_label"), //预计字体大小为默认值,
+        size: $r('app.string.EntryAbility_label'), //预计字体大小为默认值,
         weight: FontWeight.Regular,
       },
     },
     //11
     {
       selected: true,
-      selectIcon: "/resource/media/gif.gif",
+      selectIcon: '/resource/media/gif.gif',
       contentFont: {
         size: 30,
         weight: FontWeight.Medium,
@@ -267,9 +267,9 @@ struct MenuTestLevel0_10 {
     //12
     {
       selected: true,
-      selectIcon: "/resource/media/mp4_video1.mp4",
+      selectIcon: '/resource/media/mp4_video1.mp4',
       contentFont: {
-        size: "30aa", //预计字体大小为默认值
+        size: '30aa', //预计字体大小为默认值
         weight: FontWeight.Bold,
       },
     },
@@ -291,33 +291,33 @@ struct MenuTestLevel0_10 {
     },
     //3
     {
-      header: "标题",
-      footer: "脚标"
+      header: '标题',
+      footer: '脚标'
     },
     //4
     {
-      header: "标题 .".repeat(10),
-      footer: "脚标 .".repeat(10)
+      header: '标题 .'.repeat(10),
+      footer: '脚标 .'.repeat(10)
     },
     //5
     {
-      header: "标题 \n",
-      footer: "脚标 \n"
+      header: '标题 \n',
+      footer: '脚标 \n'
     },
     //6
     {
-      header: "标题 .".repeat(0),
-      footer: "脚标 .".repeat(0)
+      header: '标题 .'.repeat(0),
+      footer: '脚标 .'.repeat(0)
     },
     //7
     {
-      header: $r("app.string.EntryAbility_label"),
-      footer: $r("app.string.EntryAbility_label"),
+      header: $r('app.string.EntryAbility_label'),
+      footer: $r('app.string.EntryAbility_label'),
     },
     //8
     {
-      header: $r("app.media.app_icon"), //预期空白占位：实际不占位
-      footer: $r("app.media.app_icon"), //预期空白占位：实际不占位
+      header: $r('app.media.app_icon'), //预期空白占位：实际不占位
+      footer: $r('app.media.app_icon'), //预期空白占位：实际不占位
     },
   ]
 
@@ -341,8 +341,8 @@ struct MenuTestLevel0_10 {
   @Builder
   SubMenuBuilder() {
     Menu() {
-      MenuItem({ content: "复制", labelInfo: "Ctrl+C" })
-      MenuItem({ content: "粘贴", labelInfo: "Ctrl+V" })
+      MenuItem({ content: '复制', labelInfo: 'Ctrl+C' })
+      MenuItem({ content: '粘贴', labelInfo: 'Ctrl+V' })
     }
   }
 
@@ -351,27 +351,27 @@ struct MenuTestLevel0_10 {
   MenuItemParamBuilder() {
     Menu() {
       //设置不同MenuItem入参的组合
-      MenuItem({ startIcon: $r("app.media.app_icon")}).menuItemStyle()
-      MenuItem({ startIcon: $r("app.media.app_icon"), labelInfo: "label" }).menuItemStyle()
-      MenuItem({ startIcon: $r("app.media.app_icon"), endIcon: $r("app.media.png_arrow") }).menuItemStyle()
-      MenuItem({ startIcon: $r("app.media.app_icon"), endIcon: $r("app.media.png_arrow"), labelInfo: "label" })
+      MenuItem({ startIcon: $r('app.media.app_icon')}).menuItemStyle()
+      MenuItem({ startIcon: $r('app.media.app_icon'), labelInfo: 'label' }).menuItemStyle()
+      MenuItem({ startIcon: $r('app.media.app_icon'), endIcon: $r('app.media.png_arrow') }).menuItemStyle()
+      MenuItem({ startIcon: $r('app.media.app_icon'), endIcon: $r('app.media.png_arrow'), labelInfo: 'label' })
         .menuItemStyle()
-      MenuItem({ startIcon: $r("app.media.app_icon"), content: "菜单" }).menuItemStyle()
-      MenuItem({ startIcon: $r("app.media.app_icon"), content: "菜单", labelInfo: "label" })
+      MenuItem({ startIcon: $r('app.media.app_icon'), content: '菜单' }).menuItemStyle()
+      MenuItem({ startIcon: $r('app.media.app_icon'), content: '菜单', labelInfo: 'label' })
         .menuItemStyle()
-      MenuItem({ startIcon: $r("app.media.app_icon"), content: "菜单", endIcon: $r("app.media.app_icon") })
+      MenuItem({ startIcon: $r('app.media.app_icon'), content: '菜单', endIcon: $r('app.media.app_icon') })
         .menuItemStyle()
-      MenuItem({startIcon: $r("app.media.app_icon"),content: "菜单",endIcon: $r("app.media.app_icon"),labelInfo: "label"})
+      MenuItem({startIcon: $r('app.media.app_icon'),content: '菜单',endIcon: $r('app.media.app_icon'),labelInfo: 'label'})
         .menuItemStyle()
 
       MenuItem({}).menuItemStyle()
-      MenuItem({ labelInfo: "label" }).menuItemStyle()
-      MenuItem({ endIcon: $r("app.media.app_icon") }).menuItemStyle()
-      MenuItem({ endIcon: $r("app.media.app_icon"), labelInfo: "label" }).menuItemStyle()
-      MenuItem({ content: "菜单" }).menuItemStyle()
-      MenuItem({ content: "菜单", labelInfo: "label" }).menuItemStyle()
-      MenuItem({ content: "菜单", endIcon: $r("app.media.app_icon") }).menuItemStyle()
-      MenuItem({ content: "菜单", endIcon: $r("app.media.app_icon"), labelInfo: "label" }).menuItemStyle()
+      MenuItem({ labelInfo: 'label' }).menuItemStyle()
+      MenuItem({ endIcon: $r('app.media.app_icon') }).menuItemStyle()
+      MenuItem({ endIcon: $r('app.media.app_icon'), labelInfo: 'label' }).menuItemStyle()
+      MenuItem({ content: '菜单' }).menuItemStyle()
+      MenuItem({ content: '菜单', labelInfo: 'label' }).menuItemStyle()
+      MenuItem({ content: '菜单', endIcon: $r('app.media.app_icon') }).menuItemStyle()
+      MenuItem({ content: '菜单', endIcon: $r('app.media.app_icon'), labelInfo: 'label' }).menuItemStyle()
     }
     .width(200)
   }
@@ -393,7 +393,7 @@ struct MenuTestLevel0_10 {
   @Builder
   ItemCustomBuilder() {
     Row({ space: 5 }) {
-      Image($r("app.media.app_icon"))
+      Image($r('app.media.app_icon'))
         .width(24)
         .height(24)
         .borderRadius(3)
@@ -401,7 +401,7 @@ struct MenuTestLevel0_10 {
       Text(`菜单选项`).fontSize(16)
     }
     .margin(4)
-    .width("240")
+    .width('240')
     .padding(3)
     .borderWidth(1.0)
     .borderColor(Color.Blue)
@@ -413,26 +413,26 @@ struct MenuTestLevel0_10 {
   @Builder
   MenuItemAttrBuilder() {
     Menu() {
-      MenuItem({ content: "复制", labelInfo: "Ctrl+C" })
+      MenuItem({ content: '复制', labelInfo: 'Ctrl+C' })
         .selected(this.MenuItemAttrList[this.index[1]].selected)
         .selectIcon(this.MenuItemAttrList[this.index[1]].selectIcon)
         .contentFont(this.MenuItemAttrList[this.index[1]].contentFont)
         .contentFontColor(this.MenuItemAttrList[this.index[1]].contentFontColor)
         .labelFont(this.MenuItemAttrList[this.index[1]].contentFont)
         .labelFontColor(this.MenuItemAttrList[this.index[1]].contentFontColor)
-      MenuItem({ content: "粘贴", labelInfo: "Ctrl+V" })
+      MenuItem({ content: '粘贴', labelInfo: 'Ctrl+V' })
     }
   }
   //MenuItem设置字体自有属性和Menu设置字体属性优先级的builder
   @Builder
   MenuItemFontPriorityBuilder(){
     Menu(){
-      MenuItem({content: `菜单选项`, labelInfo: "Ctrl C"})
+      MenuItem({content: `菜单选项`, labelInfo: 'Ctrl C'})
         .contentFont({size: 10, weight: 300, style: FontStyle.Normal})
         .contentFontColor(Color.Blue)
         .labelFont({size: 10, weight: 300, style: FontStyle.Normal})
         .labelFontColor(Color.Blue)
-      MenuItem({content: "MenuItem", labelInfo: "Ctrl V"})
+      MenuItem({content: 'MenuItem', labelInfo: 'Ctrl V'})
     }
     .font({size: 20, weight: 800, style: FontStyle.Italic})
     .fontColor(Color.Red)
@@ -442,11 +442,11 @@ struct MenuTestLevel0_10 {
   @Builder
   MenuItemEventBuilder() {
     Menu() {
-      MenuItem({ content: "粘贴", labelInfo: "Ctrl+V" })
+      MenuItem({ content: '粘贴', labelInfo: 'Ctrl+V' })
         .selected(this.selected)
         .selectIcon( this.selectedIcon)
         .onChange((selected) => {
-          console.info("---LCG---  menuItem select" + selected);
+          console.info('---LCG---  menuItem select' + selected);
           this.selected = !this.selected
         })
     }
@@ -457,13 +457,13 @@ struct MenuTestLevel0_10 {
   MenuItemGroupOptionsBuilder() {
     Menu() {
       MenuItemGroup(this.MenuItemGroupOptionsList[this.index[2]]) {
-        MenuItem({ content: "复制", labelInfo: "Ctrl+C" })
-        MenuItem({ content: "粘贴", labelInfo: "Ctrl+V" })
+        MenuItem({ content: '复制', labelInfo: 'Ctrl+C' })
+        MenuItem({ content: '粘贴', labelInfo: 'Ctrl+V' })
       }
 
       MenuItemGroup() {
-        MenuItem({ content: "复制", labelInfo: "Ctrl+C" })
-        MenuItem({ content: "粘贴", labelInfo: "Ctrl+V" })
+        MenuItem({ content: '复制', labelInfo: 'Ctrl+C' })
+        MenuItem({ content: '粘贴', labelInfo: 'Ctrl+V' })
       }
     }
   }
@@ -473,8 +473,8 @@ struct MenuTestLevel0_10 {
   MenuItemGroupCustomBuilder() {
     Menu() {
       MenuItemGroup({ header: this.MenuItemGroupHeaderBuilder(), footer: this.MenuItemGroupHeaderBuilder() }) {
-        MenuItem({ content: "复制", labelInfo: "Ctrl+C" })
-        MenuItem({ content: "粘贴", labelInfo: "Ctrl+V" })
+        MenuItem({ content: '复制', labelInfo: 'Ctrl+C' })
+        MenuItem({ content: '粘贴', labelInfo: 'Ctrl+V' })
       }
     }
   }
@@ -483,7 +483,7 @@ struct MenuTestLevel0_10 {
   @Builder
   MenuItemGroupHeaderBuilder() {
     Column() {
-      Text("标题").backgroundColor(Color.Orange)
+      Text('标题').backgroundColor(Color.Orange)
     }
     .padding(10)
     .borderWidth(1.0)
@@ -501,14 +501,14 @@ struct MenuTestLevel0_10 {
         Column({ space: 3 }) {
           Text(`MenuItem入参Options属性的组合测试: `)
             .paramTextStyle()
-          Text("MenuItemParam")
+          Text('MenuItemParam')
             .backgroundColor(Color.Orange)
             .bindMenu(this.MenuItemParamBuilder(), {placement: Placement.Bottom})
 
           Text(`MenuItem入参设置MenuItemOptions:`)
             .paramTextStyle()
           Row({ space: 2 }) {
-            Text(`${this.index[0] + 1}` + " / ")
+            Text(`${this.index[0] + 1}` + ' / ')
               .fontSize(9)
             Text(`${this.MenuItemOptionsList.length}`)
               .key('paramSets_key_0')
@@ -531,7 +531,7 @@ struct MenuTestLevel0_10 {
             })
           }
 
-          Text("MenuItem: Options")
+          Text('MenuItem: Options')
             .backgroundColor(Color.Orange)
             .bindMenu(this.MenuItemOptionsBuilder(), {placement: Placement.Bottom})
         }
@@ -540,7 +540,7 @@ struct MenuTestLevel0_10 {
         Column({ space: 3 }) {
           Text(`MenuItem设置CustomBuilder:`)
             .paramTextStyle()
-          Text("MenuItem: CustomBuilder")
+          Text('MenuItem: CustomBuilder')
             .backgroundColor(Color.Orange)
             .bindMenu(this.MenuItemCustomBuilder(), {
               placement: Placement.Bottom
@@ -554,7 +554,7 @@ struct MenuTestLevel0_10 {
           Text(`切换MenuItem的自有属性参数：`)
             .paramTextStyle()
           Row({ space: 2 }) {
-            Text(`${this.index[1] + 1}` + " / ")
+            Text(`${this.index[1] + 1}` + ' / ')
               .fontSize(9)
             Text(`${this.MenuItemAttrList.length}`)
               .key('paramSets_key_1')
@@ -577,7 +577,7 @@ struct MenuTestLevel0_10 {
             })
           }
 
-          Text("MenuItem: Attribute")
+          Text('MenuItem: Attribute')
             .backgroundColor(Color.Orange)
             .bindMenu(this.MenuItemAttrBuilder(), {
               placement: Placement.Bottom
@@ -600,7 +600,7 @@ struct MenuTestLevel0_10 {
               this.selectedIcon = true
             }})
             MyComponent({title: `ResStr`, func: () => {
-              this.selectedIcon = $r("app.media.app_icon")
+              this.selectedIcon = $r('app.media.app_icon')
             }})
             MyComponent({title: `Symbol`, func: () => {
               this.selectedIcon = new SymbolGlyphModifier($r('sys.symbol.checkmark_square_on_square_fill'))
@@ -612,7 +612,7 @@ struct MenuTestLevel0_10 {
                 .symbolEffect(SymbolEffect.prototype, 2)
             }})
           }
-          Text("MenuItem: Event")
+          Text('MenuItem: Event')
             .backgroundColor(Color.Orange)
             .bindMenu(this.MenuItemEventBuilder(), {
               placement: Placement.Bottom
@@ -626,7 +626,7 @@ struct MenuTestLevel0_10 {
           Text(`切换MenuItemGroupOptions参数: `)
             .paramTextStyle()
           Row({ space: 2 }) {
-            Text(`${this.index[2] + 1}` + " / ")
+            Text(`${this.index[2] + 1}` + ' / ')
               .fontSize(9)
             Text(`${this.MenuItemGroupOptionsList.length}`)
               .key('paramSets_key_2')
@@ -649,7 +649,7 @@ struct MenuTestLevel0_10 {
             })
           }
 
-          Text("MenuItemGroup: Options")
+          Text('MenuItemGroup: Options')
             .backgroundColor(Color.Orange)
             .bindMenu(this.MenuItemGroupOptionsBuilder(), {
               placement: Placement.Bottom
@@ -659,7 +659,7 @@ struct MenuTestLevel0_10 {
             .paramTextStyle()
           Row({ space: 2 }) {
             MyComponent({
-              title: "width++", func: () => {
+              title: 'width++', func: () => {
                 if (this.widthColumn >= 400) {
                   this.widthColumn = 400
                 } else {
@@ -668,7 +668,7 @@ struct MenuTestLevel0_10 {
               }
             })
             MyComponent({
-              title: "width--", func: () => {
+              title: 'width--', func: () => {
                 if (this.widthColumn <= 60) {
                   this.widthColumn = 60
                 } else {
@@ -677,7 +677,7 @@ struct MenuTestLevel0_10 {
               }
             })
             MyComponent({
-              title: "height++", func: () => {
+              title: 'height++', func: () => {
                 if (this.heightColumn >= 800) {
                   this.heightColumn = 800
                 } else {
@@ -686,7 +686,7 @@ struct MenuTestLevel0_10 {
               }
             })
             MyComponent({
-              title: "height--", func: () => {
+              title: 'height--', func: () => {
                 if (this.heightColumn <= 40) {
                   this.heightColumn = 40
                 } else {
@@ -696,7 +696,7 @@ struct MenuTestLevel0_10 {
             })
           }
 
-          Text("MenuItemGroup: Builder")
+          Text('MenuItemGroup: Builder')
             .backgroundColor(Color.Orange)
             .bindMenu(this.MenuItemGroupCustomBuilder(), {
               placement: Placement.Bottom
@@ -704,11 +704,11 @@ struct MenuTestLevel0_10 {
         }
         .columnStyle()
       }
-      .width("100%")
+      .width('100%')
     }
     .padding(12)
     .align(Alignment.TopStart)
-    .width("100%").height("100%")
+    .width('100%').height('100%')
   }
 
   pageTransition() {
