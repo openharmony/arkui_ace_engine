@@ -266,4 +266,32 @@ HWTEST_F(ViewAbstractModelStaticTestNg, BindMenu_BindMenuGestureBranch, TestSize
     ViewAbstractModelStatic::BindMenu(AceType::RawPtr(frameNode), std::move(params), std::move(buildFunc), menuParam);
     EXPECT_EQ(gestureHub->showMenu_, nullptr);
 }
+
+/**
+ * @tc.name: BindContextMenuStatic001
+ * @tc.desc: Test the BindContextMenuStatic
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelStaticTestNg, BindContextMenuStatic001, TestSize.Level1)
+{
+    /**
+     * @tc.steps 1: create node and gestureHub.
+     */
+    ViewAbstractModelStatic viewAbstractModelStatic;
+    auto targetNode = FrameNode::CreateFrameNode(TAG_CHILD, 2, MOCK_PATTERN_ROOT, false);
+    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+    gestureHub->SetPreviewMode(MenuPreviewMode::NONE);
+    std::function<void()> buildMenuFunc = nullptr;
+    NG::MenuParam menuParam;
+
+    /**
+     * @tc.steps 2: buildMenuFunc is null, clear longPressEvent.
+     */
+    auto type = ResponseType::RIGHT_CLICK;
+    targetNode->destroyCallbacksMap_.clear();
+    std::function<void()> previewBuildFunc = []() {};
+    viewAbstractModelStatic.BindContextMenuStatic(
+        targetNode, type, std::move(buildMenuFunc), menuParam, std::move(previewBuildFunc));
+    EXPECT_EQ(gestureHub->GetLongPressEventActuator()->longPressEvent_, nullptr);
+}
 } // namespace OHOS::Ace::NG

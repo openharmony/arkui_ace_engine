@@ -84,7 +84,13 @@ void MenuModelStatic::SetFontColor(FrameNode* frameNode, const std::optional<Col
     if (color.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, color.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, frameNode);
+        auto menuNode = reinterpret_cast<FrameNode*>(frameNode);
+        CHECK_NULL_VOID(menuNode);
+        auto pipeline = menuNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, theme->GetMenuFontColor(), frameNode);
     }
 }
 
