@@ -61,7 +61,7 @@ struct PredictLayoutItem {
     int32_t index;
     int32_t forwardCacheCount;
     int32_t backwardCacheCount;
-    bool forceCache = false;
+    bool forceCache = true;
 };
 
 struct ListPredictLayoutParamV2 {

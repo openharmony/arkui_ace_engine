@@ -4754,4 +4754,30 @@ HWTEST_F(ListLayoutTestNg, SupportEmptyBranchInLazyLoading001, TestSize.Level1)
     model.SetSupportEmptyBranchInLazyLoading(false);
     EXPECT_EQ(layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false), true);
 }
+
+/**
+ * @tc.name: TestLanesCacheRangeInBusy
+ * @tc.desc: Test List cached node with lanes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, TestLanesCacheRangeInBusy, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2);
+    model.SetLanes(1);
+    CreateItemsInLazyForEach(10, 100.0f, nullptr); /* 10: item count */
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. SetCacheRange
+     * @tc.expected: 1 ListItem cached.
+     */
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushUITasks(frameNode_);
+    ASSERT_NE(listPattern->GetPredictLayoutParamV2(), std::nullopt);
+    auto param = listPattern->GetPredictLayoutParamV2().value();
+    for (auto it : param.items) {
+        EXPECT_EQ(it.forceCache, true);
+    }
+}
 } // namespace OHOS::Ace::NG

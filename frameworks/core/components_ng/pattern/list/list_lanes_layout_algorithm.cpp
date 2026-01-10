@@ -499,6 +499,9 @@ std::pair<bool, bool> ListLanesLayoutAlgorithm::CheckACachedItem(
 int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
     int32_t cacheCount, int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList, bool show)
 {
+    auto prop = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(prop, curIndex);
+    int32_t minCacheCount = prop->GetMinCacheCount();
     float crossSize = GetLayoutCrossAxisSize(layoutWrapper);
     RefPtr<LayoutWrapper> wrapper;
     curIndex = GetItemPosition().rbegin()->first + 1;
@@ -508,11 +511,12 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
         float mainLen = 0.0f;
         bool isGroup = false;
         int32_t cnt = 0;
+        bool forceCache = cachedCount <= minCacheCount;
         for (int32_t i = 0; i < lanes_ && curIndex + i <= GetMaxListItemIndex() && !isGroup; i++) {
             wrapper = GetChildByIndex(layoutWrapper, curIndex + i, !show);
             auto [needBreak, needPredict] = CheckACachedItem(wrapper, cnt, isGroup);
             if (needPredict) {
-                predictList.emplace_back(PredictLayoutItem { curIndex + i, cachedCount, -1 });
+                predictList.emplace_back(PredictLayoutItem { curIndex + i, cachedCount, -1, forceCache });
             }
             if (needBreak) {
                 break;
@@ -527,7 +531,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, cacheCount - cachedCount, -1, curIndex, true);
             if (res.forwardCachedCount < res.forwardCacheMax && res.forwardCachedCount < cacheCount - cachedCount) {
                 LayoutItem(wrapper, posMap.begin()->first, posMap.begin()->second, startIndex, crossSize);
-                predictList.emplace_back(PredictLayoutItem { posMap.begin()->first, cachedCount, -1 });
+                predictList.emplace_back(PredictLayoutItem { posMap.begin()->first, cachedCount, -1, forceCache });
                 return res.forwardCachedCount > 0 ? curIndex : curIndex - 1;
             }
             currCache = std::max(res.forwardCacheMax, 1);
@@ -557,6 +561,9 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
 int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
     int32_t cacheCount, int32_t& cachedCount, int32_t curIndex, std::list<PredictLayoutItem>& predictList, bool show)
 {
+    auto prop = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(prop, curIndex);
+    int32_t minCacheCount = prop->GetMinCacheCount();
     float crossSize = GetLayoutCrossAxisSize(layoutWrapper);
     RefPtr<LayoutWrapper> wrapper;
     curIndex = GetItemPosition().begin()->first - 1;
@@ -566,12 +573,13 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
         float mainLen = 0.0f;
         bool isGroup = false;
         int32_t cnt = 0;
+        bool forceCache = cachedCount <= minCacheCount;
         for (int32_t i = 0; i < lanes_ && curIndex - i >= 0; i++) {
             auto idx = curIndex - i;
             wrapper = GetChildByIndex(layoutWrapper, idx, !show);
             auto [needBreak, needPredict] = CheckACachedItem(wrapper, cnt, isGroup);
             if (needPredict) {
-                predictList.emplace_back(PredictLayoutItem { idx, -1, cachedCount });
+                predictList.emplace_back(PredictLayoutItem { idx, -1, cachedCount, forceCache });
             }
             if (needBreak) {
                 break;
@@ -589,7 +597,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, -1, cacheCount - cachedCount, curIndex, true);
             if (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount - cachedCount) {
                 LayoutItem(wrapper, posMap.begin()->first, posMap.begin()->second, startIndex, crossSize);
-                predictList.emplace_back(PredictLayoutItem { posMap.begin()->first, -1, cachedCount });
+                predictList.emplace_back(PredictLayoutItem { posMap.begin()->first, -1, cachedCount, forceCache });
                 return res.backwardCachedCount > 0 ? curIndex : curIndex + 1;
             }
             currCache = std::max(res.backwardCacheMax, 1);
