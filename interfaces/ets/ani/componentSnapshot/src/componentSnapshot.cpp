@@ -110,6 +110,17 @@ void AniThrowError(ani_env* env, ani_int code, const std::string& msg)
     }
 }
 
+ani_object CreateNull(ani_env* env)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref nullObj;
+    if (ANI_OK != env->GetNull(&nullObj)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT,  "Get null object failed!");
+        return nullptr;
+    }
+    return static_cast<ani_object>(nullObj);
+}
+
 std::string ANIUtils_ANIStringToStdString(ani_env* env, ani_string ani_str)
 {
     ani_size strSize;
@@ -157,7 +168,11 @@ void TriggerJsCallback(SnapshotAsyncCtx* asyncCtx)
 #endif
     }
     ani_status status = ANI_OK;
-    resultRef[0] = CreateStsError(ctx->env, ctx->errCode, "");
+    if (ctx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        resultRef[0] = CreateNull(ctx->env);
+    } else {
+        resultRef[0] = CreateStsError(ctx->env, ctx->errCode, "");
+    }
     if (ctx->deferred) {
         // promise
         if (ctx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
