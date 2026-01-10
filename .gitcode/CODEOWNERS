@@ -3173,7 +3173,7 @@ interfaces/inner_api/BUILD.gn @arkui_architecture
 interfaces/inner_api/drawable_descriptor/ @arkui001
 interfaces/inner_api/form_render/ @form_framework
 interfaces/inner_api/ui_service_manager/ @ArkUI_ability_group
-interfaces/inner_api/ui_session/ @arkui_framework_resource
+interfaces/inner_api/ui_session/ @arkui_framework_xnode
 interfaces/inner_api/xcomponent_controller/ @ArkUI_ability_group
 interfaces/inner_api/ace_kit/include/ @arkui_architecture
 interfaces/inner_api/ace_kit/src/ @arkui_framework_resource
