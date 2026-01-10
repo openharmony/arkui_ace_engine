@@ -173,8 +173,6 @@ export class ArkPluginComponentComponent extends ArkCommonMethodComponent implem
 export function PluginComponentImpl(
     @memo
     style: ((attributes: PluginComponentAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkPluginComponentComponent>((): ArkPluginComponentComponent => {
         return new ArkPluginComponentComponent()
@@ -183,7 +181,6 @@ export function PluginComponentImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
