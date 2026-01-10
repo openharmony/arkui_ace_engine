@@ -40,7 +40,8 @@ std::string UseEffectTypeToString(EffectType effectType)
 std::string MaterialTypeToString(int32_t type)
 {
     static const std::string MaterialTypeStyles[] = { "MaterialType.NONE", "MaterialType.SEMI_TRANSPARENT" };
-    if (type >= static_cast<int32_t>(MaterialType::NONE) && type <= static_cast<int32_t>(MaterialType::MAX)) {
+    if (type >= static_cast<int32_t>(MaterialType::NONE) &&
+        type <= static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT)) {
         return MaterialTypeStyles[type];
     }
     return MaterialTypeStyles[0];
@@ -202,7 +203,7 @@ void RenderContext::ToJsonValuePart1(std::unique_ptr<JsonValue>& json, const Ins
 {
     if (uiMaterial_) {
         auto optJsonValue = JsonUtil::Create(true);
-        optJsonValue->Put("type", MaterialTypeToString(uiMaterial_->GetType()));
+        optJsonValue->Put("type", MaterialTypeToString(uiMaterial_->GetType()).c_str());
         auto materialJsonValue = JsonUtil::Create(true);
         materialJsonValue->Put("material", optJsonValue);
         json->PutExtAttr("systemMaterial", materialJsonValue, filter);
