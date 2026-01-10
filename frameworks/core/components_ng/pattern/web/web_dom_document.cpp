@@ -303,7 +303,7 @@ std::pair<int32_t, RectF> WebDomDocument::GetScrollAreaInfoById(int32_t id) cons
     }
     int32_t depthCounter = 0;
     while (current && current->attributes && current->attributes->IsValid()) {
-        if (current->attributes->GetBool(WEB_ATTR_IS_SCROLLABLE, true)) {
+        if (current->attributes->GetBool(WEB_ATTR_IS_SCROLLABLE, false)) {
             auto scrollLeft = current->attributes->GetDouble(WEB_ATTR_SCROLL_LEFT, WEB_ERROR_DOUBLE);
             auto scrollTop = current->attributes->GetDouble(WEB_ATTR_SCROLL_TOP, WEB_ERROR_DOUBLE);
             auto scrollWidth = current->attributes->GetDouble(WEB_ATTR_SCROLL_WIDTH, WEB_ERROR_DOUBLE);
