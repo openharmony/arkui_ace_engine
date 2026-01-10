@@ -329,6 +329,9 @@ export class DragController {
     public notifyDragStartRequest(requestStatus: dragController.DragStartRequestStatus): void {
         throw Error("setDragEventStrictReportingEnabled not implemented in DragController!")
     }
+    public enableDropDisallowedBadge(enabled: boolean): void {
+        throw Error('enableDropDisallowedBadge not implemented in DragController!')
+    }
 }
 
 export interface OverlayManagerOptions {

@@ -1115,6 +1115,11 @@ void ANIDragActionNotifyDragStartReques(int requestStatus)
     ViewAbstractModel::GetInstance()->NotifyDragStartRequest(static_cast<Ace::DragStartRequestStatus>(requestStatus));
 }
 
+void ANIDragActionEnableDropDisallowedBadge(bool enabled)
+{
+    ViewAbstractModel::GetInstance()->EnableDropDisallowedBadge(enabled);
+}
+
 const ArkUIAniDragControllerModifier* GetDragControllerAniModifier()
 {
     static const ArkUIAniDragControllerModifier impl = {
@@ -1127,6 +1132,7 @@ const ArkUIAniDragControllerModifier* GetDragControllerAniModifier()
         .aniDragActionSetDragEventStrictReportingEnabled = NG::ANIDragActionSetDragEventStrictReportingEnabled,
         .aniDragActionCancelDataLoading = NG::ANIDragActionCancelDataLoading,
         .aniDragActionNotifyDragStartReques = NG::ANIDragActionNotifyDragStartReques,
+        .aniDragActionEnableDropDisallowedBadge = NG::ANIDragActionEnableDropDisallowedBadge,
     };
     return &impl;
 }

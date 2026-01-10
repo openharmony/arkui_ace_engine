@@ -240,6 +240,7 @@ export class ArkUIAniModule {
     native static _DragController_setDragEventStrictReportingEnabled(enable: boolean): void
     native static _DragController_cancelDataLoading(key: string): void
     native static _DragController_notifyDragStartReques(requestStatus: dragController.DragStartRequestStatus): void
+    native static _DragController_enableDropDisallowedBadge(enabled: boolean): void
     native static _DragController_getDragPreview(): dragController.DragPreview
     native static _DragController_setForegroundColor(color: KLong, dragPreviewPtr: KPointer): void
     native static _DragController_animate(options: dragController.AnimationOptions, handler: () =>void,
