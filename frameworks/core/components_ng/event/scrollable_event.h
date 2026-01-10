@@ -53,11 +53,11 @@ public:
         return axis_;
     }
 
-    void SetAxis(Axis axis);
+    ACE_FORCE_EXPORT void SetAxis(Axis axis);
 
     void SetScrollable(const RefPtr<Scrollable>& scrollable);
 
-    const RefPtr<Scrollable>& GetScrollable() const;
+    ACE_FORCE_EXPORT const RefPtr<Scrollable>& GetScrollable() const;
 
     void SetEnabled(bool enabled)
     {
@@ -69,7 +69,7 @@ public:
         return enabled_;
     }
 
-    bool Idle() const;
+    ACE_FORCE_EXPORT bool Idle() const;
 
     bool IsHitTestBlock(const PointF& localPoint, SourceType source) const;
 

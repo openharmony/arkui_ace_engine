@@ -427,7 +427,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/theme:ace_core_components_theme_$platform",
       "$ace_root/frameworks/core/components/tip:ace_core_components_tip_$platform",
       "$ace_root/frameworks/core/components/toast:ace_core_components_toast_$platform",
-      "$ace_root/frameworks/core/components/toggle:ace_core_components_toggle_$platform",
       "$ace_root/frameworks/core/components/touch_listener:ace_core_components_touch_listener_$platform",
       "$ace_root/frameworks/core/components/track:ace_core_components_track_$platform",
       "$ace_root/frameworks/core/components/transform:ace_core_components_transform_$platform",

@@ -1967,38 +1967,20 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
     CHECK_NULL_VOID(builderFunc);
 
-    std::optional<ResponseType> responseType = std::nullopt;
-    size_t optionsIndex = builderIndex + 1;
-
+    ResponseType responseType = ResponseType::LONG_PRESS;
     if (!info[NUM_ZERO]->IsBoolean() && info.Length() >= PARAMETER_LENGTH_SECOND && info[NUM_FIRST]->IsNumber()) {
         auto response = info[NUM_FIRST]->ToNumber<int32_t>();
         responseType = static_cast<ResponseType>(response);
-        optionsIndex = NUM_SECOND;
     }
 
     menuParam.previewMode = MenuPreviewMode::NONE;
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     std::function<void()> previewBuildFunc = nullptr;
-    if (info.Length() > optionsIndex && info[optionsIndex]->IsObject()) {
-        ParseBindContentOptionParam(info, info[optionsIndex], menuParam, previewBuildFunc);
+    if (info.Length() >= PARAMETER_LENGTH_THIRD && info[NUM_SECOND]->IsObject()) {
+        ParseBindContentOptionParam(info, info[NUM_SECOND], menuParam, previewBuildFunc);
     }
 
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    if (!responseType.has_value() && menuParam.contextMenuRegisterType != NG::ContextMenuRegisterType::CUSTOM_TYPE) {
-        std::function<void(MenuBindingType)> buildFuncWithType =
-            [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = frameNode]
-                (MenuBindingType type) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                ACE_SCORING_EVENT("BuildContextMenu");
-                PipelineContext::SetCallBackNode(node);
-                JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(type)));
-                func->ExecuteJS(1, &param);
-            };
-
-        ViewAbstractModel::GetInstance()->BindContextMenu(buildFuncWithType, menuParam, previewBuildFunc);
-        return;
-    }
-
     std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
                                           node = frameNode]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -2007,9 +1989,49 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
         func->Execute();
     };
 
-    ViewAbstractModel::GetInstance()->BindContextMenu(
-        responseType.value_or(ResponseType::LONG_PRESS), buildFunc, menuParam, previewBuildFunc);
+    ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
     ViewAbstractModel::GetInstance()->BindDragWithContextMenuParams(menuParam);
+}
+
+void JSViewAbstract::JsBindContextMenuWithResponse(const JSCallbackInfo& info)
+{
+    NG::MenuParam menuParam;
+    // Check the parameters
+    if (info.Length() <= PARAMETER_LENGTH_ZERO) {
+        return;
+    }
+    size_t builderIndex = ParseBindContextMenuShow(info, menuParam);
+    if (!info[builderIndex]->IsObject()) {
+        return;
+    }
+
+    JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[builderIndex]);
+    auto builder = menuObj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        return;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
+
+    size_t optionsIndex = builderIndex + 1;
+    menuParam.previewMode = MenuPreviewMode::NONE;
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
+    std::function<void()> previewBuildFunc = nullptr;
+    if (info.Length() > optionsIndex && info[optionsIndex]->IsObject()) {
+        ParseBindContentOptionParam(info, info[optionsIndex], menuParam, previewBuildFunc);
+    }
+
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    std::function<void(MenuBindingType)> buildFuncWithType =
+        [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = frameNode](MenuBindingType type) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("BuildContextMenuWithResponse");
+            PipelineContext::SetCallBackNode(node);
+            JSRef<JSVal> param = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(type)));
+            func->ExecuteJS(1, &param);
+        };
+
+    ViewAbstractModel::GetInstance()->BindContextMenu(buildFuncWithType, menuParam, previewBuildFunc);
 }
 #endif
 

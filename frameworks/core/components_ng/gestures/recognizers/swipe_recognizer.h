@@ -85,6 +85,8 @@ public:
         return speed_.ConvertToPx();
     }
 
+protected:
+    std::string GetGestureInfoString() const override;
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;

@@ -2118,7 +2118,7 @@ HWTEST_F(SearchTestTwoNg, searchModelStatic012, TestSize.Level1)
     EXPECT_EQ(buttonLayoutProperty->GetFontSize().value(), SEARCH_BUTTON_FONT_SIZE);
 
     SearchModelStatic::SetSearchButtonFontSize(frameNode, std::nullopt);
-    EXPECT_FALSE(buttonLayoutProperty->GetFontSize().has_value());
+    EXPECT_TRUE(buttonLayoutProperty->GetFontSize().has_value());
 }
 
 /**

@@ -30,6 +30,7 @@ RefPtr<FrameNode> ContainerModalStaticView::Create(RefPtr<FrameNode>& content)
 {
     auto containerModalNode = FrameNode::CreateFrameNode("ContainerModal",
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ContainerModalStaticPattern>());
+    ACE_UINODE_TRACE(containerModalNode);
     auto stack = FrameNode::CreateFrameNode(
         V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),

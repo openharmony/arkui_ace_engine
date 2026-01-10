@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -49,6 +49,7 @@ template("ace_core_interfaces_native_node") {
       "node/extension_companion_node.cpp",
       "node/extension_custom_node.cpp",
       "node/flex_modifier.cpp",
+      "node/flow_item_modifier.cpp",
       "node/frame_node_modifier.cpp",
       "node/frame_node_modifier_multi_thread.cpp",
       "node/gauge_modifier.cpp",

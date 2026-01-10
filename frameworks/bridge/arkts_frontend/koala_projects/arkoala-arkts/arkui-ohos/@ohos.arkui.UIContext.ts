@@ -178,11 +178,11 @@ export class Router {
         throw Error("replaceNamedRoute not implemented in Router!");
     }
 
-    public back(options?:router.RouterOptions): void {
+    public back(options?: router.RouterOptions): void {
         throw Error("back not implemented in Router!");
     }
 
-    public back(index: int, params?: jsonx.JsonElement): void {
+    public back(index: int, params?: Object): void {
         throw Error("back not implemented in Router!");
     }
 
@@ -196,7 +196,7 @@ export class Router {
         throw Error("getStackSize not implemented in Router!")
     }
 
-    public getParams(): jsonx.JsonElement {
+    public getParams(): Object {
         throw Error("getParams not implemented in Router!");
     }
 

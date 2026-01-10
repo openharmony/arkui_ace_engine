@@ -284,11 +284,11 @@ export class CommonMethodModifier implements CommonMethod {
     _bindContextMenu_0_0value?: CustomBuilder | undefined
     _bindContextMenu_0_1value?: ResponseType | undefined
     _bindContextMenu_0_2value?: ContextMenuOptions | undefined
-    _bindContextMenu_1_0value?: CustomBuilderT<ResponseType> | undefined
-    _bindContextMenu_1_1value?: ContextMenuOptions | undefined
-    _bindContextMenu_2_0value?: boolean | undefined
-    _bindContextMenu_2_1value?: CustomBuilder | undefined
-    _bindContextMenu_2_2value?: ContextMenuOptions | undefined
+    _bindContextMenuWithResponse_0_0value?: CustomBuilderT<ResponseType> | undefined
+    _bindContextMenuWithResponse_0_1value?: ContextMenuOptions | undefined
+    _bindContextMenu_1_0value?: boolean | undefined
+    _bindContextMenu_1_1value?: CustomBuilder | undefined
+    _bindContextMenu_1_2value?: ContextMenuOptions | undefined
     _bindContentCover_0_0value?: boolean | Bindable<boolean> | undefined
     _bindContentCover_0_1value?: CustomBuilder | undefined
     _bindContentCover_0_2value?: ModalTransition | undefined
@@ -3821,7 +3821,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (flagArray[193] as int32) {
                 case 1: {
-                    peer.setBindContextMenu1Attribute((this._bindContextMenu_1_0value as CustomBuilderT<ResponseType> | undefined), (this._bindContextMenu_1_1value as ContextMenuOptions | undefined));
+                    peer.setBindContextMenuWithResponseAttribute((this._bindContextMenuWithResponse_0_0value as CustomBuilderT<ResponseType> | undefined), (this._bindContextMenuWithResponse_0_1value as ContextMenuOptions | undefined));
                     flagArray[193] = 2;
                     break;
                 }
@@ -3831,7 +3831,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[193] = 0;
-                    peer.setBindContextMenu1Attribute((undefined as CustomBuilderT<ResponseType> | undefined), (undefined as ContextMenuOptions | undefined));
+                    peer.setBindContextMenuWithResponseAttribute((undefined as CustomBuilderT<ResponseType> | undefined), (undefined as ContextMenuOptions | undefined));
                 }
             }
         }
@@ -3839,7 +3839,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (flagArray[194] as int32) {
                 case 1: {
-                    peer.setBindContextMenu2Attribute((this._bindContextMenu_2_0value as boolean | undefined), (this._bindContextMenu_2_1value as CustomBuilder | undefined), (this._bindContextMenu_2_2value as ContextMenuOptions | undefined | undefined));
+                    peer.setBindContextMenu1Attribute((this._bindContextMenu_1_0value as boolean | undefined), (this._bindContextMenu_1_1value as CustomBuilder | undefined), (this._bindContextMenu_1_2value as ContextMenuOptions | undefined | undefined));
                     flagArray[194] = 2;
                     break;
                 }
@@ -3849,7 +3849,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[194] = 0;
-                    peer.setBindContextMenu2Attribute((undefined as boolean | undefined), (undefined as CustomBuilder | undefined), (undefined as ContextMenuOptions | undefined | undefined));
+                    peer.setBindContextMenu1Attribute((undefined as boolean | undefined), (undefined as CustomBuilder | undefined), (undefined as ContextMenuOptions | undefined | undefined));
                 }
             }
         }
@@ -6599,11 +6599,11 @@ export class CommonMethodModifier implements CommonMethod {
             switch (flagArray[193] as int32) {
                 case 1:
                 case 3: {
-                    this.bindContextMenu(modifier._bindContextMenu_1_0value, modifier._bindContextMenu_1_1value);
+                    this.bindContextMenuWithResponse(modifier._bindContextMenuWithResponse_0_0value, modifier._bindContextMenuWithResponse_0_1value);
                     break;
                 }
                 default: {
-                    this.bindContextMenu((undefined as CustomBuilderT<ResponseType> | undefined), (undefined as ContextMenuOptions | undefined));
+                    this.bindContextMenuWithResponse((undefined as CustomBuilderT<ResponseType> | undefined), (undefined as ContextMenuOptions | undefined));
                 }
             }
         }
@@ -6612,7 +6612,7 @@ export class CommonMethodModifier implements CommonMethod {
             switch (flagArray[194] as int32) {
                 case 1:
                 case 3: {
-                    this.bindContextMenu(modifier._bindContextMenu_2_0value, modifier._bindContextMenu_2_1value, modifier._bindContextMenu_2_2value);
+                    this.bindContextMenu(modifier._bindContextMenu_1_0value, modifier._bindContextMenu_1_1value, modifier._bindContextMenu_1_2value);
                     break;
                 }
                 default: {
@@ -9179,12 +9179,12 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    bindContextMenu(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
+    bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
         if (((this._flagArray[193]) == (0)) || (true) || (true))
         {
             this._flagArray[193] = 1
-            this._bindContextMenu_1_0value = content
-            this._bindContextMenu_1_1value = options
+            this._bindContextMenuWithResponse_0_0value = content
+            this._bindContextMenuWithResponse_0_1value = options
             this._state.fireChange()
         } else
         {
@@ -9193,12 +9193,12 @@ export class CommonMethodModifier implements CommonMethod {
         return this
     }
     bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
-        if (((this._flagArray[194]) == (0)) || ((this._bindContextMenu_2_0value) !== (isShown)) || (true) || (true))
+        if (((this._flagArray[194]) == (0)) || ((this._bindContextMenu_1_0value) !== (isShown)) || (true) || (true))
         {
             this._flagArray[194] = 1
-            this._bindContextMenu_2_0value = isShown
-            this._bindContextMenu_2_1value = content
-            this._bindContextMenu_2_2value = options
+            this._bindContextMenu_1_0value = isShown
+            this._bindContextMenu_1_1value = content
+            this._bindContextMenu_1_2value = options
             this._state.fireChange()
         } else
         {

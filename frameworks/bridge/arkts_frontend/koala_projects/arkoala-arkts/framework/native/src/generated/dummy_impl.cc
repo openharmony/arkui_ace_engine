@@ -4934,22 +4934,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetBindContextMenu1Impl(Ark_NativePointer node,
-                                 const Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType* content,
-                                 const Opt_ContextMenuOptions* options)
+    void SetBindContextMenuWithResponseImpl(Ark_NativePointer node,
+                                            const Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType* content,
+                                            const Opt_ContextMenuOptions* options)
     {
         if (!needGroupedLog(1))
         {
             return;
         }
-        string out("setBindContextMenu1(");
+        string out("setBindContextMenuWithResponse(");
         WriteToString(&out, content);
         out.append(", ");
         WriteToString(&out, options);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetBindContextMenu2Impl(Ark_NativePointer node,
+    void SetBindContextMenu1Impl(Ark_NativePointer node,
                                  const Opt_Boolean* isShown,
                                  const Opt_CustomNodeBuilder* content,
                                  const Opt_ContextMenuOptions* options)
@@ -4958,7 +4958,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         {
             return;
         }
-        string out("setBindContextMenu2(");
+        string out("setBindContextMenu1(");
         WriteToString(&out, isShown);
         out.append(", ");
         WriteToString(&out, content);
@@ -22839,8 +22839,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetBindMenu0Impl,
             CommonMethodModifier::SetBindMenu1Impl,
             CommonMethodModifier::SetBindContextMenu0Impl,
+            CommonMethodModifier::SetBindContextMenuWithResponseImpl,
             CommonMethodModifier::SetBindContextMenu1Impl,
-            CommonMethodModifier::SetBindContextMenu2Impl,
             CommonMethodModifier::SetBindContentCover0Impl,
             CommonMethodModifier::SetBindContentCover1Impl,
             CommonMethodModifier::SetBindSheetImpl,
@@ -26934,6 +26934,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return 0;
         }
         string out("postTouchEvent(");
+        WriteToString(&out, event);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_Boolean PostInputEventImpl(Ark_BuilderNodeOps peer,
+                                   const Opt_InputEventType* event)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("postInputEvent(");
         WriteToString(&out, event);
         out.append(") \n");
         out.append("[return 0] \n");
@@ -48978,6 +48992,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             BuilderNodeOpsAccessor::SetUpdateConfigurationCallbackImpl,
             BuilderNodeOpsAccessor::SetOptionsImpl,
             BuilderNodeOpsAccessor::PostTouchEventImpl,
+            BuilderNodeOpsAccessor::PostInputEventImpl,
             BuilderNodeOpsAccessor::SetRootFrameNodeInBuilderNodeImpl,
         };
         return &BuilderNodeOpsAccessorImpl;

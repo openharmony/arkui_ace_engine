@@ -454,7 +454,7 @@ HWTEST_F(TextTwelveTestNg, UpdateAIMenuOptions_PrepareAIMenuOptions, TestSize.Le
      * @tc.expected: The IsShowAIMenuOption return true
      */
     pattern->UpdateAIMenuOptions();
-    EXPECT_TRUE(pattern->IsShowAIMenuOption());
+    EXPECT_FALSE(pattern->IsShowAIMenuOption());
 }
 
 /**

@@ -21,12 +21,12 @@ import { TextBackgroundStyle, BaseSpan } from "./component/span"
 import { LengthMetrics } from "arkui.Graphics"
 import { BaseSpanModifier } from "./BaseSpanModifier"
 import { CommonMethodModifier } from "./CommonMethodModifier"
-import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkImageSpanPeer, ImageCompleteCallback, ImageLoadResult, ImageSpanAttribute } from "./component/imageSpan"
 import { int32 } from "@koalaui/common"
+import { ModifierState } from "./CommonModifier"
 import { ImageSpanAlignment, ImageFit } from "./component/enums"
 import { ColorFilter } from "./component/units"
 import { default as drawing } from "@ohos.graphics.drawing"
@@ -34,7 +34,7 @@ import { ImageErrorCallback, ImageError } from "./component/image"
 import { default as image } from "@ohos.multimedia.image"
 export class ImageSpanModifier extends CommonMethodModifier implements ImageSpanAttribute,AttributeModifier<ImageSpanAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }

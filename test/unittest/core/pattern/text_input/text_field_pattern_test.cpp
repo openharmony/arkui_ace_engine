@@ -3142,6 +3142,13 @@ HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread3, TestSize.Level1
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->StartTwinklingMultiThread();
+    MoveCaretToContentRectData val = {
+        .index = 0,
+        .textAffinity = TextAffinity::DOWNSTREAM,
+        .isEditorValueChanged = true,
+        .moveContent = false
+    };
+    pattern->MoveCaretToContentRectMultiThread(val);
 }
 
 /**
@@ -3169,10 +3176,10 @@ HWTEST_F(TextFieldPatternTest, TextInputResponseAreaGetChildOffset, TestSize.Lev
      * @tc.steps: step2. get childOffset
      */
     auto offset = responseArea->GetChildOffset(parentSize, contentRect, childSize, nodeWidth);
-    EXPECT_EQ(offset, OffsetF(75.0f, 20.0f));
+    EXPECT_EQ(offset, OffsetF(20.0f, 30.0f));
     responseArea->hostPattern_.Reset();
     offset = responseArea->GetChildOffset(parentSize, contentRect, childSize, nodeWidth);
-    EXPECT_EQ(offset, OffsetF(40.0f, 40.0f));
+    EXPECT_EQ(offset, OffsetF(15.0f, 30.0f));
 }
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -627,17 +627,6 @@ const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetListItemOnSelect,
 };
 
-const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
-    NodeModifier::SetOnWillScroll,
-    NodeModifier::SetOnWaterFlowReachEnd,
-    NodeModifier::SetOnDidScroll,
-    NodeModifier::SetOnWaterFlowScrollStart,
-    NodeModifier::SetOnWaterFlowScrollStop,
-    NodeModifier::SetOnWaterFlowScrollFrameBegin,
-    NodeModifier::SetOnWaterFlowScrollIndex,
-    NodeModifier::SetOnWaterFlowReachStart,
-};
-
 const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
     NodeModifier::SetOnGridScrollStart,
@@ -870,17 +859,6 @@ const ResetComponentAsyncEventHandler LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
 
 const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetListItemOnSelect,
-};
-
-const ResetComponentAsyncEventHandler WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
-    NodeModifier::ResetOnWillScroll,
-    NodeModifier::ResetOnWaterFlowReachEnd,
-    NodeModifier::ResetOnDidScroll,
-    NodeModifier::ResetOnWaterFlowScrollStart,
-    NodeModifier::ResetOnWaterFlowScrollStop,
-    NodeModifier::ResetOnWaterFlowScrollFrameBegin,
-    NodeModifier::ResetOnWaterFlowScrollIndex,
-    NodeModifier::ResetOnWaterFlowReachStart,
 };
 
 const ResetComponentAsyncEventHandler GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -1117,12 +1095,11 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             break;
         }
         case ARKUI_WATER_FLOW: {
-            // swiper event type.
-            if (subKind >= sizeof(WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
-                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
+            auto* waterFlowModifier = NodeModifier::GetWaterFlowModifier();
+            if (waterFlowModifier) {
+                eventHandle =
+                    reinterpret_cast<ComponentAsyncEventHandler>(waterFlowModifier->getEventSetHandler(subKind));
             }
-            eventHandle = WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_GRID: {
@@ -1407,14 +1384,11 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             break;
         }
         case ARKUI_WATER_FLOW: {
-            // swiper event type.
-            if (subKind >=
-                sizeof(WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
-                TAG_LOGE(
-                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
+            auto* waterFlowModifier = NodeModifier::GetWaterFlowModifier();
+            if (waterFlowModifier) {
+                eventHandle =
+                    reinterpret_cast<ResetComponentAsyncEventHandler>(waterFlowModifier->getEventResetHandler(subKind));
             }
-            eventHandle = WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_GRID: {

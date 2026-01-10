@@ -43,6 +43,7 @@
       GetArkUIAniModifiers;
       GetArkUIDrawableDescriptor;
       GetArkUINodeModifiers;
+      SendArkUISyncEvent;
 
       OHOS::Ace::AceApplicationInfo::*;
       OHOS::Ace::AceScopedTrace::*;
@@ -134,7 +135,6 @@
       OHOS::Ace::BadgeModel::*;
       OHOS::Ace::BlankModel::*;
       OHOS::Ace::ButtonModel::*;
-      OHOS::Ace::WaterFlowModel::*;
       OHOS::Ace::NG::WaterFlowSections::*;
       OHOS::Ace::WaterFlowItemModel::*;
       OHOS::Ace::OffscreenContextModel::*;
@@ -229,6 +229,72 @@
       "OHOS::Ace::ControlledAnimator::Forward()";
       "OHOS::Ace::ControlledAnimator::GetControlStatus() const";
       OHOS::Ace::DrawableDescriptorInfo::DrawableDescriptorInfo*;
+      OHOS::Ace::FeatureParam::*;
+      OHOS::Ace::NodeAdapter::GetNodeAdapterAPI*;
+
+      OHOS::Ace::NG::AddPaddingToSize*;
+      OHOS::Ace::NG::ParseTemplateArgs*;
+      OHOS::Ace::NG::BuildItemFillPolicyColumns*;
+      OHOS::Ace::NG::CreateIdealSize*;
+      OHOS::Ace::NG::ConstrainIdealSizeByLayoutPolicy*;
+      OHOS::Ace::NG::GetCrossAxisSize*;
+      OHOS::Ace::NG::GetMainAxisSize*;
+      OHOS::Ace::NG::ScrollableUtils::CheckHeightExpansion*;
+      OHOS::Ace::NG::ScopedLayout::*;
+      OHOS::Ace::NG::ConvertToMarginPropertyF*;
+      OHOS::Ace::NG::ConvertToOptionalSize*;
+      OHOS::Ace::NG::ConvertToSize*;
+      OHOS::Ace::NG::MeasureProperty::UpdateMaxSizeWithCheck*;
+      OHOS::Ace::NG::MeasureProperty::UpdateMinSizeWithCheck*;
+      OHOS::Ace::NG::ViewStackProcessor::IsCurrentVisualStateProcess*;
+      OHOS::Ace::NG::ScrollAdjustmanager::*;
+      "OHOS::Ace::GetSysTimestamp()";
+      OHOS::Ace::NG::ScrollableAccessibilityProperty::*;
+      OHOS::Ace::NG::ScrollableLayoutProperty::*;
+      OHOS::Ace::NG::ScrollablePaintProperty::*;
+      OHOS::Ace::NG::ScrollablePaintMethod::*;
+      OHOS::Ace::NG::ScrollablePattern::*;
+      OHOS::Ace::NG::ScrollBarOverlayModifier::*;
+      OHOS::Ace::NG::NestableScrollContainer::*;
+      OHOS::Ace::NG::ScrollableEvent::SetAxis*;
+      OHOS::Ace::NG::ScrollableEvent::GetScrollable*;
+      OHOS::Ace::NG::ScrollableEvent::Idle*;
+      OHOS::Ace::NG::ScrollBar::GetForegroundColor*;
+      OHOS::Ace::NG::ScrollBarProxy::SetScrollEnabled*;
+      OHOS::Ace::NG::ScrollBarProxy::IsNestScroller*;
+      OHOS::Ace::NG::FocusState::GetFrameNode*;
+      OHOS::Ace::NG::CalcSize::ToString*;
+      OHOS::Ace::NG::CreateProxyNode*;
+      OHOS::Ace::NG::ScrollableModelStatic::SetOnWillScroll*;
+      OHOS::Ace::NG::ScrollableModelStatic::SetOnDidScroll*;
+      OHOS::Ace::V2::WaterFlowItemComponent::*;
+      OHOS::Ace::V2::WaterFlowComponent::*;
+      OHOS::Ace::V2::WaterFlowPositionController::*;
+      OHOS::Ace::Framework::JSWaterFlowSections::NewInstance*;
+      OHOS::Ace::Framework::ScopedViewStackProcessor::*;
+      OHOS::Ace::Framework::ViewStackProcessor::FinishReturnMain*;
+      "std::__h::vector<panda::Local<panda::JSValueRef>, std::__h::allocator<panda::Local<panda::JSValueRef>>> OHOS::Ace::NG::ArkTSUtils::ConvertToJSValues<OHOS::Ace::CalcDimension, OHOS::Ace::ScrollState>(panda::ecmascript::EcmaVM const*, OHOS::Ace::CalcDimension, OHOS::Ace::ScrollState)";
+      "std::__h::vector<panda::Local<panda::JSValueRef>, std::__h::allocator<panda::Local<panda::JSValueRef>>> OHOS::Ace::NG::ArkTSUtils::ConvertToJSValues<int, int>(panda::ecmascript::EcmaVM const*, int, int)";
+      "std::__h::vector<panda::Local<panda::JSValueRef>, std::__h::allocator<panda::Local<panda::JSValueRef>>> OHOS::Ace::NG::ArkTSUtils::ConvertToJSValues<OHOS::Ace::Dimension, OHOS::Ace::ScrollState>(panda::ecmascript::EcmaVM const*, OHOS::Ace::Dimension, OHOS::Ace::ScrollState)";
+
+      VTT?for?OHOS::Ace::NG::ScrollableLayoutProperty;
+      VTT?for?OHOS::Ace::NG::ScrollableController;
+      VTT?for?OHOS::Ace::NG::ScrollableAccessibilityProperty*;
+      VTT?for?OHOS::Ace::NG::NestableScrollContainer;
+      VTT?for?OHOS::Ace::V2::WaterFlowItemComponent;
+      VTT?for?OHOS::Ace::V2::WaterFlowComponent;
+      VTT?for?OHOS::Ace::V2::WaterFlowPositionController;
+
+      vtable?for?OHOS::Ace::NG::ScrollableAccessibilityProperty;
+      vtable?for?OHOS::Ace::NG::ScrollableLayoutProperty;
+      vtable?for?OHOS::Ace::NG::ScrollableController;
+      vtable?for?OHOS::Ace::NG::ScrollablePattern;
+      vtable?for?OHOS::Ace::NG::NestableScrollContainer;
+      vtable?for?OHOS::Ace::V2::WaterFlowItemComponent;
+      vtable?for?OHOS::Ace::V2::WaterFlowComponent;
+      vtable?for?OHOS::Ace::V2::WaterFlowPositionController;
+
+      virtual?thunk?to?OHOS::Ace::NG::ScrollablePattern::*;
 
       OHOS::Ace::Framework::JsAcePage::*;
       OHOS::Ace::TextPickerModel::*;
@@ -362,6 +428,8 @@
       OHOS::Ace::NG::SecurityUIExtensionProxy::*;
       OHOS::Ace::NG::DynamicModelStatic::*;
       OHOS::Ace::NG::DynamicParam::*;
+      OHOS::Ace::CheckableComponent::*;
+      OHOS::Ace::RenderCheckable::*;
       OHOS::Ace::NG::MinusPaddingToSize*;
       OHOS::Ace::NG::AddPaddingToSize*;
       OHOS::Ace::ToRSPoint*;
@@ -430,6 +498,16 @@
       OHOS::Ace::RatingComponent::*;
       "OHOS::Ace::Component::Component()";
       "OHOS::Ace::NG::CreateProxyNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
+
+      "OHOS::Ace::NG::ViewStackProcessor::Pop()";
+      "OHOS::Ace::MultiModalScene::UnSubscribeVoiceEvent(OHOS::Ace::VoiceEvent const&)";
+      "OHOS::Ace::RosenCheckablePainter::SetStrokeWidth(double, OHOS::Rosen::Drawing::Pen&) const";
+      "OHOS::Ace::RosenUniversalPainter::DrawRRectBackground(OHOS::Rosen::Drawing::Canvas*, OHOS::Ace::RRect const&, unsigned int, double)";
+      "OHOS::Ace::RosenUniversalPainter::DrawHoverBackground(OHOS::Rosen::Drawing::Canvas*, OHOS::Ace::Rect const&, unsigned int, double)";
+      "OHOS::Ace::TextStyle::SetAdaptTextSize(OHOS::Ace::Dimension const&, OHOS::Ace::Dimension const&, OHOS::Ace::Dimension const&)";
+      "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, uint32_t, bool)>>::GetInstance()";
+      "OHOS::Ace::AnimatableColor::AnimatableColor(unsigned int, OHOS::Ace::AnimationOption const&)";
+      
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
@@ -539,6 +617,10 @@
       VTT?for?OHOS::Ace::FocusNode*;
       VTT?for?OHOS::Ace::CheckableComponent;
       VTT?for?OHOS::Ace::RatingComponent;
+      VTT?for?OHOS::Ace::PaddingComponent;
+      VTT?for?OHOS::Ace::RawRecognizer;
+      VTT?for?OHOS::Ace::RenderCheckable;
+      
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
@@ -646,6 +728,7 @@
       OHOS::Ace::NG::CreateProxyNode*;
       OHOS::Ace::NG::Converter::ResourceConverter::*;
       OHOS::Ace::NG::CommonViewModelNG::CreateFrameNode*;
+      *OHOS::Ace::NG::Converter::ConvContext::Allocate*;
       *OHOS::Ace::NG::Converter::Convert*;
       *OHOS::Ace::NG::Converter::AssignCast*;
       *OHOS::Ace::NG::Converter::AssignArkValue*;
@@ -731,6 +814,8 @@
       vtable?for?OHOS::Ace::PixelMapDrawableDescriptor;
       vtable?for?OHOS::Ace::AnimatedDrawableDescriptor;
       vtable?for?OHOS::Ace::ImageComponent;
+      vtable?for?OHOS::Ace::PaddingComponent;
+      vtable?for?OHOS::Ace::RawRecognizer;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
@@ -989,6 +1074,21 @@
       vtable?for?OHOS::Ace::PaddingComponent;
       vtable?for?OHOS::Ace::LengthLimitingFormatter;
 
+      OHOS::Ace::DOM_DISABLED;
+      OHOS::Ace::DOM_TEXT_VALUE;
+      OHOS::Ace::DOM_TEXT_ALLOW_SCALE;
+      OHOS::Ace::DOM_TEXT_FONT_SIZE;
+      OHOS::Ace::DOM_TEXT_FONT_WEIGHT;
+      OHOS::Ace::DOM_TEXT_FONT_FAMILY;
+      OHOS::Ace::DOM_TEXT_FONT_STYLE;
+      OHOS::Ace::DOM_TEXT_LETTER_SPACING;
+      OHOS::Ace::DOM_TEXT_DECORATION;
+      OHOS::Ace::DOM_TEXT_DECORATION_LINETHROUGH;
+      OHOS::Ace::DOM_TEXT_DECORATION_NONE;
+      OHOS::Ace::DOM_TEXT_DECORATION_OVERLINE;
+      OHOS::Ace::DOM_TEXT_DECORATION_UNDERLINE;
+      OHOS::Ace::DOM_TEXT_FONT_STYLE_ITALIC;
+      OHOS::Ace::DOM_TEXT_DECORATION_INHERIT;
       virtual?thunk?to?OHOS::Ace::Framework::DOMNode::*;
       virtual?thunk?to?OHOS::Ace::RenderElement::*;
       virtual?thunk?to?OHOS::Ace::Element::*;

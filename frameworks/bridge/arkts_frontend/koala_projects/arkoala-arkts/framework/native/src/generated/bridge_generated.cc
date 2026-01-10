@@ -5451,7 +5451,7 @@ void impl_CommonMethod_setBindContextMenu0(Ark_NativePointer thisPtr, KSerialize
         GetNodeModifiers()->getCommonMethodModifier()->setBindContextMenu0(self, static_cast<Opt_CustomNodeBuilder*>(&contentValueTemp), static_cast<Opt_ResponseType*>(&responseTypeValueTemp), static_cast<Opt_ContextMenuOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setBindContextMenu0, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CommonMethod_setBindContextMenu1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_CommonMethod_setBindContextMenuWithResponse(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto contentValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -5468,10 +5468,10 @@ void impl_CommonMethod_setBindContextMenu1(Ark_NativePointer thisPtr, KSerialize
             optionsValueTempTmpBuf.value = ContextMenuOptions_serializer::read(thisDeserializer);
         }
         Opt_ContextMenuOptions optionsValueTemp = optionsValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setBindContextMenu1(self, static_cast<Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType*>(&contentValueTemp), static_cast<Opt_ContextMenuOptions*>(&optionsValueTemp));
+        GetNodeModifiers()->getCommonMethodModifier()->setBindContextMenuWithResponse(self, static_cast<Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType*>(&contentValueTemp), static_cast<Opt_ContextMenuOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(CommonMethod_setBindContextMenu1, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CommonMethod_setBindContextMenu2(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+KOALA_INTEROP_DIRECT_V3(CommonMethod_setBindContextMenuWithResponse, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_CommonMethod_setBindContextMenu1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto isShownValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -5495,9 +5495,9 @@ void impl_CommonMethod_setBindContextMenu2(Ark_NativePointer thisPtr, KSerialize
             optionsValueTempTmpBuf.value = ContextMenuOptions_serializer::read(thisDeserializer);
         }
         Opt_ContextMenuOptions optionsValueTemp = optionsValueTempTmpBuf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setBindContextMenu2(self, static_cast<Opt_Boolean*>(&isShownValueTemp), static_cast<Opt_CustomNodeBuilder*>(&contentValueTemp), static_cast<Opt_ContextMenuOptions*>(&optionsValueTemp));
+        GetNodeModifiers()->getCommonMethodModifier()->setBindContextMenu1(self, static_cast<Opt_Boolean*>(&isShownValueTemp), static_cast<Opt_CustomNodeBuilder*>(&contentValueTemp), static_cast<Opt_ContextMenuOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V3(CommonMethod_setBindContextMenu2, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(CommonMethod_setBindContextMenu1, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setBindContentCover0(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -28892,6 +28892,38 @@ Ark_Boolean impl_BuilderNodeOps_postTouchEvent(Ark_NativePointer thisPtr, Ark_Na
         return GetAccessors()->getBuilderNodeOpsAccessor()->postTouchEvent(self, static_cast<Ark_TouchEvent>(event));
 }
 KOALA_INTEROP_DIRECT_2(BuilderNodeOps_postTouchEvent, Ark_Boolean, Ark_NativePointer, Ark_NativePointer)
+Ark_Boolean impl_BuilderNodeOps_postInputEvent(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+ 	     Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
+ 	     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+ 	     const auto event_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+ 	     Opt_InputEventType event_value_buf = {};
+ 	     event_value_buf.tag = event_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+ 	     if ((INTEROP_RUNTIME_UNDEFINED) != (event_value_buf_runtimeType))
+ 	     {
+ 	         const Ark_Int8 event_value_buf__selector = thisDeserializer.readInt8();
+ 	         Ark_InputEventType event_value_buf_ = {};
+ 	         event_value_buf_.selector = event_value_buf__selector;
+ 	         if (event_value_buf__selector == 0) {
+ 	             event_value_buf_.selector = 0;
+ 	             event_value_buf_.value0 = static_cast<Ark_TouchEvent>(TouchEvent_serializer::read(thisDeserializer));
+ 	         }
+ 	         else if (event_value_buf__selector == 1) {
+ 	             event_value_buf_.selector = 1;
+ 	             event_value_buf_.value1 = static_cast<Ark_MouseEvent>(MouseEvent_serializer::read(thisDeserializer));
+ 	         }
+ 	         else if (event_value_buf__selector == 2) {
+ 	             event_value_buf_.selector = 2;
+ 	             event_value_buf_.value2 = static_cast<Ark_AxisEvent>(AxisEvent_serializer::read(thisDeserializer));
+ 	         }
+ 	         else {
+ 	             INTEROP_FATAL("One of the branches for event_value_buf_ has to be chosen through deserialisation.");
+ 	         }
+ 	         event_value_buf.value = static_cast<Ark_InputEventType>(event_value_buf_);
+ 	     }
+ 	     Opt_InputEventType event_value = event_value_buf;;
+ 	     return GetAccessors()->getBuilderNodeOpsAccessor()->postInputEvent(self, (const Opt_InputEventType*)&event_value);
+}
+KOALA_INTEROP_DIRECT_3(BuilderNodeOps_postInputEvent, Ark_Boolean, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_BuilderNodeOps_setRootFrameNodeInBuilderNode(Ark_NativePointer thisPtr, Ark_NativePointer node) {
         Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
         return GetAccessors()->getBuilderNodeOpsAccessor()->setRootFrameNodeInBuilderNode(self, node);

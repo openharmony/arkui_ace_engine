@@ -283,7 +283,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
       .sort((view1, view2) => view1.id__() - view2.id__());
 
     dirtyView.forEach((view: ViewPU) => {
-      view.dirtyElementIdsNeedsUpdateSynchronously_.forEach((elementId: number) => {
+      view.dirtyElementIdsNeedsUpdateSynchronously_?.forEach((elementId: number) => {
         view.UpdateElement(elementId);
       })
     })

@@ -29,7 +29,7 @@ import { Color, FontWeight, MarqueeUpdateStrategy } from "./component/enums"
 import { Resource } from "global.resource"
 export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttribute,AttributeModifier<MarqueeAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }

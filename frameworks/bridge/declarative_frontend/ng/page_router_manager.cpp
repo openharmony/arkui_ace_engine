@@ -16,7 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-
+#include "bridge/common/utils/engine_helper.h"
 #include "base/i18n/localization.h"
 #include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -1643,7 +1643,7 @@ RefPtr<FrameNode> PageRouterManager::CreateDynamicPage(int32_t pageId, const Rou
                 "1. there is a js error in target page;\n"
                 "2. invalid moduleName or bundleName in target page;\n"
                 "3. the ability exited unexpectedly.";
-            ThrowError(errorMsg, ERROR_CODE_INTERNAL_ERROR);
+            ThrowRuntimeError(errorMsg, ERROR_CODE_INTERNAL_ERROR);
         }
 #endif
         pageRouterStack_.pop_back();
@@ -1744,7 +1744,7 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
                 "Load Page Failed: " + target.url + ", probably caused by reasons as follows:\n"
                 "1. there is a js error in target page;\n"
                 "2. invalid moduleName or bundleName in target page.";
-            ThrowError(errorMsg, ERROR_CODE_INTERNAL_ERROR);
+            ThrowRuntimeError(errorMsg, ERROR_CODE_INTERNAL_ERROR);
         }
 #endif
         pageRouterStack_.pop_back();
@@ -2318,6 +2318,25 @@ void PageRouterManager::ThrowError(const std::string& msg, int32_t code)
     auto runtime = std::static_pointer_cast<Framework::ArkJSRuntime>(
         Framework::JsiDeclarativeEngineInstance::GetCurrentRuntime());
     runtime->ThrowError(msg, code);
+}
+
+void PageRouterManager::ThrowRuntimeError(const std::string& message, int32_t errCode)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_value code = nullptr;
+    napi_create_int32(env, errCode, &code);
+
+    napi_value msg = nullptr;
+    LOGE("napi throw errCode %{public}d strMsg %{public}s", errCode, message.c_str());
+    napi_create_string_utf8(env, message.c_str(), message.length(), &msg);
+
+    napi_value error = nullptr;
+    napi_create_error(env, code, msg, &error);
+    napi_throw(env, error);
 }
 
 int32_t PageRouterManager::GetPageIndex(const WeakPtr<FrameNode>& page)

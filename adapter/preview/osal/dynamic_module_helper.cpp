@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,7 +83,9 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"CheckboxGroup", "checkbox"},
         {"Gauge", "gauge"},
         {"Rating", "rating"},
-        {"Hyperlink", "hyperlink"},
+        { "FlowItem", "waterflow" },
+        { "WaterFlow", "waterflow" },
+        { "Hyperlink", "hyperlink" },
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);

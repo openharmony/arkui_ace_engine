@@ -22,7 +22,7 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from "./alertDialog"
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, GeometryInfo, Measurable, Layoutable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, TouchObject, KeyEvent, KeyEventInternal, MouseEvent, MouseEventInternal, SourceTool, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, ChildrenMainSize_serializer, ChildrenMainSize, ChildrenMainSizeInternal, OnWillScrollCallback, OnScrollCallback, SheetOptions_serializer, SheetOptions } from "./common"
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, GeometryInfo, Measurable, Layoutable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, TouchObject, KeyEvent, KeyEventInternal, MouseEvent, MouseEventInternal, SourceTool, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, ChildrenMainSize_serializer, ChildrenMainSize, ChildrenMainSizeInternal, OnWillScrollCallback, OnScrollCallback, SheetOptions_serializer, SheetOptions, AxisEvent, InputEventType, TouchEvent_serializer, MouseEvent_serializer, AxisEvent_serializer } from "./common"
 import { ArkListOptions_serializer } from "./../framework/ohos.arkui.ArcList"
 import { ArkListOptions, ArcScrollIndexHandler } from "@ohos.arkui.ArcList"
 import { SwipeActionOptions_serializer, SwipeActionOptions } from "./listItem"
@@ -886,6 +886,10 @@ export class BuilderNodeOps implements MaterializedBase {
         const event_casted = event as (TouchEvent)
         return this.postTouchEvent_serialize(event_casted)
     }
+    public postInputEvent(event: InputEventType): boolean {
+        const event_casted = event as (InputEventType)
+        return this.postInputEvent_serialize(event_casted)
+    }
     public setRootFrameNodeInBuilderNode(node: KPointer): KPointer {
         const node_casted = node as (KPointer)
         return this.setRootFrameNodeInBuilderNode_serialize(node_casted)
@@ -913,6 +917,25 @@ export class BuilderNodeOps implements MaterializedBase {
     }
     postTouchEvent_serialize(event: TouchEvent): boolean {
         const retval  = ArkUIGeneratedNativeModule._BuilderNodeOps_postTouchEvent(this.peer!.ptr, toPeerPtr(event))
+        return retval
+    }
+    postInputEvent_serialize(event: InputEventType): boolean {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt8(runtimeType(event))
+        if (event instanceof TouchEvent) {
+            thisSerializer.writeInt8((0).toByte())
+            TouchEvent_serializer.write(thisSerializer, event)
+        }
+        else if (event instanceof MouseEvent) {
+            thisSerializer.writeInt8((1).toByte())
+            MouseEvent_serializer.write(thisSerializer, event)
+        }
+        else if (event instanceof AxisEvent) {
+            thisSerializer.writeInt8((2).toByte())
+            AxisEvent_serializer.write(thisSerializer, event)
+        }
+        const retval  = ArkUIGeneratedNativeModule._BuilderNodeOps_postInputEvent(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
     setRootFrameNodeInBuilderNode_serialize(node: KPointer): KPointer {

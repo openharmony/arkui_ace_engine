@@ -382,6 +382,9 @@ void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& tar
         auto inputHub = targetNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(inputHub);
         inputHub->BindContextMenu(nullptr);
+        auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetLongPressEvent(nullptr);
         return;
     }
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());

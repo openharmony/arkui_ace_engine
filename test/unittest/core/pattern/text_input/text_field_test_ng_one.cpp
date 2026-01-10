@@ -44,6 +44,13 @@ HWTEST_F(TextFieldTestNGOne, TextPattern001, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+
+    /*
+        @tc.steps:
+        step2.
+        pattern update caret rect
+    */
+
     pattern->UpdateCaretRect(true);
 }
 
