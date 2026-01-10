@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_RENDER_TOOL_BAR_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_RENDER_TOOL_BAR_H
-
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_TOOL_BAR_RENDER_TOOL_BAR_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_TOOL_BAR_RENDER_TOOL_BAR_H
 #include <vector>
 
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/flex/render_flex.h"
-#include "core/components/tool_bar/tool_bar_component.h"
+#include "compatible/components/toolbar/tool_bar_component.h"
 
 namespace OHOS::Ace {
 
@@ -53,4 +52,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TOOL_BAR_RENDER_TOOL_BAR_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIABLE_TOOL_BAR_RENDER_TOOL_BAR_H

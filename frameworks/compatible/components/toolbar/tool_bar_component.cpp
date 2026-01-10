@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,21 @@
  * limitations under the License.
  */
 
-#include "rosen_render_tool_bar_item.h"
+#include "compatible/components/toolbar/tool_bar_component.h"
+
+#include "compatible/components/toolbar/render_tool_bar.h"
+#include "compatible/components/toolbar/tool_bar_element.h"
 
 namespace OHOS::Ace {
-RefPtr<RenderNode> RenderToolBarItem::Create()
+
+RefPtr<RenderNode> ToolBarComponent::CreateRenderNode()
 {
-    if (SystemProperties::GetRosenBackendEnabled()) {
-#ifdef ENABLE_ROSEN_BACKEND
-        return AceType::MakeRefPtr<RosenRenderToolBarItem>();
-#else
-        return nullptr;
-#endif
-    } else {
-        return nullptr;
-    }
+    return RenderToolBar::Create();
 }
+
+RefPtr<Element> ToolBarComponent::CreateElement()
+{
+    return AceType::MakeRefPtr<ToolBarElement>();
+}
+
 } // namespace OHOS::Ace

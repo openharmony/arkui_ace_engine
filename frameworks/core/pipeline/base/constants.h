@@ -560,7 +560,7 @@ extern const char SELECT_OPTION_VALUE[];
 extern const char SELECT_OPTION_TEXT[];
 extern const char SELECT_OPTION_SELECTED[];
 extern const uint32_t SELECT_DEFAULT_OPTION_SIZE;
-ACE_EXPORT extern const uint32_t SELECT_INVALID_INDEX;
+ACE_FORCE_EXPORT extern const uint32_t SELECT_INVALID_INDEX;
 
 // clip constants
 extern const char CLIP_NAME[];

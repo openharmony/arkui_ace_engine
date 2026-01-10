@@ -623,7 +623,6 @@ template("ace_core_source_set") {
         "$ace_root/frameworks/core/components/piece:ace_core_components_piece_$platform",
         "$ace_root/frameworks/core/components/popup:ace_core_components_popup_$platform",
         "$ace_root/frameworks/core/components/select:ace_core_components_select_$platform",
-        "$ace_root/frameworks/core/components/tool_bar:ace_core_components_tool_bar_$platform",
       ]
     }
 

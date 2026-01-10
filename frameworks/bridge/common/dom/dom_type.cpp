@@ -937,18 +937,6 @@ const char DOM_PANEL_ATTR_HALF_HEIGHT[] = "halfheight";
 const char DOM_PANEL_ATTR_FULL_HEIGHT[] = "fullheight";
 const char DOM_PANEL_EVENT_SIZE_CHANGED[] = "sizechange";
 
-// tool-bar-item constants
-const char DOM_TOOL_BAR_ITEM_ICON[] = "icon";
-const char DOM_TOOL_BAR_ITEM_VALUE[] = "value";
-const char DOM_TOOL_BAR_ITEM_TEXT_COLOR[] = "textColor";
-const char DOM_TOOL_BAR_ITEM_COLOR[] = "color";
-const char DOM_TOOL_BAR_ITEM_FONT_SIZE[] = "fontSize";
-const char DOM_TOOL_BAR_ITEM_FONT_STYLE[] = "fontStyle";
-const char DOM_TOOL_BAR_ITEM_FONT_WEIGHT[] = "fontWeight";
-const char DOM_TOOL_BAR_ITEM_TEXT_DECORATION[] = "textDecoration";
-const char DOM_TOOL_BAR_ITEM_FONT_FAMILY[] = "fontFamily";
-const char DOM_TOOL_BAR_ITEM_ALLOW_SCALE[] = "allowScale";
-
 // card transition
 const char DOM_TRANSITION_EFFECT[] = "transitionEffect";
 const char DOM_TRANSITION_CARD_COMPOSEID[] = "ref";

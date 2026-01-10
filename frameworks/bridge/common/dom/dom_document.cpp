@@ -47,7 +47,6 @@
 #include "frameworks/bridge/common/dom/dom_piece.h"
 #include "frameworks/bridge/common/dom/dom_popup.h"
 #include "frameworks/bridge/common/dom/dom_select.h"
-#include "frameworks/bridge/common/dom/dom_tool_bar.h"
 #if !defined(PREVIEW)
 #ifdef WEB_SUPPORTED
 #include "frameworks/bridge/common/dom/dom_web.h"
@@ -138,10 +137,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
 #endif
         { DOM_NODE_TAG_SWIPER, &DOMNodeCreator<DOMSwiper> },
         { DOM_NODE_TAG_TEXT, &DOMNodeCreator<DOMText> },
-#ifndef WEARABLE_PRODUCT
-        { DOM_NODE_TAG_TOOL_BAR, &DOMNodeCreator<DOMToolBar> },
-        { DOM_NODE_TAG_TOOL_BAR_ITEM, &DOMNodeCreator<DOMToolBarItem> },
-#endif
 #ifndef WEARABLE_PRODUCT
 #ifdef WEB_SUPPORTED
         { DOM_NODE_TAG_WEB, &DOMNodeCreator<DOMWeb> },
