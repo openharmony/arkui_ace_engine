@@ -309,6 +309,26 @@ public:
     FillContentMap GetFillContentMap(int32_t id);
     void RemoveFillContentMap(int32_t id);
 
+    void SetLastAvoidOrientation(int32_t lastAvoidOrientation)
+    {
+        lastAvoidOrientation_ = lastAvoidOrientation;
+    }
+
+    std::optional<int32_t> GetLastAvoidOrientation() const
+    {
+        return lastAvoidOrientation_;
+    }
+
+    void SetLastRootHeight(double lastRootHeight)
+    {
+        lastRootHeight_ = lastRootHeight;
+    }
+
+    std::optional<double> GetLastRootHeight() const
+    {
+        return lastRootHeight_;
+    }
+
     int32_t GetAttachInputId() const
     {
         return attachInputId_;
@@ -392,6 +412,8 @@ private:
     int32_t currentCustomId_ = -1;
     WeakPtr<FrameNode> preNode_;
     int32_t attachInputId_ = -1;
+    std::optional<int32_t> lastAvoidOrientation_ = -1;
+    std::optional<double> lastRootHeight_;
     std::optional<bool> isAskCeliaSupported_;
 };
 
