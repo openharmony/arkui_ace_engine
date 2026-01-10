@@ -356,6 +356,7 @@ HWTEST_F(TextFieldTestNgTwo, testEnterKeyType001, TestSize.Level1)
     pattern_->UpdateTextInputAction(TextInputAction::PREVIOUS);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->GetTextInputActionValue(), TextInputAction::PREVIOUS);
+    EXPECT_STREQ(pattern_->TextInputActionToString().c_str(), "EnterKeyType.Previous");
 
     /**
      * @tc.step: step4. Set enterKeyType
@@ -363,6 +364,14 @@ HWTEST_F(TextFieldTestNgTwo, testEnterKeyType001, TestSize.Level1)
     pattern_->UpdateTextInputAction(TextInputAction::END);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->GetTextInputActionValue(), TextInputAction::END);
+
+    /**
+     * @tc.step: step4. Set enterKeyType
+     */
+    pattern_->UpdateTextInputAction(TextInputAction::NEW_LINE);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->GetTextInputActionValue(), TextInputAction::NEW_LINE);
+    EXPECT_STREQ(pattern_->TextInputActionToString().c_str(), "EnterKeyType.NewLine");
 }
 
 /**

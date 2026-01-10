@@ -7533,6 +7533,10 @@ std::string TextFieldPattern::TextInputActionToString() const
             return "EnterKeyType.Send";
         case TextInputAction::NEXT:
             return "EnterKeyType.Next";
+        case TextInputAction::PREVIOUS:
+            return "EnterKeyType.Previous";
+        case TextInputAction::NEW_LINE:
+            return "EnterKeyType.NewLine";
         default:
             return "EnterKeyType.Done";
     }
