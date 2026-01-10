@@ -58,6 +58,14 @@ HWTEST_F(TextFieldTestNgTwo, testCaretPosition001, TestSize.Level1)
     pattern_->UpdateSelectionOffset();
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), value.text.length());
+
+    /** 
+     * @tc.step: step4. Set value
+     */
+    value.text = "12345678";
+    selection.baseOffset = value.text.length();
+    value.selection = selection;
+    pattern_->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
 }
 
 /**
