@@ -134,7 +134,6 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/linear_layout/row_model_ng_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/linear_split/linear_split_model_ng_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/list/list_item_group_model_static.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/list/list_item_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item_group/menu_item_group_view_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/model/model_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/model/model_paint_method.cpp",

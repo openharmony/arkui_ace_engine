@@ -17,8 +17,10 @@
 
 #include "gtest/gtest.h"
 #include "list_test_ng.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 
 #include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
+#include "core/components_ng/pattern/list/list_item_model_static.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -365,5 +367,79 @@ HWTEST_F(ListItemModelTestNg, SetStyle_TwoParameters, TestSize.Level1)
      */
     model.SetStyle(AceType::RawPtr(listNode), V2::ListItemStyle::CARD);
     EXPECT_EQ(pattern->listItemStyle_, V2::ListItemStyle::CARD);
+}
+
+/**
+ * @tc.name: SetDeleteArea001
+ * @tc.desc: Test SetDeleteArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemModelTestNg, StaticSetDeleteArea001, TestSize.Level1)
+{
+    auto listItemNode = FrameNode::CreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, 0, AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
+    ASSERT_NE(listItemNode, nullptr);
+    auto pattern = listItemNode->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListItemLayoutProperty> listItemLayoutProperty = AceType::MakeRefPtr<ListItemLayoutProperty>();
+    listItemNode->SetLayoutProperty(listItemLayoutProperty);
+    auto layoutProperty = listItemNode->GetLayoutProperty<ListItemLayoutProperty>();
+
+    RefPtr<NG::UINode> startNode;
+    RowModelNG rowModel;
+    rowModel.Create(std::nullopt, nullptr, "");
+    ViewAbstract::SetWidth(CalcLength(50.0f));
+    ViewAbstract::SetHeight(CalcLength(50.0f));
+    startNode = NG::ViewStackProcessor::GetInstance()->Finish();
+
+    auto context = listItemNode->GetContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    context->SetThemeManager(themeManager);
+    auto listItemThemeConstants = CreateThemeConstants(THEME_PATTERN_LIST_ITEM);
+    auto listItemTheme = ListItemTheme::Builder().Build(listItemThemeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(ListItemTheme::TypeId())).WillRepeatedly(Return(listItemTheme));
+    ListItemModelStatic::SetDeleteArea(AceType::RawPtr(listItemNode), AceType::RawPtr(startNode), nullptr, nullptr,
+        nullptr, nullptr, std::nullopt, true);
+    ASSERT_NE(layoutProperty, nullptr);
+    auto startDistance = static_cast<float>(
+        layoutProperty->GetStartDeleteAreaDistance().value_or(Dimension(0, DimensionUnit::VP)).ConvertToPx());
+    EXPECT_EQ(startDistance, 56);
+}
+
+/**
+ * @tc.name: SetDeleteArea002
+ * @tc.desc: Test SetDeleteArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemModelTestNg, SetDeleteArea002, TestSize.Level1)
+{
+    auto listItemNode = FrameNode::CreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, 0, AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
+    ASSERT_NE(listItemNode, nullptr);
+    auto pattern = listItemNode->GetPattern<ListItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListItemLayoutProperty> listItemLayoutProperty = AceType::MakeRefPtr<ListItemLayoutProperty>();
+    listItemNode->SetLayoutProperty(listItemLayoutProperty);
+    auto layoutProperty = listItemNode->GetLayoutProperty<ListItemLayoutProperty>();
+
+    RefPtr<NG::UINode> endNode;
+    RowModelNG rowModel;
+    rowModel.Create(std::nullopt, nullptr, "");
+    ViewAbstract::SetWidth(CalcLength(50.0f));
+    ViewAbstract::SetHeight(CalcLength(50.0f));
+    endNode = NG::ViewStackProcessor::GetInstance()->Finish();
+
+    auto context = listItemNode->GetContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    context->SetThemeManager(themeManager);
+    auto listItemThemeConstants = CreateThemeConstants(THEME_PATTERN_LIST_ITEM);
+    auto listItemTheme = ListItemTheme::Builder().Build(listItemThemeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(ListItemTheme::TypeId())).WillRepeatedly(Return(listItemTheme));
+    ListItemModelStatic::SetDeleteArea(AceType::RawPtr(listItemNode), AceType::RawPtr(endNode), nullptr, nullptr,
+        nullptr, nullptr, std::nullopt, false);
+    ASSERT_NE(layoutProperty, nullptr);
+    auto endDistance = static_cast<float>(
+        layoutProperty->GetEndDeleteAreaDistance().value_or(Dimension(0, DimensionUnit::VP)).ConvertToPx());
+    EXPECT_EQ(endDistance, 56);
 }
 } // namespace OHOS::Ace::NG
