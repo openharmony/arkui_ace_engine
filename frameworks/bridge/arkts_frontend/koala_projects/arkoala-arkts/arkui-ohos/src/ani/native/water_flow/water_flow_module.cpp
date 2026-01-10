@@ -93,6 +93,20 @@ ArkUIWaterFlowSectionGap ParseDimension(ani_env *env, ani_ref dimensionRef)
     return res;
 }
 
+ArkUIWaterFlowSectionGap ParseOptionalDimension(ani_env* env, ani_object section, const char* propName)
+{
+    ArkUIWaterFlowSectionGap result;
+
+    ani_ref propRef;
+    if (env->Object_GetPropertyByName_Ref(section, propName, &propRef) == ANI_OK) {
+        if (!AniUtils::IsUndefined(env, propRef)) {
+            result = ParseDimension(env, propRef);
+        }
+    }
+
+    return result;
+}
+
 ArkUIWaterFlowSectionPadding ParsePadding(ani_env* env, ani_ref paddingRef)
 {
     ArkUIWaterFlowSectionPadding res;
@@ -147,50 +161,30 @@ ArkUIWaterFlowSection ParseSectionOptions(ani_env* env, ani_ref section)
     }
     curSection.itemsCount = itemsCount;
 
+    curSection.crossCount = 1;
     ani_ref crossCount;
-    if (env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "crossCount", &crossCount) != ANI_OK) {
-        curSection.crossCount = 1;
-    }
-    ani_boolean isUndefined = false;
-    if (env->Reference_IsUndefined(crossCount, &isUndefined) != ANI_OK) {
-        curSection.crossCount = 1;
-    }
-    if (!isUndefined) {
-        ani_double crossCnt;
-        env->Object_CallMethodByName_Double(static_cast<ani_object>(crossCount), "toDouble", ":d", &crossCnt);
-        if (crossCnt <= 0) {
-            crossCnt = 1;
+    if (env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "crossCount", &crossCount) == ANI_OK) {
+        if (!AniUtils::IsUndefined(env, crossCount)) {
+            int32_t crossCnt;
+            if (AniUtils::GetOptionalInt(env, crossCount, crossCnt) && crossCnt > 0) {
+                curSection.crossCount = crossCnt;
+            }
         }
-        curSection.crossCount = static_cast<int32_t>(crossCnt);
     }
 
-    ani_ref columnsGap;
-    env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "columnsGap", &columnsGap);
-    isUndefined = false;
-    env->Reference_IsUndefined(columnsGap, &isUndefined);
-    if (!isUndefined) {
-        curSection.columnsGap = ParseDimension(env, columnsGap);
-    }
-
-    ani_ref rowsGap;
-    env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "rowsGap", &rowsGap);
-    isUndefined = false;
-    env->Reference_IsUndefined(rowsGap, &isUndefined);
-    if (!isUndefined) {
-        curSection.rowsGap = ParseDimension(env, rowsGap);
-    }
+    curSection.columnsGap = ParseOptionalDimension(env, static_cast<ani_object>(section), "columnsGap");
+    curSection.rowsGap = ParseOptionalDimension(env, static_cast<ani_object>(section), "rowsGap");
 
     ani_ref margin;
-    env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "margin", &margin);
-    isUndefined = false;
-    env->Reference_IsUndefined(margin, &isUndefined);
-    if (!isUndefined) {
-        curSection.margin = ParseMargin(env, margin);
+    if (env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "margin", &margin) == ANI_OK) {
+        if (!AniUtils::IsUndefined(env, margin)) {
+            curSection.margin = ParseMargin(env, margin);
+        }
     }
 
     ani_ref func;
     env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "onGetItemMainSizeByIndex", &func);
-    isUndefined = false;
+    ani_boolean isUndefined = false;
     ani_boolean isGetItemMainSizeByIndex = ANI_FALSE;
     env->Reference_IsUndefined(func, &isUndefined);
     if (!isUndefined) {
