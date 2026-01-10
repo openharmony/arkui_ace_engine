@@ -22,13 +22,14 @@
 #include "ui_content_service_interface.h"
 #include "window_manager.h"
 
-#include "frameworks/base/json/json_util.h"
-#include "frameworks/core/components_ng/base/frame_node.h"
+#include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
 
 namespace OHOS::Ace {
 
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&UiSaService::GetInstance());
 constexpr int32_t SIMPLIFYTREE_WITH_PARAMCONFIG = 4;
+constexpr unsigned long int PARAMS_LENGTH_THREE  = 3;
+constexpr unsigned long int PARAMS_LENGTH_TWO  = 2;
 
 std::mutex uiContentRemoteObjMapMtx;
 
@@ -117,6 +118,18 @@ int32_t UiSaService::Dump(int32_t fd, const std::vector<std::u16string>& args)
                 LOGI("through uiSa, currentPageName = %{public}s", data.c_str());
             };
             service->GetCurrentPageName(getPageNameCallback);
+        } else if (params[0] == "SendCommand" && params.size() == PARAMS_LENGTH_THREE) {
+            int32_t id = std::atoi(params[1].c_str());
+            std::string command = params[2];
+            service->SendCommand(id, command);
+        } else if (params[0] == "SendCommand" && params.size() == PARAMS_LENGTH_TWO) {
+            std::string command = params[1];
+            service->SendCommand(command);
+        } else if (params[0] == "SendCommandAsync" && params.size() == PARAMS_LENGTH_THREE) {
+            int32_t id = std::atoi(params[1].c_str());
+            std::string command = params[2];
+            service->SendCommand(id, command);
+            service->SendCommandAsync(id, command);
         }
     }
 

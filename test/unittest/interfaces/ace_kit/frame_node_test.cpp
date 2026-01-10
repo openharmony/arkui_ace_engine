@@ -78,19 +78,14 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest002, TestSize.Level1)
     auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
     auto frameNode = AbstractViewFactory::CreateFrameNode(tag, 2, mockPattern);
     EXPECT_NE(frameNode, nullptr);
-
     auto property = frameNode->GetProperty();
     EXPECT_TRUE(property);
-
     auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(frameNode);
     ASSERT_TRUE(frameNodeImpl);
-
     auto* aceNodePtr = frameNodeImpl->GetAceNodePtr();
     EXPECT_TRUE(aceNodePtr);
-
     auto aceNode = frameNodeImpl->GetAceNode();
     EXPECT_TRUE(aceNode);
-
     auto pattern = frameNodeImpl->GetPattern();
     EXPECT_TRUE(pattern);
     frameNode->Reset();
@@ -135,15 +130,19 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest004, TestSize.Level1)
     auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
     auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
     EXPECT_NE(frameNode, nullptr);
+
     auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(frameNode);
     ASSERT_TRUE(frameNodeImpl);
+
     frameNode->AddChild(nullptr);
     EXPECT_EQ(frameNode->GetChildren().size(), 0);
+
     const std::string childTag = "TEST4_CHILD";
     const int32_t childId = 4;
     auto mockPatternChild = AceType::MakeRefPtr<MockAceKitPattern>();
     auto frameNodeChild = AbstractViewFactory::CreateFrameNode(childTag, childId, mockPatternChild);
     EXPECT_NE(frameNode, nullptr);
+
     frameNode->AddChild(frameNodeChild);
     EXPECT_EQ(frameNode->GetChildren().size(), 1);
 
@@ -163,6 +162,7 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest005, TestSize.Level1)
     auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
     auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
     EXPECT_NE(frameNode, nullptr);
+
     auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(frameNode);
     ASSERT_TRUE(frameNodeImpl);
 
@@ -171,6 +171,7 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest005, TestSize.Level1)
     auto* aceNode = frameNodeImpl->GetAceNodePtr();
     ASSERT_TRUE(aceNode);
     EXPECT_TRUE(aceNode->IsActive());
+
     auto geometryNode = aceNode->GetGeometryNode();
     auto parentConstraint = geometryNode->GetParentLayoutConstraint();
     EXPECT_TRUE(NearEqual(parentConstraint.value().maxSize.Width(), constraint.maxWidth));
