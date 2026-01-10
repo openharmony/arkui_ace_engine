@@ -17,8 +17,8 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_MENU_ITEM_THEME_H
 
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
-#include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 
 namespace OHOS::Ace::Framework {
 class JSMenuItemTheme {
@@ -31,7 +31,11 @@ public:
             // no need to apply custom theme colors
             return;
         }
-        MenuItemModel::GetInstance()->SetLabelFontColor(themeColors.value().FontPrimary());
+        auto* stack = NG::ViewStackProcessor::GetInstance();
+        CHECK_NULL_VOID(stack);
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(stack->GetMainFrameNode());
+        CHECK_NULL_VOID(frameNode);
+        NG::MenuItemModelNG::SetLabelFontColor(frameNode, themeColors.value().FontPrimary());
     }
 };
 } // namespace OHOS::Ace::Framework

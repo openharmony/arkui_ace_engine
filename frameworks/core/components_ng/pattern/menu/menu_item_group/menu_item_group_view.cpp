@@ -42,7 +42,15 @@ void UpdateRowPadding(const RefPtr<FrameNode>& row)
 void MenuItemGroupView::CreateWithStringResourceObj(
     const RefPtr<ResourceObject>& resObj, const MenuItemGroupStringType type)
 {
+    CHECK_NULL_VOID(resObj);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithStringResourceObj(frameNode, resObj, type);
+}
+
+void MenuItemGroupView::CreateWithStringResourceObj(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, const MenuItemGroupStringType type)
+{
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
@@ -93,10 +101,23 @@ void MenuItemGroupView::Create()
     stack->Push(menuItemGroup);
 }
 
+void MenuItemGroupView::Create(const RefPtr<UINode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto* stack = ViewStackProcessor::GetInstance();
+    stack->Push(frameNode);
+}
+
 void MenuItemGroupView::SetHeader(const RefPtr<UINode>& header)
 {
-    CHECK_NULL_VOID(header);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetHeader(frameNode, header);
+}
+
+void MenuItemGroupView::SetHeader(FrameNode* frameNode, const RefPtr<UINode>& header)
+{
+    CHECK_NULL_VOID(header);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
@@ -110,6 +131,12 @@ void MenuItemGroupView::SetHeader(const RefPtr<UINode>& header)
 void MenuItemGroupView::SetHeader(const std::string& headerStr)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetHeader(frameNode, headerStr);
+}
+
+void MenuItemGroupView::SetHeader(FrameNode* frameNode, const std::string& headerStr)
+{
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
@@ -143,8 +170,14 @@ void MenuItemGroupView::SetHeader(const std::string& headerStr)
 
 void MenuItemGroupView::SetFooter(const RefPtr<UINode>& footer)
 {
-    CHECK_NULL_VOID(footer);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetHeader(frameNode, footer);
+}
+
+void MenuItemGroupView::SetFooter(FrameNode* frameNode, const RefPtr<UINode>& footer)
+{
+    CHECK_NULL_VOID(footer);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
@@ -158,6 +191,12 @@ void MenuItemGroupView::SetFooter(const RefPtr<UINode>& footer)
 void MenuItemGroupView::SetFooter(const std::string& footerStr)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetFooter(frameNode, footerStr);
+}
+
+void MenuItemGroupView::SetFooter(FrameNode* frameNode, const std::string& footerStr)
+{
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
