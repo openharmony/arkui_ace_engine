@@ -741,10 +741,15 @@ HWTEST_F(CanvasTestNg, IsEnableMatchParentTest, TestSize.Level1)
 HWTEST_F(CanvasTestNg, CanvasPatternNoCacheTest, TestSize.Level1)
 {
     g_canvasTestProperty.immediateRender = true;
-    g_canvasTestProperty.unit = CanvasUnit::DEFAULT;
+    g_canvasTestProperty.unit = CanvasUnit::PX;
     bool onReadyHasTriggered = false;
-    g_canvasTestProperty.onReady = [&onReadyHasTriggered](bool needDrawingContext, CanvasUnit unit) {
-        onReadyHasTriggered = needDrawingContext;
+    bool isNeedDrawingContext = false;
+    CanvasUnit canvasUnit = CanvasUnit::DEFAULT;
+    g_canvasTestProperty.onReady = [&onReadyHasTriggered, &isNeedDrawingContext, &canvasUnit](
+                                       bool needDrawingContext, CanvasUnit unit) {
+        onReadyHasTriggered = true;
+        isNeedDrawingContext = needDrawingContext;
+        canvasUnit = unit;
     };
 
     /**
@@ -763,5 +768,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternNoCacheTest, TestSize.Level1)
      */
     pattern->FireReadyEvent();
     EXPECT_TRUE(onReadyHasTriggered);
+    EXPECT_TRUE(isNeedDrawingContext);
+    EXPECT_EQ(canvasUnit, CanvasUnit::PX);
 }
 } // namespace OHOS::Ace::NG

@@ -37,7 +37,7 @@ public:
 
 private:
     bool needRender_;
-    bool isVisible_;
+    bool isVisible_ = true;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CANVAS_RENDER_CONTEXT_IMMEDIATE_H

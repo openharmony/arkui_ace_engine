@@ -71,7 +71,7 @@ public:
         return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density)) ? density : 1.0;
     }
 
-    const JSRef<JSVal>& GetOrCreateContext2D(bool antialias);
+    const JSRef<JSObject>& GetOrCreateContext2D(bool antialias);
 
 protected:
     WeakPtr<AceType> canvasPattern_;
@@ -81,7 +81,7 @@ private:
     JSRef<JSVal> jsCanvasVal_;
     NG::OptionalSizeF size_;
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
-    JSRef<JSVal> context2d_ {};
+    JSRef<JSObject> context2d_ {};
     std::shared_ptr<RSCanvas> canvas_ = nullptr;
 };
 } // namespace OHOS::Ace::Framework
