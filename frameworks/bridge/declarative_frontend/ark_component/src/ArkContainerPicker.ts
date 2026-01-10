@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 /// <reference path='./import.ts' />
-class ArkContainerPickerComponent extends ArkComponent implements PickerAttribute {
+class ArkContainerPickerComponent extends ArkComponent implements UIPickerComponentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -141,7 +141,7 @@ class ContainerPickerSelectionIndicatorModifier extends ModifierWithKey<Optional
   }
 }
 // @ts-ignore
-globalThis.Picker.attributeModifier = function (modifier: ArkComponent): void {
+globalThis.UIPickerComponent.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
     return new ArkContainerPickerComponent(nativePtr);
   }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
