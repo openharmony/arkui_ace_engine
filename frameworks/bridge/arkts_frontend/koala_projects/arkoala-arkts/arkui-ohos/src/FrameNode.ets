@@ -624,12 +624,20 @@ export class FrameNode implements MaterializedBase {
         const error = Error("The parameter 'child' is invalid: the child node is undefined or null.");
         throw new BusinessError(100025, error);
     }
+    if (this.isDisposed()) {
+        const error = Error('The current node has been disposed.');
+        throw new BusinessError(100026, error);
+    }
     if (!this.isModifiable()) {
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
     if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
         const error = Error("The parameter 'child' is invalid: the child node is not modifiable.");
+        throw new BusinessError(100025, error);
+    }
+    if (child.isDisposed()) {
+        const error = Error("The parameter 'child' is invalid: the child node has been disposed.");
         throw new BusinessError(100025, error);
     }
     const child_casted = child as (FrameNode);
@@ -645,12 +653,20 @@ export class FrameNode implements MaterializedBase {
         const error = Error("The parameter 'child' is invalid: the child node is undefined or null.");
         throw new BusinessError(100025, error);
     }
+    if (this.isDisposed()) {
+        const error = Error('The current node has been disposed.');
+        throw new BusinessError(100026, error);
+    }
     if (!this.isModifiable()) {
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
     if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
         const error = Error("The parameter 'child' is invalid: the child node is not modifiable.");
+        throw new BusinessError(100025, error);
+    }
+    if (child.isDisposed()) {
+        const error = Error("The parameter 'child' is invalid: the child node has been disposed.");
         throw new BusinessError(100025, error);
     }
     const child_casted = child as (FrameNode);
