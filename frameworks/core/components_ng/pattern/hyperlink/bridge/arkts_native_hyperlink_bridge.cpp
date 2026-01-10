@@ -129,10 +129,13 @@ ArkUINativeModuleValue HyperlinkBridge::Pop(ArkUIRuntimeCallInfo* runtimeCallInf
 
 ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
+    LOGI("[Hyperlink] HyperlinkBridge::SetColor arrived");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    LOGI("[Hyperlink] HyperlinkBridge::SetColor vm not null");
 
     if (runtimeCallInfo->GetCallArgRef(NUM_1)->IsBoolean()) {
+        LOGI("[Hyperlink] HyperlinkBridge::SetColor FromJS");
         auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
         auto pattern = frameNode->GetPattern();
@@ -163,18 +166,23 @@ ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCa
             nativeNode, color.GetValue(), AceType::RawPtr(resourceObject)
         );
     } else {
+        LOGI("[Hyperlink] HyperlinkBridge::SetColor from Modifier");
         Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
         CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+        LOGI("[Hyperlink] HyperlinkBridge::SetColor nodeArg is native ptr");
         auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
         auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        LOGI("[Hyperlink] HyperlinkBridge::SetColor nodeInfo made");
 
         Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
         class Color color;
         RefPtr<ResourceObject> resourceObject;
 
         if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resourceObject, nodeInfo)) {
+            LOGI("[Hyperlink] HyperlinkBridge::SetColor reset");
             GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkColor(nativeNode);
         } else {
+            LOGI("[Hyperlink] HyperlinkBridge::SetColor set");
             GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkColor(
                 nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
         }
