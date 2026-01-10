@@ -1483,20 +1483,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _PatternLockAttribute_setSkipUnselectedPoint(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _Picker_construct(id: KInt, flags: KInt): KPointer
-    @ani.unsafe.Direct
-    native static _PickerInterface_setPickerOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _PickerAttribute_setOnChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _PickerAttribute_setOnScrollStop(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _PickerAttribute_setCanLoop(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _PickerAttribute_setEnableHapticFeedback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _PickerAttribute_setSelectionIndicator(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _PluginComponent_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _PluginComponentInterface_setPluginComponentOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -2946,6 +2932,20 @@ export class ArkUIGeneratedNativeModule {
     native static _UIExtensionComponentAttribute_setOnTerminated(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _UIExtensionComponentAttribute_setOnDrawReady(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _UIPickerComponent_construct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _UIPickerComponentInterface_setUIPickerComponentOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _UIPickerComponentAttribute_setOnChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _UIPickerComponentAttribute_setOnScrollStop(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _UIPickerComponentAttribute_setCanLoop(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _UIPickerComponentAttribute_setEnableHapticFeedback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _UIPickerComponentAttribute_setSelectionIndicator(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _Video_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
@@ -5569,10 +5569,6 @@ export class ArkUIGeneratedNativeModule {
     native static _PersistentStorageBackend_set(key: KStringPtr, value: KStringPtr): void
     @ani.unsafe.Direct
     native static _PersistentStorageBackend_clear(): void
-    @ani.unsafe.Direct
-    native static _PickerModifier_construct(): KPointer
-    @ani.unsafe.Direct
-    native static _PickerModifier_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _PinchGestureEvent_construct(): KPointer
     @ani.unsafe.Direct

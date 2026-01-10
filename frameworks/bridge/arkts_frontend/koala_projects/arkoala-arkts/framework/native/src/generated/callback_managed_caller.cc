@@ -6875,27 +6875,6 @@ void callManagedOnPrepareMenuCallbackSync(Ark_VMContext vmContext, Ark_Int32 res
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
-void callManagedOnPickerCallback(Ark_Int32 resourceId, Ark_Int32 selectedIndex)
-{
-    CallbackBuffer callbackBuffer = {{}, {}};
-    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
-    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
-    argsSerializer.writeInt32(Kind_OnPickerCallback);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeInt32(selectedIndex);
-    enqueueCallback(10, &callbackBuffer);
-}
-void callManagedOnPickerCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 selectedIndex)
-{
-    uint8_t dataBuffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&dataBuffer, sizeof(dataBuffer), nullptr);
-    argsSerializer.writeInt32(10);
-    argsSerializer.writeInt32(Kind_OnPickerCallback);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeInt32(selectedIndex);
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
-}
 void callManagedOnRadioChangeCallback(Ark_Int32 resourceId, Ark_Boolean isChecked)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -7493,6 +7472,28 @@ void callManagedOnTimePickerChangeCallbackSync(Ark_VMContext vmContext, Ark_Int3
     argsSerializer.writeInt32(Kind_OnTimePickerChangeCallback);
     argsSerializer.writeInt32(resourceId);
     TimePickerResult_serializer::write(argsSerializer, result);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
+void callManagedOnUIPickerComponentCallback(Ark_Int32 resourceId, Ark_Int32 selectedIndex)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_OnUIPickerComponentCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(selectedIndex);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedOnUIPickerComponentCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 selectedIndex)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_OnUIPickerComponentCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(selectedIndex);
     KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
@@ -9272,7 +9273,6 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_OnOverrideUrlLoadingCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnOverrideUrlLoadingCallback);
         case Kind_OnPasteCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnPasteCallback);
         case Kind_OnPrepareMenuCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnPrepareMenuCallback);
-        case Kind_OnPickerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnPickerCallback);
         case Kind_OnRadioChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnRadioChangeCallback);
         case Kind_OnRatingChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnRatingChangeCallback);
         case Kind_OnRenderProcessNotRespondingCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnRenderProcessNotRespondingCallback);
@@ -9296,6 +9296,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_OnTextPickerChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTextPickerChangeCallback);
         case Kind_OnTextSelectionChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTextSelectionChangeCallback);
         case Kind_OnTimePickerChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTimePickerChangeCallback);
+        case Kind_OnUIPickerComponentCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnUIPickerComponentCallback);
         case Kind_OnViewportFitChangedCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnViewportFitChangedCallback);
         case Kind_OnWaterFlowScrollIndexCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnWaterFlowScrollIndexCallback);
         case Kind_OnWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnWillScrollCallback);
@@ -9620,7 +9621,6 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_OnOverrideUrlLoadingCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnOverrideUrlLoadingCallbackSync);
         case Kind_OnPasteCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnPasteCallbackSync);
         case Kind_OnPrepareMenuCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnPrepareMenuCallbackSync);
-        case Kind_OnPickerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnPickerCallbackSync);
         case Kind_OnRadioChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnRadioChangeCallbackSync);
         case Kind_OnRatingChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnRatingChangeCallbackSync);
         case Kind_OnRenderProcessNotRespondingCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnRenderProcessNotRespondingCallbackSync);
@@ -9644,6 +9644,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_OnTextPickerChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTextPickerChangeCallbackSync);
         case Kind_OnTextSelectionChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTextSelectionChangeCallbackSync);
         case Kind_OnTimePickerChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTimePickerChangeCallbackSync);
+        case Kind_OnUIPickerComponentCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnUIPickerComponentCallbackSync);
         case Kind_OnViewportFitChangedCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnViewportFitChangedCallbackSync);
         case Kind_OnWaterFlowScrollIndexCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnWaterFlowScrollIndexCallbackSync);
         case Kind_OnWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnWillScrollCallbackSync);

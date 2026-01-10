@@ -5746,24 +5746,6 @@ void deserializeAndCallSyncOnPrepareMenuCallback(Ark_VMContext vmContext, KSeria
     Callback_Array_TextMenuItem_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Array_TextMenuItem value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Array_TextMenuItem_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Array_TextMenuItem value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Array_TextMenuItem_Void))))};
     callSyncMethod(vmContext, resourceId, menuItems, continuationResult);
 }
-void deserializeAndCallOnPickerCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
-{
-    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
-    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 selectedIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnPickerCallback))));
-    thisDeserializer.readPointer();
-    Ark_Int32 selectedIndex = thisDeserializer.readInt32();
-    _call(_resourceId, selectedIndex);
-}
-void deserializeAndCallSyncOnPickerCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
-{
-    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
-    const Ark_Int32 resourceId = thisDeserializer.readInt32();
-    thisDeserializer.readPointer();
-    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 selectedIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnPickerCallback))));
-    Ark_Int32 selectedIndex = thisDeserializer.readInt32();
-    callSyncMethod(vmContext, resourceId, selectedIndex);
-}
 void deserializeAndCallOnRadioChangeCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -6293,6 +6275,24 @@ void deserializeAndCallSyncOnTimePickerChangeCallback(Ark_VMContext vmContext, K
     const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TimePickerResult result)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnTimePickerChangeCallback))));
     Ark_TimePickerResult result = TimePickerResult_serializer::read(thisDeserializer);
     callSyncMethod(vmContext, resourceId, result);
+}
+void deserializeAndCallOnUIPickerComponentCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 selectedIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnUIPickerComponentCallback))));
+    thisDeserializer.readPointer();
+    Ark_Int32 selectedIndex = thisDeserializer.readInt32();
+    _call(_resourceId, selectedIndex);
+}
+void deserializeAndCallSyncOnUIPickerComponentCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 selectedIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnUIPickerComponentCallback))));
+    Ark_Int32 selectedIndex = thisDeserializer.readInt32();
+    callSyncMethod(vmContext, resourceId, selectedIndex);
 }
 void deserializeAndCallOnViewportFitChangedCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
@@ -7900,7 +7900,6 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_OnOverrideUrlLoadingCallback: return deserializeAndCallOnOverrideUrlLoadingCallback(thisArray, thisLength);
         case Kind_OnPasteCallback: return deserializeAndCallOnPasteCallback(thisArray, thisLength);
         case Kind_OnPrepareMenuCallback: return deserializeAndCallOnPrepareMenuCallback(thisArray, thisLength);
-        case Kind_OnPickerCallback: return deserializeAndCallOnPickerCallback(thisArray, thisLength);
         case Kind_OnRadioChangeCallback: return deserializeAndCallOnRadioChangeCallback(thisArray, thisLength);
         case Kind_OnRatingChangeCallback: return deserializeAndCallOnRatingChangeCallback(thisArray, thisLength);
         case Kind_OnRenderProcessNotRespondingCallback: return deserializeAndCallOnRenderProcessNotRespondingCallback(thisArray, thisLength);
@@ -7924,6 +7923,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_OnTextPickerChangeCallback: return deserializeAndCallOnTextPickerChangeCallback(thisArray, thisLength);
         case Kind_OnTextSelectionChangeCallback: return deserializeAndCallOnTextSelectionChangeCallback(thisArray, thisLength);
         case Kind_OnTimePickerChangeCallback: return deserializeAndCallOnTimePickerChangeCallback(thisArray, thisLength);
+        case Kind_OnUIPickerComponentCallback: return deserializeAndCallOnUIPickerComponentCallback(thisArray, thisLength);
         case Kind_OnViewportFitChangedCallback: return deserializeAndCallOnViewportFitChangedCallback(thisArray, thisLength);
         case Kind_OnWaterFlowScrollIndexCallback: return deserializeAndCallOnWaterFlowScrollIndexCallback(thisArray, thisLength);
         case Kind_OnWillScrollCallback: return deserializeAndCallOnWillScrollCallback(thisArray, thisLength);
@@ -8249,7 +8249,6 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_OnOverrideUrlLoadingCallback: return deserializeAndCallSyncOnOverrideUrlLoadingCallback(vmContext, thisArray, thisLength);
         case Kind_OnPasteCallback: return deserializeAndCallSyncOnPasteCallback(vmContext, thisArray, thisLength);
         case Kind_OnPrepareMenuCallback: return deserializeAndCallSyncOnPrepareMenuCallback(vmContext, thisArray, thisLength);
-        case Kind_OnPickerCallback: return deserializeAndCallSyncOnPickerCallback(vmContext, thisArray, thisLength);
         case Kind_OnRadioChangeCallback: return deserializeAndCallSyncOnRadioChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnRatingChangeCallback: return deserializeAndCallSyncOnRatingChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnRenderProcessNotRespondingCallback: return deserializeAndCallSyncOnRenderProcessNotRespondingCallback(vmContext, thisArray, thisLength);
@@ -8273,6 +8272,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_OnTextPickerChangeCallback: return deserializeAndCallSyncOnTextPickerChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnTextSelectionChangeCallback: return deserializeAndCallSyncOnTextSelectionChangeCallback(vmContext, thisArray, thisLength);
         case Kind_OnTimePickerChangeCallback: return deserializeAndCallSyncOnTimePickerChangeCallback(vmContext, thisArray, thisLength);
+        case Kind_OnUIPickerComponentCallback: return deserializeAndCallSyncOnUIPickerComponentCallback(vmContext, thisArray, thisLength);
         case Kind_OnViewportFitChangedCallback: return deserializeAndCallSyncOnViewportFitChangedCallback(vmContext, thisArray, thisLength);
         case Kind_OnWaterFlowScrollIndexCallback: return deserializeAndCallSyncOnWaterFlowScrollIndexCallback(vmContext, thisArray, thisLength);
         case Kind_OnWillScrollCallback: return deserializeAndCallSyncOnWillScrollCallback(vmContext, thisArray, thisLength);

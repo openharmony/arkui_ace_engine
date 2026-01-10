@@ -12559,88 +12559,6 @@ void impl_PatternLockAttribute_setSkipUnselectedPoint(Ark_NativePointer thisPtr,
         GetNodeModifiers()->getPatternLockModifier()->setSkipUnselectedPoint(self, static_cast<Opt_Boolean*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(PatternLockAttribute_setSkipUnselectedPoint, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_Picker_construct(Ark_Int32 id, Ark_Int32 flags) {
-        return GetNodeModifiers()->getPickerModifier()->construct(id, flags);
-}
-KOALA_INTEROP_DIRECT_2(Picker_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
-void impl_PickerInterface_setPickerOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_PickerOptions optionsValueTempTmpBuf = {};
-        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            optionsValueTempTmpBuf.value = PickerOptions_serializer::read(thisDeserializer);
-        }
-        Opt_PickerOptions optionsValueTemp = optionsValueTempTmpBuf;;
-        GetNodeModifiers()->getPickerModifier()->setPickerOptions(self, static_cast<Opt_PickerOptions*>(&optionsValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(PickerInterface_setPickerOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_PickerAttribute_setOnChange(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_OnPickerCallback valueValueTempTmpBuf = {};
-        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 selectedIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnPickerCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 selectedIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnPickerCallback))))};
-        }
-        Opt_OnPickerCallback valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getPickerModifier()->setOnChange(self, static_cast<Opt_OnPickerCallback*>(&valueValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(PickerAttribute_setOnChange, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_PickerAttribute_setOnScrollStop(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_OnPickerCallback valueValueTempTmpBuf = {};
-        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 selectedIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnPickerCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 selectedIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnPickerCallback))))};
-        }
-        Opt_OnPickerCallback valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getPickerModifier()->setOnScrollStop(self, static_cast<Opt_OnPickerCallback*>(&valueValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(PickerAttribute_setOnScrollStop, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_PickerAttribute_setCanLoop(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Boolean valueValueTempTmpBuf = {};
-        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
-        }
-        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getPickerModifier()->setCanLoop(self, static_cast<Opt_Boolean*>(&valueValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(PickerAttribute_setCanLoop, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_PickerAttribute_setEnableHapticFeedback(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Boolean valueValueTempTmpBuf = {};
-        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
-        }
-        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getPickerModifier()->setEnableHapticFeedback(self, static_cast<Opt_Boolean*>(&valueValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(PickerAttribute_setEnableHapticFeedback, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_PickerAttribute_setSelectionIndicator(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_PickerIndicatorStyle valueValueTempTmpBuf = {};
-        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
-            valueValueTempTmpBuf.value = PickerIndicatorStyle_serializer::read(thisDeserializer);
-        }
-        Opt_PickerIndicatorStyle valueValueTemp = valueValueTempTmpBuf;;
-        GetNodeModifiers()->getPickerModifier()->setSelectionIndicator(self, static_cast<Opt_PickerIndicatorStyle*>(&valueValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(PickerAttribute_setSelectionIndicator, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_PluginComponent_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getPluginComponentModifier()->construct(id, flags);
 }
@@ -25060,6 +24978,88 @@ void impl_UIExtensionComponentAttribute_setOnDrawReady(Ark_NativePointer thisPtr
         GetNodeModifiers()->getUIExtensionComponentModifier()->setOnDrawReady(self, static_cast<Opt_Callback_Void*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(UIExtensionComponentAttribute_setOnDrawReady, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_UIPickerComponent_construct(Ark_Int32 id, Ark_Int32 flags) {
+        return GetNodeModifiers()->getUIPickerComponentModifier()->construct(id, flags);
+}
+KOALA_INTEROP_DIRECT_2(UIPickerComponent_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
+void impl_UIPickerComponentInterface_setUIPickerComponentOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto optionsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_UIPickerComponentOptions optionsValueTempTmpBuf = {};
+        optionsValueTempTmpBuf.tag = optionsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((optionsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            optionsValueTempTmpBuf.value = UIPickerComponentOptions_serializer::read(thisDeserializer);
+        }
+        Opt_UIPickerComponentOptions optionsValueTemp = optionsValueTempTmpBuf;;
+        GetNodeModifiers()->getUIPickerComponentModifier()->setUIPickerComponentOptions(self, static_cast<Opt_UIPickerComponentOptions*>(&optionsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(UIPickerComponentInterface_setUIPickerComponentOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_UIPickerComponentAttribute_setOnChange(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_OnUIPickerComponentCallback valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 selectedIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnUIPickerComponentCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 selectedIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnUIPickerComponentCallback))))};
+        }
+        Opt_OnUIPickerComponentCallback valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getUIPickerComponentModifier()->setOnChange(self, static_cast<Opt_OnUIPickerComponentCallback*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(UIPickerComponentAttribute_setOnChange, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_UIPickerComponentAttribute_setOnScrollStop(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_OnUIPickerComponentCallback valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 selectedIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnUIPickerComponentCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 selectedIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnUIPickerComponentCallback))))};
+        }
+        Opt_OnUIPickerComponentCallback valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getUIPickerComponentModifier()->setOnScrollStop(self, static_cast<Opt_OnUIPickerComponentCallback*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(UIPickerComponentAttribute_setOnScrollStop, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_UIPickerComponentAttribute_setCanLoop(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getUIPickerComponentModifier()->setCanLoop(self, static_cast<Opt_Boolean*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(UIPickerComponentAttribute_setCanLoop, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_UIPickerComponentAttribute_setEnableHapticFeedback(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getUIPickerComponentModifier()->setEnableHapticFeedback(self, static_cast<Opt_Boolean*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(UIPickerComponentAttribute_setEnableHapticFeedback, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_UIPickerComponentAttribute_setSelectionIndicator(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_PickerIndicatorStyle valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = PickerIndicatorStyle_serializer::read(thisDeserializer);
+        }
+        Opt_PickerIndicatorStyle valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getUIPickerComponentModifier()->setSelectionIndicator(self, static_cast<Opt_PickerIndicatorStyle*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(UIPickerComponentAttribute_setSelectionIndicator, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_Video_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getVideoModifier()->construct(id, flags);
 }
@@ -36661,14 +36661,6 @@ void impl_PersistentStorageBackend_clear() {
         GetAccessors()->getPersistentStorageBackendAccessor()->clear();
 }
 KOALA_INTEROP_DIRECT_V0(PersistentStorageBackend_clear)
-Ark_NativePointer impl_PickerModifier_construct() {
-        return GetAccessors()->getPickerModifierAccessor()->construct();
-}
-KOALA_INTEROP_DIRECT_0(PickerModifier_construct, Ark_NativePointer)
-Ark_NativePointer impl_PickerModifier_getFinalizer() {
-        return GetAccessors()->getPickerModifierAccessor()->getFinalizer();
-}
-KOALA_INTEROP_DIRECT_0(PickerModifier_getFinalizer, Ark_NativePointer)
 Ark_NativePointer impl_PinchGestureEvent_construct() {
         return GetAccessors()->getPinchGestureEventAccessor()->construct();
 }

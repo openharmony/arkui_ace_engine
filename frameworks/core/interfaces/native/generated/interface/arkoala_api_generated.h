@@ -590,9 +590,6 @@ typedef struct Opt_PatternLockController Opt_PatternLockController;
 typedef struct PermissionRequestPeer PermissionRequestPeer;
 typedef struct PermissionRequestPeer* Ark_PermissionRequest;
 typedef struct Opt_PermissionRequest Opt_PermissionRequest;
-typedef struct PickerModifierPeer PickerModifierPeer;
-typedef struct PickerModifierPeer* Ark_PickerModifier;
-typedef struct Opt_PickerModifier Opt_PickerModifier;
 typedef struct PinchRecognizerPeer PinchRecognizerPeer;
 typedef struct PinchRecognizerPeer* Ark_PinchRecognizer;
 typedef struct Opt_PinchRecognizer Opt_PinchRecognizer;
@@ -1727,8 +1724,6 @@ typedef struct OnPasteCallback OnPasteCallback;
 typedef struct Opt_OnPasteCallback Opt_OnPasteCallback;
 typedef struct OnPrepareMenuCallback OnPrepareMenuCallback;
 typedef struct Opt_OnPrepareMenuCallback Opt_OnPrepareMenuCallback;
-typedef struct OnPickerCallback OnPickerCallback;
-typedef struct Opt_OnPickerCallback Opt_OnPickerCallback;
 typedef struct OnRadioChangeCallback OnRadioChangeCallback;
 typedef struct Opt_OnRadioChangeCallback Opt_OnRadioChangeCallback;
 typedef struct OnRatingChangeCallback OnRatingChangeCallback;
@@ -1775,6 +1770,8 @@ typedef struct OnTextSelectionChangeCallback OnTextSelectionChangeCallback;
 typedef struct Opt_OnTextSelectionChangeCallback Opt_OnTextSelectionChangeCallback;
 typedef struct OnTimePickerChangeCallback OnTimePickerChangeCallback;
 typedef struct Opt_OnTimePickerChangeCallback Opt_OnTimePickerChangeCallback;
+typedef struct OnUIPickerComponentCallback OnUIPickerComponentCallback;
+typedef struct Opt_OnUIPickerComponentCallback Opt_OnUIPickerComponentCallback;
 typedef struct OnViewportFitChangedCallback OnViewportFitChangedCallback;
 typedef struct Opt_OnViewportFitChangedCallback Opt_OnViewportFitChangedCallback;
 typedef struct OnWaterFlowScrollIndexCallback OnWaterFlowScrollIndexCallback;
@@ -2376,8 +2373,6 @@ typedef struct Ark_ParticlesInner Ark_ParticlesInner;
 typedef struct Opt_ParticlesInner Opt_ParticlesInner;
 typedef struct Ark_PathOptions Ark_PathOptions;
 typedef struct Opt_PathOptions Opt_PathOptions;
-typedef struct Ark_PickerOptions Ark_PickerOptions;
-typedef struct Opt_PickerOptions Opt_PickerOptions;
 typedef struct Ark_PixelRoundPolicy Ark_PixelRoundPolicy;
 typedef struct Opt_PixelRoundPolicy Opt_PixelRoundPolicy;
 typedef struct Ark_PluginComponentTemplate Ark_PluginComponentTemplate;
@@ -2580,6 +2575,8 @@ typedef struct Ark_UIExtensionOptions Ark_UIExtensionOptions;
 typedef struct Opt_UIExtensionOptions Opt_UIExtensionOptions;
 typedef struct Ark_uiObserver_NavDestinationInfo Ark_uiObserver_NavDestinationInfo;
 typedef struct Opt_uiObserver_NavDestinationInfo Opt_uiObserver_NavDestinationInfo;
+typedef struct Ark_UIPickerComponentOptions Ark_UIPickerComponentOptions;
+typedef struct Opt_UIPickerComponentOptions Opt_UIPickerComponentOptions;
 typedef struct unifiedDataChannel_SummaryPeer unifiedDataChannel_SummaryPeer;
 typedef struct unifiedDataChannel_SummaryPeer* Ark_unifiedDataChannel_Summary;
 typedef struct Opt_unifiedDataChannel_Summary Opt_unifiedDataChannel_Summary;
@@ -8460,10 +8457,6 @@ typedef struct Opt_PermissionRequest {
     Ark_Tag tag;
     Ark_PermissionRequest value;
 } Opt_PermissionRequest;
-typedef struct Opt_PickerModifier {
-    Ark_Tag tag;
-    Ark_PickerModifier value;
-} Opt_PickerModifier;
 typedef struct Opt_PinchRecognizer {
     Ark_Tag tag;
     Ark_PinchRecognizer value;
@@ -13359,16 +13352,6 @@ typedef struct Opt_OnPrepareMenuCallback {
     Ark_Tag tag;
     OnPrepareMenuCallback value;
 } Opt_OnPrepareMenuCallback;
-typedef struct OnPickerCallback {
-    /* kind: Callback */
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 selectedIndex);
-    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 selectedIndex);
-} OnPickerCallback;
-typedef struct Opt_OnPickerCallback {
-    Ark_Tag tag;
-    OnPickerCallback value;
-} Opt_OnPickerCallback;
 typedef struct OnRadioChangeCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -13599,6 +13582,16 @@ typedef struct Opt_OnTimePickerChangeCallback {
     Ark_Tag tag;
     OnTimePickerChangeCallback value;
 } Opt_OnTimePickerChangeCallback;
+typedef struct OnUIPickerComponentCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 selectedIndex);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 selectedIndex);
+} OnUIPickerComponentCallback;
+typedef struct Opt_OnUIPickerComponentCallback {
+    Ark_Tag tag;
+    OnUIPickerComponentCallback value;
+} Opt_OnUIPickerComponentCallback;
 typedef struct OnViewportFitChangedCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -16279,14 +16272,6 @@ typedef struct Opt_PathOptions {
     Ark_Tag tag;
     Ark_PathOptions value;
 } Opt_PathOptions;
-typedef struct Ark_PickerOptions {
-    /* kind: Interface */
-    Opt_Int32 selectedIndex;
-} Ark_PickerOptions;
-typedef struct Opt_PickerOptions {
-    Ark_Tag tag;
-    Ark_PickerOptions value;
-} Opt_PickerOptions;
 typedef struct Ark_PixelRoundPolicy {
     /* kind: Interface */
     Opt_PixelRoundCalcPolicy start;
@@ -17183,6 +17168,14 @@ typedef struct Opt_uiObserver_NavDestinationInfo {
     Ark_Tag tag;
     Ark_uiObserver_NavDestinationInfo value;
 } Opt_uiObserver_NavDestinationInfo;
+typedef struct Ark_UIPickerComponentOptions {
+    /* kind: Interface */
+    Opt_Int32 selectedIndex;
+} Ark_UIPickerComponentOptions;
+typedef struct Opt_UIPickerComponentOptions {
+    Ark_Tag tag;
+    Ark_UIPickerComponentOptions value;
+} Opt_UIPickerComponentOptions;
 typedef struct Opt_unifiedDataChannel_Summary {
     Ark_Tag tag;
     Ark_unifiedDataChannel_Summary value;
@@ -25023,23 +25016,6 @@ typedef struct GENERATED_ArkUIPatternLockModifier {
                                    const Opt_Boolean* value);
 } GENERATED_ArkUIPatternLockModifier;
 
-typedef struct GENERATED_ArkUIPickerModifier {
-    Ark_NativePointer (*construct)(Ark_Int32 id,
-                                   Ark_Int32 flags);
-    void (*setPickerOptions)(Ark_NativePointer node,
-                             const Opt_PickerOptions* options);
-    void (*setOnChange)(Ark_NativePointer node,
-                        const Opt_OnPickerCallback* value);
-    void (*setOnScrollStop)(Ark_NativePointer node,
-                            const Opt_OnPickerCallback* value);
-    void (*setCanLoop)(Ark_NativePointer node,
-                       const Opt_Boolean* value);
-    void (*setEnableHapticFeedback)(Ark_NativePointer node,
-                                    const Opt_Boolean* value);
-    void (*setSelectionIndicator)(Ark_NativePointer node,
-                                  const Opt_PickerIndicatorStyle* value);
-} GENERATED_ArkUIPickerModifier;
-
 typedef struct GENERATED_ArkUIPluginComponentModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
@@ -26716,6 +26692,23 @@ typedef struct GENERATED_ArkUIUIExtensionComponentModifier {
     void (*setOnDrawReady)(Ark_NativePointer node,
                            const Opt_Callback_Void* value);
 } GENERATED_ArkUIUIExtensionComponentModifier;
+
+typedef struct GENERATED_ArkUIUIPickerComponentModifier {
+    Ark_NativePointer (*construct)(Ark_Int32 id,
+                                   Ark_Int32 flags);
+    void (*setUIPickerComponentOptions)(Ark_NativePointer node,
+                                        const Opt_UIPickerComponentOptions* options);
+    void (*setOnChange)(Ark_NativePointer node,
+                        const Opt_OnUIPickerComponentCallback* value);
+    void (*setOnScrollStop)(Ark_NativePointer node,
+                            const Opt_OnUIPickerComponentCallback* value);
+    void (*setCanLoop)(Ark_NativePointer node,
+                       const Opt_Boolean* value);
+    void (*setEnableHapticFeedback)(Ark_NativePointer node,
+                                    const Opt_Boolean* value);
+    void (*setSelectionIndicator)(Ark_NativePointer node,
+                                  const Opt_PickerIndicatorStyle* value);
+} GENERATED_ArkUIUIPickerComponentModifier;
 
 typedef struct GENERATED_ArkUIVideoModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
@@ -29467,12 +29460,6 @@ typedef struct GENERATED_ArkUIPersistentStorageBackendAccessor {
     void (*clear)();
 } GENERATED_ArkUIPersistentStorageBackendAccessor;
 
-typedef struct GENERATED_ArkUIPickerModifierAccessor {
-    void (*destroyPeer)(Ark_PickerModifier peer);
-    Ark_PickerModifier (*construct)();
-    Ark_NativePointer (*getFinalizer)();
-} GENERATED_ArkUIPickerModifierAccessor;
-
 typedef struct GENERATED_ArkUIPinchGestureEventAccessor {
     void (*destroyPeer)(Ark_PinchGestureEvent peer);
     Ark_PinchGestureEvent (*construct)();
@@ -30898,7 +30885,6 @@ typedef struct GENERATED_ArkUINodeModifiers {
     const GENERATED_ArkUIPasteButtonModifier* (*getPasteButtonModifier)();
     const GENERATED_ArkUIPathModifier* (*getPathModifier)();
     const GENERATED_ArkUIPatternLockModifier* (*getPatternLockModifier)();
-    const GENERATED_ArkUIPickerModifier* (*getPickerModifier)();
     const GENERATED_ArkUIPluginComponentModifier* (*getPluginComponentModifier)();
     const GENERATED_ArkUIPolygonModifier* (*getPolygonModifier)();
     const GENERATED_ArkUIPolylineModifier* (*getPolylineModifier)();
@@ -30946,6 +30932,7 @@ typedef struct GENERATED_ArkUINodeModifiers {
     const GENERATED_ArkUIToggleModifier* (*getToggleModifier)();
     const GENERATED_ArkUIToolBarItemModifier* (*getToolBarItemModifier)();
     const GENERATED_ArkUIUIExtensionComponentModifier* (*getUIExtensionComponentModifier)();
+    const GENERATED_ArkUIUIPickerComponentModifier* (*getUIPickerComponentModifier)();
     const GENERATED_ArkUIVideoModifier* (*getVideoModifier)();
     const GENERATED_ArkUIWaterFlowModifier* (*getWaterFlowModifier)();
     const GENERATED_ArkUIWebModifier* (*getWebModifier)();
@@ -31084,7 +31071,6 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIPatternLockControllerAccessor* (*getPatternLockControllerAccessor)();
     const GENERATED_ArkUIPermissionRequestAccessor* (*getPermissionRequestAccessor)();
     const GENERATED_ArkUIPersistentStorageBackendAccessor* (*getPersistentStorageBackendAccessor)();
-    const GENERATED_ArkUIPickerModifierAccessor* (*getPickerModifierAccessor)();
     const GENERATED_ArkUIPinchGestureEventAccessor* (*getPinchGestureEventAccessor)();
     const GENERATED_ArkUIPinchRecognizerAccessor* (*getPinchRecognizerAccessor)();
     const GENERATED_ArkUIPixelMapMockAccessor* (*getPixelMapMockAccessor)();
@@ -31239,7 +31225,6 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_PASTE_BUTTON,
     GENERATED_ARKUI_PATH,
     GENERATED_ARKUI_PATTERN_LOCK,
-    GENERATED_ARKUI_PICKER,
     GENERATED_ARKUI_PLUGIN_COMPONENT,
     GENERATED_ARKUI_POLYGON,
     GENERATED_ARKUI_POLYLINE,
@@ -31287,6 +31272,7 @@ typedef enum GENERATED_Ark_NodeType {
     GENERATED_ARKUI_TOGGLE,
     GENERATED_ARKUI_TOOL_BAR_ITEM,
     GENERATED_ARKUI_UIEXTENSION_COMPONENT,
+    GENERATED_ARKUI_UIPICKER_COMPONENT,
     GENERATED_ARKUI_VIDEO,
     GENERATED_ARKUI_WATER_FLOW,
     GENERATED_ARKUI_WEB,
