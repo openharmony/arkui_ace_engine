@@ -3070,7 +3070,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             auto rsUiDirector = pipelineWindow->GetRSUIDirector();
             CHECK_NULL_VOID(rsUiDirector);
             auto rsUiContext = rsUiDirector->GetRSUIContext();
-            if (rsUiDirector && rsUiContext) {
+            if (rsUiContext) {
                 rsUiContext->GetRSTransaction()->ExecuteSynchronousTask(syncTask);
             } else {
                 Rosen::RSTransactionProxy::GetInstance()->ExecuteSynchronousTask(syncTask);
