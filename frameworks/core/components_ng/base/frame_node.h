@@ -535,6 +535,7 @@ public:
     void OnReuse() override;
 
     void NotifyColorModeChange(uint32_t colorMode) override;
+    void NotifyColorModeChange(uint32_t colorMode, bool recursive) override;
 
     OffsetF GetOffsetRelativeToWindow() const;
 

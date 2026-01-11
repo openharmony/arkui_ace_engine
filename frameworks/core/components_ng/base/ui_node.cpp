@@ -963,6 +963,8 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     isRemoving_ = false;
     MarkNodeNotFree();
     OnAttachToMainTree(recursive);
+
+    HandleColorModeChange();
     // if recursive = false, recursively call AttachToMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     for (const auto& child : GetChildren()) {
@@ -1877,6 +1879,11 @@ void UINode::OnRecycle()
 
 void UINode::NotifyColorModeChange(uint32_t colorMode)
 {
+    NotifyColorModeChange(colorMode, true);
+}
+
+void UINode::NotifyColorModeChange(uint32_t colorMode, bool recursive)
+{
     if (CheckShouldClearCache()) {
         auto customNode = DynamicCast<CustomNode>(this);
         if (customNode) {
@@ -1887,6 +1894,9 @@ void UINode::NotifyColorModeChange(uint32_t colorMode)
             SetShouldClearCache(false);
             ACE_LAYOUT_TRACE_END()
         }
+    }
+    if (!recursive) {
+        return;
     }
     for (const auto& child : GetChildren()) {
         if (!child) {
@@ -2684,6 +2694,21 @@ void UINode::GetNodeListByComponentName(int32_t depth, std::vector<int32_t>& fou
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
     if (frameNode && frameNode->GetOverlayNode()) {
         frameNode->GetOverlayNode()->GetNodeListByComponentName(depth + 1, foundNodeId, name);
+    }
+}
+
+void UINode::HandleColorModeChange()
+{
+    if (!SystemProperties::ConfigChangePerform() || !context_) {
+        return;
+    }
+    auto colorMode = static_cast<int32_t>(context_->GetColorMode());
+    if (CheckIsDarkMode() != colorMode) {
+        context_->SetIsSystemColorChange(true);
+        SetRerenderable(true);
+        SetMeasureAnyway(true);
+        SetShouldClearCache(true);
+        NotifyColorModeChange(colorMode, false);
     }
 }
 } // namespace OHOS::Ace::NG
