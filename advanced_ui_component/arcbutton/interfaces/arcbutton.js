@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (v4, w4, x4, y4) {
-    var z4 = arguments.length, a5 = z4 < 3 ? w4 : y4 === null ? y4 = Object.getOwnPropertyDescriptor(w4, x4) : y4, b5;
+var __decorate = (this && this.__decorate) || function (l5, m5, n5, o5) {
+    var p5 = arguments.length, q5 = p5 < 3 ? m5 : o5 === null ? o5 = Object.getOwnPropertyDescriptor(m5, n5) : o5, r5;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-        a5 = Reflect.decorate(v4, w4, x4, y4);
+        q5 = Reflect.decorate(l5, m5, n5, o5);
     else
-        for (var c5 = v4.length - 1; c5 >= 0; c5--)
-            if (b5 = v4[c5])
-                a5 = (z4 < 3 ? b5(a5) : z4 > 3 ? b5(w4, x4, a5) : b5(w4, x4)) || a5;
-    return z4 > 3 && a5 && Object.defineProperty(w4, x4, a5), a5;
+        for (var s5 = l5.length - 1; s5 >= 0; s5--)
+            if (r5 = l5[s5])
+                q5 = (p5 < 3 ? r5(q5) : p5 > 3 ? r5(m5, n5, q5) : r5(m5, n5)) || q5;
+    return p5 > 3 && q5 && Object.defineProperty(m5, n5, q5), q5;
 };
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
@@ -35,23 +35,23 @@ const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const PathShape = requireNapi('arkui.shape').PathShape;
 
 export var ArcButtonPosition;
-(function (u4) {
-    u4[u4["TOP_EDGE"] = 0] = "TOP_EDGE";
-    u4[u4["BOTTOM_EDGE"] = 1] = "BOTTOM_EDGE";
+(function (k5) {
+    k5[k5["TOP_EDGE"] = 0] = "TOP_EDGE";
+    k5[k5["BOTTOM_EDGE"] = 1] = "BOTTOM_EDGE";
 })(ArcButtonPosition || (ArcButtonPosition = {}));
 export var ArcButtonStyleMode;
-(function (t4) {
-    t4[t4["EMPHASIZED_LIGHT"] = 0] = "EMPHASIZED_LIGHT";
-    t4[t4["EMPHASIZED_DARK"] = 1] = "EMPHASIZED_DARK";
-    t4[t4["NORMAL_LIGHT"] = 2] = "NORMAL_LIGHT";
-    t4[t4["NORMAL_DARK"] = 3] = "NORMAL_DARK";
-    t4[t4["CUSTOM"] = 4] = "CUSTOM";
+(function (j5) {
+    j5[j5["EMPHASIZED_LIGHT"] = 0] = "EMPHASIZED_LIGHT";
+    j5[j5["EMPHASIZED_DARK"] = 1] = "EMPHASIZED_DARK";
+    j5[j5["NORMAL_LIGHT"] = 2] = "NORMAL_LIGHT";
+    j5[j5["NORMAL_DARK"] = 3] = "NORMAL_DARK";
+    j5[j5["CUSTOM"] = 4] = "CUSTOM";
 })(ArcButtonStyleMode || (ArcButtonStyleMode = {}));
 export var ArcButtonStatus;
-(function (s4) {
-    s4[s4["NORMAL"] = 0] = "NORMAL";
-    s4[s4["PRESSED"] = 1] = "PRESSED";
-    s4[s4["DISABLED"] = 2] = "DISABLED";
+(function (i5) {
+    i5[i5["NORMAL"] = 0] = "NORMAL";
+    i5[i5["PRESSED"] = 1] = "PRESSED";
+    i5[i5["DISABLED"] = 2] = "DISABLED";
 })(ArcButtonStatus || (ArcButtonStatus = {}));
 class Constants {
 }
@@ -86,10 +86,10 @@ Constants.EMPHASIZEWARN_DISABLE_TEXT_COLOR = '#99FFFFFF';
 Constants.PRESS_MERGE_COLOR = '#1AFFFFFF';
 Constants.DEFAULT_TRANSPARENCY = 0.4;
 let ArcButtonProgressConfig = class ArcButtonProgressConfig {
-    constructor(r4) {
-        this.value = r4.value;
-        this.total = r4.total;
-        this.color = r4.color;
+    constructor(h5) {
+        this.value = h5.value;
+        this.total = h5.total;
+        this.color = h5.color;
     }
 };
 __decorate([
@@ -106,33 +106,33 @@ ArcButtonProgressConfig = __decorate([
 ], ArcButtonProgressConfig);
 export { ArcButtonProgressConfig };
 let ArcButtonOptions = class ArcButtonOptions {
-    constructor(q4) {
-        this.position = q4.position ?? ArcButtonPosition.BOTTOM_EDGE;
-        this.styleMode = q4.styleMode ?? ArcButtonStyleMode.EMPHASIZED_LIGHT;
-        this.status = q4.status ?? ArcButtonStatus.NORMAL;
-        this.label = q4.label ?? '';
-        this.backgroundBlurStyle = q4.backgroundBlurStyle ?? BlurStyle.NONE;
-        this.backgroundColor = q4.backgroundColor ?? ColorMetrics.resourceColor(Color.Black);
-        this.shadowColor = q4.shadowColor ?? ColorMetrics.resourceColor('#000000');
-        this.shadowEnabled = q4.shadowEnabled ?? false;
-        this.fontSize = q4.fontSize;
-        this.fontColor = q4.fontColor ?? ColorMetrics.resourceColor(Color.White);
-        this.pressedFontColor = q4.pressedFontColor ?? ColorMetrics.resourceColor(Color.White);
-        this.fontStyle = q4.fontStyle ?? FontStyle.Normal;
-        this.fontFamily = q4.fontFamily ?? '';
-        this.fontMargin = q4.fontMargin ?? {
+    constructor(g5) {
+        this.position = g5.position ?? ArcButtonPosition.BOTTOM_EDGE;
+        this.styleMode = g5.styleMode ?? ArcButtonStyleMode.EMPHASIZED_LIGHT;
+        this.status = g5.status ?? ArcButtonStatus.NORMAL;
+        this.label = g5.label ?? '';
+        this.backgroundBlurStyle = g5.backgroundBlurStyle ?? BlurStyle.NONE;
+        this.backgroundColor = g5.backgroundColor ?? ColorMetrics.resourceColor(Color.Black);
+        this.shadowColor = g5.shadowColor ?? ColorMetrics.resourceColor('#000000');
+        this.shadowEnabled = g5.shadowEnabled ?? false;
+        this.fontSize = g5.fontSize;
+        this.fontColor = g5.fontColor ?? ColorMetrics.resourceColor(Color.White);
+        this.pressedFontColor = g5.pressedFontColor ?? ColorMetrics.resourceColor(Color.White);
+        this.fontStyle = g5.fontStyle ?? FontStyle.Normal;
+        this.fontFamily = g5.fontFamily ?? '';
+        this.fontMargin = g5.fontMargin ?? {
             start: LengthMetrics.vp(Constants.TEXT_HORIZONTAL_MARGIN),
             top: LengthMetrics.vp(Constants.TEXT_MARGIN_TOP),
             end: LengthMetrics.vp(Constants.TEXT_HORIZONTAL_MARGIN),
             bottom: LengthMetrics.vp(Constants.TEXT_MARGIN_BOTTOM)
         };
-        this.onTouch = q4.onTouch ?? (() => {
+        this.onTouch = g5.onTouch ?? (() => {
         });
-        this.onClick = q4.onClick ?? (() => {
+        this.onClick = g5.onClick ?? (() => {
         });
-        if (q4.progressConfig) {
-            this.backgroundColor = q4.backgroundColor ?? ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
-            this.progressConfig = new ArcButtonProgressConfig(q4.progressConfig);
+        if (g5.progressConfig) {
+            this.backgroundColor = g5.backgroundColor ?? ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
+            this.progressConfig = new ArcButtonProgressConfig(g5.progressConfig);
         }
         else {
             this.progressConfig = undefined;
@@ -195,9 +195,9 @@ ArcButtonOptions = __decorate([
 ], ArcButtonOptions);
 export { ArcButtonOptions };
 export class ArcButton extends ViewV2 {
-    constructor(k4, l4, m4, n4 = -1, o4, p4) {
-        super(k4, n4, p4);
-        this.initParam("options", (l4 && "options" in l4) ? l4.options : undefined);
+    constructor(a5, b5, c5, d5 = -1, e5, f5) {
+        super(a5, d5, f5);
+        this.initParam("options", (b5 && "options" in b5) ? b5.options : undefined);
         this.canvasWidth = 0;
         this.canvasHeight = 0;
         this.scaleX = 1;
@@ -230,8 +230,8 @@ export class ArcButton extends ViewV2 {
         this.dataProcessUtil = new DataProcessUtil(this.arcButtonTheme);
         this.finalizeConstruction();
     }
-    resetStateVarsOnReuse(j4) {
-        this.resetParam("options", (j4 && "options" in j4) ? j4.options : undefined);
+    resetStateVarsOnReuse(z4) {
+        this.resetParam("options", (z4 && "options" in z4) ? z4.options : undefined);
         this.canvasWidth = 0;
         this.canvasHeight = 0;
         this.scaleX = 1;
@@ -252,6 +252,7 @@ export class ArcButton extends ViewV2 {
         this.fontSize = this.cover(this.options.fontSize ?? new LengthMetrics(Constants.MAX_FONT_SIZE));
         this.judgeTextWidth();
         this.changeStatus();
+        this.progressOptionsChange();
     }
     progressOptionsChange() {
         if (this.options.progressConfig) {
@@ -336,24 +337,24 @@ export class ArcButton extends ViewV2 {
         this.progressOptionsChange();
         this.changeStatus();
     }
-    getArcButtonThemeVpValue(g4) {
-        if (!g4) {
+    getArcButtonThemeVpValue(w4) {
+        if (!w4) {
             return 0;
         }
-        let h4 = LengthMetrics.resource(g4);
-        let i4 = h4.value;
-        switch (h4.unit) {
+        let x4 = LengthMetrics.resource(w4);
+        let y4 = x4.value;
+        switch (x4.unit) {
             case LengthUnit.PX:
-                return px2vp(i4);
+                return px2vp(y4);
             case LengthUnit.LPX:
-                return px2vp(lpx2px(i4));
+                return px2vp(lpx2px(y4));
             case LengthUnit.FP:
-                return px2vp(fp2px(i4));
+                return px2vp(fp2px(y4));
         }
-        return i4;
+        return y4;
     }
     judgeTextWidth() {
-        const f4 = measure.measureText({
+        const v4 = measure.measureText({
             textContent: this.options.label,
             fontStyle: this.options.fontStyle,
             fontFamily: this.options.fontFamily,
@@ -361,7 +362,7 @@ export class ArcButton extends ViewV2 {
             maxLines: 1,
             fontSize: `${Constants.MIN_FONT_SIZE}fp`
         });
-        this.isExceed = f4 > this.getUIContext().vp2px(this.textWidth);
+        this.isExceed = v4 > this.getUIContext().vp2px(this.textWidth);
     }
     aboutToAppear() {
         if (this.arcButtonTheme.BUTTON_HEIGHT === 0) {
@@ -370,50 +371,50 @@ export class ArcButton extends ViewV2 {
         }
         this.initValues();
         this.dataProcessUtil.initData();
-        const e4 = this.dataProcessUtil.calculate();
-        this.generatePath(e4);
+        const u4 = this.dataProcessUtil.calculate();
+        this.generatePath(u4);
     }
-    calculateActualPosition(a4, b4) {
-        const c4 = this.getUIContext().vp2px(a4.x - b4.x);
-        const d4 = this.getUIContext().vp2px(a4.y - b4.y);
-        return new ArcButtonPoint(c4, d4);
+    calculateActualPosition(q4, r4) {
+        const s4 = this.getUIContext().vp2px(q4.x - r4.x);
+        const t4 = this.getUIContext().vp2px(q4.y - r4.y);
+        return new ArcButtonPoint(s4, t4);
     }
-    generatePath(l3) {
-        if (l3 === null) {
+    generatePath(b4) {
+        if (b4 === null) {
             return;
         }
-        this.canvasWidth = l3.btnWidth + Constants.SHADOW_BLUR * 2;
-        this.canvasHeight = l3.btnHeight + Constants.DISTANCE_FROM_BORDER * 2;
-        const m3 = this.options.fontMargin;
-        const n3 = m3?.start?.value ?? 0;
-        const o3 = m3?.end?.value ?? 0;
-        const p3 = m3?.top?.value ?? 0;
-        const q3 = m3?.bottom?.value ?? 0;
-        this.textWidth = l3.btnWidth - n3 - o3;
-        this.textHeight = l3.btnHeight - p3 - q3;
+        this.canvasWidth = b4.btnWidth + Constants.SHADOW_BLUR * 2;
+        this.canvasHeight = b4.btnHeight + Constants.DISTANCE_FROM_BORDER * 2;
+        const c4 = this.options.fontMargin;
+        const d4 = c4?.start?.value ?? 0;
+        const e4 = c4?.end?.value ?? 0;
+        const f4 = c4?.top?.value ?? 0;
+        const g4 = c4?.bottom?.value ?? 0;
+        this.textWidth = b4.btnWidth - d4 - e4;
+        this.textHeight = b4.btnHeight - f4 - g4;
         this.judgeTextWidth();
-        const r3 = l3.canvasLeftTop;
-        r3.x -= Constants.SHADOW_BLUR;
-        r3.y -= Constants.DISTANCE_FROM_BORDER;
-        const s3 = this.calculateActualPosition(l3.leftTopPoint, r3);
-        const t3 = this.getUIContext().vp2px(this.arcButtonTheme.ARC_CIRCLE_DIAMETER / 2);
-        const u3 = this.calculateActualPosition(l3.rightTopPoint, r3);
-        const v3 = this.getUIContext().vp2px(this.arcButtonTheme.CHAMFER_CIRCLE_RADIUS);
-        const w3 = this.calculateActualPosition(l3.rightBottomPoint, r3);
-        const x3 = this.getUIContext().vp2px(this.arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2);
-        const y3 = this.calculateActualPosition(l3.leftBottomPoint, r3);
-        const z3 = `M ${s3.x} ${s3.y} A ${t3} ${t3}, 0, 0, 0,
-       ${u3.x} ${u3.y}` +
-            `Q ${u3.x - v3 * 1.2} ${u3.y +
-                v3 * 0.6} ${w3.x} ${w3.y}` +
-            `A ${x3} ${x3}, 0, 0, 0, ${y3.x}
-       ${y3.y}` +
-            `Q ${s3.x + v3 * 1.2} ${s3.y +
-                v3 * 0.6} ${s3.x} ${s3.y}`;
-        this.pathString = z3;
+        const h4 = b4.canvasLeftTop;
+        h4.x -= Constants.SHADOW_BLUR;
+        h4.y -= Constants.DISTANCE_FROM_BORDER;
+        const i4 = this.calculateActualPosition(b4.leftTopPoint, h4);
+        const j4 = this.getUIContext().vp2px(this.arcButtonTheme.ARC_CIRCLE_DIAMETER / 2);
+        const k4 = this.calculateActualPosition(b4.rightTopPoint, h4);
+        const l4 = this.getUIContext().vp2px(this.arcButtonTheme.CHAMFER_CIRCLE_RADIUS);
+        const m4 = this.calculateActualPosition(b4.rightBottomPoint, h4);
+        const n4 = this.getUIContext().vp2px(this.arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2);
+        const o4 = this.calculateActualPosition(b4.leftBottomPoint, h4);
+        const p4 = `M ${i4.x} ${i4.y} A ${j4} ${j4}, 0, 0, 0,
+       ${k4.x} ${k4.y}` +
+            `Q ${k4.x - l4 * 1.2} ${k4.y +
+                l4 * 0.6} ${m4.x} ${m4.y}` +
+            `A ${n4} ${n4}, 0, 0, 0, ${o4.x}
+       ${o4.y}` +
+            `Q ${i4.x + l4 * 1.2} ${i4.y +
+                l4 * 0.6} ${i4.x} ${i4.y}`;
+        this.pathString = p4;
     }
-    TextBuilderIsExceed(i3 = null) {
-        this.observeComponentCreation2((j3, k3) => {
+    TextBuilderIsExceed(y3 = null) {
+        this.observeComponentCreation2((z3, a4) => {
             Text.create(this.options.label);
             Text.width(this.textWidth);
             Text.height(this.textHeight);
@@ -435,8 +436,8 @@ export class ArcButton extends ViewV2 {
         }, Text);
         Text.pop();
     }
-    TextBuilderNormal(f3 = null) {
-        this.observeComponentCreation2((g3, h3) => {
+    TextBuilderNormal(v3 = null) {
+        this.observeComponentCreation2((w3, x3) => {
             Text.create(this.options.label);
             Text.width(this.textWidth);
             Text.height(this.textHeight);
@@ -458,18 +459,18 @@ export class ArcButton extends ViewV2 {
         }, Text);
         Text.pop();
     }
-    cover(e3) {
-        switch (e3.unit) {
+    cover(u3) {
+        switch (u3.unit) {
             case LengthUnit.VP:
-                return `${e3.value}vp`;
+                return `${u3.value}vp`;
             case LengthUnit.PX:
-                return `${e3.value}px`;
+                return `${u3.value}px`;
             case LengthUnit.FP:
-                return `${e3.value}fp`;
+                return `${u3.value}fp`;
             case LengthUnit.LPX:
-                return `${e3.value}lpx`;
+                return `${u3.value}lpx`;
             case LengthUnit.PERCENT:
-                return `${e3.value}%`;
+                return `${u3.value}%`;
         }
     }
     getShadow() {
@@ -483,7 +484,7 @@ export class ArcButton extends ViewV2 {
         };
     }
     initialRender() {
-        this.observeComponentCreation2((a3, b3) => {
+        this.observeComponentCreation2((q3, r3) => {
             Stack.create({ alignContent: Alignment.Center });
             Context.animation({ curve: this.curves });
             Stack.enabled(this.options.status !== ArcButtonStatus.DISABLED);
@@ -493,20 +494,20 @@ export class ArcButton extends ViewV2 {
             Stack.width(this.canvasWidth);
             Stack.height(this.canvasHeight);
             Stack.scale({ x: this.scaleX, y: this.scaleY, centerY: this.isUp ? 0 : this.canvasHeight });
-            Stack.onTouch((d3) => {
-                this.dealTouchEvent(d3);
+            Stack.onTouch((t3) => {
+                this.dealTouchEvent(t3);
             });
-            Stack.onClick((c3) => {
+            Stack.onClick((s3) => {
                 if (this.options.onClick) {
-                    this.options.onClick(c3);
+                    this.options.onClick(s3);
                 }
             });
         }, Stack);
-        this.observeComponentCreation2((u2, v2) => {
+        this.observeComponentCreation2((k3, l3) => {
             If.create();
             if (this.options.progressConfig) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((y2, z2) => {
+                    this.observeComponentCreation2((o3, p3) => {
                         Progress.create({ value: this.progressValue, total: this.progressTotal, type: ProgressType.Capsule });
                         Progress.width('100%');
                         Progress.height('100%');
@@ -521,7 +522,7 @@ export class ArcButton extends ViewV2 {
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((w2, x2) => {
+                    this.observeComponentCreation2((m3, n3) => {
                         Button.createWithLabel({ type: ButtonType.Normal, stateEffect: false });
                         Button.width('100%');
                         Button.height('100%');
@@ -536,7 +537,7 @@ export class ArcButton extends ViewV2 {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((s2, t2) => {
+        this.observeComponentCreation2((i3, j3) => {
             If.create();
             if (this.isExceed) {
                 this.ifElseBranchUpdateFunction(0, () => {
@@ -552,11 +553,11 @@ export class ArcButton extends ViewV2 {
         If.pop();
         Stack.pop();
     }
-    dealTouchEvent(p2) {
-        const q2 = p2.touches[0].windowX;
-        const r2 = p2.touches[0].windowY;
+    dealTouchEvent(f3) {
+        const g3 = f3.touches[0].windowX;
+        const h3 = f3.touches[0].windowY;
         if (this.options.onTouch) {
-            this.options.onTouch(p2);
+            this.options.onTouch(f3);
         }
         if (this.options.status === ArcButtonStatus.PRESSED) {
             this.scaleX = this.scaleValue;
@@ -565,7 +566,7 @@ export class ArcButton extends ViewV2 {
             this.fontColor = this.textPressColor;
         }
         else {
-            switch (p2.type) {
+            switch (f3.type) {
                 case TouchType.Down:
                     this.scaleX = this.scaleValue;
                     this.scaleY = this.scaleValue;
@@ -583,12 +584,12 @@ export class ArcButton extends ViewV2 {
             }
         }
     }
-    updateStateVars(o2) {
-        if (o2 === undefined) {
+    updateStateVars(e3) {
+        if (e3 === undefined) {
             return;
         }
-        if ("options" in o2) {
-            this.updateParam("options", o2.options);
+        if ("options" in e3) {
+            this.updateParam("options", e3.options);
         }
     }
     rerender() {
@@ -641,142 +642,139 @@ __decorate([
     Local
 ], ArcButton.prototype, "progressColor", void 0);
 __decorate([
-    Monitor('options.label', 'options.type', 'options.fontSize', 'options.styleMode', 'options.status', 'options.backgroundColor', 'options.fontColor')
+    Monitor('options.label', 'options.type', 'options.fontSize', 'options.styleMode', 'options.status', 'options.backgroundColor', 'options.fontColor', 'options.progressConfig.color', 'options.progressConfig.total', 'options.progressConfig.value')
 ], ArcButton.prototype, "optionsChange", null);
-__decorate([
-    Monitor('options.progressConfig', 'options.progressConfig.color', 'options.progressConfig.total', 'options.progressConfig.value')
-], ArcButton.prototype, "progressOptionsChange", null);
 class DataProcessUtil {
-    constructor(n2) {
+    constructor(d3) {
         this.dial = new ArcButtonCircle(0, 0, 0);
         this.arc = new ArcButtonCircle(0, 0, 0);
         this.height = 0;
         this.width = 0;
         this.arcButtonTheme = undefined;
-        this.arcButtonTheme = n2;
+        this.arcButtonTheme = d3;
     }
     initData() {
-        const j2 = this.arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2;
-        this.dial = new ArcButtonCircle(j2, j2, j2);
-        const k2 = this.arcButtonTheme.ARC_CIRCLE_DIAMETER / 2;
+        const z2 = this.arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2;
+        this.dial = new ArcButtonCircle(z2, z2, z2);
+        const a3 = this.arcButtonTheme.ARC_CIRCLE_DIAMETER / 2;
         this.height = this.arcButtonTheme.BUTTON_HEIGHT;
-        const l2 = this.dial.center.x;
-        const m2 = this.dial.center.y + j2 + k2 - this.height;
-        this.arc = new ArcButtonCircle(k2, l2, m2);
+        const b3 = this.dial.center.x;
+        const c3 = this.dial.center.y + z2 + a3 - this.height;
+        this.arc = new ArcButtonCircle(a3, b3, c3);
     }
     calculate() {
-        const a2 = this.arcButtonTheme.CHAMFER_CIRCLE_RADIUS;
-        const b2 = new ArcButtonCircle(this.dial.radius - a2, this.dial.center.x, this.dial.center.y);
-        const c2 = new ArcButtonCircle(this.arc.radius - a2, this.arc.center.x, this.arc.center.y);
-        const d2 = this.findCircleIntersections(c2, b2);
-        const e2 = this.calculateIntersection(this.arc.center, this.arc.radius, d2[0]);
-        const f2 = this.calculateIntersection(this.arc.center, this.arc.radius, d2[1]);
-        const g2 = this.calculateIntersection(this.dial.center, this.dial.radius, d2[1]);
-        const h2 = this.calculateIntersection(this.dial.center, this.dial.radius, d2[0]);
-        this.width = this.calculateDistance(d2[0], d2[1]) + a2 * 2;
-        const i2 = new ArcButtonPoint(d2[0].x - a2, this.dial.center.y +
+        const q2 = this.arcButtonTheme.CHAMFER_CIRCLE_RADIUS;
+        const r2 = new ArcButtonCircle(this.dial.radius - q2, this.dial.center.x, this.dial.center.y);
+        const s2 = new ArcButtonCircle(this.arc.radius - q2, this.arc.center.x, this.arc.center.y);
+        const t2 = this.findCircleIntersections(s2, r2);
+        const u2 = this.calculateIntersection(this.arc.center, this.arc.radius, t2[0]);
+        const v2 = this.calculateIntersection(this.arc.center, this.arc.radius, t2[1]);
+        const w2 = this.calculateIntersection(this.dial.center, this.dial.radius, t2[1]);
+        const x2 = this.calculateIntersection(this.dial.center, this.dial.radius, t2[0]);
+        this.width = this.calculateDistance(t2[0], t2[1]) + q2 * 2;
+        const y2 = new ArcButtonPoint(t2[0].x - q2, this.dial.center.y +
             this.dial.radius - this.height);
-        return new AllPoints(this.width, this.height, f2, e2, g2, h2, i2);
+        return new AllPoints(this.width, this.height, v2, u2, w2, x2, y2);
     }
-    calculateDistance(y1, z1) {
-        return Math.sqrt((z1.x - y1.x) ** 2 + (z1.y - y1.y) ** 2);
+    calculateDistance(o2, p2) {
+        return Math.sqrt((p2.x - o2.x) ** 2 + (p2.y - o2.y) ** 2);
     }
-    calculateIntersection(c1, d1, e1) {
-        const f1 = c1.x;
-        const g1 = c1.y;
-        const h1 = e1.x;
-        const i1 = e1.y;
-        let j1 = 0;
-        if (h1 !== f1) {
-            j1 = (i1 - g1) / (h1 - f1);
+    calculateIntersection(s1, t1, u1) {
+        const v1 = s1.x;
+        const w1 = s1.y;
+        const x1 = u1.x;
+        const y1 = u1.y;
+        let z1 = 0;
+        if (x1 !== v1) {
+            z1 = (y1 - w1) / (x1 - v1);
         }
         else {
-            j1 = -1;
+            z1 = -1;
         }
-        let k1 = 0;
-        if (j1 !== -1) {
-            k1 = i1 - j1 * h1;
+        let a2 = 0;
+        if (z1 !== -1) {
+            a2 = y1 - z1 * x1;
         }
-        let l1 = [];
-        if (j1 !== -1) {
-            const r1 = Math.pow(j1, 2) + 1;
-            const s1 = 2 * (j1 * k1 - j1 * g1 - f1);
-            const t1 = g1 ** 2 - d1 ** 2 + f1 ** 2 - 2 * k1 * g1 + k1 ** 2;
-            const u1 = (-s1 + (s1 ** 2 - 4 * r1 * t1) ** 0.5) / (2 * r1);
-            const v1 = (-s1 - (s1 ** 2 - 4 * r1 * t1) ** 0.5) / (2 * r1);
-            const w1 = j1 * u1 + k1;
-            const x1 = j1 * v1 + k1;
-            l1 = [new ArcButtonPoint(u1, w1), new ArcButtonPoint(v1, x1)];
-        }
-        else {
-            const o1 = f1;
-            const p1 = g1 + d1;
-            const q1 = g1 - d1;
-            l1 = [new ArcButtonPoint(o1, p1), new ArcButtonPoint(o1, q1)];
-        }
-        const m1 = this.calculateDistance(l1[0], e1);
-        const n1 = this.calculateDistance(l1[1], e1);
-        if (m1 < n1) {
-            return l1[0];
+        let b2 = [];
+        if (z1 !== -1) {
+            const h2 = Math.pow(z1, 2) + 1;
+            const i2 = 2 * (z1 * a2 - z1 * w1 - v1);
+            const j2 = w1 ** 2 - t1 ** 2 + v1 ** 2 - 2 * a2 * w1 + a2 ** 2;
+            const k2 = (-i2 + (i2 ** 2 - 4 * h2 * j2) ** 0.5) / (2 * h2);
+            const l2 = (-i2 - (i2 ** 2 - 4 * h2 * j2) ** 0.5) / (2 * h2);
+            const m2 = z1 * k2 + a2;
+            const n2 = z1 * l2 + a2;
+            b2 = [new ArcButtonPoint(k2, m2), new ArcButtonPoint(l2, n2)];
         }
         else {
-            return l1[1];
+            const e2 = v1;
+            const f2 = w1 + t1;
+            const g2 = w1 - t1;
+            b2 = [new ArcButtonPoint(e2, f2), new ArcButtonPoint(e2, g2)];
+        }
+        const c2 = this.calculateDistance(b2[0], u1);
+        const d2 = this.calculateDistance(b2[1], u1);
+        if (c2 < d2) {
+            return b2[0];
+        }
+        else {
+            return b2[1];
         }
     }
-    findCircleIntersections(m, n) {
-        const o = m.radius;
-        const p = m.center.x;
-        const q = m.center.y;
-        const r = n.radius;
-        const s = n.center.x;
-        const t = n.center.y;
-        const u = Math.sqrt((p - s) ** 2 + (q - t) ** 2);
-        if (u > o + r) {
+    findCircleIntersections(c1, d1) {
+        const e1 = c1.radius;
+        const f1 = c1.center.x;
+        const g1 = c1.center.y;
+        const h1 = d1.radius;
+        const i1 = d1.center.x;
+        const j1 = d1.center.y;
+        const k1 = Math.sqrt((f1 - i1) ** 2 + (g1 - j1) ** 2);
+        if (k1 > e1 + h1) {
             return [];
         }
-        else if (u < Math.abs(o - r)) {
+        else if (k1 < Math.abs(e1 - h1)) {
             return [];
         }
-        else if (u === 0 && o === r) {
+        else if (k1 === 0 && e1 === h1) {
             return [];
         }
-        const v = (o ** 2 - r ** 2 + u ** 2) / (2 * u);
-        const w = Math.sqrt(o ** 2 - v ** 2);
-        const x = p + v * (s - p) / u;
-        const y = q + v * (t - q) / u;
-        let z = new ArcButtonPoint(x + w * (t - q) / u, y -
-            w * (s - p) / u);
-        let a1 = new ArcButtonPoint(x - w * (t - q) / u, y +
-            w * (s - p) / u);
-        if (z.x > a1.x) {
-            const b1 = z;
-            z = a1;
-            a1 = b1;
+        const l1 = (e1 ** 2 - h1 ** 2 + k1 ** 2) / (2 * k1);
+        const m1 = Math.sqrt(e1 ** 2 - l1 ** 2);
+        const n1 = f1 + l1 * (i1 - f1) / k1;
+        const o1 = g1 + l1 * (j1 - g1) / k1;
+        let p1 = new ArcButtonPoint(n1 + m1 * (j1 - g1) / k1, o1 -
+            m1 * (i1 - f1) / k1);
+        let q1 = new ArcButtonPoint(n1 - m1 * (j1 - g1) / k1, o1 +
+            m1 * (i1 - f1) / k1);
+        if (p1.x > q1.x) {
+            const r1 = p1;
+            p1 = q1;
+            q1 = r1;
         }
-        return [z, a1];
+        return [p1, q1];
     }
 }
 class ArcButtonCircle {
-    constructor(j, k, l) {
-        this.radius = j;
-        this.center = new ArcButtonPoint(k, l);
+    constructor(z, a1, b1) {
+        this.radius = z;
+        this.center = new ArcButtonPoint(a1, b1);
     }
 }
 class ArcButtonPoint {
-    constructor(h, i) {
-        this.x = h;
-        this.y = i;
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
     }
 }
 class AllPoints {
-    constructor(a, b, c, d, e, f, g) {
-        this.btnWidth = a;
-        this.btnHeight = b;
-        this.leftTopPoint = c;
-        this.rightTopPoint = d;
-        this.leftBottomPoint = e;
-        this.rightBottomPoint = f;
-        this.canvasLeftTop = g;
+    constructor(q, r, s, t, u, v, w) {
+        this.btnWidth = q;
+        this.btnHeight = r;
+        this.leftTopPoint = s;
+        this.rightTopPoint = t;
+        this.leftBottomPoint = u;
+        this.rightBottomPoint = v;
+        this.canvasLeftTop = w;
     }
 }
 
