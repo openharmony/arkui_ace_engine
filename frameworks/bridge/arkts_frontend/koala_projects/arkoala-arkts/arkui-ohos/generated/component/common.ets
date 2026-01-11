@@ -673,6 +673,8 @@ export interface DragEvent {
     executeDropAnimation(customDropAnimation: (() => void)): void
     startDataLoading(options: unifiedDataChannel.GetDataParams): string | undefined
     getDisplayId(): int32
+    getDragSource(): string
+    isRemote(): boolean
     enableInternalDropAnimation(configuration: string): void
     getGlobalDisplayX(): double
     getGlobalDisplayY(): double
@@ -776,6 +778,12 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     public getDisplayId(): int32 {
         return this.getDisplayId_serialize()
     }
+    public getDragSource(): string {
+        return this.getDragSource_serialize()
+    }
+    public isRemote(): boolean {
+        return this.isRemote_serialize()
+    }
     public enableInternalDropAnimation(configuration: string): void {
         const configuration_casted = configuration as (string)
         this.enableInternalDropAnimation_serialize(configuration_casted)
@@ -874,6 +882,14 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     }
     getDisplayId_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getDisplayId(this.peer!.ptr)
+        return retval
+    }
+    getDragSource_serialize(): string {
+        const retval  = ArkUIGeneratedNativeModule._DragEvent_getDragSource(this.peer!.ptr)
+        return retval
+    }
+    isRemote_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._DragEvent_isRemote(this.peer!.ptr)
         return retval
     }
     enableInternalDropAnimation_serialize(configuration: string): void {

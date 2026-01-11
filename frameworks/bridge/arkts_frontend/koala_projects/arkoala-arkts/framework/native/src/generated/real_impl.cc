@@ -13491,6 +13491,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_String GetDragSourceImpl(Ark_DragEvent peer)
+    {
+        return {};
+    }
+    Ark_Boolean IsRemoteImpl(Ark_DragEvent peer)
+    {
+        return {};
+    }
     void EnableInternalDropAnimationImpl(Ark_DragEvent peer,
                                          const Ark_String* configuration)
     {
@@ -20987,6 +20995,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DragEventAccessor::GetVelocityImpl,
             DragEventAccessor::ExecuteDropAnimationImpl,
             DragEventAccessor::GetDisplayIdImpl,
+            DragEventAccessor::GetDragSourceImpl,
+            DragEventAccessor::IsRemoteImpl,
             DragEventAccessor::EnableInternalDropAnimationImpl,
             DragEventAccessor::GetGlobalDisplayXImpl,
             DragEventAccessor::GetGlobalDisplayYImpl,

@@ -4246,6 +4246,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _DragEvent_getDisplayId(ptr: KPointer): int32
     @ani.unsafe.Quick
+    native static _DragEvent_getDragSource(ptr: KPointer): string
+    @ani.unsafe.Direct
+    native static _DragEvent_isRemote(ptr: KPointer): boolean
+    @ani.unsafe.Quick
     native static _DragEvent_enableInternalDropAnimation(ptr: KPointer, configuration: KStringPtr): void
     @ani.unsafe.Quick
     native static _DragEvent_getGlobalDisplayX(ptr: KPointer): double

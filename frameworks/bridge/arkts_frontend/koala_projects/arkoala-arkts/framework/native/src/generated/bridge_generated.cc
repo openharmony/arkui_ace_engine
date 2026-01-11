@@ -31317,6 +31317,16 @@ Ark_Int32 impl_DragEvent_getDisplayId(Ark_NativePointer thisPtr) {
         return GetAccessors()->getDragEventAccessor()->getDisplayId(self);
 }
 KOALA_INTEROP_DIRECT_1(DragEvent_getDisplayId, Ark_Int32, Ark_NativePointer)
+Ark_String impl_DragEvent_getDragSource(Ark_NativePointer thisPtr) {
+        Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
+        return GetAccessors()->getDragEventAccessor()->getDragSource(self);
+}
+KOALA_INTEROP_1(DragEvent_getDragSource, KStringPtr, Ark_NativePointer)
+Ark_Boolean impl_DragEvent_isRemote(Ark_NativePointer thisPtr) {
+        Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
+        return GetAccessors()->getDragEventAccessor()->isRemote(self);
+}
+KOALA_INTEROP_DIRECT_1(DragEvent_isRemote, Ark_Boolean, Ark_NativePointer)
 void impl_DragEvent_enableInternalDropAnimation(Ark_NativePointer thisPtr, const KStringPtr& configuration) {
         Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
         GetAccessors()->getDragEventAccessor()->enableInternalDropAnimation(self, (const Ark_String*) (&configuration));
