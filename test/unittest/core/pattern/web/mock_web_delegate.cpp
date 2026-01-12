@@ -740,6 +740,7 @@ void WebDelegate::SetSurfaceDensity(const double& density) {}
 void WebDelegate::OnOnlineRenderToForeground() {}
 void WebDelegate::SetShouldFrameSubmissionBeforeDraw(bool should) {}
 void WebDelegate::NotifyMemoryLevel(int32_t level) {}
+void WebDelegate::SetIsOfflineWebComponent() {}
 void WebDelegate::SetAudioMuted(bool muted) {}
 void WebDelegate::Zoom(float factor) {}
 bool WebDelegate::ZoomIn()

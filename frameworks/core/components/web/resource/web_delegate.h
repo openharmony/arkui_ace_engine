@@ -1142,6 +1142,8 @@ public:
         backgroundColor_ = backgroundColor;
     }
     void NotifyMemoryLevel(int32_t level);
+    // Set is offline web Component when offline mode is inited.
+    void SetIsOfflineWebComponent();
     void SetAudioMuted(bool muted);
     void SetRichtextIdentifier(std::optional<std::string>& richtextData)
     {

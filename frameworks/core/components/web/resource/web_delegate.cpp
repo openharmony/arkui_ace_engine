@@ -5056,6 +5056,25 @@ void WebDelegate::NotifyMemoryLevel(int32_t level)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebNotifyMemoryLevel");
 }
 
+void WebDelegate::SetIsOfflineWebComponent()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->SetIsOfflineWebComponent();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetIsOfflineWebComponent");
+}
+
 void WebDelegate::SetAudioMuted(bool muted)
 {
     ACE_DCHECK(nweb_ != nullptr);

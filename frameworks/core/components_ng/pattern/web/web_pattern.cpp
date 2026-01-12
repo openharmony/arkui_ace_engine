@@ -4691,6 +4691,10 @@ void WebPattern::InitInOfflineMode()
     if (isOfflineWebEvictFrameBuffersEnable_) {
         pipelineContext->AddWindowStateChangedCallback(host->GetId());
         offlineWebNodeId_ = host->GetId();
+        NodeStatus nodeStatus = host->GetNodeStatus();
+        if (nodeStatus == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
+            delegate_->SetIsOfflineWebComponent();
+        }
     }
     int width = 0;
     int height = 0;
