@@ -18,7 +18,8 @@ component_modules = [
   "gauge",
   "checkbox",
   "rating",
-  "waterflow"
+  "waterflow",
+  "linear_split",
 ]
 component_modules_libs = []
 

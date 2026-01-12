@@ -139,7 +139,6 @@
       OHOS::Ace::WaterFlowItemModel::*;
       OHOS::Ace::OffscreenContextModel::*;
       OHOS::Ace::CircleModel::*;
-      OHOS::Ace::LinearSplitModel::*;
       OHOS::Ace::CounterModel::*;
       OHOS::Ace::CustomDialogControllerModel::*;
       OHOS::Ace::DataPanelModel::*;
@@ -508,6 +507,13 @@
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, uint32_t, bool)>>::GetInstance()";
       "OHOS::Ace::AnimatableColor::AnimatableColor(unsigned int, OHOS::Ace::AnimationOption const&)";
       
+      OHOS::Ace::NG::ConstrainIdealSizeByLayoutPolicy*;
+      OHOS::Ace::NG::UpdateOptionSizeByCalcLayoutConstraint*;
+      OHOS::Ace::NG::MinusPaddingToNonNegativeSize*;
+      OHOS::Ace::NG::CheckNoChanged*;
+      OHOS::Ace::NG::InputEventActuator::InputEventActuator*;
+      OHOS::Ace::ToRSColor*;
+      OHOS::Ace::RSPoint*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
@@ -572,6 +578,8 @@
       vtable?for?OHOS::Ace::Texture;
       vtable?for?OHOS::Ace::NG::RatingModelNG;
       vtable?for?OHOS::Ace::RatingComponent;
+      vtable?for?OHOS::Ace::RowSplitComponent;
+      vtable?for?OHOS::Ace::ColumnSplitComponent;
 
       VTT?for?OHOS::Ace::Player;
       VTT?for?OHOS::Ace::Texture;
@@ -621,6 +629,8 @@
       VTT?for?OHOS::Ace::RawRecognizer;
       VTT?for?OHOS::Ace::RenderCheckable;
       
+      VTT?for?OHOS::Ace::ColumnSplitComponent;
+      VTT?for?OHOS::Ace::RowSplitComponent;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;

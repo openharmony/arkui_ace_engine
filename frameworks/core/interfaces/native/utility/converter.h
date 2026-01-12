@@ -343,7 +343,7 @@ namespace Converter {
     }
 
     template<>
-    inline int Convert(const Ark_Number& src)
+    ACE_FORCE_EXPORT inline int Convert(const Ark_Number& src)
     {
         return src.tag == INTEROP_TAG_FLOAT32 ? static_cast<int>(src.f32) : src.i32;
     }

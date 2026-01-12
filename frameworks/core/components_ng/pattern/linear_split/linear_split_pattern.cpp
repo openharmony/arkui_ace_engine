@@ -25,6 +25,7 @@ constexpr std::size_t DEFAULT_DRAG_INDEX = -1;
 constexpr std::size_t SPLIT_INDEX_INC_ONE = 1;
 constexpr std::size_t SPLIT_INDEX_INC_TWO = 2;
 const std::string SPLIT_DRAG_SCENE = "split_drag_scene";
+const double DEFAULT_SPLIT_HEIGHT = 2.0;
 } // namespace
 
 void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)

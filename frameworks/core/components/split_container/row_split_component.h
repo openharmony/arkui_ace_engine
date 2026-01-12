@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT RowSplitComponent : public SplitContainerComponent {
+class ACE_FORCE_EXPORT RowSplitComponent : public SplitContainerComponent {
     DECLARE_ACE_TYPE(RowSplitComponent, SplitContainerComponent);
 
 public:

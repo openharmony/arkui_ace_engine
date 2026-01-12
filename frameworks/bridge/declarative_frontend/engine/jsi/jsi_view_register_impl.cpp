@@ -45,7 +45,6 @@
 #include "bridge/declarative_frontend/jsview/js_circle.h"
 #include "bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "bridge/declarative_frontend/jsview/js_clipboard.h"
-#include "bridge/declarative_frontend/jsview/js_column_split.h"
 #include "bridge/declarative_frontend/jsview/js_common_view.h"
 #include "bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_container_picker.h"
@@ -132,7 +131,6 @@
 #include "bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_row.h"
-#include "bridge/declarative_frontend/jsview/js_row_split.h"
 #include "bridge/declarative_frontend/jsview/js_save_button.h"
 #include "bridge/declarative_frontend/jsview/js_scope_util.h"
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
@@ -636,8 +634,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
     { "PageTransitionEnter", JSPageTransition::JSBind },
     { "PageTransitionExit", JSPageTransition::JSBind },
-    { "RowSplit", JSRowSplit::JSBind },
-    { "ColumnSplit", JSColumnSplit::JSBind },
     { "AlphabetIndexer", JSIndexer::JSBind },
     { "Hyperlink", JSHyperlink::JSBind },
     { "Radio", JSRadio::JSBind },

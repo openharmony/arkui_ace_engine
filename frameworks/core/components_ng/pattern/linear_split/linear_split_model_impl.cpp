@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/models/linear_split_model_impl.h"
+#include "core/components_ng/pattern/linear_split/linear_split_model_impl.h"
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/split_container/column_split_component.h"
@@ -58,6 +58,4 @@ void LinearSplitModelImpl::SetResizable(NG::SplitType splitType, bool resizable)
 void LinearSplitModelImpl::SetDivider(NG::SplitType splitType, const NG::ColumnSplitDivider& divider)
 {
 }
-
-
 } // namespace OHOS::Ace::Framework

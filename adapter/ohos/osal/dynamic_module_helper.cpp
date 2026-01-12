@@ -64,6 +64,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Rating", "rating"},
         { "FlowItem", "waterflow" },
         { "WaterFlow", "waterflow" },
+        {"ColumnSplit", "linearsplit"},
+        {"RowSplit", "linearsplit"},
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {

@@ -26,6 +26,7 @@
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/core/common/card_scope.h"
 #include "frameworks/core/common/resource/resource_configuration.h"
@@ -3585,4 +3586,11 @@ template ACE_FORCE_EXPORT std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJS
     const EcmaVM*, Dimension, ScrollState);
 template ACE_FORCE_EXPORT std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJSValues<int32_t, int32_t>(
     const EcmaVM*, int32_t, int32_t);
+RefPtr<BasicShape> ArkTSUtils::GetBasicShape(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj)
+{
+    Framework::JSShapeAbstract* jsShapeAbstract =
+        static_cast<Framework::JSShapeAbstract*>(jsObj->GetNativePointerField(vm, 0));
+    CHECK_NULL_RETURN(jsShapeAbstract, nullptr);
+    return jsShapeAbstract->GetBasicShape();
+}
 } // namespace OHOS::Ace::NG
