@@ -51,9 +51,9 @@ export namespace dragController {
             this.className = className;
         }
         public clean(): void {
-            if (this.className == "DragAction") {
+            if (this.className === 'DragAction') {
                 ArkUIAniModule._DragController_cleanDragAction(this.ptr);
-            } else if (this.className == "DragPreview") {
+            } else if (this.className === 'DragPreview') {
                 ArkUIAniModule._DragController_cleanDragPreview(this.ptr);
             }
         }
