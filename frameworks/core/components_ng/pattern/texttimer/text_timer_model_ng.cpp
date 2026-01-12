@@ -31,6 +31,7 @@ RefPtr<TextTimerController> TextTimerModelNG::Create()
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXTTIMER_ETS_TAG, nodeId);
     auto textTimerNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXTTIMER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextTimerPattern>(); });
+    ACE_UINODE_TRACE(textTimerNode);
 
     auto textTimerPattern = textTimerNode->GetPattern<TextTimerPattern>();
     if (textTimerNode->GetChildren().empty()) {
@@ -97,6 +98,7 @@ void TextTimerModelNG::SetTextShadow(const std::vector<Shadow>& value)
     std::string key = "textTimer.shadow";
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj(key);
@@ -173,6 +175,7 @@ RefPtr<FrameNode> TextTimerModelNG::CreateFrameNode(int32_t nodeId)
     auto textTimerNode =
         FrameNode::CreateFrameNode(V2::TEXTTIMER_ETS_TAG, nodeId, AceType::MakeRefPtr<TextTimerPattern>());
     CHECK_NULL_RETURN(textTimerNode, nullptr);
+    ACE_UINODE_TRACE(textTimerNode);
     auto textTimerPattern = textTimerNode->GetPattern<TextTimerPattern>();
     CHECK_NULL_RETURN(textTimerPattern, nullptr);
     if (textTimerNode->GetChildren().empty()) {
@@ -241,6 +244,7 @@ void TextTimerModelNG::SetFormat(FrameNode* frameNode, const std::string& format
 void TextTimerModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     CHECK_NULL_VOID(pattern);

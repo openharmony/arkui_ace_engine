@@ -2087,6 +2087,9 @@ bool TextFieldPattern::IsShowAutoFill()
 
 void TextFieldPattern::HandleOnCameraInput()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextFieldPattern::HandleOnCameraInput");
 #if defined(ENABLE_STANDARD_INPUT)
     if (textChangeListener_ == nullptr) {
@@ -3737,6 +3740,7 @@ void TextFieldPattern::OnModifyDone()
     auto host = GetHost();
     Pattern::OnModifyDone();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -5054,6 +5058,9 @@ int32_t TextFieldPattern::GetRequestKeyboardId()
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
     SourceType sourceType)
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    ACE_UINODE_TRACE(host);
     bool isFocus = HasFocus();
     if (!showKeyBoardOnFocus_ || !isFocus) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "showKeyBoardOnFocus:%{public}d, isFocus:%{public}d", showKeyBoardOnFocus_,
@@ -5744,6 +5751,7 @@ void TextFieldPattern::UltralimitShake()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto context = frameNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     AnimationOption option;
@@ -9405,6 +9413,9 @@ void TextFieldPattern::ProcessCancelButton()
 
 void TextFieldPattern::ProcessResponseArea()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     ProcessCancelButton();
     if (IsInPasswordMode()) {
         auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
@@ -9437,8 +9448,6 @@ void TextFieldPattern::ProcessResponseArea()
         }
         responseArea_ = AceType::MakeRefPtr<UnitResponseArea>(WeakClaim(this), unitNode_);
         responseArea_->InitResponseArea();
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
@@ -10877,6 +10886,9 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
 
 void TextFieldPattern::HandleOnAIWrite()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto aiWriteAdapter = aiWriteAdapter_.Upgrade();
     CHECK_NULL_VOID(aiWriteAdapter);
     AIWriteInfo info;

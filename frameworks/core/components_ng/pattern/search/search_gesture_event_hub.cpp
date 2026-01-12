@@ -21,6 +21,8 @@ RefPtr<NGGestureRecognizer> SearchGestureEventHub::PackInnerRecognizer(
     const Offset& offset, std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
     int32_t originalId, const RefPtr<TargetComponent>& targetComponent)
 {
+    auto host = GetFrameNode();
+    ACE_UINODE_TRACE(host);
     auto recognizer = GestureEventHub::PackInnerRecognizer(
         offset, innerRecognizers, touchId, originalId, targetComponent);
     auto clickEventActuator = GetUserClickEventActuator();
@@ -38,7 +40,6 @@ RefPtr<NGGestureRecognizer> SearchGestureEventHub::PackInnerRecognizer(
     }
     innerParallelRecognizer_->SetCoordinateOffset(offset);
     innerParallelRecognizer_->BeginReferee(touchId, originalId);
-    auto host = GetFrameNode();
     innerParallelRecognizer_->AttachFrameNode(WeakPtr<FrameNode>(host));
     innerParallelRecognizer_->SetTargetComponent(targetComponent);
     return innerParallelRecognizer_;

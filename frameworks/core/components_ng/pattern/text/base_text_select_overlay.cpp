@@ -1039,10 +1039,11 @@ void BaseTextSelectOverlay::RegisterScrollingListener(const RefPtr<FrameNode> sc
     if (hasRegisterListener_) {
         return;
     }
+    auto host = GetOwner();
+    CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto scrollingNode = scrollableNode;
     if (!scrollingNode) {
-        auto host = GetOwner();
-        CHECK_NULL_VOID(host);
         scrollingNode = host->GetAncestorNodeOfFrame(true);
         while (scrollingNode) {
             if (scrollingNode->GetTag() == V2::SWIPER_ETS_TAG) {

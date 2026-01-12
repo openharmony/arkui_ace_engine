@@ -26,6 +26,7 @@ void BadgePattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     if (frameNode->GetChildren().empty()) {
         return;
     }

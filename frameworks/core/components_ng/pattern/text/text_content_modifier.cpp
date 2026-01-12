@@ -1474,6 +1474,13 @@ void TextContentModifier::ContentChange()
 
 void TextContentModifier::AddDefaultShadow()
 {
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    if (textPattern) {
+        auto frameNode = textPattern->GetHost();
+        if (frameNode) {
+            ACE_UINODE_TRACE(frameNode);
+        }
+    }
     Shadow emptyShadow;
     auto blurRadius = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetBlurRadius());
     auto offsetX = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetOffset().GetX());
@@ -1576,9 +1583,15 @@ void TextContentModifier::ResumeTextRace(bool bounce)
     if (!AllowTextRace()) {
         return;
     }
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    if (textPattern) {
+        auto frameNode = textPattern->GetHost();
+        if (frameNode) {
+            ACE_UINODE_TRACE(frameNode);
+        }
+    }
     if (!bounce) {
         marqueeCount_ = 0;
-        auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
         CHECK_NULL_VOID(textPattern);
         textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
     }

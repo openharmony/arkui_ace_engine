@@ -264,6 +264,10 @@ public:
     RefPtr<DataDetectorAdapter> GetDataDetectorAdapter()
     {
         if (!dataDetectorAdapter_) {
+            auto host = GetHost();
+            if (host) {
+                ACE_UINODE_TRACE(host);
+            }
             dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
         }
         return dataDetectorAdapter_;
@@ -271,6 +275,10 @@ public:
     RefPtr<DataDetectorAdapter> GetSelectDetectorAdapter()
     {
         if (!selectDetectorAdapter_) {
+            auto host = GetHost();
+            if (host) {
+                ACE_UINODE_TRACE(host);
+            }
             selectDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
         }
         return selectDetectorAdapter_;
@@ -615,6 +623,10 @@ public:
     void AllocStyledString()
     {
         if (!styledString_) {
+            auto host = GetHost();
+            if (host) {
+                ACE_UINODE_TRACE(host);
+            }
             styledString_ = MakeRefPtr<MutableSpanString>(u"");
         }
     }
@@ -862,6 +874,10 @@ public:
     RefPtr<MagnifierController> GetOrCreateMagnifier()
     {
         if (!magnifierController_) {
+            auto host = GetHost();
+            if (host) {
+                ACE_UINODE_TRACE(host);
+            }
             magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
         }
         return magnifierController_;
@@ -1021,6 +1037,7 @@ protected:
     void HandleDoubleClickEvent(GestureEvent& info);
     void CheckOnClickEvent(GestureEvent& info);
     void HandleClickOnTextAndSpan(GestureEvent& info);
+    void InitSelectionOnLongPress(const Offset& localOffset);
     bool TryLinkJump(const RefPtr<SpanItem>& span);
     void ActTextOnClick(GestureEvent& info);
     RectF CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc);
@@ -1071,6 +1088,10 @@ protected:
     void CreateMultipleClickRecognizer()
     {
         if (!multipleClickRecognizer_) {
+            auto host = GetHost();
+            if (host) {
+                ACE_UINODE_TRACE(host);
+            }
             multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
         }
     }

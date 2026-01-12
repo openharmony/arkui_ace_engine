@@ -472,6 +472,10 @@ public:
     const RefPtr<AutoFillController>& GetOrCreateAutoFillController()
     {
         if (!autoFillController_) {
+            auto host = GetHost();
+            if (host) {
+                ACE_UINODE_TRACE(host);
+            }
             autoFillController_ = MakeRefPtr<AutoFillController>(WeakClaim(this));
         }
         return autoFillController_;
@@ -1644,6 +1648,10 @@ public:
     const RefPtr<MultipleClickRecognizer>& GetOrCreateMultipleClickRecognizer()
     {
         if (!multipleClickRecognizer_) {
+            auto host = GetHost();
+            if (host) {
+                ACE_UINODE_TRACE(host);
+            }
             multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
         }
         return multipleClickRecognizer_;
@@ -1802,6 +1810,10 @@ public:
     RefPtr<DataDetectorAdapter> GetSelectDetectorAdapter()
     {
         if (!selectDetectorAdapter_) {
+            auto host = GetHost();
+            if (host) {
+                ACE_UINODE_TRACE(host);
+            }
             selectDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
         }
         return selectDetectorAdapter_;
