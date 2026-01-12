@@ -25,25 +25,10 @@
 #include "core/components_ng/pattern/hyperlink/bridge/hyperlink_model_impl.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<HyperlinkModel> HyperlinkModel::instance_ = nullptr;
-std::mutex HyperlinkModel::mutex_;
-HyperlinkModel* HyperlinkModel::GetInstance()
+Framework::HyperlinkModelImpl* GetHyperlinkModelImpl()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
-#ifdef NG_BUILD
-            instance_.reset(new NG::HyperlinkModelNG());
-#else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::HyperlinkModelNG());
-            } else {
-                instance_.reset(new Framework::HyperlinkModelImpl());
-            }
-#endif
-        }
-    }
-    return instance_.get();
+    static Framework::HyperlinkModelImpl instance;
+    return &instance;
 }
 } // namespace OHOS::Ace
 
@@ -56,31 +41,45 @@ constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 } // namespace
 
+FrameNode* GetFrameNode(ArkUINodeHandle node)
+{
+    if (node) {
+        return reinterpret_cast<FrameNode*>(node);
+    } else {
+        return ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    }
+}
+
 void Create(const std::string& address, const std::string& content)
 {
     LOGI("[Hyperlink] HyperlinkDynamicModifier::Create arrived");
-    HyperlinkModel::GetInstance()->Create(address, content);
+    HyperlinkModelNG::CreateFrameNode(address, content);
     LOGI("[Hyperlink] HyperlinkDynamicModifier::Create finished");
 }
 
 void SetHyperlinkColor(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
+    LOGI("[Hyperlink] SetHyperlinkColor frameNode not null");
     HyperlinkModelNG::SetColor(frameNode, Color(color));
+    LOGI("[Hyperlink] SetHyperlinkColor color set");
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
+    LOGI("[Hyperlink] SetHyperlinkColor pattern not null");
     if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
+        LOGI("[Hyperlink] SetHyperlinkColor RegisterResource");
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         pattern->RegisterResource<Color>("Color", resObj, Color(color));
     } else {
+        LOGI("[Hyperlink] SetHyperlinkColor UnRegisterResource");
         pattern->UnRegisterResource("Color");
     }
 }
 
 void ResetHyperlinkColor(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
@@ -96,14 +95,14 @@ void ResetHyperlinkColor(ArkUINodeHandle node)
 
 void SetHyperlinkDraggable(ArkUINodeHandle node, ArkUI_Bool draggable)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     HyperlinkModelNG::SetDraggable(frameNode, draggable);
 }
 
 void ResetHyperlinkDraggable(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     HyperlinkModelNG::SetDraggable(frameNode, false);
 }
@@ -111,7 +110,7 @@ void ResetHyperlinkDraggable(ArkUINodeHandle node)
 void SetHyperlinkResponseRegion(
     ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<DimensionRect> region;
     for (int32_t i = 0; i < length / NUM_4; i++) {
@@ -155,22 +154,57 @@ ArkUINodeHandle CreateHyperlinkFrameNode(ArkUI_Int32 nodeId)
 
 void Pop()
 {
-    HyperlinkModel::GetInstance()->Pop();
+    HyperlinkModelNG::PopStatic();
+}
+
+void CreateImpl(const std::string& address, const std::string& summary)
+{
+    GetHyperlinkModelImpl()->Create(address, summary);
+}
+
+void SetHyperlinkColorImpl(ArkUINodeHandle node, ArkUI_Uint32 colorValue, void* colorRawPtr)
+{
+    class Color color{colorValue};
+    GetHyperlinkModelImpl()->SetColor(color);
+}
+
+void PopImpl()
+{
+    GetHyperlinkModelImpl()->Pop();
 }
 
 const ArkUIHyperlinkModifier* GetHyperlinkDynamicModifier()
 {
+    static bool IsCurrentUseNewPipeline = Container::IsCurrentUseNewPipeline();
+    if (IsCurrentUseNewPipeline) {
+        CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+        static const ArkUIHyperlinkModifier modifier = {
+            .create = Create,
+            .setHyperlinkColor = SetHyperlinkColor,
+            .resetHyperlinkColor = ResetHyperlinkColor,
+            .setHyperlinkDraggable = SetHyperlinkDraggable,
+            .resetHyperlinkDraggable = ResetHyperlinkDraggable,
+            .setHyperlinkResponseRegion = SetHyperlinkResponseRegion,
+            .resetHyperlinkResponseRegion = ResetHyperlinkResponseRegion,
+            .createHyperlinkFrameNode = CreateHyperlinkFrameNode,
+            .pop = Pop
+        };
+        CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
+        return &modifier;
+    }
+
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIHyperlinkModifier modifier = {
-        .create = Create,
-        .setHyperlinkColor = SetHyperlinkColor,
-        .resetHyperlinkColor = ResetHyperlinkColor,
-        .setHyperlinkDraggable = SetHyperlinkDraggable,
-        .resetHyperlinkDraggable = ResetHyperlinkDraggable,
-        .setHyperlinkResponseRegion = SetHyperlinkResponseRegion,
-        .resetHyperlinkResponseRegion = ResetHyperlinkResponseRegion,
+        .create = CreateImpl,
+        .setHyperlinkColor = SetHyperlinkColorImpl,
+        .resetHyperlinkColor = nullptr,
+        .setHyperlinkDraggable = nullptr,
+        .resetHyperlinkDraggable = nullptr,
+        .setHyperlinkResponseRegion = nullptr,
+        .resetHyperlinkResponseRegion = nullptr,
         .createHyperlinkFrameNode = CreateHyperlinkFrameNode,
-        .pop = Pop
+        .pop = PopImpl
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

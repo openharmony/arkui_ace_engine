@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
 
 namespace OHOS::Ace::NG {
-
 void HyperlinkModelNG::Create(const std::string& address, const std::string& content)
 {
     LOGI("[Hyperlink] HyperlinkModelNG::Create arrived");
@@ -38,6 +37,26 @@ void HyperlinkModelNG::Create(const std::string& address, const std::string& con
     CHECK_NULL_VOID(pipeline);
     auto draggable = pipeline->GetDraggable<HyperlinkTheme>();
     SetDraggable(draggable);
+}
+
+void HyperlinkModelNG::CreateFrameNode(const std::string& address, const std::string& content)
+{
+    LOGI("[Hyperlink] HyperlinkModelNG::CreateFrameNode arrived");
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    LOGI("[Hyperlink] HyperlinkModelNG::CreateFrameNode stack is non-null");
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::HYPERLINK_ETS_TAG, nodeId);
+    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(
+        V2::HYPERLINK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
+
+    stack->Push(hyperlinkNode);
+    SetTextStyle(hyperlinkNode, content, address);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto draggable = pipeline->GetDraggable<HyperlinkTheme>();
+    SetDraggable(hyperlinkNode.GetRawPtr(), draggable);
 }
 
 void HyperlinkModelNG::SetColor(const Color& value)

@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT HyperlinkModelNG : public HyperlinkModel {
 public:
     void Create(const std::string& address, const std::string& content) override;
+    static void CreateFrameNode(const std::string& address, const std::string& content);
     void Pop() override {};
     void SetColor(const Color& value) override;
     void SetDraggable(bool draggable) override;
@@ -31,9 +32,10 @@ public:
     static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetResponseRegion(
         FrameNode* frameNode, const std::vector<DimensionRect>& regions, bool isUserSetResponseRegion);
+    static void PopStatic() {};
 
 private:
-    void SetTextStyle(const RefPtr<FrameNode>& textNode, const std::string& content, const std::string& address);
+    static void SetTextStyle(const RefPtr<FrameNode>& textNode, const std::string& content, const std::string& address);
 };
 } // namespace OHOS::Ace::NG
 

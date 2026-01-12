@@ -27,6 +27,11 @@ namespace {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
+
+bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
+{
+    return firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
+}
 } // namespace
 
 void HyperlinkBridge::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
@@ -134,20 +139,20 @@ ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     LOGI("[Hyperlink] HyperlinkBridge::SetColor vm not null");
 
-    if (runtimeCallInfo->GetCallArgRef(NUM_1)->IsBoolean()) {
-        LOGI("[Hyperlink] HyperlinkBridge::SetColor FromJS");
+    if (IsJsView(runtimeCallInfo->GetCallArgRef(NUM_0), vm)) {
+        LOGI("[Hyperlink] HyperlinkBridge::SetColor From JS");
         auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
         pattern->UnRegisterResource("Color");
 
-        Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+        Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
         class Color color;
         RefPtr<ResourceObject> resourceObject;
 
-        Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-        auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+        auto nativeNode = nodePtr(frameNode);
+        LOGI("[Hyperlink] HyperlinkBridge::SetColor Node ptr address: %{public}d", int(nativeNode));
         auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
 
         if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resourceObject, nodeInfo)) {
@@ -162,6 +167,7 @@ ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCa
             color = theme->GetTextColor();
         }
 
+        LOGI("[Hyperlink] HyperlinkBridge::SetColor %{public}d", color.GetValue());
         GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkColor(
             nativeNode, color.GetValue(), AceType::RawPtr(resourceObject)
         );
@@ -171,6 +177,7 @@ ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCa
         CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
         LOGI("[Hyperlink] HyperlinkBridge::SetColor nodeArg is native ptr");
         auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+        LOGI("[Hyperlink] HyperlinkBridge::SetColor Node ptr address: %{public}d", int(nativeNode));
         auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
         LOGI("[Hyperlink] HyperlinkBridge::SetColor nodeInfo made");
 
@@ -183,6 +190,7 @@ ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCa
             GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkColor(nativeNode);
         } else {
             LOGI("[Hyperlink] HyperlinkBridge::SetColor set");
+            LOGI("[Hyperlink] HyperlinkBridge::SetColor %{public}d", color.GetValue());
             GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkColor(
                 nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
         }
