@@ -1071,6 +1071,35 @@ HWTEST_F(MenuLayout3TestNg, ModifyOffset003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetMenuWindowRectInfo001
+ * @tc.desc: Verify GetMenuWindowRectInfo.
+ * @tc.type: FUNC
+ */
+ 
+HWTEST_F(MenuLayout3TestNg, GetMenuWindowRectInfo001, TestSize.Level1)
+{
+    MenuLayoutAlgorithm menuLayoutAlgorithm;
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", MenuType::MENU);
+    menuLayoutAlgorithm.canExpandCurrentWindow_ = true;
+    menuLayoutAlgorithm.isExpandDisplay_ = false;
+    menuLayoutAlgorithm.isUIExtensionSubWindow_ = true;
+    menuLayoutAlgorithm.targetOffset_ = { TARGET_OFFSET_FIRST, TARGET_OFFSET_SECOND };
+    menuLayoutAlgorithm.displayWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD_NEW, RECT_FORTH_NEW);
+    menuLayoutAlgorithm.UIExtensionHostWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD, RECT_FORTH);
+    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_, menuPattern);
+    auto menuNode = GetOrCreateMenu(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
+    ASSERT_NE(menuNode, nullptr);
+    menuPattern->AttachToFrameNode(menuNode);
+    EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TEN);
+    EXPECT_EQ(menuLayoutAlgorithm.GetMenuWindowRectInfo(menuPattern).width_, TEN);
+ 
+    menuLayoutAlgorithm.canExpandCurrentWindow_ = true;
+    menuLayoutAlgorithm.isExpandDisplay_ = true;
+    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_, menuPattern);
+    EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TEN);
+}
+
+/**
  * @tc.name: MenuLayoutAlgorithmTestNg052
  * @tc.desc: Verify CheckHorizontalLayoutPreviewOffsetX
  * @tc.type: FUNC
