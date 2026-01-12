@@ -549,15 +549,11 @@ void ButtonModelStatic::ResetButtonFontSize(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
-    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
-    CHECK_NULL_VOID(textNode);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
 
     ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
     ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     Dimension buttonFontSize = (buttonStyle == ButtonStyleMode::TEXT && controlSize == ControlSize::NORMAL) ?
         buttonTheme->GetTextButtonFontSize() : buttonTheme->GetTextSize(controlSize);
-    textLayoutProperty->UpdateFontSize(buttonFontSize);
+    layoutProperty->UpdateFontSize(buttonFontSize);
 }
 } // namespace OHOS::Ace::NG
