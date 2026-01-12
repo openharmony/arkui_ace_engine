@@ -1719,6 +1719,7 @@ import {
         controller?.close();
         event.stopPropagation();
       }
+      return false;
     })
     this.onClick((event: ClickEvent) => {
       if (buttonOptions?.action) {

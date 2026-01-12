@@ -541,6 +541,7 @@ export struct SubHeaderV2 {
         }
         event.stopPropagation();
       }
+      return false;
     })
     instance.onClick((event: ClickEvent) => {
       if ((this.operationType === SubHeaderV2OperationType.TEXT_ARROW ||
