@@ -90,7 +90,7 @@ export class ParallelNode<T> {
             this.status = 1
             return
         }
-        if (this.status === 0) {
+        if (this.status === 3) {
             this.manager!.merge(__context() as StateManager, this.rootState!)
             this.update(updateUseParallel)
         }
@@ -123,7 +123,7 @@ export class ParallelNode<T> {
             this.status = 1
             return
         }
-        if (this.status === 0) {
+        if (this.status === 3) {
             this.manager!.merge(__context() as StateManager, this.rootState!)
             this.update(updateUseParallel)
         }
@@ -159,7 +159,7 @@ export class ParallelNode<T> {
             this.status = 1
             return
         }
-        if (this.status === 0) {
+        if (this.status === 3) {
             this.manager!.merge(__context() as StateManager, this.rootState!)
             this.update()
         }
