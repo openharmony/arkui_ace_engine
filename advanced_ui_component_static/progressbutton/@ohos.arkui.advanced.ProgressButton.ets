@@ -49,7 +49,7 @@ const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasiz
 
 @Component
 export struct ProgressButton {
-  @PropRef @Watch('getProgressContext') progress: double | undefined;
+  @PropRef @Watch('getProgressContext') progress: double | undefined = 0.0;
   @State textProgress: string = EMPTY_STRING as string;
   @PropRef content: ResourceStr | undefined = EMPTY_STRING as string;
   @State @Watch('getLoadingProgress') isLoading: boolean = false;
