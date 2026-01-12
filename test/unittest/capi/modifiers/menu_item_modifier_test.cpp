@@ -183,6 +183,7 @@ const std::string CONTENT_RES = "contentRes";
 const std::string LABEL_INFO_PROP = "labelInfo";
 const std::string LABEL_INFO = "Label";
 const std::string LABEL_INFO_RES = "labelInfoRes";
+const std::string SELECTED_STR = "selected";
 
 class MenuItemModifierTest : public ModifierTestBase<GENERATED_ArkUIMenuItemModifier,
     &GENERATED_ArkUINodeModifiers::getMenuItemModifier, GENERATED_ARKUI_MENU_ITEM> {
@@ -466,12 +467,17 @@ HWTEST_F(MenuItemModifierTest, setSelectIconSymbolTest, TestSize.Level1)
  */
 HWTEST_F(MenuItemModifierTest, setSelectedTest, TestSize.Level1)
 {
-    bool selected = GetAttrValue<bool>(node_, "selected");
+    bool selected = GetAttrValue<bool>(node_, SELECTED_STR);
     EXPECT_FALSE(selected);
     auto optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(true);
     modifier_->setSelected(node_, &optValue);
-    selected = GetAttrValue<bool>(node_, "selected");
+    selected = GetAttrValue<bool>(node_, SELECTED_STR);
     EXPECT_TRUE(selected);
+
+    optValue = Converter::ArkUnion<Opt_Union_Boolean_Bindable, Ark_Boolean>(false);
+    modifier_->setSelected(node_, &optValue);
+    selected = GetAttrValue<bool>(node_, SELECTED_STR);
+    EXPECT_FALSE(selected);
 }
 
 /*
