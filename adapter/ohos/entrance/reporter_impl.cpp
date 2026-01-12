@@ -109,6 +109,9 @@ void ReporterImpl::HandleInputEventInspectorReporting(const MouseEvent& event) c
     if (!LayoutInspector::GetInteractionEventStatus()) {
         return;
     }
+    if (event.isFalsifyCancel) {
+        return;
+    }
     if (event.sourceType != SourceType::MOUSE || (event.convertInfo.first != event.convertInfo.second)) {
         return;
     }
