@@ -72,6 +72,7 @@ void ForEachModelNG::CreateNewChildStart(const std::string& id)
     stack->PushKey(id);
     const auto stacksKey = stack->GetKey();
     auto node = AceType::MakeRefPtr<SyntaxItem>(stacksKey);
+    ACE_UINODE_TRACE(node);
     ElementRegister::GetInstance()->AddUINode(node);
     stack->Push(node);
 }

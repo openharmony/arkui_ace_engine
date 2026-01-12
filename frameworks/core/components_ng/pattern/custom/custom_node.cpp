@@ -25,6 +25,7 @@
 namespace OHOS::Ace::NG {
 RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::string& viewKey)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto node = MakeRefPtr<CustomNode>(nodeId, viewKey);
     ElementRegister::GetInstance()->AddUINode(node);
     return node;
