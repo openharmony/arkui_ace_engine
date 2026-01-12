@@ -3948,6 +3948,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg258, TestSize.Level1)
      * @tc.steps2: Ensure that rootNode_ is not nullptr.
      */
     auto rootNode = FrameNode::CreateFrameNode("root", 1, AceType::MakeRefPtr<Pattern>(), true);
+    rootNode->SetActive(true);
     context_->rootNode_ = rootNode;
     ASSERT_NE(context_->rootNode_, nullptr);
  
@@ -3957,6 +3958,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg258, TestSize.Level1)
     auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
         V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); }
     );
+    navigationGroupNode->SetActive(true);
     RefPtr<NavigationPattern> navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
     rootNode->AddChild(navigationGroupNode);
@@ -3996,6 +3998,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     auto rootNode = FrameNode::CreateFrameNode("root", 1, AceType::MakeRefPtr<Pattern>(), true);
+    rootNode->SetActive(true);
     context_->rootNode_ = rootNode;
     ASSERT_NE(context_->rootNode_, nullptr);
  
@@ -4003,8 +4006,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
      * @tc.steps2: make navigationGroupNode.
      */
     auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); }
-    );
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navigationGroupNode->SetActive(true);
+    
     RefPtr<NavigationPattern> navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     navigationPattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
     rootNode->AddChild(navigationGroupNode);

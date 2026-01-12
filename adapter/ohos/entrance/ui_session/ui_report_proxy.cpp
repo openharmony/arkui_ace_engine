@@ -67,8 +67,9 @@ void UiReportProxy::ReportClickEvent(const std::string& data)
         LOGW("ReportClickEvent write data failed");
         return;
     }
-    if (Remote()->SendRequest(REPORT_CLICK_EVENT, messageData, reply, option) != ERR_NONE) {
-        LOGW("ReportClickEvent send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(REPORT_CLICK_EVENT, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("ReportClickEvent send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -85,8 +86,9 @@ void UiReportProxy::ReportRouterChangeEvent(const std::string& data)
         LOGW("ReportRouterChangeEvent write data failed");
         return;
     }
-    if (Remote()->SendRequest(REPORT_SWITCH_EVENT, messageData, reply, option) != ERR_NONE) {
-        LOGW("ReportRouterChangeEvent send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(REPORT_SWITCH_EVENT, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("ReportRouterChangeEvent send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -103,8 +105,9 @@ void UiReportProxy::ReportComponentChangeEvent(const std::string& data)
         LOGW("ReportComponentChangeEvent write data failed");
         return;
     }
-    if (Remote()->SendRequest(REPORT_COMPONENT_EVENT, messageData, reply, option) != ERR_NONE) {
-        LOGW("ReportComponentChangeEvent send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(REPORT_COMPONENT_EVENT, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("ReportComponentChangeEvent send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -121,8 +124,9 @@ void UiReportProxy::ReportSearchEvent(const std::string& data)
         LOGW("ReportSearchEvent write data failed");
         return;
     }
-    if (Remote()->SendRequest(REPORT_SEARCH_EVENT, messageData, reply, option) != ERR_NONE) {
-        LOGW("ReportSearchEvent send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(REPORT_SEARCH_EVENT, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("ReportSearchEvent send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -139,8 +143,9 @@ void UiReportProxy::ReportTextChangeEvent(const std::string& data)
         LOGW("ReportTextChangeEvent write data failed");
         return;
     }
-    if (Remote()->SendRequest(REPORT_TEXT_CHANGE_EVENT, messageData, reply, option) != ERR_NONE) {
-        LOGW("ReportTextChangeEvent send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(REPORT_TEXT_CHANGE_EVENT, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("ReportTextChangeEvent send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -165,8 +170,9 @@ void UiReportProxy::ReportInspectorTreeValue(const std::string& data, int32_t pa
         LOGW("ReportInspectorTreeValue write data  failed");
         return;
     }
-    if (Remote()->SendRequest(REPORT_INSPECTOR_VALUE, messageData, reply, option) != ERR_NONE) {
-        LOGW("ReportInspectorTreeValue send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(REPORT_INSPECTOR_VALUE, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("ReportInspectorTreeValue send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -191,8 +197,9 @@ void UiReportProxy::ReportHitTestNodeInfos(const std::string& data, int32_t part
         LOGW("ReportHitTestNodeInfos write data  failed");
         return;
     }
-    if (Remote()->SendRequest(REPORT_HIT_TEST_NODE_INFOS, messageData, reply, option) != ERR_NONE) {
-        LOGW("ReportHitTestNodeInfos send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(REPORT_HIT_TEST_NODE_INFOS, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("ReportHitTestNodeInfos send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -222,8 +229,9 @@ void UiReportProxy::ReportWebUnfocusEvent(int64_t accessibilityId, const std::st
         LOGW("ReportWebUnfocusEvent write data  failed");
         return;
     }
-    if (Remote()->SendRequest(REPORT_WEB_UNFOCUS_EVENT, messageData, reply, option) != ERR_NONE) {
-        LOGW("ReportWebUnfocusEvent send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(REPORT_WEB_UNFOCUS_EVENT, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("ReportWebUnfocusEvent send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -240,8 +248,9 @@ void UiReportProxy::ReportScrollEvent(const std::string& data)
         LOGW("ReportScrollEvent write data  failed");
         return;
     }
-    if (Remote()->SendRequest(REPORT_SCROLL_EVENT, messageData, reply, option) != ERR_NONE) {
-        LOGW("ReportScrollEvent send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(REPORT_SCROLL_EVENT, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("ReportScrollEvent send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -258,8 +267,9 @@ void UiReportProxy::ReportLifeCycleEvent(const std::string& data)
         LOGW("ReportLifeCycleEvent write data  failed");
         return;
     }
-    if (Remote()->SendRequest(REPORT_LIFE_CYCLE_EVENT, messageData, reply, option) != ERR_NONE) {
-        LOGW("ReportLifeCycleEvent send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(REPORT_LIFE_CYCLE_EVENT, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("ReportLifeCycleEvent send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -276,8 +286,9 @@ void UiReportProxy::ReportSelectTextEvent(const std::string& data)
         LOGW("ReportLifeCycleEvent write data  failed");
         return;
     }
-    if (Remote()->SendRequest(REPORT_SELECT_TEXT_EVENT, messageData, reply, option) != ERR_NONE) {
-        LOGW("ReportLifeCycleEvent send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(REPORT_SELECT_TEXT_EVENT, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("ReportLifeCycleEvent send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -300,8 +311,9 @@ void UiReportProxy::SendSpecifiedContentOffsets(const std::vector<std::pair<floa
             return;
         }
     }
-    if (Remote()->SendRequest(SEND_SPECIFIED_CONTENT_OFFSETS, messageData, reply, option) != ERR_NONE) {
-        LOGW("SendSpecifiedContentOffsets send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(SEND_SPECIFIED_CONTENT_OFFSETS, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("SendSpecifiedContentOffsets send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -318,8 +330,9 @@ void UiReportProxy::SendBaseInfo(const std::string& data)
         LOGW("SendBaseInfo write data  failed");
         return;
     }
-    if (Remote()->SendRequest(SEND_BASE_INFO, messageData, reply, option) != ERR_NONE) {
-        LOGW("SendBaseInfo send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(SEND_BASE_INFO, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("SendBaseInfo send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -336,8 +349,9 @@ void UiReportProxy::SendCurrentLanguage(const std::string& data)
         LOGW("SendCurrentLanguage write data  failed");
         return;
     }
-    if (Remote()->SendRequest(SEND_CURRENT_LANGUAGE, messageData, reply, option) != ERR_NONE) {
-        LOGW("SendCurrentLanguage send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(SEND_CURRENT_LANGUAGE, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("SendCurrentLanguage send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -354,8 +368,9 @@ void UiReportProxy::SendCurrentPageName(const std::string& data)
         LOGW("SendCurrentPageName write data  failed");
         return;
     }
-    if (Remote()->SendRequest(SEND_CURRENT_PAGE_NAME, messageData, reply, option) != ERR_NONE) {
-        LOGW("SendCurrentPageName send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(SEND_CURRENT_PAGE_NAME, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("SendCurrentPageName send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -376,8 +391,9 @@ void UiReportProxy::SendWebText(int32_t nodeId, std::string res)
         LOGW("SendWebText write data  failed");
         return;
     }
-    if (Remote()->SendRequest(SEND_TEXT, messageData, reply, option) != ERR_NONE) {
-        LOGW("SendWebText send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(SEND_TEXT, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("SendWebText send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -417,8 +433,9 @@ void UiReportProxy::SendShowingImage(std::vector<std::pair<int32_t, std::shared_
             return;
         }
     }
-    if (Remote()->SendRequest(SEND_IMAGES, messageData, reply, option) != ERR_NONE) {
-        LOGW("SendShowingImage send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(SEND_IMAGES, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("SendShowingImage send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -461,8 +478,9 @@ void UiReportProxy::SendArkUIImagesById(int32_t windowId,
         LOGW("SendArkUIImagesById write arkUIErrorCode failed");
         return;
     }
-    if (Remote()->SendRequest(SEND_ARKUI_IMAGES_BY_ID, messageData, reply, option) != ERR_NONE) {
-        LOGW("SendArkUIImagesById send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(SEND_ARKUI_IMAGES_BY_ID, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("SendArkUIImagesById send request failed, errorCode is %{public}d", sendRequestErrorCode);
         return;
     }
 }
@@ -491,8 +509,9 @@ void UiReportProxy::SendArkWebImagesById(int32_t windowId, const std::map<int32_
         LOGW("SendArkWebImagesById write arkWebErrorCode failed");
         return;
     }
-    if (Remote()->SendRequest(SEND_ARKWEB_IMAGES_BY_ID, messageData, reply, option) != ERR_NONE) {
-        LOGW("SendArkWebImagesById send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(SEND_ARKWEB_IMAGES_BY_ID, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("SendArkWebImagesById send request failed, errorCode is %{public}d", sendRequestErrorCode);
         return;
     }
 }
@@ -510,8 +529,9 @@ void UiReportProxy::SendExeAppAIFunctionResult(uint32_t result)
         LOGW("SendExeAppAIFunctionResult write result  failed");
         return;
     }
-    if (Remote()->SendRequest(SEND_EXE_APP_AI_FUNCTION_RESULT, messageData, reply, option) != ERR_NONE) {
-        LOGW("SendExeAppAIFunctionResult send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(SEND_EXE_APP_AI_FUNCTION_RESULT, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("SendExeAppAIFunctionResult send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -532,9 +552,9 @@ void UiReportProxy::SendContentChange(ChangeType type, const std::string& simple
         LOGW("SendContentChange write simple tree failed");
         return;
     }
-
-    if (Remote()->SendRequest(SEND_CONTENT_CHANGE, messageData, reply, option) != ERR_NONE) {
-        LOGW("SendContentChange send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(SEND_CONTENT_CHANGE, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("SendContentChange send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -551,8 +571,9 @@ void UiReportProxy::ReportGetStateMgmtInfo(std::vector<std::string> results)
         LOGW("ReportGetStateMgmtInfo WriteStringVector failed");
         return;
     }
-    if (Remote()->SendRequest(REPORT_STATE_MGMT_INFO, messageData, reply, option) != ERR_NONE) {
-        LOGW("ReportGetStateMgmtInfo send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(REPORT_STATE_MGMT_INFO, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("ReportGetStateMgmtInfo send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 
@@ -589,8 +610,9 @@ void UiReportProxy::SendWebInfoRequestResult(
         LOGW("SendWebInfoRequestResult write errorCode failed");
         return;
     }
-    if (Remote()->SendRequest(SEND_WEB_INFO_BY_REQUEST, data, reply, option) != ERR_NONE) {
-        LOGW("SendWebInfoRequestResult send request failed");
+    int32_t sendRequestErrorCode = Remote()->SendRequest(SEND_WEB_INFO_BY_REQUEST, data, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("SendWebInfoRequestResult send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 } // namespace OHOS::Ace
