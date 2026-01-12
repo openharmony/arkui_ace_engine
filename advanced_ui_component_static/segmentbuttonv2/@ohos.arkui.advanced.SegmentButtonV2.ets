@@ -487,7 +487,7 @@ struct SimpleSegmentButtonV2 {
             SegmentButtonV2ItemContent({
               theme: this.theme,
               item: repeatItem.item,
-              selected: this.isSelected(repeatItem),
+              selected: this.isSelected(repeatItem)!,
               itemMinFontScale: this.itemMinFontScale,
               itemMaxFontScale: this.itemMaxFontScale,
               itemFontColor: this.itemFontColor,
